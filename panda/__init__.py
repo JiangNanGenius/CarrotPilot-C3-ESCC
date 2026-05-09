@@ -10,4 +10,4 @@ from .python import (Panda, PandaDFU, # noqa: F401
 #from .board.jungle import PandaJungle, PandaJungleDFU # noqa: F401
 
 # panda body
-from .board.body import PandaBody  # noqa: F401
+#from .board.body import PandaBody  # noqa: F401

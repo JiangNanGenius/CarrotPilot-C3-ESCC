@@ -7,7 +7,6 @@ source "$DIR/launch_env.sh"
 function agnos_init {
   # TODO: move this to agnos
   sudo rm -f /data/etc/NetworkManager/system-connections/*.nmmeta
-  rm -f /data/scons_cache/config.lock
 
   # set success flag for current boot slot
   sudo abctl --set_success
@@ -25,6 +24,34 @@ function agnos_init {
       sudo reboot
     fi
     $DIR/system/hardware/tici/updater $AGNOS_PY $MANIFEST
+  fi
+}
+
+set_tici_hw() {
+  if grep -q "tici" /sys/firmware/devicetree/base/model 2>/dev/null; then
+    echo "Querying panda MCU type..."
+    MCU_OUTPUT=$(python -c "from panda_tici import Panda; p = Panda(cli=False); print(p.get_mcu_type()); p.close()" 2>/dev/null)
+
+    if [[ "$MCU_OUTPUT" == *"McuType.F4"* ]]; then
+      echo "TICI (DOS) detected"
+    elif [[ "$MCU_OUTPUT" == *"McuType.H7"* ]]; then
+      echo "TICI (TRES) detected"
+      export TICI_TRES=1
+    else
+      echo "TICI (UNKNOWN) detected"
+    fi
+    export TICI_HW=1
+  fi
+}
+
+set_lite_hw() {
+  if grep -q "tici" /sys/firmware/devicetree/base/model 2>/dev/null; then
+    output=$(i2cget -y 0 0x10 0x00 2>/dev/null)
+
+    if [ -z "$output" ]; then
+      echo "Lite HW"
+      export LITE=1
+    fi
   fi
 }
 
@@ -72,6 +99,8 @@ function launch {
 
   # hardware specific init
   if [ -f /AGNOS ]; then
+    set_tici_hw
+    set_lite_hw
     agnos_init
   fi
 
