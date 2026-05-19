@@ -1,30 +1,154 @@
 {
-  "format_version": 1,
-  "model_type": "cas_torque",
+  "alpha_max": 0.0,
   "car": "HYUNDAI_IONIQ_5",
   "eps_firmware_hash": "",
-  "trained_on_hours": 0.0,
-  "trained_at": "2026-05-19T00:00:00Z",
-  "input_size": 20,
-  "output_size": 1,
-  "input_mean": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  "input_std": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   "feature_spec": [
-    "vEgo", "aEgo", "desiredLatAccel0", "desiredLatAccel03", "desiredLatAccel06",
-    "desiredLatAccel10", "desiredLatAccel15", "measuredLatAccel", "steeringAngleDeg",
-    "steeringRateDeg", "lateralJerkLookahead", "roll0", "roll05", "roll10",
-    "pitch", "signDesiredCurvature", "lateralOffsetNow", "lateralOffsetAvg5s",
-    "pastDesiredLatAccel03", "pastDesiredLatAccel01"
+    "vEgo",
+    "aEgo",
+    "desiredLatAccel0",
+    "desiredLatAccel03",
+    "desiredLatAccel06",
+    "desiredLatAccel10",
+    "desiredLatAccel15",
+    "measuredLatAccel",
+    "steeringAngleDeg",
+    "steeringRateDeg",
+    "lateralJerkLookahead",
+    "roll0",
+    "roll05",
+    "roll10",
+    "pitch",
+    "signDesiredCurvature",
+    "lateralOffsetNow",
+    "lateralOffsetAvg5s",
+    "pastDesiredLatAccel03",
+    "pastDesiredLatAccel01"
+  ],
+  "format_version": 1,
+  "friction_override": false,
+  "input_mean": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "input_size": 20,
+  "input_std": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
   ],
   "layers": [
-    {"W_0": [[0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0], [0]], "b_0": [0], "activation": "identity"}
+    {
+      "W_0": [
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          0.0
+        ]
+      ],
+      "activation": "identity",
+      "b_0": [
+        0.0
+      ]
+    }
   ],
-  "alpha_max": 0.0,
+  "model_type": "cas_torque",
+  "output_size": 1,
+  "trained_at": "2026-05-19T14:13:40+00:00",
+  "trained_by": "jominki354",
+  "trained_on_hours": 0.0,
+  "use_steering_angle": true,
   "validation": {
-    "status": "dummy_phase0",
-    "mean_lateral_offset": null
-  },
-  "friction_override": false,
-  "use_steering_angle": true
+    "mean_lateral_offset_m": null,
+    "status": "dummy"
+  }
 }
-

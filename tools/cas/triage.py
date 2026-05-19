@@ -19,6 +19,27 @@ TRIAGE_WEIGHTS = {
   TriageType.T5_MANUAL: 0.1,
 }
 
+_FLAG_BY_NAME = {
+  "exclude": TriageType.EXCLUDE,
+  "t1good": TriageType.T1_GOOD,
+  "t2offset": TriageType.T2_OFFSET,
+  "t3strongintervention": TriageType.T3_STRONG_INTERVENTION,
+  "t4weakintervention": TriageType.T4_WEAK_INTERVENTION,
+  "t5manual": TriageType.T5_MANUAL,
+}
+
+
+def coerce_triage(value) -> TriageType:
+  if isinstance(value, TriageType):
+    return value
+  try:
+    return TriageType(int(value))
+  except (TypeError, ValueError):
+    pass
+
+  name = str(value).split(".")[-1].replace("_", "").lower()
+  return _FLAG_BY_NAME.get(name, TriageType.EXCLUDE)
+
 
 def classify_sample(lat_active: bool, steering_pressed: bool, steering_torque_driver: float,
                     v_ego: float, lateral_offset: float,
@@ -34,4 +55,3 @@ def classify_sample(lat_active: bool, steering_pressed: bool, steering_torque_dr
   if abs(lateral_offset) > 0.25:
     return TriageType.T2_OFFSET
   return TriageType.T1_GOOD
-

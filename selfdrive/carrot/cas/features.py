@@ -6,7 +6,10 @@ import math
 
 import numpy as np
 
-from openpilot.selfdrive.modeld.constants import ModelConstants
+try:
+  from openpilot.selfdrive.modeld.constants import ModelConstants
+except ModuleNotFoundError:
+  from selfdrive.modeld.constants import ModelConstants
 
 
 FEATURE_SPEC = [
@@ -70,11 +73,31 @@ def _model_good(model_data) -> bool:
   return model_data is not None and len(model_data.acceleration.y) >= 2 and len(model_data.orientation.x) >= 2
 
 
+def lane_center_offset(model_data, min_prob: float = 0.5) -> float | None:
+  if model_data is None or len(model_data.laneLines) < 3:
+    return None
+  if len(model_data.laneLines[1].y) == 0 or len(model_data.laneLines[2].y) == 0:
+    return None
+  left_prob = float(model_data.laneLineProbs[1]) if len(model_data.laneLineProbs) > 1 else 0.0
+  right_prob = float(model_data.laneLineProbs[2]) if len(model_data.laneLineProbs) > 2 else 0.0
+  if left_prob < min_prob or right_prob < min_prob:
+    return None
+  left_y = float(model_data.laneLines[1].y[0])
+  right_y = float(model_data.laneLines[2].y[0])
+  width = abs(right_y - left_y)
+  if width < 2.0 or width > 5.0:
+    return None
+  return 0.5 * (left_y + right_y)
+
+
 def _lateral_offset(model_data, lateral_plan=None) -> float:
-  if lateral_plan is not None and len(lateral_plan.position.y) > 0:
-    return float(lateral_plan.position.y[0])
-  if model_data is not None and len(model_data.position.y) > 0:
-    return float(model_data.position.y[0])
+  lane_offset = lane_center_offset(model_data)
+  if lane_offset is not None:
+    return lane_offset
+  if lateral_plan is not None and len(lateral_plan.position.y) > 1:
+    return float(lateral_plan.position.y[1])
+  if model_data is not None and len(model_data.position.y) > 1:
+    return float(model_data.position.y[1])
   return 0.0
 
 
@@ -139,4 +162,3 @@ def build_feature_vector(state: CASFeatureState, CS, params, desired_curvature: 
     float(past_03),
     float(past_01),
   ]
-

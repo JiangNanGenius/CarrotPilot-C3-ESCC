@@ -1,5 +1,9 @@
 from cereal import log
 import cereal.messaging as messaging
+try:
+  from openpilot.selfdrive.carrot.cas.features import lane_center_offset
+except ModuleNotFoundError:
+  from selfdrive.carrot.cas.features import lane_center_offset
 
 
 class LateralDataMarker:
@@ -7,10 +11,13 @@ class LateralDataMarker:
     msg = messaging.new_message("lateralLearningInfo")
     info = msg.lateralLearningInfo
     lateral_offset = 0.0
-    if lateral_plan is not None and len(lateral_plan.position.y) > 0:
-      lateral_offset = float(lateral_plan.position.y[0])
-    elif model_data is not None and len(model_data.position.y) > 0:
-      lateral_offset = float(model_data.position.y[0])
+    lane_offset = lane_center_offset(model_data)
+    if lane_offset is not None:
+      lateral_offset = lane_offset
+    elif lateral_plan is not None and len(lateral_plan.position.y) > 1:
+      lateral_offset = float(lateral_plan.position.y[1])
+    elif model_data is not None and len(model_data.position.y) > 1:
+      lateral_offset = float(model_data.position.y[1])
 
     info.latActive = bool(CC.latActive)
     info.lateralOffset = lateral_offset

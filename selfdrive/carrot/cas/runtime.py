@@ -5,8 +5,12 @@ import math
 import re
 
 from openpilot.common.params import Params
-from openpilot.selfdrive.carrot.cas.features import CASFeatureState, build_feature_vector
-from openpilot.selfdrive.carrot.cas.model import CASModel
+try:
+  from openpilot.selfdrive.carrot.cas.features import CASFeatureState, build_feature_vector
+  from openpilot.selfdrive.carrot.cas.model import CASModel
+except ModuleNotFoundError:
+  from selfdrive.carrot.cas.features import CASFeatureState, build_feature_vector
+  from selfdrive.carrot.cas.model import CASModel
 
 
 CAS_DIR = Path(__file__).resolve().parent
@@ -86,4 +90,3 @@ class CASRuntime:
     if max_abs_z > 3.0:
       return 0.0
     return max(0.0, min(1.0, float(self.model.alpha_max)))
-

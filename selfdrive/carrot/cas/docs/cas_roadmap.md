@@ -1,6 +1,7 @@
 # Carrot Adaptive Steering (CAS) — 개발 로드맵
 
-> 실행 계획서. 설계 윤곽은 [cas_design.md](cas_design.md), 상세 논의/참고문헌은 [cnlt_design.md](cnlt_design.md).
+> 실행 계획서. 설계 윤곽은 [cas_design.md](cas_design.md), 상세 논의/참고문헌은 [cnlt_design.md](cnlt_design.md),
+> 학습 환경 준비는 [cas_training_setup.md](cas_training_setup.md).
 > 단계별 목표·산출물·체크리스트·검증 기준·위험을 한 문서에 정리.
 
 ---

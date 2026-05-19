@@ -481,7 +481,7 @@ CONFIGS = [
     pubs=["liveParameters", "liveTorqueParameters", "modelV2", "selfdriveState",
           "liveCalibration", "livePose", "longitudinalPlan", "carState", "carOutput",
           "driverMonitoringState", "onroadEvents", "driverAssistance"],
-    subs=["carControl", "controlsState"],
+    subs=["carControl", "controlsState", "lateralLearningInfo"],
     ignore=["logMonoTime", ],
     init_callback=get_car_params_callback,
     should_recv_callback=MessageBasedRcvCallback("selfdriveState"),
