@@ -1171,6 +1171,22 @@
     },
     {
       "group": "시작",
+      "name": "CAS",
+      "title": "CAS: 조향 보정",
+      "descr": "Carrot Adaptive Steering 잔차 조향 보정\n0: 사용안함, 1: 사용",
+      "egroup": "START",
+      "etitle": "CAS: Steering Assist",
+      "edescr": "Carrot Adaptive Steering residual controller\n0: Off, 1: On",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "unit": 1,
+      "cgroup": "启动设置",
+      "ctitle": "CAS: 转向辅助",
+      "cdescr": "Carrot Adaptive Steering 残差转向控制\n0: 关闭, 1: 开启"
+    },
+    {
+      "group": "시작",
       "name": "MapboxStyle",
       "title": "맵박스 스타일",
       "descr": "0: 기본 배경\n 1: 어두운 배경\n 2: 위성 지도",
