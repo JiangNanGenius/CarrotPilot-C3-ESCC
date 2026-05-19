@@ -161,6 +161,82 @@ class NumpyMLP:
           self.layers[i] = (W.astype(np.float32), b.astype(np.float32), activation)
 
 
+def train_torch_mlp(x, y, weights, input_size: int, hidden_sizes: tuple[int, ...],
+                    epochs: int, batch_size: int, lr: float, l2: float,
+                    seed: int, device_name: str):
+  import torch
+
+  if device_name == "auto":
+    device_name = "cuda" if torch.cuda.is_available() else "cpu"
+  device = torch.device(device_name)
+  torch.manual_seed(seed)
+
+  sizes = (input_size, *hidden_sizes, 1)
+  modules = []
+  activations = []
+  for i in range(len(sizes) - 1):
+    layer = torch.nn.Linear(sizes[i], sizes[i + 1])
+    torch.nn.init.kaiming_normal_(layer.weight, nonlinearity="linear")
+    torch.nn.init.zeros_(layer.bias)
+    modules.append(layer)
+    activations.append("identity" if i == len(sizes) - 2 else "tanh")
+  modules = torch.nn.ModuleList(modules).to(device)
+
+  x_t = torch.as_tensor(x, dtype=torch.float32, device=device)
+  y_t = torch.as_tensor(y.reshape(-1, 1), dtype=torch.float32, device=device)
+  w_t = torch.as_tensor(weights.reshape(-1, 1), dtype=torch.float32, device=device)
+  optimizer = torch.optim.AdamW(modules.parameters(), lr=lr, weight_decay=l2)
+  generator = torch.Generator(device=device)
+  generator.manual_seed(seed)
+
+  def forward(batch):
+    out = batch
+    for layer, activation in zip(modules, activations, strict=True):
+      out = layer(out)
+      if activation == "tanh":
+        out = torch.tanh(out)
+    return out
+
+  for _ in range(epochs):
+    order = torch.randperm(x_t.shape[0], generator=generator, device=device)
+    for start in range(0, x_t.shape[0], batch_size):
+      idx = order[start:start + batch_size]
+      pred = forward(x_t[idx])
+      denom = torch.clamp(torch.sum(w_t[idx]), min=1e-6)
+      loss = torch.sum(w_t[idx] * torch.square(pred - y_t[idx])) / denom
+      optimizer.zero_grad(set_to_none=True)
+      loss.backward()
+      optimizer.step()
+
+  model = NumpyMLP(input_size, hidden_sizes=hidden_sizes, seed=seed)
+  model.layers = []
+  for layer, activation in zip(modules, activations, strict=True):
+    W = layer.weight.detach().cpu().numpy().T.astype(np.float32)
+    b = layer.bias.detach().cpu().numpy().astype(np.float32)
+    model.layers.append((W, b, activation))
+  return model, str(device)
+
+
+def train_model(x, y, weights, input_size: int, backend: str, device: str,
+                epochs: int, batch_size: int, lr: float, l2: float, seed: int):
+  if backend == "auto":
+    try:
+      import torch
+      backend = "torch" if torch.cuda.is_available() else "numpy"
+    except ModuleNotFoundError:
+      backend = "numpy"
+
+  if backend == "torch":
+    try:
+      return train_torch_mlp(x, y, weights, input_size, (32, 16), epochs, batch_size, lr, l2, seed, device)
+    except ModuleNotFoundError as e:
+      raise RuntimeError("PyTorch backend requested, but torch is not installed") from e
+
+  model = NumpyMLP(input_size, seed=seed)
+  model.fit(x, y, weights, epochs, batch_size, lr, l2, seed)
+  return model, "numpy"
+
+
 def _stable_file(path: Path, min_file_age_sec: float) -> bool:
   if min_file_age_sec <= 0.0:
     return True
@@ -392,6 +468,8 @@ def main():
   parser.add_argument("--batch-size", type=int, default=2048)
   parser.add_argument("--lr", type=float, default=1e-3)
   parser.add_argument("--l2", type=float, default=1e-5)
+  parser.add_argument("--backend", choices=("auto", "numpy", "torch"), default="auto")
+  parser.add_argument("--device", default="auto", help="torch device: auto, cpu, cuda, cuda:0")
   parser.add_argument("--val-ratio", type=float, default=0.2)
   parser.add_argument("--sample-stride", type=int, default=5, help="use every Nth controlsState frame")
   parser.add_argument("--min-file-age-sec", type=float, default=0.0, help="skip recently modified rlogs")
@@ -426,8 +504,9 @@ def main():
   (train_x, train_y, train_w), (val_x, val_y, val_w) = train_val_split(x, y, weights, args.val_ratio)
   train_x_norm, val_x_norm, input_mean, input_std = normalize(train_x, val_x)
 
-  model = NumpyMLP(train_x.shape[1], seed=args.seed)
-  model.fit(train_x_norm, train_y, train_w, args.epochs, args.batch_size, args.lr, args.l2, args.seed)
+  model, train_backend = train_model(train_x_norm, train_y, train_w, train_x.shape[1],
+                                     args.backend, args.device, args.epochs,
+                                     args.batch_size, args.lr, args.l2, args.seed)
 
   val_pred = model.predict(val_x_norm).reshape(-1)
   trained_at = datetime.now(UTC).replace(microsecond=0).isoformat()
@@ -439,6 +518,7 @@ def main():
     "triage_counts": format_counts(triage_counts),
     "offset_metrics": lateral_offset_metrics(offsets),
     "target_metrics": prediction_metrics(val_y, val_pred, val_w),
+    "train_backend": train_backend,
   }
 
   payload = build_json_model(
@@ -460,6 +540,7 @@ def main():
   print(f"sources: {len(sources)}, collected: {len(samples)}, usable: {x.shape[0]}, hours: {duration_h:.2f}")
   print(f"triage: {dict(sorted(triage_counts.items()))}")
   print(f"val: {validation['target_metrics']}")
+  print(f"backend: {train_backend}")
   print(f"wrote: {output}")
 
 

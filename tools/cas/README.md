@@ -29,6 +29,30 @@ python tools/cas/train.py \
   --car HYUNDAI_IONIQ_5
 ```
 
+GPU acceleration is optional through PyTorch:
+
+```bash
+python3 -m pip install --user --break-system-packages -r tools/cas/requirements-gpu.txt
+
+python tools/cas/train.py \
+  --rlogs /mnt/e/rlogs \
+  --car HYUNDAI_CASPER_EV \
+  --backend torch \
+  --device cuda
+```
+
+## Windows UI
+
+```powershell
+python tools\cas\gui.py
+```
+
+Use `One Click: Train + Validate` for the normal flow. It trains a candidate,
+validates it, then runs promote dry-run only. Real `Promote` is separate.
+Only `RLOG dir`, `Car`, and the one-click button are needed for normal use.
+Extra paths and training knobs are hidden under `Advanced`.
+Each run writes raw logs under `RLOG dir/cas_runs/<timestamp>_<car>/`.
+
 ## Validate
 
 ```bash

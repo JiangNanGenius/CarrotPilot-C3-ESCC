@@ -21,6 +21,12 @@ python -m pip install --upgrade pip
 python -m pip install -r tools/cas/requirements.txt
 ```
 
+Optional GPU backend:
+
+```bash
+python -m pip install -r tools/cas/requirements-gpu.txt
+```
+
 ## rlog Input
 
 Supported:
@@ -52,7 +58,24 @@ python tools/cas/train.py \
   --car HYUNDAI_IONIQ_5 \
   --epochs 60 \
   --sample-stride 5 \
-  --alpha-max 0.4
+  --alpha-max 0.4 \
+  --backend auto
+```
+
+For CUDA:
+
+```bash
+python tools/cas/train.py \
+  --rlogs /mnt/e/rlogs \
+  --car HYUNDAI_CASPER_EV \
+  --backend torch \
+  --device cuda
+```
+
+## Windows UI
+
+```powershell
+python tools\cas\gui.py
 ```
 
 ## Pipeline Check
