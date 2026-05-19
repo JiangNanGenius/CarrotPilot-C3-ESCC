@@ -1545,6 +1545,86 @@ torqued의 조건과 동일. 학습 스크립트가 이걸로 자동 라벨링.
 
 ---
 
+## 24. NNFF 없는 차량과 CAS — 메인 타겟
+
+### 24.1 NNFF 없는 차량이 CAS의 가장 큰 가치
+
+설계상 자동으로 그렇게 됨 (base가 무엇이든 그 위에 δ 더하는 구조).
+
+| 차량 유형 | base FF | CAS 효과 (추정) |
+|---|---|---|
+| NNFF 지원 차량 | NNFF (이미 비선형 학습됨) | mean_offset 0.30m → ~0.22m (**-27%**) |
+| **NNFF 미지원 차량 (대다수)** | classical FF (lookup table) | **mean_offset 0.45m → ~0.20m (-55%)** |
+
+NNFF 없는 차량에서 효과가 더 큰 이유:
+- classical FF는 lat_accel → torque를 단순 매핑. 비선형/jerk/좌우 비대칭 거의 못 잡음
+- CAS의 δ가 정확히 그 영역을 메움
+- NNFF 차량은 이미 잡혀 있어서 CAS 추가 공간 작음
+
+→ **NNFF 미지원 차량 = CAS의 메인 타겟**. 사용자 체감 가장 큼.
+
+### 24.2 운영 우선순위 갱신
+
+Phase 1/2 차종 선정 시:
+- NNFF 미지원 차량 우선 (효과 큰 영역)
+- 기존 NNFF 사용자는 NNFF+CAS 조합 검증 (Phase 2~)
+
+---
+
+## 25. CAS의 원리 / 검증 — NNFF와 비교
+
+### 25.1 NNFF의 출신
+
+- 2022 twilsonco의 커뮤니티 프로젝트 (comma.ai/sunnypilot/FrogPilot 확산)
+- **직접 발표된 논문 없음**. 엔지니어링 작품
+- 이론적 영역: 학계의 "ANN으로 EPS system identification" 학파 (예: IEEE 10496684)
+- 원리: **Behavior Cloning** (사람 운전 모방), 작은 MLP로 lat_accel→torque 학습
+- 검증: 커뮤니티 후기 다수. 공식 정량 평가 없음.
+
+요약: **검증된 학파의 한 실용 응용**.
+
+### 25.2 CAS의 원리 — 다학파 결합
+
+CAS는 한 가지 아이디어가 아니라 **검증된 여러 컴포넌트의 결합**:
+
+| CAS 컴포넌트 | 근거 논문 | 검증 |
+|---|---|---|
+| **Residual Policy** (base + α·δ) | Trumpp 2302.07035 (레이싱카) | -4.55% 랩타임 |
+| **Physics-Guided NN** | arXiv 2204.00431 | 학계 검증 |
+| **EPS NN System ID** | IEEE 10496684 (2024) | 99.6% 정확도 |
+| **PPL (Preference Learning)** | arXiv 2510.01545 (2025) | T3 신호 효율 증폭 |
+| **PINN Lateral Control** | 2025 다수 | 학계 |
+| **Last-Layer Reset** | arXiv 2310.07996 | continual learning |
+| **Lane Centering Loss** | SAE 2026-01-0037 | ±0.35m 산업 벤치마크 |
+
+### 25.3 정직한 비교
+
+| | NNFF | CAS |
+|---|---|---|
+| 단일 vs 다학파 | 단일 (BC) | **7개 검증된 컴포넌트 결합** |
+| 인용 논문 | 없음 (커뮤니티) | **7편** |
+| 부품 학술 검증 | 부분적 (EPS NN 학파) | **모든 부품 검증** |
+| 결합 시스템 검증 | ✅ 실 운영 다수 후기 | ❌ **아직 (Phase 1 실측 예정)** |
+| 안전 메커니즘 | 없음 (FF 통째 대체) | residual + α 게이트 (논문 기반) |
+| 학습 신호 패러다임 | Behavior Cloning | **Outcome (centering loss) + BC + Preference 결합** |
+
+### 25.4 핵심 정리
+
+- NNFF = **"검증된 단순 아이디어의 실용화"** — 실 운영 검증, 안전망 없음
+- CAS = **"검증된 여러 아이디어의 안전한 결합"** — 부품은 다 검증, 결합은 새로움
+- CAS의 **각 부품은 학술적으로 검증됨**. 다만 **carrot 환경에서 결합 시 전체 효과는 Phase 1 실측이 진실의 순간**.
+- CAS는 NNFF의 단점(안전망 없음, BC만 사용)을 학술 기반으로 보완한 시스템.
+
+### 25.5 위험과 대응
+
+| 위험 | 대응 |
+|---|---|
+| 결합 자체가 미검증 → Phase 1에서 예상보다 효과 작을 수 있음 | α 게이트로 안전. 최악도 base와 동일. |
+| 논문은 racing/시뮬레이션 기반이 많음 → 실차 적용 시 차이 | 실차 데이터로 학습하므로 자연 적응 |
+| 다학파 결합의 상호작용 미검증 | Phase 1에서 ablation 가능 (각 컴포넌트 on/off) |
+
+---
+
 _상세 논의·웹 조사·참고문헌: [cnlt_design.md](cnlt_design.md)_
 
 ## Sources (§18 추가 조사 + §19 포맷 결정)
