@@ -52,6 +52,22 @@ validates it, then runs promote dry-run only. Real `Promote` is separate.
 Only `RLOG dir`, `Car`, and the one-click button are needed for normal use.
 Extra paths and training knobs are hidden under `Advanced`.
 Each run writes raw logs under `RLOG dir/cas_runs/<timestamp>_<car>/`.
+Set `Workers` under `Advanced` to parallelize rlog parsing. `4` is a safe default
+for WSL on a desktop SSD; lower it if disk usage feels too heavy.
+
+Raw/audit files:
+
+- `run_metadata.json`: command, options, backend/device, input/output paths
+- `1_3_train_candidate.log`: train stdout/stderr
+- `2_3_validate.log`: validate stdout/stderr
+- `3_3_promote_dry_run.log`: promote dry-run stdout/stderr
+- `train_audit/source_inventory.json`: rlog file size/time inventory
+- `train_audit/source_events.jsonl`: per-rlog start/end/error, message counts, triage counts
+- `train_audit/samples.jsonl`: collected sample trace with triage, offset, torque, feature vector
+- `validate_audit/source_inventory.json`: validation rlog inventory
+- `validate_audit/source_events.jsonl`: validation per-rlog trace
+- `validate_audit/samples.jsonl`: validation sample trace
+- `validate_summary.json`: validation summary copied from the output JSON
 
 ## Validate
 

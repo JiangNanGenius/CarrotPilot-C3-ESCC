@@ -4,9 +4,11 @@ from __future__ import annotations
 import argparse
 from bisect import bisect_left
 from collections import Counter
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import UTC, datetime
 import json
+import os
 from pathlib import Path
 import sys
 import time
@@ -77,6 +79,95 @@ class Sample:
   flag: TriageType
   offset: float
   driver_torque: float
+
+
+class AuditLogger:
+  def __init__(self, audit_dir: Path | None, dump_samples: bool = False):
+    self.audit_dir = audit_dir
+    self.dump_samples = dump_samples
+    if self.audit_dir is not None:
+      self.audit_dir.mkdir(parents=True, exist_ok=True)
+
+  def enabled(self) -> bool:
+    return self.audit_dir is not None
+
+  def write_json(self, name: str, data):
+    if self.audit_dir is None:
+      return
+    with open(self.audit_dir / name, "w", encoding="utf-8") as f:
+      json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True)
+      f.write("\n")
+
+  def write_jsonl(self, name: str, data):
+    if self.audit_dir is None:
+      return
+    with open(self.audit_dir / name, "a", encoding="utf-8") as f:
+      json.dump(data, f, ensure_ascii=False, sort_keys=True)
+      f.write("\n")
+
+  def source_start(self, index: int, total: int, source: str):
+    print(f"[collect] {index}/{total} reading {source}", flush=True)
+    self.write_jsonl("source_events.jsonl", {
+      "event": "source_start",
+      "index": index,
+      "total": total,
+      "source": source,
+      "wall_time": datetime.now().isoformat(timespec="seconds"),
+    })
+
+  def source_end(self, index: int, total: int, source: str, elapsed_s: float,
+                 message_counts: Counter, sample_count: int, triage_counts: Counter,
+                 first_t: float | None, last_t: float | None):
+    duration_s = 0.0 if first_t is None or last_t is None else max(0.0, last_t - first_t)
+    print(f"[collect] {index}/{total} done messages={sum(message_counts.values())} "
+          f"samples={sample_count} dt={duration_s:.1f}s elapsed={elapsed_s:.1f}s", flush=True)
+    self.write_jsonl("source_events.jsonl", {
+      "event": "source_end",
+      "index": index,
+      "total": total,
+      "source": source,
+      "elapsed_s": elapsed_s,
+      "log_duration_s": duration_s,
+      "message_counts": dict(sorted(message_counts.items())),
+      "sample_count": sample_count,
+      "triage_counts": dict(sorted(triage_counts.items())),
+      "wall_time": datetime.now().isoformat(timespec="seconds"),
+    })
+
+  def source_error(self, index: int, total: int, source: str, error: Exception):
+    print(f"[collect] {index}/{total} error {source}: {error}", flush=True)
+    self.write_jsonl("source_events.jsonl", {
+      "event": "source_error",
+      "index": index,
+      "total": total,
+      "source": source,
+      "error": repr(error),
+      "wall_time": datetime.now().isoformat(timespec="seconds"),
+    })
+
+  def sample(self, source: str, frame: int, sample: Sample):
+    if not self.dump_samples:
+      return
+    self.write_jsonl("samples.jsonl", {
+      "source": source,
+      "frame": frame,
+      "t": sample.t,
+      "flag": sample.flag.name,
+      "offset": sample.offset,
+      "driver_torque": sample.driver_torque,
+      "features": sample.features,
+    })
+
+
+@dataclass
+class SourceCollectResult:
+  source: str
+  samples: list[Sample]
+  message_counts: Counter
+  triage_counts: Counter
+  first_t: float | None
+  last_t: float | None
+  elapsed_s: float
 
 
 class NumpyMLP:
@@ -260,6 +351,24 @@ def expand_sources(sources: list[str], min_file_age_sec: float = 0.0) -> list[st
   return expanded
 
 
+def source_inventory(sources: list[str]) -> list[dict]:
+  inventory = []
+  for source in sources:
+    path = Path(source)
+    item = {"source": source}
+    try:
+      stat = path.stat()
+      item.update({
+        "exists": True,
+        "size_bytes": stat.st_size,
+        "mtime": datetime.fromtimestamp(stat.st_mtime).isoformat(timespec="seconds"),
+      })
+    except OSError:
+      item["exists"] = False
+    inventory.append(item)
+  return inventory
+
+
 def _to_float(value, default: float = 0.0) -> float:
   try:
     return float(value)
@@ -305,7 +414,7 @@ def _flag_from_message(info):
   return coerce_triage(getattr(info, "lateralLearningFlag", TriageType.EXCLUDE))
 
 
-def collect_samples(sources: list[str], sample_stride: int) -> tuple[list[Sample], float, Counter]:
+def _collect_source(source: str, sample_stride: int) -> SourceCollectResult:
   install_openpilot_aliases()
   try:
     from openpilot.tools.lib.logreader import LogReader
@@ -314,6 +423,7 @@ def collect_samples(sources: list[str], sample_stride: int) -> tuple[list[Sample
 
   samples: list[Sample] = []
   counts = Counter()
+  triage = Counter()
   feature_state = CASFeatureState()
   latest = SimpleNamespace(
     carState=None,
@@ -327,58 +437,133 @@ def collect_samples(sources: list[str], sample_stride: int) -> tuple[list[Sample
   first_t = None
   last_t = None
   frame = 0
+  started = time.monotonic()
 
-  for source in sources:
-    for msg in LogReader(source):
-      which = msg.which()
-      counts[which] += 1
-      t = msg.logMonoTime * 1e-9
-      first_t = t if first_t is None else min(first_t, t)
-      last_t = t if last_t is None else max(last_t, t)
+  for msg in LogReader(source):
+    which = msg.which()
+    counts[which] += 1
+    t = msg.logMonoTime * 1e-9
+    first_t = t if first_t is None else min(first_t, t)
+    last_t = t if last_t is None else max(last_t, t)
 
-      if which == "carState":
-        latest.carState = msg.carState
-      elif which == "liveParameters":
-        latest.liveParameters = msg.liveParameters
-      elif which == "modelV2":
-        latest.modelV2 = msg.modelV2
-      elif which == "carControl":
-        latest.carControl = msg.carControl
-      elif which == "lateralPlan":
-        latest.lateralPlan = msg.lateralPlan
-      elif which == "liveDelay":
-        latest.liveDelay = msg.liveDelay
-      elif which == "lateralLearningInfo":
-        latest.lateralLearningInfo = msg.lateralLearningInfo
-      elif which == "controlsState":
-        if latest.carState is None or latest.liveParameters is None:
-          continue
-        frame += 1
-        if frame % sample_stride != 0:
-          continue
+    if which == "carState":
+      latest.carState = msg.carState
+    elif which == "liveParameters":
+      latest.liveParameters = msg.liveParameters
+    elif which == "modelV2":
+      latest.modelV2 = msg.modelV2
+    elif which == "carControl":
+      latest.carControl = msg.carControl
+    elif which == "lateralPlan":
+      latest.lateralPlan = msg.lateralPlan
+    elif which == "liveDelay":
+      latest.liveDelay = msg.liveDelay
+    elif which == "lateralLearningInfo":
+      latest.lateralLearningInfo = msg.lateralLearningInfo
+    elif which == "controlsState":
+      if latest.carState is None or latest.liveParameters is None:
+        continue
+      frame += 1
+      if frame % sample_stride != 0:
+        continue
 
-        controls_state = msg.controlsState
-        car_control = latest.carControl or SimpleNamespace(latActive=False, orientationNED=[], angularVelocity=[])
-        offset = _lateral_offset(latest.modelV2, latest.lateralPlan)
-        flag = _flag_from_message(latest.lateralLearningInfo)
-        if flag is None:
-          flag = classify_sample(bool(getattr(car_control, "latActive", False)),
-                                 bool(latest.carState.steeringPressed),
-                                 _to_float(latest.carState.steeringTorque),
-                                 _to_float(latest.carState.vEgo), offset)
+      controls_state = msg.controlsState
+      car_control = latest.carControl or SimpleNamespace(latActive=False, orientationNED=[], angularVelocity=[])
+      offset = _lateral_offset(latest.modelV2, latest.lateralPlan)
+      flag = _flag_from_message(latest.lateralLearningInfo)
+      if flag is None:
+        flag = classify_sample(bool(getattr(car_control, "latActive", False)),
+                               bool(latest.carState.steeringPressed),
+                               _to_float(latest.carState.steeringTorque),
+                               _to_float(latest.carState.vEgo), offset)
 
-        features = build_feature_vector(
-          feature_state,
-          latest.carState,
-          latest.liveParameters,
-          _to_float(getattr(controls_state, "desiredCurvature", getattr(controls_state, "curvature", 0.0))),
-          _measured_lateral_accel(controls_state, latest.carState),
-          model_data=latest.modelV2,
-          CC=car_control,
-          lateral_plan=latest.lateralPlan,
-          lateral_delay=_latest_lateral_delay(latest.liveDelay),
-        )
-        samples.append(Sample(t, features, flag, offset, _to_float(latest.carState.steeringTorque)))
+      features = build_feature_vector(
+        feature_state,
+        latest.carState,
+        latest.liveParameters,
+        _to_float(getattr(controls_state, "desiredCurvature", getattr(controls_state, "curvature", 0.0))),
+        _measured_lateral_accel(controls_state, latest.carState),
+        model_data=latest.modelV2,
+        CC=car_control,
+        lateral_plan=latest.lateralPlan,
+        lateral_delay=_latest_lateral_delay(latest.liveDelay),
+      )
+      sample = Sample(t, features, flag, offset, _to_float(latest.carState.steeringTorque))
+      samples.append(sample)
+      triage[flag.name] += 1
+
+  return SourceCollectResult(source, samples, counts, triage, first_t, last_t, time.monotonic() - started)
+
+
+def _merge_source_result(result: SourceCollectResult, samples: list[Sample], counts: Counter,
+                         first_t: float | None, last_t: float | None) -> tuple[float | None, float | None]:
+  samples.extend(result.samples)
+  counts.update(result.message_counts)
+  if result.first_t is not None:
+    first_t = result.first_t if first_t is None else min(first_t, result.first_t)
+  if result.last_t is not None:
+    last_t = result.last_t if last_t is None else max(last_t, result.last_t)
+  return first_t, last_t
+
+
+def collect_samples(sources: list[str], sample_stride: int,
+                    audit: AuditLogger | None = None,
+                    workers: int = 1) -> tuple[list[Sample], float, Counter]:
+  samples: list[Sample] = []
+  counts = Counter()
+  first_t = None
+  last_t = None
+  total_sources = len(sources)
+  workers = max(1, int(workers))
+
+  if workers > 1 and total_sources > 1:
+    print(f"[collect] parallel workers={workers} sources={total_sources}", flush=True)
+    with ProcessPoolExecutor(max_workers=workers) as executor:
+      futures = {}
+      for source_index, source in enumerate(sources, 1):
+        if audit is not None:
+          audit.source_start(source_index, total_sources, source)
+        futures[executor.submit(_collect_source, source, sample_stride)] = (source_index, source)
+
+      for future in as_completed(futures):
+        source_index, source = futures[future]
+        try:
+          result = future.result()
+          first_t, last_t = _merge_source_result(result, samples, counts, first_t, last_t)
+          if audit is not None:
+            audit.source_end(source_index, total_sources, source, result.elapsed_s,
+                             result.message_counts, len(result.samples), result.triage_counts,
+                             result.first_t, result.last_t)
+            for frame, sample in enumerate(result.samples, 1):
+              audit.sample(source, frame, sample)
+        except Exception as e:
+          if audit is not None:
+            audit.source_error(source_index, total_sources, source, e)
+          else:
+            raise
+    samples.sort(key=lambda sample: sample.t)
+    duration_h = 0.0 if first_t is None or last_t is None else max(0.0, (last_t - first_t) / 3600.0)
+    return samples, duration_h, counts
+
+  for source_index, source in enumerate(sources, 1):
+    if audit is not None:
+      audit.source_start(source_index, total_sources, source)
+    try:
+      result = _collect_source(source, sample_stride)
+      first_t, last_t = _merge_source_result(result, samples, counts, first_t, last_t)
+    except Exception as e:
+      if audit is not None:
+        audit.source_error(source_index, total_sources, source, e)
+      else:
+        raise
+    finally:
+      if audit is not None and "result" in locals():
+        audit.source_end(source_index, total_sources, source, result.elapsed_s,
+                         result.message_counts, len(result.samples), result.triage_counts,
+                         result.first_t, result.last_t)
+        for frame, sample in enumerate(result.samples, 1):
+          audit.sample(source, frame, sample)
+        del result
 
   duration_h = 0.0 if first_t is None or last_t is None else max(0.0, (last_t - first_t) / 3600.0)
   return samples, duration_h, counts
@@ -474,6 +659,7 @@ def main():
   parser.add_argument("--sample-stride", type=int, default=5, help="use every Nth controlsState frame")
   parser.add_argument("--min-file-age-sec", type=float, default=0.0, help="skip recently modified rlogs")
   parser.add_argument("--max-sources", type=int, help="limit number of expanded rlog sources")
+  parser.add_argument("--workers", type=int, default=1, help="parallel rlog parser workers")
   parser.add_argument("--offset-horizon", type=float, default=0.5)
   parser.add_argument("--offset-gain", type=float, default=0.35)
   parser.add_argument("--driver-torque-scale", type=float, default=0.25)
@@ -483,12 +669,17 @@ def main():
   parser.add_argument("--seed", type=int, default=0)
   parser.add_argument("--include-manual", action="store_true")
   parser.add_argument("--history-dir", default="~/.cas_train")
+  parser.add_argument("--audit-dir", help="write detailed raw/audit logs to this directory")
+  parser.add_argument("--audit-samples", action="store_true", help="write collected sample records to samples.jsonl")
   args = parser.parse_args()
 
+  audit = AuditLogger(Path(args.audit_dir).expanduser() if args.audit_dir else None, args.audit_samples)
   sources = expand_sources(args.rlogs, args.min_file_age_sec)
   if args.max_sources is not None:
     sources = sources[:args.max_sources]
-  samples, duration_h, message_counts = collect_samples(sources, max(args.sample_stride, 1))
+  audit.write_json("source_inventory.json", source_inventory(sources))
+  audit.write_json("train_args.json", vars(args))
+  samples, duration_h, message_counts = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
   x, y, weights, triage_counts, offsets = build_targets(
     samples,
     args.offset_horizon,
@@ -520,6 +711,7 @@ def main():
     "target_metrics": prediction_metrics(val_y, val_pred, val_w),
     "train_backend": train_backend,
   }
+  audit.write_json("train_validation.json", validation)
 
   payload = build_json_model(
     args.car,
@@ -542,6 +734,8 @@ def main():
   print(f"val: {validation['target_metrics']}")
   print(f"backend: {train_backend}")
   print(f"wrote: {output}")
+  if audit.enabled():
+    print(f"audit: {audit.audit_dir}")
 
 
 if __name__ == "__main__":

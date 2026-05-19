@@ -48,6 +48,7 @@ class CASGui(tk.Tk):
     self.stride_var = tk.StringVar(value="10")
     self.age_var = tk.StringVar(value="120")
     self.max_sources_var = tk.StringVar(value="")
+    self.workers_var = tk.StringVar(value=str(min(4, max(1, os.cpu_count() or 1))))
     self.alpha_var = tk.StringVar(value="0.1")
     self.backend_var = tk.StringVar(value="auto")
     self.device_var = tk.StringVar(value="auto")
@@ -96,16 +97,17 @@ class CASGui(tk.Tk):
 
     opts = ttk.Frame(self.advanced)
     opts.grid(row=3, column=0, columnspan=3, sticky="ew", pady=(10, 6))
-    for i in range(8):
+    for i in range(9):
       opts.columnconfigure(i, weight=1)
     self._small(opts, 0, "Epochs", self.epochs_var)
     self._small(opts, 1, "Stride", self.stride_var)
     self._small(opts, 2, "Min age", self.age_var)
     self._small(opts, 3, "Max sources", self.max_sources_var)
-    self._small(opts, 4, "Alpha", self.alpha_var)
-    self._combo(opts, 5, "Backend", self.backend_var, ("auto", "numpy", "torch"), small=True)
-    self._small(opts, 6, "Device", self.device_var)
-    ttk.Checkbutton(opts, text="WSL", variable=self.use_wsl_var).grid(row=0, column=7, sticky="w", padx=4)
+    self._small(opts, 4, "Workers", self.workers_var)
+    self._small(opts, 5, "Alpha", self.alpha_var)
+    self._combo(opts, 6, "Backend", self.backend_var, ("auto", "numpy", "torch"), small=True)
+    self._small(opts, 7, "Device", self.device_var)
+    ttk.Checkbutton(opts, text="WSL", variable=self.use_wsl_var).grid(row=0, column=8, sticky="w", padx=4)
 
     manual = ttk.Frame(self.advanced)
     manual.grid(row=4, column=0, columnspan=3, sticky="ew", pady=(4, 0))
@@ -180,6 +182,7 @@ class CASGui(tk.Tk):
     self.log.delete("1.0", tk.END)
     self.current_run_dir = self._make_run_dir()
     self.raw_log_var.set(f"Raw log: {self.current_run_dir}")
+    commands = self._inject_audit_args(commands)
     self._write_run_metadata(self.current_run_dir, commands)
     self.status_var.set("Running")
     self.progress.start(10)
@@ -234,6 +237,30 @@ class CASGui(tk.Tk):
   def _wsl_cmd(self, inner: str) -> list[str]:
     return ["wsl", "bash", "-lc", f"cd {quote(windows_to_wsl(str(REPO_ROOT)))} && {inner}"]
 
+  def _inject_audit_args(self, commands: list[tuple[list[str], bool, str]]) -> list[tuple[list[str], bool, str]]:
+    if self.current_run_dir is None:
+      return commands
+    injected = []
+    for cmd, use_wsl_capnp, label in commands:
+      audit_dir = None
+      if "Train" in label:
+        audit_dir = self.current_run_dir / "train_audit"
+      elif "Validate" in label:
+        audit_dir = self.current_run_dir / "validate_audit"
+
+      if audit_dir is None:
+        injected.append((cmd, use_wsl_capnp, label))
+        continue
+
+      if use_wsl_capnp:
+        audit_args = f" --audit-dir {quote(windows_to_wsl(str(audit_dir)))} --audit-samples"
+        cmd = [*cmd]
+        cmd[3] = cmd[3] + audit_args
+      else:
+        cmd = [*cmd, "--audit-dir", str(audit_dir), "--audit-samples"]
+      injected.append((cmd, use_wsl_capnp, label))
+    return injected
+
   def _make_run_dir(self) -> Path:
     car = "".join(c if c.isalnum() or c in ("_", "-") else "_" for c in self.car_var.get().strip())
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -266,6 +293,7 @@ class CASGui(tk.Tk):
       "sample_stride": self.stride_var.get(),
       "min_file_age_sec": self.age_var.get(),
       "max_sources": self.max_sources_var.get().strip(),
+      "workers": self.workers_var.get(),
       "alpha_max": self.alpha_var.get(),
       "backend": self.backend_var.get(),
       "device": self.device_var.get(),
@@ -303,6 +331,7 @@ class CASGui(tk.Tk):
       "--alpha-max", self.alpha_var.get(),
       "--backend", self.backend_var.get(),
       "--device", self.device_var.get(),
+      "--workers", self.workers_var.get(),
       *self._limit_args(),
     ]
 
@@ -313,6 +342,7 @@ class CASGui(tk.Tk):
       "--rlogs", windows_to_wsl(self.rlogs_var.get()) if self.use_wsl_var.get() else self.rlogs_var.get(),
       "--sample-stride", self.stride_var.get(),
       "--min-file-age-sec", self.age_var.get(),
+      "--workers", self.workers_var.get(),
       "--output", windows_to_wsl(self.validate_var.get()) if self.use_wsl_var.get() else self.validate_var.get(),
       *self._limit_args(),
     ]

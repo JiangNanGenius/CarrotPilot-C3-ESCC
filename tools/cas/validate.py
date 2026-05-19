@@ -120,6 +120,7 @@ def main():
   parser.add_argument("--sample-stride", type=int, default=10)
   parser.add_argument("--min-file-age-sec", type=float, default=0.0, help="skip recently modified rlogs")
   parser.add_argument("--max-sources", type=int, help="limit number of expanded rlog sources")
+  parser.add_argument("--workers", type=int, default=1, help="parallel rlog parser workers")
   parser.add_argument("--offset-horizon", type=float, default=0.5)
   parser.add_argument("--offset-gain", type=float, default=0.35)
   parser.add_argument("--driver-torque-scale", type=float, default=0.25)
@@ -127,9 +128,11 @@ def main():
   parser.add_argument("--target-clip", type=float, default=0.5)
   parser.add_argument("--include-manual", action="store_true")
   parser.add_argument("--output", help="optional JSON summary output path")
+  parser.add_argument("--audit-dir", help="write detailed raw/audit logs to this directory")
+  parser.add_argument("--audit-samples", action="store_true", help="write collected sample records to samples.jsonl")
   args = parser.parse_args()
 
-  from tools.cas.train import build_targets, collect_samples, expand_sources, install_openpilot_aliases
+  from tools.cas.train import AuditLogger, build_targets, collect_samples, expand_sources, install_openpilot_aliases, source_inventory
   install_openpilot_aliases()
   try:
     from openpilot.selfdrive.carrot.cas.model import CASModel
@@ -139,7 +142,10 @@ def main():
   sources = expand_sources(args.rlogs, args.min_file_age_sec)
   if args.max_sources is not None:
     sources = sources[:args.max_sources]
-  samples, duration_h, message_counts = collect_samples(sources, max(args.sample_stride, 1))
+  audit = AuditLogger(Path(args.audit_dir).expanduser() if args.audit_dir else None, args.audit_samples)
+  audit.write_json("source_inventory.json", source_inventory(sources))
+  audit.write_json("validate_args.json", vars(args))
+  samples, duration_h, message_counts = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
   x, y, weights, target_counts, offsets = build_targets(
     samples,
     args.offset_horizon,
@@ -181,6 +187,7 @@ def main():
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(text + "\n", encoding="utf-8")
+  audit.write_json("validate_summary.json", summary)
 
 
 if __name__ == "__main__":
