@@ -17,14 +17,14 @@
 
 ### 1.1 carrot에 이미 있는 것
 
-- **NNFF 통합 완료**: [latcontrol_torque.py:86-131](selfdrive/controls/lib/latcontrol_torque.py#L86-L131). twilsonco의 `neural_ff_weights.json` 사용. **토크 차량 전용.**
+- **NNFF 통합 완료**: [latcontrol_torque.py:86-131](../../../../selfdrive/controls/lib/latcontrol_torque.py#L86-L131). twilsonco의 `neural_ff_weights.json` 사용. **토크 차량 전용.**
 - **NNFF Lite**: 모델 없는 차량용 폴백, friction 입력만 확장.
-- **Classical Auto-Tuner**: [carrot_learning.py](selfdrive/carrot/carrot_learning.py) (593 LOC). `latAccelFactor`, `friction` 등 스칼라 파라미터 온라인 추정. NN 아님.
+- **Classical Auto-Tuner**: [carrot_learning.py](../../../../selfdrive/carrot/carrot_learning.py) (593 LOC). `latAccelFactor`, `friction` 등 스칼라 파라미터 온라인 추정. NN 아님.
 - **저속 NN 보정**: `LOW_SPEED_Y_NN = [12, 3, 1, 0]` — NNFF용 별도 저속 게인.
 
 ### 1.2 비어있는 곳
 
-- **LatControlAngle**: [latcontrol_angle.py](selfdrive/controls/lib/latcontrol_angle.py) 30줄짜리 깡통. VM 변환 외 학습 요소 0.
+- **LatControlAngle**: [latcontrol_angle.py](../../../../selfdrive/controls/lib/latcontrol_angle.py) 30줄짜리 깡통. VM 변환 외 학습 요소 0.
 - **앵글 차량의 EPS 응답 보정** (데드존, hysteresis, 지연) 자동화 없음.
 
 ---
@@ -141,7 +141,7 @@
 
 ### 5.0 NNFF의 추론 코드를 본받아야 하는 이유
 
-NNFF의 [FluxModel](opendbc_repo/opendbc/car/interfaces.py#L98) 실체:
+NNFF의 [FluxModel](../../../../opendbc_repo/opendbc/car/interfaces.py#L98) 실체:
 - JSON: `{layers: [{Wxx_W, Wxx_b, activation}, ...], input_mean, input_std}`
 - forward: `x = activation(x.dot(W) + b)` 반복, **60줄**
 - 의존성: `numpy`, `json`만

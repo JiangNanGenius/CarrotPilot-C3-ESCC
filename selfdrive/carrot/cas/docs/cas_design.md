@@ -298,7 +298,7 @@ t 시점: op가 토크 T_op를 가함 → 그 결과 t+Δ 시점 lateral_offset 
 
 ### 7.4 차종 매칭 상태 표시 (NNFF 패턴 그대로)
 
-NNFF는 매칭된 차량의 이름 옆에 ",NNFF"를 붙여 표시 ([carrot.cc:3198](selfdrive/ui/carrot.cc#L3198)):
+NNFF는 매칭된 차량의 이름 옆에 ",NNFF"를 붙여 표시 ([carrot.cc:3198](../../../../selfdrive/ui/carrot.cc#L3198)):
 ```cpp
 QString NNFFModelName = QString::fromStdString(params.get("NNFFModelName"));
 if (NNFFModelName.length() > 0) carName += ",NNFF";
@@ -663,7 +663,7 @@ CAS와의 의존 패턴 차이:
 - NNFF: 입력 의존, **출력 통째 대체** → liveTorqueParameters 무시
 - CAS: 입력 의존, **출력은 base 위 잔차** → liveTorqueParameters와 자연 공존
 
-### 16.1 [torqued.py (stock의 liveTorqueParameters)](selfdrive/locationd/torqued.py)
+### 16.1 [torqued.py (stock의 liveTorqueParameters)](../../../../selfdrive/locationd/torqued.py)
 
 이미 운영 중인 온라인 토크 파라미터 추정 시스템:
 - `latAccelFactor`, `latAccelOffset`, `frictionCoefficient`을 SVD로 추정 (PointBuckets + slope2rot)
@@ -679,11 +679,11 @@ CAS와의 의존 패턴 차이:
 
 **CAS와의 관계**: liveTorqueParameters가 friction/factor를 자동 수렴시킴 → CAS의 base는 이미 자동 튜닝된 값 사용 → CAS는 그 위 residual δ만 학습. **충돌 0, 자연 공존**.
 
-### 16.2 [lateral_planner.py + lane_planner_2.py — carrot의 기존 센터링](selfdrive/controls/lib/lateral_planner.py)
+### 16.2 [lateral_planner.py + lane_planner_2.py — carrot의 기존 센터링](../../../../selfdrive/controls/lib/lateral_planner.py)
 
 이미 룰베이스 센터링 보정이 있음:
 - **`PathOffset`** (사용자 수동 cm): `path_xyz[:, 1] += self.pathOffset`
-- **`LP.offset_total`** ([lane_planner_2.py:251](selfdrive/controls/lib/lane_planner_2.py#L251)): 차선폭/곡률 의존 자동 보정
+- **`LP.offset_total`** ([lane_planner_2.py:251](../../../../selfdrive/controls/lib/lane_planner_2.py#L251)): 차선폭/곡률 의존 자동 보정
   - `offset_curve` (코너에서)
   - `offset_lane` (차선폭 좁/넓)
   - `diff_center` (좌우 차선 차이)
@@ -702,7 +702,7 @@ torqued가 steer torque 범위별 버킷으로 데이터 분포 균형을 잡음
 - 빈 버킷은 over-sampling, 과밀은 sub-sampling
 - 결과: 사용자가 매일 같은 길만 다녀도 학습 분포가 골고루
 
-### 16.4 [liveDelay.lateralDelay](selfdrive/locationd/) — 토크 응답 지연
+### 16.4 [liveDelay.lateralDelay](../../../../selfdrive/locationd/) — 토크 응답 지연
 
 openpilot이 이미 actuator delay를 추정 중. CAS는:
 - 입력 신호로 받음 (또는)
@@ -1045,7 +1045,7 @@ zstandard, bz2      # rlog 압축 해제 (LogReader가 사용)
 
 ### 19.2.1 rlog 읽기 — openpilot 표준 API 그대로 사용
 
-별도 파서 작성 안 함. openpilot의 [tools/lib/logreader.py](tools/lib/logreader.py)의 `LogReader` 사용:
+별도 파서 작성 안 함. openpilot의 [tools/lib/logreader.py](../../../../tools/lib/logreader.py)의 `LogReader` 사용:
 
 ```python
 from openpilot.tools.lib.logreader import LogReader
@@ -1340,11 +1340,11 @@ NNFF가 **"있으면 약간 나음"** 정도라면, CAS 고점은 **"있어야 �
 
 ## 23. NNFF 코드 재검토 — 미비점 보강 (2026-05-19)
 
-[latcontrol_torque.py](selfdrive/controls/lib/latcontrol_torque.py)를 다시 깊이 본 결과, 우리 §4/§5/§6에서 단순화한 부분에 NNFF의 노하우가 많이 있음. 항목별 보강.
+[latcontrol_torque.py](../../../../selfdrive/controls/lib/latcontrol_torque.py)를 다시 깊이 본 결과, 우리 §4/§5/§6에서 단순화한 부분에 NNFF의 노하우가 많이 있음. 항목별 보강.
 
 ### 23.1 ★ PID error 처리 — CAS는 ff에만 영향
 
-**NNFF가 하는 것** ([latcontrol_torque.py:240-256](selfdrive/controls/lib/latcontrol_torque.py#L240-L256)):
+**NNFF가 하는 것** ([latcontrol_torque.py:240-256](../../../../selfdrive/controls/lib/latcontrol_torque.py#L240-L256)):
 ```python
 torque_from_setpoint   = NN([vEgo, setpoint, jerk_setpoint, roll, ...])
 torque_from_measurement = NN([vEgo, measurement, jerk_measurement, roll, ...])
@@ -1392,7 +1392,7 @@ output_torque = pid.update(pid_log.error, feedforward=ff, ...)
 
 ### 23.2 friction_override 메커니즘 채택
 
-**NNFF 메커니즘** ([interfaces.py:165-167](opendbc_repo/opendbc/car/interfaces.py#L165-L167)):
+**NNFF 메커니즘** ([interfaces.py:165-167](../../../../opendbc_repo/opendbc/car/interfaces.py#L165-L167)):
 ```python
 def check_for_friction_override(self):
     y = self.evaluate([10.0, 0.0, 0.2])     # 작은 friction 입력 테스트
@@ -1429,7 +1429,7 @@ NNFF는 desired_lat_accel > 1m/s² 영역에서 error response를 점점 강화 
 
 ### 23.4 lookahead jerk 부호 일치 검증
 
-**NNFF의 트릭** ([latcontrol_torque.py:48-58](selfdrive/controls/lib/latcontrol_torque.py#L48-L58)):
+**NNFF의 트릭** ([latcontrol_torque.py:48-58](../../../../selfdrive/controls/lib/latcontrol_torque.py#L48-L58)):
 ```python
 def get_lookahead_value(future_vals, current_val):
   same_sign_vals = [v for v in future_vals if sign(v) == sign(current_val)]
@@ -1444,7 +1444,7 @@ def get_lookahead_value(future_vals, current_val):
 
 ### 23.5 adjusted_future_times — 종방향 가속 보정
 
-NNFF ([latcontrol_torque.py:233](selfdrive/controls/lib/latcontrol_torque.py#L233)):
+NNFF ([latcontrol_torque.py:233](../../../../selfdrive/controls/lib/latcontrol_torque.py#L233)):
 ```python
 adjusted_future_times = [t + 0.5*CS.aEgo*(t/max(CS.vEgo, 1.0)) for t in self.nn_future_times]
 ```
@@ -1455,7 +1455,7 @@ adjusted_future_times = [t + 0.5*CS.aEgo*(t/max(CS.vEgo, 1.0)) for t in self.nn_
 
 ### 23.6 paramsd.angleOffsetDeg — base에 이미 포함됨
 
-paramsd가 추정하는 angleOffsetDeg (직진 시 휠 중립 위치)는 [latcontrol_torque.py:172](selfdrive/controls/lib/latcontrol_torque.py#L172)에서 base에 이미 더해짐:
+paramsd가 추정하는 angleOffsetDeg (직진 시 휠 중립 위치)는 [latcontrol_torque.py:172](../../../../selfdrive/controls/lib/latcontrol_torque.py#L172)에서 base에 이미 더해짐:
 ```python
 angle_steers_des += params.angleOffsetDeg
 ```
@@ -1475,7 +1475,7 @@ NNFF 패턴: `nn_time_offset = CP.steerActuatorDelay + 0.2`. 우리도 동일 + 
 
 ### 23.8 use_steering_angle 분기 — 학습/추론 일관성
 
-NNFF ([latcontrol_torque.py:177-189](selfdrive/controls/lib/latcontrol_torque.py#L177-L189))는 측정 곡률을 두 방식으로 계산:
+NNFF ([latcontrol_torque.py:177-189](../../../../selfdrive/controls/lib/latcontrol_torque.py#L177-L189))는 측정 곡률을 두 방식으로 계산:
 - `use_steering_angle == True`: `VM.calc_curvature(steeringAngle)` (직접)
 - `use_steering_angle == False`: `angularVelocity.z / vEgo` (IMU)
 
@@ -1492,7 +1492,7 @@ CAS는 그것과 별개 — 모델 없으면 α=0 (NNFF Lite처럼 별도 폴백
 
 ### 23.10 cereal 디버깅 로그 — pid_log.nnLog 활성화
 
-[latcontrol_torque.py:303-304](selfdrive/controls/lib/latcontrol_torque.py#L303-L304):
+[latcontrol_torque.py:303-304](../../../../selfdrive/controls/lib/latcontrol_torque.py#L303-L304):
 ```python
 #if nn_log is not None:
 #  pid_log.nnLog = nn_log

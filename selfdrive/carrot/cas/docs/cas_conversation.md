@@ -35,7 +35,7 @@
 ## 3. 주요 Q&A 요약
 
 ### Q: "NNFF 같은 조향 튜닝 만들고 싶어"
-**A**: 현황 파악 — NNFF는 carrot에 이미 통합됨([latcontrol_torque.py](selfdrive/controls/lib/latcontrol_torque.py)), 앵글 차량용은 비어있음. NNFF의 한계(토크만, BC만, 안전망 없음) 위에 CAS 설계 시작.
+**A**: 현황 파악 — NNFF는 carrot에 이미 통합됨([latcontrol_torque.py](../../../../selfdrive/controls/lib/latcontrol_torque.py)), 앵글 차량용은 비어있음. NNFF의 한계(토크만, BC만, 안전망 없음) 위에 CAS 설계 시작.
 
 ### Q: "학습은 NNFF처럼 로그/PC/서버에서?"
 **A**: 확정. **기기 학습 0줄, PC만**. NNFF 워크플로우 그대로. 안전성↑.
@@ -116,7 +116,7 @@
 **A**: 거의 모든 신호 있음 (carState, modelV2, controlsState, lateralPlan, carParams, liveDelay, liveTorqueParameters). lateral_offset만 modelV2.position에서 계산. cereal에 `lateralLearningInfo` 메시지 1개만 신규.
 
 ### Q: "토크/앵글 어떻게 구분?"
-**A**: `CP.steerControlType == SteerControlType.angle`이면 앵글, 아니면 토크. [controlsd.py:73-78](selfdrive/controls/controlsd.py#L73-L78)에서 이미 분기 중. CAS는 그대로 따름.
+**A**: `CP.steerControlType == SteerControlType.angle`이면 앵글, 아니면 토크. [controlsd.py:73-78](../../../../selfdrive/controls/controlsd.py#L73-L78)에서 이미 분기 중. CAS는 그대로 따름.
 
 ---
 
