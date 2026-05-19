@@ -14,6 +14,7 @@ from openpilot.selfdrive.controls.lib.latcontrol import LatControl
 from openpilot.common.pid import PIDController
 
 from openpilot.common.params import Params
+from openpilot.selfdrive.carrot.cas.runtime import CASRuntime
 
 # At higher speeds (25+mph) we can assume:
 # Lateral acceleration achieved by a specific car correlates to
@@ -86,6 +87,7 @@ class LatControlTorque(LatControl):
     # Twilsonco's Lateral Neural Network Feedforward
     self.use_nnff = CI.use_nnff
     self.use_nnff_lite = CI.use_nnff_lite
+    self.cas = CASRuntime(CP, "torque")
 
     if self.use_nnff or self.use_nnff_lite:
       # Instantaneous lateral jerk changes very rapidly, making it not useful on its own,
@@ -285,6 +287,10 @@ class LatControlTorque(LatControl):
                                             friction_input, lateral_accel_deadzone, friction_compensation=True,
                                             gravity_adjusted=True)
 
+      cas_delta, cas_alpha, cas_log = self.cas.update(CS, params, desired_curvature, actual_lateral_accel,
+                                                      model_data=model_data, CC=CC)
+      ff += cas_alpha * cas_delta
+
       freeze_integrator = steer_limited_by_controls or CS.steeringPressed or CS.vEgo < 5
       output_torque = self.pid.update(pid_log.error,
                                       feedforward=ff,
@@ -300,8 +306,8 @@ class LatControlTorque(LatControl):
       pid_log.actualLateralAccel = float(actual_lateral_accel)
       pid_log.desiredLateralAccel = float(desired_lateral_accel)
       pid_log.saturated = bool(self._check_saturation(self.steer_max - abs(output_torque) < 1e-3, CS, steer_limited_by_controls, curvature_limited))
-      #if nn_log is not None:
-      #  pid_log.nnLog = nn_log
+      if cas_log:
+        pid_log.casLog = cas_log
 
     # TODO left is positive in this convention
     return -output_torque,angle_steers_des, pid_log

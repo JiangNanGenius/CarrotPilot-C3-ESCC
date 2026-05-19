@@ -1021,6 +1021,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   startToggles->addItem(new CValueControl("MapboxStyle", tr("Mapbox Style(0)"), "", 0, 2, 1));
   startToggles->addItem(new CValueControl("RecordRoadCam", tr("Record Road camera(0)"), tr("1:RoadCam, 2:RoadCam+WideRoadCam"), 0, 2, 1));
   startToggles->addItem(new CValueControl("HDPuse", tr("Use HDP(CCNC)(0)"), tr("1:While Using APN, 2:Always"), 0, 2, 1));
+  startToggles->addItem(new CValueControl("CAS", tr("CAS"), tr("Carrot Adaptive Steering residual controller(Reboot required)"), 0, 1, 1));
   startToggles->addItem(new CValueControl("NNFF", tr("NNFF"), tr("Twilsonco's NNFF(Reboot required)"), 0, 1, 1));
   startToggles->addItem(new CValueControl("NNFFLite", tr("NNFFLite"), tr("Twilsonco's NNFF-Lite(Reboot required)"), 0, 1, 1));
   startToggles->addItem(new CValueControl("AutoGasSyncSpeed", tr("Auto update Cruise speed"), "", 0, 1, 1));

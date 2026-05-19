@@ -957,6 +957,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     actualLateralAccel @9 :Float32;
     desiredLateralAccel @10 :Float32;
     nnLog @11 :List(Float32);
+    casLog @12 :List(Float32);
    }
 
   struct LateralLQRState {
@@ -975,6 +976,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     output @2 :Float32;
     saturated @3 :Bool;
     steeringAngleDesiredDeg @4 :Float32;
+    casLog @5 :List(Float32);
   }
 
   struct LateralCurvatureState {
@@ -2370,6 +2372,24 @@ struct LiveDelayData {
   }
 }
 
+struct LateralLearningInfoData {
+  lateralLearningFlag @0 :Type;
+  lateralOffset @1 :Float32;
+  latActive @2 :Bool;
+  vEgo @3 :Float32;
+  steeringPressed @4 :Bool;
+  steeringTorqueDriver @5 :Float32;
+
+  enum Type {
+    exclude @0;
+    t1Good @1;
+    t2Offset @2;
+    t3StrongIntervention @3;
+    t4WeakIntervention @4;
+    t5Manual @5;
+  }
+}
+
 struct LiveMapDataDEPRECATED {
   speedLimitValid @0 :Bool;
   speedLimit @1 :Float32;
@@ -2633,6 +2653,7 @@ struct Event {
     # microphone data
     soundPressure @103 :SoundPressure;
     rawAudioData @147 :AudioData;
+    lateralLearningInfo @148 :LateralLearningInfoData;
 
     # systems stuff
     androidLog @20 :AndroidLogEntry;

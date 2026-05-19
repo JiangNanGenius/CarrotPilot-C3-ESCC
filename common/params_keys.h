@@ -339,6 +339,8 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"SoftRestartTriggered", {CLEAR_ON_MANAGER_START, INT}},
 
     {"DevicePosition", {CLEAR_ON_MANAGER_START, STRING}},
+    {"CAS", {PERSISTENT, INT, "0"}},
+    {"CASModelName", {CLEAR_ON_OFFROAD_TRANSITION, STRING}},
     {"NNFF", {PERSISTENT, INT, "0"}},
     {"NNFFLite", {PERSISTENT, INT, "0"}},
     {"NNFFModelName", {CLEAR_ON_OFFROAD_TRANSITION, STRING}},

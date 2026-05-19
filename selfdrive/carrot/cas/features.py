@@ -1,0 +1,142 @@
+from __future__ import annotations
+
+from collections import deque
+from dataclasses import dataclass, field
+import math
+
+import numpy as np
+
+from openpilot.selfdrive.modeld.constants import ModelConstants
+
+
+FEATURE_SPEC = [
+  "vEgo",
+  "aEgo",
+  "desiredLatAccel0",
+  "desiredLatAccel03",
+  "desiredLatAccel06",
+  "desiredLatAccel10",
+  "desiredLatAccel15",
+  "measuredLatAccel",
+  "steeringAngleDeg",
+  "steeringRateDeg",
+  "lateralJerkLookahead",
+  "roll0",
+  "roll05",
+  "roll10",
+  "pitch",
+  "signDesiredCurvature",
+  "lateralOffsetNow",
+  "lateralOffsetAvg5s",
+  "pastDesiredLatAccel03",
+  "pastDesiredLatAccel01",
+]
+
+FUTURE_TIMES = [0.0, 0.3, 0.6, 1.0, 1.5]
+ROLL_FUTURE_TIMES = [0.0, 0.5, 1.0]
+LAT_PLAN_MIN_IDX = 5
+
+
+def sign(x: float) -> float:
+  return 1.0 if x > 0.0 else (-1.0 if x < 0.0 else 0.0)
+
+
+def roll_pitch_adjust(roll: float, pitch: float) -> float:
+  return roll * math.cos(pitch)
+
+
+def get_lookahead_value(future_vals, current_val: float) -> float:
+  if len(future_vals) == 0:
+    return current_val
+  same_sign_vals = [v for v in future_vals if sign(float(v)) == sign(current_val)]
+  if len(same_sign_vals) < len(future_vals):
+    return 0.0
+  return float(min(same_sign_vals + [current_val], key=lambda x: abs(x)))
+
+
+@dataclass
+class CASFeatureState:
+  desired_lat_accels: deque = field(default_factory=lambda: deque(maxlen=50))
+  lateral_offsets: deque = field(default_factory=lambda: deque(maxlen=500))
+
+
+def _interp_model(seq, t: float, default: float = 0.0) -> float:
+  if seq is None or len(seq) == 0:
+    return default
+  return float(np.interp(t, ModelConstants.T_IDXS[:len(seq)], list(seq)))
+
+
+def _model_good(model_data) -> bool:
+  return model_data is not None and len(model_data.acceleration.y) >= 2 and len(model_data.orientation.x) >= 2
+
+
+def _lateral_offset(model_data, lateral_plan=None) -> float:
+  if lateral_plan is not None and len(lateral_plan.position.y) > 0:
+    return float(lateral_plan.position.y[0])
+  if model_data is not None and len(model_data.position.y) > 0:
+    return float(model_data.position.y[0])
+  return 0.0
+
+
+def build_feature_vector(state: CASFeatureState, CS, params, desired_curvature: float,
+                         measured_lateral_accel: float, model_data=None, CC=None,
+                         lateral_plan=None, lateral_delay: float = 0.0) -> list[float]:
+  v_ego = float(CS.vEgo)
+  a_ego = float(CS.aEgo)
+  desired_lat_accel = float(desired_curvature * v_ego ** 2)
+  state.desired_lat_accels.append(desired_lat_accel)
+
+  offset_now = _lateral_offset(model_data, lateral_plan)
+  state.lateral_offsets.append(offset_now)
+  offset_avg = float(np.mean(state.lateral_offsets)) if len(state.lateral_offsets) else 0.0
+
+  pitch = 0.0
+  if CC is not None and len(CC.orientationNED) > 1:
+    pitch = float(CC.orientationNED[1])
+  roll = roll_pitch_adjust(float(params.roll), pitch)
+
+  future_lat_accels = []
+  model_good = _model_good(model_data)
+  for t in FUTURE_TIMES:
+    adjusted_t = t + lateral_delay + 0.5 * a_ego * (t / max(v_ego, 1.0))
+    future_lat_accels.append(_interp_model(model_data.acceleration.y if model_good else None,
+                                           adjusted_t, desired_lat_accel))
+
+  future_rolls = []
+  for t in ROLL_FUTURE_TIMES:
+    adjusted_t = t + lateral_delay + 0.5 * a_ego * (t / max(v_ego, 1.0))
+    model_roll = _interp_model(model_data.orientation.x if model_good else None, adjusted_t, 0.0)
+    model_pitch = _interp_model(model_data.orientation.y if model_good else None, adjusted_t, 0.0)
+    future_rolls.append(roll_pitch_adjust(roll + model_roll, pitch + model_pitch))
+
+  lateral_jerk_lookahead = 0.0
+  if model_good:
+    t_diffs = np.diff(ModelConstants.T_IDXS[:len(model_data.acceleration.y)])
+    accel_diffs = np.diff(list(model_data.acceleration.y))
+    predicted_jerks = accel_diffs / np.maximum(t_diffs, 1e-3)
+    desired_jerk_time = max(0.3 + lateral_delay, 0.1)
+    desired_jerk = (_interp_model(model_data.acceleration.y, desired_jerk_time, desired_lat_accel) - desired_lat_accel) / desired_jerk_time
+    lateral_jerk_lookahead = get_lookahead_value(predicted_jerks[LAT_PLAN_MIN_IDX:16], float(desired_jerk))
+
+  past_03 = state.desired_lat_accels[0] if len(state.desired_lat_accels) else desired_lat_accel
+  past_01_idx = max(0, len(state.desired_lat_accels) - 10)
+  past_01 = state.desired_lat_accels[past_01_idx] if len(state.desired_lat_accels) else desired_lat_accel
+
+  return [
+    v_ego,
+    a_ego,
+    desired_lat_accel,
+    *future_lat_accels[1:],
+    float(measured_lateral_accel),
+    float(CS.steeringAngleDeg),
+    float(CS.steeringRateDeg),
+    float(lateral_jerk_lookahead),
+    *future_rolls,
+    pitch,
+    sign(desired_curvature),
+    offset_now,
+    offset_avg,
+    float(past_03),
+    float(past_01),
+  ]
+

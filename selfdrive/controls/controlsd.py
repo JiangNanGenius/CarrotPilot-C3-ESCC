@@ -30,6 +30,7 @@ from selfdrive.modeld.modeld import LAT_SMOOTH_SECONDS
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
 
 from openpilot.selfdrive.carrot.carrot_controls import CarrotControls
+from openpilot.selfdrive.carrot.lateral_data_marker import LateralDataMarker
 
 State = log.SelfdriveState.OpenpilotState
 LaneChangeState = log.LaneChangeState
@@ -53,7 +54,7 @@ class Controls:
                                    'liveCalibration', 'livePose', 'longitudinalPlan', 'carState', 'carOutput',
                                    'carrotMan', 'lateralPlan', 'radarState',
                                    'driverMonitoringState', 'onroadEvents', 'driverAssistance'], poll='selfdriveState')
-    self.pm = messaging.PubMaster(['carControl', 'controlsState'])
+    self.pm = messaging.PubMaster(['carControl', 'controlsState', 'lateralLearningInfo'])
 
     self.steer_limited_by_controls = False
     self.curvature = 0.0
@@ -77,6 +78,7 @@ class Controls:
     elif self.CP.lateralTuning.which() == 'torque':
       self.LaC = LatControlTorque(self.CP, self.CI)
     self.carrot_controls = CarrotControls(self.CP)
+    self.lateral_data_marker = LateralDataMarker()
 
   def update(self):
     self.sm.update(15)
@@ -180,6 +182,7 @@ class Controls:
                                                        model_data=self.sm['modelV2'])
     actuators.torque = float(steer)
     actuators.steeringAngleDeg = float(steeringAngleDeg)
+    lateral_learning_msg = self.lateral_data_marker.build(CS, CC, model_v2, lat_plan)
     # Ensure no NaNs/Infs
     for p in ACTUATOR_FIELDS:
       attr = getattr(actuators, p)
@@ -190,9 +193,9 @@ class Controls:
         cloudlog.error(f"actuators.{p} not finite {actuators.to_dict()}")
         setattr(actuators, p, 0.0)
 
-    return CC, lac_log
+    return CC, lac_log, lateral_learning_msg
 
-  def publish(self, CC, lac_log):
+  def publish(self, CC, lac_log, lateral_learning_msg):
     CS = self.sm['carState']
 
     # Orientation and angle rates can be useful for carcontroller
@@ -315,6 +318,7 @@ class Controls:
 
     cs.activeLaneLine = self.lanefull_mode_enabled
     self.pm.send('controlsState', dat)
+    self.pm.send('lateralLearningInfo', lateral_learning_msg)
 
     # carControl
     cc_send = messaging.new_message('carControl')
@@ -326,8 +330,8 @@ class Controls:
     rk = Ratekeeper(100, print_delay_threshold=None)
     while True:
       self.update()
-      CC, lac_log = self.state_control()
-      self.publish(CC, lac_log)
+      CC, lac_log, lateral_learning_msg = self.state_control()
+      self.publish(CC, lac_log, lateral_learning_msg)
       rk.monitor_time()
 
 

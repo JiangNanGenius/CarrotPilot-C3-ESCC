@@ -80,6 +80,7 @@ _services: dict[str, tuple] = {
   "userFlag": (True, 0., 1),
   "soundPressure": (True, 10., 10),
   "rawAudioData": (False, 20.),
+  "lateralLearningInfo": (True, 100., 10),
 
   "carrotMan": (True, 0.),
   "navInstructionCarrot": (True, 1., 10),

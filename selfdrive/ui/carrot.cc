@@ -3199,6 +3199,10 @@ public:
         if (NNFFModelName.length() > 0) {
             carName += ",NNFF";
         }
+        QString CASModelName = QString::fromStdString(params.get("CASModelName"));
+        if (CASModelName.length() > 0) {
+            carName += ",CAS";
+        }
         sprintf(top_left, "%s", carName.toStdString().c_str());
 
         // bottom
