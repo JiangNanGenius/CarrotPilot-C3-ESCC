@@ -424,3 +424,79 @@ PY"
 ## 현재 판단
 
 현 상태에서 같은 조건으로 재학습은 필요 없다. 다음 단계는 Promote된 모델을 기기에 포함하고, CAS ON 상태에서 `alpha_max=0.1`로 실차 안전 확인을 진행하는 것이다.
+
+---
+
+## 2026-05-20 후속 갱신 (Claude 점검)
+
+첫 실차 테스트에서 사용자 체감이 거의 없었다는 보고. 5.98h 데이터 + `alpha_max=0.1` 조합의 자연스러운 결과로 분석됨. 다음 조치:
+
+### A. 코드 점검 결과 — 95% 양호
+
+설계 문서(`cas_design.md`) §22~§25 기준 8개 항목 점검 결과 모두 일치 또는 양호:
+
+1. §23 NNFF 노하우 반영 ✅ (lookahead jerk 부호 검증, adjusted future times + lateral_delay 보정, roll·cos(pitch) 합성)
+2. 안전 불변 I1 (`α=0 → base 동일`) ✅
+3. JSON 포맷 §19.6 ✅ (메타 일부는 비어있음 — 아래 D 참조)
+4. 트리아지 T1~T5 ✅
+5. 컨트롤러 통합 §23.1 (PID error는 base 그대로, ff에만 잔차) ✅
+6. cereal `lateralLearningInfo`, `casLog` ✅
+7. UI 토글 + `,CAS` 표기 ✅
+8. 차종 정규화 매칭 ✅
+
+### B. α 게이트 곱셈 형태로 보강 (`runtime.py`)
+
+이전: 트리거 모두 만족하면 `alpha_max` 그대로, 아니면 0 (on/off).
+
+이후: 곱셈 형태
+```
+alpha_final = alpha_max
+  × gate_speed (vEgo: vego_min~vego_min+2 ramp, vego_max-5~vego_max taper)
+  × gate_distribution (|z|: 0~2 full, 2~3 taper, 3+ 0)
+  × hard_gates (steeringPressed/NaN/|delta|>3 → 0)
+```
+
+→ 학습 분포 밖에서 자동 점진 감쇠. alpha_max를 올려도 분포 끝에선 자동 약해짐.
+
+### C. JSON 메타 보강 (`export_json.py`/`model.py`/`train.py`)
+
+다음 학습부터 자동으로 채워지는 필드:
+
+- `car_fingerprints` — 변형 매칭 리스트 (기본 [car])
+- `trained_rlog_count` — len(sources)
+- `output_clip` — 학습 target y의 abs 99 percentile × 1.5 (∈ [0.05, target_clip])
+- `vego_min` / `vego_max` — 학습 데이터 vEgo의 5th/95th percentile
+- `lateral_delay_at_train` — 기본 0.0 (Phase 2에서 평균 추적 추가 예정)
+- `use_steering_angle` — 기본 True
+- `friction_override` — 기본 False (Phase 2에서 자동 감지 예정)
+
+`model.evaluate()`가 `output_clip` 자동 적용 → δ가 비정상적으로 크면 안전 클립.
+`runtime._alpha`가 `vego_min/max`를 모델 메타에서 동적으로 읽음 → 차종별 적정 속도 범위 반영.
+
+기존 `HYUNDAI_CASPER_EV.json`은 옛 포맷 → 기본값 처리로 backward compatible.
+
+### D. Phase 2로 미룬 자동 추출 항목 (`cas_roadmap.md` §2.3.1a 참조)
+
+다음 3개는 train.py 작업이 더 필요해 Phase 2로 이월:
+
+1. `eps_firmware_hash` 자동 추출 (`carParams.carFw` ecu=="eps" 항목 해시)
+2. `lateral_delay_at_train` 평균 추적 (Sample 클래스 확장 필요)
+3. `friction_override` 자동 감지 (학습 후 dummy evaluate)
+
+지금 막혀 있지 않음 — 메타가 비어도 런타임은 기본값으로 정상 동작.
+
+### E. alpha 정책 갱신 — "일반 적용"으로 (사용자 요청 2026-05-20)
+
+5.98h 모델의 `alpha_max=0.1`이 너무 보수적이어서 체감 없음. 사용자 요청에 따라 일반 수준으로 상향:
+
+- `tools/cas/train.py` 기본 `--alpha-max` 0.1 → 0.5
+- `tools/cas/promote.py` 기본 `--max-alpha` 0.1 → 0.5 (이 값 안 올리면 promote 통과 안 됨)
+
+새 곱셈 α 게이트(§B) 덕에 alpha_max를 올려도:
+- 학습 분포 밖(|z|>2) → 자동 점진 감쇠
+- vego_min/max 밖 → 자동 0
+- |delta|>3 또는 NaN → 즉시 0
+
+→ alpha_max 0.5도 학습 분포 안에서만 0.5로 적용, 밖에선 자동 약화. 안전성과 체감의 균형.
+
+기존 `HYUNDAI_CASPER_EV.json`을 직접 수정해 alpha_max 0.1 → 0.3~0.5로 올릴지는 사용자 결정. 다만 5.98h는 여전히 학습량 부족 — 재학습 권장.

@@ -10,7 +10,13 @@ except ModuleNotFoundError:
 def build_json_model(car: str, kind: str, model, input_mean, input_std, validation,
                      trained_at: str, trained_on_hours: float, alpha_max: float,
                      trained_by: str = "jominki354", use_steering_angle: bool = True,
-                     eps_firmware_hash: str = ""):
+                     eps_firmware_hash: str = "",
+                     output_clip: tuple[float, float] = (-0.3, 0.3),
+                     vego_min: float = 5.0, vego_max: float = 35.0,
+                     lateral_delay_at_train: float = 0.0,
+                     trained_rlog_count: int = 0,
+                     car_fingerprints: list[str] | None = None,
+                     friction_override: bool = False):
   layers = []
   for i, layer in enumerate(model.layers):
     W, b, activation = layer
@@ -24,10 +30,12 @@ def build_json_model(car: str, kind: str, model, input_mean, input_std, validati
     "format_version": 1,
     "model_type": f"cas_{kind}",
     "car": car,
+    "car_fingerprints": list(car_fingerprints) if car_fingerprints else [car],
     "eps_firmware_hash": eps_firmware_hash,
     "trained_at": trained_at,
     "trained_by": trained_by,
     "trained_on_hours": float(trained_on_hours),
+    "trained_rlog_count": int(trained_rlog_count),
     "input_size": len(FEATURE_SPEC),
     "output_size": 1,
     "input_mean": input_mean.tolist(),
@@ -35,9 +43,13 @@ def build_json_model(car: str, kind: str, model, input_mean, input_std, validati
     "feature_spec": FEATURE_SPEC,
     "layers": layers,
     "alpha_max": float(alpha_max),
-    "validation": validation,
-    "friction_override": False,
+    "output_clip": [float(output_clip[0]), float(output_clip[1])],
+    "vego_min": float(vego_min),
+    "vego_max": float(vego_max),
+    "lateral_delay_at_train": float(lateral_delay_at_train),
     "use_steering_angle": bool(use_steering_angle),
+    "friction_override": bool(friction_override),
+    "validation": validation,
   }
 
 

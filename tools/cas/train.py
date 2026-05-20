@@ -665,7 +665,7 @@ def main():
   parser.add_argument("--driver-torque-scale", type=float, default=0.25)
   parser.add_argument("--driver-torque-sign", type=float, default=1.0)
   parser.add_argument("--target-clip", type=float, default=0.5)
-  parser.add_argument("--alpha-max", type=float, default=0.4)
+  parser.add_argument("--alpha-max", type=float, default=0.5)
   parser.add_argument("--seed", type=int, default=0)
   parser.add_argument("--include-manual", action="store_true")
   parser.add_argument("--history-dir", default="~/.cas_train")
@@ -713,6 +713,16 @@ def main():
   }
   audit.write_json("train_validation.json", validation)
 
+  # Auto-derive deployment metadata from the training distribution.
+  vego_col = x[:, 0]
+  vego_min_train = float(np.percentile(vego_col, 5)) if vego_col.size else 5.0
+  vego_max_train = float(np.percentile(vego_col, 95)) if vego_col.size else 35.0
+  if y.size:
+    y_p99 = float(np.percentile(np.abs(y), 99))
+  else:
+    y_p99 = float(args.target_clip)
+  output_clip_val = min(float(args.target_clip), max(0.05, y_p99 * 1.5))
+
   payload = build_json_model(
     args.car,
     args.kind,
@@ -723,6 +733,10 @@ def main():
     trained_at,
     duration_h,
     args.alpha_max,
+    output_clip=(-output_clip_val, output_clip_val),
+    vego_min=vego_min_train,
+    vego_max=vego_max_train,
+    trained_rlog_count=len(sources),
   )
   output = Path(args.output).expanduser() if args.output else default_checkpoint_path(Path(args.history_dir), args.car, args.kind, trained_at)
   write_json_model(output, payload)

@@ -3120,6 +3120,149 @@ protected:
         return str;
     }
 public:
+    void drawCASDebug(UIState* s, int w, int h) {
+        Params params = Params();
+        if (params.getInt("CAS") <= 0 || params.getInt("CASDebug") <= 0) return;
+
+        NVGcontext* vg = s->vg_border;
+        SubMaster& sm = *(s->sm);
+        if (!sm.alive("controlsState")) return;
+
+        QString cas_model = QString::fromStdString(params.get("CASModelName"));
+
+        // Read casLog from whichever lateral state is active.
+        auto lat = sm["controlsState"].getControlsState().getLateralControlState();
+        capnp::List<float>::Reader cas_log;
+        const char* kind_str = "—";
+        bool has_log = false;
+        switch (lat.which()) {
+            case cereal::ControlsState::LateralControlState::TORQUE_STATE: {
+                auto t = lat.getTorqueState();
+                cas_log = t.getCasLog();
+                kind_str = "cas_torque";
+                has_log = (cas_log.size() >= 11);
+                break;
+            }
+            case cereal::ControlsState::LateralControlState::ANGLE_STATE: {
+                auto a = lat.getAngleState();
+                cas_log = a.getCasLog();
+                kind_str = "cas_angle";
+                has_log = (cas_log.size() >= 11);
+                break;
+            }
+            default:
+                break;
+        }
+
+        // Colors
+        const NVGcolor C_WHITE = COLOR_WHITE;
+        const NVGcolor C_GREEN = nvgRGBA(120, 220, 120, 255);
+        const NVGcolor C_ORANGE = nvgRGBA(255, 170, 60, 255);
+        const NVGcolor C_RED = nvgRGBA(230, 80, 80, 255);
+        const NVGcolor C_GRAY = nvgRGBA(160, 160, 160, 255);
+        const NVGcolor C_BG = nvgRGBA(0, 0, 0, 180);
+
+        // Layout (right-side vertical center). Big-screen friendly.
+        const int wbox_w = 320;
+        const int wbox_h_full = 620;
+        const int wbox_h_nomodel = 90;
+        const int margin = 12;
+        const float font_size = 22.0f;
+        const int line_h = 26;
+        const int x0 = w - wbox_w - margin;
+
+        if (cas_model.length() == 0) {
+            int y0 = (h - wbox_h_nomodel) / 2;
+            ui_fill_rect(vg, { x0, y0, wbox_w, wbox_h_nomodel }, C_BG, 12);
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, x0 + 14, y0 + 14, "CAS", font_size, C_GRAY, BOLD);
+            ui_draw_text_vg(vg, x0 + 14, y0 + 46, "no model for this car", font_size - 4, C_GRAY, BOLD);
+            return;
+        }
+
+        int y0 = (h - wbox_h_full) / 2;
+        ui_fill_rect(vg, { x0, y0, wbox_w, wbox_h_full }, C_BG, 12);
+        int y = y0 + 14;
+        nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+
+        char buf[160];
+        snprintf(buf, sizeof(buf), "CAS  v1  %s", kind_str);
+        ui_draw_text_vg(vg, x0 + 14, y, buf, font_size, C_WHITE, BOLD);  y += line_h;
+        ui_draw_text_vg(vg, x0 + 14, y, cas_model.toStdString().c_str(), font_size - 4, C_GRAY, BOLD);
+        y += line_h - 2;
+        y += 8;
+
+        if (!has_log) {
+            ui_draw_text_vg(vg, x0 + 14, y, "(waiting for controls...)", font_size - 4, C_GRAY, BOLD);
+            return;
+        }
+
+        const int n = cas_log.size();
+        const float raw_delta = cas_log[n - 11];
+        const float applied_delta = cas_log[n - 10];
+        const float alpha = cas_log[n - 9];
+        const float z = cas_log[n - 8];
+        const float offset_now = cas_log[n - 7];
+        const float offset_5s = cas_log[n - 6];
+        const float offset_60s = cas_log[n - 5];
+        const float centering_score = cas_log[n - 3];
+        const int interventions = (int)cas_log[n - 2];
+        const float sec_since = cas_log[n - 1];
+
+        auto draw_line = [&](const char* label, const char* value, NVGcolor color) {
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, x0 + 14, y, label, font_size, color, BOLD);
+            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, x0 + wbox_w - 14, y, value, font_size, color, BOLD);
+            y += line_h;
+        };
+        auto draw_section = [&](const char* label) {
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, C_GREEN, BOLD);
+            y += line_h - 2;
+        };
+
+        // CURRENT
+        draw_section("CURRENT");
+        snprintf(buf, sizeof(buf), "%.3f", alpha);
+        draw_line("  alpha", buf, alpha > 0.01f ? C_GREEN : C_GRAY);
+        snprintf(buf, sizeof(buf), "%+.3f", applied_delta);
+        draw_line("  delta", buf, applied_delta != 0.0f ? C_WHITE : C_GRAY);
+        snprintf(buf, sizeof(buf), "%+.3f", raw_delta);
+        draw_line("  raw", buf, C_GRAY);
+        snprintf(buf, sizeof(buf), "%.2f", z);
+        draw_line("  z", buf, z >= 3.0f ? C_RED : (z >= 2.0f ? C_ORANGE : C_WHITE));
+        y += 6;
+
+        // CENTERING
+        draw_section("CENTERING");
+        snprintf(buf, sizeof(buf), "%.0f", centering_score);
+        NVGcolor score_c = centering_score >= 80.0f ? C_GREEN
+                           : (centering_score >= 50.0f ? C_WHITE : C_ORANGE);
+        draw_line("  score", buf, score_c);
+        snprintf(buf, sizeof(buf), "%+.3f m", offset_now);
+        draw_line("  now", buf, C_WHITE);
+        snprintf(buf, sizeof(buf), "%+.3f m", offset_5s);
+        draw_line("  5s avg", buf, C_WHITE);
+        snprintf(buf, sizeof(buf), "%+.3f m", offset_60s);
+        draw_line("  60s avg", buf, C_WHITE);
+        y += 6;
+
+        // INTERVENTION
+        draw_section("INTERVENTION");
+        snprintf(buf, sizeof(buf), "%d", interventions);
+        draw_line("  count", buf, interventions == 0 ? C_GREEN : C_WHITE);
+        if (sec_since < 0.0f) {
+            draw_line("  last", "—", C_GRAY);
+        } else if (sec_since < 60.0f) {
+            snprintf(buf, sizeof(buf), "%.0fs ago", sec_since);
+            draw_line("  last", buf, sec_since < 10.0f ? C_RED : C_ORANGE);
+        } else {
+            snprintf(buf, sizeof(buf), "%.1fm ago", sec_since / 60.0f);
+            draw_line("  last", buf, C_WHITE);
+        }
+    }
+
     void drawTpms(UIState* s, int w, int h) {
         NVGcontext* vg = s->vg_border;
         nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_BOTTOM);
@@ -3246,6 +3389,7 @@ public:
         ui_draw_text_vg(vg, w- text_margin, h, bottom_right, 30, COLOR_WHITE, BOLD);
 
         //drawTpms(s, w, h);
+        drawCASDebug(s, w, h);
     }
 };
 NVGcolor QColorToNVGcolor(const QColor& color) {

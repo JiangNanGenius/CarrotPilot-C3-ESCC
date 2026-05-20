@@ -62,7 +62,7 @@ def main():
   parser.add_argument("--output", help="destination weights JSON path")
   parser.add_argument("--car", help="expected car name")
   parser.add_argument("--kind", choices=("torque", "angle"), help="expected CAS model kind")
-  parser.add_argument("--max-alpha", type=float, default=0.1)
+  parser.add_argument("--max-alpha", type=float, default=0.5)
   parser.add_argument("--min-hours", type=float, default=0.0)
   parser.add_argument("--force", action="store_true", help="overwrite existing output")
   parser.add_argument("--dry-run", action="store_true")

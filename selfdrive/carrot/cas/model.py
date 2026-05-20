@@ -15,6 +15,7 @@ class CASModel:
     self.meta = params
     self.model_type = params.get("model_type", "")
     self.car = params.get("car", "")
+    self.car_fingerprints = list(params.get("car_fingerprints", [self.car])) if self.car else list(params.get("car_fingerprints", []))
     self.eps_firmware_hash = params.get("eps_firmware_hash", "")
     self.alpha_max = float(params.get("alpha_max", 0.0))
     self.input_size = int(params["input_size"])
@@ -23,6 +24,12 @@ class CASModel:
     self.input_std = np.asarray(params["input_std"], dtype=np.float32)
     self.input_std = np.where(np.abs(self.input_std) < 1e-6, 1.0, self.input_std)
     self.feature_spec = list(params.get("feature_spec", []))
+    output_clip = params.get("output_clip", [-3.0, 3.0])
+    self.output_clip_low = float(output_clip[0])
+    self.output_clip_high = float(output_clip[1])
+    self.vego_min = float(params.get("vego_min", 5.0))
+    self.vego_max = float(params.get("vego_max", 35.0))
+    self.use_steering_angle = bool(params.get("use_steering_angle", True))
     self.layers = []
 
     prev_size = self.input_size
@@ -89,4 +96,6 @@ class CASModel:
     x = self.normalize(input_array)
     max_abs_z = float(np.max(np.abs(x))) if x.size else 0.0
     y = self.forward(x.reshape(1, -1))
-    return float(y[0, 0]), max_abs_z
+    raw = float(y[0, 0])
+    clipped = max(self.output_clip_low, min(self.output_clip_high, raw))
+    return clipped, max_abs_z

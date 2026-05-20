@@ -1187,6 +1187,22 @@
     },
     {
       "group": "시작",
+      "name": "CASDebug",
+      "title": "CAS: 디버그 표시",
+      "descr": "CAS 상태/게이트/잔차 값을 화면 오른쪽에 표시\n0: 사용안함, 1: 사용",
+      "egroup": "START",
+      "etitle": "CAS: Debug Overlay",
+      "edescr": "Show CAS status/gates/delta values on the right side of the screen\n0: Off, 1: On",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "unit": 1,
+      "cgroup": "启动设置",
+      "ctitle": "CAS: 调试显示",
+      "cdescr": "在屏幕右侧显示 CAS 状态/门控/残差值\n0: 关闭, 1: 开启"
+    },
+    {
+      "group": "시작",
       "name": "MapboxStyle",
       "title": "맵박스 스타일",
       "descr": "0: 기본 배경\n 1: 어두운 배경\n 2: 위성 지도",

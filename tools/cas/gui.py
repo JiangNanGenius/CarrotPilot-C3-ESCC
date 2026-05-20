@@ -49,7 +49,7 @@ class CASGui(tk.Tk):
     self.age_var = tk.StringVar(value="120")
     self.max_sources_var = tk.StringVar(value="")
     self.workers_var = tk.StringVar(value=str(min(4, max(1, os.cpu_count() or 1))))
-    self.alpha_var = tk.StringVar(value="0.1")
+    self.alpha_var = tk.StringVar(value="0.5")
     self.backend_var = tk.StringVar(value="auto")
     self.device_var = tk.StringVar(value="auto")
     self.use_wsl_var = tk.BooleanVar(value=os.name == "nt")
