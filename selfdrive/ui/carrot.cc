@@ -3165,11 +3165,12 @@ public:
 
         // Layout (right-side vertical center). Big-screen friendly.
         const int wbox_w = (cas_debug_val == 1) ? 400 : 320;
-        const int wbox_h_full = (cas_debug_val == 1) ? 550 : 620;
+        const int wbox_h_full = (cas_debug_val == 1) ? 510 : 620;
         const int wbox_h_nomodel = 90;
         const int margin = 12;
         const float font_size = (cas_debug_val == 1) ? 20.0f : 22.0f;
-        const int line_h = (cas_debug_val == 1) ? 24 : 26;
+        const int line_h = (cas_debug_val == 1) ? 28 : 26;
+        const int sec_spacing = (cas_debug_val == 1) ? 18 : 6;
         const int x0 = w - wbox_w - margin;
 
         if (cas_model.length() == 0) {
@@ -3187,19 +3188,23 @@ public:
         nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 
         char buf[160];
-        snprintf(buf, sizeof(buf), "CAS  %s", kind_str);
-        ui_draw_text_vg(vg, x0 + 14, y, buf, font_size, C_WHITE, BOLD);  y += line_h;
-        ui_draw_text_vg(vg, x0 + 14, y, cas_model.toStdString().c_str(), font_size - 4, C_GRAY, BOLD);
-        y += line_h - 2;
+        if (cas_debug_val == 2) {
+            snprintf(buf, sizeof(buf), "CAS  %s", kind_str);
+            ui_draw_text_vg(vg, x0 + 14, y, buf, font_size, C_WHITE, BOLD);  y += line_h;
+            ui_draw_text_vg(vg, x0 + 14, y, cas_model.toStdString().c_str(), font_size - 4, C_GRAY, BOLD);
+            y += line_h - 2;
 
-        // 학습 시간(신뢰도) 표시 — runtime이 load_model 시 CASModelHours params에 저장
-        QString cas_hours = QString::fromStdString(params.get("CASModelHours"));
-        if (cas_hours.length() > 0) {
-            snprintf(buf, sizeof(buf), "학습 %s시간", cas_hours.toStdString().c_str());
-            ui_draw_text_vg(vg, x0 + 14, y, buf, font_size - 6, C_GRAY, BOLD);
-            y += line_h - 6;
+            // 학습 시간(신뢰도) 표시
+            QString cas_hours = QString::fromStdString(params.get("CASModelHours"));
+            if (cas_hours.length() > 0) {
+                snprintf(buf, sizeof(buf), "학습 %s시간", cas_hours.toStdString().c_str());
+                ui_draw_text_vg(vg, x0 + 14, y, buf, font_size - 6, C_GRAY, BOLD);
+                y += line_h - 6;
+            }
+            y += 8;
+        } else {
+            y = y0 + 26; // Generous padding for Mode 1 (no headers)
         }
-        y += 8;
 
         if (!has_log) {
             ui_draw_text_vg(vg, x0 + 14, y, "(컨트롤러 대기중...)", font_size - 4, C_GRAY, BOLD);
@@ -3273,7 +3278,7 @@ public:
                 }
 
                 nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, val_str, font_size - 2, C_WHITE, BOLD);
+                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, val_str, font_size - 2, color, BOLD);
                 y += line_h;
             };
 
@@ -3297,7 +3302,7 @@ public:
             snprintf(buf, sizeof(buf), "%.3f", alpha);
             draw_progress_row("alpha", alpha, 1.00f, buf, alpha > 0.01f ? C_GREEN : C_GRAY);
             
-            y += 6;
+            y += sec_spacing;
 
             // Section 2: DRIVER
             draw_sec_header("[ DRIVER (운전자 조작) ]");
@@ -3318,7 +3323,7 @@ public:
                 draw_text_row("sec_since", buf, C_WHITE);
             }
             
-            y += 6;
+            y += sec_spacing;
 
             // Section 3: METRICS
             draw_sec_header("[ METRICS (차선 오차) ]");
@@ -3332,19 +3337,17 @@ public:
             snprintf(buf, sizeof(buf), "%+.2f m", offset_60s);
             draw_lr_row("offset_60s", offset_60s, 0.30f, buf, C_WHITE);
             
-            y += 6;
+            y += sec_spacing;
 
             // Section 4: STATUS
             draw_sec_header("[ STATUS (종합 상태) ]");
             
-            const char* score_status = centering_score >= 80.0f ? "좋음" : (centering_score >= 50.0f ? "중간" : "나쁨");
             NVGcolor score_c = centering_score >= 80.0f ? C_GREEN : (centering_score >= 50.0f ? C_WHITE : C_ORANGE);
-            snprintf(buf, sizeof(buf), "%.0f %% (%s)", centering_score, score_status);
+            snprintf(buf, sizeof(buf), "%.0f %%", centering_score);
             draw_progress_row("centering_score", centering_score, 100.0f, buf, score_c);
             
-            const char* z_status = z < 1.5f ? "좋음" : (z < 3.0f ? "중간" : "나쁨");
-            NVGcolor z_c = z >= 3.0f ? C_RED : (z >= 2.0f ? C_ORANGE : C_WHITE);
-            snprintf(buf, sizeof(buf), "%.2f (%s)", z, z_status);
+            NVGcolor z_c = z < 1.5f ? C_GREEN : (z < 3.0f ? C_ORANGE : C_RED);
+            snprintf(buf, sizeof(buf), "%.2f", z);
             draw_progress_row("z_score", z, 3.00f, buf, z_c);
         } else {
             // ==========================================
@@ -3373,7 +3376,7 @@ public:
             draw_line("  raw", buf, C_GRAY);
             snprintf(buf, sizeof(buf), "%.2f", z);
             draw_line("  z", buf, z >= 3.0f ? C_RED : (z >= 2.0f ? C_ORANGE : C_WHITE));
-            y += 6;
+            y += sec_spacing;
 
             // 중앙 유지
             draw_section("중앙 유지");
@@ -3387,7 +3390,7 @@ public:
             draw_line("  5초", buf, C_WHITE);
             snprintf(buf, sizeof(buf), "%+.3f m", offset_60s);
             draw_line("  60초", buf, C_WHITE);
-            y += 6;
+            y += sec_spacing;
 
             // 운전자 개입
             draw_section("운전자 개입");
