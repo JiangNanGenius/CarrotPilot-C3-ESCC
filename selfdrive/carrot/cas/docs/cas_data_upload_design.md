@@ -16,29 +16,40 @@
 - **서버 저예산 운영**: NAS LXC + Cloudflare Tunnel. 외부 호스팅 비용 0.
 - **클론 기기 호환**: comma `DongleId` 의존 X. 자체 `CarrotDeviceId`를 첫 부팅 시 생성/저장.
 
-### 식별자 — CarrotDeviceId
+### 식별자 — CarrotDeviceId (콤마 기본 ID 우선)
 
-`DongleId`는 comma 정품 + 서버 등록 거친 기기만 있는 값. 클론/사이드로드 기기엔 없거나 신뢰 불가.
+기기에 이미 있는 하드웨어 고정 ID를 우선 사용. 둘 다 없을 때만 UUID 생성.
 
-→ 자체 식별자 사용:
+**우선순위**:
+1. **`DongleId`** — 콤마 정품 + 서버 등록 시 발급. 가장 안정적.
+2. **`HardwareSerial`** — 하드웨어 (CPU 시리얼/IMEI) 유래. flash 해도 유지. 클론 포함 대부분 기기 보유.
+3. **UUID 생성** — 1, 2 다 없으면 fallback.
+
+최종 선택값은 `CarrotDeviceId` 에 캐싱. 한 번 정해지면 `DongleId`가 나중에 활성화돼도 안 바뀜 (같은 데이터 다른 id로 중복 업로드 방지).
 
 ```python
-# selfdrive/carrot/cas/data_uploader.py 초기화
-from openpilot.common.params import Params
-import uuid
+# selfdrive/carrot/cas/data_uploader.py
+def get_device_id(params: Params) -> str:
+    cached = _read_param_str(params, "CarrotDeviceId")
+    if cached:
+        return cached
 
-def get_device_id() -> str:
-    p = Params()
-    did = (p.get("CarrotDeviceId") or "").strip()
-    if not did:
-        did = uuid.uuid4().hex[:16]   # 16자 hex
-        p.put("CarrotDeviceId", did)
-    return did
+    for source in ("DongleId", "HardwareSerial"):
+        v = _read_param_str(params, source)
+        if v and v.lower() not in ("unregistered", "none", "n/a"):
+            params.put("CarrotDeviceId", v)
+            return v
+
+    new_id = uuid.uuid4().hex[:16]
+    params.put("CarrotDeviceId", new_id)
+    return new_id
 ```
 
-- PERSISTENT 파라미터로 한 번만 생성, 이후 영구 사용
-- 기기 와이프하면 새로 생성됨 (의도된 동작)
-- comma `DongleId`가 있으면 그것도 메타에 같이 보냄 (둘 다 기록), 매칭은 `CarrotDeviceId`로
+- PERSISTENT 파라미터로 영구 캐싱
+- 기기 와이프하면 다시 결정 (의도된 동작)
+- 정품 콤마 → `DongleId` 사용
+- 클론 → `HardwareSerial` 사용
+- 둘 다 없는 특수 환경 → UUID
 
 ---
 
@@ -395,4 +406,320 @@ ON: 카로트 학습용으로 익명 주행 로그(rlog) 전송
 
 ---
 
-_최종 갱신: 2026-05-20. 이 문서는 firehose식 분산 데이터 수집 설계의 청사진._
+# 부록 A — 실제 구축된 환경 (2026-05-21 기준)
+
+이 절은 청사진이 아니라 **실제로 박혀있는 상태 스냅샷**. 운영/디버깅/이전 시 참고.
+
+## A.1 NAS 호스트 (Proxmox)
+
+| 항목 | 값 |
+|---|---|
+| Proxmox 호스트명 | `mk1` |
+| Proxmox 버전 | 9.1.4 |
+| ZFS 풀 | `datapool` (RAIDZ1, 3×1TB WDC) — ⚠️ **DEGRADED** (1 디스크 FAULTED, redundancy 0) |
+| Pool 용량 | 2.72TB raw / 1.86TB usable |
+| Proxmox 스토리지 alias | `datapool-storage` (ZFS), `local-lvm` (시스템) |
+
+### ZFS DEGRADED 상황
+
+```
+NAME                     STATE     READ WRITE CKSUM
+datapool                 DEGRADED
+  raidz1-0               DEGRADED
+    sdb                  ONLINE
+    7705461285373609670  FAULTED   was /dev/sdc1   ← 사라진 디스크
+    sdc                  ONLINE
+```
+
+- 데이터 무결성은 OK (recent scrub 통과)
+- 다음 디스크 1개 죽으면 풀 전체 손실
+- 복구: 1TB SATA HDD 1개 추가 후 `zpool replace datapool 7705461285373609670 /dev/<new>`
+- CAS rlog는 기기 원본에 남아있어 재업로드 가능 → 운영은 진행 가능
+
+## A.2 LXC 컨테이너
+
+| 항목 | 값 |
+|---|---|
+| CTID | **205** |
+| Hostname | **carrot-nas** |
+| OS | Ubuntu 24.04 LTS (template `ubuntu-24.04-standard_24.04-2_amd64.tar.zst`) |
+| IP | **192.168.50.121** (정적, `gw=192.168.50.1`) |
+| CPU | 2 코어 |
+| RAM | 2GB (swap 512MB) |
+| 시스템 디스크 | `local-lvm:vm-205-disk-0`, 8GB rootfs |
+| 데이터 디스크 | `datapool-storage:subvol-205-disk-0`, **1TB**, `mp=/srv/carrot_rlogs` |
+| unprivileged | 1 (보안상 권장) |
+| onboot | 1 (Proxmox 부팅 시 자동 시작) |
+
+생성 명령 기록:
+
+```bash
+pct create 205 local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst \
+  --hostname carrot-nas \
+  --cores 2 --memory 2048 --swap 512 \
+  --rootfs local-lvm:8 \
+  --net0 name=eth0,bridge=vmbr0,ip=192.168.50.121/24,gw=192.168.50.1 \
+  --features nesting=1 \
+  --unprivileged 1 \
+  --onboot 1 \
+  --password <비번>
+
+pct set 205 -mp0 datapool-storage:1000,mp=/srv/carrot_rlogs
+```
+
+## A.3 도메인 / Cloudflare
+
+| 항목 | 값 |
+|---|---|
+| Zone | `jominki354.live` (Cloudflare 관리, 무료 Plan) |
+| Tunnel 이름 | `carrot-upload` |
+| Tunnel ID | `3ec8aec7-f2d1-4e34-aa46-1bcf7b98f4dc` |
+| Credentials | `/etc/cloudflared/3ec8aec7-...json` |
+| Config | `/etc/cloudflared/config.yml` |
+| 서브도메인 1 | **`casroute.jominki354.live`** → 업로드 API (`:8000`) |
+| 서브도메인 2 | **`casrouter.jominki354.live`** → AList 관리 (`:5244`) |
+
+Cloudflare DNS 레코드 (자동 생성):
+- `casroute` CNAME → `<tunnel_id>.cfargotunnel.com` (Proxied ON)
+- `casrouter` CNAME → 동일 (Proxied ON)
+
+`config.yml` 내용:
+
+```yaml
+tunnel: 3ec8aec7-f2d1-4e34-aa46-1bcf7b98f4dc
+credentials-file: /etc/cloudflared/3ec8aec7-f2d1-4e34-aa46-1bcf7b98f4dc.json
+
+ingress:
+  - hostname: casroute.jominki354.live
+    service: http://localhost:8000
+  - hostname: casrouter.jominki354.live
+    service: http://localhost:5244
+  - service: http_status:404
+```
+
+## A.4 인증 — HMAC secret
+
+| 항목 | 값 |
+|---|---|
+| 위치 | `/etc/carrot-upload/secret` (root:root 0600) |
+| 길이 | 64자 hex (32바이트) |
+| 생성 명령 | `python3 -c "import secrets; print(secrets.token_hex(32))" > /etc/carrot-upload/secret` |
+| 기기 측 박힘 | `selfdrive/carrot/cas/upload_config.py` `DEFAULT_SECRET` (소스 인라인) |
+| 사용자 override | `/data/carrot_upload_secret` 파일로 기기에서 덮어쓰기 가능 |
+| 회전 정책 | 현재 없음. 향후 필요 시 carrot 빌드 + 서버 양쪽 동시 갱신 |
+
+서명 방식: `HMAC-SHA256(secret, f"{device_id}|{timestamp}")`. timestamp ±5분 윈도우.
+
+## A.5 서비스 인벤토리
+
+LXC 205 안에서 돌고 있는 서비스 3개 (systemd):
+
+### A.5.1 `cloudflared` (Cloudflare tunnel 클라이언트)
+- Binary: `/usr/bin/cloudflared` (apt deb 설치)
+- Config: `/etc/cloudflared/config.yml`
+- 메모리: ~16MB
+- 자동 업데이트: 비활성화 (`--no-autoupdate`)
+- 외부 트래픽 흐름: 모든 HTTPS → 4개 connection (QUIC, ICN icn01/icn06)
+- 재시작: `systemctl restart cloudflared`
+
+### A.5.2 `carrot-upload` (FastAPI 업로드 서버)
+- 실행: `/opt/carrot-upload-venv/bin/uvicorn server:app`
+- 코드: `/opt/carrot-upload/server.py`
+- venv: `/opt/carrot-upload-venv/` (Python 3.12, fastapi + uvicorn + python-multipart)
+- 포트: 127.0.0.1:8000 (외부 직접 노출 X, cloudflared만 닿음)
+- 메모리: ~33MB 평상시 (cap **256MB**)
+- 동시 처리: workers=1, `--limit-concurrency 4` (보수적)
+- Max request body: 50MB
+- 재시작: `systemctl restart carrot-upload`
+
+systemd unit (`/etc/systemd/system/carrot-upload.service`):
+```ini
+[Unit]
+Description=carrot CAS upload server
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/carrot-upload
+ExecStart=/opt/carrot-upload-venv/bin/uvicorn server:app \
+  --host 127.0.0.1 --port 8000 \
+  --workers 1 \
+  --limit-concurrency 4 \
+  --limit-max-requests 10000 \
+  --timeout-keep-alive 5
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=4096
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### A.5.3 `alist` (파일 탐색기 / 관리자)
+- Binary: `/opt/alist/alist` (v3.60.0 Go 단일 바이너리)
+- 데이터: `/opt/alist/data/` (SQLite + config.json + log)
+- 포트: 5244 (외부는 cloudflared 통해 casrouter 도메인)
+- 메모리: ~127MB 평상시 (cap **256MB**)
+- 관리자 계정: `admin` / **초기 비번 메모됨** (운영자가 안전한 곳에 보관)
+- 등록된 storage: `Local` 드라이버, mount=`/`, root=`/srv/carrot_rlogs`
+- WebDAV: `https://casrouter.jominki354.live/dav` (Windows 탐색기 마운트 가능)
+
+## A.6 디렉토리 / 파일 위치
+
+```
+NAS LXC (205):
+  /etc/cloudflared/
+    config.yml                              ← tunnel ingress 설정
+    3ec8aec7-...json                        ← tunnel credentials
+  /etc/carrot-upload/
+    secret                                  ← HMAC secret (mode 600)
+  /etc/systemd/system/
+    cloudflared.service
+    carrot-upload.service
+    alist.service
+  /opt/carrot-upload/
+    server.py                               ← FastAPI 코드 (216줄)
+  /opt/carrot-upload-venv/                  ← Python venv
+  /opt/alist/
+    alist                                   ← Go binary
+    data/
+      config.json
+      data.db                               ← AList 메타 SQLite
+      log/
+  /srv/carrot_rlogs/                        ← rlog 저장소 (1TB ZFS)
+    by-device/
+      <device_id>/<route>/<segment>/rlog.zst
+      <device_id>/<route>/car.txt
+      <device_id>/<route>/meta/route_meta.json
+    by-car/
+      <car>/<device_id>__<route>/           ← symlink → ../../by-device/...
+```
+
+## A.7 자원 사용 현황 (2026-05-21)
+
+```
+RAM      : 199MB / 2048MB   (9% — 1.8GB 여유)
+CPU      : 모든 프로세스 0.0% (idle)
+디스크    : 256KB / 1TB      (사실상 비어있음)
+
+서비스별:
+  cloudflared    16MB
+  carrot-upload  33MB (cap 256MB, 12%)
+  alist          127MB (cap 256MB, 50%)
+  systemd 외      ~25MB
+```
+
+→ **현재 한가함. 50대 동시 클라이언트도 받음.**
+
+## A.8 일상 운영 명령
+
+### 상태 확인
+```bash
+systemctl status cloudflared carrot-upload alist --no-pager
+free -h
+df -h /srv/carrot_rlogs
+```
+
+### 로그 보기
+```bash
+journalctl -u carrot-upload -f                 # 실시간 업로드 로그
+journalctl -u cloudflared -n 30 --no-pager     # tunnel 상태
+journalctl -u alist -n 20 --no-pager           # AList
+journalctl -u carrot-upload | grep cleanup     # 자동 정리 발동 이력
+```
+
+### Health check
+```bash
+# 내부
+curl -s http://127.0.0.1:8000/health           # FastAPI
+curl -s http://127.0.0.1:5244/                 # AList
+
+# 외부 (Cloudflare 거쳐)
+curl -s https://casroute.jominki354.live/health
+curl -sI https://casrouter.jominki354.live/
+```
+
+### HMAC 테스트 업로드 (서버 검증)
+```bash
+SECRET=$(cat /etc/carrot-upload/secret)
+DEVICE_ID="testdevice01"
+TS=$(date +%s)
+SIG=$(printf "%s|%s" "$DEVICE_ID" "$TS" | openssl dgst -sha256 -hmac "$SECRET" -hex | awk '{print $2}')
+echo "test" > /tmp/rlog.zst
+curl -s -X POST \
+  -H "X-Carrot-TS: $TS" -H "X-Carrot-Sig: $SIG" \
+  -H "X-Carrot-Version: test" -H "X-Carrot-Car: HYUNDAI_CASPER_EV" \
+  --data-binary @/tmp/rlog.zst \
+  "https://casroute.jominki354.live/upload/${DEVICE_ID}/test-route/0/rlog.zst"
+```
+
+### 자동 정리 임계값 조정
+`/opt/carrot-upload/server.py` 상단 상수:
+```python
+DISK_WARN_PCT = 85       # cleanup 발동 임계
+DISK_TARGET_PCT = 75     # 정리 목표
+CLEANUP_EVERY_N = 100    # 매 N회 업로드마다 검사
+```
+변경 후 `systemctl restart carrot-upload`.
+
+### 디스크 정리 수동 트리거 (필요 시)
+```bash
+# 가장 오래된 device/route 10개 보기
+ls -1tr /srv/carrot_rlogs/by-device/*/ | head -20
+# 특정 device 통째로 삭제
+rm -rf /srv/carrot_rlogs/by-device/<device_id>/
+```
+
+### 컨테이너 재시작 (드물게 필요)
+Proxmox 호스트에서:
+```bash
+pct reboot 205
+```
+
+## A.9 보안 운영
+
+| 항목 | 현재 상태 |
+|---|---|
+| HMAC secret 노출 | 소스 코드(공개 git)에 박힘 — Phase A 한정. Phase C 시 빌드 시점 주입 검토 |
+| AList admin 비번 | 초기 random, 운영자가 변경 권장 |
+| SSH (carrot 계정) | GitHub 키 동기화 (`https://github.com/jominki354.keys`) |
+| 외부 노출 포트 | Cloudflare Tunnel만 (직접 포트 포워딩 X) |
+| Cloudflare WAF | 기본 활성 (Free plan 수준) |
+| Rate limit | 미구현 (사용자 요청대로 — 운영하다 필요해지면 추가) |
+| Blacklist | 미구현 (필요 시 server.py에 `BLACKLIST = {...}` 한 줄) |
+
+## A.10 백업
+
+| 대상 | 백업 정책 |
+|---|---|
+| `/srv/carrot_rlogs/` | 없음 (rlog는 기기 원본에서 재업로드 가능) |
+| AList DB (`/opt/alist/data/data.db`) | 별도 백업 권장 (storage 설정/사용자) — 현재 미구성 |
+| HMAC secret | 운영자가 별도 메모 권장 |
+| Cloudflared credentials | `/etc/cloudflared/*.json` 분실 시 `cloudflared tunnel create` 재실행 필요 |
+| Proxmox 측 백업 | PBS-backup 스토리지 존재 (LXC 205 백업 스케줄 설정 권장) |
+
+## A.11 모니터링 — 운영 점검 주기
+
+| 주기 | 점검 항목 |
+|---|---|
+| 매주 | `df -h /srv/carrot_rlogs` 디스크 사용량 추세 |
+| 매주 | `systemctl status` 3개 서비스 active 여부 |
+| 매월 | `journalctl --since "1 month ago" | grep -E "ERROR\|FAIL"` 오류 누적 |
+| 분기 | ZFS scrub (`zpool scrub datapool`) — Proxmox에서 cron 등록 권장 |
+| 분기 | AList admin 비번 회전 |
+| 연 | HMAC secret 회전 (기기 빌드 + 서버 양쪽 동시 갱신) |
+
+## A.12 알려진 이슈 / 향후 보완
+
+- **ZFS DEGRADED**: 디스크 교체 전까지 redundancy 0. 우선순위 높음.
+- **AdGuard DNS 캐싱**: PC 측이 AdGuard를 DNS로 쓰면 새 도메인의 NXDOMAIN 캐시 이슈 가능. `pct restart 103`으로 해소.
+- **HMAC secret 공개**: 현재 git에 박힘. Phase C 진입 시 빌드 시점 secret 주입 방식 전환 필요.
+- **클라이언트 동시 업로드**: 현재 직렬. 필요 시 데몬 측 ThreadPoolExecutor 도입.
+- **server.py `GET /list` 엔드포인트 부재**: gui.py "Pull from NAS" 기능 가려면 추가 필요.
+
+---
+
+_부록 A 최종 갱신: 2026-05-21._
+_본 문서는 firehose식 분산 데이터 수집 설계의 청사진 + 실제 구축 환경 스냅샷._

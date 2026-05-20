@@ -54,18 +54,46 @@ def _log(msg: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Device identity
+# Device identity — prefer hardware-stable IDs comma already provides.
+#
+# Priority:
+#   1) DongleId        — comma-issued, only present after registration. Most stable.
+#   2) HardwareSerial  — hardware-derived (CPU/IMEI), persistent across reflashes.
+#   3) CarrotDeviceId  — generated UUID fallback for devices that have neither.
+#
+# Final id is cached in CarrotDeviceId so the chosen id never changes even if
+# DongleId is set later (avoids re-uploading the same data under a new id).
+
+def _read_param_str(params: Params, key: str) -> str:
+  try:
+    v = params.get(key)
+    if isinstance(v, bytes):
+      return v.decode("utf-8", "ignore").strip()
+    return (v or "").strip()
+  except Exception:
+    return ""
+
 
 def get_device_id(params: Params) -> str:
-  try:
-    cur = (params.get("CarrotDeviceId") or b"").decode("utf-8").strip()
-  except Exception:
-    cur = ""
-  if cur:
-    return cur
+  cached = _read_param_str(params, "CarrotDeviceId")
+  if cached:
+    return cached
+
+  # DongleId may be present but set to "UnregisteredDevice" before comma
+  # registration. Treat any value containing "unregistered" as missing.
+  for source in ("DongleId", "HardwareSerial"):
+    v = _read_param_str(params, source)
+    if not v:
+      continue
+    if "unregistered" in v.lower() or v.lower() in ("none", "n/a", "0", "default"):
+      continue
+    params.put("CarrotDeviceId", v)
+    _log(f"using {source}={v} as CarrotDeviceId")
+    return v
+
   new_id = uuid.uuid4().hex[:16]
   params.put("CarrotDeviceId", new_id)
-  _log(f"generated CarrotDeviceId={new_id}")
+  _log(f"generated CarrotDeviceId={new_id} (no DongleId/HardwareSerial)")
   return new_id
 
 
