@@ -1203,6 +1203,22 @@
     },
     {
       "group": "시작",
+      "name": "CASAlphaOverride",
+      "title": "CAS: Alpha 강도 오버라이드 (×0.01)",
+      "descr": "CAS 보정 강도를 JSON 기본값 대신 강제 적용 (테스트용)\n0: JSON 기본값 사용\n1~50: 0.01~0.50 강제 적용\n* gate(속도/분포/개입)는 그대로 작동",
+      "egroup": "START",
+      "etitle": "CAS: Alpha Override (×0.01)",
+      "edescr": "Override CAS strength instead of JSON default (for testing)\n0: Use JSON default\n1~50: Force 0.01~0.50\n* Safety gates (speed/dist/driver) still apply",
+      "min": 0,
+      "max": 50,
+      "default": 0,
+      "unit": 1,
+      "cgroup": "启动设置",
+      "ctitle": "CAS: Alpha 强度覆盖 (×0.01)",
+      "cdescr": "强制覆盖 CAS 强度而非使用 JSON 默认值（测试用）\n0: 使用 JSON 默认值\n1~50: 强制 0.01~0.50\n* 安全门控（速度/分布/介入）仍然有效"
+    },
+    {
+      "group": "시작",
       "name": "MapboxStyle",
       "title": "맵박스 스타일",
       "descr": "0: 기본 배경\n 1: 어두운 배경\n 2: 위성 지도",

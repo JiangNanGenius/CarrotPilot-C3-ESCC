@@ -91,15 +91,13 @@ class CASRuntime:
       if name_score < 0:
         continue
 
+      # Matching is by car name (from settings) and torque/angle kind only.
+      # EPS hash is informational: matching hashes get a tiebreaker bonus,
+      # but a mismatch (or missing hash) no longer disqualifies the model.
       eps_score = 0
       candidate_eps_hash = str(candidate.eps_firmware_hash or "").strip()
-      if candidate_eps_hash:
-        if runtime_eps_hash and candidate_eps_hash == runtime_eps_hash:
-          eps_score = 1000
-        elif runtime_eps_hash:
-          continue
-        else:
-          eps_score = 0
+      if candidate_eps_hash and runtime_eps_hash and candidate_eps_hash == runtime_eps_hash:
+        eps_score = 1000
 
       score = eps_score + name_score
       if score > best_score:
@@ -118,11 +116,15 @@ class CASRuntime:
     # Expose training hours for the HUD so users can see model trust at a glance.
     hours = float(self.model.meta.get("trained_on_hours", 0.0))
     self.params.put_nonblocking("CASModelHours", f"{hours:.2f}")
+    eps_note = ""
+    json_eps = str(self.model.eps_firmware_hash or "").strip()
+    if json_eps and runtime_eps_hash and json_eps != runtime_eps_hash:
+      eps_note = " (eps mismatch — name-matched, using anyway)"
     print(f"[CAS] matched {self.model.car} kind={self.kind} "
           f"eps={self.model.eps_firmware_hash or '<none>'} "
           f"runtime_eps={runtime_eps_hash or '<none>'} "
           f"hours={hours:.2f} alpha_max={self.model.alpha_max} "
-          f"score={best_score}", flush=True)
+          f"score={best_score}{eps_note}", flush=True)
 
   def update(self, CS, params, desired_curvature: float, measured_lateral_accel: float,
              model_data=None, CC=None, lateral_plan=None, lateral_delay: float = 0.0) -> tuple[float, float, list[float]]:
@@ -223,5 +225,11 @@ class CASRuntime:
       return 0.0
     gate_distribution = 1.0 if max_abs_z <= 2.0 else max(0.0, (3.0 - max_abs_z))
 
-    alpha_max = max(0.0, min(1.0, float(self.model.alpha_max)))
+    # CASAlphaOverride: 0 = use JSON default, 1~50 = override 0.01~0.50.
+    # Safety gates (steeringPressed/NaN/speed/distribution) still apply on top.
+    override = self.params.get_int("CASAlphaOverride")
+    if override > 0:
+      alpha_max = max(0.0, min(0.5, override / 100.0))
+    else:
+      alpha_max = max(0.0, min(1.0, float(self.model.alpha_max)))
     return alpha_max * gate_speed * gate_distribution
