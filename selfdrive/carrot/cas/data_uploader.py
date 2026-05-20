@@ -201,6 +201,9 @@ def upload_file(endpoint: str, secret: bytes, device_id: str, route_id: str,
     body = f.read()
 
   req = urllib.request.Request(url, data=body, method="POST")
+  # Cloudflare blocks the default Python-urllib User-Agent as a bot. Use a
+  # distinct identifier so it passes Bot Fight Mode / Browser Integrity Check.
+  req.add_header("User-Agent", "carrot-cas-uploader/0.1")
   req.add_header("X-Carrot-TS", str(ts))
   req.add_header("X-Carrot-Sig", sig)
   req.add_header("X-Carrot-Version", carrot_version)
