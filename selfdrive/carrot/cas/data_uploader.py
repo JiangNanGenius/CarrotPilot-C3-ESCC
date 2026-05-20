@@ -134,7 +134,10 @@ def list_segments() -> list[tuple[str, str, Path]]:
 
 
 def is_segment_complete(seg_dir: Path) -> bool:
-  """Heuristic: rlog.zst exists and hasn't been touched in 60s."""
+  """Heuristic: rlog.zst exists and hasn't been touched in 30s.
+
+  Short window so uploads start soon after a segment closes, even mid-drive.
+  """
   rlog = seg_dir / "rlog.zst"
   if not rlog.exists():
     return False
@@ -142,7 +145,7 @@ def is_segment_complete(seg_dir: Path) -> bool:
     mtime = rlog.stat().st_mtime
   except OSError:
     return False
-  return (time.time() - mtime) > 60
+  return (time.time() - mtime) > 30
 
 
 # ---------------------------------------------------------------------------
