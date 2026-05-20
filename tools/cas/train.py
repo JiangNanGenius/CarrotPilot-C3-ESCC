@@ -172,6 +172,10 @@ class SourceCollectResult:
   first_t: float | None
   last_t: float | None
   elapsed_s: float
+  # Sum / count of per-sample lateralDelay (s) so the final model JSON can
+  # record the average actuator delay seen during training.
+  lateral_delay_sum: float = 0.0
+  lateral_delay_count: int = 0
 
 
 class NumpyMLP:
@@ -430,6 +434,8 @@ def _collect_source(source: str, sample_stride: int) -> SourceCollectResult:
   triage = Counter()
   detected_car_names = Counter()
   eps_hashes = Counter()
+  lateral_delay_sum = 0.0
+  lateral_delay_count = 0
   feature_state = CASFeatureState()
   latest = SimpleNamespace(
     carState=None,
@@ -490,6 +496,7 @@ def _collect_source(source: str, sample_stride: int) -> SourceCollectResult:
                                _to_float(latest.carState.steeringTorque),
                                _to_float(latest.carState.vEgo), offset)
 
+      sample_lateral_delay = _latest_lateral_delay(latest.liveDelay)
       features = build_feature_vector(
         feature_state,
         latest.carState,
@@ -499,19 +506,27 @@ def _collect_source(source: str, sample_stride: int) -> SourceCollectResult:
         model_data=latest.modelV2,
         CC=car_control,
         lateral_plan=latest.lateralPlan,
-        lateral_delay=_latest_lateral_delay(latest.liveDelay),
+        lateral_delay=sample_lateral_delay,
         t=t,
       )
       sample = Sample(t, features, flag, offset, _to_float(latest.carState.steeringTorque))
       samples.append(sample)
       triage[flag.name] += 1
+      lateral_delay_sum += float(sample_lateral_delay)
+      lateral_delay_count += 1
 
-  return SourceCollectResult(source, samples, counts, triage, detected_car_names, eps_hashes, first_t, last_t, time.monotonic() - started)
+  return SourceCollectResult(
+    source, samples, counts, triage, detected_car_names, eps_hashes,
+    first_t, last_t, time.monotonic() - started,
+    lateral_delay_sum=lateral_delay_sum,
+    lateral_delay_count=lateral_delay_count,
+  )
 
 
 def _merge_source_result(result: SourceCollectResult, samples: list[Sample], counts: Counter,
                          detected_car_names: Counter, eps_hashes: Counter,
-                         first_t: float | None, last_t: float | None) -> tuple[float | None, float | None]:
+                         first_t: float | None, last_t: float | None,
+                         delay_acc: dict | None = None) -> tuple[float | None, float | None]:
   samples.extend(result.samples)
   counts.update(result.message_counts)
   detected_car_names.update(result.detected_car_names)
@@ -520,16 +535,20 @@ def _merge_source_result(result: SourceCollectResult, samples: list[Sample], cou
     first_t = result.first_t if first_t is None else min(first_t, result.first_t)
   if result.last_t is not None:
     last_t = result.last_t if last_t is None else max(last_t, result.last_t)
+  if delay_acc is not None:
+    delay_acc["sum"] += float(result.lateral_delay_sum)
+    delay_acc["count"] += int(result.lateral_delay_count)
   return first_t, last_t
 
 
 def collect_samples(sources: list[str], sample_stride: int,
                     audit: AuditLogger | None = None,
-                    workers: int = 1) -> tuple[list[Sample], float, Counter, Counter, Counter]:
+                    workers: int = 1) -> tuple[list[Sample], float, Counter, Counter, Counter, dict]:
   samples: list[Sample] = []
   counts = Counter()
   detected_car_names = Counter()
   eps_hashes = Counter()
+  delay_acc = {"sum": 0.0, "count": 0}
   first_t = None
   last_t = None
   total_sources = len(sources)
@@ -548,7 +567,8 @@ def collect_samples(sources: list[str], sample_stride: int,
         source_index, source = futures[future]
         try:
           result = future.result()
-          first_t, last_t = _merge_source_result(result, samples, counts, detected_car_names, eps_hashes, first_t, last_t)
+          first_t, last_t = _merge_source_result(result, samples, counts, detected_car_names, eps_hashes,
+                                                 first_t, last_t, delay_acc)
           if audit is not None:
             audit.source_end(source_index, total_sources, source, result.elapsed_s,
                              result.message_counts, len(result.samples), result.triage_counts,
@@ -562,14 +582,15 @@ def collect_samples(sources: list[str], sample_stride: int,
             raise
     samples.sort(key=lambda sample: sample.t)
     duration_h = 0.0 if first_t is None or last_t is None else max(0.0, (last_t - first_t) / 3600.0)
-    return samples, duration_h, counts, eps_hashes, detected_car_names
+    return samples, duration_h, counts, eps_hashes, detected_car_names, delay_acc
 
   for source_index, source in enumerate(sources, 1):
     if audit is not None:
       audit.source_start(source_index, total_sources, source)
     try:
       result = _collect_source(source, sample_stride)
-      first_t, last_t = _merge_source_result(result, samples, counts, detected_car_names, eps_hashes, first_t, last_t)
+      first_t, last_t = _merge_source_result(result, samples, counts, detected_car_names, eps_hashes,
+                                             first_t, last_t, delay_acc)
     except Exception as e:
       if audit is not None:
         audit.source_error(source_index, total_sources, source, e)
@@ -585,7 +606,7 @@ def collect_samples(sources: list[str], sample_stride: int,
         del result
 
   duration_h = 0.0 if first_t is None or last_t is None else max(0.0, (last_t - first_t) / 3600.0)
-  return samples, duration_h, counts, eps_hashes, detected_car_names
+  return samples, duration_h, counts, eps_hashes, detected_car_names, delay_acc
 
 
 def build_targets(samples: list[Sample], offset_horizon: float, offset_gain: float,
@@ -700,7 +721,8 @@ def main():
     sources = sources[:args.max_sources]
   audit.write_json("source_inventory.json", source_inventory(sources))
   audit.write_json("train_args.json", vars(args))
-  samples, duration_h, message_counts, eps_hashes, detected_car_names = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
+  samples, duration_h, message_counts, eps_hashes, detected_car_names, delay_acc = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
+  lateral_delay_at_train = (delay_acc["sum"] / delay_acc["count"]) if delay_acc["count"] > 0 else 0.0
   model_car = args.car.strip()
   if not model_car and detected_car_names:
     model_car = detected_car_names.most_common(1)[0][0]
@@ -752,6 +774,23 @@ def main():
   else:
     y_p99 = float(args.target_clip)
   output_clip_val = min(float(args.target_clip), max(0.05, y_p99 * 1.5))
+
+  # friction_override auto-detect (§23.2): probe the trained model with a small
+  # error-only input (no lat_accel signal). If the model barely reacts, the
+  # downstream runtime should add classical friction back on top.
+  # We use the (already normalized) value of the lateralJerkLookahead feature
+  # (index 10) plus all zeros as a synthetic "tiny friction" probe and look
+  # at the absolute response in normalized output units.
+  try:
+    probe = np.zeros(input_mean.shape[0], dtype=np.float32)
+    if probe.size > 10:
+      # 0.2 m/s^3 jerk in raw units; normalize using the same mean/std.
+      probe[10] = (0.2 - float(input_mean[10])) / max(float(input_std[10]), 1e-3)
+    probe_out = model.predict(probe.reshape(1, -1))[0, 0]
+    friction_override = bool(abs(float(probe_out)) < 0.1)
+  except Exception:
+    friction_override = False
+  validation["friction_override_probe"] = float(probe_out) if "probe_out" in locals() else None
   detected_eps_hash = args.eps_firmware_hash.strip()
   if not detected_eps_hash and eps_hashes:
     detected_eps_hash = eps_hashes.most_common(1)[0][0]
@@ -777,6 +816,8 @@ def main():
     trained_rlog_count=len(sources),
     eps_firmware_hash=detected_eps_hash,
     car_names=car_names,
+    lateral_delay_at_train=lateral_delay_at_train,
+    friction_override=friction_override,
   )
   output = Path(args.output).expanduser() if args.output else default_checkpoint_path(Path(args.history_dir), model_car, args.kind, trained_at)
   write_json_model(output, payload)

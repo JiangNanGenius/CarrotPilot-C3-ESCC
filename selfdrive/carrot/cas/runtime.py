@@ -106,12 +106,23 @@ class CASRuntime:
         best_path = path
         best_score = score
 
+    runtime_car = runtime_names[0] if runtime_names else "<unknown>"
     if best_path is None:
+      print(f"[CAS] no matching {expected_type} model for car={runtime_car} "
+            f"eps={runtime_eps_hash or '<none>'}", flush=True)
       return
 
     self.model = CASModel(best_path)
     self.model_name = self.model.car or best_path.stem
     self.params.put_nonblocking(self.model_param, self.model_name.replace("_", " "))
+    # Expose training hours for the HUD so users can see model trust at a glance.
+    hours = float(self.model.meta.get("trained_on_hours", 0.0))
+    self.params.put_nonblocking("CASModelHours", f"{hours:.2f}")
+    print(f"[CAS] matched {self.model.car} kind={self.kind} "
+          f"eps={self.model.eps_firmware_hash or '<none>'} "
+          f"runtime_eps={runtime_eps_hash or '<none>'} "
+          f"hours={hours:.2f} alpha_max={self.model.alpha_max} "
+          f"score={best_score}", flush=True)
 
   def update(self, CS, params, desired_curvature: float, measured_lateral_accel: float,
              model_data=None, CC=None, lateral_plan=None, lateral_delay: float = 0.0) -> tuple[float, float, list[float]]:

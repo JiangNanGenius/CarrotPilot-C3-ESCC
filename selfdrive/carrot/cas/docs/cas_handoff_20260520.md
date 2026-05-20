@@ -264,10 +264,10 @@ tools/cas/README.md
 문서:
 
 ```text
+selfdrive/carrot/cas/README.md
 selfdrive/carrot/cas/docs/cas_design.md
-selfdrive/carrot/cas/docs/cnlt_design.md
 selfdrive/carrot/cas/docs/cas_roadmap.md
-selfdrive/carrot/cas/docs/cas_training_setup.md
+selfdrive/carrot/cas/docs/cas_conversation.md
 selfdrive/carrot/cas/docs/cas_handoff_20260520.md
 ```
 
@@ -374,7 +374,7 @@ selfdrive/carrot/cas/docs/cas_handoff_20260520.md
 
 ## 다음 AI가 바로 할 일
 
-1. 이 문서와 `cas_roadmap.md`, `cas_design.md`, `cnlt_design.md`를 읽는다.
+1. `../README.md` + 이 문서 + `cas_design.md` + `cas_roadmap.md` 순서로 읽는다.
 2. 현재 브랜치가 `jominki354/cas_vA`인지 확인한다.
 3. `git status --short`로 사용자의 변경사항을 먼저 확인한다.
 4. Promote된 weights 파일이 존재하는지 확인한다.

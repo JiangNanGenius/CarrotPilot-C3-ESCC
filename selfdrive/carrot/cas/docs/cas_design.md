@@ -1,7 +1,7 @@
 # Carrot Adaptive Steering (CAS) — 설계 윤곽서
 
 > carrot 포크용 학습 기반 조향 시스템의 구조/구현 원리 윤곽.
-> 상세 논의·웹 조사·참고문헌은 [cnlt_design.md](cnlt_design.md) 참조.
+> 결정/대화 기록은 [cas_conversation.md](cas_conversation.md), 운영 가이드는 폴더 상위의 [`../README.md`](../README.md) 참조.
 > 이 문서는 "무엇을 만들 것인가"의 청사진.
 
 ---
@@ -775,7 +775,7 @@ torqued가 사용하는 `PoseCalibrator`를 CAS도 활용. lateral_offset 계산
 
 ## 18. 2026년 5월 기준 추가 조사 — 적용할 최신 기법
 
-§11(이전 조사: cnlt_design.md §11)에서 4편 reference를 확보했고, 이번엔 CAS 컴포넌트별로 다시 깊게 조사. 핵심 6개 발견.
+§11에서 4편 reference를 확보했고, 이번엔 CAS 컴포넌트별로 다시 깊게 조사. 핵심 6개 발견.
 
 ### 18.1 ⭐ Predictive Preference Learning from Human Interventions (PPL) — arXiv 2510.01545
 
@@ -1625,7 +1625,7 @@ CAS는 한 가지 아이디어가 아니라 **검증된 여러 컴포넌트의 �
 
 ---
 
-_상세 논의·웹 조사·참고문헌: [cnlt_design.md](cnlt_design.md)_
+_결정 기록: [cas_conversation.md](cas_conversation.md) / 운영 가이드: [../README.md](../README.md)_
 
 ## Sources (§18 추가 조사 + §19 포맷 결정)
 
@@ -1643,3 +1643,85 @@ _상세 논의·웹 조사·참고문헌: [cnlt_design.md](cnlt_design.md)_
 - [Robot-Gated Interactive Imitation Learning with Adaptive Intervention Mechanism](https://arxiv.org/html/2506.09176v1)
 - [Neural L1 Adaptive Control of Vehicle Lateral Dynamics](https://arxiv.org/pdf/2405.16358)
 - [OpenLKA dataset](https://arxiv.org/html/2505.09092v1)
+
+---
+
+## 26. CAS v2 — 독립 시스템 격상 (2026-05-20)
+
+이 절은 CAS를 NNFF 등 외부 조향 NN과 완전히 분리된 독립 시스템으로 격상한 결정을 정리한다 (2026-05-20 다른 AI 작업 결과 흡수).
+
+### 26.1 결정 — CAS는 다른 조향 NN과 무관
+
+- CAS weight JSON / log / 메타에 다른 NN의 이름/상태/필드를 직접 저장하지 않는다.
+- CAS는 잔차 구조와 α 게이트로 안전을 보장하는 독립 시스템이며, 같은 차량에서 다른 NN이 동시 동작 중이라도 CAS는 그 시점의 `base FF`(classical 또는 NN 출력) 위에 잔차 δ를 더할 뿐이다.
+- 운영/구현 원칙은 이 §26과 §9(NNFF와의 관계)에 통합되어 있다.
+
+### 26.2 새 JSON 메타 (format_version: 2)
+
+- `format_version: 2` — model.py는 `SUPPORTED_FORMAT_VERSION = 2` 가드. 더 새 포맷은 ValueError로 reject.
+- `feature_schema: "cas_v2_timed_20d"` — features.py의 `FEATURE_SCHEMA`. runtime이 일치 검사 후 mismatch면 자동 reject.
+- `car_names: [primary, alias, ...]` — 차종 변형 매칭. 옛 `car_fingerprints` 키 대체.
+- `eps_firmware_hash` — `metadata.py:eps_firmware_hash()` SHA1 12자.
+- `lateral_delay_at_train` — 학습 동안 sample별 `liveDelay.lateralDelay` 평균.
+- `friction_override` — 학습 후 probe로 자동 감지.
+
+### 26.3 runtime 차량 매칭 — 점수 합산
+
+`runtime.py` load_model 흐름:
+- 후보 weight JSON 순회
+- `feature_schema != FEATURE_SCHEMA` → reject
+- `model_type != f"cas_{kind}"` → reject
+- 이름 매칭: `CarName`/`CarSelected3` ↔ `path.stem`/`candidate.car`/`car_names`의 부분일치 → 최대 길이를 점수로
+- EPS 해시 매칭:
+  - 후보 hash 있고 런타임 hash 같음 → +1000
+  - 후보 hash 있고 런타임 hash 다름 → reject
+  - 후보 hash 없음 → 0점 (안전 fallback)
+- 종합 점수 최고인 weight 선택
+
+→ 차종이 같아도 EPS firmware가 다르면 reject. 같은 차종의 변형(예: HEV/EV) 사이 안전한 분리.
+
+### 26.4 컨트롤러 시그니처 통일
+
+- `LatControl.update(...)` abstract 시그니처에 `lateral_plan=None, lateral_delay=0.0` 기본 인자 추가.
+- `LatControlAngle`, `LatControlTorque`는 그 인자를 `cas.update()`로 전달.
+- `LatControlPID`는 시그니처만 통일(CAS 통합 코드 없음 — PID 컨트롤러는 옛날 차량용, 자동 fallback만).
+- `controlsd.py`는 `LaC.update(...)` 호출 직전에 `CC.orientationNED/angularVelocity`를 채워, CAS가 일관된 pose를 보게 함(이전엔 publish 단계에서만 채워졌음).
+
+### 26.5 §23.12 보강 — Phase 2 §2.3.1a 항목 완료
+
+| 항목 | 현재 상태 |
+|---|---|
+| B `friction_override` 자동 감지 | ✅ 완료 (train.py probe + JSON meta) |
+| I `lateral_delay_at_train` 평균 추적 | ✅ 완료 (SourceCollectResult 누적) |
+| `eps_firmware_hash` 자동 추출 | ✅ 완료 (metadata.py) |
+| 컨트롤러 통합 일관성 | ✅ 완료 (LatControl base + 3 sub) |
+| format_version 호환 가드 | ✅ 완료 (model.py SUPPORTED_FORMAT_VERSION) |
+
+### 26.6 최종 구조 — 동작 흐름
+
+```text
+openpilot lateral controller
+  → base steering command (classical / 또는 외부 NN 출력)
+  → CAS feature builder (FEATURE_SCHEMA=cas_v2_timed_20d)
+  → CASModel JSON/numpy 추론
+  → α 곱셈 게이트 (speed × distribution × user × physics)
+  → final = base + α · cas_delta
+```
+
+CAS weight의 의미: "이 차종 / 이 EPS firmware / 이 feature schema에서 학습된 차선 중앙 유지용 residual 조향 보정 모델". CAS는 다른 NN 구현과 독립 시스템이며, JSON/log/UX에 외부 구현 상태를 기록하지 않는다.
+
+### 26.7 운영/UX 결정 정리
+
+- **HUD 표기**: 차량 이름 옆 `,CAS` 1회만 (NNFF 등 외부 표기와 별개). 디버그 위젯은 `CASDebug` 토글로 우측 정중앙 표시.
+- **`casLog` extras 11개** (인덱스 명확): `raw_delta, applied_delta, alpha, max_abs_z, offset_now, offset_5s_avg, offset_60s_avg, mean_abs_5s, centering_score, intervention_count, sec_since_intervention`.
+- **HUD가 읽는 params 키**: `CAS`, `CASDebug`, `CASModelName`, `CASModelHours` (학습 시간 신뢰도 표시).
+- **매칭 로그**: runtime이 `[CAS] matched ... eps=... hours=... alpha_max=... score=...` print → `journalctl -u comma -f | grep '\[CAS\]'`로 부팅 시 확인 가능.
+
+### 26.8 미완료 마이그레이션 항목 (참고)
+
+| 항목 | 상태 | 위치 |
+|---|---|---|
+| `target_kind`, `control_mode` JSON 필드 | ⏳ | export_json.py에 추가 시점 |
+| EPS hash mismatch 시 α 강제 제한 | ⏳ | runtime `_alpha` 추가 게이트 |
+| 학습 시 speed/curvature bucket validation | ⏳ | Phase 2 §2.3.3 |
+| 이전 weight 대비 regression report | ⏳ | validate.py 비교 모드 |

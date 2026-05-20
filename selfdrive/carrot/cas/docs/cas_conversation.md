@@ -1,7 +1,7 @@
 # CAS 설계 대화 요약
 
 > jominki354와 Claude의 CAS(Carrot Adaptive Steering) 설계 대화 기록.
-> 관련 문서: [cas_design.md](cas_design.md) (설계 윤곽), [cas_roadmap.md](cas_roadmap.md) (개발 계획), [cnlt_design.md](cnlt_design.md) (초기 논의)
+> 관련 문서: [cas_design.md](cas_design.md) (설계 윤곽), [cas_roadmap.md](cas_roadmap.md) (개발 계획), [../README.md](../README.md) (운영 가이드)
 
 ---
 
@@ -197,11 +197,11 @@
 
 | 문서 | 역할 |
 |---|---|
-| [cas_design.md](cas_design.md) | 설계 윤곽 (구조, 원리, 결정 사항) |
+| [../README.md](../README.md) | 진입점 — 학습 환경 / 명령 / 데이터 양 / 매칭 확인 |
+| [cas_design.md](cas_design.md) | 설계 윤곽 (구조, 원리, 결정 사항, NNFF 비교, CAS v2 독립화 §26) |
 | [cas_roadmap.md](cas_roadmap.md) | 개발 로드맵 (Phase 0~5+, 체크리스트) |
-| [cas_independent_migration.md](cas_independent_migration.md) | CAS 독립성을 유지하면서 기존 조향 NN의 실전 장점을 이식하는 계획 |
 | [cas_conversation.md](cas_conversation.md) | **이 문서**, 대화 요약 + Q&A |
-| [cnlt_design.md](cnlt_design.md) | 초기 상세 논의 (참고용) |
+| [cas_handoff_YYYYMMDD.md](.) | 날짜별 운영 상태 핸드오프 (최신 1개만 의미 있음) |
 
 ---
 

@@ -1,7 +1,7 @@
 # Carrot Adaptive Steering (CAS) — 개발 로드맵
 
-> 실행 계획서. 설계 윤곽은 [cas_design.md](cas_design.md), 상세 논의/참고문헌은 [cnlt_design.md](cnlt_design.md),
-> 학습 환경 준비는 [cas_training_setup.md](cas_training_setup.md).
+> 실행 계획서. 설계 윤곽/상세 논의는 [cas_design.md](cas_design.md), 결정 기록은 [cas_conversation.md](cas_conversation.md),
+> 학습 환경 / 운영 가이드는 폴더 상위의 [`../README.md`](../README.md).
 > 단계별 목표·산출물·체크리스트·검증 기준·위험을 한 문서에 정리.
 
 ---
@@ -213,15 +213,15 @@
 - [ ] 차종별 EPS firmware 해시 매핑 정착
 - [ ] 매칭 안 되는 차량은 자동 fallback 동작 확인
 
-#### 2.3.1a Phase 1 점검에서 발견된 자동 추출 미구현 항목 (2026-05-20)
+#### 2.3.1a Phase 1 점검에서 발견된 자동 추출 미구현 항목 (2026-05-20 → 완료)
 
-Phase 1 첫 학습 후 JSON 메타 점검 결과, 다음 3개가 자동 채워지지 않음. Phase 2에서 train.py에 자동 추출 로직 추가:
+Phase 1 첫 학습 후 JSON 메타 점검 결과, 3개 항목이 자동 채워지지 않았던 것을 Phase 2 초입에 모두 처리:
 
-- [x] **`eps_firmware_hash` 자동 추출**: rlog의 `carParams.carFw` 중 `ecu == "eps"`인 항목들의 `fwVersion` → SHA1 짧은 해시. 차종 변형 매칭에 필수 (§24).
-- [ ] **`lateral_delay_at_train` 평균 추적**: 현재 `_latest_lateral_delay`로 한 번만 보고 학습 전체에 못 씀. Sample 클래스에 `lateral_delay` 필드 추가하거나 source별 평균 집계.
-- [ ] **`friction_override` 자동 감지**: 학습 끝난 모델에 `evaluate([10.0, 0.0, 0.2, ...])` 호출해서 출력이 작으면 (`<0.1`) True 설정 (§23.2). 현재 항상 False.
+- [x] **`eps_firmware_hash` 자동 추출** — `selfdrive/carrot/cas/metadata.py` 신설. `carParams.carFw` 중 `ecu == "eps"` 항목들의 `(address, subAddress, fwVersion)` 정렬 후 SHA1 12자. 차종 변형 매칭(§24)에 사용.
+- [x] **`lateral_delay_at_train` 평균 추적** — `SourceCollectResult`에 `lateral_delay_sum/count` 누적, `collect_samples`가 `delay_acc` dict로 합산, 학습 종료 후 평균 → `build_json_model(lateral_delay_at_train=…)` 자동.
+- [x] **`friction_override` 자동 감지** — 학습 끝난 후 `lateralJerkLookahead` feature만 0.2 m/s³로 채운 probe vector로 `model.predict()` 호출. 출력 절댓값 < 0.1이면 `friction_override=True` 마킹. validation 결과에 `friction_override_probe` 원본 값도 기록.
 
-지금은 안 막혀 있는 이유: 메타가 비어 있어도 런타임은 기본값으로 정상 동작. 다만 차종 변형 매칭 정확도(`CarName`/`CarSelected3` + `eps_firmware_hash`)와 friction 보완 동작 검증을 위해 Phase 2 안에 처리.
+런타임은 위 메타가 비어 있어도 기본값으로 정상 동작하지만, 채워진 경우 차종 변형 매칭 정확도와 friction 보완 신호 활용 가능.
 
 #### 2.3.2 학습 정교화 (§18 / §23 반영)
 - [ ] **PPL preference horizon L** 자동 튜닝 (§18.1, L=50~100 그리드서치)
@@ -372,4 +372,4 @@ Phase 0의 가장 가벼운 시작점.
 
 ---
 
-_설계 윤곽: [cas_design.md](cas_design.md) / 상세 논의: [cnlt_design.md](cnlt_design.md)_
+_설계 윤곽: [cas_design.md](cas_design.md) / 결정 기록: [cas_conversation.md](cas_conversation.md) / 운영 가이드: [../README.md](../README.md)_

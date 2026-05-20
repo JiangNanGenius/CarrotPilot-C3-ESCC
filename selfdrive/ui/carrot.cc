@@ -3176,7 +3176,7 @@ public:
             ui_fill_rect(vg, { x0, y0, wbox_w, wbox_h_nomodel }, C_BG, 12);
             nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
             ui_draw_text_vg(vg, x0 + 14, y0 + 14, "CAS", font_size, C_GRAY, BOLD);
-            ui_draw_text_vg(vg, x0 + 14, y0 + 46, "no model for this car", font_size - 4, C_GRAY, BOLD);
+            ui_draw_text_vg(vg, x0 + 14, y0 + 46, "이 차량용 모델 없음", font_size - 4, C_GRAY, BOLD);
             return;
         }
 
@@ -3186,14 +3186,22 @@ public:
         nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 
         char buf[160];
-        snprintf(buf, sizeof(buf), "CAS  v1  %s", kind_str);
+        snprintf(buf, sizeof(buf), "CAS  %s", kind_str);
         ui_draw_text_vg(vg, x0 + 14, y, buf, font_size, C_WHITE, BOLD);  y += line_h;
         ui_draw_text_vg(vg, x0 + 14, y, cas_model.toStdString().c_str(), font_size - 4, C_GRAY, BOLD);
         y += line_h - 2;
+
+        // 학습 시간(신뢰도) 표시 — runtime이 load_model 시 CASModelHours params에 저장
+        QString cas_hours = QString::fromStdString(params.get("CASModelHours"));
+        if (cas_hours.length() > 0) {
+            snprintf(buf, sizeof(buf), "학습 %s시간", cas_hours.toStdString().c_str());
+            ui_draw_text_vg(vg, x0 + 14, y, buf, font_size - 6, C_GRAY, BOLD);
+            y += line_h - 6;
+        }
         y += 8;
 
         if (!has_log) {
-            ui_draw_text_vg(vg, x0 + 14, y, "(waiting for controls...)", font_size - 4, C_GRAY, BOLD);
+            ui_draw_text_vg(vg, x0 + 14, y, "(컨트롤러 대기중...)", font_size - 4, C_GRAY, BOLD);
             return;
         }
 
@@ -3222,8 +3230,8 @@ public:
             y += line_h - 2;
         };
 
-        // CURRENT
-        draw_section("CURRENT");
+        // 현재 상태
+        draw_section("현재 상태");
         snprintf(buf, sizeof(buf), "%.3f", alpha);
         draw_line("  alpha", buf, alpha > 0.01f ? C_GREEN : C_GRAY);
         snprintf(buf, sizeof(buf), "%+.3f", applied_delta);
@@ -3234,32 +3242,32 @@ public:
         draw_line("  z", buf, z >= 3.0f ? C_RED : (z >= 2.0f ? C_ORANGE : C_WHITE));
         y += 6;
 
-        // CENTERING
-        draw_section("CENTERING");
+        // 중앙 유지
+        draw_section("중앙 유지");
         snprintf(buf, sizeof(buf), "%.0f", centering_score);
         NVGcolor score_c = centering_score >= 80.0f ? C_GREEN
                            : (centering_score >= 50.0f ? C_WHITE : C_ORANGE);
-        draw_line("  score", buf, score_c);
+        draw_line("  점수", buf, score_c);
         snprintf(buf, sizeof(buf), "%+.3f m", offset_now);
-        draw_line("  now", buf, C_WHITE);
+        draw_line("  현재", buf, C_WHITE);
         snprintf(buf, sizeof(buf), "%+.3f m", offset_5s);
-        draw_line("  5s avg", buf, C_WHITE);
+        draw_line("  5초", buf, C_WHITE);
         snprintf(buf, sizeof(buf), "%+.3f m", offset_60s);
-        draw_line("  60s avg", buf, C_WHITE);
+        draw_line("  60초", buf, C_WHITE);
         y += 6;
 
-        // INTERVENTION
-        draw_section("INTERVENTION");
+        // 운전자 개입
+        draw_section("운전자 개입");
         snprintf(buf, sizeof(buf), "%d", interventions);
-        draw_line("  count", buf, interventions == 0 ? C_GREEN : C_WHITE);
+        draw_line("  횟수", buf, interventions == 0 ? C_GREEN : C_WHITE);
         if (sec_since < 0.0f) {
-            draw_line("  last", "—", C_GRAY);
+            draw_line("  최근", "—", C_GRAY);
         } else if (sec_since < 60.0f) {
-            snprintf(buf, sizeof(buf), "%.0fs ago", sec_since);
-            draw_line("  last", buf, sec_since < 10.0f ? C_RED : C_ORANGE);
+            snprintf(buf, sizeof(buf), "%.0f초 전", sec_since);
+            draw_line("  최근", buf, sec_since < 10.0f ? C_RED : C_ORANGE);
         } else {
-            snprintf(buf, sizeof(buf), "%.1fm ago", sec_since / 60.0f);
-            draw_line("  last", buf, C_WHITE);
+            snprintf(buf, sizeof(buf), "%.1f분 전", sec_since / 60.0f);
+            draw_line("  최근", buf, C_WHITE);
         }
     }
 

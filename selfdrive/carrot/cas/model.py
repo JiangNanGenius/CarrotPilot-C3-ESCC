@@ -4,6 +4,11 @@ from pathlib import Path
 import numpy as np
 
 
+# Maximum CAS weight JSON format_version this runtime can load.
+# Bumping this is a deliberate code change; never read it from JSON.
+SUPPORTED_FORMAT_VERSION = 2
+
+
 class CASModel:
   activation_function_names = {"σ": "sigmoid"}
 
@@ -14,6 +19,14 @@ class CASModel:
 
     self.meta = params
     self.format_version = int(params.get("format_version", 1))
+    # Hard guard: reject weights that were written with a newer schema this
+    # runtime doesn't understand. Older formats stay loadable; missing
+    # fields fall back to defaults via params.get().
+    if self.format_version > SUPPORTED_FORMAT_VERSION:
+      raise ValueError(
+        f"CAS weight format_version {self.format_version} is newer than "
+        f"this runtime supports ({SUPPORTED_FORMAT_VERSION}). Update carrot."
+      )
     self.model_type = params.get("model_type", "")
     self.car = params.get("car", "")
     self.car_names = list(params.get("car_names", [self.car])) if self.car else list(params.get("car_names", []))
