@@ -3122,7 +3122,8 @@ protected:
 public:
     void drawCASDebug(UIState* s, int w, int h) {
         Params params = Params();
-        if (params.getInt("CAS") <= 0 || params.getInt("CASDebug") <= 0) return;
+        int cas_debug_val = params.getInt("CASDebug");
+        if (params.getInt("CAS") <= 0 || cas_debug_val <= 0) return;
 
         NVGcontext* vg = s->vg_border;
         SubMaster& sm = *(s->sm);
@@ -3163,12 +3164,12 @@ public:
         const NVGcolor C_BG = nvgRGBA(0, 0, 0, 180);
 
         // Layout (right-side vertical center). Big-screen friendly.
-        const int wbox_w = 320;
-        const int wbox_h_full = 620;
+        const int wbox_w = (cas_debug_val == 1) ? 400 : 320;
+        const int wbox_h_full = (cas_debug_val == 1) ? 550 : 620;
         const int wbox_h_nomodel = 90;
         const int margin = 12;
-        const float font_size = 22.0f;
-        const int line_h = 26;
+        const float font_size = (cas_debug_val == 1) ? 20.0f : 22.0f;
+        const int line_h = (cas_debug_val == 1) ? 24 : 26;
         const int x0 = w - wbox_w - margin;
 
         if (cas_model.length() == 0) {
@@ -3217,57 +3218,190 @@ public:
         const int interventions = (int)cas_log[n - 2];
         const float sec_since = cas_log[n - 1];
 
-        auto draw_line = [&](const char* label, const char* value, NVGcolor color) {
-            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-            ui_draw_text_vg(vg, x0 + 14, y, label, font_size, color, BOLD);
-            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
-            ui_draw_text_vg(vg, x0 + wbox_w - 14, y, value, font_size, color, BOLD);
-            y += line_h;
-        };
-        auto draw_section = [&](const char* label) {
-            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-            ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, C_GREEN, BOLD);
-            y += line_h - 2;
-        };
+        // Read steeringTorque from carState
+        float steering_torque = 0.00f;
+        if (sm.alive("carState")) {
+            steering_torque = sm["carState"].getCarState().getSteeringTorque();
+        }
 
-        // 현재 상태
-        draw_section("현재 상태");
-        snprintf(buf, sizeof(buf), "%.3f", alpha);
-        draw_line("  alpha", buf, alpha > 0.01f ? C_GREEN : C_GRAY);
-        snprintf(buf, sizeof(buf), "%+.3f", applied_delta);
-        draw_line("  delta", buf, applied_delta != 0.0f ? C_WHITE : C_GRAY);
-        snprintf(buf, sizeof(buf), "%+.3f", raw_delta);
-        draw_line("  raw", buf, C_GRAY);
-        snprintf(buf, sizeof(buf), "%.2f", z);
-        draw_line("  z", buf, z >= 3.0f ? C_RED : (z >= 2.0f ? C_ORANGE : C_WHITE));
-        y += 6;
+        if (cas_debug_val == 1) {
+            // ==========================================
+            // Mode 1: User-Friendly Graphical Debug HUD
+            // ==========================================
+            auto draw_sec_header = [&](const char* label) {
+                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 4, C_GREEN, BOLD);
+                y += line_h - 4;
+            };
 
-        // 중앙 유지
-        draw_section("중앙 유지");
-        snprintf(buf, sizeof(buf), "%.0f", centering_score);
-        NVGcolor score_c = centering_score >= 80.0f ? C_GREEN
-                           : (centering_score >= 50.0f ? C_WHITE : C_ORANGE);
-        draw_line("  점수", buf, score_c);
-        snprintf(buf, sizeof(buf), "%+.3f m", offset_now);
-        draw_line("  현재", buf, C_WHITE);
-        snprintf(buf, sizeof(buf), "%+.3f m", offset_5s);
-        draw_line("  5초", buf, C_WHITE);
-        snprintf(buf, sizeof(buf), "%+.3f m", offset_60s);
-        draw_line("  60초", buf, C_WHITE);
-        y += 6;
+            auto draw_lr_row = [&](const char* label, float val, float max_val, const char* val_str, NVGcolor color) {
+                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, C_WHITE, BOLD);
 
-        // 운전자 개입
-        draw_section("운전자 개입");
-        snprintf(buf, sizeof(buf), "%d", interventions);
-        draw_line("  횟수", buf, interventions == 0 ? C_GREEN : C_WHITE);
-        if (sec_since < 0.0f) {
-            draw_line("  최근", "—", C_GRAY);
-        } else if (sec_since < 60.0f) {
-            snprintf(buf, sizeof(buf), "%.0f초 전", sec_since);
-            draw_line("  최근", buf, sec_since < 10.0f ? C_RED : C_ORANGE);
+                int cx = x0 + 210;
+                int gy = y + 6;
+                ui_fill_rect(vg, {cx - 45, gy, 90, 6}, nvgRGBA(60, 60, 60, 255), 2);
+                ui_fill_rect(vg, {cx - 1, y + 2, 2, 14}, C_GRAY, 0);
+
+                float norm = val / max_val;
+                norm = std::max(-1.0f, std::min(1.0f, norm));
+                int fill_w = (int)(norm * 45);
+                if (fill_w < 0) {
+                    ui_fill_rect(vg, {cx + fill_w, gy, -fill_w, 6}, color, 2);
+                } else if (fill_w > 0) {
+                    ui_fill_rect(vg, {cx, gy, fill_w, 6}, color, 2);
+                }
+
+                nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, val_str, font_size - 2, C_WHITE, BOLD);
+                y += line_h;
+            };
+
+            auto draw_progress_row = [&](const char* label, float val, float max_val, const char* val_str, NVGcolor color) {
+                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, C_WHITE, BOLD);
+
+                int gx = x0 + 165;
+                int gy = y + 6;
+                ui_fill_rect(vg, {gx, gy, 90, 6}, nvgRGBA(60, 60, 60, 255), 2);
+
+                float norm = val / max_val;
+                norm = std::max(0.0f, std::min(1.0f, norm));
+                int fill_w = (int)(norm * 90);
+                if (fill_w > 0) {
+                    ui_fill_rect(vg, {gx, gy, fill_w, 6}, color, 2);
+                }
+
+                nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, val_str, font_size - 2, C_WHITE, BOLD);
+                y += line_h;
+            };
+
+            auto draw_text_row = [&](const char* label, const char* val_str, NVGcolor color) {
+                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, color, BOLD);
+                nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, val_str, font_size - 2, color, BOLD);
+                y += line_h;
+            };
+
+            // Section 1: CONTROL
+            draw_sec_header("[ CONTROL (보조 제어) ]");
+            
+            snprintf(buf, sizeof(buf), "%+.2f", applied_delta);
+            draw_lr_row("applied_delta", applied_delta, 0.20f, buf, C_WHITE);
+            
+            snprintf(buf, sizeof(buf), "%+.2f", raw_delta);
+            draw_lr_row("raw_delta", raw_delta, 0.20f, buf, C_GRAY);
+            
+            snprintf(buf, sizeof(buf), "%.3f", alpha);
+            draw_progress_row("alpha", alpha, 1.00f, buf, alpha > 0.01f ? C_GREEN : C_GRAY);
+            
+            y += 6;
+
+            // Section 2: DRIVER
+            draw_sec_header("[ DRIVER (운전자 조작) ]");
+            
+            snprintf(buf, sizeof(buf), "%.2f", steering_torque);
+            draw_lr_row("steeringTorque", steering_torque, 1.00f, buf, std::abs(steering_torque) > 0.01f ? C_ORANGE : C_GRAY);
+            
+            snprintf(buf, sizeof(buf), "%d 회", interventions);
+            draw_text_row("interventions", buf, interventions == 0 ? C_GREEN : C_WHITE);
+            
+            if (sec_since < 0.0f) {
+                draw_text_row("sec_since", "—", C_GRAY);
+            } else if (sec_since < 60.0f) {
+                snprintf(buf, sizeof(buf), "%.0fs", sec_since);
+                draw_text_row("sec_since", buf, sec_since < 10.0f ? C_RED : C_ORANGE);
+            } else {
+                snprintf(buf, sizeof(buf), "%.1fm", sec_since / 60.0f);
+                draw_text_row("sec_since", buf, C_WHITE);
+            }
+            
+            y += 6;
+
+            // Section 3: METRICS
+            draw_sec_header("[ METRICS (차선 오차) ]");
+            
+            snprintf(buf, sizeof(buf), "%+.2f m", offset_now);
+            draw_lr_row("offset_now", offset_now, 0.30f, buf, C_WHITE);
+            
+            snprintf(buf, sizeof(buf), "%+.2f m", offset_5s);
+            draw_lr_row("offset_5s", offset_5s, 0.30f, buf, C_WHITE);
+            
+            snprintf(buf, sizeof(buf), "%+.2f m", offset_60s);
+            draw_lr_row("offset_60s", offset_60s, 0.30f, buf, C_WHITE);
+            
+            y += 6;
+
+            // Section 4: STATUS
+            draw_sec_header("[ STATUS (종합 상태) ]");
+            
+            const char* score_status = centering_score >= 80.0f ? "좋음" : (centering_score >= 50.0f ? "중간" : "나쁨");
+            NVGcolor score_c = centering_score >= 80.0f ? C_GREEN : (centering_score >= 50.0f ? C_WHITE : C_ORANGE);
+            snprintf(buf, sizeof(buf), "%.0f %% (%s)", centering_score, score_status);
+            draw_progress_row("centering_score", centering_score, 100.0f, buf, score_c);
+            
+            const char* z_status = z < 1.5f ? "좋음" : (z < 3.0f ? "중간" : "나쁨");
+            NVGcolor z_c = z >= 3.0f ? C_RED : (z >= 2.0f ? C_ORANGE : C_WHITE);
+            snprintf(buf, sizeof(buf), "%.2f (%s)", z, z_status);
+            draw_progress_row("z_score", z, 3.00f, buf, z_c);
         } else {
-            snprintf(buf, sizeof(buf), "%.1f분 전", sec_since / 60.0f);
-            draw_line("  최근", buf, C_WHITE);
+            // ==========================================
+            // Mode 2: Original Developer Text Debug HUD
+            // ==========================================
+            auto draw_line = [&](const char* label, const char* value, NVGcolor color) {
+                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + 14, y, label, font_size, color, BOLD);
+                nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, value, font_size, color, BOLD);
+                y += line_h;
+            };
+            auto draw_section = [&](const char* label) {
+                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, C_GREEN, BOLD);
+                y += line_h - 2;
+            };
+
+            // 현재 상태
+            draw_section("현재 상태");
+            snprintf(buf, sizeof(buf), "%.3f", alpha);
+            draw_line("  alpha", buf, alpha > 0.01f ? C_GREEN : C_GRAY);
+            snprintf(buf, sizeof(buf), "%+.3f", applied_delta);
+            draw_line("  delta", buf, applied_delta != 0.0f ? C_WHITE : C_GRAY);
+            snprintf(buf, sizeof(buf), "%+.3f", raw_delta);
+            draw_line("  raw", buf, C_GRAY);
+            snprintf(buf, sizeof(buf), "%.2f", z);
+            draw_line("  z", buf, z >= 3.0f ? C_RED : (z >= 2.0f ? C_ORANGE : C_WHITE));
+            y += 6;
+
+            // 중앙 유지
+            draw_section("중앙 유지");
+            snprintf(buf, sizeof(buf), "%.0f", centering_score);
+            NVGcolor score_c = centering_score >= 80.0f ? C_GREEN
+                               : (centering_score >= 50.0f ? C_WHITE : C_ORANGE);
+            draw_line("  점수", buf, score_c);
+            snprintf(buf, sizeof(buf), "%+.3f m", offset_now);
+            draw_line("  현재", buf, C_WHITE);
+            snprintf(buf, sizeof(buf), "%+.3f m", offset_5s);
+            draw_line("  5초", buf, C_WHITE);
+            snprintf(buf, sizeof(buf), "%+.3f m", offset_60s);
+            draw_line("  60초", buf, C_WHITE);
+            y += 6;
+
+            // 운전자 개입
+            draw_section("운전자 개입");
+            snprintf(buf, sizeof(buf), "%d", interventions);
+            draw_line("  횟수", buf, interventions == 0 ? C_GREEN : C_WHITE);
+            if (sec_since < 0.0f) {
+                draw_line("  최근", "—", C_GRAY);
+            } else if (sec_since < 60.0f) {
+                snprintf(buf, sizeof(buf), "%.0f초 전", sec_since);
+                draw_line("  최근", buf, sec_since < 10.0f ? C_RED : C_ORANGE);
+            } else {
+                snprintf(buf, sizeof(buf), "%.1f분 전", sec_since / 60.0f);
+                draw_line("  최근", buf, C_WHITE);
+            }
         }
     }
 
