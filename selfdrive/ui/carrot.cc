@@ -3025,6 +3025,10 @@ static void drawLaneCenterIndicator(const UIState *s) {
   }
 }
 
+// Defined after BorderDrawer/borderDrawer below; forward-declared so it can be
+// invoked from ui_draw where the s->vg frame is active.
+void ui_draw_cas_overlay(UIState* s);
+
 void ui_draw(UIState *s, ModelRenderer* model_renderer, int w, int h) {
   _model = model_renderer;
   if (s->fb_w != w || s->fb_h != h) {
@@ -3086,6 +3090,8 @@ void ui_draw(UIState *s, ModelRenderer* model_renderer, int w, int h) {
 
   drawTurnInfo.draw(s);
 
+  ui_draw_cas_overlay(s);
+
   ui_draw_text_a2(s);
   ui_draw_alert(s);
 
@@ -3125,7 +3131,10 @@ public:
         int cas_debug_val = params.getInt("CASDebug");
         if (params.getInt("CAS") <= 0 || cas_debug_val <= 0) return;
 
-        NVGcontext* vg = s->vg_border;
+        // Draw on the inner camera overlay (s->vg), not s->vg_border.
+        // s->vg_border is occluded by the opaque AnnotatedCameraWidget child
+        // except for the outer ~30px border strip, which would clip the widget.
+        NVGcontext* vg = s->vg;
         SubMaster& sm = *(s->sm);
         if (!sm.alive("controlsState")) return;
 
@@ -3534,13 +3543,20 @@ public:
         ui_draw_text_vg(vg, w- text_margin, h, bottom_right, 30, COLOR_WHITE, BOLD);
 
         //drawTpms(s, w, h);
-        drawCASDebug(s, w, h);
+        // CAS overlay is drawn from ui_draw() on the inner camera canvas;
+        // drawing it here would land on s->vg_border and be clipped.
     }
 };
 NVGcolor QColorToNVGcolor(const QColor& color) {
     return nvgRGBAf(color.redF(), color.greenF(), color.blueF(), color.alphaF());
 }
 BorderDrawer borderDrawer;
+
+void ui_draw_cas_overlay(UIState* s) {
+    // Use camera framebuffer dimensions so the widget sits at the right edge
+    // of the visible camera view (not the outer OnroadWindow with borders).
+    borderDrawer.drawCASDebug(s, s->fb_w, s->fb_h);
+}
 void ui_draw_border(UIState* s, int w, int h, QColor bg, QColor bg_long) {
 
     if (s->vg_border == nullptr) {
