@@ -27,7 +27,10 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-from openpilot.common.params import Params
+try:
+  from openpilot.common.params import Params
+except ModuleNotFoundError:
+  from common.params import Params
 
 try:
   from openpilot.selfdrive.carrot.cas import upload_config, uploader_state
