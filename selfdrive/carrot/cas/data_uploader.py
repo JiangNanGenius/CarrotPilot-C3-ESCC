@@ -39,7 +39,11 @@ except ModuleNotFoundError:
 
 
 REALDATA = Path("/data/media/0/realdata")
-ROUTE_SEG_RE = re.compile(r"^(?P<route>\d{4}-\d{2}-\d{2}--\d{2}-\d{2}-\d{2})--(?P<seg>\d+)$")
+# Comma's segment folder naming has two forms in the wild:
+#   - registered devices: "2026-05-21--14-30-00--0"  (date-time + segment)
+#   - unregistered:       "00000000--4c043f717d--6"  (bootcount + hash + segment)
+# Match anything ending with --<digits>$.
+ROUTE_SEG_RE = re.compile(r"^(?P<route>.+)--(?P<seg>\d+)$")
 
 UPLOAD_FILES = ("rlog.zst", "qlog.zst")
 META_FILENAME = "route_meta.json"
