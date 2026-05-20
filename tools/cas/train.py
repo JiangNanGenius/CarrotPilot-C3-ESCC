@@ -58,11 +58,13 @@ def install_openpilot_aliases():
 
 try:
   from openpilot.selfdrive.carrot.cas.features import CASFeatureState, build_feature_vector, lane_center_offset
+  from openpilot.selfdrive.carrot.cas.metadata import eps_firmware_hash
   from openpilot.tools.cas.export_json import build_json_model, write_json_model
   from openpilot.tools.cas.triage import TRIAGE_WEIGHTS, TriageType, classify_sample, coerce_triage
   from openpilot.tools.cas.validate import format_counts, lateral_offset_metrics, prediction_metrics
 except ModuleNotFoundError:
   from selfdrive.carrot.cas.features import CASFeatureState, build_feature_vector, lane_center_offset
+  from selfdrive.carrot.cas.metadata import eps_firmware_hash
   from tools.cas.export_json import build_json_model, write_json_model
   from tools.cas.triage import TRIAGE_WEIGHTS, TriageType, classify_sample, coerce_triage
   from tools.cas.validate import format_counts, lateral_offset_metrics, prediction_metrics
@@ -165,6 +167,8 @@ class SourceCollectResult:
   samples: list[Sample]
   message_counts: Counter
   triage_counts: Counter
+  detected_car_names: Counter
+  eps_firmware_hashes: Counter
   first_t: float | None
   last_t: float | None
   elapsed_s: float
@@ -424,6 +428,8 @@ def _collect_source(source: str, sample_stride: int) -> SourceCollectResult:
   samples: list[Sample] = []
   counts = Counter()
   triage = Counter()
+  detected_car_names = Counter()
+  eps_hashes = Counter()
   feature_state = CASFeatureState()
   latest = SimpleNamespace(
     carState=None,
@@ -460,6 +466,13 @@ def _collect_source(source: str, sample_stride: int) -> SourceCollectResult:
       latest.liveDelay = msg.liveDelay
     elif which == "lateralLearningInfo":
       latest.lateralLearningInfo = msg.lateralLearningInfo
+    elif which == "carParams":
+      car_name = str(getattr(msg.carParams, "carFingerprint", "")).strip()
+      if car_name:
+        detected_car_names[car_name] += 1
+      eps_hash = eps_firmware_hash(msg.carParams.carFw)
+      if eps_hash:
+        eps_hashes[eps_hash] += 1
     elif which == "controlsState":
       if latest.carState is None or latest.liveParameters is None:
         continue
@@ -487,18 +500,22 @@ def _collect_source(source: str, sample_stride: int) -> SourceCollectResult:
         CC=car_control,
         lateral_plan=latest.lateralPlan,
         lateral_delay=_latest_lateral_delay(latest.liveDelay),
+        t=t,
       )
       sample = Sample(t, features, flag, offset, _to_float(latest.carState.steeringTorque))
       samples.append(sample)
       triage[flag.name] += 1
 
-  return SourceCollectResult(source, samples, counts, triage, first_t, last_t, time.monotonic() - started)
+  return SourceCollectResult(source, samples, counts, triage, detected_car_names, eps_hashes, first_t, last_t, time.monotonic() - started)
 
 
 def _merge_source_result(result: SourceCollectResult, samples: list[Sample], counts: Counter,
+                         detected_car_names: Counter, eps_hashes: Counter,
                          first_t: float | None, last_t: float | None) -> tuple[float | None, float | None]:
   samples.extend(result.samples)
   counts.update(result.message_counts)
+  detected_car_names.update(result.detected_car_names)
+  eps_hashes.update(result.eps_firmware_hashes)
   if result.first_t is not None:
     first_t = result.first_t if first_t is None else min(first_t, result.first_t)
   if result.last_t is not None:
@@ -508,9 +525,11 @@ def _merge_source_result(result: SourceCollectResult, samples: list[Sample], cou
 
 def collect_samples(sources: list[str], sample_stride: int,
                     audit: AuditLogger | None = None,
-                    workers: int = 1) -> tuple[list[Sample], float, Counter]:
+                    workers: int = 1) -> tuple[list[Sample], float, Counter, Counter, Counter]:
   samples: list[Sample] = []
   counts = Counter()
+  detected_car_names = Counter()
+  eps_hashes = Counter()
   first_t = None
   last_t = None
   total_sources = len(sources)
@@ -529,7 +548,7 @@ def collect_samples(sources: list[str], sample_stride: int,
         source_index, source = futures[future]
         try:
           result = future.result()
-          first_t, last_t = _merge_source_result(result, samples, counts, first_t, last_t)
+          first_t, last_t = _merge_source_result(result, samples, counts, detected_car_names, eps_hashes, first_t, last_t)
           if audit is not None:
             audit.source_end(source_index, total_sources, source, result.elapsed_s,
                              result.message_counts, len(result.samples), result.triage_counts,
@@ -543,14 +562,14 @@ def collect_samples(sources: list[str], sample_stride: int,
             raise
     samples.sort(key=lambda sample: sample.t)
     duration_h = 0.0 if first_t is None or last_t is None else max(0.0, (last_t - first_t) / 3600.0)
-    return samples, duration_h, counts
+    return samples, duration_h, counts, eps_hashes, detected_car_names
 
   for source_index, source in enumerate(sources, 1):
     if audit is not None:
       audit.source_start(source_index, total_sources, source)
     try:
       result = _collect_source(source, sample_stride)
-      first_t, last_t = _merge_source_result(result, samples, counts, first_t, last_t)
+      first_t, last_t = _merge_source_result(result, samples, counts, detected_car_names, eps_hashes, first_t, last_t)
     except Exception as e:
       if audit is not None:
         audit.source_error(source_index, total_sources, source, e)
@@ -566,7 +585,7 @@ def collect_samples(sources: list[str], sample_stride: int,
         del result
 
   duration_h = 0.0 if first_t is None or last_t is None else max(0.0, (last_t - first_t) / 3600.0)
-  return samples, duration_h, counts
+  return samples, duration_h, counts, eps_hashes, detected_car_names
 
 
 def build_targets(samples: list[Sample], offset_horizon: float, offset_gain: float,
@@ -646,7 +665,9 @@ def default_checkpoint_path(history_dir: Path, car: str, kind: str, trained_at: 
 def main():
   parser = argparse.ArgumentParser(description="Train/export a CAS JSON model from rlogs.")
   parser.add_argument("--rlogs", nargs="+", required=True, help="rlog files, route URLs, or directories")
-  parser.add_argument("--car", required=True, help="car fingerprint/name for the exported model")
+  parser.add_argument("--car", default="", help="primary car name for the exported model; auto-detected from carParams when omitted")
+  parser.add_argument("--car-name", action="append", default=[], help="additional CarName/CarSelected3 alias for runtime matching")
+  parser.add_argument("--eps-firmware-hash", default="", help="override auto-detected EPS firmware hash")
   parser.add_argument("--output", help="candidate JSON path; defaults to ~/.cas_train/<car>/checkpoints/")
   parser.add_argument("--kind", choices=("torque", "angle"), default="torque")
   parser.add_argument("--epochs", type=int, default=60)
@@ -679,7 +700,13 @@ def main():
     sources = sources[:args.max_sources]
   audit.write_json("source_inventory.json", source_inventory(sources))
   audit.write_json("train_args.json", vars(args))
-  samples, duration_h, message_counts = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
+  samples, duration_h, message_counts, eps_hashes, detected_car_names = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
+  model_car = args.car.strip()
+  if not model_car and detected_car_names:
+    model_car = detected_car_names.most_common(1)[0][0]
+  if not model_car:
+    raise RuntimeError("Could not auto-detect car name from rlogs. Use --car in advanced/manual mode.")
+
   x, y, weights, triage_counts, offsets = build_targets(
     samples,
     args.offset_horizon,
@@ -704,8 +731,11 @@ def main():
   validation = {
     "trained_at": trained_at,
     "status": "phase1_candidate",
+    "car": model_car,
     "source_count": len(sources),
     "message_counts": format_counts(message_counts),
+    "detected_car_name_counts": format_counts(detected_car_names),
+    "eps_firmware_hash_counts": format_counts(eps_hashes),
     "triage_counts": format_counts(triage_counts),
     "offset_metrics": lateral_offset_metrics(offsets),
     "target_metrics": prediction_metrics(val_y, val_pred, val_w),
@@ -722,9 +752,17 @@ def main():
   else:
     y_p99 = float(args.target_clip)
   output_clip_val = min(float(args.target_clip), max(0.05, y_p99 * 1.5))
+  detected_eps_hash = args.eps_firmware_hash.strip()
+  if not detected_eps_hash and eps_hashes:
+    detected_eps_hash = eps_hashes.most_common(1)[0][0]
+  car_names = []
+  for name in [model_car, *args.car_name]:
+    name = name.strip()
+    if name and name not in car_names:
+      car_names.append(name)
 
   payload = build_json_model(
-    args.car,
+    model_car,
     args.kind,
     model,
     input_mean,
@@ -737,16 +775,20 @@ def main():
     vego_min=vego_min_train,
     vego_max=vego_max_train,
     trained_rlog_count=len(sources),
+    eps_firmware_hash=detected_eps_hash,
+    car_names=car_names,
   )
-  output = Path(args.output).expanduser() if args.output else default_checkpoint_path(Path(args.history_dir), args.car, args.kind, trained_at)
+  output = Path(args.output).expanduser() if args.output else default_checkpoint_path(Path(args.history_dir), model_car, args.kind, trained_at)
   write_json_model(output, payload)
-  update_history(Path(args.history_dir), args.car, output, validation)
+  update_history(Path(args.history_dir), model_car, output, validation)
 
-  print(f"CAS trained {args.car} ({args.kind})")
+  print(f"CAS trained {model_car} ({args.kind})")
+  print(f"detected_car_names: {dict(sorted(detected_car_names.items()))}")
   print(f"sources: {len(sources)}, collected: {len(samples)}, usable: {x.shape[0]}, hours: {duration_h:.2f}")
   print(f"triage: {dict(sorted(triage_counts.items()))}")
   print(f"val: {validation['target_metrics']}")
   print(f"backend: {train_backend}")
+  print(f"eps_firmware_hash: {detected_eps_hash or '<none>'}")
   print(f"wrote: {output}")
   if audit.enabled():
     print(f"audit: {audit.audit_dir}")

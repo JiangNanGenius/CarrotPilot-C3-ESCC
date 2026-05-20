@@ -2,9 +2,11 @@ import json
 from pathlib import Path
 
 try:
-  from openpilot.selfdrive.carrot.cas.features import FEATURE_SPEC
+  from openpilot.selfdrive.carrot.cas.features import FEATURE_SCHEMA, FEATURE_SPEC
+  from openpilot.selfdrive.carrot.cas.metadata import FORMAT_VERSION
 except ModuleNotFoundError:
-  from selfdrive.carrot.cas.features import FEATURE_SPEC
+  from selfdrive.carrot.cas.features import FEATURE_SCHEMA, FEATURE_SPEC
+  from selfdrive.carrot.cas.metadata import FORMAT_VERSION
 
 
 def build_json_model(car: str, kind: str, model, input_mean, input_std, validation,
@@ -15,7 +17,7 @@ def build_json_model(car: str, kind: str, model, input_mean, input_std, validati
                      vego_min: float = 5.0, vego_max: float = 35.0,
                      lateral_delay_at_train: float = 0.0,
                      trained_rlog_count: int = 0,
-                     car_fingerprints: list[str] | None = None,
+                     car_names: list[str] | None = None,
                      friction_override: bool = False):
   layers = []
   for i, layer in enumerate(model.layers):
@@ -27,11 +29,12 @@ def build_json_model(car: str, kind: str, model, input_mean, input_std, validati
     })
 
   return {
-    "format_version": 1,
+    "format_version": FORMAT_VERSION,
     "model_type": f"cas_{kind}",
     "car": car,
-    "car_fingerprints": list(car_fingerprints) if car_fingerprints else [car],
+    "car_names": list(car_names) if car_names else [car],
     "eps_firmware_hash": eps_firmware_hash,
+    "feature_schema": FEATURE_SCHEMA,
     "trained_at": trained_at,
     "trained_by": trained_by,
     "trained_on_hours": float(trained_on_hours),

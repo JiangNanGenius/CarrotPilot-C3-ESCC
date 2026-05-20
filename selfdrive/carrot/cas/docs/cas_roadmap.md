@@ -217,11 +217,11 @@
 
 Phase 1 첫 학습 후 JSON 메타 점검 결과, 다음 3개가 자동 채워지지 않음. Phase 2에서 train.py에 자동 추출 로직 추가:
 
-- [ ] **`eps_firmware_hash` 자동 추출**: rlog의 `carParams.carFw` 중 `ecu == "eps"`인 항목들의 `fwVersion` → SHA1/MD5 짧은 해시. 차종 변형 매칭에 필수 (§24).
+- [x] **`eps_firmware_hash` 자동 추출**: rlog의 `carParams.carFw` 중 `ecu == "eps"`인 항목들의 `fwVersion` → SHA1 짧은 해시. 차종 변형 매칭에 필수 (§24).
 - [ ] **`lateral_delay_at_train` 평균 추적**: 현재 `_latest_lateral_delay`로 한 번만 보고 학습 전체에 못 씀. Sample 클래스에 `lateral_delay` 필드 추가하거나 source별 평균 집계.
 - [ ] **`friction_override` 자동 감지**: 학습 끝난 모델에 `evaluate([10.0, 0.0, 0.2, ...])` 호출해서 출력이 작으면 (`<0.1`) True 설정 (§23.2). 현재 항상 False.
 
-지금은 안 막혀 있는 이유: 메타가 비어 있어도 런타임은 기본값으로 정상 동작. 다만 차종 변형 매칭 정확도(§24 `car_fingerprints`/`eps_firmware_substitutes`)와 friction 보완 동작 검증을 위해 Phase 2 안에 처리.
+지금은 안 막혀 있는 이유: 메타가 비어 있어도 런타임은 기본값으로 정상 동작. 다만 차종 변형 매칭 정확도(`CarName`/`CarSelected3` + `eps_firmware_hash`)와 friction 보완 동작 검증을 위해 Phase 2 안에 처리.
 
 #### 2.3.2 학습 정교화 (§18 / §23 반영)
 - [ ] **PPL preference horizon L** 자동 튜닝 (§18.1, L=50~100 그리드서치)

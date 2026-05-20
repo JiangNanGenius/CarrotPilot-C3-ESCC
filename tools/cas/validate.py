@@ -83,20 +83,33 @@ def evaluate_model(model, samples):
     alpha = float(model.alpha_max)
     v_ego = float(sample.features[0]) if sample.features else 0.0
 
-    if v_ego < 5.0:
-      alpha = 0.0
-      blocked["low_speed"] += 1
-    elif sample.flag in (TriageType.T3_STRONG_INTERVENTION, TriageType.T4_WEAK_INTERVENTION, TriageType.T5_MANUAL):
+    if sample.flag in (TriageType.T3_STRONG_INTERVENTION, TriageType.T4_WEAK_INTERVENTION, TriageType.T5_MANUAL):
       alpha = 0.0
       blocked["driver_or_manual"] += 1
     elif not np.isfinite(delta) or abs(delta) > 3.0:
       alpha = 0.0
       blocked["delta_limit"] += 1
-    elif max_abs_z > 3.0:
+    elif v_ego < model.vego_min:
+      alpha = 0.0
+      blocked["low_speed"] += 1
+    elif v_ego >= model.vego_max:
+      alpha = 0.0
+      blocked["high_speed"] += 1
+    elif max_abs_z >= 3.0:
       alpha = 0.0
       blocked["input_z_limit"] += 1
     else:
-      gate_pass += 1
+      gate_speed_low = min(1.0, max(0.0, (v_ego - model.vego_min) / 2.0))
+      if v_ego > model.vego_max - 5.0:
+        gate_speed_high = max(0.0, (model.vego_max - v_ego) / 5.0)
+      else:
+        gate_speed_high = 1.0
+      gate_distribution = 1.0 if max_abs_z <= 2.0 else max(0.0, 3.0 - max_abs_z)
+      alpha = max(0.0, min(1.0, alpha)) * gate_speed_low * gate_speed_high * gate_distribution
+      if alpha > 0.0:
+        gate_pass += 1
+      else:
+        blocked["soft_gate_zero"] += 1
 
     deltas.append(float(delta))
     applied.append(float(alpha * delta))
@@ -145,7 +158,7 @@ def main():
   audit = AuditLogger(Path(args.audit_dir).expanduser() if args.audit_dir else None, args.audit_samples)
   audit.write_json("source_inventory.json", source_inventory(sources))
   audit.write_json("validate_args.json", vars(args))
-  samples, duration_h, message_counts = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
+  samples, duration_h, message_counts, eps_hashes, detected_car_names = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
   x, y, weights, target_counts, offsets = build_targets(
     samples,
     args.offset_horizon,
@@ -174,6 +187,8 @@ def main():
     "collected_samples": len(samples),
     "usable_samples": int(x.shape[0]) if x.ndim else 0,
     "message_counts": format_counts(message_counts),
+    "detected_car_name_counts": format_counts(detected_car_names),
+    "eps_firmware_hash_counts": format_counts(eps_hashes),
     "collected_triage_counts": format_counts(collected_counts),
     "target_triage_counts": format_counts(target_counts),
     "offset_metrics": lateral_offset_metrics(offsets),

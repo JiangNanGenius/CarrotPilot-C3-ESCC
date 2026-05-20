@@ -34,6 +34,7 @@ FEATURE_SPEC = [
   "pastDesiredLatAccel03",
   "pastDesiredLatAccel01",
 ]
+FEATURE_SCHEMA = "cas_v2_timed_20d"
 
 FUTURE_TIMES = [0.0, 0.3, 0.6, 1.0, 1.5]
 ROLL_FUTURE_TIMES = [0.0, 0.5, 1.0]
@@ -59,8 +60,39 @@ def get_lookahead_value(future_vals, current_val: float) -> float:
 
 @dataclass
 class CASFeatureState:
-  desired_lat_accels: deque = field(default_factory=lambda: deque(maxlen=50))
-  lateral_offsets: deque = field(default_factory=lambda: deque(maxlen=500))
+  desired_lat_accels: deque = field(default_factory=deque)
+  lateral_offsets: deque = field(default_factory=deque)
+  fallback_t: float = 0.0
+
+
+def _sample_time(state: CASFeatureState, t: float | None) -> float:
+  if t is not None and math.isfinite(t):
+    return float(t)
+  state.fallback_t += 0.01
+  return state.fallback_t
+
+
+def _append_timed(values: deque, t: float, value: float, keep_s: float) -> None:
+  values.append((t, float(value)))
+  cutoff = t - keep_s
+  while values and values[0][0] < cutoff:
+    values.popleft()
+
+
+def _mean_timed(values: deque) -> float:
+  if not values:
+    return 0.0
+  return float(np.mean([value for _, value in values]))
+
+
+def _past_value(values: deque, t: float, age_s: float, default: float) -> float:
+  if not values:
+    return float(default)
+  target_t = t - age_s
+  for sample_t, value in reversed(values):
+    if sample_t <= target_t:
+      return float(value)
+  return float(values[0][1])
 
 
 def _interp_model(seq, t: float, default: float = 0.0) -> float:
@@ -103,15 +135,17 @@ def _lateral_offset(model_data, lateral_plan=None) -> float:
 
 def build_feature_vector(state: CASFeatureState, CS, params, desired_curvature: float,
                          measured_lateral_accel: float, model_data=None, CC=None,
-                         lateral_plan=None, lateral_delay: float = 0.0) -> list[float]:
+                         lateral_plan=None, lateral_delay: float = 0.0,
+                         t: float | None = None) -> list[float]:
+  sample_t = _sample_time(state, t)
   v_ego = float(CS.vEgo)
   a_ego = float(CS.aEgo)
   desired_lat_accel = float(desired_curvature * v_ego ** 2)
-  state.desired_lat_accels.append(desired_lat_accel)
+  _append_timed(state.desired_lat_accels, sample_t, desired_lat_accel, 0.5)
 
   offset_now = _lateral_offset(model_data, lateral_plan)
-  state.lateral_offsets.append(offset_now)
-  offset_avg = float(np.mean(state.lateral_offsets)) if len(state.lateral_offsets) else 0.0
+  _append_timed(state.lateral_offsets, sample_t, offset_now, 5.0)
+  offset_avg = _mean_timed(state.lateral_offsets)
 
   pitch = 0.0
   if CC is not None and len(CC.orientationNED) > 1:
@@ -141,9 +175,8 @@ def build_feature_vector(state: CASFeatureState, CS, params, desired_curvature: 
     desired_jerk = (_interp_model(model_data.acceleration.y, desired_jerk_time, desired_lat_accel) - desired_lat_accel) / desired_jerk_time
     lateral_jerk_lookahead = get_lookahead_value(predicted_jerks[LAT_PLAN_MIN_IDX:16], float(desired_jerk))
 
-  past_03 = state.desired_lat_accels[0] if len(state.desired_lat_accels) else desired_lat_accel
-  past_01_idx = max(0, len(state.desired_lat_accels) - 10)
-  past_01 = state.desired_lat_accels[past_01_idx] if len(state.desired_lat_accels) else desired_lat_accel
+  past_03 = _past_value(state.desired_lat_accels, sample_t, 0.3, desired_lat_accel)
+  past_01 = _past_value(state.desired_lat_accels, sample_t, 0.1, desired_lat_accel)
 
   return [
     v_ego,

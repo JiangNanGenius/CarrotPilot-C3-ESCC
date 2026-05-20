@@ -13,19 +13,23 @@ if str(REPO_ROOT) not in sys.path:
   sys.path.insert(0, str(REPO_ROOT))
 
 try:
-  from openpilot.selfdrive.carrot.cas.features import FEATURE_SPEC
+  from openpilot.selfdrive.carrot.cas.features import FEATURE_SCHEMA, FEATURE_SPEC
+  from openpilot.selfdrive.carrot.cas.metadata import FORMAT_VERSION
   from openpilot.tools.cas.export_json import write_json_model
 except ModuleNotFoundError:
-  from selfdrive.carrot.cas.features import FEATURE_SPEC
+  from selfdrive.carrot.cas.features import FEATURE_SCHEMA, FEATURE_SPEC
+  from selfdrive.carrot.cas.metadata import FORMAT_VERSION
   from tools.cas.export_json import write_json_model
 
 
 def build_dummy(car: str, kind: str, alpha_max: float):
   return {
-    "format_version": 1,
+    "format_version": FORMAT_VERSION,
     "model_type": f"cas_{kind}",
     "car": car,
+    "car_names": [car],
     "eps_firmware_hash": "",
+    "feature_schema": FEATURE_SCHEMA,
     "trained_on_hours": 0.0,
     "trained_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
     "trained_by": "jominki354",

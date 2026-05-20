@@ -114,6 +114,11 @@ class Controls:
 
     CC = car.CarControl.new_message()
     CC.enabled = self.sm['selfdriveState'].enabled
+    # Keep controller inputs consistent with the logged carControl message.
+    # CAS and torque NN features read pitch/yaw-rate from CC during LaC.update().
+    if self.calibrated_pose is not None:
+      CC.orientationNED = self.calibrated_pose.orientation.xyz.tolist()
+      CC.angularVelocity = self.calibrated_pose.angular_velocity.xyz.tolist()
 
     # carrot
     gear = car.CarState.GearShifter
@@ -179,7 +184,9 @@ class Controls:
     steer, steeringAngleDeg, lac_log = self.LaC.update(CC.latActive, CS, self.VM, lp,
                                                        self.steer_limited_by_controls, self.desired_curvature,
                                                        CC, curvature_limited,
-                                                       model_data=self.sm['modelV2'])
+                                                       model_data=self.sm['modelV2'],
+                                                       lateral_plan=lat_plan,
+                                                       lateral_delay=steer_actuator_delay)
     actuators.torque = float(steer)
     actuators.steeringAngleDeg = float(steeringAngleDeg)
     lateral_learning_msg = self.lateral_data_marker.build(CS, CC, model_v2, lat_plan)
@@ -198,8 +205,9 @@ class Controls:
   def publish(self, CC, lac_log, lateral_learning_msg):
     CS = self.sm['carState']
 
-    # Orientation and angle rates can be useful for carcontroller
-    # Only calibrated (car) frame is relevant for the carcontroller
+    # Orientation and angle rates can be useful for carcontroller.
+    # They are also set before LaC.update() so controllers see the same values
+    # that are later published in carControl.
     if self.calibrated_pose is not None:
       CC.orientationNED = self.calibrated_pose.orientation.xyz.tolist()
       CC.angularVelocity = self.calibrated_pose.angular_velocity.xyz.tolist()

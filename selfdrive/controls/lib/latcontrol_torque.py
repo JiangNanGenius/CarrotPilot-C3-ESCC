@@ -141,7 +141,8 @@ class LatControlTorque(LatControl):
     self.torque_params.latAccelOffset = latAccelOffset
     self.torque_params.friction = friction
 
-  def update(self, active, CS, VM, params, steer_limited_by_controls, desired_curvature, CC, curvature_limited, model_data=None):
+  def update(self, active, CS, VM, params, steer_limited_by_controls, desired_curvature, CC, curvature_limited,
+             model_data=None, lateral_plan=None, lateral_delay: float = 0.0):
     self.frame += 1
     if self.frame % 10 == 0:
       lateralTorqueCustom = self.params.get_int("LateralTorqueCustom")
@@ -288,7 +289,8 @@ class LatControlTorque(LatControl):
                                             gravity_adjusted=True)
 
       cas_delta, cas_alpha, cas_log = self.cas.update(CS, params, desired_curvature, actual_lateral_accel,
-                                                      model_data=model_data, CC=CC)
+                                                      model_data=model_data, CC=CC,
+                                                      lateral_plan=lateral_plan, lateral_delay=lateral_delay)
       ff += cas_alpha * cas_delta
 
       freeze_integrator = steer_limited_by_controls or CS.steeringPressed or CS.vEgo < 5

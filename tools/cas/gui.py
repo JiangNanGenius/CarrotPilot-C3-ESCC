@@ -11,12 +11,16 @@ import subprocess
 import sys
 import threading
 import tkinter as tk
+import time
+from collections import Counter
 from datetime import datetime
 from tkinter import filedialog, messagebox, ttk
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = Path.home() / ".cas_train" / "gui_config.json"
+LOG_FILENAMES = {"rlog", "rlog.bz2", "rlog.zst", "raw_log.bz2"}
+LOG_SUFFIXES = ("--rlog", "--rlog.bz2", "--rlog.zst", "--raw_log.bz2")
 
 
 def windows_to_wsl(path: str) -> str:
@@ -78,6 +82,106 @@ def recommend_workers() -> int:
   return max(2, min(12, cpu // 2))
 
 
+def _stable_file(path: Path, min_file_age_sec: float) -> bool:
+  if min_file_age_sec <= 0.0:
+    return True
+  try:
+    return time.time() - path.stat().st_mtime >= min_file_age_sec
+  except OSError:
+    return False
+
+
+def _fast_log_sources(rlogs: str, min_file_age_sec: float, max_sources: int) -> tuple[list[str], int]:
+  path = Path(rlogs).expanduser()
+  if path.is_file():
+    return ([str(path)] if _stable_file(path, min_file_age_sec) else []), 1
+  if not path.is_dir():
+    return [rlogs], 1
+
+  sources = []
+  seen = 0
+  max_dirs = 800
+  for dir_index, (root, dirs, files) in enumerate(os.walk(path)):
+    if dir_index >= max_dirs or len(sources) >= max_sources:
+      break
+    dirs.sort(reverse=True)
+    for name in sorted(files, reverse=True):
+      if name in LOG_FILENAMES or name.endswith(LOG_SUFFIXES):
+        seen += 1
+        candidate = Path(root) / name
+        if _stable_file(candidate, min_file_age_sec):
+          sources.append(str(candidate))
+          if len(sources) >= max_sources:
+            break
+  return sources, max(seen, len(sources))
+
+
+def scan_rlog_metadata(rlogs: str, min_file_age_sec: float = 0.0,
+                       max_sources: int = 4, max_messages_per_source: int = 20000) -> dict:
+  from tools.cas.train import install_openpilot_aliases
+
+  install_openpilot_aliases()
+  try:
+    from openpilot.tools.lib.logreader import LogReader
+    from openpilot.selfdrive.carrot.cas.metadata import eps_firmware_hash
+  except ModuleNotFoundError:
+    from tools.lib.logreader import LogReader
+    from selfdrive.carrot.cas.metadata import eps_firmware_hash
+
+  selected, source_count = _fast_log_sources(rlogs, min_file_age_sec, max(1, max_sources))
+  cars = Counter()
+  eps_hashes = Counter()
+  message_counts = Counter()
+  errors = []
+  first_t = None
+  last_t = None
+  scanned_count = 0
+
+  for source in selected:
+    scanned_count += 1
+    try:
+      for index, msg in enumerate(LogReader(source), 1):
+        which = msg.which()
+        message_counts[which] += 1
+        t = msg.logMonoTime * 1e-9
+        first_t = t if first_t is None else min(first_t, t)
+        last_t = t if last_t is None else max(last_t, t)
+        if which == "carParams":
+          car = str(getattr(msg.carParams, "carFingerprint", "")).strip()
+          if car:
+            cars[car] += 1
+          eps_hash = eps_firmware_hash(msg.carParams.carFw)
+          if eps_hash:
+            eps_hashes[eps_hash] += 1
+          break
+        if index >= max_messages_per_source:
+          break
+    except Exception as e:
+      errors.append(f"{source}: {e}")
+    if cars and eps_hashes:
+      break
+
+  return {
+    "source_count": source_count,
+    "scanned_count": scanned_count,
+    "cars": cars,
+    "eps_hashes": eps_hashes,
+    "message_counts": message_counts,
+    "duration_hours": 0.0 if first_t is None or last_t is None else max(0.0, last_t - first_t) / 3600.0,
+    "errors": errors,
+  }
+
+
+def default_candidate_name(car: str) -> str:
+  safe_car = car.strip() or "CAS_AUTO"
+  return f"{safe_car}_candidate.json"
+
+
+def default_validate_name(car: str) -> str:
+  safe_car = car.strip() or "CAS_AUTO"
+  return f"{safe_car}_validate.json"
+
+
 # Mapping from python import name → pip package name (when they differ).
 PIP_NAME = {
   "capnp": "pycapnp",
@@ -98,10 +202,12 @@ class CASGui(tk.Tk):
   def __init__(self):
     super().__init__()
     self.title("CAS Training")
-    self.geometry("980x700")
+    self.geometry("900x640")
+    self.minsize(760, 560)
     self.proc: subprocess.Popen | None = None
     self.queue: queue.Queue[str] = queue.Queue()
     self.current_run_dir: Path | None = None
+    self.advanced_window: tk.Toplevel | None = None
 
     config = _load_gui_config()
     last_rlogs = config.get("rlogs", "")
@@ -113,6 +219,8 @@ class CASGui(tk.Tk):
     self.repo_var = tk.StringVar(value=config.get("repo", str(REPO_ROOT)))
     self.rlogs_var = tk.StringVar(value=last_rlogs)
     self.car_var = tk.StringVar(value=last_car)
+    self.car_aliases_var = tk.StringVar(value=config.get("car_aliases", ""))
+    self.eps_hash_var = tk.StringVar(value=config.get("eps_firmware_hash", ""))
     self.kind_var = tk.StringVar(value=last_kind)
     self.epochs_var = tk.StringVar(value=str(config.get("epochs", 20)))
     self.stride_var = tk.StringVar(value=str(config.get("stride", 10)))
@@ -123,11 +231,12 @@ class CASGui(tk.Tk):
     self.backend_var = tk.StringVar(value=config.get("backend", "auto"))
     self.device_var = tk.StringVar(value=config.get("device", "auto"))
     self.use_wsl_var = tk.BooleanVar(value=bool(config.get("use_wsl", os.name == "nt")))
-    self.advanced_visible_var = tk.BooleanVar(value=False)
-    self.candidate_var = tk.StringVar(value=self._derive_candidate_path(last_rlogs, last_car))
-    self.validate_var = tk.StringVar(value=self._derive_validate_path(last_rlogs, last_car))
+    self.candidate_var = tk.StringVar(value=config.get("candidate", self._derive_candidate_path(last_rlogs, last_car)))
+    self.validate_var = tk.StringVar(value=config.get("validate_json", self._derive_validate_path(last_rlogs, last_car)))
     self.gpu_status_var = tk.StringVar(value="PyTorch/CUDA: checking...")
-    self.raw_log_var = tk.StringVar(value="Raw log: not started")
+    self.raw_log_var = tk.StringVar(value="실행 로그: 아직 없음")
+    self.log_info_var = tk.StringVar(value=self._log_info_text(last_car, "", 0, 0, 0.0))
+    self.scan_running = False
 
     self._build()
     self.after(100, self._poll)
@@ -137,15 +246,24 @@ class CASGui(tk.Tk):
 
   @staticmethod
   def _derive_candidate_path(rlogs: str, car: str) -> str:
-    if not rlogs or not car:
+    if not rlogs:
       return ""
-    return str(Path(rlogs) / f"{car}_candidate.json")
+    return str(Path(rlogs) / default_candidate_name(car))
 
   @staticmethod
   def _derive_validate_path(rlogs: str, car: str) -> str:
-    if not rlogs or not car:
+    if not rlogs:
       return ""
-    return str(Path(rlogs) / f"{car}_validate.json")
+    return str(Path(rlogs) / default_validate_name(car))
+
+  @staticmethod
+  def _log_info_text(car: str, eps_hash: str, source_count: int, scanned_count: int, duration_hours: float) -> str:
+    del duration_hours
+    car_text = car.strip() if car.strip() else "감지 전"
+    eps_text = eps_hash.strip() if eps_hash.strip() else "감지 전"
+    if source_count > 0:
+      return f"감지된 차량: {car_text} / EPS: {eps_text} / 로그: {source_count}개 중 {scanned_count}개 빠른 확인"
+    return f"감지된 차량: {car_text} / EPS: {eps_text} / 학습 시작 후 자동으로 확정됩니다."
 
   def _save_config(self):
     try:
@@ -154,6 +272,10 @@ class CASGui(tk.Tk):
         "repo": self.repo_var.get(),
         "rlogs": self.rlogs_var.get(),
         "car": self.car_var.get(),
+        "candidate": self.candidate_var.get(),
+        "validate_json": self.validate_var.get(),
+        "car_aliases": self.car_aliases_var.get(),
+        "eps_firmware_hash": self.eps_hash_var.get(),
         "kind": self.kind_var.get(),
         "epochs": self.epochs_var.get(),
         "stride": self.stride_var.get(),
@@ -171,68 +293,130 @@ class CASGui(tk.Tk):
 
   def _on_close(self):
     self._save_config()
+    if self.advanced_window is not None and self.advanced_window.winfo_exists():
+      self.advanced_window.destroy()
     self.destroy()
 
   def _require_paths(self) -> bool:
     """Validate that both Openpilot dir and RLOG dir are set and exist.
-    Also requires a car name. Returns False (and shows a message) if not."""
+    Returns False (and shows a message) if not."""
     repo = self.repo_var.get().strip()
     rlogs = self.rlogs_var.get().strip()
-    car = self.car_var.get().strip()
     if not repo or not Path(repo).is_dir():
       messagebox.showerror("CAS", "Openpilot dir이 잘못되었습니다. 폴더를 선택하세요.")
       return False
     if not rlogs or not Path(rlogs).is_dir():
       messagebox.showerror("CAS", "RLOG dir이 비어있거나 존재하지 않습니다. 폴더를 선택하세요.")
       return False
-    if not car:
-      messagebox.showerror("CAS", "Car 이름을 입력하세요 (예: HYUNDAI_CASPER_EV).")
-      return False
-    # Auto-derive candidate/validate paths if the user left them empty or
-    # they still point at a stale rlog dir.
-    if not self.candidate_var.get().strip() or str(Path(self.candidate_var.get()).parent) != str(Path(rlogs)):
-      self.candidate_var.set(self._derive_candidate_path(rlogs, car))
-    if not self.validate_var.get().strip() or str(Path(self.validate_var.get()).parent) != str(Path(rlogs)):
-      self.validate_var.set(self._derive_validate_path(rlogs, car))
+    car = self.car_var.get().strip()
+    self._refresh_derived_paths(rlogs, car)
     self._save_config()
     return True
 
+  def _refresh_derived_paths(self, rlogs: str, car: str):
+    expected_candidate = self._derive_candidate_path(rlogs, car)
+    expected_validate = self._derive_validate_path(rlogs, car)
+
+    candidate = self.candidate_var.get().strip()
+    if not candidate:
+      self.candidate_var.set(expected_candidate)
+    else:
+      candidate_path = Path(candidate)
+      if (not candidate_path.exists()
+          and str(candidate_path.parent) == str(Path(rlogs))
+          and candidate_path.name.endswith("_candidate.json")):
+        self.candidate_var.set(expected_candidate)
+
+    validate = self.validate_var.get().strip()
+    if not validate:
+      self.validate_var.set(expected_validate)
+    else:
+      validate_path = Path(validate)
+      if (not validate_path.exists()
+          and str(validate_path.parent) == str(Path(rlogs))
+          and validate_path.name.endswith("_validate.json")):
+        self.validate_var.set(expected_validate)
+
   def _build(self):
-    root = ttk.Frame(self, padding=10)
+    root = ttk.Frame(self, padding=12)
     root.pack(fill=tk.BOTH, expand=True)
 
-    form = ttk.Frame(root)
+    header = ttk.Frame(root)
+    header.pack(fill=tk.X, pady=(0, 10))
+    ttk.Label(header, text="CAS Training", font=("TkDefaultFont", 16, "bold")).pack(anchor="w")
+    ttk.Label(header, text="RLOG 폴더만 고르면 됩니다. 차량 정보는 학습 시작 후 로그에서 자동으로 확정됩니다.").pack(anchor="w", pady=(2, 0))
+
+    form = ttk.LabelFrame(root, text="일반 모드", padding=10)
     form.pack(fill=tk.X)
     form.columnconfigure(1, weight=1)
 
-    self._row(form, 0, "Openpilot dir", self.repo_var, browse=True)
-    self._row(form, 1, "RLOG dir", self.rlogs_var, browse=True)
-    self._row(form, 2, "Car", self.car_var)
+    self._row(form, 0, "RLOG 폴더", self.rlogs_var, browse=True)
+    ttk.Label(form, text="로그 정보").grid(row=1, column=0, sticky="w", pady=3)
+    ttk.Label(form, textvariable=self.log_info_var).grid(row=1, column=1, columnspan=2, sticky="w", padx=5)
 
     buttons = ttk.Frame(root)
-    buttons.pack(fill=tk.X, pady=(10, 8))
-    ttk.Button(buttons, text="One Click: Train + Validate", command=self.one_click).pack(side=tk.LEFT, padx=3)
-    ttk.Button(buttons, text="Auto Tune", command=self.auto_tune).pack(side=tk.LEFT, padx=3)
-    ttk.Button(buttons, text="Detect GPU", command=self.detect_backend).pack(side=tk.LEFT, padx=3)
-    ttk.Checkbutton(buttons, text="Advanced", variable=self.advanced_visible_var,
-                    command=self._toggle_advanced).pack(side=tk.LEFT, padx=8)
-    ttk.Button(buttons, text="Stop", command=self.stop).pack(side=tk.RIGHT, padx=3)
+    buttons.pack(fill=tk.X, pady=(12, 10))
+    ttk.Button(buttons, text="학습 시작 + 검증", command=self.one_click).pack(side=tk.LEFT, padx=(0, 6))
+    ttk.Button(buttons, text="자동 설정", command=self.auto_tune).pack(side=tk.LEFT, padx=3)
+    ttk.Button(buttons, text="로그 확인", command=self.scan_logs).pack(side=tk.LEFT, padx=3)
+    ttk.Button(buttons, text="모델 적용", command=lambda: self.promote(False)).pack(side=tk.LEFT, padx=3)
+    ttk.Button(buttons, text="고급 설정...", command=self._open_advanced).pack(side=tk.LEFT, padx=3)
+    ttk.Button(buttons, text="중지", command=self.stop).pack(side=tk.RIGHT, padx=(6, 0))
 
     self.progress = ttk.Progressbar(root, mode="indeterminate")
     self.progress.pack(fill=tk.X)
     self.status_var = tk.StringVar(value="Idle")
-    ttk.Label(root, textvariable=self.status_var).pack(anchor="w", pady=(4, 2))
-    ttk.Label(root, textvariable=self.gpu_status_var).pack(anchor="w", pady=(0, 4))
-    ttk.Label(root, textvariable=self.raw_log_var).pack(anchor="w", pady=(0, 4))
+    status = ttk.LabelFrame(root, text="상태", padding=(10, 6))
+    status.pack(fill=tk.X, pady=(8, 8))
+    ttk.Label(status, textvariable=self.status_var).pack(anchor="w", pady=(0, 2))
+    ttk.Label(status, textvariable=self.gpu_status_var).pack(anchor="w", pady=(0, 2))
+    ttk.Label(status, textvariable=self.raw_log_var).pack(anchor="w")
 
-    self.advanced = ttk.LabelFrame(root, text="Advanced", padding=8)
-    self.advanced.columnconfigure(1, weight=1)
-    self._combo(self.advanced, 0, "Kind", self.kind_var, ("torque", "angle"))
-    self._row(self.advanced, 1, "Candidate", self.candidate_var, save=True)
-    self._row(self.advanced, 2, "Validate JSON", self.validate_var, save=True)
+    ttk.Label(root, text="작업 로그").pack(anchor="w", pady=(2, 4))
+    self.log = tk.Text(root, wrap=tk.WORD, height=28)
+    self.log.pack(fill=tk.BOTH, expand=True)
 
-    opts = ttk.Frame(self.advanced)
-    opts.grid(row=3, column=0, columnspan=3, sticky="ew", pady=(10, 6))
+  def _open_advanced(self):
+    if self.advanced_window is not None and self.advanced_window.winfo_exists():
+      self.advanced_window.lift()
+      self.advanced_window.focus_force()
+      return
+
+    win = tk.Toplevel(self)
+    self.advanced_window = win
+    win.title("CAS 고급 설정")
+    win.geometry("940x430")
+    win.minsize(760, 380)
+    win.transient(self)
+
+    def close():
+      self._save_config()
+      self.advanced_window = None
+      win.destroy()
+
+    win.protocol("WM_DELETE_WINDOW", close)
+
+    root = ttk.Frame(win, padding=12)
+    root.pack(fill=tk.BOTH, expand=True)
+
+    paths = ttk.LabelFrame(root, text="경로", padding=10)
+    paths.pack(fill=tk.X, pady=(0, 8))
+    paths.columnconfigure(1, weight=1)
+    self._row(paths, 0, "Openpilot 폴더", self.repo_var, browse=True)
+    self._row(paths, 1, "RLOG 폴더", self.rlogs_var, browse=True)
+    self._row(paths, 2, "Candidate JSON", self.candidate_var, save=True)
+    self._row(paths, 3, "Validate JSON", self.validate_var, save=True)
+
+    model = ttk.LabelFrame(root, text="모델 식별", padding=10)
+    model.pack(fill=tk.X, pady=(0, 8))
+    model.columnconfigure(1, weight=1)
+    self._combo(model, 0, "종류", self.kind_var, ("torque", "angle"))
+    self._row(model, 1, "모델 차량 이름", self.car_var)
+    self._row(model, 2, "차량 별칭", self.car_aliases_var)
+    self._row(model, 3, "EPS 해시 강제 지정", self.eps_hash_var)
+
+    opts = ttk.LabelFrame(root, text="학습 옵션", padding=10)
+    opts.pack(fill=tk.X, pady=(0, 8))
     for i in range(9):
       opts.columnconfigure(i, weight=1)
     self._small(opts, 0, "Epochs", self.epochs_var)
@@ -245,29 +429,21 @@ class CASGui(tk.Tk):
     self._small(opts, 7, "Device", self.device_var)
     ttk.Checkbutton(opts, text="WSL", variable=self.use_wsl_var).grid(row=0, column=8, sticky="w", padx=4)
 
-    manual = ttk.Frame(self.advanced)
-    manual.grid(row=4, column=0, columnspan=3, sticky="ew", pady=(4, 0))
-    ttk.Button(manual, text="Train Candidate", command=self.train).pack(side=tk.LEFT, padx=3)
+    manual = ttk.Frame(root)
+    manual.pack(fill=tk.X)
+    ttk.Button(manual, text="Train Candidate", command=self.train).pack(side=tk.LEFT, padx=(0, 6))
     ttk.Button(manual, text="Validate", command=self.validate).pack(side=tk.LEFT, padx=3)
     ttk.Button(manual, text="Promote Dry Run", command=lambda: self.promote(True)).pack(side=tk.LEFT, padx=3)
     ttk.Button(manual, text="Promote", command=lambda: self.promote(False)).pack(side=tk.LEFT, padx=3)
-
-    self.log = tk.Text(root, wrap=tk.WORD, height=28)
-    self.log.pack(fill=tk.BOTH, expand=True)
-
-  def _toggle_advanced(self):
-    if self.advanced_visible_var.get():
-      self.advanced.pack(fill=tk.X, pady=(0, 8), before=self.log)
-    else:
-      self.advanced.pack_forget()
+    ttk.Button(manual, text="닫기", command=close).pack(side=tk.RIGHT)
 
   def _row(self, parent, row, label, var, browse=False, save=False):
     ttk.Label(parent, text=label).grid(row=row, column=0, sticky="w", pady=3)
     ttk.Entry(parent, textvariable=var).grid(row=row, column=1, sticky="ew", padx=5)
     if browse:
-      ttk.Button(parent, text="Browse", command=lambda: self._browse_dir(var)).grid(row=row, column=2)
+      ttk.Button(parent, text="찾기", command=lambda: self._browse_dir(var)).grid(row=row, column=2)
     elif save:
-      ttk.Button(parent, text="File", command=lambda: self._browse_save(var)).grid(row=row, column=2)
+      ttk.Button(parent, text="파일", command=lambda: self._browse_save(var)).grid(row=row, column=2)
 
   def _small(self, parent, col, label, var):
     frame = ttk.Frame(parent)
@@ -286,14 +462,95 @@ class CASGui(tk.Tk):
       ttk.Combobox(parent, textvariable=var, values=values, state="readonly").grid(row=row_or_col, column=1, sticky="w", padx=5)
 
   def _browse_dir(self, var):
+    old = var.get().strip()
     path = filedialog.askdirectory(initialdir=var.get() or str(self._repo()))
     if path:
       var.set(path)
+      if var is self.rlogs_var and path != old:
+        self.car_var.set("")
+        self.car_aliases_var.set("")
+        self.eps_hash_var.set("")
+        self._refresh_derived_paths(path, "")
+        self.log_info_var.set(self._log_info_text("", "", 0, 0, 0.0))
 
   def _browse_save(self, var):
     path = filedialog.asksaveasfilename(initialfile=Path(var.get()).name)
     if path:
       var.set(path)
+
+  def _scan_logs_sync(self, show_errors: bool = True) -> bool:
+    rlogs = self.rlogs_var.get().strip()
+    if not rlogs or not Path(rlogs).is_dir():
+      if show_errors:
+        messagebox.showerror("CAS 로그 확인", "먼저 RLOG 폴더를 선택하세요.")
+      return False
+    try:
+      result = scan_rlog_metadata(rlogs, float(self.age_var.get() or 0.0))
+    except Exception as e:
+      if show_errors:
+        messagebox.showerror("CAS 로그 확인", f"로그 정보를 읽지 못했습니다.\n\n{e}")
+      self.log_info_var.set("로그 정보 확인 실패")
+      return False
+    self._apply_scan_result(result)
+    return bool(self.car_var.get().strip())
+
+  def scan_logs(self):
+    if self.scan_running:
+      return
+    rlogs = self.rlogs_var.get().strip()
+    if not rlogs or not Path(rlogs).is_dir():
+      messagebox.showerror("CAS 로그 확인", "먼저 RLOG 폴더를 선택하세요.")
+      return
+
+    self.scan_running = True
+    self.status_var.set("로그에서 차량 정보 확인 중")
+    self.log_info_var.set("로그 정보 확인 중...")
+
+    def worker():
+      try:
+        result = scan_rlog_metadata(rlogs, float(self.age_var.get() or 0.0))
+      except Exception as e:
+        self.after(0, lambda: self._scan_failed(e))
+        return
+      self.after(0, lambda: self._scan_done(result))
+
+    threading.Thread(target=worker, daemon=True).start()
+
+  def _scan_failed(self, error: Exception):
+    self.scan_running = False
+    self.status_var.set("로그 정보 확인 실패")
+    self.log_info_var.set("로그 정보 확인 실패")
+    messagebox.showerror("CAS 로그 확인", f"로그 정보를 읽지 못했습니다.\n\n{error}")
+
+  def _scan_done(self, result: dict):
+    self.scan_running = False
+    self._apply_scan_result(result)
+    self.status_var.set("로그 정보 확인 완료" if self.car_var.get().strip() else "차량 정보 없음")
+
+  def _apply_scan_result(self, result: dict):
+    cars: Counter = result.get("cars", Counter())
+    eps_hashes: Counter = result.get("eps_hashes", Counter())
+    car = cars.most_common(1)[0][0] if cars else ""
+    eps_hash = eps_hashes.most_common(1)[0][0] if eps_hashes else ""
+
+    if car:
+      self.car_var.set(car)
+      aliases = [alias.strip() for alias in self.car_aliases_var.get().replace(";", ",").split(",") if alias.strip()]
+      if car not in aliases:
+        aliases.insert(0, car)
+        self.car_aliases_var.set(", ".join(aliases))
+    if eps_hash:
+      self.eps_hash_var.set(eps_hash)
+
+    self.log_info_var.set(self._log_info_text(
+      car,
+      eps_hash,
+      int(result.get("source_count", 0)),
+      int(result.get("scanned_count", 0)),
+      float(result.get("duration_hours", 0.0)),
+    ))
+    if car and self.rlogs_var.get().strip():
+      self._refresh_derived_paths(self.rlogs_var.get().strip(), car)
 
   def _append(self, text: str):
     self.log.insert(tk.END, text)
@@ -313,14 +570,14 @@ class CASGui(tk.Tk):
 
   def _run_sequence(self, commands: list[tuple[list[str], bool, str]], summary_path: str | None = None):
     if self.proc is not None:
-      messagebox.showwarning("CAS", "A command is already running.")
+      messagebox.showwarning("CAS", "이미 실행 중인 작업이 있습니다. 끝난 뒤 다시 눌러주세요.")
       return
     self.log.delete("1.0", tk.END)
     self.current_run_dir = self._make_run_dir()
-    self.raw_log_var.set(f"Raw log: {self.current_run_dir}")
+    self.raw_log_var.set(f"실행 로그 폴더: {self.current_run_dir}")
     commands = self._inject_audit_args(commands)
     self._write_run_metadata(self.current_run_dir, commands)
-    self.status_var.set("Running")
+    self.status_var.set("실행 중")
     self.progress.start(10)
     thread = threading.Thread(target=self._sequence_worker, args=(commands, summary_path), daemon=True)
     thread.start()
@@ -335,7 +592,7 @@ class CASGui(tk.Tk):
     if ok and summary_path:
       self._print_summary(summary_path)
       self._copy_summary(summary_path)
-    self.after(0, self.status_var.set, "Done" if ok else "Failed")
+    self.after(0, self.status_var.set, "완료" if ok else "실패")
     self.after(0, self.progress.stop)
     # Triggered when _install_deps just ran — re-probe so GPU/CUDA status
     # refreshes without the user clicking Detect GPU again.
@@ -405,9 +662,10 @@ class CASGui(tk.Tk):
     return injected
 
   def _make_run_dir(self) -> Path:
-    car = "".join(c if c.isalnum() or c in ("_", "-") else "_" for c in self.car_var.get().strip())
+    car = "".join(c if c.isalnum() or c in ("_", "-") else "_" for c in self.car_var.get().strip()) or "setup"
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_dir = Path(self.rlogs_var.get()) / "cas_runs" / f"{stamp}_{car}"
+    base = Path(self.rlogs_var.get().strip()) if self.rlogs_var.get().strip() else CONFIG_PATH.parent
+    run_dir = base / "cas_runs" / f"{stamp}_{car}"
     run_dir.mkdir(parents=True, exist_ok=True)
     return run_dir
 
@@ -429,6 +687,8 @@ class CASGui(tk.Tk):
       "repo": str(self._repo()),
       "rlogs": self.rlogs_var.get(),
       "car": self.car_var.get().strip(),
+      "car_aliases": self.car_aliases_var.get().strip(),
+      "eps_firmware_hash": self.eps_hash_var.get().strip(),
       "kind": self.kind_var.get(),
       "candidate": self.candidate_var.get(),
       "validate_json": self.validate_var.get(),
@@ -461,11 +721,21 @@ class CASGui(tk.Tk):
       args += ["--max-sources", self.max_sources_var.get().strip()]
     return args
 
+  def _car_metadata_args(self):
+    args = []
+    aliases = [alias.strip() for alias in self.car_aliases_var.get().replace(";", ",").split(",")]
+    for alias in aliases:
+      if alias:
+        args += ["--car-name", alias]
+    eps_hash = self.eps_hash_var.get().strip()
+    if eps_hash:
+      args += ["--eps-firmware-hash", eps_hash]
+    return args
+
   def _train_cmd(self):
-    return [
+    cmd = [
       "python3", "tools/cas/train.py",
       "--rlogs", windows_to_wsl(self.rlogs_var.get()) if self.use_wsl_var.get() else self.rlogs_var.get(),
-      "--car", self.car_var.get().strip(),
       "--kind", self.kind_var.get(),
       "--output", windows_to_wsl(self.candidate_var.get()) if self.use_wsl_var.get() else self.candidate_var.get(),
       "--epochs", self.epochs_var.get(),
@@ -475,8 +745,12 @@ class CASGui(tk.Tk):
       "--backend", self.backend_var.get(),
       "--device", self.device_var.get(),
       "--workers", self.workers_var.get(),
+      *self._car_metadata_args(),
       *self._limit_args(),
     ]
+    if self.car_var.get().strip():
+      cmd[4:4] = ["--car", self.car_var.get().strip()]
+    return cmd
 
   def _validate_cmd(self):
     return [
@@ -494,10 +768,11 @@ class CASGui(tk.Tk):
     cmd = [
       sys.executable, str(self._repo() / "tools" / "cas" / "promote.py"),
       "--candidate", self.candidate_var.get(),
-      "--car", self.car_var.get().strip(),
       "--kind", self.kind_var.get(),
       "--max-alpha", self.alpha_var.get(),
     ]
+    if self.car_var.get().strip():
+      cmd[4:4] = ["--car", self.car_var.get().strip()]
     cmd.append("--dry-run" if dry_run else "--force")
     return cmd
 
@@ -522,6 +797,21 @@ class CASGui(tk.Tk):
   def promote(self, dry_run: bool):
     if not self._require_paths():
       return
+    if not dry_run:
+      candidate = Path(self.candidate_var.get())
+      if not candidate.exists():
+        messagebox.showerror("CAS 모델 적용", "적용할 candidate JSON이 없습니다. 먼저 학습 + 검증을 실행하세요.")
+        return
+      if not Path(self.validate_var.get()).exists():
+        messagebox.showerror("CAS 모델 적용", "검증 결과 JSON이 없습니다. 먼저 [학습 시작 + 검증]을 실행하세요.")
+        return
+      ok = messagebox.askyesno(
+        "CAS 모델 적용",
+        "검증된 candidate 모델을 실제 weights 폴더에 적용할까요?\n\n"
+        "차량에서 바로 사용될 파일이 바뀝니다. 학습 결과가 부족하다고 표시되면 적용하지 않는 것이 좋습니다.",
+      )
+      if not ok:
+        return
     cmd = self._promote_cmd(dry_run)
     self._run(cmd)
 
@@ -698,6 +988,17 @@ class CASGui(tk.Tk):
         data = json.load(f)
       out = data["output_metrics"]
       applied = out["applied_delta"]
+      detected_car = str(data.get("car", "")).strip()
+      eps_counts = data.get("eps_firmware_hash_counts", {}) or {}
+      detected_eps = max(eps_counts.items(), key=lambda item: int(item[1]))[0] if eps_counts else ""
+      if detected_car:
+        self.after(0, self.car_var.set, detected_car)
+      if detected_eps:
+        self.after(0, self.eps_hash_var.set, detected_eps)
+      if detected_car or detected_eps:
+        self.after(0, self.log_info_var.set,
+                   self._log_info_text(detected_car, detected_eps, int(data.get("source_count", 0)),
+                                       int(data.get("source_count", 0)), float(data.get("duration_hours", 0.0))))
 
       hours = float(data.get("duration_hours", 0.0))
       samples = int(data.get("usable_samples", 0))
@@ -712,7 +1013,6 @@ class CASGui(tk.Tk):
       total_triage = max(t1 + t2 + t3 + t4, 1)
       pct = lambda n: 100.0 * n / total_triage
 
-      # ── Grade the run ──
       issues = []
       good_points = []
       if hours < 1.0:
@@ -744,9 +1044,8 @@ class CASGui(tk.Tk):
       else:
         good_points.append(f"적용 보정량 {p95:.4f} (정상 범위)")
 
-      grade = "✅ 학습 양호" if not issues else ("⚠️ 학습 완료 (주의 필요)" if len(issues) <= 2 else "❌ 데이터/설정 부족")
+      grade = "학습 양호" if not issues else ("학습 완료 (주의 필요)" if len(issues) <= 2 else "데이터/설정 부족")
 
-      # ── Text log ──
       self.queue.put("\n[요약]\n")
       self.queue.put(f"평가: {grade}\n")
       self.queue.put(f"학습 시간: {hours:.2f} 시간\n")
@@ -768,34 +1067,29 @@ class CASGui(tk.Tk):
         self.queue.put("\n확인 필요:\n")
         for i in issues:
           self.queue.put(f"  ! {i}\n")
-      self.queue.put("\nPromote는 dry-run만 실행됨. 실제 적용은 [Promote] 버튼 눌러야 함.\n")
+      self.queue.put("\n아직 실제 적용은 하지 않았습니다. 결과가 괜찮으면 [모델 적용]을 누르세요.\n")
 
-      # ── Popup with next-step guidance ──
       summary_for_popup = (
         f"평가: {grade}\n\n"
-        f"━━━ 학습 결과 ━━━\n"
-        f"• 학습 시간: {hours:.2f}시간\n"
-        f"• 사용 샘플: {samples:,}개\n"
-        f"• 양호 운전(T1): {pct(t1):.0f}%\n"
-        f"• 쏠림 학습(T2): {pct(t2):.0f}%\n"
-        f"• 운전자 개입(T3): {pct(t3):.0f}%  ★\n"
-        f"• 적용 보정량: {p95:.4f} (p95)\n"
-        f"• 게이트 통과: {gate_rate:.0%}\n"
+        f"학습 결과\n"
+        f"- 학습 시간: {hours:.2f}시간\n"
+        f"- 사용 샘플: {samples:,}개\n"
+        f"- 양호 운전(T1): {pct(t1):.0f}%\n"
+        f"- 쏠림 학습(T2): {pct(t2):.0f}%\n"
+        f"- 운전자 개입(T3): {pct(t3):.0f}%\n"
+        f"- 적용 보정량: {p95:.4f} (p95)\n"
+        f"- 게이트 통과: {gate_rate:.0%}\n"
       )
       if issues:
-        summary_for_popup += "\n━━━ 확인 필요 ━━━\n"
+        summary_for_popup += "\n확인 필요\n"
         for i in issues:
-          summary_for_popup += f"• {i}\n"
+          summary_for_popup += f"- {i}\n"
       summary_for_popup += (
-        "\n━━━ 다음 단계 ━━━\n"
-        "1. [Promote] 버튼 → 차량에 실제 적용\n"
-        "2. 차량 부팅 후 도로 테스트\n"
-        "   ※ 저속·한산 도로부터 시작\n"
-        "   ※ 화면 오른쪽 CAS 위젯에서 작동 상태 확인\n"
-        "   ※ 진동/이상감 있으면 CAS 토글 OFF\n"
-        "3. 더 좋은 결과를 원하면\n"
-        "   • rlog 더 모으기 (다양한 도로/속도/날씨)\n"
-        "   • GUI에서 다시 [One Click: Train + Validate]"
+        "\n다음 단계\n"
+        "1. 결과가 괜찮으면 [모델 적용]을 누르세요.\n"
+        "2. 차량에서는 저속, 한산한 도로부터 테스트하세요.\n"
+        "3. 진동이나 이상감이 있으면 CAS 토글을 끄세요.\n"
+        "4. 결과가 부족하면 rlog를 더 모은 뒤 다시 학습하세요."
       )
       self.after(0, lambda s=summary_for_popup, g=grade: self._show_summary_popup(s, g))
 
@@ -803,9 +1097,9 @@ class CASGui(tk.Tk):
       self.queue.put(f"\n[요약]\n요약 파일 읽기 실패: {e}\n")
 
   def _show_summary_popup(self, message: str, grade: str):
-    if "❌" in grade:
+    if "부족" in grade:
       messagebox.showerror("CAS 학습 결과", message)
-    elif "⚠️" in grade:
+    elif "주의" in grade:
       messagebox.showwarning("CAS 학습 결과", message)
     else:
       messagebox.showinfo("CAS 학습 결과", message)
@@ -813,7 +1107,7 @@ class CASGui(tk.Tk):
   def stop(self):
     if self.proc is not None:
       self.proc.terminate()
-      self.status_var.set("Stopping")
+      self.status_var.set("중지 중")
 
 
 if __name__ == "__main__":

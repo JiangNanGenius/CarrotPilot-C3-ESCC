@@ -8,10 +8,12 @@ import time
 
 from openpilot.common.params import Params
 try:
-  from openpilot.selfdrive.carrot.cas.features import CASFeatureState, build_feature_vector
+  from openpilot.selfdrive.carrot.cas.features import FEATURE_SCHEMA, CASFeatureState, build_feature_vector
+  from openpilot.selfdrive.carrot.cas.metadata import eps_firmware_hash
   from openpilot.selfdrive.carrot.cas.model import CASModel
 except ModuleNotFoundError:
-  from selfdrive.carrot.cas.features import CASFeatureState, build_feature_vector
+  from selfdrive.carrot.cas.features import FEATURE_SCHEMA, CASFeatureState, build_feature_vector
+  from selfdrive.carrot.cas.metadata import eps_firmware_hash
   from selfdrive.carrot.cas.model import CASModel
 
 
@@ -27,6 +29,15 @@ _CENTERING_FULL_M = 0.5  # |offset| >= this -> score 0; offset == 0 -> score 100
 
 def _norm_name(value: str) -> str:
   return re.sub(r"[^A-Z0-9]+", "", value.upper())
+
+
+def _param_text(params: Params, key: str) -> str:
+  value = params.get(key)
+  if value is None:
+    return ""
+  if isinstance(value, bytes):
+    return value.decode("utf-8", "ignore").strip()
+  return str(value).strip()
 
 
 class CASRuntime:
@@ -55,7 +66,12 @@ class CASRuntime:
     if not WEIGHTS_DIR.exists():
       return
 
-    car_name = _norm_name(getattr(self.CP, "carFingerprint", ""))
+    runtime_names = [
+      _norm_name(_param_text(self.params, "CarName")),
+      _norm_name(_param_text(self.params, "CarSelected3")),
+    ]
+    runtime_names = [name for name in runtime_names if name and name != "MOCK"]
+    runtime_eps_hash = eps_firmware_hash(getattr(self.CP, "carFw", []))
     expected_type = f"cas_{self.kind}"
     best_path = None
     best_score = -1
@@ -66,8 +82,26 @@ class CASRuntime:
         continue
       if candidate.model_type and candidate.model_type != expected_type:
         continue
+      if candidate.feature_schema != FEATURE_SCHEMA:
+        continue
       names = [_norm_name(path.stem), _norm_name(candidate.car)]
-      score = max((len(name) for name in names if name and (name in car_name or car_name in name)), default=-1)
+      names += [_norm_name(name) for name in candidate.car_names]
+      name_score = max((len(name) for name in names for runtime_name in runtime_names
+                        if name and runtime_name and (name in runtime_name or runtime_name in name)), default=-1)
+      if name_score < 0:
+        continue
+
+      eps_score = 0
+      candidate_eps_hash = str(candidate.eps_firmware_hash or "").strip()
+      if candidate_eps_hash:
+        if runtime_eps_hash and candidate_eps_hash == runtime_eps_hash:
+          eps_score = 1000
+        elif runtime_eps_hash:
+          continue
+        else:
+          eps_score = 0
+
+      score = eps_score + name_score
       if score > best_score:
         best_path = path
         best_score = score
@@ -86,10 +120,12 @@ class CASRuntime:
 
     features = build_feature_vector(self.feature_state, CS, params, desired_curvature,
                                     measured_lateral_accel, model_data=model_data, CC=CC,
-                                    lateral_plan=lateral_plan, lateral_delay=lateral_delay)
+                                    lateral_plan=lateral_plan, lateral_delay=lateral_delay,
+                                    t=time.monotonic())
     delta, max_abs_z = self.model.evaluate(features)
     alpha = self._alpha(CS, delta, max_abs_z)
     raw_delta = float(delta)
+    applied_delta = float(alpha * raw_delta)
     if alpha <= 0.0:
       delta = 0.0
 
@@ -127,7 +163,7 @@ class CASRuntime:
     # Layout: features (20) + extras (11).
     extras = [
       raw_delta,                          # [-11] NN raw output (pre-alpha)
-      float(delta),                       # [-10] applied delta (post-alpha gate)
+      applied_delta,                      # [-10] actual applied delta (alpha * raw_delta)
       float(alpha),                        # [ -9] alpha (final, post multiplicative gate)
       float(max_abs_z),                    # [ -8] distribution z
       offset_now,                          # [ -7] m, instantaneous lateral offset

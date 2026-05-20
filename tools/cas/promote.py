@@ -12,10 +12,12 @@ if str(REPO_ROOT) not in sys.path:
   sys.path.insert(0, str(REPO_ROOT))
 
 try:
-  from openpilot.selfdrive.carrot.cas.features import FEATURE_SPEC
+  from openpilot.selfdrive.carrot.cas.features import FEATURE_SCHEMA, FEATURE_SPEC
+  from openpilot.selfdrive.carrot.cas.metadata import FORMAT_VERSION
   from openpilot.selfdrive.carrot.cas.model import CASModel
 except ModuleNotFoundError:
-  from selfdrive.carrot.cas.features import FEATURE_SPEC
+  from selfdrive.carrot.cas.features import FEATURE_SCHEMA, FEATURE_SPEC
+  from selfdrive.carrot.cas.metadata import FORMAT_VERSION
   from selfdrive.carrot.cas.model import CASModel
 
 
@@ -34,8 +36,10 @@ def validate_candidate(path: Path, car: str | None, kind: str | None,
   model = CASModel(path)
 
   errors = []
-  if payload.get("format_version") != 1:
-    errors.append("format_version must be 1")
+  if payload.get("format_version") != FORMAT_VERSION:
+    errors.append(f"format_version must be {FORMAT_VERSION}")
+  if payload.get("feature_schema") != FEATURE_SCHEMA:
+    errors.append(f"feature_schema must be {FEATURE_SCHEMA}")
   if payload.get("feature_spec") != FEATURE_SPEC:
     errors.append("feature_spec does not match runtime FEATURE_SPEC")
   if car is not None and _norm_car_name(model.car) != _norm_car_name(car):

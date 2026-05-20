@@ -13,10 +13,12 @@ class CASModel:
       params = json.load(f)
 
     self.meta = params
+    self.format_version = int(params.get("format_version", 1))
     self.model_type = params.get("model_type", "")
     self.car = params.get("car", "")
-    self.car_fingerprints = list(params.get("car_fingerprints", [self.car])) if self.car else list(params.get("car_fingerprints", []))
+    self.car_names = list(params.get("car_names", [self.car])) if self.car else list(params.get("car_names", []))
     self.eps_firmware_hash = params.get("eps_firmware_hash", "")
+    self.feature_schema = params.get("feature_schema", "")
     self.alpha_max = float(params.get("alpha_max", 0.0))
     self.input_size = int(params["input_size"])
     self.output_size = int(params.get("output_size", 1))
