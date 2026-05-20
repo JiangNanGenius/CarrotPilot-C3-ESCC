@@ -62,11 +62,13 @@ try:
   from openpilot.tools.cas.export_json import build_json_model, write_json_model
   from openpilot.tools.cas.triage import TRIAGE_WEIGHTS, TriageType, classify_sample, coerce_triage
   from openpilot.tools.cas.validate import format_counts, lateral_offset_metrics, prediction_metrics
+  from openpilot.tools.cas import cache as feature_cache
 except ModuleNotFoundError:
   from selfdrive.carrot.cas.features import CASFeatureState, build_feature_vector, lane_center_offset
   from selfdrive.carrot.cas.metadata import eps_firmware_hash
   from tools.cas.export_json import build_json_model, write_json_model
   from tools.cas.triage import TRIAGE_WEIGHTS, TriageType, classify_sample, coerce_triage
+  from tools.cas import cache as feature_cache
   from tools.cas.validate import format_counts, lateral_offset_metrics, prediction_metrics
 
 
@@ -422,7 +424,21 @@ def _flag_from_message(info):
   return coerce_triage(getattr(info, "lateralLearningFlag", TriageType.EXCLUDE))
 
 
-def _collect_source(source: str, sample_stride: int) -> SourceCollectResult:
+def _collect_source(source: str, sample_stride: int,
+                    cache_dir: Path | None = None) -> SourceCollectResult:
+  # Cache hit fast-path: return reconstructed result without touching the rlog.
+  if cache_dir is not None:
+    cached = feature_cache.load(cache_dir, source, sample_stride)
+    if cached is not None:
+      m = feature_cache.materialize(cached, Sample, coerce_triage)
+      return SourceCollectResult(
+        source, m["samples"], m["message_counts"], m["triage_counts"],
+        m["detected_car_names"], m["eps_firmware_hashes"],
+        m["first_t"], m["last_t"], m["elapsed_s"],
+        lateral_delay_sum=m["lateral_delay_sum"],
+        lateral_delay_count=m["lateral_delay_count"],
+      )
+
   install_openpilot_aliases()
   try:
     from openpilot.tools.lib.logreader import LogReader
@@ -515,9 +531,21 @@ def _collect_source(source: str, sample_stride: int) -> SourceCollectResult:
       lateral_delay_sum += float(sample_lateral_delay)
       lateral_delay_count += 1
 
+  elapsed = time.monotonic() - started
+  if cache_dir is not None:
+    try:
+      feature_cache.save(
+        cache_dir, source, sample_stride,
+        samples, counts, triage, detected_car_names, eps_hashes,
+        first_t, last_t, elapsed,
+        lateral_delay_sum, lateral_delay_count,
+      )
+    except Exception as e:
+      # Cache write failure is non-fatal — training still completes.
+      print(f"[cache] save failed for {source}: {e}", flush=True)
   return SourceCollectResult(
     source, samples, counts, triage, detected_car_names, eps_hashes,
-    first_t, last_t, time.monotonic() - started,
+    first_t, last_t, elapsed,
     lateral_delay_sum=lateral_delay_sum,
     lateral_delay_count=lateral_delay_count,
   )
@@ -543,7 +571,8 @@ def _merge_source_result(result: SourceCollectResult, samples: list[Sample], cou
 
 def collect_samples(sources: list[str], sample_stride: int,
                     audit: AuditLogger | None = None,
-                    workers: int = 1) -> tuple[list[Sample], float, Counter, Counter, Counter, dict]:
+                    workers: int = 1,
+                    cache_dir: Path | None = None) -> tuple[list[Sample], float, Counter, Counter, Counter, dict]:
   samples: list[Sample] = []
   counts = Counter()
   detected_car_names = Counter()
@@ -561,7 +590,7 @@ def collect_samples(sources: list[str], sample_stride: int,
       for source_index, source in enumerate(sources, 1):
         if audit is not None:
           audit.source_start(source_index, total_sources, source)
-        futures[executor.submit(_collect_source, source, sample_stride)] = (source_index, source)
+        futures[executor.submit(_collect_source, source, sample_stride, cache_dir)] = (source_index, source)
 
       for future in as_completed(futures):
         source_index, source = futures[future]
@@ -588,7 +617,7 @@ def collect_samples(sources: list[str], sample_stride: int,
     if audit is not None:
       audit.source_start(source_index, total_sources, source)
     try:
-      result = _collect_source(source, sample_stride)
+      result = _collect_source(source, sample_stride, cache_dir)
       first_t, last_t = _merge_source_result(result, samples, counts, detected_car_names, eps_hashes,
                                              first_t, last_t, delay_acc)
     except Exception as e:
@@ -702,6 +731,10 @@ def main():
   parser.add_argument("--min-file-age-sec", type=float, default=0.0, help="skip recently modified rlogs")
   parser.add_argument("--max-sources", type=int, help="limit number of expanded rlog sources")
   parser.add_argument("--workers", type=int, default=1, help="parallel rlog parser workers")
+  parser.add_argument("--cache-dir", default="~/.cas_train/feature_cache",
+                      help="directory for per-rlog feature cache; empty string disables cache")
+  parser.add_argument("--no-cache", action="store_true",
+                      help="disable feature cache (always re-parse rlogs)")
   parser.add_argument("--offset-horizon", type=float, default=0.5)
   parser.add_argument("--offset-gain", type=float, default=0.35)
   parser.add_argument("--driver-torque-scale", type=float, default=0.25)
@@ -721,7 +754,16 @@ def main():
     sources = sources[:args.max_sources]
   audit.write_json("source_inventory.json", source_inventory(sources))
   audit.write_json("train_args.json", vars(args))
-  samples, duration_h, message_counts, eps_hashes, detected_car_names, delay_acc = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
+
+  cache_dir = None
+  if not args.no_cache and args.cache_dir:
+    cache_dir = Path(args.cache_dir).expanduser()
+    print(f"[cache] feature cache enabled at {cache_dir}", flush=True)
+  else:
+    print("[cache] feature cache disabled", flush=True)
+
+  samples, duration_h, message_counts, eps_hashes, detected_car_names, delay_acc = collect_samples(
+    sources, max(args.sample_stride, 1), audit, args.workers, cache_dir=cache_dir)
   lateral_delay_at_train = (delay_acc["sum"] / delay_acc["count"]) if delay_acc["count"] > 0 else 0.0
   model_car = args.car.strip()
   if not model_car and detected_car_names:

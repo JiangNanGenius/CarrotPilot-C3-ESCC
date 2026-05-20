@@ -1219,6 +1219,22 @@
     },
     {
       "group": "시작",
+      "name": "CarrotDataUpload",
+      "title": "주행 데이터 업로드 (CAS 학습 기여)",
+      "descr": "익명 주행 로그(rlog)를 carrot 학습 서버로 업로드.\n영상은 보내지 않음. WiFi/offroad에서만 동작.\n0: 사용안함, 1: 사용",
+      "egroup": "START",
+      "etitle": "Upload Driving Data (Contribute to CAS)",
+      "edescr": "Upload anonymous driving logs (rlog) to carrot training server.\nNo video. Only on WiFi and offroad.\n0: Off, 1: On",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "unit": 1,
+      "cgroup": "启动设置",
+      "ctitle": "上传驾驶数据（CAS 训练贡献）",
+      "cdescr": "上传匿名驾驶日志（rlog）到 carrot 训练服务器\n不上传视频。仅在 WiFi 和停车时\n0: 关闭, 1: 开启"
+    },
+    {
+      "group": "시작",
       "name": "MapboxStyle",
       "title": "맵박스 스타일",
       "descr": "0: 기본 배경\n 1: 어두운 배경\n 2: 위성 지도",

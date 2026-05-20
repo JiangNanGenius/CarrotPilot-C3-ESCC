@@ -134,6 +134,10 @@ def main():
   parser.add_argument("--min-file-age-sec", type=float, default=0.0, help="skip recently modified rlogs")
   parser.add_argument("--max-sources", type=int, help="limit number of expanded rlog sources")
   parser.add_argument("--workers", type=int, default=1, help="parallel rlog parser workers")
+  parser.add_argument("--cache-dir", default="~/.cas_train/feature_cache",
+                      help="directory for per-rlog feature cache; empty string disables cache")
+  parser.add_argument("--no-cache", action="store_true",
+                      help="disable feature cache (always re-parse rlogs)")
   parser.add_argument("--offset-horizon", type=float, default=0.5)
   parser.add_argument("--offset-gain", type=float, default=0.35)
   parser.add_argument("--driver-torque-scale", type=float, default=0.25)
@@ -158,7 +162,15 @@ def main():
   audit = AuditLogger(Path(args.audit_dir).expanduser() if args.audit_dir else None, args.audit_samples)
   audit.write_json("source_inventory.json", source_inventory(sources))
   audit.write_json("validate_args.json", vars(args))
-  samples, duration_h, message_counts, eps_hashes, detected_car_names, _delay_acc = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
+  cache_dir = None
+  if not args.no_cache and args.cache_dir:
+    cache_dir = Path(args.cache_dir).expanduser()
+    print(f"[cache] feature cache enabled at {cache_dir}", flush=True)
+  else:
+    print("[cache] feature cache disabled", flush=True)
+
+  samples, duration_h, message_counts, eps_hashes, detected_car_names, _delay_acc = collect_samples(
+    sources, max(args.sample_stride, 1), audit, args.workers, cache_dir=cache_dir)
   x, y, weights, target_counts, offsets = build_targets(
     samples,
     args.offset_horizon,

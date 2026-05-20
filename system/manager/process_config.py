@@ -143,6 +143,9 @@ procs = [
 
   PythonProcess("carrot_server", "selfdrive.carrot.carrot_server", always_run),
 
+  # CAS firehose-style data uploader (toggled via CarrotDataUpload param)
+  PythonProcess("cas_uploader", "selfdrive.carrot.cas.data_uploader", always_run, enabled=not PC),
+
   #Xiaoge data broadcaster (conditional on ShareData param)
   PythonProcess("xiaoge_data", "selfdrive.carrot.xiaoge_data", enable_xiaoge_data),
   # c3x lite
