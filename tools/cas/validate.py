@@ -158,7 +158,7 @@ def main():
   audit = AuditLogger(Path(args.audit_dir).expanduser() if args.audit_dir else None, args.audit_samples)
   audit.write_json("source_inventory.json", source_inventory(sources))
   audit.write_json("validate_args.json", vars(args))
-  samples, duration_h, message_counts, eps_hashes, detected_car_names = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
+  samples, duration_h, message_counts, eps_hashes, detected_car_names, _delay_acc = collect_samples(sources, max(args.sample_stride, 1), audit, args.workers)
   x, y, weights, target_counts, offsets = build_targets(
     samples,
     args.offset_horizon,

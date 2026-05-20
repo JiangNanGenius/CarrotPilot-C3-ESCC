@@ -36,7 +36,9 @@ def eps_firmware_hash(car_fw) -> str:
     return ""
 
   digest = hashlib.sha1()
-  for address, sub_address, version in sorted(parts):
+  # carFw may contain duplicate EPS firmware responses in some logs. Duplicates
+  # do not mean the EPS firmware changed, so collapse them before hashing.
+  for address, sub_address, version in sorted(set(parts)):
     digest.update(address.to_bytes(4, "big", signed=False))
     digest.update(sub_address.to_bytes(1, "big", signed=False))
     digest.update(len(version).to_bytes(2, "big", signed=False))

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+import gc
 import json
 import os
 from pathlib import Path
@@ -18,9 +20,17 @@ from tkinter import filedialog, messagebox, ttk
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+  sys.path.insert(0, str(REPO_ROOT))
 CONFIG_PATH = Path.home() / ".cas_train" / "gui_config.json"
 LOG_FILENAMES = {"rlog", "rlog.bz2", "rlog.zst", "raw_log.bz2"}
 LOG_SUFFIXES = ("--rlog", "--rlog.bz2", "--rlog.zst", "--raw_log.bz2")
+RLOG_INDEX_VERSION = 2
+LOG_MAX_LINES = 1500
+
+
+class IndexCancelled(Exception):
+  pass
 
 
 def windows_to_wsl(path: str) -> str:
@@ -114,6 +124,309 @@ def _fast_log_sources(rlogs: str, min_file_age_sec: float, max_sources: int) -> 
           if len(sources) >= max_sources:
             break
   return sources, max(seen, len(sources))
+
+
+def _is_log_name(name: str) -> bool:
+  return name in LOG_FILENAMES or name.endswith(LOG_SUFFIXES)
+
+
+def _iter_log_sources(rlogs: str, min_file_age_sec: float, progress=None) -> list[str]:
+  path = Path(rlogs).expanduser()
+  if path.is_file():
+    return [str(path)] if _stable_file(path, min_file_age_sec) else []
+  if not path.is_dir():
+    return [rlogs]
+
+  sources = []
+  seen = set()
+  checked = 0
+
+  # Fast path for comma/openpilot segment folders:
+  #   root/<segment>/rlog.zst
+  # This gives immediate progress instead of waiting for a full recursive walk.
+  try:
+    entries = sorted(path.iterdir(), key=lambda p: p.name, reverse=True)
+  except OSError:
+    entries = []
+
+  for entry in entries:
+    checked += 1
+    before_found = len(sources)
+    if entry.name == ".cas":
+      continue
+    if entry.is_file() and _is_log_name(entry.name) and _stable_file(entry, min_file_age_sec):
+      source = str(entry)
+      if source not in seen:
+        seen.add(source)
+        sources.append(source)
+    elif entry.is_dir():
+      for log_name in LOG_FILENAMES:
+        candidate = entry / log_name
+        if candidate.exists() and _stable_file(candidate, min_file_age_sec):
+          source = str(candidate)
+          if source not in seen:
+            seen.add(source)
+            sources.append(source)
+          break
+    if progress is not None and (checked % 20 == 0 or len(sources) != before_found):
+      progress("탐색", checked, len(sources), str(entry))
+
+  # Fallback for nested layouts. Only skip CAS's own bookkeeping directory.
+  # Organized logs must remain discoverable so an interrupted indexing run can
+  # recover files that were moved before index.json was saved.
+  for root, dirs, files in os.walk(path):
+    root_path = Path(root)
+    dirs[:] = [d for d in dirs if d != ".cas"]
+    dirs.sort(reverse=True)
+    for name in sorted(files, reverse=True):
+      if _is_log_name(name):
+        candidate = Path(root) / name
+        if _stable_file(candidate, min_file_age_sec):
+          source = str(candidate)
+          if source not in seen:
+            seen.add(source)
+            sources.append(source)
+        checked += 1
+        if progress is not None and checked % 50 == 0:
+          progress("탐색", checked, len(sources), str(root_path))
+  return sources
+
+
+def _log_signature(path: str) -> dict:
+  try:
+    stat = Path(path).stat()
+    return {"size": int(stat.st_size), "mtime": float(stat.st_mtime)}
+  except OSError:
+    return {"size": -1, "mtime": 0.0}
+
+
+def _cas_dir(rlogs: str) -> Path:
+  return Path(rlogs).expanduser() / ".cas"
+
+
+def _index_path(rlogs: str) -> Path:
+  return _cas_dir(rlogs) / "index.json"
+
+
+def _load_rlog_index(rlogs: str) -> dict:
+  path = _index_path(rlogs)
+  try:
+    if path.exists():
+      index = json.loads(path.read_text(encoding="utf-8"))
+      if int(index.get("version", 0)) == RLOG_INDEX_VERSION:
+        return index
+  except Exception:
+    pass
+  return {"version": RLOG_INDEX_VERSION, "root": str(Path(rlogs).expanduser()), "logs": {}}
+
+
+def _save_rlog_index(rlogs: str, index: dict):
+  root = _cas_dir(rlogs)
+  root.mkdir(parents=True, exist_ok=True)
+  index["version"] = RLOG_INDEX_VERSION
+  index["root"] = str(Path(rlogs).expanduser())
+  _index_path(rlogs).write_text(json.dumps(index, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def read_log_identity(source: str, max_messages: int = 30000, progress=None) -> dict:
+  if progress is not None:
+    progress("준비")
+  from tools.cas.train import install_openpilot_aliases
+
+  install_openpilot_aliases()
+  if progress is not None:
+    progress("openpilot alias 준비 완료")
+  try:
+    from openpilot.tools.lib.logreader import LogReader
+    from openpilot.selfdrive.carrot.cas.metadata import eps_firmware_hash
+  except ModuleNotFoundError:
+    from tools.lib.logreader import LogReader
+    from selfdrive.carrot.cas.metadata import eps_firmware_hash
+  if progress is not None:
+    progress("LogReader import 완료")
+
+  first_t = None
+  last_t = None
+  car = ""
+  eps_hash = ""
+  message_count = 0
+  error = ""
+  reader = None
+  try:
+    if progress is not None:
+      progress("LogReader 생성 시작")
+    reader = LogReader(source)
+    if progress is not None:
+      progress("LogReader 생성 완료")
+    for index, msg in enumerate(reader, 1):
+      message_count = index
+      if progress is not None and index % 5000 == 0:
+        progress(f"{index}개 메시지 확인")
+      t = msg.logMonoTime * 1e-9
+      first_t = t if first_t is None else min(first_t, t)
+      last_t = t if last_t is None else max(last_t, t)
+      if msg.which() == "carParams":
+        car = str(getattr(msg.carParams, "carFingerprint", "")).strip()
+        eps_hash = eps_firmware_hash(msg.carParams.carFw)
+        if progress is not None:
+          progress(f"carParams 발견: {car or '차량 미확인'}")
+        break
+      if index >= max_messages:
+        break
+  except Exception as e:
+    error = repr(e)
+  finally:
+    reader = None
+    if progress is not None:
+      progress("LogReader 해제/GC 시작")
+    gc.collect()
+    if progress is not None:
+      progress("LogReader 해제/GC 완료")
+
+  return {
+    "car": car,
+    "eps_firmware_hash": eps_hash,
+    "duration_hours": 0.0 if first_t is None or last_t is None else max(0.0, last_t - first_t) / 3600.0,
+    "message_count": message_count,
+    "error": error,
+    "indexed_at": datetime.now().isoformat(timespec="seconds"),
+  }
+
+
+def summarize_index(index: dict) -> dict:
+  groups = {}
+  for source, meta in index.get("logs", {}).items():
+    car = str(meta.get("car", "")).strip()
+    eps_hash = str(meta.get("eps_firmware_hash", "")).strip()
+    if not car and not eps_hash:
+      continue
+    key = f"{car}|{eps_hash}"
+    group = groups.setdefault(key, {
+      "car": car,
+      "eps_firmware_hash": eps_hash,
+      "sources": [],
+      "duration_hours": 0.0,
+    })
+    group["sources"].append(source)
+    group["duration_hours"] += float(meta.get("duration_hours", 0.0))
+
+  return groups
+
+
+def _safe_component(value: str, fallback: str = "unknown") -> str:
+  safe = "".join(c if c.isalnum() or c in ("_", "-") else "_" for c in value.strip())
+  return safe.strip("_") or fallback
+
+
+def _organized_logs_root(rlogs: str, car: str, eps_hash: str) -> Path:
+  car_dir = _safe_component(car, "UNKNOWN_CAR")
+  eps_dir = f"eps_{_safe_component(eps_hash, 'unknown')}"
+  return Path(rlogs).expanduser() / car_dir / eps_dir / "logs"
+
+
+def _route_key_from_source(source: str) -> str:
+  segment = Path(source).parent.name
+  if "--" not in segment:
+    return ""
+  parts = segment.rsplit("--", 1)
+  return parts[0] if len(parts) == 2 else segment
+
+
+def _is_relative_to(path: Path, parent: Path) -> bool:
+  try:
+    path.resolve().relative_to(parent.resolve())
+    return True
+  except ValueError:
+    return False
+  except OSError:
+    return False
+
+
+def _unique_destination(path: Path) -> Path:
+  if not path.exists():
+    return path
+  stem = path.stem
+  suffix = path.suffix
+  for idx in range(1, 1000):
+    candidate = path.with_name(f"{stem}_{idx}{suffix}")
+    if not candidate.exists():
+      return candidate
+  raise RuntimeError(f"Could not find unique destination for {path}")
+
+
+def _move_dir_contents(src_dir: Path, dest_dir: Path, watched: Path | None = None) -> Path | None:
+  dest_dir.mkdir(parents=True, exist_ok=True)
+  moved_watched = None
+  for child in list(src_dir.iterdir()):
+    target = dest_dir / child.name
+    if child.is_dir() and target.exists() and target.is_dir():
+      nested = _move_dir_contents(child, target, watched)
+      moved_watched = moved_watched or nested
+      try:
+        child.rmdir()
+      except OSError:
+        pass
+      continue
+    if target.exists():
+      target = _unique_destination(target)
+    shutil.move(str(child), str(target))
+    if watched is not None:
+      try:
+        if child.resolve() == watched.resolve():
+          moved_watched = target
+      except OSError:
+        pass
+  try:
+    src_dir.rmdir()
+  except OSError:
+    pass
+  return moved_watched
+
+
+def organize_log_source(rlogs: str, source: str, car: str, eps_hash: str) -> tuple[str, bool]:
+  if not car:
+    return source, False
+  src = Path(source)
+  root = Path(rlogs).expanduser()
+  organized_root = _organized_logs_root(rlogs, car, eps_hash)
+  if _is_relative_to(src, organized_root):
+    return str(src), False
+
+  try:
+    parent_name = src.parent.name if src.parent.resolve() != root.resolve() else ""
+  except OSError:
+    parent_name = src.parent.name
+  dest_dir = organized_root / _safe_component(parent_name, "root")
+  if src.parent.is_dir() and "--" in src.parent.name:
+    moved_log = _move_dir_contents(src.parent, dest_dir, src)
+    return str(moved_log or (dest_dir / src.name)), True
+  dest_dir.mkdir(parents=True, exist_ok=True)
+  dest = _unique_destination(dest_dir / src.name)
+  shutil.move(str(src), str(dest))
+  return str(dest), True
+
+
+def cleanup_root_segment_dirs(rlogs: str, logs: dict) -> int:
+  root = Path(rlogs).expanduser()
+  dest_by_segment = {}
+  for source in logs:
+    path = Path(source)
+    segment = path.parent.name
+    try:
+      is_root_segment = path.parent.parent.resolve() == root.resolve()
+    except OSError:
+      is_root_segment = False
+    if "--" in segment and not is_root_segment:
+      dest_by_segment.setdefault(segment, path.parent)
+
+  merged = 0
+  for segment, dest_dir in dest_by_segment.items():
+    src_dir = root / segment
+    if not src_dir.is_dir() or src_dir.resolve() == dest_dir.resolve():
+      continue
+    _move_dir_contents(src_dir, dest_dir)
+    merged += 1
+  return merged
 
 
 def scan_rlog_metadata(rlogs: str, min_file_age_sec: float = 0.0,
@@ -236,11 +549,21 @@ class CASGui(tk.Tk):
     self.gpu_status_var = tk.StringVar(value="PyTorch/CUDA: checking...")
     self.raw_log_var = tk.StringVar(value="실행 로그: 아직 없음")
     self.log_info_var = tk.StringVar(value=self._log_info_text(last_car, "", 0, 0, 0.0))
+    self.index_status_var = tk.StringVar(value="인덱스: 대기")
+    self.group_var = tk.StringVar(value="")
+    self.group_map: dict[str, dict] = {}
+    self.index_data: dict = {}
     self.scan_running = False
+    self.index_running = False
+    self.index_cancel = threading.Event()
 
     self._build()
     self.after(100, self._poll)
     self.after(300, self.detect_backend)
+    if last_rlogs and Path(last_rlogs).is_dir():
+      self.after(800, self.start_indexing)
+    else:
+      self.after(500, self._prompt_initial_rlogs)
     # Save config on close.
     self.protocol("WM_DELETE_WINDOW", self._on_close)
 
@@ -248,13 +571,13 @@ class CASGui(tk.Tk):
   def _derive_candidate_path(rlogs: str, car: str) -> str:
     if not rlogs:
       return ""
-    return str(Path(rlogs) / default_candidate_name(car))
+    return str(_cas_dir(rlogs) / "candidates" / default_candidate_name(car))
 
   @staticmethod
   def _derive_validate_path(rlogs: str, car: str) -> str:
     if not rlogs:
       return ""
-    return str(Path(rlogs) / default_validate_name(car))
+    return str(_cas_dir(rlogs) / "validations" / default_validate_name(car))
 
   @staticmethod
   def _log_info_text(car: str, eps_hash: str, source_count: int, scanned_count: int, duration_hours: float) -> str:
@@ -323,7 +646,7 @@ class CASGui(tk.Tk):
     else:
       candidate_path = Path(candidate)
       if (not candidate_path.exists()
-          and str(candidate_path.parent) == str(Path(rlogs))
+          and str(candidate_path.parent) == str(_cas_dir(rlogs) / "candidates")
           and candidate_path.name.endswith("_candidate.json")):
         self.candidate_var.set(expected_candidate)
 
@@ -333,9 +656,40 @@ class CASGui(tk.Tk):
     else:
       validate_path = Path(validate)
       if (not validate_path.exists()
-          and str(validate_path.parent) == str(Path(rlogs))
+          and str(validate_path.parent) == str(_cas_dir(rlogs) / "validations")
           and validate_path.name.endswith("_validate.json")):
         self.validate_var.set(expected_validate)
+
+  def _set_default_output_paths(self, rlogs: str, car: str):
+    self.candidate_var.set(self._derive_candidate_path(rlogs, car))
+    self.validate_var.set(self._derive_validate_path(rlogs, car))
+
+  def _set_rlogs_path(self, path: str):
+    old = self.rlogs_var.get().strip()
+    if not path or path == old:
+      return
+    self.rlogs_var.set(path)
+    self.car_var.set("")
+    self.car_aliases_var.set("")
+    self.eps_hash_var.set("")
+    self.group_var.set("")
+    self.group_map = {}
+    if hasattr(self, "group_combo"):
+      self.group_combo.configure(values=[])
+    self._set_default_output_paths(path, "")
+    self.log_info_var.set(self._log_info_text("", "", 0, 0, 0.0))
+    self._save_config()
+    self.start_indexing()
+
+  def _prompt_initial_rlogs(self):
+    current = self.rlogs_var.get().strip()
+    if current and Path(current).is_dir():
+      return
+    self.index_status_var.set("RLOG 폴더를 먼저 선택하세요.")
+    path = filedialog.askdirectory(title="CAS 학습에 사용할 RLOG 폴더를 선택하세요",
+                                   initialdir=current if current else str(Path.home()))
+    if path:
+      self._set_rlogs_path(path)
 
   def _build(self):
     root = ttk.Frame(self, padding=12)
@@ -344,26 +698,31 @@ class CASGui(tk.Tk):
     header = ttk.Frame(root)
     header.pack(fill=tk.X, pady=(0, 10))
     ttk.Label(header, text="CAS Training", font=("TkDefaultFont", 16, "bold")).pack(anchor="w")
-    ttk.Label(header, text="RLOG 폴더만 고르면 됩니다. 차량 정보는 학습 시작 후 로그에서 자동으로 확정됩니다.").pack(anchor="w", pady=(2, 0))
 
     form = ttk.LabelFrame(root, text="일반 모드", padding=10)
     form.pack(fill=tk.X)
     form.columnconfigure(1, weight=1)
 
     self._row(form, 0, "RLOG 폴더", self.rlogs_var, browse=True)
-    ttk.Label(form, text="로그 정보").grid(row=1, column=0, sticky="w", pady=3)
-    ttk.Label(form, textvariable=self.log_info_var).grid(row=1, column=1, columnspan=2, sticky="w", padx=5)
+    ttk.Label(form, text="학습 대상").grid(row=1, column=0, sticky="w", pady=3)
+    self.group_combo = ttk.Combobox(form, textvariable=self.group_var, state="readonly")
+    self.group_combo.grid(row=1, column=1, columnspan=2, sticky="ew", padx=5)
+    self.group_combo.bind("<<ComboboxSelected>>", lambda _event: self._on_group_selected())
+    ttk.Label(form, text="로그 정보").grid(row=2, column=0, sticky="w", pady=3)
+    ttk.Label(form, textvariable=self.log_info_var).grid(row=2, column=1, columnspan=2, sticky="w", padx=5)
+    ttk.Label(form, textvariable=self.index_status_var).grid(row=3, column=1, columnspan=2, sticky="w", padx=5)
 
     buttons = ttk.Frame(root)
     buttons.pack(fill=tk.X, pady=(12, 10))
     ttk.Button(buttons, text="학습 시작 + 검증", command=self.one_click).pack(side=tk.LEFT, padx=(0, 6))
     ttk.Button(buttons, text="자동 설정", command=self.auto_tune).pack(side=tk.LEFT, padx=3)
-    ttk.Button(buttons, text="로그 확인", command=self.scan_logs).pack(side=tk.LEFT, padx=3)
+    ttk.Button(buttons, text="인덱스/정리", command=self.scan_logs).pack(side=tk.LEFT, padx=3)
     ttk.Button(buttons, text="모델 적용", command=lambda: self.promote(False)).pack(side=tk.LEFT, padx=3)
     ttk.Button(buttons, text="고급 설정...", command=self._open_advanced).pack(side=tk.LEFT, padx=3)
     ttk.Button(buttons, text="중지", command=self.stop).pack(side=tk.RIGHT, padx=(6, 0))
 
-    self.progress = ttk.Progressbar(root, mode="indeterminate")
+    self.progress_var = tk.DoubleVar(value=0.0)
+    self.progress = ttk.Progressbar(root, mode="determinate", maximum=100.0, variable=self.progress_var)
     self.progress.pack(fill=tk.X)
     self.status_var = tk.StringVar(value="Idle")
     status = ttk.LabelFrame(root, text="상태", padding=(10, 6))
@@ -462,21 +821,358 @@ class CASGui(tk.Tk):
       ttk.Combobox(parent, textvariable=var, values=values, state="readonly").grid(row=row_or_col, column=1, sticky="w", padx=5)
 
   def _browse_dir(self, var):
-    old = var.get().strip()
     path = filedialog.askdirectory(initialdir=var.get() or str(self._repo()))
     if path:
-      var.set(path)
-      if var is self.rlogs_var and path != old:
-        self.car_var.set("")
-        self.car_aliases_var.set("")
-        self.eps_hash_var.set("")
-        self._refresh_derived_paths(path, "")
-        self.log_info_var.set(self._log_info_text("", "", 0, 0, 0.0))
+      if var is self.rlogs_var:
+        self._set_rlogs_path(path)
+      else:
+        var.set(path)
+        self._save_config()
 
   def _browse_save(self, var):
     path = filedialog.asksaveasfilename(initialfile=Path(var.get()).name)
     if path:
       var.set(path)
+
+  def _progress_begin(self, maximum: int | float = 100.0):
+    self.progress.stop()
+    self.progress.configure(mode="determinate", maximum=max(float(maximum), 1.0))
+    self.progress_var.set(0.0)
+
+  def _progress_set(self, value: int | float, maximum: int | float | None = None):
+    if maximum is not None:
+      self.progress.configure(maximum=max(float(maximum), 1.0))
+    self.progress_var.set(float(value))
+
+  def _progress_done(self):
+    try:
+      maximum = float(self.progress.cget("maximum"))
+    except Exception:
+      maximum = 100.0
+    self.progress.stop()
+    self.progress.configure(mode="determinate", maximum=max(maximum, 1.0))
+    self.progress_var.set(maximum)
+
+  def start_indexing(self, force: bool = False):
+    if self.index_running:
+      return
+    rlogs = self.rlogs_var.get().strip()
+    if not rlogs or not Path(rlogs).is_dir():
+      return
+
+    self.index_cancel.clear()
+    self.index_running = True
+    self.index_status_var.set("인덱싱/정리 준비 중...")
+    self.status_var.set("인덱싱/정리 중")
+    self._progress_begin(100)
+    self.queue.put(f"\n[인덱싱/정리]\nroot: {rlogs}\n")
+    min_age = float(self.age_var.get() or 0.0)
+    try:
+      index_workers = max(1, min(8, int(self.workers_var.get() or 1)))
+    except ValueError:
+      index_workers = 1
+
+    def worker():
+      try:
+        index, stats = self._index_worker(rlogs, min_age, force, index_workers)
+      except IndexCancelled:
+        self.after(0, self._index_cancelled)
+        return
+      except Exception as e:
+        self.after(0, lambda error=e: self._index_failed(error))
+        return
+      self.after(0, lambda: self._index_done(rlogs, index, stats))
+
+    threading.Thread(target=worker, daemon=True).start()
+
+  def _index_worker(self, rlogs: str, min_age: float, force: bool, index_workers: int) -> tuple[dict, dict]:
+    last_discovery_log = {"t": 0.0}
+
+    def discovery_progress(phase: str, checked: int, found: int, current: str):
+      now = time.monotonic()
+      self.after(0, self.index_status_var.set, f"{phase} 중... 확인 {checked}개 / rlog 발견 {found}개")
+      self.after(0, self.status_var.set, f"{phase} 중")
+      self.after(0, self._progress_set, checked % 100, 100)
+      if now - last_discovery_log["t"] >= 1.0:
+        last_discovery_log["t"] = now
+        self.queue.put(f"  [{phase}] 확인 {checked}개, rlog 발견 {found}개: {current}\n")
+
+    sources = _iter_log_sources(rlogs, min_age, discovery_progress)
+    if self.index_cancel.is_set():
+      raise IndexCancelled()
+    source_set = set(sources)
+    index = _load_rlog_index(rlogs)
+    old_logs = index.get("logs", {})
+    new_logs = {}
+    stats = {"total": len(sources), "read": 0, "cached": 0, "moved": 0, "merged_dirs": 0, "errors": 0}
+    self.after(0, lambda total=len(sources): self._progress_begin(total))
+    self.queue.put(f"  탐색 완료: rlog {len(sources)}개 발견\n")
+    self.queue.put(f"  병렬 읽기: workers={index_workers}\n")
+    if not sources:
+      self.queue.put("  처리할 rlog가 없습니다.\n")
+
+    pending = []
+    completed = 0
+    total = len(sources)
+    for source in sources:
+      if self.index_cancel.is_set():
+        raise IndexCancelled()
+      sig = _log_signature(source)
+      cached = old_logs.get(source)
+      if (not force and cached
+          and int(cached.get("size", -2)) == sig["size"]
+          and abs(float(cached.get("mtime", -1.0)) - sig["mtime"]) < 0.001):
+        item = dict(cached)
+        pending.append((source, sig, item, "cache", 0.0))
+        stats["cached"] += 1
+      else:
+        pending.append((source, sig, None, "read", 0.0))
+
+    def read_one(source: str, sig: dict) -> tuple[str, dict, dict, float]:
+      read_started = time.monotonic()
+      identity = read_log_identity(source)
+      return source, sig, identity, time.monotonic() - read_started
+
+    read_pending = [(source, sig) for source, sig, item, action, _elapsed in pending if action == "read"]
+    read_results = {source: (sig, item, action, elapsed) for source, sig, item, action, elapsed in pending if action == "cache"}
+    executor = ThreadPoolExecutor(max_workers=index_workers)
+    futures = {executor.submit(read_one, source, sig): source for source, sig in read_pending}
+    remaining = set(futures)
+    try:
+      while remaining:
+        if self.index_cancel.is_set():
+          for f in remaining:
+            f.cancel()
+          raise IndexCancelled()
+        done, remaining = wait(remaining, timeout=0.2, return_when=FIRST_COMPLETED)
+        if not done:
+          continue
+        for future in done:
+          source = futures[future]
+          try:
+            _source, sig, identity, read_elapsed = future.result()
+            item = {**sig, **identity}
+            action = "error" if item.get("error") else "read"
+            stats["read"] += 1
+            if item.get("error"):
+              stats["errors"] += 1
+          except Exception as e:
+            sig = _log_signature(source)
+            item = {**sig, "car": "", "eps_firmware_hash": "", "duration_hours": 0.0,
+                    "message_count": 0, "error": repr(e),
+                    "indexed_at": datetime.now().isoformat(timespec="seconds")}
+            action = "error"
+            read_elapsed = 0.0
+            stats["read"] += 1
+            stats["errors"] += 1
+          read_results[source] = (sig, item, action, read_elapsed)
+          completed = len(read_results)
+          self.after(0, lambda done=completed, s=dict(stats): self._index_progress(done, s))
+          if completed % 10 == 0 or action == "error":
+            car_label = str(item.get("car", "")).strip() or "차량정보 대기"
+            eps_label = str(item.get("eps_firmware_hash", "")).strip() or "eps 대기"
+            self.queue.put(
+              f"  [읽기 {completed}/{total}] {car_label} / {eps_label} / "
+              f"{item.get('message_count', 0)} msg / {read_elapsed:.2f}s\n"
+            )
+    finally:
+      executor.shutdown(wait=False, cancel_futures=True)
+      if self.index_cancel.is_set():
+        raise IndexCancelled()
+
+    known_counts = Counter(
+      (str(item.get("car", "")).strip(), str(item.get("eps_firmware_hash", "")).strip())
+      for _source, (_sig, item, _action, _elapsed) in read_results.items()
+      if str(item.get("car", "")).strip()
+    )
+    route_identity = {}
+    for source, (_sig, item, _action, _elapsed) in read_results.items():
+      car = str(item.get("car", "")).strip()
+      eps_hash = str(item.get("eps_firmware_hash", "")).strip()
+      route_key = _route_key_from_source(source)
+      if route_key and car:
+        route_identity[route_key] = {"car": car, "eps_firmware_hash": eps_hash}
+    inferred = 0
+    for source, (_sig, item, _action, _elapsed) in read_results.items():
+      if str(item.get("car", "")).strip():
+        continue
+      identity = route_identity.get(_route_key_from_source(source))
+      if not identity:
+        continue
+      item["car"] = identity["car"]
+      item["eps_firmware_hash"] = identity["eps_firmware_hash"]
+      item["identity_inferred_from_route"] = True
+      inferred += 1
+    if inferred:
+      self.queue.put(f"  route 기준 차량정보 보강: {inferred}개\n")
+    if known_counts:
+      (default_car, default_eps), default_count = known_counts.most_common(1)[0]
+      known_total = sum(known_counts.values())
+      if default_car and known_total >= 20 and default_count / max(known_total, 1) >= 0.9:
+        fallback_inferred = 0
+        for source, (_sig, item, _action, _elapsed) in read_results.items():
+          if str(item.get("car", "")).strip():
+            continue
+          item["car"] = default_car
+          item["eps_firmware_hash"] = default_eps
+          item["identity_inferred_from_collection"] = True
+          fallback_inferred += 1
+        if fallback_inferred:
+          self.queue.put(f"  폴더 기준 차량정보 보강: {fallback_inferred}개 ({default_car} / {default_eps})\n")
+
+    self.queue.put("  읽기 완료, 파일 정리 중...\n")
+    completed = 0
+    for source in sources:
+      if self.index_cancel.is_set():
+        raise IndexCancelled()
+      if source not in read_results:
+        continue
+      sig, item, action, _read_elapsed = read_results[source]
+      item["source"] = source
+      car = str(item.get("car", "")).strip()
+      eps_hash = str(item.get("eps_firmware_hash", "")).strip()
+      final_source = source
+      if car:
+        try:
+          move_started = time.monotonic()
+          final_source, moved = organize_log_source(rlogs, source, car, eps_hash)
+          if moved:
+            stats["moved"] += 1
+            action = "move"
+            item["moved_from"] = source
+            item.update(_log_signature(final_source))
+            item["source"] = final_source
+            if stats["moved"] % 10 == 0:
+              self.queue.put(f"  이동 {stats['moved']}개 완료: {final_source} / {time.monotonic() - move_started:.2f}s\n")
+        except Exception as e:
+          item["error"] = repr(e)
+          stats["errors"] += 1
+          action = "error"
+          final_source = source
+
+      new_logs[final_source] = item
+      completed += 1
+      if action in ("error", "move") or completed % 25 == 0 or completed == total:
+        self.queue.put(self._index_log_line(completed, total, action, source, final_source, item))
+      self.after(0, lambda i=completed, s=dict(stats): self._index_progress(i, s))
+
+    # Keep valid cached entries for files already moved into organized folders
+    # but no longer present in the original discovery snapshot.
+    for source, item in old_logs.items():
+      if source in new_logs or source in source_set:
+        continue
+      if Path(source).exists():
+        new_logs[source] = item
+
+    merged_dirs = cleanup_root_segment_dirs(rlogs, new_logs)
+    stats["merged_dirs"] = merged_dirs
+    if merged_dirs:
+      self.queue.put(f"  남은 segment 폴더 정리: {merged_dirs}개\n")
+
+    index["logs"] = new_logs
+    _save_rlog_index(rlogs, index)
+    return index, stats
+
+  def _index_log_line(self, idx: int, total: int, action: str, source: str, final_source: str, item: dict) -> str:
+    labels = {
+      "cache": "캐시",
+      "read": "읽음",
+      "move": "이동",
+      "error": "오류",
+    }
+    car = str(item.get("car", "")).strip() or "차량 미확인"
+    eps_hash = str(item.get("eps_firmware_hash", "")).strip() or "eps 미확인"
+    src_name = str(Path(source))
+    if action == "move":
+      return f"  [{idx}/{total}] {labels[action]} {car} / {eps_hash}\n    {src_name}\n    -> {final_source}\n"
+    if action == "error":
+      return f"  [{idx}/{total}] 오류 {src_name}\n    {item.get('error')}\n"
+    return f"  [{idx}/{total}] {labels.get(action, action)} {car} / {eps_hash} / {src_name}\n"
+
+  def _index_progress(self, done: int, stats: dict):
+    total = int(stats.get("total", 0))
+    read = int(stats.get("read", 0))
+    cached = int(stats.get("cached", 0))
+    moved = int(stats.get("moved", 0))
+    merged_dirs = int(stats.get("merged_dirs", 0))
+    errors = int(stats.get("errors", 0))
+    self._progress_set(done, max(total, 1))
+    self.index_status_var.set(f"인덱싱/정리 중... {done}/{total} (읽음 {read}, 캐시 {cached}, 이동 {moved}, 폴더 {merged_dirs}, 오류 {errors})")
+
+  def _index_failed(self, error: Exception):
+    self.index_running = False
+    self.index_status_var.set(f"인덱싱 실패: {error}")
+    self.status_var.set("인덱싱 실패")
+    self.queue.put(f"  인덱싱 실패: {error}\n")
+
+  def _index_cancelled(self):
+    self.index_running = False
+    self.index_status_var.set("인덱싱 중지됨")
+    self.status_var.set("인덱싱 중지됨")
+    self.progress.stop()
+    self.queue.put("  인덱싱/정리를 중지했습니다. 이미 이동된 로그는 다음 인덱싱에서 다시 감지됩니다.\n")
+
+  def _index_done(self, rlogs: str, index: dict, stats: dict):
+    self.index_running = False
+    self.index_data = index
+    self._refresh_groups()
+    total = int(stats.get("total", 0))
+    read = int(stats.get("read", 0))
+    cached = int(stats.get("cached", 0))
+    moved = int(stats.get("moved", 0))
+    merged_dirs = int(stats.get("merged_dirs", 0))
+    errors = int(stats.get("errors", 0))
+    self.index_status_var.set(f"인덱싱 완료: {total}개 (새로 읽음 {read}, 캐시 {cached}, 이동 {moved}, 폴더정리 {merged_dirs}, 오류 {errors})")
+    self.status_var.set("인덱싱 완료")
+    self.raw_log_var.set(f"인덱스: {_index_path(rlogs)}")
+    self._progress_done()
+    self.queue.put(f"완료: 총 {total}개, 새로 읽음 {read}, 캐시 {cached}, 이동 {moved}, 폴더정리 {merged_dirs}, 오류 {errors}\n")
+
+  def _refresh_groups(self):
+    groups = summarize_index(self.index_data)
+    labels = []
+    self.group_map = {}
+    for group in sorted(groups.values(), key=lambda g: (-len(g["sources"]), g["car"], g["eps_firmware_hash"])):
+      car = group["car"] or "UNKNOWN_CAR"
+      eps_hash = group["eps_firmware_hash"] or "unknown"
+      label = f"{car} / eps_{eps_hash} / {len(group['sources'])}개"
+      labels.append(label)
+      self.group_map[label] = group
+
+    if hasattr(self, "group_combo"):
+      self.group_combo.configure(values=labels)
+    if labels:
+      current = self.group_var.get()
+      self.group_var.set(current if current in self.group_map else labels[0])
+      self._on_group_selected()
+    else:
+      self.group_var.set("")
+      self.log_info_var.set(self._log_info_text("", "", 0, 0, 0.0))
+
+  def _on_group_selected(self):
+    group = self.group_map.get(self.group_var.get())
+    if not group:
+      return
+    car = str(group.get("car", "")).strip()
+    eps_hash = str(group.get("eps_firmware_hash", "")).strip()
+    if car:
+      self.car_var.set(car)
+      aliases = [alias.strip() for alias in self.car_aliases_var.get().replace(";", ",").split(",") if alias.strip()]
+      if car not in aliases:
+        aliases.insert(0, car)
+        self.car_aliases_var.set(", ".join(aliases))
+    if eps_hash:
+      self.eps_hash_var.set(eps_hash)
+    self._set_default_output_paths(self.rlogs_var.get().strip(), car)
+    self.log_info_var.set(self._log_info_text(car, eps_hash, len(group.get("sources", [])),
+                                             len(group.get("sources", [])), float(group.get("duration_hours", 0.0))))
+
+  def _selected_sources(self) -> list[str]:
+    group = self.group_map.get(self.group_var.get())
+    if group and group.get("sources"):
+      return list(group["sources"])
+    rlogs = self.rlogs_var.get().strip()
+    return [rlogs] if rlogs else []
 
   def _scan_logs_sync(self, show_errors: bool = True) -> bool:
     rlogs = self.rlogs_var.get().strip()
@@ -495,26 +1191,11 @@ class CASGui(tk.Tk):
     return bool(self.car_var.get().strip())
 
   def scan_logs(self):
-    if self.scan_running:
-      return
     rlogs = self.rlogs_var.get().strip()
     if not rlogs or not Path(rlogs).is_dir():
-      messagebox.showerror("CAS 로그 확인", "먼저 RLOG 폴더를 선택하세요.")
+      messagebox.showerror("CAS 인덱싱", "먼저 RLOG 폴더를 선택하세요.")
       return
-
-    self.scan_running = True
-    self.status_var.set("로그에서 차량 정보 확인 중")
-    self.log_info_var.set("로그 정보 확인 중...")
-
-    def worker():
-      try:
-        result = scan_rlog_metadata(rlogs, float(self.age_var.get() or 0.0))
-      except Exception as e:
-        self.after(0, lambda: self._scan_failed(e))
-        return
-      self.after(0, lambda: self._scan_done(result))
-
-    threading.Thread(target=worker, daemon=True).start()
+    self.start_indexing()
 
   def _scan_failed(self, error: Exception):
     self.scan_running = False
@@ -554,15 +1235,23 @@ class CASGui(tk.Tk):
 
   def _append(self, text: str):
     self.log.insert(tk.END, text)
+    try:
+      line_count = int(self.log.index("end-1c").split(".", 1)[0])
+      if line_count > LOG_MAX_LINES:
+        self.log.delete("1.0", f"{line_count - LOG_MAX_LINES}.0")
+    except Exception:
+      pass
     self.log.see(tk.END)
 
   def _poll(self):
+    batch = []
     try:
-      while True:
-        msg = self.queue.get_nowait()
-        self._append(msg)
+      while len(batch) < 200:
+        batch.append(self.queue.get_nowait())
     except queue.Empty:
       pass
+    if batch:
+      self._append("".join(batch))
     self.after(100, self._poll)
 
   def _run(self, cmd: list[str], use_wsl_capnp=False, summary_path: str | None = None):
@@ -572,20 +1261,26 @@ class CASGui(tk.Tk):
     if self.proc is not None:
       messagebox.showwarning("CAS", "이미 실행 중인 작업이 있습니다. 끝난 뒤 다시 눌러주세요.")
       return
+    if self.index_running:
+      messagebox.showwarning("CAS", "인덱싱/정리가 진행 중입니다. 끝난 뒤 다시 눌러주세요.")
+      return
     self.log.delete("1.0", tk.END)
     self.current_run_dir = self._make_run_dir()
     self.raw_log_var.set(f"실행 로그 폴더: {self.current_run_dir}")
     commands = self._inject_audit_args(commands)
     self._write_run_metadata(self.current_run_dir, commands)
     self.status_var.set("실행 중")
-    self.progress.start(10)
+    self._progress_begin(len(commands))
     thread = threading.Thread(target=self._sequence_worker, args=(commands, summary_path), daemon=True)
     thread.start()
 
   def _sequence_worker(self, commands: list[tuple[list[str], bool, str]], summary_path: str | None):
     ok = True
-    for cmd, use_wsl_capnp, label in commands:
+    total = len(commands)
+    for idx, (cmd, use_wsl_capnp, label) in enumerate(commands, 1):
+      self.after(0, self.status_var.set, f"실행 중: {idx}/{total} {label}")
       code = self._run_one(cmd, use_wsl_capnp, label)
+      self.after(0, self._progress_set, idx, total)
       if code != 0:
         ok = False
         break
@@ -593,7 +1288,8 @@ class CASGui(tk.Tk):
       self._print_summary(summary_path)
       self._copy_summary(summary_path)
     self.after(0, self.status_var.set, "완료" if ok else "실패")
-    self.after(0, self.progress.stop)
+    if ok:
+      self.after(0, self._progress_done)
     # Triggered when _install_deps just ran — re-probe so GPU/CUDA status
     # refreshes without the user clicking Detect GPU again.
     self.after(0, self._maybe_redetect_after_install)
@@ -664,8 +1360,8 @@ class CASGui(tk.Tk):
   def _make_run_dir(self) -> Path:
     car = "".join(c if c.isalnum() or c in ("_", "-") else "_" for c in self.car_var.get().strip()) or "setup"
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    base = Path(self.rlogs_var.get().strip()) if self.rlogs_var.get().strip() else CONFIG_PATH.parent
-    run_dir = base / "cas_runs" / f"{stamp}_{car}"
+    base = _cas_dir(self.rlogs_var.get().strip()) if self.rlogs_var.get().strip() else CONFIG_PATH.parent
+    run_dir = base / "runs" / f"{stamp}_{car}"
     run_dir.mkdir(parents=True, exist_ok=True)
     return run_dir
 
@@ -733,9 +1429,12 @@ class CASGui(tk.Tk):
     return args
 
   def _train_cmd(self):
-    cmd = [
-      "python3", "tools/cas/train.py",
-      "--rlogs", windows_to_wsl(self.rlogs_var.get()) if self.use_wsl_var.get() else self.rlogs_var.get(),
+    rlog_args = [windows_to_wsl(source) if self.use_wsl_var.get() else source for source in self._selected_sources()]
+    cmd = ["python3", "tools/cas/train.py"]
+    if self.car_var.get().strip():
+      cmd += ["--car", self.car_var.get().strip()]
+    cmd += [
+      "--rlogs", *rlog_args,
       "--kind", self.kind_var.get(),
       "--output", windows_to_wsl(self.candidate_var.get()) if self.use_wsl_var.get() else self.candidate_var.get(),
       "--epochs", self.epochs_var.get(),
@@ -748,15 +1447,14 @@ class CASGui(tk.Tk):
       *self._car_metadata_args(),
       *self._limit_args(),
     ]
-    if self.car_var.get().strip():
-      cmd[4:4] = ["--car", self.car_var.get().strip()]
     return cmd
 
   def _validate_cmd(self):
+    rlog_args = [windows_to_wsl(source) if self.use_wsl_var.get() else source for source in self._selected_sources()]
     return [
       "python3", "tools/cas/validate.py",
       "--model", windows_to_wsl(self.candidate_var.get()) if self.use_wsl_var.get() else self.candidate_var.get(),
-      "--rlogs", windows_to_wsl(self.rlogs_var.get()) if self.use_wsl_var.get() else self.rlogs_var.get(),
+      "--rlogs", *rlog_args,
       "--sample-stride", self.stride_var.get(),
       "--min-file-age-sec", self.age_var.get(),
       "--workers", self.workers_var.get(),
@@ -863,6 +1561,8 @@ class CASGui(tk.Tk):
       summary_parts.append(f"rlogs={current}")
 
     self.gpu_status_var.set("Auto Tune: " + ", ".join(summary_parts) + " — probing GPU…")
+    if self.rlogs_var.get().strip():
+      self.start_indexing()
     # Fire GPU/dependency detection (it will update gpu_status_var itself).
     self.detect_backend()
 
@@ -1105,6 +1805,11 @@ class CASGui(tk.Tk):
       messagebox.showinfo("CAS 학습 결과", message)
 
   def stop(self):
+    if self.index_running:
+      self.index_cancel.set()
+      self.index_status_var.set("인덱싱 중지 요청 중...")
+      self.status_var.set("인덱싱 중지 중")
+      self.queue.put("중지 요청: 인덱싱/정리를 멈추는 중입니다...\n")
     if self.proc is not None:
       self.proc.terminate()
       self.status_var.set("중지 중")
