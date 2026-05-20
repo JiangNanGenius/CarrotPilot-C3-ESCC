@@ -113,16 +113,6 @@ def _on_wifi() -> bool:
   return False
 
 
-def _battery_pct() -> int:
-  for path in ("/sys/class/power_supply/battery/capacity",
-               "/sys/class/power_supply/BAT0/capacity"):
-    try:
-      return int(Path(path).read_text().strip())
-    except (OSError, ValueError):
-      continue
-  return 100   # if we can't read, assume fine
-
-
 def _is_offroad(params: Params) -> bool:
   try:
     return not bool(params.get_bool("IsOnroad"))
@@ -131,13 +121,14 @@ def _is_offroad(params: Params) -> bool:
 
 
 def upload_allowed(params: Params) -> tuple[bool, str]:
+  # Battery check intentionally removed — comma C3/C3X is car-powered, the
+  # tiny internal battery reading isn't meaningful, and a battery gate just
+  # blocks uploads on bench testing. Keep CarrotUploadMinBattery param around
+  # for backward compatibility but ignore its value.
   if not params.get_bool("CarrotDataUpload"):
     return False, "toggle off"
   if params.get_bool("CarrotUploadWifiOnly") and not _on_wifi():
     return False, "not on wifi"
-  min_batt = params.get_int("CarrotUploadMinBattery") or 0
-  if _battery_pct() < min_batt:
-    return False, f"battery<{min_batt}"
   if params.get_bool("CarrotUploadOnlyOffroad") and not _is_offroad(params):
     return False, "onroad"
   return True, ""
@@ -276,11 +267,20 @@ def run() -> None:
 
   _log(f"device_id={device_id} endpoint={upload_config.resolve_endpoint(params)}")
 
+  last_reason = None       # avoid spamming the same gate-block message
+  last_scan_summary = None # avoid spamming the same scan result
+
   while True:
     ok, reason = upload_allowed(params)
     if not ok:
+      if reason != last_reason:
+        _log(f"idle: {reason}")
+        last_reason = reason
       time.sleep(POLL_OFF_SEC)
       continue
+    if last_reason is not None:
+      _log("gates OK, scanning")
+      last_reason = None
 
     endpoint = upload_config.resolve_endpoint(params)
     carrot_version = ""
