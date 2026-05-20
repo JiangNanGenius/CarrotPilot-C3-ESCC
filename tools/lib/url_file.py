@@ -160,4 +160,7 @@ class URLFile:
     return self._url
 
 
-os.register_at_fork(after_in_child=URLFile.reset)
+# os.register_at_fork is POSIX-only; skip on Windows so cas training/validate
+# can import this module without AttributeError.
+if hasattr(os, "register_at_fork"):
+  os.register_at_fork(after_in_child=URLFile.reset)

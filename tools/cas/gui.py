@@ -16,6 +16,7 @@ from tkinter import filedialog, messagebox, ttk
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+CONFIG_PATH = Path.home() / ".cas_train" / "gui_config.json"
 
 
 def windows_to_wsl(path: str) -> str:
@@ -31,6 +32,68 @@ def quote(value: str) -> str:
   return shlex.quote(value)
 
 
+# ── Host environment auto-detection helpers ──────────────────────────────
+
+def detect_wsl() -> bool:
+  """Return True only if WSL is actually usable (distro available)."""
+  if os.name != "nt":
+    return False
+  try:
+    r = subprocess.run(["wsl", "--status"], capture_output=True, timeout=5)
+    if r.returncode != 0:
+      return False
+    # 'wsl --status' on a working host prints the default distro name.
+    return len(r.stdout) > 0
+  except Exception:
+    return False
+
+
+def detect_rlog_dir() -> str | None:
+  """Best-effort guess for an existing rlog directory."""
+  candidates = []
+  if os.name == "nt":
+    # Drive-letter heuristics common on the dev PCs.
+    candidates += [
+      "E:\\rlogs", "E:\\rlog",
+      "D:\\rlogs", "D:\\rlog",
+      "C:\\rlogs", "C:\\rlog",
+    ]
+  candidates += [
+    str(Path.home() / "rlogs"),
+    str(Path.home() / "rlog"),
+  ]
+  for c in candidates:
+    p = Path(c)
+    try:
+      if p.exists() and p.is_dir() and any(p.iterdir()):
+        return str(p)
+    except (PermissionError, OSError):
+      continue
+  return None
+
+
+def recommend_workers() -> int:
+  """Half of logical CPUs, clamped to [2, 12]."""
+  cpu = os.cpu_count() or 4
+  return max(2, min(12, cpu // 2))
+
+
+# Mapping from python import name → pip package name (when they differ).
+PIP_NAME = {
+  "capnp": "pycapnp",
+  "zmq": "pyzmq",
+}
+
+
+def _load_gui_config() -> dict:
+  try:
+    if CONFIG_PATH.exists():
+      return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+  except Exception:
+    pass
+  return {}
+
+
 class CASGui(tk.Tk):
   def __init__(self):
     super().__init__()
@@ -40,28 +103,99 @@ class CASGui(tk.Tk):
     self.queue: queue.Queue[str] = queue.Queue()
     self.current_run_dir: Path | None = None
 
-    default_rlogs = "E:\\rlogs" if os.name == "nt" and Path("E:\\rlogs").exists() else str(REPO_ROOT)
-    self.rlogs_var = tk.StringVar(value=default_rlogs)
-    self.car_var = tk.StringVar(value="HYUNDAI_CASPER_EV")
-    self.kind_var = tk.StringVar(value="torque")
-    self.epochs_var = tk.StringVar(value="20")
-    self.stride_var = tk.StringVar(value="10")
-    self.age_var = tk.StringVar(value="120")
-    self.max_sources_var = tk.StringVar(value="")
-    self.workers_var = tk.StringVar(value=str(min(4, max(1, os.cpu_count() or 1))))
-    self.alpha_var = tk.StringVar(value="0.5")
-    self.backend_var = tk.StringVar(value="auto")
-    self.device_var = tk.StringVar(value="auto")
-    self.use_wsl_var = tk.BooleanVar(value=os.name == "nt")
+    config = _load_gui_config()
+    last_rlogs = config.get("rlogs", "")
+    last_car = config.get("car", "")
+    last_kind = config.get("kind", "torque")
+
+    # Openpilot dir is auto-detected from this script's location. User can
+    # still see it (and the config override survives moves of gui.py).
+    self.repo_var = tk.StringVar(value=config.get("repo", str(REPO_ROOT)))
+    self.rlogs_var = tk.StringVar(value=last_rlogs)
+    self.car_var = tk.StringVar(value=last_car)
+    self.kind_var = tk.StringVar(value=last_kind)
+    self.epochs_var = tk.StringVar(value=str(config.get("epochs", 20)))
+    self.stride_var = tk.StringVar(value=str(config.get("stride", 10)))
+    self.age_var = tk.StringVar(value=str(config.get("min_file_age_sec", 120)))
+    self.max_sources_var = tk.StringVar(value=str(config.get("max_sources", "")))
+    self.workers_var = tk.StringVar(value=str(config.get("workers", min(4, max(1, os.cpu_count() or 1)))))
+    self.alpha_var = tk.StringVar(value=str(config.get("alpha", 0.5)))
+    self.backend_var = tk.StringVar(value=config.get("backend", "auto"))
+    self.device_var = tk.StringVar(value=config.get("device", "auto"))
+    self.use_wsl_var = tk.BooleanVar(value=bool(config.get("use_wsl", os.name == "nt")))
     self.advanced_visible_var = tk.BooleanVar(value=False)
-    self.candidate_var = tk.StringVar(value=str(Path(default_rlogs) / "HYUNDAI_CASPER_EV_candidate.json"))
-    self.validate_var = tk.StringVar(value=str(Path(default_rlogs) / "HYUNDAI_CASPER_EV_validate.json"))
+    self.candidate_var = tk.StringVar(value=self._derive_candidate_path(last_rlogs, last_car))
+    self.validate_var = tk.StringVar(value=self._derive_validate_path(last_rlogs, last_car))
     self.gpu_status_var = tk.StringVar(value="PyTorch/CUDA: checking...")
     self.raw_log_var = tk.StringVar(value="Raw log: not started")
 
     self._build()
     self.after(100, self._poll)
     self.after(300, self.detect_backend)
+    # Save config on close.
+    self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+  @staticmethod
+  def _derive_candidate_path(rlogs: str, car: str) -> str:
+    if not rlogs or not car:
+      return ""
+    return str(Path(rlogs) / f"{car}_candidate.json")
+
+  @staticmethod
+  def _derive_validate_path(rlogs: str, car: str) -> str:
+    if not rlogs or not car:
+      return ""
+    return str(Path(rlogs) / f"{car}_validate.json")
+
+  def _save_config(self):
+    try:
+      CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+      data = {
+        "repo": self.repo_var.get(),
+        "rlogs": self.rlogs_var.get(),
+        "car": self.car_var.get(),
+        "kind": self.kind_var.get(),
+        "epochs": self.epochs_var.get(),
+        "stride": self.stride_var.get(),
+        "min_file_age_sec": self.age_var.get(),
+        "max_sources": self.max_sources_var.get(),
+        "workers": self.workers_var.get(),
+        "alpha": self.alpha_var.get(),
+        "backend": self.backend_var.get(),
+        "device": self.device_var.get(),
+        "use_wsl": self.use_wsl_var.get(),
+      }
+      CONFIG_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+      pass
+
+  def _on_close(self):
+    self._save_config()
+    self.destroy()
+
+  def _require_paths(self) -> bool:
+    """Validate that both Openpilot dir and RLOG dir are set and exist.
+    Also requires a car name. Returns False (and shows a message) if not."""
+    repo = self.repo_var.get().strip()
+    rlogs = self.rlogs_var.get().strip()
+    car = self.car_var.get().strip()
+    if not repo or not Path(repo).is_dir():
+      messagebox.showerror("CAS", "Openpilot dir이 잘못되었습니다. 폴더를 선택하세요.")
+      return False
+    if not rlogs or not Path(rlogs).is_dir():
+      messagebox.showerror("CAS", "RLOG dir이 비어있거나 존재하지 않습니다. 폴더를 선택하세요.")
+      return False
+    if not car:
+      messagebox.showerror("CAS", "Car 이름을 입력하세요 (예: HYUNDAI_CASPER_EV).")
+      return False
+    # Auto-derive candidate/validate paths if the user left them empty or
+    # they still point at a stale rlog dir.
+    if not self.candidate_var.get().strip() or str(Path(self.candidate_var.get()).parent) != str(Path(rlogs)):
+      self.candidate_var.set(self._derive_candidate_path(rlogs, car))
+    if not self.validate_var.get().strip() or str(Path(self.validate_var.get()).parent) != str(Path(rlogs)):
+      self.validate_var.set(self._derive_validate_path(rlogs, car))
+    self._save_config()
+    return True
 
   def _build(self):
     root = ttk.Frame(self, padding=10)
@@ -71,12 +205,14 @@ class CASGui(tk.Tk):
     form.pack(fill=tk.X)
     form.columnconfigure(1, weight=1)
 
-    self._row(form, 0, "RLOG dir", self.rlogs_var, browse=True)
-    self._row(form, 1, "Car", self.car_var)
+    self._row(form, 0, "Openpilot dir", self.repo_var, browse=True)
+    self._row(form, 1, "RLOG dir", self.rlogs_var, browse=True)
+    self._row(form, 2, "Car", self.car_var)
 
     buttons = ttk.Frame(root)
     buttons.pack(fill=tk.X, pady=(10, 8))
     ttk.Button(buttons, text="One Click: Train + Validate", command=self.one_click).pack(side=tk.LEFT, padx=3)
+    ttk.Button(buttons, text="Auto Tune", command=self.auto_tune).pack(side=tk.LEFT, padx=3)
     ttk.Button(buttons, text="Detect GPU", command=self.detect_backend).pack(side=tk.LEFT, padx=3)
     ttk.Checkbutton(buttons, text="Advanced", variable=self.advanced_visible_var,
                     command=self._toggle_advanced).pack(side=tk.LEFT, padx=8)
@@ -150,7 +286,7 @@ class CASGui(tk.Tk):
       ttk.Combobox(parent, textvariable=var, values=values, state="readonly").grid(row=row_or_col, column=1, sticky="w", padx=5)
 
   def _browse_dir(self, var):
-    path = filedialog.askdirectory(initialdir=var.get() or str(REPO_ROOT))
+    path = filedialog.askdirectory(initialdir=var.get() or str(self._repo()))
     if path:
       var.set(path)
 
@@ -201,11 +337,18 @@ class CASGui(tk.Tk):
       self._copy_summary(summary_path)
     self.after(0, self.status_var.set, "Done" if ok else "Failed")
     self.after(0, self.progress.stop)
+    # Triggered when _install_deps just ran — re-probe so GPU/CUDA status
+    # refreshes without the user clicking Detect GPU again.
+    self.after(0, self._maybe_redetect_after_install)
+
+  def _repo(self) -> Path:
+    return Path(self.repo_var.get().strip() or str(REPO_ROOT))
 
   def _run_one(self, cmd: list[str], use_wsl_capnp: bool, label: str) -> int:
-    backup = REPO_ROOT / "cereal" / "car.capnp.casbak"
-    car_capnp = REPO_ROOT / "cereal" / "car.capnp"
-    real_car_capnp = REPO_ROOT / "opendbc_repo" / "opendbc" / "car" / "car.capnp"
+    repo = self._repo()
+    backup = repo / "cereal" / "car.capnp.casbak"
+    car_capnp = repo / "cereal" / "car.capnp"
+    real_car_capnp = repo / "opendbc_repo" / "opendbc" / "car" / "car.capnp"
     log_path = self._stage_log_path(label)
     try:
       if use_wsl_capnp:
@@ -214,7 +357,7 @@ class CASGui(tk.Tk):
       header = f"\n[{label}]\n> " + " ".join(cmd) + "\n"
       self.queue.put(header)
       self._append_raw(log_path, header)
-      self.proc = subprocess.Popen(cmd, cwd=REPO_ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+      self.proc = subprocess.Popen(cmd, cwd=str(repo), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
       assert self.proc.stdout is not None
       for line in self.proc.stdout:
         self.queue.put(line)
@@ -235,7 +378,7 @@ class CASGui(tk.Tk):
         shutil.move(str(backup), str(car_capnp))
 
   def _wsl_cmd(self, inner: str) -> list[str]:
-    return ["wsl", "bash", "-lc", f"cd {quote(windows_to_wsl(str(REPO_ROOT)))} && {inner}"]
+    return ["wsl", "bash", "-lc", f"cd {quote(windows_to_wsl(str(self._repo())))} && {inner}"]
 
   def _inject_audit_args(self, commands: list[tuple[list[str], bool, str]]) -> list[tuple[list[str], bool, str]]:
     if self.current_run_dir is None:
@@ -283,7 +426,7 @@ class CASGui(tk.Tk):
   def _write_run_metadata(self, run_dir: Path, commands: list[tuple[list[str], bool, str]]):
     data = {
       "started_at": datetime.now().isoformat(timespec="seconds"),
-      "repo": str(REPO_ROOT),
+      "repo": str(self._repo()),
       "rlogs": self.rlogs_var.get(),
       "car": self.car_var.get().strip(),
       "kind": self.kind_var.get(),
@@ -349,7 +492,7 @@ class CASGui(tk.Tk):
 
   def _promote_cmd(self, dry_run: bool):
     cmd = [
-      sys.executable, str(REPO_ROOT / "tools" / "cas" / "promote.py"),
+      sys.executable, str(self._repo() / "tools" / "cas" / "promote.py"),
       "--candidate", self.candidate_var.get(),
       "--car", self.car_var.get().strip(),
       "--kind", self.kind_var.get(),
@@ -359,6 +502,8 @@ class CASGui(tk.Tk):
     return cmd
 
   def train(self):
+    if not self._require_paths():
+      return
     cmd = self._train_cmd()
     if self.use_wsl_var.get():
       self._run(self._wsl_cmd(" ".join(quote(x) for x in cmd)), use_wsl_capnp=True)
@@ -366,6 +511,8 @@ class CASGui(tk.Tk):
       self._run([sys.executable, *cmd[1:]], use_wsl_capnp=False)
 
   def validate(self):
+    if not self._require_paths():
+      return
     cmd = self._validate_cmd()
     if self.use_wsl_var.get():
       self._run(self._wsl_cmd(" ".join(quote(x) for x in cmd)), use_wsl_capnp=True, summary_path=self.validate_var.get())
@@ -373,10 +520,14 @@ class CASGui(tk.Tk):
       self._run([sys.executable, *cmd[1:]], use_wsl_capnp=False, summary_path=self.validate_var.get())
 
   def promote(self, dry_run: bool):
+    if not self._require_paths():
+      return
     cmd = self._promote_cmd(dry_run)
     self._run(cmd)
 
   def one_click(self):
+    if not self._require_paths():
+      return
     train_cmd = self._train_cmd()
     validate_cmd = self._validate_cmd()
     commands: list[tuple[list[str], bool, str]] = []
@@ -388,6 +539,42 @@ class CASGui(tk.Tk):
       commands.append(([sys.executable, *validate_cmd[1:]], False, "2/3 Validate"))
     commands.append((self._promote_cmd(True), False, "3/3 Promote Dry Run"))
     self._run_sequence(commands, self.validate_var.get())
+
+  def auto_tune(self):
+    """Detect CPU / disk / GPU / WSL and apply best-effort defaults."""
+    if self.proc is not None:
+      return
+
+    summary_parts = []
+
+    # CPU + workers
+    cpu = os.cpu_count() or 4
+    workers = recommend_workers()
+    self.workers_var.set(str(workers))
+    summary_parts.append(f"workers={workers} (CPU={cpu})")
+
+    # WSL
+    wsl_ok = detect_wsl()
+    self.use_wsl_var.set(wsl_ok)
+    summary_parts.append(f"WSL={'on' if wsl_ok else 'off'}")
+
+    # rlog dir — only override if current path looks unusable.
+    current = self.rlogs_var.get().strip()
+    cur_ok = bool(current) and Path(current).exists() and Path(current).is_dir() \
+             and any(Path(current).iterdir()) and Path(current).resolve() != REPO_ROOT
+    if not cur_ok:
+      guess = detect_rlog_dir()
+      if guess:
+        self.rlogs_var.set(guess)
+        summary_parts.append(f"rlogs={guess}")
+      else:
+        summary_parts.append("rlogs=(not found, set manually)")
+    else:
+      summary_parts.append(f"rlogs={current}")
+
+    self.gpu_status_var.set("Auto Tune: " + ", ".join(summary_parts) + " — probing GPU…")
+    # Fire GPU/dependency detection (it will update gpu_status_var itself).
+    self.detect_backend()
 
   def detect_backend(self):
     if self.proc is not None:
@@ -408,6 +595,12 @@ class CASGui(tk.Tk):
       )
     else:
       code = (
+        "import importlib\n"
+        "missing = []\n"
+        "for mod in ('numpy', 'capnp', 'zmq', 'tqdm', 'zstandard'):\n"
+        " try: importlib.import_module(mod)\n"
+        " except ImportError: missing.append(mod)\n"
+        "print('missing=' + ','.join(missing))\n"
         "try:\n"
         " import torch\n"
         " print('torch=' + torch.__version__)\n"
@@ -422,7 +615,7 @@ class CASGui(tk.Tk):
 
     def worker():
       try:
-        out = subprocess.check_output(cmd, cwd=REPO_ROOT, text=True, stderr=subprocess.STDOUT, timeout=20)
+        out = subprocess.check_output(cmd, cwd=str(self._repo()), text=True, stderr=subprocess.STDOUT, timeout=20)
       except Exception as e:
         self.after(0, self.gpu_status_var.set, f"PyTorch/CUDA: detect failed ({e})")
         return
@@ -430,35 +623,192 @@ class CASGui(tk.Tk):
       torch_ver = lines.get("torch", "missing")
       cuda = lines.get("cuda", "False")
       device = lines.get("device", "cpu")
-      if cuda == "True":
+      missing = [m for m in lines.get("missing", "").split(",") if m]
+
+      # Pick backend / device based on what's actually available.
+      if torch_ver == "missing":
+        self.after(0, self.backend_var.set, "numpy")
+        self.after(0, self.device_var.set, "cpu")
+      elif cuda == "True":
         self.after(0, self.backend_var.set, "torch")
         self.after(0, self.device_var.set, "cuda")
       else:
-        self.after(0, self.backend_var.set, "auto")
-        self.after(0, self.device_var.set, "auto")
-      self.after(0, self.gpu_status_var.set, f"PyTorch/CUDA: torch {torch_ver}, cuda {cuda}, {device}")
+        self.after(0, self.backend_var.set, "torch")
+        self.after(0, self.device_var.set, "cpu")
+
+      status = f"PyTorch/CUDA: torch {torch_ver}, cuda {cuda}, {device}"
+      torch_missing = torch_ver == "missing"
+      if torch_missing or missing:
+        need = list(missing)
+        if torch_missing:
+          need.append("torch")
+        status = f"PyTorch/CUDA: missing {','.join(need)} — installing automatically…"
+        self.after(0, self.gpu_status_var.set, status)
+        # Schedule the actual install on the main thread; it uses _run_sequence
+        # which streams output to the log area.
+        self.after(0, lambda m=list(missing), t=torch_missing: self._install_deps(m, t))
+        return
+      self.after(0, self.gpu_status_var.set, status)
     threading.Thread(target=worker, daemon=True).start()
+
+  def _install_deps(self, missing: list[str], torch_missing: bool):
+    """Auto-install missing deps via pip. Runs through _run_sequence so output
+    streams to the log area. After install completes, re-runs detect_backend.
+
+    Skipped silently if a command is already in progress (e.g. training)."""
+    if self.proc is not None:
+      self.gpu_status_var.set(
+        "PyTorch/CUDA: deps missing — auto-install skipped (a command is running)."
+      )
+      return
+
+    cmds: list[tuple[list[str], bool, str]] = []
+    base_pip = [PIP_NAME.get(m, m) for m in missing if m != "torch"]
+    py = sys.executable
+    if base_pip:
+      cmds.append(([py, "-m", "pip", "install", *base_pip], False, "Install base deps"))
+    if torch_missing:
+      # CUDA wheel via official PyTorch index. Drops to CPU wheel only if
+      # the user explicitly edited requirements; cu128 works on most modern GPUs.
+      cmds.append((
+        [py, "-m", "pip", "install", "--index-url", "https://download.pytorch.org/whl/cu128", "torch"],
+        False, "Install CUDA torch",
+      ))
+    if not cmds:
+      return
+
+    self.gpu_status_var.set("Installing missing deps… (see log)")
+    # Hook: after the sequence finishes, re-detect.
+    self._post_install_redetect = True
+    self._run_sequence(cmds)
+
+  def _maybe_redetect_after_install(self):
+    if getattr(self, "_post_install_redetect", False):
+      self._post_install_redetect = False
+      # Small delay so file locks settle.
+      self.after(500, self.detect_backend)
 
   def _print_summary(self, summary_path: str):
     path = Path(summary_path)
     if not path.exists():
-      self.queue.put("\n[Summary]\nvalidation JSON not found\n")
+      self.queue.put("\n[요약]\nvalidation JSON을 찾을 수 없습니다.\n")
       return
     try:
       with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
       out = data["output_metrics"]
       applied = out["applied_delta"]
-      self.queue.put("\n[Summary]\n")
-      self.queue.put(f"hours: {data.get('duration_hours', 0.0):.2f}\n")
-      self.queue.put(f"usable samples: {data.get('usable_samples', 0)}\n")
-      self.queue.put(f"triage: {data.get('target_triage_counts', {})}\n")
-      self.queue.put(f"target RMSE: {data.get('target_metrics', {}).get('rmse', 0.0):.4f}\n")
-      self.queue.put(f"applied_delta p95_abs: {applied.get('p95_abs', 0.0):.4f}\n")
-      self.queue.put(f"gate pass rate: {out.get('gate_pass_rate', 0.0):.3f}\n")
-      self.queue.put("Promote was dry-run only. Real Promote is separate.\n")
+
+      hours = float(data.get("duration_hours", 0.0))
+      samples = int(data.get("usable_samples", 0))
+      triage = data.get("target_triage_counts", {}) or {}
+      t1 = int(triage.get("T1_GOOD", 0))
+      t2 = int(triage.get("T2_OFFSET", 0))
+      t3 = int(triage.get("T3_STRONG_INTERVENTION", 0))
+      t4 = int(triage.get("T4_WEAK_INTERVENTION", 0))
+      rmse = float(data.get("target_metrics", {}).get("rmse", 0.0))
+      p95 = float(applied.get("p95_abs", 0.0))
+      gate_rate = float(out.get("gate_pass_rate", 0.0))
+      total_triage = max(t1 + t2 + t3 + t4, 1)
+      pct = lambda n: 100.0 * n / total_triage
+
+      # ── Grade the run ──
+      issues = []
+      good_points = []
+      if hours < 1.0:
+        issues.append(f"학습 시간이 너무 짧음 ({hours:.2f}h, 권장 ≥ 10h)")
+      elif hours < 10.0:
+        issues.append(f"학습 시간이 다소 짧음 ({hours:.2f}h, 권장 ≥ 10h, 그래도 첫 적용은 가능)")
+      else:
+        good_points.append(f"학습 시간 충분 ({hours:.2f}h)")
+
+      if samples < 50000:
+        issues.append(f"사용 가능한 샘플이 적음 ({samples:,}개)")
+      else:
+        good_points.append(f"샘플 수 {samples:,}개")
+
+      if t3 + t4 < 1000:
+        issues.append("운전자 개입 신호(T3/T4) 부족 — 일반화 약함")
+      else:
+        good_points.append(f"운전자 개입 신호 충분 (T3={t3:,}, T4={t4:,})")
+
+      if gate_rate < 0.2:
+        issues.append(f"게이트 통과율 낮음 ({gate_rate:.1%}) — 학습 분포 너무 좁음")
+      else:
+        good_points.append(f"게이트 통과율 {gate_rate:.1%}")
+
+      if p95 < 0.01:
+        issues.append(f"적용 보정량 매우 작음 (p95={p95:.4f}) — 체감 거의 없을 수 있음")
+      elif p95 > 0.5:
+        issues.append(f"적용 보정량 큼 (p95={p95:.4f}) — 진동/과보정 주의")
+      else:
+        good_points.append(f"적용 보정량 {p95:.4f} (정상 범위)")
+
+      grade = "✅ 학습 양호" if not issues else ("⚠️ 학습 완료 (주의 필요)" if len(issues) <= 2 else "❌ 데이터/설정 부족")
+
+      # ── Text log ──
+      self.queue.put("\n[요약]\n")
+      self.queue.put(f"평가: {grade}\n")
+      self.queue.put(f"학습 시간: {hours:.2f} 시간\n")
+      self.queue.put(f"사용 샘플: {samples:,}개\n")
+      self.queue.put(f"트리아지 분포:\n")
+      self.queue.put(f"  T1 양호 운전:        {t1:>8,} ({pct(t1):5.1f}%)\n")
+      self.queue.put(f"  T2 쏠림 구간:        {t2:>8,} ({pct(t2):5.1f}%)\n")
+      self.queue.put(f"  T3 운전자 강 개입:   {t3:>8,} ({pct(t3):5.1f}%)  ★ 가장 강한 학습 신호\n")
+      if t4:
+        self.queue.put(f"  T4 운전자 약 개입:   {t4:>8,} ({pct(t4):5.1f}%)\n")
+      self.queue.put(f"학습 정확도(RMSE):    {rmse:.4f}\n")
+      self.queue.put(f"실제 적용 보정량 p95: {p95:.4f}\n")
+      self.queue.put(f"게이트 통과율:        {gate_rate:.1%}\n")
+      if good_points:
+        self.queue.put("\n잘된 점:\n")
+        for g in good_points:
+          self.queue.put(f"  ✓ {g}\n")
+      if issues:
+        self.queue.put("\n확인 필요:\n")
+        for i in issues:
+          self.queue.put(f"  ! {i}\n")
+      self.queue.put("\nPromote는 dry-run만 실행됨. 실제 적용은 [Promote] 버튼 눌러야 함.\n")
+
+      # ── Popup with next-step guidance ──
+      summary_for_popup = (
+        f"평가: {grade}\n\n"
+        f"━━━ 학습 결과 ━━━\n"
+        f"• 학습 시간: {hours:.2f}시간\n"
+        f"• 사용 샘플: {samples:,}개\n"
+        f"• 양호 운전(T1): {pct(t1):.0f}%\n"
+        f"• 쏠림 학습(T2): {pct(t2):.0f}%\n"
+        f"• 운전자 개입(T3): {pct(t3):.0f}%  ★\n"
+        f"• 적용 보정량: {p95:.4f} (p95)\n"
+        f"• 게이트 통과: {gate_rate:.0%}\n"
+      )
+      if issues:
+        summary_for_popup += "\n━━━ 확인 필요 ━━━\n"
+        for i in issues:
+          summary_for_popup += f"• {i}\n"
+      summary_for_popup += (
+        "\n━━━ 다음 단계 ━━━\n"
+        "1. [Promote] 버튼 → 차량에 실제 적용\n"
+        "2. 차량 부팅 후 도로 테스트\n"
+        "   ※ 저속·한산 도로부터 시작\n"
+        "   ※ 화면 오른쪽 CAS 위젯에서 작동 상태 확인\n"
+        "   ※ 진동/이상감 있으면 CAS 토글 OFF\n"
+        "3. 더 좋은 결과를 원하면\n"
+        "   • rlog 더 모으기 (다양한 도로/속도/날씨)\n"
+        "   • GUI에서 다시 [One Click: Train + Validate]"
+      )
+      self.after(0, lambda s=summary_for_popup, g=grade: self._show_summary_popup(s, g))
+
     except Exception as e:
-      self.queue.put(f"\n[Summary]\nfailed to read summary: {e}\n")
+      self.queue.put(f"\n[요약]\n요약 파일 읽기 실패: {e}\n")
+
+  def _show_summary_popup(self, message: str, grade: str):
+    if "❌" in grade:
+      messagebox.showerror("CAS 학습 결과", message)
+    elif "⚠️" in grade:
+      messagebox.showwarning("CAS 학습 결과", message)
+    else:
+      messagebox.showinfo("CAS 학습 결과", message)
 
   def stop(self):
     if self.proc is not None:

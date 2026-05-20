@@ -1,3 +1,4 @@
 -r requirements.txt
---index-url https://download.pytorch.org/whl/cu128
+# Use --extra-index-url so the regular PyPI is still consulted for non-torch deps.
+--extra-index-url https://download.pytorch.org/whl/cu128
 torch
