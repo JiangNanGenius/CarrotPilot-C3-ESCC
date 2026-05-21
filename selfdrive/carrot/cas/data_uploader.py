@@ -33,6 +33,11 @@ except ModuleNotFoundError:
   from common.params import Params
 
 try:
+  from openpilot.common.swaglog import cloudlog
+except ModuleNotFoundError:
+  cloudlog = None
+
+try:
   from openpilot.selfdrive.carrot.cas import upload_config, uploader_state
 except ModuleNotFoundError:
   from selfdrive.carrot.cas import upload_config, uploader_state
@@ -55,9 +60,32 @@ POLL_BUSY_SEC = 2          # short pause between segments while uploading
 REQUEST_TIMEOUT_SEC = 60   # HTTP timeout per file
 MAX_FILE_BYTES = 50 * 1024 * 1024
 
+# systemd-timesyncd writes this once NTP sync completes. comma3X RTC has no
+# battery, so the clock boots at 1970 and only becomes correct after a network
+# connection lets NTP (or carrot/browser) set it. We must not upload before
+# then — the request timestamp would be wrong and the server rejects it.
+NTP_SYNCED_FLAG = Path("/run/systemd/timesync/synchronized")
+MIN_VALID_EPOCH = 1704067200   # 2024-01-01; below this the clock isn't set yet
+
 
 def _log(msg: str) -> None:
-  print(f"[cas_upload] {msg}", flush=True)
+  # Use cloudlog so the message lands in swaglog and is traceable after a
+  # drive. Falls back to print when cloudlog isn't importable (PC tooling).
+  if cloudlog is not None:
+    cloudlog.info(f"[cas_upload] {msg}")
+  else:
+    print(f"[cas_upload] {msg}", flush=True)
+
+
+def _clock_synced() -> bool:
+  """True once the system clock is trustworthy (network time has been set)."""
+  try:
+    if NTP_SYNCED_FLAG.exists():
+      return True
+  except OSError:
+    pass
+  # Covers non-systemd sync paths (carrotMan epochTime, browser time_sync).
+  return time.time() > MIN_VALID_EPOCH
 
 
 # ---------------------------------------------------------------------------
@@ -134,6 +162,8 @@ def upload_allowed(params: Params) -> tuple[bool, str]:
   # for backward compatibility but ignore its value.
   if not params.get_bool("CarrotDataUpload"):
     return False, "toggle off"
+  if not _clock_synced():
+    return False, "clock not synced (waiting for network time)"
   if params.get_bool("CarrotUploadWifiOnly") and not _on_wifi():
     return False, "not on wifi"
   if params.get_bool("CarrotUploadOnlyOffroad") and not _is_offroad(params):
