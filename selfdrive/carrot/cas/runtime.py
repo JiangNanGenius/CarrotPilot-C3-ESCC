@@ -53,10 +53,20 @@ class CASRuntime:
     # Centering / intervention stats (cleared per session).
     self.offset_5s = deque(maxlen=_OFFSET_5S)
     self.offset_60s = deque(maxlen=_OFFSET_60S)
+    # Strong/weak intervention split + last-seen timestamps.
     self.intervention_count = 0
-    self._was_pressed = False
+    self.intervention_strong = 0
+    self.intervention_weak = 0
     self.last_intervention_t: float | None = None
+    self.last_strong_t: float | None = None
+    self.last_weak_t: float | None = None
+    self._was_pressed = False
     self.session_start_t = time.monotonic()
+    # CAS accuracy: did delta push toward the centerline?
+    # We log per-frame correctness over a 60-second window.
+    self.acc_window = deque(maxlen=_OFFSET_60S)  # 1 = correct, 0 = wrong
+    # Distribution-in flag history (vEgo inside vego_min..vego_max).
+    self.dist_in_window = deque(maxlen=_OFFSET_60S * 5)  # 5 min window
     self.load_model()
 
   def load_model(self):
@@ -159,33 +169,96 @@ class CASRuntime:
     centering_score = max(0.0, min(100.0, (1.0 - mean_abs_5s / _CENTERING_FULL_M) * 100.0))
 
     # Intervention: rising edge of steeringPressed counts as one event.
+    # Split strong / weak by the driver torque magnitude (mirrors lateral_data_marker).
     pressed = bool(CS.steeringPressed)
+    now_t = time.monotonic()
     if pressed and not self._was_pressed:
       self.intervention_count += 1
-      self.last_intervention_t = time.monotonic()
+      self.last_intervention_t = now_t
+      driver_torque = abs(float(getattr(CS, "steeringTorque", 0.0)))
+      if driver_torque >= 0.8:
+        self.intervention_strong += 1
+        self.last_strong_t = now_t
+      elif driver_torque >= 0.2:
+        self.intervention_weak += 1
+        self.last_weak_t = now_t
+      else:
+        # Small touches still count toward weak.
+        self.intervention_weak += 1
+        self.last_weak_t = now_t
     self._was_pressed = pressed
 
-    sec_since_intervention = -1.0
-    if self.last_intervention_t is not None:
-      sec_since_intervention = float(time.monotonic() - self.last_intervention_t)
-    session_minutes = max((time.monotonic() - self.session_start_t) / 60.0, 1e-3)
-    intervention_rate_per_min = float(self.intervention_count) / session_minutes
+    def _sec_since(last_t):
+      return float(now_t - last_t) if last_t is not None else -1.0
 
-    # Append diagnostics to casLog. Order is fixed; HUD reads by index from
-    # the end (see selfdrive/ui/carrot.cc CAS overlay).
-    # Layout: features (20) + extras (11).
+    sec_since_intervention = _sec_since(self.last_intervention_t)
+    sec_since_strong = _sec_since(self.last_strong_t)
+    sec_since_weak = _sec_since(self.last_weak_t)
+    session_seconds = max(now_t - self.session_start_t, 1e-3)
+
+    # CAS accuracy: signed delta should push the car toward zero offset.
+    # When offset > 0 (car is right of centerline) a left-pushing torque
+    # is correct; sign convention follows offset >0=right / <0=left and
+    # delta >0=correction-toward-right / <0=toward-left.
+    # → correct when sign(delta) opposes sign(offset_now).
+    correct = 0
+    if abs(applied_delta) > 1e-4 and abs(offset_now) > 0.01:
+      if (applied_delta > 0.0) != (offset_now > 0.0):
+        correct = 1
+    if abs(applied_delta) > 1e-4:
+      self.acc_window.append(correct)
+    accuracy_pct = 0.0
+    if len(self.acc_window) > 0:
+      accuracy_pct = 100.0 * sum(self.acc_window) / len(self.acc_window)
+
+    # Distribution-in fraction: vEgo within learned vego_min..vego_max.
+    if self.model is not None:
+      in_dist = 1.0 if (self.model.vego_min <= CS.vEgo <= self.model.vego_max) else 0.0
+    else:
+      in_dist = 0.0
+    self.dist_in_window.append(in_dist)
+    dist_in_pct = 100.0 * sum(self.dist_in_window) / max(len(self.dist_in_window), 1)
+
+    # Lane pattern code over the 60 s window (HUD turns this into Korean text).
+    # 0 = stable, 1 = drift left, 2 = drift right, 3 = oscillating.
+    if len(self.offset_60s) >= 50:
+      sample = list(self.offset_60s)
+      mean_off = sum(sample) / len(sample)
+      var_off = sum((s - mean_off) ** 2 for s in sample) / len(sample)
+      std_off = var_off ** 0.5
+      if std_off > 0.05:
+        lane_pattern = 3.0
+      elif mean_off > 0.02:
+        lane_pattern = 2.0
+      elif mean_off < -0.02:
+        lane_pattern = 1.0
+      else:
+        lane_pattern = 0.0
+    else:
+      lane_pattern = 0.0
+
+    # Append diagnostics to casLog. Indexed from the end by carrot.cc.
+    # Layout: features (20) + extras (19).
     extras = [
-      raw_delta,                          # [-11] NN raw output (pre-alpha)
-      applied_delta,                      # [-10] actual applied delta (alpha * raw_delta)
-      float(alpha),                        # [ -9] alpha (final, post multiplicative gate)
-      float(max_abs_z),                    # [ -8] distribution z
-      offset_now,                          # [ -7] m, instantaneous lateral offset
-      offset_5s_avg,                       # [ -6] m, 5 s rolling mean (signed)
-      offset_60s_avg,                      # [ -5] m, 60 s rolling mean (signed)
-      mean_abs_5s,                         # [ -4] m, 5 s rolling |offset| mean
-      centering_score,                     # [ -3] 0..100
-      float(self.intervention_count),      # [ -2] cumulative interventions this session
-      sec_since_intervention,              # [ -1] s since last (or -1.0 if none)
+      raw_delta,                            # [-19]
+      applied_delta,                        # [-18]
+      float(alpha),                          # [-17]
+      float(max_abs_z),                      # [-16]
+      offset_now,                            # [-15]
+      offset_5s_avg,                         # [-14]
+      offset_60s_avg,                        # [-13]
+      mean_abs_5s,                           # [-12]
+      centering_score,                       # [-11]
+      float(self.intervention_count),        # [-10]
+      sec_since_intervention,                # [ -9]
+      float(self.intervention_strong),       # [ -8]
+      float(self.intervention_weak),         # [ -7]
+      sec_since_strong,                      # [ -6]
+      sec_since_weak,                        # [ -5]
+      accuracy_pct,                          # [ -4]
+      session_seconds,                       # [ -3]
+      dist_in_pct,                           # [ -2]
+      lane_pattern,                          # [ -1]
     ]
     cas_log = features + extras
     return float(delta), float(alpha), cas_log

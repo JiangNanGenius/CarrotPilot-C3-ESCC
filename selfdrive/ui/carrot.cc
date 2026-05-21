@@ -3170,209 +3170,411 @@ public:
         const NVGcolor C_ORANGE = nvgRGBA(255, 170, 60, 255);
         const NVGcolor C_RED = nvgRGBA(230, 80, 80, 255);
         const NVGcolor C_GRAY = nvgRGBA(160, 160, 160, 255);
-        const NVGcolor C_BG = nvgRGBA(0, 0, 0, 180);
+        // BG2: solid-feeling dark panel with a subtle outline for readability.
+        const NVGcolor C_BG = nvgRGBA(10, 10, 14, 225);
+        NVGcolor C_BG_STROKE = nvgRGBA(90, 90, 100, 200);
 
-        // Layout (right-side vertical center). Big-screen friendly.
-        const int wbox_w = (cas_debug_val == 1) ? 400 : 320;
-        const int wbox_h_full = (cas_debug_val == 1) ? 510 : 620;
-        const int wbox_h_nomodel = 90;
-        const int margin = 12;
-        const float font_size = (cas_debug_val == 1) ? 20.0f : 22.0f;
-        const int line_h = (cas_debug_val == 1) ? 28 : 26;
-        const int sec_spacing = (cas_debug_val == 1) ? 18 : 6;
+        // Layout — large panel on the right side. Allowed to cover the
+        // top-right NetworkAddress / top-right logo / bottom-right git branch.
+        // Font is the priority — sized for at-a-glance readability while driving.
+        const int wbox_w = 900;
+        const int wbox_h_full = std::min(h - 60, 1120);
+        const int wbox_h_nomodel = 200;
+        const int margin = 24;
+        const float font_size = 44.0f;
+        const int line_h = 64;
+        const int sec_spacing = 28;
         const int x0 = w - wbox_w - margin;
 
         if (cas_model.length() == 0) {
             int y0 = (h - wbox_h_nomodel) / 2;
-            ui_fill_rect(vg, { x0, y0, wbox_w, wbox_h_nomodel }, C_BG, 12);
+            ui_fill_rect(vg, { x0, y0, wbox_w, wbox_h_nomodel }, C_BG, 22, 2, &C_BG_STROKE);
             nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-            ui_draw_text_vg(vg, x0 + 14, y0 + 14, "CAS", font_size, C_GRAY, BOLD);
-            ui_draw_text_vg(vg, x0 + 14, y0 + 46, "이 차량용 모델 없음", font_size - 4, C_GRAY, BOLD);
+            ui_draw_text_vg(vg, x0 + 24, y0 + 22, "CAS", font_size, C_GRAY, BOLD);
+            ui_draw_text_vg(vg, x0 + 24, y0 + 22 + line_h, "이 차량용 모델 없음", font_size - 8, C_GRAY, BOLD);
             return;
         }
 
         int y0 = (h - wbox_h_full) / 2;
-        ui_fill_rect(vg, { x0, y0, wbox_w, wbox_h_full }, C_BG, 12);
-        int y = y0 + 14;
+        ui_fill_rect(vg, { x0, y0, wbox_w, wbox_h_full }, C_BG, 22, 2, &C_BG_STROKE);
+        int y = y0 + 24;
         nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 
         char buf[160];
-        if (cas_debug_val == 2) {
-            snprintf(buf, sizeof(buf), "CAS  %s", kind_str);
-            ui_draw_text_vg(vg, x0 + 14, y, buf, font_size, C_WHITE, BOLD);  y += line_h;
-            ui_draw_text_vg(vg, x0 + 14, y, cas_model.toStdString().c_str(), font_size - 4, C_GRAY, BOLD);
-            y += line_h - 2;
+        // Common header (both modes) — gives the user something to look at while
+        // controlsState is still warming up and matters for trust.
+        snprintf(buf, sizeof(buf), "CAS  %s", kind_str);
+        ui_draw_text_vg(vg, x0 + 24, y, buf, font_size, C_WHITE, BOLD);
+        y += line_h;
+        ui_draw_text_vg(vg, x0 + 24, y, cas_model.toStdString().c_str(), font_size - 8, C_GRAY, BOLD);
+        y += line_h - 8;
 
-            // 학습 시간(신뢰도) 표시
-            QString cas_hours = QString::fromStdString(params.get("CASModelHours"));
-            if (cas_hours.length() > 0) {
-                snprintf(buf, sizeof(buf), "학습 %s시간", cas_hours.toStdString().c_str());
-                ui_draw_text_vg(vg, x0 + 14, y, buf, font_size - 6, C_GRAY, BOLD);
-                y += line_h - 6;
-            }
-            y += 8;
-        } else {
-            y = y0 + 26; // Generous padding for Mode 1 (no headers)
+        QString cas_hours = QString::fromStdString(params.get("CASModelHours"));
+        if (cas_hours.length() > 0) {
+            snprintf(buf, sizeof(buf), "학습 %s시간", cas_hours.toStdString().c_str());
+            ui_draw_text_vg(vg, x0 + 24, y, buf, font_size - 12, C_GRAY, BOLD);
+            y += line_h - 12;
+        }
+        y += sec_spacing;
+
+        // Always render content while CASDebug is on — keep last values via
+        // static cache so the panel doesn't blank when controlsState pauses.
+        // casLog layout: features(20) + extras(19). Indices read from the end.
+        static float last_raw_delta = 0.0f;
+        static float last_applied_delta = 0.0f;
+        static float last_alpha = 0.0f;
+        static float last_z = 0.0f;
+        static float last_offset_now = 0.0f;
+        static float last_offset_5s = 0.0f;
+        static float last_offset_60s = 0.0f;
+        static float last_centering_score = 0.0f;
+        static int last_interventions = 0;
+        static float last_sec_since = -1.0f;
+        static int last_strong = 0;
+        static int last_weak = 0;
+        static float last_sec_strong = -1.0f;
+        static float last_sec_weak = -1.0f;
+        static float last_accuracy = 0.0f;
+        static float last_session_s = 0.0f;
+        static float last_dist_in = 0.0f;
+        static int last_pattern = 0;
+        // Per-second trail buffer of offset_now (last 30 s = 30 samples).
+        static float trail[30] = {0};
+        static int trail_head = 0;     // most-recent slot index
+        static double trail_last_t = 0.0;
+
+        if (has_log) {
+            const int n = cas_log.size();
+            // ── new 19-extras layout ──
+            last_raw_delta       = cas_log[n - 19];
+            last_applied_delta   = cas_log[n - 18];
+            last_alpha           = cas_log[n - 17];
+            last_z               = cas_log[n - 16];
+            last_offset_now      = cas_log[n - 15];
+            last_offset_5s       = cas_log[n - 14];
+            last_offset_60s      = cas_log[n - 13];
+            last_centering_score = cas_log[n - 11];
+            last_interventions   = (int)cas_log[n - 10];
+            last_sec_since       = cas_log[n - 9];
+            last_strong          = (int)cas_log[n - 8];
+            last_weak            = (int)cas_log[n - 7];
+            last_sec_strong      = cas_log[n - 6];
+            last_sec_weak        = cas_log[n - 5];
+            last_accuracy        = cas_log[n - 4];
+            last_session_s       = cas_log[n - 3];
+            last_dist_in         = cas_log[n - 2];
+            last_pattern         = (int)cas_log[n - 1];
+        }
+        const float raw_delta       = last_raw_delta;
+        const float applied_delta   = last_applied_delta;
+        const float alpha           = last_alpha;
+        const float z               = last_z;
+        const float offset_now      = last_offset_now;
+        const float offset_5s       = last_offset_5s;
+        const float offset_60s      = last_offset_60s;
+        const float centering_score = last_centering_score;
+        const int   interventions   = last_interventions;
+        const float sec_since       = last_sec_since;
+        const int   strong_cnt      = last_strong;
+        const int   weak_cnt        = last_weak;
+        const float sec_since_strong = last_sec_strong;
+        const float sec_since_weak  = last_sec_weak;
+        const float accuracy_pct    = last_accuracy;
+        const float session_seconds = last_session_s;
+        const float dist_in_pct     = last_dist_in;
+        const int   lane_pattern    = last_pattern;
+
+        // Push offset_now into per-second trail (downsampled).
+        double now_t = nanos_since_boot() / 1e9;
+        if (now_t - trail_last_t >= 1.0) {
+            trail_head = (trail_head + 1) % 30;
+            trail[trail_head] = offset_now;
+            trail_last_t = now_t;
         }
 
-        if (!has_log) {
-            ui_draw_text_vg(vg, x0 + 14, y, "(컨트롤러 대기중...)", font_size - 4, C_GRAY, BOLD);
-            return;
-        }
-
-        const int n = cas_log.size();
-        const float raw_delta = cas_log[n - 11];
-        const float applied_delta = cas_log[n - 10];
-        const float alpha = cas_log[n - 9];
-        const float z = cas_log[n - 8];
-        const float offset_now = cas_log[n - 7];
-        const float offset_5s = cas_log[n - 6];
-        const float offset_60s = cas_log[n - 5];
-        const float centering_score = cas_log[n - 3];
-        const int interventions = (int)cas_log[n - 2];
-        const float sec_since = cas_log[n - 1];
-
-        // Read steeringTorque from carState
-        float steering_torque = 0.00f;
+        // Read live signals straight from cereal for display headers.
+        float v_ego_kmh = 0.0f;
         if (sm.alive("carState")) {
-            steering_torque = sm["carState"].getCarState().getSteeringTorque();
+            v_ego_kmh = sm["carState"].getCarState().getVEgo() * 3.6f;
         }
+        float vego_min_kmh = 0.0f, vego_max_kmh = 130.0f;
+        // We don't have direct access to model.vego_min/max from C++; use defaults
+        // that match the trained Casper EV (7..30 m/s ≈ 26..108 km/h). The HUD
+        // judgement is informational; the real gate uses the model's own values.
+        vego_min_kmh = 7.0f * 3.6f;
+        vego_max_kmh = 30.0f * 3.6f;
 
         if (cas_debug_val == 1) {
             // ==========================================
-            // Mode 1: User-Friendly Graphical Debug HUD
+            // Mode 1: 운전자 친화 그래픽 HUD
             // ==========================================
-            auto draw_sec_header = [&](const char* label) {
-                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 4, C_GREEN, BOLD);
-                y += line_h - 4;
-            };
+            const int label_x    = x0 + 24;
+            const int val_x      = x0 + wbox_w - 24;
+            const int gauge_h    = 18;
+            const int gauge_left = x0 + 24;
+            const int gauge_w    = wbox_w - 48;
+            const int gauge_cx   = x0 + wbox_w / 2;
 
-            auto draw_lr_row = [&](const char* label, float val, float max_val, const char* val_str, NVGcolor color) {
-                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, C_WHITE, BOLD);
-
-                int cx = x0 + 210;
-                int gy = y + 6;
-                ui_fill_rect(vg, {cx - 45, gy, 90, 6}, nvgRGBA(60, 60, 60, 255), 2);
-                ui_fill_rect(vg, {cx - 1, y + 2, 2, 14}, C_GRAY, 0);
-
-                float norm = val / max_val;
-                norm = std::max(-1.0f, std::min(1.0f, norm));
-                int fill_w = (int)(norm * 45);
-                if (fill_w < 0) {
-                    ui_fill_rect(vg, {cx + fill_w, gy, -fill_w, 6}, color, 2);
-                } else if (fill_w > 0) {
-                    ui_fill_rect(vg, {cx, gy, fill_w, 6}, color, 2);
-                }
-
-                nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, val_str, font_size - 2, C_WHITE, BOLD);
-                y += line_h;
-            };
-
-            auto draw_progress_row = [&](const char* label, float val, float max_val, const char* val_str, NVGcolor color) {
-                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, C_WHITE, BOLD);
-
-                int gx = x0 + 165;
-                int gy = y + 6;
-                ui_fill_rect(vg, {gx, gy, 90, 6}, nvgRGBA(60, 60, 60, 255), 2);
-
-                float norm = val / max_val;
-                norm = std::max(0.0f, std::min(1.0f, norm));
-                int fill_w = (int)(norm * 90);
-                if (fill_w > 0) {
-                    ui_fill_rect(vg, {gx, gy, fill_w, 6}, color, 2);
-                }
-
-                nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, val_str, font_size - 2, color, BOLD);
-                y += line_h;
-            };
-
-            auto draw_text_row = [&](const char* label, const char* val_str, NVGcolor color) {
-                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, color, BOLD);
-                nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, val_str, font_size - 2, color, BOLD);
-                y += line_h;
-            };
-
-            // Section 1: CONTROL
-            draw_sec_header("[ CONTROL (보조 제어) ]");
-            
-            snprintf(buf, sizeof(buf), "%+.2f", applied_delta);
-            draw_lr_row("applied_delta", applied_delta, 0.20f, buf, C_WHITE);
-            
-            snprintf(buf, sizeof(buf), "%+.2f", raw_delta);
-            draw_lr_row("raw_delta", raw_delta, 0.20f, buf, C_GRAY);
-            
-            snprintf(buf, sizeof(buf), "%.3f", alpha);
-            draw_progress_row("alpha", alpha, 1.00f, buf, alpha > 0.01f ? C_GREEN : C_GRAY);
-            
-            y += sec_spacing;
-
-            // Section 2: DRIVER
-            draw_sec_header("[ DRIVER (운전자 조작) ]");
-            
-            snprintf(buf, sizeof(buf), "%.2f", steering_torque);
-            draw_lr_row("steeringTorque", steering_torque, 1.00f, buf, std::abs(steering_torque) > 0.01f ? C_ORANGE : C_GRAY);
-            
-            snprintf(buf, sizeof(buf), "%d 회", interventions);
-            draw_text_row("interventions", buf, interventions == 0 ? C_GREEN : C_WHITE);
-            
-            if (sec_since < 0.0f) {
-                draw_text_row("sec_since", "—", C_GRAY);
-            } else if (sec_since < 60.0f) {
-                snprintf(buf, sizeof(buf), "%.0fs", sec_since);
-                draw_text_row("sec_since", buf, sec_since < 10.0f ? C_RED : C_ORANGE);
+            // Header evaluation bar: a one-liner status that summarises
+            // "is CAS working well right now?"
+            // Logic: combine score, accuracy, distribution and intervention rate.
+            const char* eval_text = "● CAS 대기 중";
+            NVGcolor eval_color = C_GRAY;
+            float intervention_rate = (session_seconds > 30.0f)
+                ? (interventions * 60.0f / session_seconds)
+                : 0.0f;
+            if (alpha < 0.05f) {
+                eval_text = "● CAS 대기 중";    eval_color = C_GRAY;
+            } else if (z >= 3.0f) {
+                eval_text = "● 분포 밖 — 학습 범위 벗어남";  eval_color = C_RED;
+            } else if (accuracy_pct > 0.0f && accuracy_pct < 50.0f) {
+                eval_text = "● 주의 — 보정 방향 오류";       eval_color = C_ORANGE;
+            } else if (centering_score >= 80.0f && intervention_rate <= 0.2f && accuracy_pct >= 70.0f) {
+                eval_text = "●● CAS 매우 잘 작동";            eval_color = C_GREEN;
+            } else if (centering_score >= 60.0f) {
+                eval_text = "● CAS 작동 중";                  eval_color = C_WHITE;
+            } else if (centering_score < 40.0f || intervention_rate > 1.0f) {
+                eval_text = "● 주의 — 학습 부족/비대칭";     eval_color = C_ORANGE;
             } else {
-                snprintf(buf, sizeof(buf), "%.1fm", sec_since / 60.0f);
-                draw_text_row("sec_since", buf, C_WHITE);
+                eval_text = "● CAS 작동 중";                  eval_color = C_WHITE;
             }
-            
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, label_x, y, eval_text, font_size, eval_color, BOLD);
+            y += line_h;
+            snprintf(buf, sizeof(buf),
+                "점수 %.0f  정확도 %.0f%%  분포 %s",
+                centering_score,
+                std::max(0.0f, accuracy_pct),
+                (dist_in_pct >= 80.0f ? "안" : "밖"));
+            ui_draw_text_vg(vg, label_x, y, buf, font_size - 12, C_GRAY, BOLD);
+            y += line_h - 12;
             y += sec_spacing;
 
-            // Section 3: METRICS
-            draw_sec_header("[ METRICS (차선 오차) ]");
-            
-            snprintf(buf, sizeof(buf), "%+.2f m", offset_now);
-            draw_lr_row("offset_now", offset_now, 0.30f, buf, C_WHITE);
-            
-            snprintf(buf, sizeof(buf), "%+.2f m", offset_5s);
-            draw_lr_row("offset_5s", offset_5s, 0.30f, buf, C_WHITE);
-            
-            snprintf(buf, sizeof(buf), "%+.2f m", offset_60s);
-            draw_lr_row("offset_60s", offset_60s, 0.30f, buf, C_WHITE);
-            
+            // Common helpers
+            auto draw_section = [&](const char* label) {
+                nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+                ui_draw_text_vg(vg, label_x, y, label, font_size - 6, C_GREEN, BOLD);
+                y += line_h - 6;
+            };
+            auto draw_progress_bar = [&](float val_norm, NVGcolor color, int h_) {
+                int gy = y;
+                ui_fill_rect(vg, {gauge_left, gy, gauge_w, h_}, nvgRGBA(60, 60, 60, 255), 6);
+                float n = std::max(0.0f, std::min(1.0f, val_norm));
+                int fw = (int)(n * gauge_w);
+                if (fw > 0) ui_fill_rect(vg, {gauge_left, gy, fw, h_}, color, 6);
+                y += h_ + 6;
+            };
+            auto draw_lr_bar = [&](float val, float max_abs, NVGcolor color, int h_) {
+                int gy = y;
+                ui_fill_rect(vg, {gauge_left, gy, gauge_w, h_}, nvgRGBA(60, 60, 60, 255), 6);
+                // center line
+                ui_fill_rect(vg, {gauge_cx - 1, gy - 3, 2, h_ + 6}, C_GRAY, 0);
+                float n = val / std::max(max_abs, 1e-3f);
+                n = std::max(-1.0f, std::min(1.0f, n));
+                int half = gauge_w / 2;
+                int fw = (int)(n * half);
+                if (fw > 0) {
+                    ui_fill_rect(vg, {gauge_cx, gy, fw, h_}, color, 6);
+                } else if (fw < 0) {
+                    ui_fill_rect(vg, {gauge_cx + fw, gy, -fw, h_}, color, 6);
+                }
+                y += h_ + 6;
+            };
+
+            // ───── CAS 개입 정도 ─────
+            draw_section("CAS 개입 정도");
+            NVGcolor inv_c = alpha < 0.05f ? C_GRAY
+                            : (alpha < 0.4f ? C_WHITE
+                            : (alpha < 0.8f ? C_GREEN : nvgRGBA(255, 230, 60, 255)));
+            draw_progress_bar(alpha, inv_c, gauge_h);
+            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+            snprintf(buf, sizeof(buf), "%.0f %%", alpha * 100.0f);
+            ui_draw_text_vg(vg, val_x, y, buf, font_size - 4, inv_c, BOLD);
+            y += line_h - 8;
+
+            // ───── 보정량 (좌우 막대 + 수치) ─────
+            ui_draw_text_vg(vg, label_x, y, "보정량", font_size - 8, C_WHITE, BOLD);
+            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+            snprintf(buf, sizeof(buf), "%+.3f Nm", applied_delta);
+            ui_draw_text_vg(vg, val_x, y, buf, font_size - 6, C_WHITE, BOLD);
+            y += line_h - 8;
+            draw_lr_bar(applied_delta, 0.30f, C_GREEN, gauge_h);
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, label_x, y, "왼쪽", font_size - 14, C_GRAY, BOLD);
+            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, val_x, y, "오른쪽", font_size - 14, C_GRAY, BOLD);
+            y += line_h - 6;
+
+            // ───── CAS 정확도 ─────
+            ui_draw_text_vg(vg, label_x, y, "CAS 정확도", font_size - 6, C_WHITE, BOLD);
+            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+            snprintf(buf, sizeof(buf), "%.0f %%", accuracy_pct);
+            NVGcolor acc_c = accuracy_pct >= 70.0f ? C_GREEN
+                            : (accuracy_pct >= 50.0f ? C_WHITE : C_ORANGE);
+            ui_draw_text_vg(vg, val_x, y, buf, font_size - 4, acc_c, BOLD);
+            y += line_h - 6;
+            draw_progress_bar(accuracy_pct / 100.0f, acc_c, gauge_h - 4);
             y += sec_spacing;
 
-            // Section 4: STATUS
-            draw_sec_header("[ STATUS (종합 상태) ]");
-            
-            NVGcolor score_c = centering_score >= 80.0f ? C_GREEN : (centering_score >= 50.0f ? C_WHITE : C_ORANGE);
-            snprintf(buf, sizeof(buf), "%.0f %%", centering_score);
-            draw_progress_row("centering_score", centering_score, 100.0f, buf, score_c);
-            
-            NVGcolor z_c = z < 1.5f ? C_GREEN : (z < 3.0f ? C_ORANGE : C_RED);
-            snprintf(buf, sizeof(buf), "%.2f", z);
-            draw_progress_row("z_score", z, 3.00f, buf, z_c);
+            // ───── 속도 + 학습 범위 ─────
+            ui_draw_text_vg(vg, label_x, y, "속도", font_size - 6, C_WHITE, BOLD);
+            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+            snprintf(buf, sizeof(buf), "%.0f km/h", v_ego_kmh);
+            ui_draw_text_vg(vg, val_x, y, buf, font_size - 4,
+                            dist_in_pct >= 80.0f ? C_GREEN : C_ORANGE, BOLD);
+            y += line_h - 6;
+            // gauge with learned-range highlight
+            {
+                int gy = y;
+                ui_fill_rect(vg, {gauge_left, gy, gauge_w, gauge_h - 4}, nvgRGBA(60, 60, 60, 255), 6);
+                // learned region overlay
+                float max_kmh = 130.0f;
+                int lx_min = gauge_left + (int)(gauge_w * vego_min_kmh / max_kmh);
+                int lx_max = gauge_left + (int)(gauge_w * vego_max_kmh / max_kmh);
+                lx_min = std::max(gauge_left, std::min(gauge_left + gauge_w, lx_min));
+                lx_max = std::max(gauge_left, std::min(gauge_left + gauge_w, lx_max));
+                ui_fill_rect(vg, {lx_min, gy, lx_max - lx_min, gauge_h - 4}, nvgRGBA(120, 180, 120, 100), 6);
+                // current vEgo marker
+                int mark_x = gauge_left + (int)(gauge_w * std::min(v_ego_kmh, max_kmh) / max_kmh);
+                ui_fill_rect(vg, {mark_x - 2, gy - 3, 4, gauge_h + 2}, C_WHITE, 1);
+                y += gauge_h - 4 + 6;
+            }
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            snprintf(buf, sizeof(buf), "학습 범위 %.0f~%.0f km/h", vego_min_kmh, vego_max_kmh);
+            ui_draw_text_vg(vg, label_x, y, buf, font_size - 14, C_GRAY, BOLD);
+            y += line_h - 14;
+            y += sec_spacing;
+
+            // ───── 중앙 유지 점수 ─────
+            draw_section("중앙 유지 점수");
+            NVGcolor score_c = centering_score >= 80.0f ? C_GREEN
+                              : (centering_score >= 50.0f ? C_WHITE : C_ORANGE);
+            draw_progress_bar(centering_score / 100.0f, score_c, gauge_h);
+            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+            snprintf(buf, sizeof(buf), "%.0f", centering_score);
+            ui_draw_text_vg(vg, val_x, y, buf, font_size - 4, score_c, BOLD);
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            const char* score_tag =
+                centering_score >= 90.0f ? "매우 좋음" :
+                centering_score >= 75.0f ? "좋음" :
+                centering_score >= 50.0f ? "보통" :
+                centering_score >= 25.0f ? "주의" : "나쁨";
+            ui_draw_text_vg(vg, label_x, y, score_tag, font_size - 6, score_c, BOLD);
+            y += line_h - 6;
+            y += sec_spacing;
+
+            // ───── 차선 안 위치 (가로 막대 + 도트) ─────
+            draw_section("차선 안 위치");
+            {
+                int gy = y;
+                int track_h = 28;
+                ui_fill_rect(vg, {gauge_left, gy, gauge_w, track_h}, nvgRGBA(40, 40, 45, 255), 8);
+                // center reference line
+                ui_fill_rect(vg, {gauge_cx - 1, gy - 4, 2, track_h + 8}, C_GRAY, 0);
+                // dot for offset_now (range ±10 cm = ±0.10 m maps to full width)
+                float frac = std::max(-1.0f, std::min(1.0f, offset_now / 0.10f));
+                int dot_x = gauge_cx + (int)(frac * (gauge_w / 2 - 14));
+                int dot_y = gy + track_h / 2;
+                NVGcolor dot_c = std::abs(offset_now) < 0.03f ? C_GREEN : C_ORANGE;
+                ui_fill_rect(vg, {dot_x - 10, dot_y - 10, 20, 20}, dot_c, 10);
+                y += track_h + 8;
+            }
+            // scale labels
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, gauge_left, y, "-10cm", font_size - 16, C_GRAY, BOLD);
+            nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, gauge_cx, y, "0", font_size - 16, C_GRAY, BOLD);
+            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, gauge_left + gauge_w, y, "+10cm", font_size - 16, C_GRAY, BOLD);
+            y += line_h - 16;
+            y += 8;
+
+            // 30s trail dots
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            ui_draw_text_vg(vg, label_x, y, "추세 (30초)", font_size - 10, C_WHITE, BOLD);
+            y += line_h - 12;
+            {
+                int gy = y;
+                int track_h = 22;
+                ui_fill_rect(vg, {gauge_left, gy, gauge_w, track_h}, nvgRGBA(30, 30, 35, 255), 6);
+                ui_fill_rect(vg, {gauge_cx - 1, gy, 2, track_h}, nvgRGBA(80, 80, 90, 200), 0);
+                // Plot each trail sample; head is "now", going back 30 s.
+                for (int i = 0; i < 30; i++) {
+                    int slot = (trail_head + 30 - i) % 30;
+                    float v = trail[slot];
+                    float frac = std::max(-1.0f, std::min(1.0f, v / 0.10f));
+                    int dx = gauge_left + (gauge_w - 12) - (i * (gauge_w - 12) / 29);
+                    int dxv = gauge_cx + (int)(frac * (gauge_w / 2 - 12));
+                    int dy = gy + track_h / 2;
+                    int alpha_dot = std::max(60, 255 - i * 6);
+                    NVGcolor dotc = nvgRGBA(180, 220, 255, alpha_dot);
+                    ui_fill_rect(vg, {dxv - 3, dy - 3, 6, 6}, dotc, 3);
+                    (void)dx;
+                }
+                y += track_h + 4;
+            }
+            // numeric line
+            snprintf(buf, sizeof(buf), "지금 %+.0fcm   5초 %+.0fcm   1분 %+.0fcm",
+                     offset_now * 100.0f, offset_5s * 100.0f, offset_60s * 100.0f);
+            ui_draw_text_vg(vg, label_x, y, buf, font_size - 12, C_WHITE, BOLD);
+            y += line_h - 12;
+            // judgement
+            const char* pattern_txt = "안정";
+            NVGcolor pattern_c = C_GREEN;
+            switch (lane_pattern) {
+                case 1: pattern_txt = "왼쪽으로 일관 쏠림";   pattern_c = C_ORANGE; break;
+                case 2: pattern_txt = "오른쪽으로 일관 쏠림"; pattern_c = C_ORANGE; break;
+                case 3: pattern_txt = "진동 / 불안정";        pattern_c = C_ORANGE; break;
+                default: pattern_txt = "안정";                pattern_c = C_GREEN;  break;
+            }
+            snprintf(buf, sizeof(buf), "판정: %s ●", pattern_txt);
+            ui_draw_text_vg(vg, label_x, y, buf, font_size - 8, pattern_c, BOLD);
+            y += line_h - 8;
+            y += sec_spacing;
+
+            // ───── 오늘 개입 ─────
+            draw_section("오늘 개입");
+            auto fmt_sec_since = [&](float s, char* dest, size_t dest_n) {
+                if (s < 0.0f) snprintf(dest, dest_n, "—");
+                else if (s < 60.0f) snprintf(dest, dest_n, "%.0f초 전", s);
+                else snprintf(dest, dest_n, "%.1f분 전", s / 60.0f);
+            };
+            char strong_t[32], weak_t[32];
+            fmt_sec_since(sec_since_strong, strong_t, sizeof(strong_t));
+            fmt_sec_since(sec_since_weak,   weak_t,   sizeof(weak_t));
+
+            snprintf(buf, sizeof(buf), "강한  %d회   (%s)", strong_cnt, strong_t);
+            ui_draw_text_vg(vg, label_x, y, buf, font_size - 6,
+                            strong_cnt > 0 ? C_ORANGE : C_WHITE, BOLD);
+            y += line_h - 6;
+            snprintf(buf, sizeof(buf), "약한  %d회   (%s)", weak_cnt, weak_t);
+            ui_draw_text_vg(vg, label_x, y, buf, font_size - 6, C_WHITE, BOLD);
+            y += line_h - 6;
+
+            // Session summary (replacement of the "분당 빈도/추세" lines).
+            int run_min = (int)(session_seconds / 60.0f);
+            snprintf(buf, sizeof(buf), "운행 시간   %d 분", run_min);
+            ui_draw_text_vg(vg, label_x, y, buf, font_size - 6, C_WHITE, BOLD);
+            y += line_h - 6;
+            snprintf(buf, sizeof(buf), "분포 안 비율  %.0f %%", dist_in_pct);
+            ui_draw_text_vg(vg, label_x, y, buf, font_size - 6,
+                            dist_in_pct >= 80.0f ? C_GREEN : C_ORANGE, BOLD);
+            y += line_h - 6;
         } else {
             // ==========================================
             // Mode 2: Original Developer Text Debug HUD
             // ==========================================
             auto draw_line = [&](const char* label, const char* value, NVGcolor color) {
                 nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + 14, y, label, font_size, color, BOLD);
+                ui_draw_text_vg(vg, x0 + 24, y, label, font_size, color, BOLD);
                 nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + wbox_w - 14, y, value, font_size, color, BOLD);
+                ui_draw_text_vg(vg, x0 + wbox_w - 24, y, value, font_size, color, BOLD);
                 y += line_h;
             };
             auto draw_section = [&](const char* label) {
                 nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-                ui_draw_text_vg(vg, x0 + 14, y, label, font_size - 2, C_GREEN, BOLD);
-                y += line_h - 2;
+                ui_draw_text_vg(vg, x0 + 24, y, label, font_size - 4, C_GREEN, BOLD);
+                y += line_h - 4;
             };
 
             // 현재 상태
