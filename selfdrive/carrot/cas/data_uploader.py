@@ -332,7 +332,10 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
     year_attr = getattr(car_params, "year", "")
     car_model_year = str(year_attr).strip() if year_attr else ""
 
-  car_key = car_fingerprint or car_name or car_selected or last_known_car
+  # CarSelected3 first: it's the user-explicit choice in Carrot's car menu,
+  # so it's the most authoritative identifier. Fall back to openpilot's
+  # fingerprint/CarName, then to the persisted last-known.
+  car_key = car_selected or car_fingerprint or car_name or last_known_car
 
   carrot_version  = _read_param_str(params, "GitCommit")[:12]
   carrot_branch   = _read_param_str(params, "GitBranch")
@@ -356,7 +359,13 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
   except Exception:
     pass
 
-  # Real driving time from segment mtimes (more accurate than segments × 60s).
+  # Duration: openpilot segments are ~60s each — that's the reliable estimate.
+  # Do NOT derive duration from segment mtimes: mtime reflects file write/copy/
+  # sync time and can span boots, inflating the value by orders of magnitude.
+  duration_sec = int(len(segments) * 60)
+  duration_estimated = True
+  # route_start/end timestamps kept as *informational* metadata only (when the
+  # files were last written) — never used for duration.
   route_start_ts = 0
   route_end_ts = 0
   if segments:
@@ -367,11 +376,6 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
         route_end_ts   = mtimes[-1]
     except OSError:
       pass
-  duration_sec = int(len(segments) * 60)
-  duration_estimated = True
-  if route_end_ts > route_start_ts > 0:
-    duration_sec = max(duration_sec, route_end_ts - route_start_ts + 60)
-    duration_estimated = False
 
   file_bytes = {}
   for fname in UPLOAD_FILES:

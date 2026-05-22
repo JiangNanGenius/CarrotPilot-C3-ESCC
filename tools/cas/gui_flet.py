@@ -952,12 +952,36 @@ def main(page: ft.Page):
 
     ok = _execute_commands_inline([(train_cmd, "Train"), (val_cmd, "Validate")])
 
-    # Phase 3: record + optional cleanup
+    # Phase 3: record train run
     if ok:
       try:
         record_train_run(ds, cand, val, run_dir)
       except Exception as e:
         append_log(f"[record] {e}")
+
+      # Phase 4: auto-promote — copy candidate JSON to repo's weights/ so PC-side
+      # runtime (if anyone runs it) can match. Devices get it via Phase 5 (OTA pull
+      # from server). We promote first so the same file is ready for both paths.
+      promote_cmd = build_promote_cmd(ds, cand)
+      ok_promote = _execute_commands_inline([(promote_cmd, "Promote")])
+      append_log(f"[promote] {'OK' if ok_promote else 'FAIL'}")
+
+      # Phase 5: auto-publish to server. Device puller will pick this up at next
+      # boot. rlog files are unrelated; we send only the small model JSON.
+      if ok_promote:
+        try:
+          endpoint = cfg.get("endpoint") or cloud_sync.DEFAULT_SERVER_ENDPOINT
+          secret = cloud_sync.resolve_upload_secret()
+          result = cloud_sync.post_model(
+            endpoint, train_car, kind, str(cand), secret, timeout=60.0,
+          )
+          append_log(f"[publish] 서버 발행 완료: car={train_car}/{kind} "
+                     f"version={result.get('version','?')} "
+                     f"sha={str(result.get('sha256',''))[:12]}…")
+        except Exception as e:
+          append_log(f"[publish] FAIL: {e}")
+
+      # Phase 6: optional cleanup
       if cfg.get("cleanup_after_train", False):
         try:
           n_segs, n_bytes = cleanup_for_car_kind(cloud_car, kind)

@@ -18,6 +18,14 @@ except ModuleNotFoundError:
 
 
 CAS_DIR = Path(__file__).resolve().parent
+# OTA weights pulled by cas_model_puller take precedence over the git-tracked
+# factory dir. When the same car matches in both, the one with the more recent
+# trained_at wins (tie-breaker after the existing score logic).
+WEIGHTS_DIRS = [
+  Path("/data/cas_weights"),    # OTA — populated by selfdrive/carrot/cas/model_puller.py
+  CAS_DIR / "weights",          # factory/legacy — git-tracked
+]
+# Kept for backward compat with anything that imports WEIGHTS_DIR.
 WEIGHTS_DIR = CAS_DIR / "weights"
 
 # Runtime is called at ~100 Hz from latcontrol_*.
@@ -75,7 +83,7 @@ class CASRuntime:
     # Don't remove CASModelName at entry: if torque and angle CASRuntime both
     # init in the same process, the later one would wipe the earlier one's
     # match. Defer the remove until we're sure no model matches (see below).
-    if not WEIGHTS_DIR.exists():
+    if not any(d.exists() for d in WEIGHTS_DIRS):
       self.params.remove(self.model_param)
       return
 
@@ -88,34 +96,44 @@ class CASRuntime:
     expected_type = f"cas_{self.kind}"
     best_path = None
     best_score = -1
-    for path in WEIGHTS_DIR.glob("*.json"):
-      try:
-        candidate = CASModel(path)
-      except Exception:
+    best_trained_at = ""    # tie-breaker: prefer newer model when scores match
+    # Walk every weights dir (OTA first, then factory). Within each dir, score
+    # candidates; across dirs, the higher score wins, and for ties the more
+    # recent trained_at wins — so a fresh OTA pull naturally beats a stale
+    # git-tracked model for the same car.
+    for weights_dir in WEIGHTS_DIRS:
+      if not weights_dir.exists():
         continue
-      if candidate.model_type and candidate.model_type != expected_type:
-        continue
-      if candidate.feature_schema != FEATURE_SCHEMA:
-        continue
-      names = [_norm_name(path.stem), _norm_name(candidate.car)]
-      names += [_norm_name(name) for name in candidate.car_names]
-      name_score = max((len(name) for name in names for runtime_name in runtime_names
-                        if name and runtime_name and (name in runtime_name or runtime_name in name)), default=-1)
-      if name_score < 0:
-        continue
+      for path in weights_dir.glob("*.json"):
+        try:
+          candidate = CASModel(path)
+        except Exception:
+          continue
+        if candidate.model_type and candidate.model_type != expected_type:
+          continue
+        if candidate.feature_schema != FEATURE_SCHEMA:
+          continue
+        names = [_norm_name(path.stem), _norm_name(candidate.car)]
+        names += [_norm_name(name) for name in candidate.car_names]
+        name_score = max((len(name) for name in names for runtime_name in runtime_names
+                          if name and runtime_name and (name in runtime_name or runtime_name in name)), default=-1)
+        if name_score < 0:
+          continue
 
-      # Matching is by car name (from settings) and torque/angle kind only.
-      # EPS hash is informational: matching hashes get a tiebreaker bonus,
-      # but a mismatch (or missing hash) no longer disqualifies the model.
-      eps_score = 0
-      candidate_eps_hash = str(candidate.eps_firmware_hash or "").strip()
-      if candidate_eps_hash and runtime_eps_hash and candidate_eps_hash == runtime_eps_hash:
-        eps_score = 1000
+        # Matching is by car name (from settings) and torque/angle kind only.
+        # EPS hash is informational: matching hashes get a tiebreaker bonus,
+        # but a mismatch (or missing hash) no longer disqualifies the model.
+        eps_score = 0
+        candidate_eps_hash = str(candidate.eps_firmware_hash or "").strip()
+        if candidate_eps_hash and runtime_eps_hash and candidate_eps_hash == runtime_eps_hash:
+          eps_score = 1000
 
-      score = eps_score + name_score
-      if score > best_score:
-        best_path = path
-        best_score = score
+        score = eps_score + name_score
+        candidate_ta = str(candidate.meta.get("trained_at", ""))
+        if (score > best_score) or (score == best_score and candidate_ta > best_trained_at):
+          best_path = path
+          best_score = score
+          best_trained_at = candidate_ta
 
     runtime_car = runtime_names[0] if runtime_names else "<unknown>"
     if best_path is None:

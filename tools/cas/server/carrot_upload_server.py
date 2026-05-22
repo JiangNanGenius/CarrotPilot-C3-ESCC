@@ -40,6 +40,11 @@ BASE = Path("/srv/carrot_rlogs")
 BY_DEVICE = BASE / "by-device"
 BY_CAR = BASE / "by-car"
 TRAIN_RUNS_PATH = BASE / "server_train_runs.json"
+# OTA model distribution: PC publishes trained models here, devices pull the
+# latest. Versioned by trained_at (YYYYMMDD_HHMMSS) for human-readable history.
+MODELS_BASE = Path("/srv/carrot_models")
+MAX_MODEL_BYTES = 4 * 1024 * 1024     # 4 MB — typical CAS JSON is < 200 KB
+VERSION_RE = re.compile(r"^[0-9]{8}_[0-9]{6}$")
 
 MAX_BODY_BYTES = 50 * 1024 * 1024
 TS_WINDOW = 300
@@ -58,6 +63,19 @@ KIND_RE = re.compile(r"^(?:torque|angle)$")
 SECRET = SECRET_PATH.read_text(encoding="utf-8").strip().encode("utf-8")
 BY_DEVICE.mkdir(parents=True, exist_ok=True)
 BY_CAR.mkdir(parents=True, exist_ok=True)
+MODELS_BASE.mkdir(parents=True, exist_ok=True)
+
+
+def _version_from_trained_at(trained_at: str) -> str:
+  """ISO '2026-05-22T15:30:00+00:00' → '20260522_153000'. Falls back to now."""
+  if trained_at:
+    try:
+      ta = trained_at.replace("Z", "+00:00")
+      dt = datetime.fromisoformat(ta)
+      return dt.strftime("%Y%m%d_%H%M%S")
+    except Exception:
+      pass
+  return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 app = FastAPI(title="carrot-upload", docs_url=None, redoc_url=None)
 _upload_counter = 0
@@ -174,13 +192,16 @@ def _route_meta(route_dir: Path) -> dict[str, Any]:
 
 
 def _car_key_from_meta(route_dir: Path, meta: dict[str, Any]) -> str:
-  # Walk most-specific → least-specific. last_known_car is the device's
-  # persisted "previous good CarName" — lets routes uploaded before this
-  # boot's CarParams arrived still bin to the right car.
-  # EPS firmware hash is intentionally NOT in this chain — it's reference
-  # diagnostic only (matches runtime's behavior of treating EPS as a
-  # tiebreaker bonus, never a disqualifier).
-  for key in ("car_key", "car", "car_name_raw", "car_selected", "last_known_car"):
+  # car_key first: that's the device's already-normalized result (which itself
+  # prioritizes CarSelected3 — the user-explicit menu choice). Then car_selected
+  # explicitly (in case the device shipped meta from an older client that didn't
+  # promote it to car_key). Then openpilot-side fields. last_known_car is the
+  # device's persisted "previous good CarName" — lets routes uploaded before
+  # this boot's CarParams arrived still bin to the right car.
+  # EPS firmware hash is intentionally NOT in this chain — reference diagnostic
+  # only (matches runtime's behavior of treating EPS as a tiebreaker bonus,
+  # never a disqualifier).
+  for key in ("car_key", "car_selected", "car", "car_name_raw", "last_known_car"):
     value = str(meta.get(key, "")).strip()
     normalized = _norm_car_key(value)
     if normalized:
@@ -259,7 +280,6 @@ def _route_record(route_dir: Path) -> dict[str, Any]:
   car_key = _car_key_from_meta(route_dir, meta)
   kind = _kind_from_meta(meta)
   eps_hash = str(meta.get("eps_firmware_hash", "")).strip()
-  duration_hours = _duration_hours(meta)
   segments = []
   total_bytes = 0
 
@@ -280,8 +300,15 @@ def _route_record(route_dir: Path) -> dict[str, Any]:
       "complete": "rlog.zst" in files and "qlog.zst" in files,
     })
 
-  if duration_hours <= 0.0 and segments:
-    duration_hours = len(segments) / 6.0
+  # Duration: openpilot segments are ~60s each, and we hold the actual segment
+  # dirs on disk — that's the reliable source. meta.duration_sec is NOT trusted
+  # (older/buggy device builds derived it from file mtimes and could inflate it
+  # by orders of magnitude). Fall back to meta only for meta-only records that
+  # have no segment dirs on disk.
+  if segments:
+    duration_hours = len(segments) / 60.0
+  else:
+    duration_hours = _duration_hours(meta)
 
   return {
     "device_id": device_id,
@@ -601,4 +628,131 @@ async def upload(
     "bytes": total,
     "disk_pct": round(_disk_used_pct(), 1),
   })
+
+
+# ─── OTA model distribution endpoints ───────────────────────────────────────
+# Flow: PC trains → publishes via POST → devices poll GET /latest → download.
+
+@app.post("/api/models/upload/{car}/{kind}")
+async def upload_model(
+  car: str,
+  kind: str,
+  request: Request,
+  x_carrot_ts: str = Header(default=""),
+  x_carrot_sig: str = Header(default=""),
+):
+  if not CAR_RE.match(car):
+    raise HTTPException(status_code=400, detail="bad car")
+  if not KIND_RE.match(kind):
+    raise HTTPException(status_code=400, detail="bad kind")
+  # Sign message: "model|<ts>" with the same shared secret used for uploads.
+  if not _verify_sig("model", x_carrot_ts, x_carrot_sig):
+    raise HTTPException(status_code=401, detail="bad signature")
+
+  # Read body with hard size cap (models are tiny).
+  body = b""
+  async for chunk in request.stream():
+    body += chunk
+    if len(body) > MAX_MODEL_BYTES:
+      raise HTTPException(status_code=413, detail="model too large")
+  if not body:
+    raise HTTPException(status_code=400, detail="empty body")
+
+  # Parse JSON and validate it looks like a CAS model.
+  try:
+    meta = json.loads(body.decode("utf-8"))
+  except Exception:
+    raise HTTPException(status_code=400, detail="not valid JSON")
+  if not isinstance(meta, dict):
+    raise HTTPException(status_code=400, detail="not a JSON object")
+  required = ("input_size", "layers", "feature_schema")
+  missing = [k for k in required if k not in meta]
+  if missing:
+    raise HTTPException(status_code=400, detail=f"not a CAS model (missing: {missing})")
+
+  trained_at = str(meta.get("trained_at", ""))
+  version = _version_from_trained_at(trained_at)
+  sha = hashlib.sha256(body).hexdigest()
+
+  model_dir = MODELS_BASE / car / kind
+  model_dir.mkdir(parents=True, exist_ok=True)
+  dest = model_dir / f"{version}.json"
+  tmp = dest.with_suffix(dest.suffix + ".part")
+  try:
+    tmp.write_bytes(body)
+    os.replace(tmp, dest)
+  except Exception as e:
+    tmp.unlink(missing_ok=True)
+    raise HTTPException(status_code=500, detail=f"write failed: {e}")
+
+  latest = {
+    "version":          version,
+    "sha256":           sha,
+    "size":             len(body),
+    "trained_at":       trained_at,
+    "trained_on_hours": float(meta.get("trained_on_hours", 0.0) or 0.0),
+    "alpha_max":        float(meta.get("alpha_max", 0.0) or 0.0),
+    "car":              str(meta.get("car", "")),
+    "model_type":       str(meta.get("model_type", "")),
+    "eps_firmware_hash": str(meta.get("eps_firmware_hash", "")),
+    "stored_at":        int(time.time()),
+    "download_url":     f"/api/models/{car}/{kind}/download/{version}",
+  }
+  _write_json_atomic(model_dir / "latest.json", latest)
+  return JSONResponse({"ok": True, "version": version, "sha256": sha, "size": len(body)})
+
+
+@app.get("/api/models/{car}/{kind}/latest")
+async def model_latest(car: str, kind: str, authorization: str = Header(default="")):
+  _require_read_auth(authorization)
+  if not CAR_RE.match(car):
+    raise HTTPException(status_code=400, detail="bad car")
+  if not KIND_RE.match(kind):
+    raise HTTPException(status_code=400, detail="bad kind")
+  latest_path = MODELS_BASE / car / kind / "latest.json"
+  if not latest_path.exists():
+    raise HTTPException(status_code=404, detail="no model published")
+  return JSONResponse(_read_json(latest_path))
+
+
+@app.get("/api/models/{car}/{kind}/download/{version}")
+async def model_download(car: str, kind: str, version: str,
+                         authorization: str = Header(default="")):
+  _require_read_auth(authorization)
+  if not CAR_RE.match(car):
+    raise HTTPException(status_code=400, detail="bad car")
+  if not KIND_RE.match(kind):
+    raise HTTPException(status_code=400, detail="bad kind")
+  if not VERSION_RE.match(version):
+    raise HTTPException(status_code=400, detail="bad version")
+  p = MODELS_BASE / car / kind / f"{version}.json"
+  if not p.exists():
+    raise HTTPException(status_code=404, detail="version not found")
+  return FileResponse(str(p), media_type="application/json", filename=f"{car}_{kind}_{version}.json")
+
+
+@app.get("/api/models")
+async def list_models(authorization: str = Header(default="")):
+  """Catalog: which cars/kinds have published models."""
+  _require_read_auth(authorization)
+  out = []
+  if MODELS_BASE.exists():
+    for car_dir in sorted(MODELS_BASE.iterdir()):
+      if not car_dir.is_dir():
+        continue
+      for kind_dir in sorted(car_dir.iterdir()):
+        if not kind_dir.is_dir():
+          continue
+        latest = kind_dir / "latest.json"
+        if not latest.exists():
+          continue
+        meta = _read_json(latest)
+        out.append({
+          "car":              car_dir.name,
+          "kind":             kind_dir.name,
+          "version":          meta.get("version", ""),
+          "trained_on_hours": meta.get("trained_on_hours", 0.0),
+          "stored_at":        meta.get("stored_at", 0),
+        })
+  return JSONResponse({"models": out, "count": len(out)})
 

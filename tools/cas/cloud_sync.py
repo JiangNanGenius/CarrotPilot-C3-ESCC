@@ -109,6 +109,65 @@ def resolve_upload_secret() -> bytes:
   return upload_config.resolve_secret()
 
 
+def post_model(endpoint: str, car: str, kind: str, model_json_path: str | Path,
+               secret: bytes, timeout: float = 60.0) -> dict[str, Any]:
+  """PC publishes a trained CAS model JSON to the server. Server stores it
+  under /srv/carrot_models/<car>/<kind>/<trained_at>.json and updates the
+  latest pointer. Devices then pull via fetch_latest_model_info + download_model.
+
+  HMAC signature: same shared secret as uploads, signed message is "model|<ts>".
+  """
+  ts = int(time.time())
+  sig = hmac.new(secret, f"model|{ts}".encode("utf-8"), hashlib.sha256).hexdigest()
+  with open(model_json_path, "rb") as f:
+    body = f.read()
+  url = _join_url(endpoint, f"/api/models/upload/{car}/{kind}")
+  req = Request(url, data=body, method="POST")
+  req.add_header("User-Agent", "carrot-cas-publish/1.0")
+  req.add_header("X-Carrot-TS", str(ts))
+  req.add_header("X-Carrot-Sig", sig)
+  req.add_header("Content-Type", "application/json")
+  with urlopen(req, timeout=timeout) as response:
+    return json.loads(response.read().decode("utf-8"))
+
+
+def fetch_latest_model_info(endpoint: str, car: str, kind: str,
+                            token: str = "", timeout: float = 15.0) -> dict[str, Any]:
+  """Returns {version, sha256, size, trained_at, trained_on_hours, alpha_max,
+  download_url, ...} for the latest published model. Raises HTTPError(404) if
+  no model published yet for this (car, kind)."""
+  url = _join_url(endpoint, f"/api/models/{car}/{kind}/latest")
+  req = Request(url, headers=_auth_headers(token))
+  with urlopen(req, timeout=timeout) as response:
+    return json.loads(response.read().decode("utf-8"))
+
+
+def download_model(endpoint: str, car: str, kind: str, version: str,
+                   dest_path: str | Path, token: str = "",
+                   timeout: float = 60.0) -> Path:
+  """Download a specific model version to dest_path (atomic via .part rename)."""
+  url = _join_url(endpoint, f"/api/models/{car}/{kind}/download/{version}")
+  req = Request(url, headers=_auth_headers(token))
+  dest = Path(dest_path)
+  dest.parent.mkdir(parents=True, exist_ok=True)
+  tmp = dest.with_suffix(dest.suffix + ".part")
+  try:
+    with urlopen(req, timeout=timeout) as response, open(tmp, "wb") as f:
+      while True:
+        chunk = response.read(1024 * 1024)
+        if not chunk:
+          break
+        f.write(chunk)
+    tmp.replace(dest)
+  except Exception:
+    try:
+      tmp.unlink(missing_ok=True)
+    except OSError:
+      pass
+    raise
+  return dest
+
+
 def post_route_meta(endpoint: str, device_id: str, route_id: str, meta: dict[str, Any],
                     secret: bytes, timeout: float = 30.0) -> dict[str, Any]:
   """Overwrite a route's route_meta.json on the server. The upload handler
