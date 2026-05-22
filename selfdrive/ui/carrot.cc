@@ -3209,7 +3209,14 @@ public:
         }
         QString CASModelName = QString::fromStdString(params.get("CASModelName"));
         if (CASModelName.length() > 0) {
-            carName += ",CAS";
+            QString CASModelHours = QString::fromStdString(params.get("CASModelHours"));
+            bool cas_hours_ok = false;
+            double cas_hours = CASModelHours.toDouble(&cas_hours_ok);
+            if (cas_hours_ok && cas_hours > 0.0) {
+                carName += QString(",CAS %1h").arg((int)std::round(cas_hours));
+            } else {
+                carName += ",CAS";
+            }
         }
         sprintf(top_left, "%s", carName.toStdString().c_str());
 

@@ -26,6 +26,7 @@ def build_dummy(car: str, kind: str, alpha_max: float):
   return {
     "format_version": FORMAT_VERSION,
     "model_type": f"cas_{kind}",
+    "kind": kind,
     "car": car,
     "car_names": [car],
     "eps_firmware_hash": "",

@@ -17,13 +17,15 @@ selfdrive/carrot/cas/
 │
 ├── weights/
 │   ├── .gitkeep
-│   ├── HYUNDAI_CASPER_EV.json # 실제 학습본 (5.98h, α_max=0.5, format_v2)
+│   ├── HYUNDAI_CASPER_EV.json # 실제 학습본 (5.98h, α_max=0.5, format_v2; 구형 파일명)
 │   └── HYUNDAI_IONIQ_5.json   # 더미 (α_max=0, format_v1)
 │
 └── docs/
     ├── cas_design.md          # 설계 윤곽
     ├── cas_roadmap.md         # Phase 0~5+ 체크리스트
     ├── cas_conversation.md    # 결정/패러다임 전환 이력
+    ├── cas_dataset_sync_plan.md # 업로드/학습 연동 단계별 작업계획
+    ├── cas_server_phase6.md   # LXC 서버 API 배포/검증 메모
     ├── cas_handoff_20260520.md# 최근 운영 상태 핸드오프
     └── cas_data_upload_design.md # 업로더 + NAS 서버 설계
 ```
@@ -100,7 +102,7 @@ selfdrive/carrot/cas/
 | `system/manager/process_config.py:147` | `PythonProcess("cas_uploader", "selfdrive.carrot.cas.data_uploader", always_run, enabled=not PC)` |
 | `selfdrive/ui/cas_debug.{h,cc}` | **CAS HUD 전용 파일** (carrot.cc에서 분리). 삭제하면 HUD만 제거됨 |
 | `selfdrive/ui/carrot.cc:3031, 3094` | `#include cas_debug.h` + `ui_draw_cas_overlay(s)` 호출 (2줄) |
-| `selfdrive/ui/carrot.cc:3701-3703` | 차량명에 `,CAS` 접미 (Params 직접 읽음, 3줄) |
+| `selfdrive/ui/carrot.cc` | 차량명에 `,CAS 6h` 접미 (`CASModelName`/`CASModelHours` 직접 읽음) |
 | `selfdrive/ui/qt/offroad/settings.cc` | `CAS`, `CASDebug` 토글 |
 | `cereal/log.capnp` | `LateralTorqueState.casLog` 필드 |
 | `common/params_keys.h` | `CAS`, `CASDebug`, `CASModelName`, `CASModelHours`, `CASAlphaOverride`, `CarrotDataUpload`, `CarrotUploadWifiOnly`, `CarrotUploadOnlyOffroad`, `CarrotUploadEndpoint`, `CarrotDeviceId` |
@@ -113,6 +115,7 @@ selfdrive/carrot/cas/
 |---|---|---|
 | `format_version` | int | 2 (model.py가 하드 가드) |
 | `model_type` | str | `cas_torque` 또는 `cas_angle` |
+| `kind` | str | `torque` 또는 `angle` |
 | `car` / `car_names[]` | str / list | 정규화 매칭 대상 |
 | `eps_firmware_hash` | str | SHA1 앞 12자, 매칭 보너스용 |
 | `feature_schema` | str | 반드시 `cas_v2_timed_20d` |
@@ -127,6 +130,30 @@ selfdrive/carrot/cas/
 | `trained_on_hours` / `trained_at` / `trained_by` | meta | HUD/감사용 |
 | `triage_counts` / `target_metrics` / `offset_metrics` / `msg_counts` | dict | 학습 audit 메타 |
 
+신규 promote 기본 파일명은 `<CAR>_<kind>.json`이다. 예: `HYUNDAI_CASPER_EV_torque.json`.
+기존 `<CAR>.json` 파일명도 runtime이 계속 로드하므로 구형 배포본과 호환된다.
+
+---
+
+## PC 학습 로컬 상태
+
+`tools/cas/gui.py`는 선택한 RLOG 루트 아래 `.cas/`에 로컬 작업 상태를 저장한다.
+이 상태는 학습 PC 전용이며 서버 원본 route 삭제/변경과 무관하다.
+
+| 경로 | 용도 |
+|---|---|
+| `.cas/index.json` | rlog 인덱스. `car`, `kind`, EPS hash, duration 요약 |
+| `.cas/local_manifest.json` | 서버 manifest와 같은 형태의 로컬 데이터셋 요약 |
+| `.cas/train_runs.json` | 성공한 train+validate 이력. `car_key + kind`별 최근 학습 시간 계산 |
+| `.cas/runs/<timestamp>_<car>_<kind>/` | 각 실행의 raw stdout/stderr, audit, validate summary |
+| `.cas/source_lists/selected_rlogs*.txt` | Windows 명령줄 길이 제한 회피용 임시 rlog 목록 |
+| `.cas/candidates/<CAR>_<kind>_candidate.json` | GUI 기본 candidate 출력 |
+| `.cas/validations/<CAR>_<kind>_validate.json` | GUI 기본 validate summary 출력 |
+
+GUI의 학습 대상 콤보는 `.cas/index.json`과 `.cas/train_runs.json`을 합쳐 총 로그 시간, 최근 로컬 학습 시간, 신규 시간을 표시한다.
+`tools/cas/cloud_sync.py`는 아직 서버 통신을 하지 않고, 로컬 manifest 생성과 향후 cloud cache 경로 정책만 정의한다.
+Phase 6 기준 서버 구현은 `tools/cas/server/carrot_upload_server.py`에 두고, LXC의 `/opt/carrot-upload/server.py`로 배포한다.
+
 ---
 
 ## Params 키 일람 (CAS 관련)
@@ -136,7 +163,7 @@ selfdrive/carrot/cas/
 | `CAS` | bool | 메인 토글 |
 | `CASDebug` | bool | HUD 위젯 표시 |
 | `CASModelName` | str | 매칭된 모델 이름 (런타임이 기록) |
-| `CASModelHours` | str | 모델 학습 시간 (HUD용) |
+| `CASModelHours` | str | 현재 적용 모델 학습 시간 (차량명 `,CAS 6h` 및 HUD용) |
 | `CASAlphaOverride` | int | 0=JSON default, 1~50=0.01~0.50 override |
 | `CarrotDataUpload` | bool | 업로더 토글 |
 | `CarrotUploadWifiOnly` | bool | WiFi 한정 게이트 |
@@ -184,7 +211,7 @@ CAS를 폐기하려면 다음 순서로 정리. 모든 변경은 file/line 단�
    - `selfdrive/ui/SConscript`: `"cas_debug.cc"` 1줄 제거
    - `selfdrive/ui/carrot.cc:3031`: `#include cas_debug.h` 4줄(주석 포함) 제거
    - `selfdrive/ui/carrot.cc:3094`: `ui_draw_cas_overlay(s);` 호출 1줄 제거
-   - `selfdrive/ui/carrot.cc:3701-3703`: `,CAS` 차량명 접미 3줄 제거
+   - `selfdrive/ui/carrot.cc`: `,CAS 6h` 차량명 접미 제거
 
 3. **cereal 측 (옵션)**
    - `cereal/log.capnp`의 `LateralTorqueState.casLog` 필드 → 그대로 둬도 무해(없으면 빈 list)

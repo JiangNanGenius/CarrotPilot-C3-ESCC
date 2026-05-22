@@ -22,10 +22,14 @@ from tkinter import filedialog, messagebox, ttk
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
   sys.path.insert(0, str(REPO_ROOT))
+from tools.cas import cloud_sync
+
 CONFIG_PATH = Path.home() / ".cas_train" / "gui_config.json"
 LOG_FILENAMES = {"rlog", "rlog.bz2", "rlog.zst", "raw_log.bz2"}
 LOG_SUFFIXES = ("--rlog", "--rlog.bz2", "--rlog.zst", "--raw_log.bz2")
-RLOG_INDEX_VERSION = 2
+RLOG_INDEX_VERSION = 3
+TRAIN_RUNS_VERSION = 1
+TRAIN_RUNS_MAX_ITEMS = 500
 LOG_MAX_LINES = 1500
 
 
@@ -208,6 +212,10 @@ def _index_path(rlogs: str) -> Path:
   return _cas_dir(rlogs) / "index.json"
 
 
+def _train_runs_path(rlogs: str) -> Path:
+  return _cas_dir(rlogs) / "train_runs.json"
+
+
 def _load_rlog_index(rlogs: str) -> dict:
   path = _index_path(rlogs)
   try:
@@ -220,12 +228,47 @@ def _load_rlog_index(rlogs: str) -> dict:
   return {"version": RLOG_INDEX_VERSION, "root": str(Path(rlogs).expanduser()), "logs": {}}
 
 
+def _load_train_runs(rlogs: str) -> dict:
+  path = _train_runs_path(rlogs)
+  try:
+    if path.exists():
+      data = json.loads(path.read_text(encoding="utf-8"))
+      if isinstance(data.get("runs"), list):
+        return data
+  except Exception:
+    pass
+  return {"version": TRAIN_RUNS_VERSION, "root": str(Path(rlogs).expanduser()), "runs": []}
+
+
+def _save_train_runs(rlogs: str, data: dict):
+  root = _cas_dir(rlogs)
+  root.mkdir(parents=True, exist_ok=True)
+  data["version"] = TRAIN_RUNS_VERSION
+  data["root"] = str(Path(rlogs).expanduser())
+  data["updated_at"] = datetime.now().isoformat(timespec="seconds")
+  runs = list(data.get("runs", []))
+  data["runs"] = runs[-TRAIN_RUNS_MAX_ITEMS:]
+  _train_runs_path(rlogs).write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def _save_rlog_index(rlogs: str, index: dict):
   root = _cas_dir(rlogs)
   root.mkdir(parents=True, exist_ok=True)
   index["version"] = RLOG_INDEX_VERSION
   index["root"] = str(Path(rlogs).expanduser())
   _index_path(rlogs).write_text(json.dumps(index, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def steer_kind_from_car_params(car_params) -> str:
+  value = getattr(car_params, "steerControlType", "")
+  text = str(value).lower()
+  try:
+    numeric = int(value)
+  except Exception:
+    numeric = None
+  if text.endswith(".angle") or text == "angle" or numeric == 1:
+    return "angle"
+  return "torque"
 
 
 def read_log_identity(source: str, max_messages: int = 30000, progress=None) -> dict:
@@ -249,6 +292,7 @@ def read_log_identity(source: str, max_messages: int = 30000, progress=None) -> 
   last_t = None
   car = ""
   eps_hash = ""
+  kind = ""
   message_count = 0
   error = ""
   reader = None
@@ -268,8 +312,9 @@ def read_log_identity(source: str, max_messages: int = 30000, progress=None) -> 
       if msg.which() == "carParams":
         car = str(getattr(msg.carParams, "carFingerprint", "")).strip()
         eps_hash = eps_firmware_hash(msg.carParams.carFw)
+        kind = steer_kind_from_car_params(msg.carParams)
         if progress is not None:
-          progress(f"carParams 발견: {car or '차량 미확인'}")
+          progress(f"carParams 발견: {car or '차량 미확인'} / {kind}")
         break
       if index >= max_messages:
         break
@@ -286,6 +331,7 @@ def read_log_identity(source: str, max_messages: int = 30000, progress=None) -> 
   return {
     "car": car,
     "eps_firmware_hash": eps_hash,
+    "kind": kind,
     "duration_hours": 0.0 if first_t is None or last_t is None else max(0.0, last_t - first_t) / 3600.0,
     "message_count": message_count,
     "error": error,
@@ -298,11 +344,13 @@ def summarize_index(index: dict) -> dict:
   for source, meta in index.get("logs", {}).items():
     car = str(meta.get("car", "")).strip()
     eps_hash = str(meta.get("eps_firmware_hash", "")).strip()
+    kind = str(meta.get("kind", "")).strip() or "torque"
     if not car and not eps_hash:
       continue
-    key = f"{car}|{eps_hash}"
+    key = f"{car}|{kind}|{eps_hash}"
     group = groups.setdefault(key, {
       "car": car,
+      "kind": kind,
       "eps_firmware_hash": eps_hash,
       "sources": [],
       "duration_hours": 0.0,
@@ -311,6 +359,33 @@ def summarize_index(index: dict) -> dict:
     group["duration_hours"] += float(meta.get("duration_hours", 0.0))
 
   return groups
+
+
+def summarize_train_runs(rlogs: str) -> dict:
+  summary = {}
+  if not rlogs:
+    return summary
+  data = _load_train_runs(rlogs)
+  for run in data.get("runs", []):
+    car = str(run.get("car_key") or run.get("car") or "").strip()
+    kind = str(run.get("kind") or "torque").strip() or "torque"
+    if not car:
+      continue
+    key = f"{car}|{kind}"
+    item = summary.setdefault(key, {
+      "trained_hours": 0.0,
+      "run_count": 0,
+      "latest_at": "",
+      "latest_run_id": "",
+    })
+    hours = float(run.get("trained_on_hours", 0.0) or 0.0)
+    item["trained_hours"] = max(float(item.get("trained_hours", 0.0)), hours)
+    item["run_count"] = int(item.get("run_count", 0)) + 1
+    created_at = str(run.get("created_at", ""))
+    if created_at >= str(item.get("latest_at", "")):
+      item["latest_at"] = created_at
+      item["latest_run_id"] = str(run.get("train_run_id", ""))
+  return summary
 
 
 def _safe_component(value: str, fallback: str = "unknown") -> str:
@@ -330,6 +405,11 @@ def _route_key_from_source(source: str) -> str:
     return ""
   parts = segment.rsplit("--", 1)
   return parts[0] if len(parts) == 2 else segment
+
+
+def _segment_key_from_source(source: str) -> str:
+  segment = Path(source).parent.name
+  return segment if "--" in segment else str(Path(source))
 
 
 def _is_relative_to(path: Path, parent: Path) -> bool:
@@ -444,6 +524,7 @@ def scan_rlog_metadata(rlogs: str, min_file_age_sec: float = 0.0,
   selected, source_count = _fast_log_sources(rlogs, min_file_age_sec, max(1, max_sources))
   cars = Counter()
   eps_hashes = Counter()
+  kinds = Counter()
   message_counts = Counter()
   errors = []
   first_t = None
@@ -463,6 +544,7 @@ def scan_rlog_metadata(rlogs: str, min_file_age_sec: float = 0.0,
           car = str(getattr(msg.carParams, "carFingerprint", "")).strip()
           if car:
             cars[car] += 1
+          kinds[steer_kind_from_car_params(msg.carParams)] += 1
           eps_hash = eps_firmware_hash(msg.carParams.carFw)
           if eps_hash:
             eps_hashes[eps_hash] += 1
@@ -479,20 +561,23 @@ def scan_rlog_metadata(rlogs: str, min_file_age_sec: float = 0.0,
     "scanned_count": scanned_count,
     "cars": cars,
     "eps_hashes": eps_hashes,
+    "kinds": kinds,
     "message_counts": message_counts,
     "duration_hours": 0.0 if first_t is None or last_t is None else max(0.0, last_t - first_t) / 3600.0,
     "errors": errors,
   }
 
 
-def default_candidate_name(car: str) -> str:
+def default_candidate_name(car: str, kind: str = "torque") -> str:
   safe_car = car.strip() or "CAS_AUTO"
-  return f"{safe_car}_candidate.json"
+  safe_kind = kind.strip() or "torque"
+  return f"{safe_car}_{safe_kind}_candidate.json"
 
 
-def default_validate_name(car: str) -> str:
+def default_validate_name(car: str, kind: str = "torque") -> str:
   safe_car = car.strip() or "CAS_AUTO"
-  return f"{safe_car}_validate.json"
+  safe_kind = kind.strip() or "torque"
+  return f"{safe_car}_{safe_kind}_validate.json"
 
 
 # Mapping from python import name → pip package name (when they differ).
@@ -544,6 +629,7 @@ class CASGui(tk.Tk):
     self.backend_var = tk.StringVar(value=config.get("backend", "auto"))
     self.device_var = tk.StringVar(value=config.get("device", "auto"))
     self.use_wsl_var = tk.BooleanVar(value=bool(config.get("use_wsl", os.name == "nt")))
+    self.cloud_raw_policy_var = tk.StringVar(value=config.get("cloud_raw_policy", cloud_sync.DEFAULT_LOCAL_RAW_POLICY))
     self.candidate_var = tk.StringVar(value=config.get("candidate", self._derive_candidate_path(last_rlogs, last_car)))
     self.validate_var = tk.StringVar(value=config.get("validate_json", self._derive_validate_path(last_rlogs, last_car)))
     self.gpu_status_var = tk.StringVar(value="PyTorch/CUDA: checking...")
@@ -553,11 +639,13 @@ class CASGui(tk.Tk):
     self.group_var = tk.StringVar(value="")
     self.group_map: dict[str, dict] = {}
     self.index_data: dict = {}
+    self.local_manifest: dict = {}
     self.scan_running = False
     self.index_running = False
     self.index_cancel = threading.Event()
 
     self._build()
+    self.kind_var.trace_add("write", lambda *_args: self._refresh_derived_paths(self.rlogs_var.get().strip(), self.car_var.get().strip()))
     self.after(100, self._poll)
     self.after(300, self.detect_backend)
     if last_rlogs and Path(last_rlogs).is_dir():
@@ -567,26 +655,36 @@ class CASGui(tk.Tk):
     # Save config on close.
     self.protocol("WM_DELETE_WINDOW", self._on_close)
 
-  @staticmethod
-  def _derive_candidate_path(rlogs: str, car: str) -> str:
+  def _derive_candidate_path(self, rlogs: str, car: str) -> str:
     if not rlogs:
       return ""
-    return str(_cas_dir(rlogs) / "candidates" / default_candidate_name(car))
+    return str(_cas_dir(rlogs) / "candidates" / default_candidate_name(car, self.kind_var.get()))
 
-  @staticmethod
-  def _derive_validate_path(rlogs: str, car: str) -> str:
+  def _derive_validate_path(self, rlogs: str, car: str) -> str:
     if not rlogs:
       return ""
-    return str(_cas_dir(rlogs) / "validations" / default_validate_name(car))
+    return str(_cas_dir(rlogs) / "validations" / default_validate_name(car, self.kind_var.get()))
 
   @staticmethod
-  def _log_info_text(car: str, eps_hash: str, source_count: int, scanned_count: int, duration_hours: float) -> str:
-    del duration_hours
+  def _log_info_text(car: str, eps_hash: str, source_count: int, scanned_count: int,
+                     duration_hours: float, kind: str = "", trained_hours: float = 0.0,
+                     run_count: int = 0) -> str:
     car_text = car.strip() if car.strip() else "감지 전"
+    kind_text = kind.strip() if kind.strip() else "감지 전"
     eps_text = eps_hash.strip() if eps_hash.strip() else "감지 전"
     if source_count > 0:
-      return f"감지된 차량: {car_text} / EPS: {eps_text} / 로그: {source_count}개 중 {scanned_count}개 빠른 확인"
-    return f"감지된 차량: {car_text} / EPS: {eps_text} / 학습 시작 후 자동으로 확정됩니다."
+      if duration_hours > 0.0:
+        new_hours = max(0.0, duration_hours - trained_hours)
+        learned = f"학습 {trained_hours:.1f}h"
+        if run_count > 0:
+          learned += f" ({run_count}회)"
+        return (
+          f"감지된 차량: {car_text} / 종류: {kind_text} / EPS: {eps_text} / "
+          f"로그: {source_count}개 중 {scanned_count}개 / "
+          f"총 {duration_hours:.1f}h · {learned} · 신규 {new_hours:.1f}h · 상태: 학습 준비됨"
+        )
+      return f"감지된 차량: {car_text} / 종류: {kind_text} / EPS: {eps_text} / 로그: {source_count}개 중 {scanned_count}개 빠른 확인"
+    return f"감지된 차량: {car_text} / 종류: {kind_text} / EPS: {eps_text} / 학습 시작 후 자동으로 확정됩니다."
 
   def _save_config(self):
     try:
@@ -609,6 +707,7 @@ class CASGui(tk.Tk):
         "backend": self.backend_var.get(),
         "device": self.device_var.get(),
         "use_wsl": self.use_wsl_var.get(),
+        "cloud_raw_policy": self.cloud_raw_policy_var.get(),
       }
       CONFIG_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
     except Exception:
@@ -776,7 +875,7 @@ class CASGui(tk.Tk):
 
     opts = ttk.LabelFrame(root, text="학습 옵션", padding=10)
     opts.pack(fill=tk.X, pady=(0, 8))
-    for i in range(9):
+    for i in range(10):
       opts.columnconfigure(i, weight=1)
     self._small(opts, 0, "Epochs", self.epochs_var)
     self._small(opts, 1, "Stride", self.stride_var)
@@ -786,7 +885,8 @@ class CASGui(tk.Tk):
     self._small(opts, 5, "Alpha", self.alpha_var)
     self._combo(opts, 6, "Backend", self.backend_var, ("auto", "numpy", "torch"), small=True)
     self._small(opts, 7, "Device", self.device_var)
-    ttk.Checkbutton(opts, text="WSL", variable=self.use_wsl_var).grid(row=0, column=8, sticky="w", padx=4)
+    self._combo(opts, 8, "Raw cache", self.cloud_raw_policy_var, cloud_sync.LOCAL_RAW_POLICIES, small=True)
+    ttk.Checkbutton(opts, text="WSL", variable=self.use_wsl_var).grid(row=0, column=9, sticky="w", padx=4)
 
     manual = ttk.Frame(root)
     manual.pack(fill=tk.X)
@@ -958,7 +1058,7 @@ class CASGui(tk.Tk):
               stats["errors"] += 1
           except Exception as e:
             sig = _log_signature(source)
-            item = {**sig, "car": "", "eps_firmware_hash": "", "duration_hours": 0.0,
+            item = {**sig, "car": "", "eps_firmware_hash": "", "kind": "", "duration_hours": 0.0,
                     "message_count": 0, "error": repr(e),
                     "indexed_at": datetime.now().isoformat(timespec="seconds")}
             action = "error"
@@ -970,9 +1070,10 @@ class CASGui(tk.Tk):
           self.after(0, lambda done=completed, s=dict(stats): self._index_progress(done, s))
           if completed % 10 == 0 or action == "error":
             car_label = str(item.get("car", "")).strip() or "차량정보 대기"
+            kind_label = str(item.get("kind", "")).strip() or "kind 대기"
             eps_label = str(item.get("eps_firmware_hash", "")).strip() or "eps 대기"
             self.queue.put(
-              f"  [읽기 {completed}/{total}] {car_label} / {eps_label} / "
+              f"  [읽기 {completed}/{total}] {car_label} / {kind_label} / {eps_label} / "
               f"{item.get('message_count', 0)} msg / {read_elapsed:.2f}s\n"
             )
     finally:
@@ -981,17 +1082,20 @@ class CASGui(tk.Tk):
         raise IndexCancelled()
 
     known_counts = Counter(
-      (str(item.get("car", "")).strip(), str(item.get("eps_firmware_hash", "")).strip())
+      (str(item.get("car", "")).strip(),
+       str(item.get("kind", "")).strip() or "torque",
+       str(item.get("eps_firmware_hash", "")).strip())
       for _source, (_sig, item, _action, _elapsed) in read_results.items()
       if str(item.get("car", "")).strip()
     )
     route_identity = {}
     for source, (_sig, item, _action, _elapsed) in read_results.items():
       car = str(item.get("car", "")).strip()
+      kind = str(item.get("kind", "")).strip() or "torque"
       eps_hash = str(item.get("eps_firmware_hash", "")).strip()
       route_key = _route_key_from_source(source)
       if route_key and car:
-        route_identity[route_key] = {"car": car, "eps_firmware_hash": eps_hash}
+        route_identity[route_key] = {"car": car, "kind": kind, "eps_firmware_hash": eps_hash}
     inferred = 0
     for source, (_sig, item, _action, _elapsed) in read_results.items():
       if str(item.get("car", "")).strip():
@@ -1000,13 +1104,14 @@ class CASGui(tk.Tk):
       if not identity:
         continue
       item["car"] = identity["car"]
+      item["kind"] = identity["kind"]
       item["eps_firmware_hash"] = identity["eps_firmware_hash"]
       item["identity_inferred_from_route"] = True
       inferred += 1
     if inferred:
       self.queue.put(f"  route 기준 차량정보 보강: {inferred}개\n")
     if known_counts:
-      (default_car, default_eps), default_count = known_counts.most_common(1)[0]
+      (default_car, default_kind, default_eps), default_count = known_counts.most_common(1)[0]
       known_total = sum(known_counts.values())
       if default_car and known_total >= 20 and default_count / max(known_total, 1) >= 0.9:
         fallback_inferred = 0
@@ -1014,11 +1119,12 @@ class CASGui(tk.Tk):
           if str(item.get("car", "")).strip():
             continue
           item["car"] = default_car
+          item["kind"] = default_kind
           item["eps_firmware_hash"] = default_eps
           item["identity_inferred_from_collection"] = True
           fallback_inferred += 1
         if fallback_inferred:
-          self.queue.put(f"  폴더 기준 차량정보 보강: {fallback_inferred}개 ({default_car} / {default_eps})\n")
+          self.queue.put(f"  폴더 기준 차량정보 보강: {fallback_inferred}개 ({default_car} / {default_kind} / {default_eps})\n")
 
     self.queue.put("  읽기 완료, 파일 정리 중...\n")
     completed = 0
@@ -1030,6 +1136,7 @@ class CASGui(tk.Tk):
       sig, item, action, _read_elapsed = read_results[source]
       item["source"] = source
       car = str(item.get("car", "")).strip()
+      item["kind"] = str(item.get("kind", "")).strip() or ("torque" if car else "")
       eps_hash = str(item.get("eps_firmware_hash", "")).strip()
       final_source = source
       if car:
@@ -1081,13 +1188,14 @@ class CASGui(tk.Tk):
       "error": "오류",
     }
     car = str(item.get("car", "")).strip() or "차량 미확인"
+    kind = str(item.get("kind", "")).strip() or "kind 미확인"
     eps_hash = str(item.get("eps_firmware_hash", "")).strip() or "eps 미확인"
     src_name = str(Path(source))
     if action == "move":
-      return f"  [{idx}/{total}] {labels[action]} {car} / {eps_hash}\n    {src_name}\n    -> {final_source}\n"
+      return f"  [{idx}/{total}] {labels[action]} {car} / {kind} / {eps_hash}\n    {src_name}\n    -> {final_source}\n"
     if action == "error":
       return f"  [{idx}/{total}] 오류 {src_name}\n    {item.get('error')}\n"
-    return f"  [{idx}/{total}] {labels.get(action, action)} {car} / {eps_hash} / {src_name}\n"
+    return f"  [{idx}/{total}] {labels.get(action, action)} {car} / {kind} / {eps_hash} / {src_name}\n"
 
   def _index_progress(self, done: int, stats: dict):
     total = int(stats.get("total", 0))
@@ -1127,15 +1235,27 @@ class CASGui(tk.Tk):
     self.raw_log_var.set(f"인덱스: {_index_path(rlogs)}")
     self._progress_done()
     self.queue.put(f"완료: 총 {total}개, 새로 읽음 {read}, 캐시 {cached}, 이동 {moved}, 폴더정리 {merged_dirs}, 오류 {errors}\n")
+    self.queue.put(f"local manifest: {cloud_sync.local_manifest_path(rlogs)}\n")
 
   def _refresh_groups(self):
+    rlogs = self.rlogs_var.get().strip()
+    self._refresh_local_manifest(rlogs)
     groups = summarize_index(self.index_data)
+    run_summary = summarize_train_runs(rlogs)
     labels = []
     self.group_map = {}
-    for group in sorted(groups.values(), key=lambda g: (-len(g["sources"]), g["car"], g["eps_firmware_hash"])):
+    for group in sorted(groups.values(), key=lambda g: (-len(g["sources"]), g["car"], g["kind"], g["eps_firmware_hash"])):
       car = group["car"] or "UNKNOWN_CAR"
+      kind = group["kind"] or "torque"
       eps_hash = group["eps_firmware_hash"] or "unknown"
-      label = f"{car} / eps_{eps_hash} / {len(group['sources'])}개"
+      history = run_summary.get(f"{car}|{kind}", {})
+      trained_hours = float(history.get("trained_hours", 0.0) or 0.0)
+      run_count = int(history.get("run_count", 0) or 0)
+      group["trained_hours"] = trained_hours
+      group["train_run_count"] = run_count
+      group["latest_train_run_id"] = str(history.get("latest_run_id", ""))
+      total_hours = float(group.get("duration_hours", 0.0) or 0.0)
+      label = f"{car} / {kind} / {total_hours:.1f}h (학습 {trained_hours:.1f}h) / eps_{eps_hash} / {len(group['sources'])}개"
       labels.append(label)
       self.group_map[label] = group
 
@@ -1149,11 +1269,26 @@ class CASGui(tk.Tk):
       self.group_var.set("")
       self.log_info_var.set(self._log_info_text("", "", 0, 0, 0.0))
 
+  def _refresh_local_manifest(self, rlogs: str):
+    if not rlogs:
+      self.local_manifest = {}
+      return
+    try:
+      self.local_manifest = cloud_sync.build_local_manifest(
+        self.index_data,
+        _load_train_runs(rlogs),
+        raw_policy=self.cloud_raw_policy_var.get(),
+      )
+      cloud_sync.save_manifest(cloud_sync.local_manifest_path(rlogs), self.local_manifest)
+    except Exception as e:
+      self.queue.put(f"  local manifest 저장 실패: {e}\n")
+
   def _on_group_selected(self):
     group = self.group_map.get(self.group_var.get())
     if not group:
       return
     car = str(group.get("car", "")).strip()
+    kind = str(group.get("kind", "")).strip()
     eps_hash = str(group.get("eps_firmware_hash", "")).strip()
     if car:
       self.car_var.set(car)
@@ -1163,16 +1298,47 @@ class CASGui(tk.Tk):
         self.car_aliases_var.set(", ".join(aliases))
     if eps_hash:
       self.eps_hash_var.set(eps_hash)
+    if kind in ("torque", "angle"):
+      self.kind_var.set(kind)
     self._set_default_output_paths(self.rlogs_var.get().strip(), car)
     self.log_info_var.set(self._log_info_text(car, eps_hash, len(group.get("sources", [])),
-                                             len(group.get("sources", [])), float(group.get("duration_hours", 0.0))))
+                                             len(group.get("sources", [])), float(group.get("duration_hours", 0.0)),
+                                             kind, float(group.get("trained_hours", 0.0)),
+                                             int(group.get("train_run_count", 0))))
 
   def _selected_sources(self) -> list[str]:
     group = self.group_map.get(self.group_var.get())
     if group and group.get("sources"):
-      return list(group["sources"])
+      sources = list(group["sources"])
+    else:
+      rlogs = self.rlogs_var.get().strip()
+      sources = [rlogs] if rlogs else []
+    try:
+      max_sources = int(self.max_sources_var.get().strip() or 0)
+    except ValueError:
+      max_sources = 0
+    if max_sources > 0:
+      sources = sources[:max_sources]
+    return sources
+
+  def _write_rlog_list(self, sources: list[str], use_wsl: bool) -> str:
     rlogs = self.rlogs_var.get().strip()
-    return [rlogs] if rlogs else []
+    base = self.current_run_dir if self.current_run_dir is not None else _cas_dir(rlogs) / "source_lists"
+    base.mkdir(parents=True, exist_ok=True)
+    suffix = "_wsl" if use_wsl else ""
+    path = base / f"selected_rlogs{suffix}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.txt"
+    lines = [windows_to_wsl(source) if use_wsl else source for source in sources]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return windows_to_wsl(str(path)) if use_wsl else str(path)
+
+  def _rlog_input_args(self) -> list[str]:
+    sources = self._selected_sources()
+    use_wsl = self.use_wsl_var.get()
+    converted = [windows_to_wsl(source) if use_wsl else source for source in sources]
+    command_chars = sum(len(source) + 1 for source in converted)
+    if len(converted) > 8 or command_chars > 3000:
+      return ["--rlog-list", self._write_rlog_list(sources, use_wsl)]
+    return ["--rlogs", *converted]
 
   def _scan_logs_sync(self, show_errors: bool = True) -> bool:
     rlogs = self.rlogs_var.get().strip()
@@ -1211,8 +1377,10 @@ class CASGui(tk.Tk):
   def _apply_scan_result(self, result: dict):
     cars: Counter = result.get("cars", Counter())
     eps_hashes: Counter = result.get("eps_hashes", Counter())
+    kinds: Counter = result.get("kinds", Counter())
     car = cars.most_common(1)[0][0] if cars else ""
     eps_hash = eps_hashes.most_common(1)[0][0] if eps_hashes else ""
+    kind = kinds.most_common(1)[0][0] if kinds else ""
 
     if car:
       self.car_var.set(car)
@@ -1222,6 +1390,8 @@ class CASGui(tk.Tk):
         self.car_aliases_var.set(", ".join(aliases))
     if eps_hash:
       self.eps_hash_var.set(eps_hash)
+    if kind in ("torque", "angle"):
+      self.kind_var.set(kind)
 
     self.log_info_var.set(self._log_info_text(
       car,
@@ -1229,6 +1399,7 @@ class CASGui(tk.Tk):
       int(result.get("source_count", 0)),
       int(result.get("scanned_count", 0)),
       float(result.get("duration_hours", 0.0)),
+      kind,
     ))
     if car and self.rlogs_var.get().strip():
       self._refresh_derived_paths(self.rlogs_var.get().strip(), car)
@@ -1287,9 +1458,11 @@ class CASGui(tk.Tk):
     if ok and summary_path:
       self._print_summary(summary_path)
       self._copy_summary(summary_path)
+      self._record_train_run(summary_path, commands)
     self.after(0, self.status_var.set, "완료" if ok else "실패")
     if ok:
       self.after(0, self._progress_done)
+      self.after(0, self._refresh_groups)
     # Triggered when _install_deps just ran — re-probe so GPU/CUDA status
     # refreshes without the user clicking Detect GPU again.
     self.after(0, self._maybe_redetect_after_install)
@@ -1359,9 +1532,10 @@ class CASGui(tk.Tk):
 
   def _make_run_dir(self) -> Path:
     car = "".join(c if c.isalnum() or c in ("_", "-") else "_" for c in self.car_var.get().strip()) or "setup"
+    kind = "".join(c if c.isalnum() or c in ("_", "-") else "_" for c in self.kind_var.get().strip()) or "torque"
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     base = _cas_dir(self.rlogs_var.get().strip()) if self.rlogs_var.get().strip() else CONFIG_PATH.parent
-    run_dir = base / "runs" / f"{stamp}_{car}"
+    run_dir = base / "runs" / f"{stamp}_{car}_{kind}"
     run_dir.mkdir(parents=True, exist_ok=True)
     return run_dir
 
@@ -1378,6 +1552,7 @@ class CASGui(tk.Tk):
       f.write(text)
 
   def _write_run_metadata(self, run_dir: Path, commands: list[tuple[list[str], bool, str]]):
+    selected_sources = self._selected_sources()
     data = {
       "started_at": datetime.now().isoformat(timespec="seconds"),
       "repo": str(self._repo()),
@@ -1397,7 +1572,11 @@ class CASGui(tk.Tk):
       "backend": self.backend_var.get(),
       "device": self.device_var.get(),
       "use_wsl": self.use_wsl_var.get(),
+      "cloud_raw_policy": self.cloud_raw_policy_var.get(),
       "gpu_status": self.gpu_status_var.get(),
+      "selected_source_count": len(selected_sources),
+      "selected_route_count": len({k for k in (_route_key_from_source(s) for s in selected_sources) if k}),
+      "selected_segment_count": len({_segment_key_from_source(s) for s in selected_sources}),
       "commands": [{"label": label, "use_wsl_capnp": use_wsl_capnp, "cmd": cmd}
                    for cmd, use_wsl_capnp, label in commands],
     }
@@ -1410,6 +1589,63 @@ class CASGui(tk.Tk):
     src = Path(summary_path)
     if src.exists():
       shutil.copyfile(src, self.current_run_dir / "validate_summary.json")
+
+  def _record_train_run(self, summary_path: str, commands: list[tuple[list[str], bool, str]]):
+    if self.current_run_dir is None:
+      return
+    rlogs = self.rlogs_var.get().strip()
+    if not rlogs:
+      return
+
+    summary_file = Path(summary_path)
+    if not summary_file.exists():
+      return
+
+    try:
+      summary = json.loads(summary_file.read_text(encoding="utf-8"))
+    except Exception as e:
+      self.queue.put(f"\n[학습 이력]\n검증 요약을 읽지 못해 이력 기록을 건너뜁니다: {e}\n")
+      return
+
+    candidate_payload = {}
+    candidate_file = Path(self.candidate_var.get().strip())
+    if candidate_file.exists():
+      try:
+        candidate_payload = json.loads(candidate_file.read_text(encoding="utf-8"))
+      except Exception:
+        candidate_payload = {}
+
+    has_train_step = any("Train" in label for _cmd, _use_wsl, label in commands)
+    has_trained_candidate = "trained_on_hours" in candidate_payload
+    if not has_train_step and not has_trained_candidate:
+      return
+
+    selected_sources = self._selected_sources()
+    car = str(candidate_payload.get("car") or summary.get("car") or self.car_var.get().strip())
+    kind = str(candidate_payload.get("kind") or summary.get("kind") or self.kind_var.get()).strip() or "torque"
+    hours = float(candidate_payload.get("trained_on_hours", summary.get("duration_hours", 0.0)) or 0.0)
+    created_at = datetime.now().isoformat(timespec="seconds")
+    run = {
+      "train_run_id": self.current_run_dir.name,
+      "created_at": created_at,
+      "run_dir": str(self.current_run_dir),
+      "car_key": car,
+      "kind": kind,
+      "trained_on_hours": hours,
+      "trained_rlog_count": int(candidate_payload.get("trained_rlog_count", summary.get("source_count", len(selected_sources))) or 0),
+      "trained_route_count": len({k for k in (_route_key_from_source(s) for s in selected_sources) if k}),
+      "trained_segment_count": len({_segment_key_from_source(s) for s in selected_sources}),
+      "candidate": str(candidate_file),
+      "validate_json": str(summary_file),
+      "grade_source": "validate_summary",
+    }
+    try:
+      data = _load_train_runs(rlogs)
+      data.setdefault("runs", []).append(run)
+      _save_train_runs(rlogs, data)
+      self.queue.put(f"\n[학습 이력]\n{_train_runs_path(rlogs)} 기록 완료: {car} / {kind} / {hours:.2f}h\n")
+    except Exception as e:
+      self.queue.put(f"\n[학습 이력]\n기록 실패: {e}\n")
 
   def _limit_args(self):
     args = []
@@ -1429,12 +1665,11 @@ class CASGui(tk.Tk):
     return args
 
   def _train_cmd(self):
-    rlog_args = [windows_to_wsl(source) if self.use_wsl_var.get() else source for source in self._selected_sources()]
     cmd = ["python3", "tools/cas/train.py"]
     if self.car_var.get().strip():
       cmd += ["--car", self.car_var.get().strip()]
     cmd += [
-      "--rlogs", *rlog_args,
+      *self._rlog_input_args(),
       "--kind", self.kind_var.get(),
       "--output", windows_to_wsl(self.candidate_var.get()) if self.use_wsl_var.get() else self.candidate_var.get(),
       "--epochs", self.epochs_var.get(),
@@ -1450,11 +1685,10 @@ class CASGui(tk.Tk):
     return cmd
 
   def _validate_cmd(self):
-    rlog_args = [windows_to_wsl(source) if self.use_wsl_var.get() else source for source in self._selected_sources()]
     return [
       "python3", "tools/cas/validate.py",
       "--model", windows_to_wsl(self.candidate_var.get()) if self.use_wsl_var.get() else self.candidate_var.get(),
-      "--rlogs", *rlog_args,
+      *self._rlog_input_args(),
       "--sample-stride", self.stride_var.get(),
       "--min-file-age-sec", self.age_var.get(),
       "--workers", self.workers_var.get(),
@@ -1696,9 +1930,11 @@ class CASGui(tk.Tk):
       if detected_eps:
         self.after(0, self.eps_hash_var.set, detected_eps)
       if detected_car or detected_eps:
+        detected_kind = str(data.get("kind") or self.kind_var.get()).strip()
         self.after(0, self.log_info_var.set,
                    self._log_info_text(detected_car, detected_eps, int(data.get("source_count", 0)),
-                                       int(data.get("source_count", 0)), float(data.get("duration_hours", 0.0))))
+                                       int(data.get("source_count", 0)), float(data.get("duration_hours", 0.0)),
+                                       detected_kind, float(data.get("duration_hours", 0.0)), 1))
 
       hours = float(data.get("duration_hours", 0.0))
       samples = int(data.get("usable_samples", 0))

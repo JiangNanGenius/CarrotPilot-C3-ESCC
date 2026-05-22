@@ -171,6 +171,7 @@ class SourceCollectResult:
   triage_counts: Counter
   detected_car_names: Counter
   eps_firmware_hashes: Counter
+  steer_control_types: Counter
   first_t: float | None
   last_t: float | None
   elapsed_s: float
@@ -260,6 +261,18 @@ class NumpyMLP:
           W -= lr * (m_w[i] / (1.0 - beta1 ** step)) / (np.sqrt(v_w[i] / (1.0 - beta2 ** step)) + eps)
           b -= lr * (m_b[i] / (1.0 - beta1 ** step)) / (np.sqrt(v_b[i] / (1.0 - beta2 ** step)) + eps)
           self.layers[i] = (W.astype(np.float32), b.astype(np.float32), activation)
+
+
+def steer_kind_from_car_params(car_params) -> str:
+  value = getattr(car_params, "steerControlType", "")
+  text = str(value).lower()
+  try:
+    numeric = int(value)
+  except Exception:
+    numeric = None
+  if text.endswith(".angle") or text == "angle" or numeric == 1:
+    return "angle"
+  return "torque"
 
 
 def train_torch_mlp(x, y, weights, input_size: int, hidden_sizes: tuple[int, ...],
@@ -361,6 +374,26 @@ def expand_sources(sources: list[str], min_file_age_sec: float = 0.0) -> list[st
   return expanded
 
 
+def read_rlog_list_files(paths: list[str]) -> list[str]:
+  sources = []
+  for list_path in paths:
+    path = Path(list_path).expanduser()
+    with open(path, "r", encoding="utf-8") as f:
+      for line in f:
+        source = line.strip()
+        if source and not source.startswith("#"):
+          sources.append(source)
+  return sources
+
+
+def resolve_rlog_inputs(rlogs: list[str], rlog_lists: list[str]) -> list[str]:
+  sources = list(rlogs or [])
+  sources.extend(read_rlog_list_files(rlog_lists or []))
+  if not sources:
+    raise RuntimeError("No rlog inputs. Use --rlogs or --rlog-list.")
+  return sources
+
+
 def source_inventory(sources: list[str]) -> list[dict]:
   inventory = []
   for source in sources:
@@ -434,6 +467,7 @@ def _collect_source(source: str, sample_stride: int,
       return SourceCollectResult(
         source, m["samples"], m["message_counts"], m["triage_counts"],
         m["detected_car_names"], m["eps_firmware_hashes"],
+        m["steer_control_types"],
         m["first_t"], m["last_t"], m["elapsed_s"],
         lateral_delay_sum=m["lateral_delay_sum"],
         lateral_delay_count=m["lateral_delay_count"],
@@ -450,6 +484,7 @@ def _collect_source(source: str, sample_stride: int,
   triage = Counter()
   detected_car_names = Counter()
   eps_hashes = Counter()
+  steer_control_types = Counter()
   lateral_delay_sum = 0.0
   lateral_delay_count = 0
   feature_state = CASFeatureState()
@@ -492,6 +527,7 @@ def _collect_source(source: str, sample_stride: int,
       car_name = str(getattr(msg.carParams, "carFingerprint", "")).strip()
       if car_name:
         detected_car_names[car_name] += 1
+      steer_control_types[steer_kind_from_car_params(msg.carParams)] += 1
       eps_hash = eps_firmware_hash(msg.carParams.carFw)
       if eps_hash:
         eps_hashes[eps_hash] += 1
@@ -536,7 +572,7 @@ def _collect_source(source: str, sample_stride: int,
     try:
       feature_cache.save(
         cache_dir, source, sample_stride,
-        samples, counts, triage, detected_car_names, eps_hashes,
+        samples, counts, triage, detected_car_names, eps_hashes, steer_control_types,
         first_t, last_t, elapsed,
         lateral_delay_sum, lateral_delay_count,
       )
@@ -544,7 +580,7 @@ def _collect_source(source: str, sample_stride: int,
       # Cache write failure is non-fatal — training still completes.
       print(f"[cache] save failed for {source}: {e}", flush=True)
   return SourceCollectResult(
-    source, samples, counts, triage, detected_car_names, eps_hashes,
+    source, samples, counts, triage, detected_car_names, eps_hashes, steer_control_types,
     first_t, last_t, elapsed,
     lateral_delay_sum=lateral_delay_sum,
     lateral_delay_count=lateral_delay_count,
@@ -553,12 +589,14 @@ def _collect_source(source: str, sample_stride: int,
 
 def _merge_source_result(result: SourceCollectResult, samples: list[Sample], counts: Counter,
                          detected_car_names: Counter, eps_hashes: Counter,
+                         steer_control_types: Counter,
                          first_t: float | None, last_t: float | None,
                          delay_acc: dict | None = None) -> tuple[float | None, float | None]:
   samples.extend(result.samples)
   counts.update(result.message_counts)
   detected_car_names.update(result.detected_car_names)
   eps_hashes.update(result.eps_firmware_hashes)
+  steer_control_types.update(result.steer_control_types)
   if result.first_t is not None:
     first_t = result.first_t if first_t is None else min(first_t, result.first_t)
   if result.last_t is not None:
@@ -572,11 +610,12 @@ def _merge_source_result(result: SourceCollectResult, samples: list[Sample], cou
 def collect_samples(sources: list[str], sample_stride: int,
                     audit: AuditLogger | None = None,
                     workers: int = 1,
-                    cache_dir: Path | None = None) -> tuple[list[Sample], float, Counter, Counter, Counter, dict]:
+                    cache_dir: Path | None = None) -> tuple[list[Sample], float, Counter, Counter, Counter, Counter, dict]:
   samples: list[Sample] = []
   counts = Counter()
   detected_car_names = Counter()
   eps_hashes = Counter()
+  steer_control_types = Counter()
   delay_acc = {"sum": 0.0, "count": 0}
   first_t = None
   last_t = None
@@ -597,6 +636,7 @@ def collect_samples(sources: list[str], sample_stride: int,
         try:
           result = future.result()
           first_t, last_t = _merge_source_result(result, samples, counts, detected_car_names, eps_hashes,
+                                                 steer_control_types,
                                                  first_t, last_t, delay_acc)
           if audit is not None:
             audit.source_end(source_index, total_sources, source, result.elapsed_s,
@@ -611,7 +651,7 @@ def collect_samples(sources: list[str], sample_stride: int,
             raise
     samples.sort(key=lambda sample: sample.t)
     duration_h = 0.0 if first_t is None or last_t is None else max(0.0, (last_t - first_t) / 3600.0)
-    return samples, duration_h, counts, eps_hashes, detected_car_names, delay_acc
+    return samples, duration_h, counts, eps_hashes, detected_car_names, steer_control_types, delay_acc
 
   for source_index, source in enumerate(sources, 1):
     if audit is not None:
@@ -619,6 +659,7 @@ def collect_samples(sources: list[str], sample_stride: int,
     try:
       result = _collect_source(source, sample_stride, cache_dir)
       first_t, last_t = _merge_source_result(result, samples, counts, detected_car_names, eps_hashes,
+                                             steer_control_types,
                                              first_t, last_t, delay_acc)
     except Exception as e:
       if audit is not None:
@@ -635,7 +676,7 @@ def collect_samples(sources: list[str], sample_stride: int,
         del result
 
   duration_h = 0.0 if first_t is None or last_t is None else max(0.0, (last_t - first_t) / 3600.0)
-  return samples, duration_h, counts, eps_hashes, detected_car_names, delay_acc
+  return samples, duration_h, counts, eps_hashes, detected_car_names, steer_control_types, delay_acc
 
 
 def build_targets(samples: list[Sample], offset_horizon: float, offset_gain: float,
@@ -714,12 +755,14 @@ def default_checkpoint_path(history_dir: Path, car: str, kind: str, trained_at: 
 
 def main():
   parser = argparse.ArgumentParser(description="Train/export a CAS JSON model from rlogs.")
-  parser.add_argument("--rlogs", nargs="+", required=True, help="rlog files, route URLs, or directories")
+  parser.add_argument("--rlogs", nargs="*", default=[], help="rlog files, route URLs, or directories")
+  parser.add_argument("--rlog-list", action="append", default=[],
+                      help="text file containing one rlog file, route URL, or directory per line")
   parser.add_argument("--car", default="", help="primary car name for the exported model; auto-detected from carParams when omitted")
   parser.add_argument("--car-name", action="append", default=[], help="additional CarName/CarSelected3 alias for runtime matching")
   parser.add_argument("--eps-firmware-hash", default="", help="override auto-detected EPS firmware hash")
   parser.add_argument("--output", help="candidate JSON path; defaults to ~/.cas_train/<car>/checkpoints/")
-  parser.add_argument("--kind", choices=("torque", "angle"), default="torque")
+  parser.add_argument("--kind", choices=("auto", "torque", "angle"), default="torque")
   parser.add_argument("--epochs", type=int, default=60)
   parser.add_argument("--batch-size", type=int, default=2048)
   parser.add_argument("--lr", type=float, default=1e-3)
@@ -749,7 +792,8 @@ def main():
   args = parser.parse_args()
 
   audit = AuditLogger(Path(args.audit_dir).expanduser() if args.audit_dir else None, args.audit_samples)
-  sources = expand_sources(args.rlogs, args.min_file_age_sec)
+  source_inputs = resolve_rlog_inputs(args.rlogs, args.rlog_list)
+  sources = expand_sources(source_inputs, args.min_file_age_sec)
   if args.max_sources is not None:
     sources = sources[:args.max_sources]
   audit.write_json("source_inventory.json", source_inventory(sources))
@@ -762,7 +806,7 @@ def main():
   else:
     print("[cache] feature cache disabled", flush=True)
 
-  samples, duration_h, message_counts, eps_hashes, detected_car_names, delay_acc = collect_samples(
+  samples, duration_h, message_counts, eps_hashes, detected_car_names, steer_control_types, delay_acc = collect_samples(
     sources, max(args.sample_stride, 1), audit, args.workers, cache_dir=cache_dir)
   lateral_delay_at_train = (delay_acc["sum"] / delay_acc["count"]) if delay_acc["count"] > 0 else 0.0
   model_car = args.car.strip()
@@ -770,6 +814,12 @@ def main():
     model_car = detected_car_names.most_common(1)[0][0]
   if not model_car:
     raise RuntimeError("Could not auto-detect car name from rlogs. Use --car in advanced/manual mode.")
+  detected_kind = steer_control_types.most_common(1)[0][0] if steer_control_types else ""
+  model_kind = detected_kind if args.kind == "auto" and detected_kind else args.kind
+  if model_kind == "auto":
+    model_kind = "torque"
+  if detected_kind and model_kind != detected_kind:
+    raise RuntimeError(f"CAS kind mismatch: --kind {model_kind} but rlogs look like {detected_kind}")
 
   x, y, weights, triage_counts, offsets = build_targets(
     samples,
@@ -800,6 +850,8 @@ def main():
     "message_counts": format_counts(message_counts),
     "detected_car_name_counts": format_counts(detected_car_names),
     "eps_firmware_hash_counts": format_counts(eps_hashes),
+    "steer_control_type_counts": format_counts(steer_control_types),
+    "kind": model_kind,
     "triage_counts": format_counts(triage_counts),
     "offset_metrics": lateral_offset_metrics(offsets),
     "target_metrics": prediction_metrics(val_y, val_pred, val_w),
@@ -844,7 +896,7 @@ def main():
 
   payload = build_json_model(
     model_car,
-    args.kind,
+    model_kind,
     model,
     input_mean,
     input_std,
@@ -861,12 +913,13 @@ def main():
     lateral_delay_at_train=lateral_delay_at_train,
     friction_override=friction_override,
   )
-  output = Path(args.output).expanduser() if args.output else default_checkpoint_path(Path(args.history_dir), model_car, args.kind, trained_at)
+  output = Path(args.output).expanduser() if args.output else default_checkpoint_path(Path(args.history_dir), model_car, model_kind, trained_at)
   write_json_model(output, payload)
   update_history(Path(args.history_dir), model_car, output, validation)
 
-  print(f"CAS trained {model_car} ({args.kind})")
+  print(f"CAS trained {model_car} ({model_kind})")
   print(f"detected_car_names: {dict(sorted(detected_car_names.items()))}")
+  print(f"steer_control_types: {dict(sorted(steer_control_types.items()))}")
   print(f"sources: {len(sources)}, collected: {len(samples)}, usable: {x.shape[0]}, hours: {duration_h:.2f}")
   print(f"triage: {dict(sorted(triage_counts.items()))}")
   print(f"val: {validation['target_metrics']}")

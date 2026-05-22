@@ -28,8 +28,8 @@ from typing import Any
 import numpy as np
 
 
-# Bump when the on-disk array layout changes in a non-backward-compatible way.
-CACHE_SCHEMA_VERSION = 1
+# Bump when the on-disk array/meta layout changes in a non-backward-compatible way.
+CACHE_SCHEMA_VERSION = 2
 
 
 def _file_hash(path: Path) -> str:
@@ -116,6 +116,7 @@ def load(cache_dir: Path, source: str, sample_stride: int):
 def save(cache_dir: Path, source: str, sample_stride: int,
          samples: list, message_counts: Counter, triage_counts: Counter,
          detected_car_names: Counter, eps_firmware_hashes: Counter,
+         steer_control_types: Counter,
          first_t: float | None, last_t: float | None, elapsed_s: float,
          lateral_delay_sum: float, lateral_delay_count: int):
   if not cache_dir:
@@ -150,6 +151,7 @@ def save(cache_dir: Path, source: str, sample_stride: int,
     "triage_counts": dict(triage_counts),
     "detected_car_names": dict(detected_car_names),
     "eps_firmware_hashes": dict(eps_firmware_hashes),
+    "steer_control_types": dict(steer_control_types),
     "first_t": first_t,
     "last_t": last_t,
     "elapsed_s": elapsed_s,
@@ -161,8 +163,12 @@ def save(cache_dir: Path, source: str, sample_stride: int,
   # Write atomically: tmp then rename, so a crash mid-write can't corrupt cache.
   npz_tmp = npz_path.with_suffix(".npz.tmp")
   meta_tmp = meta_path.with_suffix(".json.tmp")
-  np.savez_compressed(npz_tmp, t=t, features=features, triage=triage,
-                      offset=offset, driver_torque=driver_torque)
+  # Passing a path without a .npz suffix makes numpy append ".npz" again
+  # (foo.npz.tmp -> foo.npz.tmp.npz). Use a file handle to keep the exact
+  # temporary name that os.replace expects.
+  with open(npz_tmp, "wb") as f:
+    np.savez_compressed(f, t=t, features=features, triage=triage,
+                        offset=offset, driver_torque=driver_torque)
   meta_tmp.write_text(json.dumps(meta, sort_keys=True), encoding="utf-8")
   os.replace(npz_tmp, npz_path)
   os.replace(meta_tmp, meta_path)
@@ -188,6 +194,7 @@ def materialize(cached, Sample, coerce_triage):
     "triage_counts": Counter(meta.get("triage_counts", {})),
     "detected_car_names": Counter(meta.get("detected_car_names", {})),
     "eps_firmware_hashes": Counter(meta.get("eps_firmware_hashes", {})),
+    "steer_control_types": Counter(meta.get("steer_control_types", {})),
     "first_t": meta.get("first_t"),
     "last_t": meta.get("last_t"),
     "elapsed_s": float(meta.get("elapsed_s", 0.0)),

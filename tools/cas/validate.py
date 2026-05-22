@@ -129,7 +129,9 @@ def evaluate_model(model, samples):
 def main():
   parser = argparse.ArgumentParser(description="Validate a CAS JSON model against rlogs.")
   parser.add_argument("--model", required=True, help="CAS JSON model path")
-  parser.add_argument("--rlogs", nargs="+", required=True, help="rlog files, route URLs, or directories")
+  parser.add_argument("--rlogs", nargs="*", default=[], help="rlog files, route URLs, or directories")
+  parser.add_argument("--rlog-list", action="append", default=[],
+                      help="text file containing one rlog file, route URL, or directory per line")
   parser.add_argument("--sample-stride", type=int, default=10)
   parser.add_argument("--min-file-age-sec", type=float, default=0.0, help="skip recently modified rlogs")
   parser.add_argument("--max-sources", type=int, help="limit number of expanded rlog sources")
@@ -149,14 +151,15 @@ def main():
   parser.add_argument("--audit-samples", action="store_true", help="write collected sample records to samples.jsonl")
   args = parser.parse_args()
 
-  from tools.cas.train import AuditLogger, build_targets, collect_samples, expand_sources, install_openpilot_aliases, source_inventory
+  from tools.cas.train import AuditLogger, build_targets, collect_samples, expand_sources, install_openpilot_aliases, resolve_rlog_inputs, source_inventory
   install_openpilot_aliases()
   try:
     from openpilot.selfdrive.carrot.cas.model import CASModel
   except ModuleNotFoundError:
     from selfdrive.carrot.cas.model import CASModel
 
-  sources = expand_sources(args.rlogs, args.min_file_age_sec)
+  source_inputs = resolve_rlog_inputs(args.rlogs, args.rlog_list)
+  sources = expand_sources(source_inputs, args.min_file_age_sec)
   if args.max_sources is not None:
     sources = sources[:args.max_sources]
   audit = AuditLogger(Path(args.audit_dir).expanduser() if args.audit_dir else None, args.audit_samples)
@@ -169,7 +172,7 @@ def main():
   else:
     print("[cache] feature cache disabled", flush=True)
 
-  samples, duration_h, message_counts, eps_hashes, detected_car_names, _delay_acc = collect_samples(
+  samples, duration_h, message_counts, eps_hashes, detected_car_names, steer_control_types, _delay_acc = collect_samples(
     sources, max(args.sample_stride, 1), audit, args.workers, cache_dir=cache_dir)
   x, y, weights, target_counts, offsets = build_targets(
     samples,
@@ -201,6 +204,7 @@ def main():
     "message_counts": format_counts(message_counts),
     "detected_car_name_counts": format_counts(detected_car_names),
     "eps_firmware_hash_counts": format_counts(eps_hashes),
+    "steer_control_type_counts": format_counts(steer_control_types),
     "collected_triage_counts": format_counts(collected_counts),
     "target_triage_counts": format_counts(target_counts),
     "offset_metrics": lateral_offset_metrics(offsets),

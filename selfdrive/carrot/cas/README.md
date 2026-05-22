@@ -12,7 +12,7 @@ CAS는 기존 lateral 컨트롤러 위에 학습된 잔차 조향 보정을 더�
 | 영역 | 경로 |
 |---|---|
 | 기기 추론 코드 | `selfdrive/carrot/cas/{model.py, runtime.py, features.py, metadata.py}` |
-| 가중치 (배포본) | `selfdrive/carrot/cas/weights/<CAR>.json` |
+| 가중치 (배포본) | `selfdrive/carrot/cas/weights/<CAR>_<kind>.json` (`kind=torque/angle`, 구형 `<CAR>.json`도 로드 가능) |
 | PC 학습 도구 | `tools/cas/{train.py, validate.py, promote.py, gui.py, export_json.py, make_dummy.py, triage.py}` |
 | 컨트롤러 통합 | `selfdrive/controls/lib/latcontrol_torque.py`, `latcontrol_angle.py` |
 | HUD / 토글 | `selfdrive/ui/carrot.cc` (drawCASDebug), `selfdrive/ui/qt/offroad/settings.cc` |
@@ -30,7 +30,7 @@ CAS는 기존 lateral 컨트롤러 위에 학습된 잔차 조향 보정을 더�
 | `CAS` | 시작 메뉴 | CAS 잔차 보정 사용 (재부팅 권장) |
 | `CASDebug` | 시작 메뉴 (CAS 아래) | 화면 우측 정중앙에 CAS 디버그 위젯 표시 |
 
-매칭된 모델이 있으면 차종명 옆에 `,CAS` 표기. HUD 위젯에 학습 시간/centering score/개입 카운트가 한국어로 표시됩니다.
+매칭된 모델이 있으면 차종명 옆에 `,CAS 6h`처럼 현재 적용 모델의 학습 시간이 함께 표기됩니다. HUD 위젯에도 학습 시간/centering score/개입 카운트가 한국어로 표시됩니다.
 
 ---
 
@@ -88,6 +88,9 @@ python tools\cas\gui.py
 - **Alpha**: 0.5 권장 (보수는 0.1~0.3, 적극은 0.5+).
 - **One Click**: Train + Validate + Promote dry-run 자동.
 
+GUI는 실행 시 RLOG 폴더를 인덱싱해서 `car + kind` 단위로 묶고, 각 그룹에 총 로그 시간/최근 로컬 학습 시간/신규 시간을 표시합니다.
+학습+검증이 성공하면 `.cas/train_runs.json`에 로컬 PC 기준 학습 이력이 남습니다. 서버 원본 로그는 건드리지 않습니다.
+
 학습 완료 시 한국어 요약 팝업이 평가(✅ / ⚠️ / ❌)와 다음 단계 안내를 보여줍니다.
 
 ### 4.2 CLI
@@ -100,22 +103,22 @@ python tools/cas/train.py \
   --backend torch --device cuda \
   --workers 4 \
   --alpha-max 0.5 \
-  --output /mnt/d/rlog/HYUNDAI_CASPER_EV_candidate.json
+  --output /mnt/d/rlog/HYUNDAI_CASPER_EV_torque_candidate.json
 ```
 
 검증:
 ```bash
 python tools/cas/validate.py \
-  --model /mnt/d/rlog/HYUNDAI_CASPER_EV_candidate.json \
+  --model /mnt/d/rlog/HYUNDAI_CASPER_EV_torque_candidate.json \
   --rlogs /mnt/d/rlog \
   --workers 4 \
-  --output /mnt/d/rlog/HYUNDAI_CASPER_EV_validate.json
+  --output /mnt/d/rlog/HYUNDAI_CASPER_EV_torque_validate.json
 ```
 
 Promote (weights 폴더에 실제 적용):
 ```bash
 python tools/cas/promote.py \
-  --candidate /mnt/d/rlog/HYUNDAI_CASPER_EV_candidate.json \
+  --candidate /mnt/d/rlog/HYUNDAI_CASPER_EV_torque_candidate.json \
   --car HYUNDAI_CASPER_EV \
   --kind torque \
   --max-alpha 0.5 \

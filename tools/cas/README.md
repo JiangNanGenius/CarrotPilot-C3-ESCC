@@ -51,13 +51,26 @@ Use `One Click: Train + Validate` for the normal flow. It trains a candidate,
 validates it, then runs promote dry-run only. Real `Promote` is separate.
 Only `RLOG dir`, `Car`, and the one-click button are needed for normal use.
 Extra paths and training knobs are hidden under `Advanced`.
-Each run writes raw logs under `RLOG dir/cas_runs/<timestamp>_<car>/`.
+Default candidate/validate/weight names include `kind` (`torque` or `angle`) so
+the two controller families do not share files.
+The main target selector shows local data hours and the latest local training
+hours per `car + kind`, then marks the group ready when indexing is complete.
+Each run writes raw logs under `RLOG dir/.cas/runs/<timestamp>_<car>_<kind>/`.
+Successful train+validate runs are appended to `RLOG dir/.cas/train_runs.json`.
+Indexing also writes `RLOG dir/.cas/local_manifest.json`, the local-side shape
+that future server manifest/download code will use.
+Server-side reference code lives at `tools/cas/server/carrot_upload_server.py`;
+deploy notes are in `selfdrive/carrot/cas/docs/cas_server_phase6.md`.
+When many rlogs are selected, the GUI writes a temporary `selected_rlogs*.txt`
+and passes it with `--rlog-list` so Windows command-line length limits are not
+hit.
 Set `Workers` under `Advanced` to parallelize rlog parsing. `4` is a safe default
 for WSL on a desktop SSD; lower it if disk usage feels too heavy.
 
 Raw/audit files:
 
 - `run_metadata.json`: command, options, backend/device, input/output paths
+- `../../train_runs.json`: local training history summary for the RLOG folder
 - `1_3_train_candidate.log`: train stdout/stderr
 - `2_3_validate.log`: validate stdout/stderr
 - `3_3_promote_dry_run.log`: promote dry-run stdout/stderr
@@ -105,6 +118,7 @@ python tools/cas/promote.py \
 ```bash
 python tools/cas/make_dummy.py \
   --car HYUNDAI_IONIQ_5 \
-  --output selfdrive/carrot/cas/weights/HYUNDAI_IONIQ_5.json \
+  --kind torque \
+  --output selfdrive/carrot/cas/weights/HYUNDAI_IONIQ_5_torque.json \
   --alpha-max 0.0
 ```

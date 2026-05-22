@@ -109,6 +109,42 @@ def _read_param_str(params: Params, key: str) -> str:
     return ""
 
 
+def _car_key_from_name(name: str) -> str:
+  text = re.sub(r"[^A-Za-z0-9]+", "_", str(name).strip()).strip("_").upper()
+  return text
+
+
+def _steer_kind_from_car_params(car_params) -> str:
+  value = getattr(car_params, "steerControlType", "")
+  text = str(value).lower()
+  try:
+    numeric = int(value)
+  except Exception:
+    numeric = None
+  if text.endswith(".angle") or text == "angle" or numeric == 1:
+    return "angle"
+  return "torque"
+
+
+def _read_car_params(params: Params):
+  raw = None
+  for key in ("CarParams", "CarParamsPersistent", "CarParamsCache"):
+    try:
+      raw = params.get(key)
+    except Exception:
+      raw = None
+    if raw:
+      break
+  if not raw:
+    return None
+  try:
+    import cereal.messaging as messaging
+    from cereal import car
+    return messaging.log_from_bytes(raw, car.CarParams)
+  except Exception:
+    return None
+
+
 def get_device_id(params: Params) -> str:
   cached = _read_param_str(params, "CarrotDeviceId")
   if cached:
@@ -270,11 +306,15 @@ def upload_file(endpoint: str, secret: bytes, device_id: str, route_id: str,
 
 def build_route_meta(params: Params, route_id: str, segments: list[Path],
                      device_id: str) -> dict:
-  car_name = ""
-  try:
-    car_name = (params.get("CarName") or b"").decode("utf-8", "ignore").strip()
-  except Exception:
-    pass
+  car_name = _read_param_str(params, "CarName")
+  car_selected = _read_param_str(params, "CarSelected3")
+  car_params = _read_car_params(params)
+  car_fingerprint = ""
+  kind = ""
+  if car_params is not None:
+    car_fingerprint = str(getattr(car_params, "carFingerprint", "")).strip()
+    kind = _steer_kind_from_car_params(car_params)
+  car_key = car_fingerprint or car_name or car_selected
   carrot_version = ""
   try:
     carrot_version = (params.get("GitCommit") or b"")[:12].decode("utf-8", "ignore").strip()
@@ -285,14 +325,31 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
     cas_model = (params.get("CASModelName") or b"").decode("utf-8", "ignore").strip()
   except Exception:
     pass
+  file_bytes = {}
+  for fname in UPLOAD_FILES:
+    total = 0
+    for seg_dir in segments:
+      try:
+        total += int((seg_dir / fname).stat().st_size)
+      except OSError:
+        pass
+    file_bytes[fname] = total
 
   return {
     "device_id": device_id,
     "route_id": route_id,
-    "car": car_name,
+    "car": car_fingerprint or car_name,
+    "car_key": _car_key_from_name(car_key),
+    "car_name_raw": car_name,
+    "car_selected": car_selected,
+    "kind": kind,
+    "steer_control_type": kind,
     "carrot_version": carrot_version,
     "cas_model_used": cas_model,
     "segments": len(segments),
+    "duration_sec": int(len(segments) * 60),
+    "duration_estimated": True,
+    "file_bytes": file_bytes,
     "uploaded_at": int(time.time()),
   }
 

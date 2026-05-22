@@ -90,6 +90,13 @@ const NVGcolor C_RED    = nvgRGBA(230,  80,  80, 255);
 const NVGcolor C_GRAY   = nvgRGBA(160, 160, 160, 255);
 const NVGcolor C_BG     = nvgRGBA( 10,  10,  14, BG_ALPHA);
 
+std::string format_cas_hours(const QString& cas_hours) {
+  bool ok = false;
+  const double hours = cas_hours.toDouble(&ok);
+  if (!ok || hours <= 0.0) return "";
+  return std::to_string((int)std::round(hours)) + "h";
+}
+
 // Outline color follows panel status — gives peripheral cue.
 //   0=idle/gray, 1=active+good/green, 2=caution/orange, 3=out-of-dist/red.
 NVGcolor stroke_for_status(int status) {
@@ -264,11 +271,12 @@ void ui_draw_cas_overlay(UIState* s) {
   int y = y0 + 20;
 
   // ───── Header (single line) ──────────────────────────────────────
-  //   CAS · CASPER EV · 5.98h
+  //   CAS · CASPER EV · 6h
   QString cas_hours = QString::fromStdString(params.get("CASModelHours"));
+  const std::string cas_hours_label = format_cas_hours(cas_hours);
   std::string header = "CAS · " + cas_model.toStdString();
-  if (cas_hours.length() > 0) {
-    header += " · " + cas_hours.toStdString() + "h";
+  if (!cas_hours_label.empty()) {
+    header += " · " + cas_hours_label;
   }
   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
   ui_draw_text_vg(vg, label_x, y, header.c_str(), FONT_SIZE - 2, C_WHITE, BOLD);

@@ -31,6 +31,7 @@ def build_json_model(car: str, kind: str, model, input_mean, input_std, validati
   return {
     "format_version": FORMAT_VERSION,
     "model_type": f"cas_{kind}",
+    "kind": kind,
     "car": car,
     "car_names": list(car_names) if car_names else [car],
     "eps_firmware_hash": eps_firmware_hash,

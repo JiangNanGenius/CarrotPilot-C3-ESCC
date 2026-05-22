@@ -46,6 +46,9 @@ def validate_candidate(path: Path, car: str | None, kind: str | None,
     errors.append(f"car mismatch: expected {car}, got {model.car}")
   if kind is not None and model.model_type != f"cas_{kind}":
     errors.append(f"model_type mismatch: expected cas_{kind}, got {model.model_type}")
+  payload_kind = str(payload.get("kind", "")).strip()
+  if kind is not None and payload_kind and payload_kind != kind:
+    errors.append(f"kind mismatch: expected {kind}, got {payload_kind}")
   if model.alpha_max < 0.0 or model.alpha_max > max_alpha:
     errors.append(f"alpha_max {model.alpha_max} exceeds limit {max_alpha}")
   if float(payload.get("trained_on_hours", 0.0)) < min_hours:
@@ -57,7 +60,8 @@ def validate_candidate(path: Path, car: str | None, kind: str | None,
 
 def default_output_path(model: CASModel) -> Path:
   name = _norm_car_name(model.car or Path(model.params_file).stem)
-  return REPO_ROOT / "selfdrive" / "carrot" / "cas" / "weights" / f"{name}.json"
+  kind = str(model.model_type).replace("cas_", "").strip() or "torque"
+  return REPO_ROOT / "selfdrive" / "carrot" / "cas" / "weights" / f"{name}_{kind}.json"
 
 
 def main():
