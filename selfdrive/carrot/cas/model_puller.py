@@ -132,34 +132,61 @@ def _download(url: str, dest: Path, timeout: float = 60.0) -> None:
     raise
 
 
-def _resolve_car_name(params: Params) -> str:
-  """CarSelected3 first — user's explicit choice. Fall back to CarName
-  (openpilot fingerprint), then to CarrotLastCarName (persisted previous)."""
+def _resolve_car_candidates(params: Params) -> list[str]:
+  """Multiple candidate names to try in priority order. Server may have
+  published the model under any one of the device's identification fields,
+  with or without a trailing year suffix (e.g. CarSelected3 'Hyundai Casper
+  EV 2024' vs openpilot's platform name 'HYUNDAI_CASPER_EV')."""
+  raw = []
   for key in ("CarSelected3", "CarName", "CarrotLastCarName"):
     v = _read_param_str(params, key)
     if v and v.upper() != "MOCK":
-      return _norm_car(v)
-  return ""
+      raw.append(v)
+
+  cands: list[str] = []
+  seen: set[str] = set()
+  for name in raw:
+    n = _norm_car(name)
+    if n and n not in seen:
+      cands.append(n); seen.add(n)
+    # Try year-stripped variant too (HYUNDAI_CASPER_EV_2024 -> HYUNDAI_CASPER_EV).
+    stripped = re.sub(r"_\d{4}$", "", n)
+    if stripped and stripped != n and stripped not in seen:
+      cands.append(stripped); seen.add(stripped)
+  return cands
 
 
-def check_and_install(params: Params, car: str) -> int:
-  """Try each kind for this car. Returns how many ended up newly installed."""
+def check_and_install(params: Params, candidates: list[str]) -> int:
+  """Try each kind for each candidate car name. First non-404 response wins
+  for that kind. Returns how many ended up newly installed."""
   endpoint = upload_config.resolve_endpoint(params).rstrip("/")
   versions = _read_versions()
   updated = 0
 
   for kind in KINDS:
+    # Walk candidates until one returns a model (or a non-404 error).
+    car: str | None = None
+    info: dict | None = None
+    for cand in candidates:
+      try:
+        info = _http_get_json(f"{endpoint}/api/models/{cand}/{kind}/latest")
+        car = cand
+        break
+      except urllib.error.HTTPError as e:
+        if e.code == 404:
+          continue          # try next candidate
+        _log(f"{cand}/{kind} HTTP {e.code}")
+        info = None
+        break
+      except Exception as e:
+        _log(f"{cand}/{kind} fetch error: {e}")
+        info = None
+        break
+    if info is None or car is None:
+      continue              # no model for any candidate (normal first time)
     key = f"{car}/{kind}"
-    try:
-      info = _http_get_json(f"{endpoint}/api/models/{car}/{kind}/latest")
-    except urllib.error.HTTPError as e:
-      if e.code == 404:
-        continue            # no published model for this (car, kind) — normal
-      _log(f"{key} latest HTTP {e.code}")
-      continue
-    except Exception as e:
-      _log(f"{key} latest fetch error: {e}")
-      continue
+    if len(candidates) > 1 and car != candidates[0]:
+      _log(f"{kind}: matched candidate {car} (primary was {candidates[0]})")
 
     server_version = str(info.get("version", "")).strip()
     if not server_version:
@@ -224,16 +251,16 @@ def run() -> None:
   if not _wait_for_network(NETWORK_WAIT_SEC):
     _log("network/NTP not available — giving up this boot")
   else:
-    car = _resolve_car_name(params)
-    if not car:
+    candidates = _resolve_car_candidates(params)
+    if not candidates:
       _log("no CarSelected3 / CarName / CarrotLastCarName — skip")
     else:
       endpoint = upload_config.resolve_endpoint(params)
-      _log(f"car={car} endpoint={endpoint}")
+      _log(f"car candidates={candidates} endpoint={endpoint}")
       done = False
       for attempt, delay in enumerate(RETRY_DELAYS_SEC, 1):
         try:
-          n = check_and_install(params, car)
+          n = check_and_install(params, candidates)
           _log(f"boot-once done: {n} update(s)")
           done = True
           break
