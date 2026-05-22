@@ -1001,6 +1001,52 @@ def main(page: ft.Page):
     refresh_data_status()
     threading.Thread(target=load_server_data, daemon=True).start()
 
+  # ── Backfill server route_meta (re-bin UNKNOWN → chosen car) ──
+  def backfill_server_meta(ds: dict[str, Any], chosen_car: str):
+    """Overwrite route_meta.json on the server for every route in this
+    dataset's cloud bin, tagging it with chosen_car. rlogs untouched."""
+    endpoint = cfg.get("endpoint") or cloud_sync.DEFAULT_SERVER_ENDPOINT
+    cloud_car = ds_cloud_car(ds) or "UNKNOWN_CAR"
+    kind = str(ds.get("kind", "torque")).strip() or "torque"
+    try:
+      secret = cloud_sync.resolve_upload_secret()
+    except Exception as e:
+      append_log(f"[backfill] 시크릿 로드 실패: {e}")
+      show_toast("서버 메타 갱신 실패 (시크릿)", error=True)
+      return
+    try:
+      routes_data = cloud_sync.fetch_server_routes(
+        endpoint=endpoint, car_key=cloud_car, kind=kind,
+        token=cfg.get("token", ""), limit=500, timeout=30.0,
+      )
+    except Exception as e:
+      append_log(f"[backfill] 라우트 조회 실패: {e}")
+      show_toast("서버 메타 갱신 실패 (라우트 조회)", error=True)
+      return
+    routes = list(routes_data.get("routes", []) or [])
+    n_ok = n_fail = 0
+    append_log(f"\n[backfill] {cloud_car} → {chosen_car} · {len(routes)} 라우트 메타 갱신")
+    for route in routes:
+      device_id = str(route.get("device_id", "")).strip()
+      route_id  = str(route.get("route_id", "")).strip()
+      if not device_id or not route_id:
+        continue
+      meta = dict(route.get("route_meta", {}) or {})
+      meta["car_name_raw"]   = chosen_car
+      meta["car_key"]        = chosen_car
+      meta["backfilled_at"]  = int(__import__("time").time())
+      meta["backfill_source"] = "gui_manual"
+      try:
+        cloud_sync.post_route_meta(endpoint, device_id, route_id, meta, secret, timeout=30.0)
+        n_ok += 1
+      except Exception as e:
+        n_fail += 1
+        append_log(f"[backfill] FAIL {route_id}: {e}")
+    append_log(f"[backfill] 완료: 성공 {n_ok} · 실패 {n_fail}")
+    show_toast(f"서버 메타 {n_ok}개 갱신 (다음 새로고침부터 {chosen_car})",
+               error=n_fail > 0 and n_ok == 0)
+    threading.Thread(target=load_server_data, daemon=True).start()
+
   # ── Car identification prompt (for UNKNOWN_CAR datasets) ──
   def prompt_car_and_train(ds: dict[str, Any]):
     """Server bucketed this data as UNKNOWN_CAR — let user tell us which car
@@ -1051,6 +1097,9 @@ def main(page: ft.Page):
       value=default,
       dense=True,
     )
+    update_server_cb = ft.Checkbox(
+      label="서버 메타도 갱신 (다음부터 자동 인식)", value=True,
+    )
 
     def confirm(_e=None):
       chosen = (car_tf.value or "").strip() or (car_dd.value or "").strip()
@@ -1060,10 +1109,17 @@ def main(page: ft.Page):
       if chosen.upper() == "UNKNOWN_CAR":
         show_toast("UNKNOWN_CAR는 학습 대상 이름이 될 수 없습니다", error=True)
         return
+      do_backfill = bool(update_server_cb.value)
       page.pop_dialog()
       resolved = dict(ds)
       resolved["train_car_override"] = chosen
       append_log(f"[pipeline] UNKNOWN_CAR 데이터를 '{chosen}'로 학습 진행")
+      # Optionally re-bin on the server (overwrite route_meta) so future
+      # refreshes see this data under the real car, not UNKNOWN.
+      if do_backfill:
+        threading.Thread(
+          target=lambda: backfill_server_meta(ds, chosen), daemon=True,
+        ).start()
       threading.Thread(
         target=lambda: train_pipeline_wrapper([resolved], label_prefix="단일 차량"),
         daemon=True,
@@ -1109,9 +1165,12 @@ def main(page: ft.Page):
           "(선택할 차량 후보가 없습니다)", size=11, color=ft.Colors.ON_SURFACE_VARIANT,
         ),
         car_tf,
+        update_server_cb,
         ft.Container(height=4),
         ft.Text("※ 입력한 이름은 학습된 모델 파일명과 차량 매칭에 사용됩니다.\n"
-                "openpilot에 등록된 정확한 platform 이름을 권장합니다.",
+                "openpilot에 등록된 정확한 platform 이름을 권장합니다.\n"
+                "※ '서버 메타 갱신'은 rlog는 그대로 두고 메타(작은 JSON)만\n"
+                "   덮어써 서버 분류를 UNKNOWN → 해당 차량으로 바꿉니다.",
                 size=10, color=ft.Colors.ON_SURFACE_VARIANT),
       ], spacing=8, tight=True)),
     )

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
+import time
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -94,6 +97,41 @@ def post_train_run(endpoint: str, payload: dict[str, Any], token: str = "", time
   req = Request(_join_url(endpoint, "/api/train-runs"), data=body, headers=headers, method="POST")
   with urlopen(req, timeout=timeout) as response:
     return json.loads(response.read().decode("utf-8"))
+
+
+def resolve_upload_secret() -> bytes:
+  """Same HMAC secret the device uses (selfdrive/carrot/cas/upload_config).
+  Lets PC tools re-post route_meta.json with a valid signature."""
+  try:
+    from openpilot.selfdrive.carrot.cas import upload_config
+  except ModuleNotFoundError:
+    from selfdrive.carrot.cas import upload_config
+  return upload_config.resolve_secret()
+
+
+def post_route_meta(endpoint: str, device_id: str, route_id: str, meta: dict[str, Any],
+                    secret: bytes, timeout: float = 30.0) -> dict[str, Any]:
+  """Overwrite a route's route_meta.json on the server. The upload handler
+  recomputes car_key from the new meta and re-bins the route (UNKNOWN → real
+  car). rlog/qlog files are NOT touched — only the small JSON is sent.
+
+  This is the PC-side backfill path for routes the device uploaded before it
+  had identified the car (empty CarName/CarParams → UNKNOWN bucket)."""
+  ts = int(time.time())
+  sig = hmac.new(secret, f"{device_id}|{ts}".encode("utf-8"), hashlib.sha256).hexdigest()
+  body = json.dumps(meta, ensure_ascii=False).encode("utf-8")
+  url = _join_url(endpoint, f"/upload/{device_id}/{route_id}/meta/route_meta.json")
+  req = Request(url, data=body, method="POST")
+  req.add_header("User-Agent", "carrot-cas-backfill/1.0")
+  req.add_header("X-Carrot-TS", str(ts))
+  req.add_header("X-Carrot-Sig", sig)
+  car_hdr = str(meta.get("car_key") or meta.get("car_name_raw") or "").strip()
+  if car_hdr:
+    req.add_header("X-Carrot-Car", car_hdr)
+  req.add_header("Content-Type", "application/octet-stream")
+  with urlopen(req, timeout=timeout) as response:
+    raw = response.read().decode("utf-8", "ignore")
+    return json.loads(raw) if raw else {}
 
 
 def download_cloud_file(endpoint: str, download_url: str, dest: str | Path,
