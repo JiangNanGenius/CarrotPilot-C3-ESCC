@@ -22,16 +22,47 @@
 #include "common/params.h"
 #include "common/timing.h"
 
-// carrot.cc defines BOLD and COLOR_WHITE as file-scope macros (not in
-// carrot.h), so we redeclare them locally to stay decoupled from carrot.cc.
+// carrot.cc defines BOLD/COLOR_* as file-scope macros (not in carrot.h),
+// and ui_draw_text_vg is static there too. To keep this file self-contained
+// (deletable as a unit), redeclare them locally with internal linkage.
 #ifndef BOLD
 #define BOLD "KaiGenGothicKR-Bold"
 #endif
 #ifndef COLOR_WHITE
 #define COLOR_WHITE nvgRGBA(255, 255, 255, 255)
 #endif
+#ifndef COLOR_BLACK
+#define COLOR_BLACK nvgRGBA(0, 0, 0, 255)
+#endif
 
 namespace {
+
+// File-local copy of carrot.cc::ui_draw_text_vg (which is `static` there and
+// thus invisible to other TUs). Keeping a private copy lets us drop cas_debug.cc
+// without modifying carrot.cc.
+void ui_draw_text_vg(NVGcontext* vg, float x, float y, const char* string,
+                     float size, NVGcolor color, const char* font_name,
+                     float borderWidth = 3.0, float shadowOffset = 0.0,
+                     NVGcolor borderColor = COLOR_BLACK,
+                     NVGcolor shadowColor = COLOR_BLACK) {
+  nvgFontFace(vg, font_name);
+  nvgFontSize(vg, size);
+  if (borderWidth > 0.0) {
+    nvgFillColor(vg, borderColor);
+    for (int i = 0; i < 360; i += 45) {
+      float angle = i * NVG_PI / 180.0f;
+      float offsetX = borderWidth * cos(angle);
+      float offsetY = borderWidth * sin(angle);
+      nvgText(vg, x + offsetX, y + offsetY, string, NULL);
+    }
+  }
+  if (shadowOffset != 0.0) {
+    nvgFillColor(vg, shadowColor);
+    nvgText(vg, x + shadowOffset, y + shadowOffset, string, NULL);
+  }
+  nvgFillColor(vg, color);
+  nvgText(vg, x, y, string, NULL);
+}
 
 // ───── Layout ─────────────────────────────────────────────────────
 // All visual tuning lives here. Adjust these, not inline numbers.
