@@ -154,14 +154,14 @@ def build_feature_vector(state: CASFeatureState, CS, params, desired_curvature: 
 
   future_lat_accels = []
   model_good = _model_good(model_data)
-  for t in FUTURE_TIMES:
-    adjusted_t = t + lateral_delay + 0.5 * a_ego * (t / max(v_ego, 1.0))
+  for future_t in FUTURE_TIMES:
+    adjusted_t = future_t + lateral_delay + 0.5 * a_ego * (future_t / max(v_ego, 1.0))
     future_lat_accels.append(_interp_model(model_data.acceleration.y if model_good else None,
                                            adjusted_t, desired_lat_accel))
 
   future_rolls = []
-  for t in ROLL_FUTURE_TIMES:
-    adjusted_t = t + lateral_delay + 0.5 * a_ego * (t / max(v_ego, 1.0))
+  for future_t in ROLL_FUTURE_TIMES:
+    adjusted_t = future_t + lateral_delay + 0.5 * a_ego * (future_t / max(v_ego, 1.0))
     model_roll = _interp_model(model_data.orientation.x if model_good else None, adjusted_t, 0.0)
     model_pitch = _interp_model(model_data.orientation.y if model_good else None, adjusted_t, 0.0)
     future_rolls.append(roll_pitch_adjust(roll + model_roll, pitch + model_pitch))

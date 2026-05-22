@@ -72,8 +72,11 @@ class CASRuntime:
   def load_model(self):
     self.model = None
     self.model_name = ""
-    self.params.remove(self.model_param)
+    # Don't remove CASModelName at entry: if torque and angle CASRuntime both
+    # init in the same process, the later one would wipe the earlier one's
+    # match. Defer the remove until we're sure no model matches (see below).
     if not WEIGHTS_DIR.exists():
+      self.params.remove(self.model_param)
       return
 
     runtime_names = [
@@ -116,6 +119,7 @@ class CASRuntime:
 
     runtime_car = runtime_names[0] if runtime_names else "<unknown>"
     if best_path is None:
+      self.params.remove(self.model_param)
       print(f"[CAS] no matching {expected_type} model for car={runtime_car} "
             f"eps={runtime_eps_hash or '<none>'}", flush=True)
       return
@@ -197,10 +201,14 @@ class CASRuntime:
     session_seconds = max(now_t - self.session_start_t, 1e-3)
 
     # CAS accuracy: signed delta should push the car toward zero offset.
-    # When offset > 0 (car is right of centerline) a left-pushing torque
-    # is correct; sign convention follows offset >0=right / <0=left and
-    # delta >0=correction-toward-right / <0=toward-left.
-    # → correct when sign(delta) opposes sign(offset_now).
+    # NOTE: sign convention here assumes delta>0 = correction-toward-right (after
+    # the carcontroller actuator-side flip), so opposite-sign = correct. Standard
+    # openpilot internal convention is the other way around (positive ff = left
+    # push, since position.y/laneLines.y are +y=LEFT), which would make
+    # same-sign correct. The metric is diagnostic only — it does not affect
+    # `ff += alpha * cas_delta` — so an inverted reading would lie on the HUD
+    # but not change CAS behavior. Verify against actual rlog (offset_now vs
+    # raw_delta) and tools/cas/train.py target sign before flipping this.
     correct = 0
     if abs(applied_delta) > 1e-4 and abs(offset_now) > 0.01:
       if (applied_delta > 0.0) != (offset_now > 0.0):
@@ -268,7 +276,7 @@ class CASRuntime:
     #   * gate_user (hard off if user pressed)
     #   * gate_speed (ramp 5..7 m/s)
     #   * gate_finite (hard off on NaN / extreme delta)
-    #   * gate_distribution (ramp |z| 2.0..3.0)
+    #   * gate_distribution (ramp |z| 2.5..3.5)
     # Safety invariant I1 preserved: any factor 0 -> alpha 0 -> base output unchanged.
     if self.model is None:
       return 0.0
@@ -293,10 +301,14 @@ class CASRuntime:
       gate_speed_high = 1.0
     gate_speed = gate_speed_low * gate_speed_high
 
-    # Distribution ramp: full below |z|=2, taper to 0 by |z|=3.
-    if max_abs_z >= 3.0:
+    # Distribution ramp: full below |z|=2.5, taper to 0 by |z|=3.5.
+    # Widened from [2.0, 3.0] because short training runs (e.g. 5.98h Casper
+    # candidate) produce narrow input_std, so ordinary corner/jerk inputs land
+    # at |z|~2 and get aggressively damped right when CAS should help. The
+    # output_clip and |delta|>3 hard cap above still bound any extrapolation.
+    if max_abs_z >= 3.5:
       return 0.0
-    gate_distribution = 1.0 if max_abs_z <= 2.0 else max(0.0, (3.0 - max_abs_z))
+    gate_distribution = 1.0 if max_abs_z <= 2.5 else max(0.0, (3.5 - max_abs_z))
 
     # CASAlphaOverride: 0 = use JSON default, 1~50 = override 0.01~0.50.
     # Safety gates (steeringPressed/NaN/speed/distribution) still apply on top.

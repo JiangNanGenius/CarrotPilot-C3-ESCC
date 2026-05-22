@@ -175,7 +175,15 @@ def upload_allowed(params: Params) -> tuple[bool, str]:
 # Filesystem scanning
 
 def list_segments() -> list[tuple[str, str, Path]]:
-  """Returns list of (route_id, segment, path) sorted oldest-first."""
+  """Returns list of (route_id, segment, path) sorted oldest-first.
+
+  Registered comma devices name routes "YYYY-MM-DD--HH-MM-SS--N" so name
+  sorting is already chronological. Unregistered devices use
+  "00000000--<hash>--N" — the bootcount stays zero so name-sorting falls back
+  to hash alphabetical, which has nothing to do with real time. Use directory
+  mtime as the primary key so oldest-first holds in both cases; fall back to
+  (route, seg) for stability when mtimes tie.
+  """
   out = []
   if not REALDATA.exists():
     return out
@@ -183,10 +191,13 @@ def list_segments() -> list[tuple[str, str, Path]]:
     m = ROUTE_SEG_RE.match(entry.name)
     if not m:
       continue
-    out.append((m.group("route"), m.group("seg"), entry))
-  # Sort by route then segment numerically.
-  out.sort(key=lambda x: (x[0], int(x[1])))
-  return out
+    try:
+      mtime = entry.stat().st_mtime
+    except OSError:
+      mtime = 0.0
+    out.append((mtime, m.group("route"), m.group("seg"), entry))
+  out.sort(key=lambda x: (x[0], x[1], int(x[2])))
+  return [(route, seg, path) for _, route, seg, path in out]
 
 
 def is_segment_complete(seg_dir: Path) -> bool:
