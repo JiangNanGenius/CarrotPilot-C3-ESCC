@@ -49,9 +49,13 @@ NETWORK_WAIT_SEC      = 300                  # max wait for NTP/online
 RETRY_DELAYS_SEC      = (10, 30, 90)         # backoff between retries
 SLEEP_AFTER_DONE_SEC  = 24 * 3600            # park until reboot
 
-# Same NTP-synced markers data_uploader uses
+# NTP sync markers (matches data_uploader). MIN_VALID_EPOCH must be recent
+# enough that a regressed device clock (e.g. RTC default to old date) doesn't
+# slip through and trigger SSL "certificate not yet valid" failures against
+# the Cloudflare-fronted server (~90-day cert validity).
+# Bump this whenever the deployment year rolls over.
 NTP_SYNCED_FLAG = Path("/run/systemd/timesync/synchronized")
-MIN_VALID_EPOCH = 1704067200                 # 2024-01-01
+MIN_VALID_EPOCH = 1767225600                 # 2026-01-01 UTC
 
 
 def _log(msg: str) -> None:
