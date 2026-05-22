@@ -599,7 +599,7 @@ def _load_gui_config() -> dict:
 class CASGui(tk.Tk):
   def __init__(self):
     super().__init__()
-    self.title("CAS Training")
+    self.title("CAS Learner")
     self.geometry("900x640")
     self.minsize(760, 560)
     self.proc: subprocess.Popen | None = None
@@ -630,16 +630,29 @@ class CASGui(tk.Tk):
     self.device_var = tk.StringVar(value=config.get("device", "auto"))
     self.use_wsl_var = tk.BooleanVar(value=bool(config.get("use_wsl", os.name == "nt")))
     self.cloud_raw_policy_var = tk.StringVar(value=config.get("cloud_raw_policy", cloud_sync.DEFAULT_LOCAL_RAW_POLICY))
+    self.cloud_endpoint_var = tk.StringVar(value=config.get("cloud_endpoint", cloud_sync.DEFAULT_SERVER_ENDPOINT))
+    self.cloud_token_var = tk.StringVar(value=config.get("cloud_token", ""))
+    self.cloud_auto_fetch_var = tk.BooleanVar(value=bool(config.get("cloud_auto_fetch", True)))
     self.candidate_var = tk.StringVar(value=config.get("candidate", self._derive_candidate_path(last_rlogs, last_car)))
     self.validate_var = tk.StringVar(value=config.get("validate_json", self._derive_validate_path(last_rlogs, last_car)))
     self.gpu_status_var = tk.StringVar(value="PyTorch/CUDA: checking...")
     self.raw_log_var = tk.StringVar(value="실행 로그: 아직 없음")
     self.log_info_var = tk.StringVar(value=self._log_info_text(last_car, "", 0, 0, 0.0))
     self.index_status_var = tk.StringVar(value="인덱스: 대기")
+    self.app_vehicle_var = tk.StringVar(value="차량 확인 전")
+    self.app_kind_var = tk.StringVar(value="조향 보정")
+    self.app_status_var = tk.StringVar(value="데이터를 확인하고 있습니다")
+    self.app_total_hours_var = tk.StringVar(value="0.0h")
+    self.app_trained_hours_var = tk.StringVar(value="0.0h")
+    self.app_new_hours_var = tk.StringVar(value="0.0h")
+    self.app_source_var = tk.StringVar(value="로컬/서버 확인 중")
+    self.app_sync_var = tk.StringVar(value="최신 모델 서버 동기화 준비 중")
     self.group_var = tk.StringVar(value="")
     self.group_map: dict[str, dict] = {}
     self.index_data: dict = {}
     self.local_manifest: dict = {}
+    self.server_manifest: dict = {}
+    self.cloud_running = False
     self.scan_running = False
     self.index_running = False
     self.index_cancel = threading.Event()
@@ -708,6 +721,9 @@ class CASGui(tk.Tk):
         "device": self.device_var.get(),
         "use_wsl": self.use_wsl_var.get(),
         "cloud_raw_policy": self.cloud_raw_policy_var.get(),
+        "cloud_endpoint": self.cloud_endpoint_var.get(),
+        "cloud_token": self.cloud_token_var.get(),
+        "cloud_auto_fetch": self.cloud_auto_fetch_var.get(),
       }
       CONFIG_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
     except Exception:
@@ -795,44 +811,69 @@ class CASGui(tk.Tk):
     root.pack(fill=tk.BOTH, expand=True)
 
     header = ttk.Frame(root)
-    header.pack(fill=tk.X, pady=(0, 10))
-    ttk.Label(header, text="CAS Training", font=("TkDefaultFont", 16, "bold")).pack(anchor="w")
+    header.pack(fill=tk.X, pady=(0, 12))
+    ttk.Label(header, text="CAS Learner", font=("TkDefaultFont", 18, "bold")).pack(side=tk.LEFT)
+    ttk.Button(header, text="전문가 설정", command=self._open_advanced).pack(side=tk.RIGHT)
 
-    form = ttk.LabelFrame(root, text="일반 모드", padding=10)
-    form.pack(fill=tk.X)
-    form.columnconfigure(1, weight=1)
+    dashboard = ttk.LabelFrame(root, text="학습 준비", padding=14)
+    dashboard.pack(fill=tk.X)
+    dashboard.columnconfigure(1, weight=1)
 
-    self._row(form, 0, "RLOG 폴더", self.rlogs_var, browse=True)
-    ttk.Label(form, text="학습 대상").grid(row=1, column=0, sticky="w", pady=3)
-    self.group_combo = ttk.Combobox(form, textvariable=self.group_var, state="readonly")
-    self.group_combo.grid(row=1, column=1, columnspan=2, sticky="ew", padx=5)
+    ttk.Label(dashboard, text="학습할 차량").grid(row=0, column=0, sticky="w", pady=(0, 8))
+    self.group_combo = ttk.Combobox(dashboard, textvariable=self.group_var, state="readonly", height=8)
+    self.group_combo.grid(row=0, column=1, sticky="ew", padx=(12, 0), pady=(0, 8))
     self.group_combo.bind("<<ComboboxSelected>>", lambda _event: self._on_group_selected())
-    ttk.Label(form, text="로그 정보").grid(row=2, column=0, sticky="w", pady=3)
-    ttk.Label(form, textvariable=self.log_info_var).grid(row=2, column=1, columnspan=2, sticky="w", padx=5)
-    ttk.Label(form, textvariable=self.index_status_var).grid(row=3, column=1, columnspan=2, sticky="w", padx=5)
+
+    hero = ttk.Frame(dashboard)
+    hero.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(6, 12))
+    hero.columnconfigure(0, weight=1)
+    ttk.Label(hero, textvariable=self.app_vehicle_var, font=("TkDefaultFont", 20, "bold")).grid(row=0, column=0, sticky="w")
+    ttk.Label(hero, textvariable=self.app_kind_var, font=("TkDefaultFont", 11)).grid(row=1, column=0, sticky="w", pady=(2, 0))
+    ttk.Label(hero, textvariable=self.app_status_var, font=("TkDefaultFont", 11, "bold")).grid(row=2, column=0, sticky="w", pady=(10, 0))
+
+    metrics = ttk.Frame(dashboard)
+    metrics.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 8))
+    for col in range(4):
+      metrics.columnconfigure(col, weight=1)
+    self._metric(metrics, 0, "준비된 데이터", self.app_total_hours_var)
+    self._metric(metrics, 1, "학습 완료", self.app_trained_hours_var)
+    self._metric(metrics, 2, "새 데이터", self.app_new_hours_var)
+    self._metric(metrics, 3, "데이터 위치", self.app_source_var)
+
+    sync = ttk.Frame(dashboard)
+    sync.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(4, 0))
+    sync.columnconfigure(0, weight=1)
+    ttk.Label(sync, textvariable=self.app_sync_var).grid(row=0, column=0, sticky="w")
+    ttk.Button(sync, text="데이터 새로고침", command=self.scan_logs).grid(row=0, column=1, sticky="e", padx=(8, 0))
+    ttk.Button(sync, text="폴더 변경", command=lambda: self._browse_dir(self.rlogs_var)).grid(row=0, column=2, sticky="e", padx=(8, 0))
 
     buttons = ttk.Frame(root)
-    buttons.pack(fill=tk.X, pady=(12, 10))
-    ttk.Button(buttons, text="학습 시작 + 검증", command=self.one_click).pack(side=tk.LEFT, padx=(0, 6))
-    ttk.Button(buttons, text="자동 설정", command=self.auto_tune).pack(side=tk.LEFT, padx=3)
-    ttk.Button(buttons, text="인덱스/정리", command=self.scan_logs).pack(side=tk.LEFT, padx=3)
-    ttk.Button(buttons, text="모델 적용", command=lambda: self.promote(False)).pack(side=tk.LEFT, padx=3)
-    ttk.Button(buttons, text="고급 설정...", command=self._open_advanced).pack(side=tk.LEFT, padx=3)
-    ttk.Button(buttons, text="중지", command=self.stop).pack(side=tk.RIGHT, padx=(6, 0))
+    buttons.pack(fill=tk.X, pady=(14, 10))
+    self.train_button = ttk.Button(buttons, text="학습 시작", command=self.one_click)
+    self.train_button.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8), ipady=6)
+    self.apply_button = ttk.Button(buttons, text="차량에 적용", command=lambda: self.promote(False), state=tk.DISABLED)
+    self.apply_button.pack(side=tk.LEFT, padx=(0, 8), ipady=6)
+    ttk.Button(buttons, text="중지", command=self.stop).pack(side=tk.RIGHT, ipady=6)
 
     self.progress_var = tk.DoubleVar(value=0.0)
     self.progress = ttk.Progressbar(root, mode="determinate", maximum=100.0, variable=self.progress_var)
     self.progress.pack(fill=tk.X)
     self.status_var = tk.StringVar(value="Idle")
-    status = ttk.LabelFrame(root, text="상태", padding=(10, 6))
+    status = ttk.LabelFrame(root, text="세부 상태", padding=(10, 6))
     status.pack(fill=tk.X, pady=(8, 8))
     ttk.Label(status, textvariable=self.status_var).pack(anchor="w", pady=(0, 2))
     ttk.Label(status, textvariable=self.gpu_status_var).pack(anchor="w", pady=(0, 2))
     ttk.Label(status, textvariable=self.raw_log_var).pack(anchor="w")
 
-    ttk.Label(root, text="작업 로그").pack(anchor="w", pady=(2, 4))
-    self.log = tk.Text(root, wrap=tk.WORD, height=28)
+    ttk.Label(root, text="상세 로그").pack(anchor="w", pady=(2, 4))
+    self.log = tk.Text(root, wrap=tk.WORD, height=18)
     self.log.pack(fill=tk.BOTH, expand=True)
+
+  def _metric(self, parent, col: int, label: str, var: tk.StringVar):
+    frame = ttk.Frame(parent, padding=(8, 6))
+    frame.grid(row=0, column=col, sticky="ew", padx=(0 if col == 0 else 6, 0))
+    ttk.Label(frame, text=label).pack(anchor="w")
+    ttk.Label(frame, textvariable=var, font=("TkDefaultFont", 13, "bold")).pack(anchor="w", pady=(3, 0))
 
   def _open_advanced(self):
     if self.advanced_window is not None and self.advanced_window.winfo_exists():
@@ -864,6 +905,8 @@ class CASGui(tk.Tk):
     self._row(paths, 1, "RLOG 폴더", self.rlogs_var, browse=True)
     self._row(paths, 2, "Candidate JSON", self.candidate_var, save=True)
     self._row(paths, 3, "Validate JSON", self.validate_var, save=True)
+    self._row(paths, 4, "Server URL", self.cloud_endpoint_var)
+    self._row(paths, 5, "Read token", self.cloud_token_var)
 
     model = ttk.LabelFrame(root, text="모델 식별", padding=10)
     model.pack(fill=tk.X, pady=(0, 8))
@@ -887,11 +930,13 @@ class CASGui(tk.Tk):
     self._small(opts, 7, "Device", self.device_var)
     self._combo(opts, 8, "Raw cache", self.cloud_raw_policy_var, cloud_sync.LOCAL_RAW_POLICIES, small=True)
     ttk.Checkbutton(opts, text="WSL", variable=self.use_wsl_var).grid(row=0, column=9, sticky="w", padx=4)
+    ttk.Checkbutton(opts, text="Server auto", variable=self.cloud_auto_fetch_var).grid(row=1, column=0, columnspan=2, sticky="w", padx=4, pady=(8, 0))
 
     manual = ttk.Frame(root)
     manual.pack(fill=tk.X)
     ttk.Button(manual, text="Train Candidate", command=self.train).pack(side=tk.LEFT, padx=(0, 6))
     ttk.Button(manual, text="Validate", command=self.validate).pack(side=tk.LEFT, padx=3)
+    ttk.Button(manual, text="Server Sync", command=lambda: self.start_cloud_sync(auto=False)).pack(side=tk.LEFT, padx=3)
     ttk.Button(manual, text="Promote Dry Run", command=lambda: self.promote(True)).pack(side=tk.LEFT, padx=3)
     ttk.Button(manual, text="Promote", command=lambda: self.promote(False)).pack(side=tk.LEFT, padx=3)
     ttk.Button(manual, text="닫기", command=close).pack(side=tk.RIGHT)
@@ -1236,6 +1281,103 @@ class CASGui(tk.Tk):
     self._progress_done()
     self.queue.put(f"완료: 총 {total}개, 새로 읽음 {read}, 캐시 {cached}, 이동 {moved}, 폴더정리 {merged_dirs}, 오류 {errors}\n")
     self.queue.put(f"local manifest: {cloud_sync.local_manifest_path(rlogs)}\n")
+    if self.cloud_auto_fetch_var.get():
+      self.start_cloud_sync(auto=True)
+
+  def start_cloud_sync(self, auto: bool = False):
+    if self.cloud_running:
+      return
+    rlogs = self.rlogs_var.get().strip()
+    endpoint = self.cloud_endpoint_var.get().strip()
+    if not rlogs or not Path(rlogs).is_dir() or not endpoint:
+      return
+    self.cloud_running = True
+    self.status_var.set("서버 데이터 확인 중")
+    self.queue.put(f"\n[서버 동기화]\nendpoint: {endpoint}\n")
+
+    def worker():
+      try:
+        manifest = cloud_sync.fetch_server_manifest(
+          endpoint=endpoint,
+          token=self.cloud_token_var.get().strip(),
+          include_routes=True,
+          timeout=30.0,
+        )
+      except Exception as e:
+        self.after(0, lambda error=e: self._cloud_sync_failed(error, auto))
+        return
+      self.after(0, lambda: self._cloud_sync_done(manifest))
+
+    threading.Thread(target=worker, daemon=True).start()
+
+  def _cloud_sync_failed(self, error: Exception, auto: bool):
+    self.cloud_running = False
+    if not auto:
+      messagebox.showerror("CAS Server Sync", f"서버 manifest를 가져오지 못했습니다.\n\n{error}")
+    self.queue.put(f"  서버 동기화 실패: {error}\n")
+    self.status_var.set("서버 데이터 확인 실패")
+
+  def _cloud_sync_done(self, manifest: dict):
+    self.cloud_running = False
+    self.server_manifest = manifest
+    datasets = manifest.get("datasets", []) or []
+    total_hours = float((manifest.get("summary", {}) or {}).get("total_hours", 0.0) or 0.0)
+    self.queue.put(f"  서버 manifest 확인: dataset {len(datasets)}개, {total_hours:.1f}h\n")
+    self.status_var.set("서버 데이터 확인 완료")
+    self.app_sync_var.set("서버 연결됨. 학습 후 최신 이력이 자동 기록됩니다")
+    self._refresh_groups()
+
+  def _display_car(self, car: str) -> str:
+    car = str(car or "").strip()
+    if not car or car == "UNKNOWN_CAR":
+      return "차량 확인 전 데이터"
+    return car
+
+  def _display_kind(self, kind: str) -> str:
+    kind = str(kind or "").strip()
+    if kind == "angle":
+      return "앵글 조향"
+    return "조향 보정"
+
+  def _group_label(self, group: dict, source_label: str = "") -> str:
+    car = self._display_car(str(group.get("car", "")))
+    kind = self._display_kind(str(group.get("kind", "")))
+    total_hours = float(group.get("duration_hours", 0.0) or 0.0)
+    trained_hours = float(group.get("trained_hours", 0.0) or 0.0)
+    new_hours = max(0.0, total_hours - trained_hours)
+    prefix = f"{source_label} " if source_label else ""
+    return f"{prefix}{car} · {kind} · 새 데이터 {new_hours:.1f}h"
+
+  def _refresh_dashboard(self, group: dict | None = None):
+    if not group:
+      self.app_vehicle_var.set("차량 확인 전")
+      self.app_kind_var.set("조향 보정")
+      self.app_status_var.set("데이터를 확인하고 있습니다")
+      self.app_total_hours_var.set("0.0h")
+      self.app_trained_hours_var.set("0.0h")
+      self.app_new_hours_var.set("0.0h")
+      self.app_source_var.set("로컬/서버 확인 중")
+      self.app_sync_var.set("최신 모델 서버 동기화 준비 중")
+      return
+
+    total_hours = float(group.get("duration_hours", 0.0) or 0.0)
+    trained_hours = float(group.get("trained_hours", 0.0) or 0.0)
+    new_hours = max(0.0, total_hours - trained_hours)
+    source = "서버" if group.get("source") == "server" else "내 PC"
+    status = "바로 학습할 수 있습니다" if total_hours > 0.0 else "주행 데이터를 찾는 중입니다"
+    if new_hours <= 0.05 and trained_hours > 0.0:
+      status = "이미 최신 데이터까지 학습했습니다"
+    elif total_hours < 1.0 and total_hours > 0.0:
+      status = "테스트 학습은 가능하지만 실제 적용은 이릅니다"
+
+    self.app_vehicle_var.set(self._display_car(str(group.get("car", ""))))
+    self.app_kind_var.set(self._display_kind(str(group.get("kind", ""))))
+    self.app_status_var.set(status)
+    self.app_total_hours_var.set(f"{total_hours:.1f}h")
+    self.app_trained_hours_var.set(f"{trained_hours:.1f}h")
+    self.app_new_hours_var.set(f"{new_hours:.1f}h")
+    self.app_source_var.set(source)
+    self.app_sync_var.set("학습이 끝나면 최신 모델 정보를 서버에 기록합니다")
 
   def _refresh_groups(self):
     rlogs = self.rlogs_var.get().strip()
@@ -1254,10 +1396,15 @@ class CASGui(tk.Tk):
       group["trained_hours"] = trained_hours
       group["train_run_count"] = run_count
       group["latest_train_run_id"] = str(history.get("latest_run_id", ""))
-      total_hours = float(group.get("duration_hours", 0.0) or 0.0)
-      label = f"{car} / {kind} / {total_hours:.1f}h (학습 {trained_hours:.1f}h) / eps_{eps_hash} / {len(group['sources'])}개"
+      group["source"] = "local"
+      label = self._group_label(group, "내 PC")
       labels.append(label)
       self.group_map[label] = group
+
+    for dataset in self._server_dataset_groups(run_summary):
+      label = self._group_label(dataset, "서버")
+      labels.append(label)
+      self.group_map[label] = dataset
 
     if hasattr(self, "group_combo"):
       self.group_combo.configure(values=labels)
@@ -1268,6 +1415,51 @@ class CASGui(tk.Tk):
     else:
       self.group_var.set("")
       self.log_info_var.set(self._log_info_text("", "", 0, 0, 0.0))
+      self._refresh_dashboard(None)
+
+  def _server_dataset_groups(self, run_summary: dict) -> list[dict]:
+    rlogs = self.rlogs_var.get().strip()
+    groups = []
+    for dataset in self.server_manifest.get("datasets", []) or []:
+      car = str(dataset.get("car_key", "")).strip() or "UNKNOWN_CAR"
+      kind = str(dataset.get("kind", "")).strip() or "torque"
+      summary = dataset.get("summary", {}) or {}
+      trained_hours = float(summary.get("trained_hours", 0.0) or 0.0)
+      local_history = run_summary.get(f"{car}|{kind}", {})
+      trained_hours = max(trained_hours, float(local_history.get("trained_hours", 0.0) or 0.0))
+      sources = []
+      cloud_segments = []
+      for route in dataset.get("routes", []) or []:
+        device_id = str(route.get("device_id", "")).strip()
+        route_id = str(route.get("route_id", "")).strip()
+        if not device_id or not route_id:
+          continue
+        for segment in route.get("segments", []) or []:
+          files = segment.get("files", {}) or {}
+          if "rlog.zst" not in files:
+            continue
+          seg_id = str(segment.get("segment", "")).strip()
+          cache_file = cloud_sync.cloud_route_dir(rlogs, device_id, route_id, seg_id) / "rlog.zst"
+          sources.append(str(cache_file))
+          cloud_segments.append({
+            "device_id": device_id,
+            "route_id": route_id,
+            "segment": seg_id,
+            "download_url": files["rlog.zst"].get("download_url", ""),
+            "cache_file": str(cache_file),
+          })
+      groups.append({
+        "source": "server",
+        "car": car,
+        "kind": kind,
+        "eps_firmware_hash": ",".join(dataset.get("eps_firmware_hashes", []) or []),
+        "sources": sources,
+        "cloud_segments": cloud_segments,
+        "duration_hours": float(summary.get("total_hours", 0.0) or 0.0),
+        "trained_hours": trained_hours,
+        "train_run_count": int(summary.get("train_run_count", 0) or 0),
+      })
+    return sorted(groups, key=lambda g: (-len(g.get("sources", [])), g["car"], g["kind"]))
 
   def _refresh_local_manifest(self, rlogs: str):
     if not rlogs:
@@ -1290,21 +1482,26 @@ class CASGui(tk.Tk):
     car = str(group.get("car", "")).strip()
     kind = str(group.get("kind", "")).strip()
     eps_hash = str(group.get("eps_firmware_hash", "")).strip()
-    if car:
+    if car and car != "UNKNOWN_CAR":
       self.car_var.set(car)
       aliases = [alias.strip() for alias in self.car_aliases_var.get().replace(";", ",").split(",") if alias.strip()]
       if car not in aliases:
         aliases.insert(0, car)
         self.car_aliases_var.set(", ".join(aliases))
+    elif car == "UNKNOWN_CAR":
+      self.car_var.set("")
+      self.car_aliases_var.set("")
     if eps_hash:
       self.eps_hash_var.set(eps_hash)
     if kind in ("torque", "angle"):
       self.kind_var.set(kind)
-    self._set_default_output_paths(self.rlogs_var.get().strip(), car)
+    path_car = "" if car == "UNKNOWN_CAR" else car
+    self._set_default_output_paths(self.rlogs_var.get().strip(), path_car)
     self.log_info_var.set(self._log_info_text(car, eps_hash, len(group.get("sources", [])),
                                              len(group.get("sources", [])), float(group.get("duration_hours", 0.0)),
                                              kind, float(group.get("trained_hours", 0.0)),
                                              int(group.get("train_run_count", 0))))
+    self._refresh_dashboard(group)
 
   def _selected_sources(self) -> list[str]:
     group = self.group_map.get(self.group_var.get())
@@ -1320,6 +1517,61 @@ class CASGui(tk.Tk):
     if max_sources > 0:
       sources = sources[:max_sources]
     return sources
+
+  def _cloud_source_limit(self) -> int:
+    try:
+      limit = int(self.max_sources_var.get().strip() or 0)
+    except ValueError:
+      limit = 0
+    return limit if limit > 0 else 50
+
+  def _prepare_cloud_sources(self) -> bool:
+    group = self.group_map.get(self.group_var.get())
+    if not group or group.get("source") != "server":
+      return True
+    rlogs = self.rlogs_var.get().strip()
+    endpoint = self.cloud_endpoint_var.get().strip()
+    if not rlogs or not endpoint:
+      return False
+    limit = self._cloud_source_limit()
+    segments = list(group.get("cloud_segments", []))[:limit]
+    if not segments:
+      messagebox.showerror("CAS Server Sync", "서버 그룹에 받을 rlog가 없습니다.")
+      return False
+
+    self.queue.put(f"\n[서버 캐시]\n선택 그룹 rlog 준비: {len(segments)}개\n")
+    self.status_var.set("서버 rlog 다운로드 중")
+    self.app_status_var.set("서버에서 필요한 주행 데이터를 받고 있습니다")
+    self._progress_begin(len(segments))
+    token = self.cloud_token_var.get().strip()
+    downloaded = 0
+    cached = 0
+    for idx, item in enumerate(segments, start=1):
+      dest = Path(str(item.get("cache_file", "")))
+      try:
+        if dest.exists() and dest.stat().st_size > 0:
+          cached += 1
+        else:
+          download_url = str(item.get("download_url", "")).strip()
+          if not download_url:
+            download_url = f"/download/{item['device_id']}/{item['route_id']}/{item['segment']}/rlog.zst"
+          cloud_sync.download_cloud_file(endpoint, download_url, dest, token=token, timeout=180.0)
+          downloaded += 1
+      except Exception as e:
+        self._progress_done()
+        self.status_var.set("서버 rlog 다운로드 실패")
+        messagebox.showerror("CAS Server Sync", f"rlog 다운로드 실패\n\n{dest}\n\n{e}")
+        return False
+      self._progress_set(idx, len(segments))
+      if idx == 1 or idx % 5 == 0 or idx == len(segments):
+        self.queue.put(f"  [{idx}/{len(segments)}] cached={cached}, downloaded={downloaded}: {dest}\n")
+        self.update_idletasks()
+
+    self._progress_done()
+    self.status_var.set("서버 rlog 준비 완료")
+    self.app_status_var.set("주행 데이터 준비 완료. 학습을 시작합니다")
+    self.queue.put(f"  서버 캐시 완료: cached={cached}, downloaded={downloaded}\n")
+    return True
 
   def _write_rlog_list(self, sources: list[str], use_wsl: bool) -> str:
     rlogs = self.rlogs_var.get().strip()
@@ -1450,6 +1702,12 @@ class CASGui(tk.Tk):
     total = len(commands)
     for idx, (cmd, use_wsl_capnp, label) in enumerate(commands, 1):
       self.after(0, self.status_var.set, f"실행 중: {idx}/{total} {label}")
+      if "Train" in label:
+        self.after(0, self.app_status_var.set, "학습 중입니다")
+      elif "Validate" in label:
+        self.after(0, self.app_status_var.set, "학습 결과를 확인하고 있습니다")
+      elif "Promote" in label:
+        self.after(0, self.app_status_var.set, "실제 적용 전 마지막 점검 중입니다")
       code = self._run_one(cmd, use_wsl_capnp, label)
       self.after(0, self._progress_set, idx, total)
       if code != 0:
@@ -1644,8 +1902,26 @@ class CASGui(tk.Tk):
       data.setdefault("runs", []).append(run)
       _save_train_runs(rlogs, data)
       self.queue.put(f"\n[학습 이력]\n{_train_runs_path(rlogs)} 기록 완료: {car} / {kind} / {hours:.2f}h\n")
+      self._post_train_run_to_server(run)
     except Exception as e:
       self.queue.put(f"\n[학습 이력]\n기록 실패: {e}\n")
+
+  def _post_train_run_to_server(self, run: dict):
+    endpoint = self.cloud_endpoint_var.get().strip()
+    if not endpoint:
+      return
+    try:
+      result = cloud_sync.post_train_run(
+        endpoint,
+        run,
+        token=self.cloud_token_var.get().strip(),
+        timeout=20.0,
+      )
+      self.queue.put(f"[서버 학습 이력]\n업로드 완료: count={result.get('count')}\n")
+      self.after(0, self.app_sync_var.set, "서버에 학습 이력이 기록되었습니다")
+    except Exception as e:
+      self.queue.put(f"[서버 학습 이력]\n업로드 실패: {e}\n")
+      self.after(0, self.app_sync_var.set, "서버 학습 이력 기록 실패. 로컬 기록은 남아 있습니다")
 
   def _limit_args(self):
     args = []
@@ -1711,6 +1987,8 @@ class CASGui(tk.Tk):
   def train(self):
     if not self._require_paths():
       return
+    if not self._prepare_cloud_sources():
+      return
     cmd = self._train_cmd()
     if self.use_wsl_var.get():
       self._run(self._wsl_cmd(" ".join(quote(x) for x in cmd)), use_wsl_capnp=True)
@@ -1719,6 +1997,8 @@ class CASGui(tk.Tk):
 
   def validate(self):
     if not self._require_paths():
+      return
+    if not self._prepare_cloud_sources():
       return
     cmd = self._validate_cmd()
     if self.use_wsl_var.get():
@@ -1732,14 +2012,14 @@ class CASGui(tk.Tk):
     if not dry_run:
       candidate = Path(self.candidate_var.get())
       if not candidate.exists():
-        messagebox.showerror("CAS 모델 적용", "적용할 candidate JSON이 없습니다. 먼저 학습 + 검증을 실행하세요.")
+        messagebox.showerror("CAS 차량 적용", "적용할 학습 결과가 없습니다. 먼저 [학습 시작]을 실행하세요.")
         return
       if not Path(self.validate_var.get()).exists():
-        messagebox.showerror("CAS 모델 적용", "검증 결과 JSON이 없습니다. 먼저 [학습 시작 + 검증]을 실행하세요.")
+        messagebox.showerror("CAS 차량 적용", "검증 결과가 없습니다. 먼저 [학습 시작]을 실행하세요.")
         return
       ok = messagebox.askyesno(
-        "CAS 모델 적용",
-        "검증된 candidate 모델을 실제 weights 폴더에 적용할까요?\n\n"
+        "CAS 차량 적용",
+        "검증된 학습 결과를 이 openpilot 폴더에 적용할까요?\n\n"
         "차량에서 바로 사용될 파일이 바뀝니다. 학습 결과가 부족하다고 표시되면 적용하지 않는 것이 좋습니다.",
       )
       if not ok:
@@ -1749,6 +2029,8 @@ class CASGui(tk.Tk):
 
   def one_click(self):
     if not self._require_paths():
+      return
+    if not self._prepare_cloud_sources():
       return
     train_cmd = self._train_cmd()
     validate_cmd = self._validate_cmd()
@@ -1981,6 +2263,18 @@ class CASGui(tk.Tk):
         good_points.append(f"적용 보정량 {p95:.4f} (정상 범위)")
 
       grade = "학습 양호" if not issues else ("학습 완료 (주의 필요)" if len(issues) <= 2 else "데이터/설정 부족")
+      if "부족" in grade:
+        self.after(0, self.app_status_var.set, "학습은 완료됐지만 실제 적용은 아직 이릅니다")
+        self.after(0, self.app_sync_var.set, "학습 이력은 서버에 기록됩니다. 더 많은 데이터로 다시 학습하세요")
+        self.after(0, self.apply_button.configure, {"state": tk.DISABLED})
+      elif "주의" in grade:
+        self.after(0, self.app_status_var.set, "학습 완료. 적용 전 결과를 꼭 확인하세요")
+        self.after(0, self.app_sync_var.set, "학습 이력은 서버에 기록됩니다")
+        self.after(0, self.apply_button.configure, {"state": tk.NORMAL})
+      else:
+        self.after(0, self.app_status_var.set, "학습 결과가 좋습니다. 차량에 적용할 수 있습니다")
+        self.after(0, self.app_sync_var.set, "학습 이력은 서버에 기록됩니다. 다음 단계는 모델 업로드/자동 배포입니다")
+        self.after(0, self.apply_button.configure, {"state": tk.NORMAL})
 
       self.queue.put("\n[요약]\n")
       self.queue.put(f"평가: {grade}\n")
@@ -2003,7 +2297,7 @@ class CASGui(tk.Tk):
         self.queue.put("\n확인 필요:\n")
         for i in issues:
           self.queue.put(f"  ! {i}\n")
-      self.queue.put("\n아직 실제 적용은 하지 않았습니다. 결과가 괜찮으면 [모델 적용]을 누르세요.\n")
+      self.queue.put("\n아직 실제 적용은 하지 않았습니다. 결과가 괜찮으면 [차량에 적용]을 누르세요.\n")
 
       summary_for_popup = (
         f"평가: {grade}\n\n"
@@ -2022,7 +2316,7 @@ class CASGui(tk.Tk):
           summary_for_popup += f"- {i}\n"
       summary_for_popup += (
         "\n다음 단계\n"
-        "1. 결과가 괜찮으면 [모델 적용]을 누르세요.\n"
+        "1. 결과가 괜찮으면 [차량에 적용]을 누르세요.\n"
         "2. 차량에서는 저속, 한산한 도로부터 테스트하세요.\n"
         "3. 진동이나 이상감이 있으면 CAS 토글을 끄세요.\n"
         "4. 결과가 부족하면 rlog를 더 모은 뒤 다시 학습하세요."

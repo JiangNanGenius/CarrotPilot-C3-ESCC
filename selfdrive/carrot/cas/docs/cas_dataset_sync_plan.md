@@ -456,3 +456,64 @@ repo 기준 서버 파일은 `tools/cas/server/carrot_upload_server.py`로 둔�
 6. Phase 6: 서버 구현
 
 가장 먼저 해야 하는 것은 Phase 1이다. 이후 모든 기능이 `car_key + kind` 기준을 공유해야 torque/angle 혼합, 차량명 혼선, 모델 표시 혼선을 피할 수 있다.
+
+---
+
+## 9. 2026-05-22 Phase 6.5 - GUI server manifest/download bridge
+
+- LXC 205 server internal/external API check passed.
+  - Internal: `http://127.0.0.1:8000/health`
+  - External: `https://casroute.jominki354.live/health`
+  - `GET /api/datasets?include_routes=false` returns HTTP 200.
+- GUI now fetches server manifest from `https://casroute.jominki354.live` by default.
+- Server datasets are shown in the target selector as `[server] ...` groups next to local groups.
+- Selecting a server group and starting training downloads only the needed `rlog.zst` files into:
+
+  ```text
+  <RLOG>/.cas/cloud_cache/<device>/<route>--<seg>/rlog.zst
+  ```
+
+- Successful train+validate runs are recorded locally in `<RLOG>/.cas/train_runs.json` and posted to `/api/train-runs` when a server URL is configured.
+- Older server routes can appear as `UNKNOWN_CAR/torque` because their uploaded `route_meta.json` did not include `car_key`/`kind`. New uploads should split as `HYUNDAI_CASPER_EV/torque` etc.
+
+---
+
+## 10. UX Phase - non-developer app mode
+
+목표: 사용자가 설정값을 거의 고민하지 않고 `학습 시작`만 누를 수 있는 앱 형태로 전환한다.
+
+기본 화면 원칙:
+
+- 화면 제목은 `CAS Learner`로 단순화한다.
+- 기본 화면에는 차량 선택, 최소 메타, 큰 `학습 시작` 버튼, `차량에 적용` 버튼만 둔다.
+- `RLOG`, `candidate`, `validate`, `manifest`, `torque` 같은 내부 용어는 기본 화면에서 숨긴다.
+- 여러 차량은 드롭다운으로 고르되, 항목은 `차량명 · 조향 방식 · 새 데이터 시간`만 표시한다.
+- `UNKNOWN_CAR`는 `차량 확인 전 데이터`로 표시한다.
+- 학습 성공 후에는 로컬 이력과 서버 이력을 기록한다.
+- 다음 Phase에서는 학습된 모델 JSON 자체를 서버에 업로드하고, comma/openpilot 쪽이 최신 모델을 받아 쓰는 배포 API를 추가한다.
+
+현재 구현:
+
+- `tools/cas/gui.py` 기본 화면을 앱 모드로 재배치했다.
+- 최소 메타는 `준비된 데이터`, `학습 완료`, `새 데이터`, `데이터 위치`만 표시한다.
+- `전문가 설정` 안에 기존 상세 경로/학습 옵션/수동 버튼을 유지한다.
+- 학습 후 서버 `/api/train-runs`에 이력이 기록되면 화면에 서버 동기화 상태를 표시한다.
+
+### Flet prototype note
+
+- Added `tools/cas/gui_flet.py` as a Material-style app shell.
+- It uses Flet 0.85.x, Material 3 theme, one primary card, one primary action, and hidden expert details.
+- It currently fetches server datasets and shows the simplified UX only.
+- Production train/validate/apply still remains in `tools/cas/gui.py` until the runner is split out of Tkinter and reused by Flet.
+
+### Material 3 Flet redesign note
+
+- Reworked `tools/cas/gui_flet.py` around Material 3 app structure:
+  - top app bar with refresh/settings actions
+  - one primary content card
+  - one primary action (`학습 시작`)
+  - secondary apply action disabled until enough trained hours exist
+  - vehicle dropdown only when more than one dataset exists
+  - technical details collapsed under `자세히`
+- Default screen no longer shows logs, GPU text, file paths, or progress unless needed.
+- This is the preferred UX direction for non-developer users. The next implementation step is extracting the train/validate/apply runner from `gui.py` so this Flet app can execute the real workflow.

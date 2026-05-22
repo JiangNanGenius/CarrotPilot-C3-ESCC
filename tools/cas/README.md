@@ -47,6 +47,18 @@ python tools/cas/train.py \
 python tools\cas\gui.py
 ```
 
+Flet/Material-style prototype:
+
+```powershell
+python -m pip install flet
+python tools\cas\gui_flet.py
+```
+
+The Flet screen is currently a lightweight app-style front end for checking
+server datasets and the simplified non-developer UX. The production
+train/validate/apply flow still lives in `tools\cas\gui.py` until the runner is
+split into a reusable service.
+
 Use `One Click: Train + Validate` for the normal flow. It trains a candidate,
 validates it, then runs promote dry-run only. Real `Promote` is separate.
 Only `RLOG dir`, `Car`, and the one-click button are needed for normal use.
@@ -58,7 +70,12 @@ hours per `car + kind`, then marks the group ready when indexing is complete.
 Each run writes raw logs under `RLOG dir/.cas/runs/<timestamp>_<car>_<kind>/`.
 Successful train+validate runs are appended to `RLOG dir/.cas/train_runs.json`.
 Indexing also writes `RLOG dir/.cas/local_manifest.json`, the local-side shape
-that future server manifest/download code will use.
+that server manifest/download code uses. The GUI can fetch the server manifest
+from `https://casroute.jominki354.live`, list server datasets next to local
+datasets, and download the selected server rlogs into
+`RLOG dir/.cas/cloud_cache` before training. Successful train+validate runs are
+also posted back to `/api/train-runs` when the server URL is configured, so
+other training PCs can see the latest trained hours.
 Server-side reference code lives at `tools/cas/server/carrot_upload_server.py`;
 deploy notes are in `selfdrive/carrot/cas/docs/cas_server_phase6.md`.
 When many rlogs are selected, the GUI writes a temporary `selected_rlogs*.txt`

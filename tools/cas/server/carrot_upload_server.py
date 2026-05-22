@@ -174,7 +174,13 @@ def _route_meta(route_dir: Path) -> dict[str, Any]:
 
 
 def _car_key_from_meta(route_dir: Path, meta: dict[str, Any]) -> str:
-  for key in ("car_key", "car", "car_name_raw", "car_selected"):
+  # Walk most-specific → least-specific. last_known_car is the device's
+  # persisted "previous good CarName" — lets routes uploaded before this
+  # boot's CarParams arrived still bin to the right car.
+  # EPS firmware hash is intentionally NOT in this chain — it's reference
+  # diagnostic only (matches runtime's behavior of treating EPS as a
+  # tiebreaker bonus, never a disqualifier).
+  for key in ("car_key", "car", "car_name_raw", "car_selected", "last_known_car"):
     value = str(meta.get(key, "")).strip()
     normalized = _norm_car_key(value)
     if normalized:

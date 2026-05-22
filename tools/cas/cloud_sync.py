@@ -87,6 +87,15 @@ def fetch_server_routes(endpoint: str = DEFAULT_SERVER_ENDPOINT, car_key: str = 
   return _fetch_json(_join_url(endpoint, "/api/routes") + "?" + urlencode(query), token=token, timeout=timeout)
 
 
+def post_train_run(endpoint: str, payload: dict[str, Any], token: str = "", timeout: float = 30.0) -> dict[str, Any]:
+  body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+  headers = _auth_headers(token)
+  headers["Content-Type"] = "application/json"
+  req = Request(_join_url(endpoint, "/api/train-runs"), data=body, headers=headers, method="POST")
+  with urlopen(req, timeout=timeout) as response:
+    return json.loads(response.read().decode("utf-8"))
+
+
 def download_cloud_file(endpoint: str, download_url: str, dest: str | Path,
                         token: str = "", timeout: float = 120.0) -> Path:
   dest_path = Path(dest)

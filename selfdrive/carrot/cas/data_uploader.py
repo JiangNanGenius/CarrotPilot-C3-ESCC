@@ -308,23 +308,71 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
                      device_id: str) -> dict:
   car_name = _read_param_str(params, "CarName")
   car_selected = _read_param_str(params, "CarSelected3")
+
+  # Persist most-recent good CarName. Lets a future upload that happens before
+  # CarParams becomes available (e.g. just after boot) still carry a hint:
+  # 디바이스가 "지난 번엔 이 차였다"고 알려줌. Server side adds last_known_car to
+  # its car_key resolution chain so even pre-identification uploads bin correctly.
+  if car_name and car_name.upper() != "MOCK":
+    try:
+      params.put("CarrotLastCarName", car_name)
+    except Exception:
+      pass
+  last_known_car = _read_param_str(params, "CarrotLastCarName")
+
   car_params = _read_car_params(params)
   car_fingerprint = ""
+  car_make = ""
+  car_model_year = ""
   kind = ""
   if car_params is not None:
     car_fingerprint = str(getattr(car_params, "carFingerprint", "")).strip()
     kind = _steer_kind_from_car_params(car_params)
-  car_key = car_fingerprint or car_name or car_selected
-  carrot_version = ""
+    car_make = str(getattr(car_params, "make", "") or getattr(car_params, "brand", "")).strip()
+    year_attr = getattr(car_params, "year", "")
+    car_model_year = str(year_attr).strip() if year_attr else ""
+
+  car_key = car_fingerprint or car_name or car_selected or last_known_car
+
+  carrot_version  = _read_param_str(params, "GitCommit")[:12]
+  carrot_branch   = _read_param_str(params, "GitBranch")
+  hardware_serial = _read_param_str(params, "HardwareSerial")
+  dongle_id       = _read_param_str(params, "DongleId")
+  cas_model       = _read_param_str(params, "CASModelName")
+
+  # EPS firmware hash — **reference only**, NEVER a primary matching key.
+  # Same SHA1-12 the runtime computes; surfaced here so the PC GUI can show
+  # "this car has EPS XYZ" for debug/diagnostic context. Server's car_key
+  # resolution chain intentionally ignores this field (matches the runtime
+  # behavior where EPS hash mismatch no longer disqualifies a model).
+  eps_hash = ""
   try:
-    carrot_version = (params.get("GitCommit") or b"")[:12].decode("utf-8", "ignore").strip()
+    try:
+      from openpilot.selfdrive.carrot.cas.metadata import eps_firmware_hash
+    except ModuleNotFoundError:
+      from selfdrive.carrot.cas.metadata import eps_firmware_hash
+    if car_params is not None and hasattr(car_params, "carFw"):
+      eps_hash = eps_firmware_hash(list(car_params.carFw))
   except Exception:
     pass
-  cas_model = ""
-  try:
-    cas_model = (params.get("CASModelName") or b"").decode("utf-8", "ignore").strip()
-  except Exception:
-    pass
+
+  # Real driving time from segment mtimes (more accurate than segments × 60s).
+  route_start_ts = 0
+  route_end_ts = 0
+  if segments:
+    try:
+      mtimes = sorted(int(s.stat().st_mtime) for s in segments if s.exists())
+      if mtimes:
+        route_start_ts = mtimes[0]
+        route_end_ts   = mtimes[-1]
+    except OSError:
+      pass
+  duration_sec = int(len(segments) * 60)
+  duration_estimated = True
+  if route_end_ts > route_start_ts > 0:
+    duration_sec = max(duration_sec, route_end_ts - route_start_ts + 60)
+    duration_estimated = False
+
   file_bytes = {}
   for fname in UPLOAD_FILES:
     total = 0
@@ -336,21 +384,34 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
     file_bytes[fname] = total
 
   return {
-    "device_id": device_id,
-    "route_id": route_id,
-    "car": car_fingerprint or car_name,
-    "car_key": _car_key_from_name(car_key),
-    "car_name_raw": car_name,
-    "car_selected": car_selected,
-    "kind": kind,
+    "meta_schema_version": 2,
+    "device_id":         device_id,
+    "route_id":          route_id,
+    # Car identity (most-specific first; server.lookup walks down this chain)
+    "car":               car_fingerprint or car_name,
+    "car_key":           _car_key_from_name(car_key),
+    "car_name_raw":      car_name,
+    "car_selected":      car_selected,
+    "last_known_car":    last_known_car,
+    "car_make":          car_make,
+    "car_model_year":    car_model_year,
+    "eps_firmware_hash": eps_hash,
+    "kind":              kind,
     "steer_control_type": kind,
-    "carrot_version": carrot_version,
-    "cas_model_used": cas_model,
-    "segments": len(segments),
-    "duration_sec": int(len(segments) * 60),
-    "duration_estimated": True,
-    "file_bytes": file_bytes,
-    "uploaded_at": int(time.time()),
+    # Device traceability
+    "dongle_id":         dongle_id,
+    "hardware_serial":   hardware_serial,
+    "carrot_version":    carrot_version,
+    "carrot_branch":     carrot_branch,
+    "cas_model_used":    cas_model,
+    # Route stats
+    "segments":          len(segments),
+    "duration_sec":      duration_sec,
+    "duration_estimated": duration_estimated,
+    "route_start_ts":    route_start_ts,
+    "route_end_ts":      route_end_ts,
+    "file_bytes":        file_bytes,
+    "uploaded_at":       int(time.time()),
   }
 
 
