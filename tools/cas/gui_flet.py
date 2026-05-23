@@ -203,7 +203,22 @@ def main(page: ft.Page):
     "log":              [],
     "current_run_dir":  None,              # Path of timestamped run folder
     "current_run_log":  None,              # Path of run.log file inside it
+    "deployed":         {},                # "<car>/<kind>" -> latest model info dict
   }
+
+  def _dataset_model_key(ds: dict[str, Any]) -> str:
+    car = ds_train_car(ds) or ds_cloud_car(ds)
+    kind = str(ds.get("kind", "torque")).strip() or "torque"
+    return f"{car}/{kind}"
+
+  def _deployed_detail_text(ds: dict[str, Any]) -> str:
+    dep = state.get("deployed", {}).get(_dataset_model_key(ds))
+    if not dep:
+      return "아직 배포된 모델이 없습니다"
+    ver = str(dep.get("version", ""))
+    hrs = float(dep.get("trained_on_hours", 0) or 0)
+    sha = str(dep.get("sha256", ""))[:12]
+    return f"{ver} · {hrs:.2f}h · sha {sha}\n기기는 다음 부팅 시 자동 수신"
 
   # ── Path resolution (depends on cfg) ──
   def rlog_dir() -> Path:
@@ -241,14 +256,14 @@ def main(page: ft.Page):
     d.mkdir(parents=True, exist_ok=True)
     return d
 
-  # ── Core UI controls ──
-  headline = ft.Text("데이터 확인 중", size=28, weight=ft.FontWeight.W_700)
-  assist   = ft.Text("서버 연결 중", size=14, color=ft.Colors.ON_SURFACE_VARIANT)
-  status   = ft.Text("잠시만 기다려 주세요.", size=15, weight=ft.FontWeight.W_500)
+  # ── Core UI controls (minimal main surface) ──
+  headline = ft.Text("데이터 확인 중", size=26, weight=ft.FontWeight.W_700)
+  status   = ft.Text("서버 연결 중", size=15, weight=ft.FontWeight.W_500)
   progress = ft.ProgressBar(visible=False, value=None, bar_height=4)
-  primary_button  = ft.FilledButton("학습 시작", icon=ft.Icons.PLAY_ARROW_ROUNDED, height=52, disabled=True)
-  apply_button    = ft.TextButton("차량에 적용", icon=ft.Icons.DIRECTIONS_CAR, disabled=True)
-  stop_button     = ft.OutlinedButton("중지", icon=ft.Icons.STOP_CIRCLE_ROUNDED, visible=False)
+  primary_button  = ft.FilledButton("학습 시작", icon=ft.Icons.PLAY_ARROW_ROUNDED, height=56, disabled=True)
+  stop_button     = ft.OutlinedButton("중지", icon=ft.Icons.STOP_CIRCLE_ROUNDED, visible=False, height=44)
+  # Small one-line deploy status under the button.
+  deploy_status   = ft.Text("", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
   refresh_button  = ft.IconButton(ft.Icons.REFRESH_ROUNDED, tooltip="새로고침")
   settings_button = ft.IconButton(ft.Icons.SETTINGS_ROUNDED, tooltip="전문가 설정")
 
@@ -464,10 +479,9 @@ def main(page: ft.Page):
     ds = selected_dataset()
     if ds is None:
       headline.value = "데이터 없음"
-      assist.value = "서버 데이터가 없습니다"
       status.value = "새로고침 후 다시 확인하세요."
+      deploy_status.value = ""
       primary_button.disabled = True
-      apply_button.disabled = True
       vehicle_menu.visible = False
       detail_tile.visible = False
       page.update()
@@ -480,24 +494,31 @@ def main(page: ft.Page):
     source_count = int(summary.get("source_count", 0) or summary.get("segment_count", 0) or 0)
     train_runs = int(summary.get("train_run_count", 0) or 0)
     can_train = total > 0.0 and new_hours > 0.05
-    enough_to_apply = trained >= MIN_APPLY_HOURS or candidate_path(ds).exists()
-
     is_unknown = str(ds.get("car_key", "")) == "UNKNOWN_CAR"
-    headline.value = car
-    assist.value = f"{kind} · {total:.1f}h 준비됨"
-    if is_unknown and can_train:
-      status.value = f"차량 식별 안 됨 · 새 데이터 {new_hours:.1f}h (학습 시작 시 차량 선택)"
-    elif can_train:
-      status.value = f"새 데이터 {new_hours:.1f}h가 있습니다."
-    elif trained > 0.0:
-      status.value = "최신 데이터까지 학습했습니다."
-    else:
-      status.value = "학습할 데이터가 없습니다."
 
-    # UNKNOWN_CAR with data is still trainable — we'll prompt for the actual
-    # car name on click. Only disable when there's truly no new data.
+    # ── Headline + plain-language state ──
+    headline.value = car
+    if is_unknown and can_train:
+      status.value = f"차량 확인 필요 · 새 데이터 {new_hours:.1f}시간"
+    elif can_train:
+      status.value = f"새 데이터 {new_hours:.1f}시간"
+    elif total > 0.0:
+      status.value = "최신 상태입니다"
+    else:
+      status.value = "수집된 데이터가 없습니다"
+
+    # ── Deploy status line (small) — from cached deployed model info ──
+    dep = state.get("deployed", {}).get(_dataset_model_key(ds))
+    if dep:
+      ver = str(dep.get("version", ""))
+      hrs = float(dep.get("trained_on_hours", 0) or 0)
+      when = ver[:8]  # YYYYMMDD
+      when_fmt = f"{when[:4]}-{when[4:6]}-{when[6:8]}" if len(when) == 8 else ver
+      deploy_status.value = f"📦 배포됨: {when_fmt} ({hrs:.1f}h) · 다음 시동 시 적용"
+    else:
+      deploy_status.value = "📦 배포된 모델 없음"
+
     primary_button.disabled = not can_train
-    apply_button.disabled = not enough_to_apply
     # Count untrained datasets across all cars for the "all" button.
     untrained = [
       d for d in state["datasets"]
@@ -550,6 +571,13 @@ def main(page: ft.Page):
         ),
         dense=True,
       ),
+      # 배포 모델 상세
+      ft.ListTile(
+        leading=ft.Icon(ft.Icons.ROCKET_LAUNCH_ROUNDED, color=ft.Colors.PRIMARY),
+        title=ft.Text("배포 모델"),
+        subtitle=ft.Text(_deployed_detail_text(ds)),
+        dense=True,
+      ),
       # 학습 이력 요약 + 클릭하면 다이얼로그
       ft.ListTile(
         leading=ft.Icon(ft.Icons.TIMELINE_ROUNDED),
@@ -595,12 +623,27 @@ def main(page: ft.Page):
       progress.visible = False
       refresh_button.disabled = False
       headline.value = "연결 실패"
-      assist.value = "서버를 확인할 수 없습니다"
       status.value = str(e)
+      deploy_status.value = ""
       primary_button.disabled = True
-      apply_button.disabled = True
       page.update()
       return
+    # Fetch latest published model per dataset (best-effort) so the deploy
+    # status line + 자세히 can show what's currently on the device path.
+    endpoint = cfg.get("endpoint") or cloud_sync.DEFAULT_SERVER_ENDPOINT
+    token = cfg.get("token", "")
+    deployed: dict[str, dict] = {}
+    for d in state["datasets"]:
+      car = ds_train_car(d) or ds_cloud_car(d)
+      kind = str(d.get("kind", "torque")).strip() or "torque"
+      if not car or car == "UNKNOWN_CAR":
+        continue
+      try:
+        info = cloud_sync.fetch_latest_model_info(endpoint, car, kind, token=token, timeout=10.0)
+        deployed[f"{car}/{kind}"] = info
+      except Exception:
+        pass  # 404 = no model yet, fine
+    state["deployed"] = deployed
     set_ready()
 
   def refresh_clicked(_event=None):
@@ -750,7 +793,6 @@ def main(page: ft.Page):
     progress.value           = None
     primary_button.disabled  = True
     train_all_button.disabled = True
-    apply_button.disabled    = True
     refresh_button.disabled  = True
     download_button.disabled = True
     cleanup_button.disabled  = True
@@ -763,7 +805,6 @@ def main(page: ft.Page):
     refresh_button.disabled  = False
     primary_button.disabled  = False
     train_all_button.disabled = False
-    apply_button.disabled    = False
     download_button.disabled = False
     cleanup_button.disabled  = False
     try: page.update()
@@ -958,29 +999,23 @@ def main(page: ft.Page):
       except Exception as e:
         append_log(f"[record] {e}")
 
-      # Phase 4: auto-promote — copy candidate JSON to repo's weights/ so PC-side
-      # runtime (if anyone runs it) can match. Devices get it via Phase 5 (OTA pull
-      # from server). We promote first so the same file is ready for both paths.
-      promote_cmd = build_promote_cmd(ds, cand)
-      ok_promote = _execute_commands_inline([(promote_cmd, "Promote")])
-      append_log(f"[promote] {'OK' if ok_promote else 'FAIL'}")
+      # Phase 4: publish to server = the deployment. Device's model_puller picks
+      # this up at next boot. (Local promote into git weights/ is no longer part
+      # of the flow — OTA is the only deployment path. Use tools/cas/promote.py
+      # manually if you ever need the git-tracked fallback updated for PC tests.)
+      try:
+        endpoint = cfg.get("endpoint") or cloud_sync.DEFAULT_SERVER_ENDPOINT
+        secret = cloud_sync.resolve_upload_secret()
+        result = cloud_sync.post_model(
+          endpoint, train_car, kind, str(cand), secret, timeout=60.0,
+        )
+        append_log(f"[배포] 서버 발행 완료: {train_car}/{kind} "
+                   f"v{result.get('version','?')} "
+                   f"sha={str(result.get('sha256',''))[:12]}")
+      except Exception as e:
+        append_log(f"[배포] 실패: {e}")
 
-      # Phase 5: auto-publish to server. Device puller will pick this up at next
-      # boot. rlog files are unrelated; we send only the small model JSON.
-      if ok_promote:
-        try:
-          endpoint = cfg.get("endpoint") or cloud_sync.DEFAULT_SERVER_ENDPOINT
-          secret = cloud_sync.resolve_upload_secret()
-          result = cloud_sync.post_model(
-            endpoint, train_car, kind, str(cand), secret, timeout=60.0,
-          )
-          append_log(f"[publish] 서버 발행 완료: car={train_car}/{kind} "
-                     f"version={result.get('version','?')} "
-                     f"sha={str(result.get('sha256',''))[:12]}…")
-        except Exception as e:
-          append_log(f"[publish] FAIL: {e}")
-
-      # Phase 6: optional cleanup
+      # Phase 5: optional cleanup
       if cfg.get("cleanup_after_train", False):
         try:
           n_segs, n_bytes = cleanup_for_car_kind(cloud_car, kind)
@@ -1239,22 +1274,7 @@ def main(page: ft.Page):
       daemon=True,
     ).start()
 
-  def apply_clicked(_event=None):
-    ds = selected_dataset()
-    if ds is None:
-      return
-    cand = candidate_path(ds)
-    if not cand.exists():
-      open_message(
-        "candidate 없음",
-        f"먼저 학습을 실행하세요.\n예상 경로:\n{cand}",
-      )
-      return
-    threading.Thread(
-      target=run_subprocess,
-      args=([(build_promote_cmd(ds, cand), "Apply")],),
-      daemon=True,
-    ).start()
+  # (apply_clicked removed — OTA replaces local promote; deployment = publish.)
 
   def stop_clicked(_event=None):
     # Flag is checked by the multi-phase pipeline between phases (download /
@@ -1529,7 +1549,6 @@ def main(page: ft.Page):
   refresh_button.on_click  = refresh_clicked
   settings_button.on_click = settings_clicked
   primary_button.on_click  = train_clicked
-  apply_button.on_click    = apply_clicked
   stop_button.on_click     = stop_clicked
   download_button.on_click   = download_clicked
   cleanup_button.on_click    = cleanup_clicked
@@ -1546,44 +1565,49 @@ def main(page: ft.Page):
     actions=[refresh_button, settings_button],
   )
 
+  # ── Minimal main surface ──
+  # 메인 카드: 아이콘 + 차량명 + 상태 한 줄 + 큰 버튼 + 배포 상태 한 줄.
+  # 나머지(로그/환경/옵션/데이터 액션)는 모두 '자세히'(접힘) 안으로.
+  main_card = ft.Card(
+    elevation=0,
+    bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
+    content=ft.Container(
+      padding=ft.Padding.symmetric(horizontal=24, vertical=28),
+      content=ft.Column(
+        [
+          ft.Icon(ft.Icons.AUTO_AWESOME_ROUNDED, size=34, color=ft.Colors.PRIMARY),
+          headline,
+          status,
+          progress,
+          ft.Container(height=12),
+          primary_button,                       # 큰 주 버튼
+          train_all_button,                     # (다차량일 때만 보임)
+          ft.Row([stop_button], alignment=ft.MainAxisAlignment.CENTER),
+          ft.Container(height=4),
+          deploy_status,                        # 배포 상태 한 줄
+        ],
+        spacing=8,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        tight=True,
+      ),
+    ),
+  )
+
+  # 자세히: 페이지 전체가 스크롤되도록 page.scroll=AUTO (이미 설정됨).
+  # ExpansionTile은 펼치면 controls가 흐름에 추가되고, 그 아래 log_container도
+  # 함께 페이지 스크롤 범위에 들어감.
   page.add(
     ft.SafeArea(
       ft.Container(
-        padding=ft.Padding.only(left=20, right=20, bottom=20),
+        padding=ft.Padding.only(left=16, right=16, top=4, bottom=24),
         content=ft.Column(
           [
-            ft.Card(
-              elevation=0,
-              bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
-              content=ft.Container(
-                padding=24,
-                content=ft.Column(
-                  [
-                    ft.Icon(ft.Icons.AUTO_AWESOME_ROUNDED, size=32, color=ft.Colors.PRIMARY),
-                    headline,
-                    assist,
-                    ft.Container(height=8),
-                    status,
-                    progress,
-                    ft.Container(height=8),
-                    primary_button,
-                    train_all_button,
-                    ft.Row(
-                      [apply_button, stop_button],
-                      alignment=ft.MainAxisAlignment.END,
-                      spacing=8,
-                    ),
-                  ],
-                  spacing=8,
-                  tight=True,
-                ),
-              ),
-            ),
+            main_card,
             vehicle_menu,
             detail_tile,
             log_container,
           ],
-          spacing=16,
+          spacing=14,
         ),
       )
     )

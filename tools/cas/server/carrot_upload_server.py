@@ -26,12 +26,13 @@ import os
 import re
 import shutil
 import time
+from collections import deque
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, Query, Request
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse
 
 
 SECRET_PATH = Path("/etc/carrot-upload/secret")
@@ -83,6 +84,16 @@ def _version_from_trained_at(trained_at: str) -> str:
 
 app = FastAPI(title="carrot-upload", docs_url=None, redoc_url=None)
 _upload_counter = 0
+
+# ─── live status (in-memory, lost on restart — fine, it's a monitoring view) ──
+# Safe as plain globals because the service runs single-worker (--workers 1) and
+# the upload handler is async on one event loop, so there's no true parallelism
+# to race these. With multiple workers these counts would be per-worker and wrong.
+SERVER_START = time.time()
+RECENT_UPLOADS: deque = deque(maxlen=300)   # {ts, device_id, car, ip, bytes, file}
+_inflight = 0
+_status_cache: dict[str, Any] = {"at": 0.0, "text": ""}
+STATUS_CACHE_SEC = 5.0   # disk scan is cheap but pointless to redo every 2s
 
 
 def _verify_sig(device_id: str, ts: str, sig: str) -> bool:
@@ -579,6 +590,12 @@ async def upload(
   dest = seg_dir / filename
   tmp = dest.with_suffix(dest.suffix + ".part")
 
+  # Real client IP behind Cloudflare Tunnel (request.client is the tunnel).
+  client_ip = request.headers.get("cf-connecting-ip") or (
+    request.client.host if request.client else "")
+
+  global _inflight
+  _inflight += 1
   total = 0
   try:
     with tmp.open("wb") as f:
@@ -594,6 +611,13 @@ async def upload(
   except Exception as e:
     tmp.unlink(missing_ok=True)
     raise HTTPException(status_code=500, detail=f"write failed: {e}")
+  finally:
+    _inflight -= 1
+
+  RECENT_UPLOADS.append({
+    "ts": time.time(), "device_id": device_id, "car": car_key,
+    "ip": client_ip, "bytes": total, "file": filename,
+  })
 
   # When route_meta arrives, sanity-check car_key against meta. Mismatch is
   # informational only — folder stays where it was first placed.
@@ -740,4 +764,167 @@ async def list_models(authorization: str = Header(default="")):
           "stored_at":        meta.get("stored_at", 0),
         })
   return JSONResponse({"models": out, "count": len(out)})
+
+
+# ─── live status page (htop-style, no DB, no CSS framework) ──────────────────
+# /status      → tiny HTML shell that polls /status.txt every 2s in place
+# /status.txt  → plain-text dump (LIVE in-memory + disk-scanned TOTAL/CAR/DEVICE)
+# Open by design (public). Add _require_read_auth() later if it needs locking.
+
+def _fmt_min(epoch) -> str:
+  try:
+    if not epoch:
+      return "-"
+    return datetime.fromtimestamp(int(float(epoch))).strftime("%Y%m%d_%H%M")
+  except Exception:
+    return "-"
+
+
+def _fmt_uptime(sec: float) -> str:
+  sec = int(sec)
+  h, rem = divmod(sec, 3600)
+  m = rem // 60
+  return f"{h}h{m:02d}m" if h else f"{m}m"
+
+
+def _age_days(version: str):
+  try:
+    return (datetime.now() - datetime.strptime(str(version)[:8], "%Y%m%d")).days
+  except Exception:
+    return None
+
+
+def _model_for_car(car_key: str):
+  """Most recently versioned published model across kinds, or None."""
+  best = None
+  cdir = MODELS_BASE / car_key
+  if cdir.is_dir():
+    for kind_dir in sorted(cdir.iterdir()):
+      lp = kind_dir / "latest.json"
+      if not lp.exists():
+        continue
+      m = _read_json(lp)
+      v = str(m.get("version", ""))
+      if best is None or v > str(best.get("version", "")):
+        best = {"version": v, "size": int(m.get("size", 0) or 0), "kind": kind_dir.name}
+  return best
+
+
+def _live_text() -> str:
+  now = time.time()
+  active: dict = {}     # (device, car) -> latest event in last 60s
+  for ev in RECENT_UPLOADS:
+    if now - ev["ts"] <= 60:
+      active[(ev["device_id"], ev["car"])] = ev
+  lines = [f"[ LIVE ]  in-flight {_inflight}"]
+  if active:
+    lines.append(f"{'DEVICE':<16}  {'car':<24}  {'ip':<15}  {'ago':>5}  {'MB':>6}")
+    for (dev, car), ev in sorted(active.items(), key=lambda kv: kv[1]["ts"], reverse=True):
+      ago = f"{int(now - ev['ts'])}s"
+      lines.append(f"{dev[:16]:<16}  {car[:24]:<24}  {ev['ip'][:15]:<15}  "
+                   f"{ago:>5}  {ev['bytes']/1e6:>6.1f}")
+  else:
+    lines.append("(no uploads in last 60s)")
+  return "\n".join(lines)
+
+
+def _disk_blocks_text() -> str:
+  now = time.time()
+  if _status_cache["text"] and now - _status_cache["at"] < STATUS_CACHE_SEC:
+    return _status_cache["text"]
+
+  cars: dict = {}                 # car_key -> {routes, segs, hours}
+  devices: dict = {}              # (device_id, car_key) -> {routes, segs, hours, last}
+  for route_dir in _iter_route_dirs():
+    rec = _route_record(route_dir)
+    ck = rec["car_key"] or "UNKNOWN_CAR"
+    c = cars.setdefault(ck, {"routes": 0, "segs": 0, "hours": 0.0})
+    c["routes"] += 1
+    c["segs"] += int(rec["segment_count"])
+    c["hours"] += float(rec["duration_hours"])
+    did = rec["device_id"] or "?"
+    d = devices.setdefault((did, ck), {"routes": 0, "segs": 0, "hours": 0.0, "last": 0})
+    d["routes"] += 1
+    d["segs"] += int(rec["segment_count"])
+    d["hours"] += float(rec["duration_hours"])
+    meta = rec.get("route_meta", {})
+    try:
+      d["last"] = max(d["last"], int(float(meta.get("route_start_ts") or meta.get("uploaded_at") or 0)))
+    except Exception:
+      pass
+
+  dev_ids = {dev for (dev, _c) in devices}
+  lines = [
+    f"[ TOTAL ]   cars {len(cars)}   devices {len(dev_ids)}   "
+    f"routes {sum(c['routes'] for c in cars.values())}   "
+    f"segments {sum(c['segs'] for c in cars.values())}   "
+    f"hours {sum(c['hours'] for c in cars.values()):.1f}   "
+    f"disk {_disk_used_pct():.0f}%",
+    "",
+    "[ BY CAR ]",
+    f"{'CAR':<24}  {'routes':>6}  {'segs':>5}  {'hours':>6}  {'model':<15}  {'age':>5}",
+  ]
+  for ck in sorted(cars):
+    c = cars[ck]
+    m = _model_for_car(ck)
+    if m and m["version"]:
+      model = m["version"][:13]
+      ad = _age_days(m["version"])
+      age = "-" if ad is None else (f"{ad}d*" if ad > 14 else f"{ad}d")
+    else:
+      model, age = "-", "-"
+    lines.append(f"{ck[:24]:<24}  {c['routes']:>6}  {c['segs']:>5}  "
+                 f"{c['hours']:>6.1f}  {model:<15}  {age:>5}")
+  lines += [
+    "",
+    "[ BY DEVICE ]",
+    f"{'DEVICE':<16}  {'car':<24}  {'routes':>6}  {'segs':>5}  {'hours':>6}  {'last upload':<13}",
+  ]
+  for key in sorted(devices):
+    dev, car = key
+    d = devices[key]
+    lines.append(f"{dev[:16]:<16}  {car[:24]:<24}  {d['routes']:>6}  {d['segs']:>5}  "
+                 f"{d['hours']:>6.1f}  {_fmt_min(d['last']):<13}")
+
+  text = "\n".join(lines)
+  _status_cache["at"] = now
+  _status_cache["text"] = text
+  return text
+
+
+def _status_text() -> str:
+  last_activity = max((ev["ts"] for ev in RECENT_UPLOADS), default=0)
+  header = (f"CAS upload server   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}   "
+            f"(auto 2s)   uptime {_fmt_uptime(time.time() - SERVER_START)}   "
+            f"last activity {_fmt_min(last_activity)}")
+  return f"{header}\n\n{_live_text()}\n\n{_disk_blocks_text()}\n"
+
+
+_STATUS_HTML = """<!doctype html>
+<meta charset="utf-8">
+<title>CAS status</title>
+<style>body{background:#fff;color:#000;font-family:monospace;font-size:13px;margin:8px}pre{margin:0}</style>
+<pre id="s">loading…</pre>
+<script>
+async function tick(){
+  try{
+    const r = await fetch('/status.txt', {cache:'no-store'});
+    document.getElementById('s').textContent = await r.text();
+  }catch(e){
+    document.getElementById('s').textContent = 'fetch error: ' + e;
+  }
+}
+tick(); setInterval(tick, 2000);
+</script>
+"""
+
+
+@app.get("/status.txt", response_class=PlainTextResponse)
+async def status_txt():
+  return PlainTextResponse(_status_text())
+
+
+@app.get("/status", response_class=HTMLResponse)
+async def status_page():
+  return HTMLResponse(_STATUS_HTML)
 
