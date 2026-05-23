@@ -29,7 +29,8 @@ import numpy as np
 
 
 # Bump when the on-disk array/meta layout changes in a non-backward-compatible way.
-CACHE_SCHEMA_VERSION = 2
+# v3: added per-sample lat_accel + lane_change (for #2 training-data filters).
+CACHE_SCHEMA_VERSION = 3
 
 
 def _file_hash(path: Path) -> str:
@@ -101,6 +102,7 @@ def load(cache_dir: Path, source: str, sample_stride: int):
   size, mtime = _rlog_signature(source)
   if meta.get("size") != size or meta.get("mtime") != mtime:
     return None
+  n = int(arrays["triage"].size)
   return {
     "samples": {
       "t":              arrays["t"],
@@ -108,6 +110,8 @@ def load(cache_dir: Path, source: str, sample_stride: int):
       "triage":         arrays["triage"],
       "offset":         arrays["offset"],
       "driver_torque":  arrays["driver_torque"],
+      "lat_accel":      arrays["lat_accel"] if "lat_accel" in arrays else np.zeros(n, dtype=np.float32),
+      "lane_change":    arrays["lane_change"] if "lane_change" in arrays else np.zeros(n, dtype=np.int8),
     },
     "meta": meta,
   }
@@ -132,12 +136,16 @@ def save(cache_dir: Path, source: str, sample_stride: int,
     triage = np.asarray([int(getattr(s.flag, "value", s.flag)) for s in samples], dtype=np.int16)
     offset = np.asarray([s.offset for s in samples], dtype=np.float32)
     driver_torque = np.asarray([s.driver_torque for s in samples], dtype=np.float32)
+    lat_accel = np.asarray([getattr(s, "lat_accel", 0.0) for s in samples], dtype=np.float32)
+    lane_change = np.asarray([1 if getattr(s, "lane_change", False) else 0 for s in samples], dtype=np.int8)
   else:
     t = np.zeros(0, dtype=np.float64)
     features = np.zeros((0, 0), dtype=np.float32)
     triage = np.zeros(0, dtype=np.int16)
     offset = np.zeros(0, dtype=np.float32)
     driver_torque = np.zeros(0, dtype=np.float32)
+    lat_accel = np.zeros(0, dtype=np.float32)
+    lane_change = np.zeros(0, dtype=np.int8)
 
   size, mtime = _rlog_signature(source)
   meta = {
@@ -168,7 +176,8 @@ def save(cache_dir: Path, source: str, sample_stride: int,
   # temporary name that os.replace expects.
   with open(npz_tmp, "wb") as f:
     np.savez_compressed(f, t=t, features=features, triage=triage,
-                        offset=offset, driver_torque=driver_torque)
+                        offset=offset, driver_torque=driver_torque,
+                        lat_accel=lat_accel, lane_change=lane_change)
   meta_tmp.write_text(json.dumps(meta, sort_keys=True), encoding="utf-8")
   os.replace(npz_tmp, npz_path)
   os.replace(meta_tmp, meta_path)
@@ -179,6 +188,8 @@ def materialize(cached, Sample, coerce_triage):
   arrays = cached["samples"]
   meta = cached["meta"]
   n = int(arrays["triage"].size)
+  lat_accel = arrays.get("lat_accel") if hasattr(arrays, "get") else arrays["lat_accel"]
+  lane_change = arrays.get("lane_change") if hasattr(arrays, "get") else arrays["lane_change"]
   samples = []
   for i in range(n):
     samples.append(Sample(
@@ -187,6 +198,8 @@ def materialize(cached, Sample, coerce_triage):
       coerce_triage(int(arrays["triage"][i])),
       float(arrays["offset"][i]),
       float(arrays["driver_torque"][i]),
+      float(lat_accel[i]) if lat_accel is not None and i < len(lat_accel) else 0.0,
+      bool(lane_change[i]) if lane_change is not None and i < len(lane_change) else False,
     ))
   return {
     "samples": samples,

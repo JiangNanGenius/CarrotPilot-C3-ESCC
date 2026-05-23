@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from collections import deque
 from pathlib import Path
+import json
 import math
+import os
 import re
 import time
 
@@ -33,6 +35,14 @@ _HZ = 100
 _OFFSET_5S = 5 * _HZ
 _OFFSET_60S = 60 * _HZ
 _CENTERING_FULL_M = 0.5  # |offset| >= this -> score 0; offset == 0 -> score 100
+
+# #3 on-road effectiveness: runtime periodically snapshots cumulative-since-boot
+# stats here; data_uploader embeds them into each route_meta so the server can
+# show per-car effectiveness trends as data accumulates. One file per kind so a
+# torque + angle runtime in the same process don't clobber each other.
+_STATS_WRITE_SEC = 10.0
+def _stats_path(kind: str) -> Path:
+  return Path("/data") / f"cas_runtime_stats_{kind}.json"
 
 
 def _norm_name(value: str) -> str:
@@ -75,6 +85,14 @@ class CASRuntime:
     self.acc_window = deque(maxlen=_OFFSET_60S)  # 1 = correct, 0 = wrong
     # Distribution-in flag history (vEgo inside vego_min..vego_max).
     self.dist_in_window = deque(maxlen=_OFFSET_60S * 5)  # 5 min window
+    # #3 effectiveness accumulators (cumulative since boot).
+    self._stat_frames = 0
+    self._stat_inband = 0
+    self._stat_gate_pass = 0
+    self._stat_alpha_sum = 0.0
+    self._stat_applied_abs_sum = 0.0
+    self._stat_delta_abs_sum = 0.0
+    self._stat_last_write = 0.0
     self.load_model()
 
   def load_model(self):
@@ -245,6 +263,19 @@ class CASRuntime:
     self.dist_in_window.append(in_dist)
     dist_in_pct = 100.0 * sum(self.dist_in_window) / max(len(self.dist_in_window), 1)
 
+    # #3 effectiveness accumulation + throttled snapshot to disk.
+    self._stat_frames += 1
+    self._stat_delta_abs_sum += abs(raw_delta)
+    if in_dist > 0.5:
+      self._stat_inband += 1
+    if alpha > 0.0:
+      self._stat_gate_pass += 1
+      self._stat_alpha_sum += float(alpha)
+      self._stat_applied_abs_sum += abs(applied_delta)
+    if now_t - self._stat_last_write > _STATS_WRITE_SEC:
+      self._stat_last_write = now_t
+      self._write_runtime_stats(accuracy_pct, dist_in_pct)
+
     # Lane pattern code over the 60 s window (HUD turns this into Korean text).
     # 0 = stable, 1 = drift left, 2 = drift right, 3 = oscillating.
     if len(self.offset_60s) >= 50:
@@ -288,6 +319,36 @@ class CASRuntime:
     ]
     cas_log = features + extras
     return float(delta), float(alpha), cas_log
+
+  def _write_runtime_stats(self, accuracy_pct: float, dist_in_pct: float) -> None:
+    """Snapshot cumulative-since-boot effectiveness stats. Best-effort: any IO
+    error is swallowed so a read-only/full disk never disrupts CAS control."""
+    n = max(self._stat_frames, 1)
+    engaged = max(self._stat_gate_pass, 1)
+    stats = {
+      "updated_at":        int(time.time()),
+      "model_name":        self.model_name,
+      "kind":              self.kind,
+      "frames":            self._stat_frames,
+      "inband_pct":        round(100.0 * self._stat_inband / n, 1),
+      "gate_pass_pct":     round(100.0 * self._stat_gate_pass / n, 1),
+      "alpha_mean":        round(self._stat_alpha_sum / engaged, 4),       # when engaged
+      "applied_abs_mean":  round(self._stat_applied_abs_sum / engaged, 5), # correction magnitude
+      "delta_abs_mean":    round(self._stat_delta_abs_sum / n, 5),         # raw NN residual size
+      "accuracy_pct":      round(float(accuracy_pct), 1),
+      "dist_in_pct":       round(float(dist_in_pct), 1),
+      "intervention_count":  self.intervention_count,
+      "intervention_strong": self.intervention_strong,
+      "intervention_weak":   self.intervention_weak,
+      "session_sec":       int(time.monotonic() - self.session_start_t),
+    }
+    try:
+      path = _stats_path(self.kind)
+      tmp = path.with_suffix(".json.tmp")
+      tmp.write_text(json.dumps(stats), encoding="utf-8")
+      os.replace(tmp, path)
+    except OSError:
+      pass
 
   def _alpha(self, CS, delta: float, max_abs_z: float) -> float:
     # Multiplicative gate: alpha_final = alpha_max

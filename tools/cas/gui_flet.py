@@ -16,6 +16,7 @@ unaffected by anything here.
 from __future__ import annotations
 
 import json
+import math
 import os
 import shlex
 import subprocess
@@ -55,6 +56,16 @@ DEFAULT_CONFIG: dict[str, Any] = {
   "use_wsl":            False,                               # True on Windows if WSL available
   "auto_download":      True,                                # download missing rlogs before training
   "cleanup_after_train": False,                              # delete consumed rlogs after success
+  # Pre-publish quality gate (#1): block a worse/broken model from OTA deploy.
+  "quality_gate":       True,                                # master switch
+  "gate_min_samples":   300,                                 # min usable val samples to trust a model
+  "gate_tolerance":     0.10,                                # allow new RMSE up to +10% of deployed
+  # Training-data quality filters (#2). A+B on by default, C+D off (0 = disabled).
+  "filter_vego_min":    5.0,                                 # A: min speed m/s
+  "filter_vego_max":    35.0,                                # A: max speed m/s (deployment band)
+  "filter_lane_change": True,                                # B: drop blinker/lane-change frames
+  "max_lat_accel":      0.0,                                 # C: 0=off; else drop hard corners
+  "dt_outlier_pct":     0.0,                                 # D: 0=off; else drop driver-torque outliers
 }
 
 
@@ -678,9 +689,19 @@ def main(page: ft.Page):
       "--workers",       str(cfg["workers"]),
       "--backend",       str(cfg["backend"]),
       "--device",        str(cfg["device"]),
+      "--filter-vego-min", str(cfg.get("filter_vego_min", 5.0)),
+      "--filter-vego-max", str(cfg.get("filter_vego_max", 35.0)),
       "--audit-dir",     maybe_wsl_path(str(audit_dir)),
       "--audit-samples",
     ]
+    # #2 filter B (lane change) — default on; explicit flag both ways.
+    cmd.append("--filter-lane-change" if cfg.get("filter_lane_change", True)
+               else "--no-filter-lane-change")
+    # #2 filters C/D — only pass when enabled (>0).
+    if float(cfg.get("max_lat_accel", 0) or 0) > 0:
+      cmd += ["--max-lat-accel", str(cfg["max_lat_accel"])]
+    if float(cfg.get("dt_outlier_pct", 0) or 0) > 0:
+      cmd += ["--dt-outlier-pct", str(cfg["dt_outlier_pct"])]
     return cmd
 
   def build_validate_cmd(ds: dict[str, Any], candidate: Path, validate_out: Path,
@@ -951,6 +972,65 @@ def main(page: ft.Page):
             append_log(f"[cleanup] {route_dir.name}: {e}")
     return segs, total_bytes
 
+  # ── Pre-publish quality gate (#1) ──
+  def quality_gate(ds: dict[str, Any], kind: str, train_car: str,
+                   cand: Path, val: Path, run_dir: Path) -> tuple[bool, str]:
+    """Return (ok, reason). Blocks OTA publish when the new model looks broken
+    (absolute sanity) or regresses vs the currently-deployed model. The
+    regression check re-validates the deployed model on the SAME current data,
+    so RMSE is an apples-to-apples comparison (validate data changes each run)."""
+    if not cfg.get("quality_gate", True):
+      return True, "(게이트 비활성)"
+    try:
+      s = json.loads(Path(val).read_text(encoding="utf-8"))
+    except Exception as e:
+      return False, f"검증요약 읽기 실패: {e}"
+
+    usable = int(s.get("usable_samples", 0))
+    tm = s.get("target_metrics", {}) or {}
+    new_rmse = float(tm.get("weighted_rmse", tm.get("rmse", float("inf"))))
+    applied_max = float((s.get("output_metrics", {}) or {}).get("applied_delta", {}).get("max_abs", 0.0))
+
+    # Part 1 — absolute sanity (protects even the first publish, where there's
+    # no previous model to compare against).
+    min_samples = int(cfg.get("gate_min_samples", 300))
+    if usable < min_samples:
+      return False, f"검증 샘플 부족 {usable} < {min_samples}"
+    if not math.isfinite(new_rmse):
+      return False, "검증 RMSE 비정상(NaN/inf)"
+    if not math.isfinite(applied_max):
+      return False, "적용 보정값 비정상(NaN/inf)"
+
+    # Part 2 — regression vs deployed model, re-validated on the same data.
+    endpoint = cfg.get("endpoint") or cloud_sync.DEFAULT_SERVER_ENDPOINT
+    token = cfg.get("token", "")
+    try:
+      prev = cloud_sync.fetch_latest_model_info(endpoint, train_car, kind, token=token, timeout=15.0)
+    except Exception:
+      prev = None   # 404 → first publish for this car/kind, nothing to regress against
+    if prev and prev.get("version"):
+      try:
+        old_model = run_dir / "prev_model.json"
+        prev_val  = run_dir / "prev_validate.json"
+        cloud_sync.download_model(endpoint, train_car, kind, str(prev["version"]),
+                                  str(old_model), token=token, timeout=60.0)
+        cmd = build_validate_cmd(ds, old_model, prev_val, run_dir / "prev_validate_audit")
+        if _execute_commands_inline([(cmd, "Validate(이전모델)")]) and prev_val.exists():
+          ps = json.loads(prev_val.read_text(encoding="utf-8"))
+          old_rmse = float((ps.get("target_metrics", {}) or {}).get("weighted_rmse", float("inf")))
+          tol = float(cfg.get("gate_tolerance", 0.10))
+          if math.isfinite(old_rmse) and new_rmse > old_rmse * (1.0 + tol):
+            return False, (f"회귀 감지: 새 RMSE {new_rmse:.4f} > 이전 {old_rmse:.4f} "
+                           f"(+{tol*100:.0f}% 허용, 동일데이터·v{prev['version']})")
+          append_log(f"[게이트] 회귀검사 OK: 새 {new_rmse:.4f} vs 이전 {old_rmse:.4f} (v{prev['version']})")
+        else:
+          append_log("[게이트] 이전 모델 재검증 실패 — 회귀검사 생략")
+      except Exception as e:
+        append_log(f"[게이트] 회귀검사 생략({e})")
+    else:
+      append_log("[게이트] 이전 배포 모델 없음 — 절대 안전치만 검사(최초 발행)")
+    return True, ""
+
   # ── Full train pipeline (download → train → validate → record → cleanup) ──
   def train_pipeline_worker(ds: dict[str, Any]) -> bool:
     """Single-dataset pipeline. Returns True if train+validate succeeded."""
@@ -998,6 +1078,16 @@ def main(page: ft.Page):
         record_train_run(ds, cand, val, run_dir)
       except Exception as e:
         append_log(f"[record] {e}")
+
+      # Phase 3.5: quality gate — never auto-deploy a worse/broken model.
+      g_ok, g_reason = quality_gate(ds, kind, train_car, cand, val, run_dir)
+      if not g_ok:
+        append_log(f"[게이트] 발행 차단: {g_reason}")
+        append_log("[게이트] 학습 결과는 보관됨(미발행). 데이터 보강 후 재학습 권장.")
+        state["current_run_dir"] = None
+        state["current_run_log"] = None
+        return ok
+      append_log(f"[게이트] 통과 — 발행 진행{(' · ' + g_reason) if g_reason else ''}")
 
       # Phase 4: publish to server = the deployment. Device's model_puller picks
       # this up at next boot. (Local promote into git weights/ is no longer part

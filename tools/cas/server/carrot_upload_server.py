@@ -810,31 +810,31 @@ def _model_for_car(car_key: str):
   return best
 
 
-def _live_text() -> str:
+def _live_data() -> dict:
   now = time.time()
   active: dict = {}     # (device, car) -> latest event in last 60s
   for ev in RECENT_UPLOADS:
     if now - ev["ts"] <= 60:
       active[(ev["device_id"], ev["car"])] = ev
-  lines = [f"[ LIVE ]  in-flight {_inflight}"]
-  if active:
-    lines.append(f"{'DEVICE':<16}  {'car':<24}  {'ip':<15}  {'ago':>5}  {'MB':>6}")
-    for (dev, car), ev in sorted(active.items(), key=lambda kv: kv[1]["ts"], reverse=True):
-      ago = f"{int(now - ev['ts'])}s"
-      lines.append(f"{dev[:16]:<16}  {car[:24]:<24}  {ev['ip'][:15]:<15}  "
-                   f"{ago:>5}  {ev['bytes']/1e6:>6.1f}")
-  else:
-    lines.append("(no uploads in last 60s)")
-  return "\n".join(lines)
+  rows = [{
+    "device": dev, "car": car, "ip": ev["ip"],
+    "ago": int(now - ev["ts"]), "mb": round(ev["bytes"] / 1e6, 1),
+  } for (dev, car), ev in active.items()]
+  rows.sort(key=lambda r: r["ago"])
+  return {"inflight": _inflight, "rows": rows}
 
 
-def _disk_blocks_text() -> str:
+def _disk_data() -> dict:
+  """Disk-scanned totals. Cached STATUS_CACHE_SEC so the 2s page poll doesn't
+  re-walk every route's meta on every request."""
   now = time.time()
-  if _status_cache["text"] and now - _status_cache["at"] < STATUS_CACHE_SEC:
-    return _status_cache["text"]
+  cached = _status_cache.get("data")
+  if cached is not None and now - _status_cache["at"] < STATUS_CACHE_SEC:
+    return cached
 
   cars: dict = {}                 # car_key -> {routes, segs, hours}
   devices: dict = {}              # (device_id, car_key) -> {routes, segs, hours, last}
+  car_effect: dict = {}           # car_key -> (ts, cas_runtime_stats) from most recent route
   for route_dir in _iter_route_dirs():
     rec = _route_record(route_dir)
     ck = rec["car_key"] or "UNKNOWN_CAR"
@@ -849,74 +849,227 @@ def _disk_blocks_text() -> str:
     d["hours"] += float(rec["duration_hours"])
     meta = rec.get("route_meta", {})
     try:
-      d["last"] = max(d["last"], int(float(meta.get("route_start_ts") or meta.get("uploaded_at") or 0)))
+      ts = int(float(meta.get("route_start_ts") or meta.get("uploaded_at") or 0))
+      d["last"] = max(d["last"], ts)
     except Exception:
-      pass
+      ts = 0
+    # #3 keep the newest route's runtime effectiveness snapshot per car.
+    crs = meta.get("cas_runtime_stats") or {}
+    snap = crs.get("torque") or crs.get("angle") or (next(iter(crs.values()), None) if crs else None)
+    if snap and ts >= car_effect.get(ck, (0, None))[0]:
+      car_effect[ck] = (ts, snap)
 
-  dev_ids = {dev for (dev, _c) in devices}
-  lines = [
-    f"[ TOTAL ]   cars {len(cars)}   devices {len(dev_ids)}   "
-    f"routes {sum(c['routes'] for c in cars.values())}   "
-    f"segments {sum(c['segs'] for c in cars.values())}   "
-    f"hours {sum(c['hours'] for c in cars.values()):.1f}   "
-    f"disk {_disk_used_pct():.0f}%",
-    "",
-    "[ BY CAR ]",
-    f"{'CAR':<24}  {'routes':>6}  {'segs':>5}  {'hours':>6}  {'model':<15}  {'age':>5}",
-  ]
+  car_rows = []
   for ck in sorted(cars):
     c = cars[ck]
     m = _model_for_car(ck)
-    if m and m["version"]:
-      model = m["version"][:13]
-      ad = _age_days(m["version"])
-      age = "-" if ad is None else (f"{ad}d*" if ad > 14 else f"{ad}d")
-    else:
-      model, age = "-", "-"
-    lines.append(f"{ck[:24]:<24}  {c['routes']:>6}  {c['segs']:>5}  "
-                 f"{c['hours']:>6.1f}  {model:<15}  {age:>5}")
-  lines += [
-    "",
-    "[ BY DEVICE ]",
-    f"{'DEVICE':<16}  {'car':<24}  {'routes':>6}  {'segs':>5}  {'hours':>6}  {'last upload':<13}",
-  ]
-  for key in sorted(devices):
-    dev, car = key
-    d = devices[key]
-    lines.append(f"{dev[:16]:<16}  {car[:24]:<24}  {d['routes']:>6}  {d['segs']:>5}  "
-                 f"{d['hours']:>6.1f}  {_fmt_min(d['last']):<13}")
+    version = m["version"] if (m and m.get("version")) else ""
+    snap = car_effect.get(ck, (0, None))[1] or {}
+    car_rows.append({
+      "car": ck, "routes": c["routes"], "segs": c["segs"], "hours": round(c["hours"], 1),
+      "model": version, "age_days": _age_days(version) if version else None,
+      # #3 effectiveness from the most recent drive (None → '-' in UI)
+      "gate": snap.get("gate_pass_pct"),
+      "acc": snap.get("accuracy_pct"),
+      "apply": snap.get("applied_abs_mean"),
+    })
+  dev_rows = [{
+    "device": dev, "car": car, "routes": d["routes"], "segs": d["segs"],
+    "hours": round(d["hours"], 1), "last": d["last"],
+  } for (dev, car), d in devices.items()]
 
-  text = "\n".join(lines)
+  data = {
+    "total": {
+      "cars": len(cars),
+      "devices": len({dev for (dev, _c) in devices}),
+      "routes": sum(c["routes"] for c in cars.values()),
+      "segs": sum(c["segs"] for c in cars.values()),
+      "hours": round(sum(c["hours"] for c in cars.values()), 1),
+      "disk": round(_disk_used_pct(), 0),
+    },
+    "cars": car_rows,
+    "devices": dev_rows,
+  }
   _status_cache["at"] = now
-  _status_cache["text"] = text
-  return text
+  _status_cache["data"] = data
+  return data
 
 
 def _status_text() -> str:
+  """Plain-text dump for `curl /status.txt` (default sort, no interactivity)."""
+  d = _disk_data()
   last_activity = max((ev["ts"] for ev in RECENT_UPLOADS), default=0)
-  header = (f"CAS upload server   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}   "
-            f"(auto 2s)   uptime {_fmt_uptime(time.time() - SERVER_START)}   "
-            f"last activity {_fmt_min(last_activity)}")
-  return f"{header}\n\n{_live_text()}\n\n{_disk_blocks_text()}\n"
+  live = _live_data()
+  lines = [
+    f"CAS upload server   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}   "
+    f"(auto 2s)   uptime {_fmt_uptime(time.time() - SERVER_START)}   "
+    f"last activity {_fmt_min(last_activity)}",
+    "",
+    f"[ LIVE ]  in-flight {live['inflight']}",
+  ]
+  if live["rows"]:
+    lines.append(f"{'DEVICE':<12}  {'CAR':<24}  {'IP':<15}  {'AGO':>5}  {'MB':>6}")
+    for r in live["rows"]:
+      lines.append(f"{r['device'][:12]:<12}  {r['car'][:24]:<24}  {r['ip'][:15]:<15}  "
+                   f"{str(r['ago'])+'s':>5}  {r['mb']:>6.1f}")
+  else:
+    lines.append("(no uploads in last 60s)")
+  t = d["total"]
+  lines += [
+    "",
+    f"[ TOTAL ]  cars {t['cars']}  devices {t['devices']}  routes {t['routes']}  "
+    f"segs {t['segs']}  {t['hours']}h  disk {t['disk']:.0f}%",
+    "",
+    "[ BY CAR ]",
+    f"{'CAR':<24}  {'ROUTES':>6}  {'SEGS':>5}  {'HOURS':>6}  {'MODEL':<14}  {'AGE':>5}  "
+    f"{'GATE%':>5}  {'ACC%':>4}  {'APPLY':>6}",
+  ]
+  for r in sorted(d["cars"], key=lambda x: x["hours"], reverse=True):
+    model = r["model"] or "(none)"
+    age = "-" if r["age_days"] is None else (f"{r['age_days']}d*" if r["age_days"] > 14 else f"{r['age_days']}d")
+    gate = "-" if r.get("gate") is None else f"{r['gate']:.0f}"
+    acc  = "-" if r.get("acc") is None else f"{r['acc']:.0f}"
+    appl = "-" if r.get("apply") is None else f"{r['apply']:.3f}"
+    lines.append(f"{r['car'][:24]:<24}  {r['routes']:>6}  {r['segs']:>5}  "
+                 f"{r['hours']:>6.1f}  {model[:14]:<14}  {age:>5}  "
+                 f"{gate:>5}  {acc:>4}  {appl:>6}")
+  lines += [
+    "",
+    "[ BY DEVICE ]",
+    f"{'DEVICE':<12}  {'CAR':<24}  {'ROUTES':>6}  {'SEGS':>5}  {'HOURS':>6}  {'LAST UPLOAD':<13}",
+  ]
+  for r in sorted(d["devices"], key=lambda x: x["hours"], reverse=True):
+    lines.append(f"{r['device'][:12]:<12}  {r['car'][:24]:<24}  {r['routes']:>6}  {r['segs']:>5}  "
+                 f"{r['hours']:>6.1f}  {_fmt_min(r['last']):<13}")
+  return "\n".join(lines) + "\n"
 
 
 _STATUS_HTML = """<!doctype html>
 <meta charset="utf-8">
 <title>CAS status</title>
-<style>body{background:#fff;color:#000;font-family:monospace;font-size:13px;margin:8px}pre{margin:0}</style>
-<pre id="s">loading…</pre>
+<style>
+body{background:#161616;color:#c8c8c8;font-family:Consolas,'DejaVu Sans Mono',monospace;font-size:13px;margin:12px}
+.hd{color:#888;margin-bottom:12px}
+.cap{display:inline-block;color:#161616;font-weight:bold;padding:1px 10px;margin:8px 0 3px;border-radius:2px}
+.c-live{background:#7fbf7f}.c-total{background:#6fb0ff}.c-car{background:#e0c050}.c-dev{background:#d28fd2}
+.totline{margin:2px 0 14px}
+table{border-collapse:collapse;margin:2px 0 18px}
+th,td{border:1px solid #333;padding:2px 10px;white-space:nowrap;text-align:left}
+th{background:#202020;color:#ddd;user-select:none}
+th.h{cursor:pointer}
+th.h:hover{color:#ffd54a}
+.num{text-align:right}
+tbody tr:nth-child(even){background:#1c1c1c}
+tbody tr:hover{background:#2b2b2b}
+.muted{color:#6e6e6e}
+.stale{color:#ff6b6b}
+</style>
+<div id="app">loading…</div>
 <script>
-async function tick(){
-  try{
-    const r = await fetch('/status.txt', {cache:'no-store'});
-    document.getElementById('s').textContent = await r.text();
-  }catch(e){
-    document.getElementById('s').textContent = 'fetch error: ' + e;
-  }
+const SORT = {cars:{k:'hours',d:-1}, devices:{k:'hours',d:-1}};
+const LIVE_COLS = [
+  {k:'device',label:'DEVICE'}, {k:'car',label:'CAR'}, {k:'ip',label:'IP'},
+  {k:'ago',label:'AGO',num:1,fmt:r=>r.ago+'s'}, {k:'mb',label:'MB',num:1,fmt:r=>r.mb.toFixed(1)},
+];
+const TOTAL_COLS = [
+  {k:'cars',label:'CARS',num:1}, {k:'devices',label:'DEVICES',num:1},
+  {k:'routes',label:'ROUTES',num:1}, {k:'segs',label:'SEGS',num:1},
+  {k:'hours',label:'HOURS',num:1}, {k:'disk',label:'DISK',num:1,fmt:r=>r.disk+'%'},
+];
+const CAR_COLS = [
+  {k:'car',label:'CAR',cls:r=>r.car==='UNKNOWN_CAR'?'stale':''},
+  {k:'routes',label:'ROUTES',num:1}, {k:'segs',label:'SEGS',num:1},
+  {k:'hours',label:'HOURS',num:1,fmt:r=>r.hours.toFixed(1)},
+  {k:'model',label:'MODEL',fmt:r=>r.model||'(none)',cls:r=>r.model?'':'muted'},
+  {k:'age',label:'AGE',num:1,get:r=>r.age_days==null?-1:r.age_days,
+   fmt:r=>r.age_days==null?'\\u2013':(r.age_days+'d'+(r.age_days>14?'*':'')),
+   cls:r=>(r.age_days!=null&&r.age_days>14)?'stale':(r.model?'':'muted')},
+  // #3 on-road effectiveness (most recent drive): GATE%=engaged fraction,
+  // ACC%=correction-direction accuracy, APPLY=mean |applied correction|.
+  {k:'gate',label:'GATE%',num:1,get:r=>r.gate==null?-1:r.gate,
+   fmt:r=>r.gate==null?'\\u2013':r.gate.toFixed(0),cls:r=>r.gate==null?'muted':''},
+  {k:'acc',label:'ACC%',num:1,get:r=>r.acc==null?-1:r.acc,
+   fmt:r=>r.acc==null?'\\u2013':r.acc.toFixed(0),cls:r=>r.acc==null?'muted':(r.acc<50?'stale':'')},
+  {k:'apply',label:'APPLY',num:1,get:r=>r.apply==null?-1:r.apply,
+   fmt:r=>r.apply==null?'\\u2013':r.apply.toFixed(3),cls:r=>r.apply==null?'muted':''},
+];
+const DEV_COLS = [
+  {k:'device',label:'DEVICE',fmt:r=>(r.device&&r.device!=='?')?r.device:'(unknown)',
+   cls:r=>(r.device&&r.device!=='?')?'':'muted'},
+  {k:'car',label:'CAR',cls:r=>r.car==='UNKNOWN_CAR'?'stale':''},
+  {k:'routes',label:'ROUTES',num:1}, {k:'segs',label:'SEGS',num:1},
+  {k:'hours',label:'HOURS',num:1,fmt:r=>r.hours.toFixed(1)},
+  {k:'last',label:'LAST UPLOAD',get:r=>r.last||0,fmt:r=>fmtLast(r.last),cls:r=>r.last?'':'muted'},
+];
+let DATA = null;
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtLast(e){if(!e)return '\\u2013'; const d=new Date(e*1000); const p=n=>String(n).padStart(2,'0');
+  return `${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+
+function buildTable(tbl, cols, rows, sortable){
+  let sorted;
+  if(sortable){
+    const st=SORT[tbl], c=cols.find(x=>x.k===st.k)||cols[0];
+    sorted=rows.slice().sort((a,b)=>{
+      let va=c.get?c.get(a):a[c.k], vb=c.get?c.get(b):b[c.k];
+      if(typeof va==='number'&&typeof vb==='number') return (va-vb)*st.d;
+      return String(va).localeCompare(String(vb))*st.d;
+    });
+  } else { sorted=rows.slice().sort((a,b)=>a.ago-b.ago); }
+  const st=SORT[tbl];
+  const thead=cols.map(c=>{
+    const arrow=(sortable && st.k===c.k)?(st.d<0?' \\u25be':' \\u25b4'):'';
+    const klass=(c.num?'num ':'')+(sortable?'h':'');
+    const attr=sortable?` data-tbl="${tbl}" data-k="${c.k}"`:'';
+    return `<th class="${klass.trim()}"${attr}>${esc(c.label)}${arrow}</th>`;
+  }).join('');
+  const body=sorted.map(r=>'<tr>'+cols.map(c=>{
+    const v=c.fmt?c.fmt(r):r[c.k];
+    const klass=((c.num?'num ':'')+(c.cls?c.cls(r):'')).trim();
+    return `<td class="${klass}">${esc(v)}</td>`;
+  }).join('')+'</tr>').join('');
+  return `<table><thead><tr>${thead}</tr></thead><tbody>${body}</tbody></table>`;
 }
-tick(); setInterval(tick, 2000);
+
+function render(){
+  if(!DATA)return;
+  let html=`<div class=hd>CAS upload server &nbsp; ${esc(DATA.server_time)} &nbsp; uptime ${esc(DATA.uptime)} &nbsp; (auto 2s) &nbsp; last activity ${esc(DATA.last_activity)}</div>`;
+  html+=`<div class="cap c-live">LIVE &nbsp; in-flight ${DATA.live.inflight}</div>`;
+  html+= DATA.live.rows.length ? buildTable('live',LIVE_COLS,DATA.live.rows,false)
+       : '<div class=muted style="margin:4px 0 16px">(no uploads in last 60s)</div>';
+  html+=`<div class="cap c-total">TOTAL</div>`+buildTable('total',TOTAL_COLS,[DATA.total],false);
+  html+=`<div class="cap c-car">BY CAR</div>`+buildTable('cars',CAR_COLS,DATA.cars,true);
+  html+=`<div class="cap c-dev">BY DEVICE</div>`+buildTable('devices',DEV_COLS,DATA.devices,true);
+  document.getElementById('app').innerHTML=html;
+  document.querySelectorAll('th.h').forEach(th=>th.onclick=()=>{
+    const tb=th.dataset.tbl,k=th.dataset.k,st=SORT[tb];
+    if(st.k===k)st.d*=-1; else {st.k=k; st.d=-1;}
+    render();
+  });
+}
+async function tick(){
+  try{ const r=await fetch('/status.json',{cache:'no-store'}); DATA=await r.json(); render(); }
+  catch(e){ document.getElementById('app').textContent='fetch error: '+e; }
+}
+tick(); setInterval(tick,2000);
 </script>
 """
+
+
+@app.get("/status.json")
+async def status_json():
+  d = _disk_data()
+  last_activity = max((ev["ts"] for ev in RECENT_UPLOADS), default=0)
+  return JSONResponse({
+    "server_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    "uptime": _fmt_uptime(time.time() - SERVER_START),
+    "last_activity": _fmt_min(last_activity),
+    "live": _live_data(),
+    "total": d["total"],
+    "cars": d["cars"],
+    "devices": d["devices"],
+  })
 
 
 @app.get("/status.txt", response_class=PlainTextResponse)
@@ -927,4 +1080,15 @@ async def status_txt():
 @app.get("/status", response_class=HTMLResponse)
 async def status_page():
   return HTMLResponse(_STATUS_HTML)
+
+
+@app.get("/")
+async def root(request: Request):
+  # The status page lives at the dedicated casstatus host's root. casroute /
+  # casrouter (upload/API/alist) keep a bare root so they don't masquerade as
+  # the dashboard. cloudflared forwards the original Host header by hostname.
+  host = (request.headers.get("host") or "").split(":")[0].lower()
+  if host.startswith("casstatus."):
+    return HTMLResponse(_STATUS_HTML)
+  return PlainTextResponse("carrot-upload\n")
 

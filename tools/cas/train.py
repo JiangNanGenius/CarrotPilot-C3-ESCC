@@ -83,6 +83,8 @@ class Sample:
   flag: TriageType
   offset: float
   driver_torque: float
+  lat_accel: float = 0.0          # measured lateral accel — for #2 hard-corner filter
+  lane_change: bool = False       # driver-intended maneuver (blinker / laneChangeState)
 
 
 class AuditLogger:
@@ -549,19 +551,29 @@ def _collect_source(source: str, sample_stride: int,
                                _to_float(latest.carState.vEgo), offset)
 
       sample_lateral_delay = _latest_lateral_delay(latest.liveDelay)
+      lat_accel = _measured_lateral_accel(controls_state, latest.carState)
+      # Lane-change / maneuver detection (#2 filter B). Blinker is always present
+      # and a reliable "driver-intended maneuver" proxy; augment with
+      # lateralPlan.laneChangeState when the fork's cereal exposes it.
+      lane_change = bool(getattr(latest.carState, "leftBlinker", False)
+                         or getattr(latest.carState, "rightBlinker", False))
+      lcs = getattr(latest.lateralPlan, "laneChangeState", None) if latest.lateralPlan is not None else None
+      if lcs is not None:
+        lane_change = lane_change or (str(lcs).split(".")[-1].lower() not in ("off", "lanechangeoff", "0"))
       features = build_feature_vector(
         feature_state,
         latest.carState,
         latest.liveParameters,
         _to_float(getattr(controls_state, "desiredCurvature", getattr(controls_state, "curvature", 0.0))),
-        _measured_lateral_accel(controls_state, latest.carState),
+        lat_accel,
         model_data=latest.modelV2,
         CC=car_control,
         lateral_plan=latest.lateralPlan,
         lateral_delay=sample_lateral_delay,
         t=t,
       )
-      sample = Sample(t, features, flag, offset, _to_float(latest.carState.steeringTorque))
+      sample = Sample(t, features, flag, offset, _to_float(latest.carState.steeringTorque),
+                      lat_accel, lane_change)
       samples.append(sample)
       triage[flag.name] += 1
       lateral_delay_sum += float(sample_lateral_delay)
@@ -681,15 +693,51 @@ def collect_samples(sources: list[str], sample_stride: int,
 
 def build_targets(samples: list[Sample], offset_horizon: float, offset_gain: float,
                   driver_torque_scale: float, driver_torque_sign: float,
-                  target_clip: float, include_manual: bool):
+                  target_clip: float, include_manual: bool,
+                  vego_min: float = 0.0, vego_max: float = float("inf"),
+                  filter_lane_change: bool = False,
+                  max_lat_accel: float = float("inf"),
+                  dt_outlier_pct: float = 0.0):
+  """#2 training-data quality filters (all default off → callers that don't pass
+  them, e.g. validate.py, behave exactly as before):
+    A vego band  — keep only [vego_min, vego_max] so training matches the
+                   deployment gate (model.vego_min/max).
+    B lane change — drop driver-intended maneuvers (blinker/laneChangeState);
+                   their driver torque isn't a lane-centering correction.
+    C lat accel  — drop hard-corner frames (|lat_accel| > max_lat_accel).
+    D dt outlier — drop driver-torque-derived targets above the dt_outlier_pct
+                   percentile (a violent yank shouldn't bias the model)."""
   times = [sample.t for sample in samples]
   offsets = np.asarray([sample.offset for sample in samples], dtype=np.float32)
   x, y, w, flags, used_offsets = [], [], [], [], []
+
+  # D: compute an absolute |driver_torque| cutoff from the engaged samples whose
+  # target is derived from driver torque (T3/T4/T5). 0 (or >=100) disables it.
+  dt_cutoff = float("inf")
+  _dt_flags = (TriageType.T3_STRONG_INTERVENTION, TriageType.T4_WEAK_INTERVENTION, TriageType.T5_MANUAL)
+  if 0.0 < dt_outlier_pct < 100.0:
+    dts = [abs(s.driver_torque) for s in samples if s.flag in _dt_flags]
+    if dts:
+      dt_cutoff = float(np.percentile(dts, dt_outlier_pct))
 
   for i, sample in enumerate(samples):
     flag = sample.flag
     weight = TRIAGE_WEIGHTS.get(flag, 0.0)
     if weight <= 0.0:
+      continue
+
+    # A — speed band (features[0] is vEgo)
+    v_ego = float(sample.features[0]) if sample.features else 0.0
+    if v_ego < vego_min or v_ego > vego_max:
+      continue
+    # B — driver-intended maneuver
+    if filter_lane_change and getattr(sample, "lane_change", False):
+      continue
+    # C — hard corner
+    if abs(getattr(sample, "lat_accel", 0.0)) > max_lat_accel:
+      continue
+    # D — driver-torque outlier (only where the target uses driver torque)
+    if flag in _dt_flags and abs(sample.driver_torque) > dt_cutoff:
       continue
 
     target = 0.0
@@ -783,6 +831,19 @@ def main():
   parser.add_argument("--driver-torque-scale", type=float, default=0.25)
   parser.add_argument("--driver-torque-sign", type=float, default=1.0)
   parser.add_argument("--target-clip", type=float, default=0.5)
+  # ── #2 training-data quality filters ──
+  parser.add_argument("--filter-vego-min", type=float, default=5.0,
+                      help="A: drop samples below this speed (m/s)")
+  parser.add_argument("--filter-vego-max", type=float, default=35.0,
+                      help="A: drop samples above this speed (m/s); aligns with deployment band")
+  parser.add_argument("--filter-lane-change", dest="filter_lane_change", action="store_true", default=True,
+                      help="B: drop blinker/lane-change frames (default on)")
+  parser.add_argument("--no-filter-lane-change", dest="filter_lane_change", action="store_false",
+                      help="B: keep lane-change frames")
+  parser.add_argument("--max-lat-accel", type=float, default=0.0,
+                      help="C: 0=off; else drop |lateral accel| above this (m/s^2)")
+  parser.add_argument("--dt-outlier-pct", type=float, default=0.0,
+                      help="D: 0=off; else drop driver-torque targets above this percentile")
   parser.add_argument("--alpha-max", type=float, default=0.5)
   parser.add_argument("--seed", type=int, default=0)
   parser.add_argument("--include-manual", action="store_true")
@@ -829,6 +890,11 @@ def main():
     args.driver_torque_sign,
     args.target_clip,
     args.include_manual,
+    vego_min=args.filter_vego_min,
+    vego_max=args.filter_vego_max,
+    filter_lane_change=args.filter_lane_change,
+    max_lat_accel=(args.max_lat_accel if args.max_lat_accel > 0 else float("inf")),
+    dt_outlier_pct=args.dt_outlier_pct,
   )
   if x.shape[0] < 100:
     raise RuntimeError(f"Not enough CAS training samples: {x.shape[0]} usable / {len(samples)} collected")

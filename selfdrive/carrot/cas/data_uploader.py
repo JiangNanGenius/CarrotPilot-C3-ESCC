@@ -405,6 +405,18 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
     except OSError:
       pass
 
+  # #3 on-road effectiveness: pull the runtime's cumulative-since-boot snapshot
+  # (written by CASRuntime) so the server gets per-car effectiveness trends.
+  # Best-effort — absent/garbage file just omits the field.
+  cas_runtime_stats = {}
+  for k in ("torque", "angle"):
+    try:
+      sp = Path("/data") / f"cas_runtime_stats_{k}.json"
+      if sp.exists():
+        cas_runtime_stats[k] = json.loads(sp.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+      pass
+
   file_bytes = {}
   for fname in UPLOAD_FILES:
     total = 0
@@ -443,6 +455,7 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
     "route_start_ts":    route_start_ts,
     "route_end_ts":      route_end_ts,
     "file_bytes":        file_bytes,
+    "cas_runtime_stats": cas_runtime_stats,
     "uploaded_at":       int(time.time()),
   }
 
