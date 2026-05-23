@@ -114,20 +114,36 @@ def _car_key_from_name(name: str) -> str:
   return text
 
 
+# Last-known car persisted to a plain file, NOT a Param. CarrotLastCarName was
+# never registered in common/params_keys.h, so params.put/get raise
+# UnknownKeyName. A file avoids the C++ header registration + recompile.
+LAST_CAR_PATH = Path("/data/cas_last_car.txt")
+
+
+def _remember_car_name(name: str) -> None:
+  if name and name.upper() != "MOCK":
+    try:
+      LAST_CAR_PATH.write_text(name, encoding="utf-8")
+    except OSError:
+      pass
+
+
+def _last_car_name() -> str:
+  try:
+    return LAST_CAR_PATH.read_text(encoding="utf-8").strip()
+  except OSError:
+    return ""
+
+
 def _resolve_car_key(params: Params) -> str:
   """Single source of truth for the car_key, used for BOTH the per-file
   X-Carrot-Car header and the route_meta.json. Priority: CarSelected3 (the
-  CarrotWeb menu choice) → carParams.carFingerprint → CarName → CarrotLastCarName.
+  CarrotWeb menu choice) → carParams.carFingerprint → CarName → last-known.
   Returns normalized car_key (UPPER_SNAKE) or '' if nothing identifies the car."""
   car_selected = _read_param_str(params, "CarSelected3")
   car_name = _read_param_str(params, "CarName")
-  # Persist last good CarName so a pre-fingerprint boot still has a hint.
-  if car_name and car_name.upper() != "MOCK":
-    try:
-      params.put("CarrotLastCarName", car_name)
-    except Exception:
-      pass
-  last_known = _read_param_str(params, "CarrotLastCarName")
+  _remember_car_name(car_name)                      # persist for pre-fingerprint boots
+  last_known = _last_car_name()
   car_fingerprint = ""
   cp = _read_car_params(params)
   if cp is not None:
@@ -330,7 +346,7 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
                      device_id: str) -> dict:
   car_name = _read_param_str(params, "CarName")
   car_selected = _read_param_str(params, "CarSelected3")
-  last_known_car = _read_param_str(params, "CarrotLastCarName")
+  last_known_car = _last_car_name()
 
   car_params = _read_car_params(params)
   car_fingerprint = ""
