@@ -32,15 +32,16 @@ def cloud_cache_dir(rlogs: str | Path) -> Path:
   return cas_dir(rlogs) / "cloud_cache"
 
 
-def cloud_route_dir(rlogs: str | Path, device_id: str, route_id: str, segment: str | int) -> Path:
-  safe_device = _safe_component(device_id, "unknown_device")
+def cloud_route_dir(rlogs: str | Path, car_key: str, route_id: str, segment: str | int) -> Path:
+  # Phase 7: local cache organized by car_key (mirrors server car/ layout).
+  safe_car = _safe_component(car_key, "unknown_car")
   safe_route = _safe_component(route_id, "unknown_route")
   safe_segment = _safe_component(str(segment), "0")
-  return cloud_cache_dir(rlogs) / safe_device / f"{safe_route}--{safe_segment}"
+  return cloud_cache_dir(rlogs) / safe_car / f"{safe_route}--{safe_segment}"
 
 
-def cloud_route_files(rlogs: str | Path, device_id: str, route_id: str, segment: str | int) -> dict[str, str]:
-  root = cloud_route_dir(rlogs, device_id, route_id, segment)
+def cloud_route_files(rlogs: str | Path, car_key: str, route_id: str, segment: str | int) -> dict[str, str]:
+  root = cloud_route_dir(rlogs, car_key, route_id, segment)
   return {
     "rlog": str(root / "rlog.zst"),
     "qlog": str(root / "qlog.zst"),
@@ -216,17 +217,18 @@ def download_cloud_file(endpoint: str, download_url: str, dest: str | Path,
   return dest_path
 
 
-def download_segment(endpoint: str, rlogs: str | Path, device_id: str, route_id: str,
+def download_segment(endpoint: str, rlogs: str | Path, car_key: str, route_id: str,
                      segment: str | int, filenames: tuple[str, ...] = ("rlog.zst", "qlog.zst"),
                      token: str = "") -> dict[str, str]:
-  files = cloud_route_files(rlogs, device_id, route_id, segment)
+  # Phase 7: download URL + local cache keyed by car_key (was device_id).
+  files = cloud_route_files(rlogs, car_key, route_id, segment)
   written = {}
   for filename in filenames:
     key = filename.split(".", 1)[0]
     dest = files.get(key)
     if not dest:
       continue
-    url = f"/download/{device_id}/{route_id}/{segment}/{filename}"
+    url = f"/download/{car_key}/{route_id}/{segment}/{filename}"
     written[filename] = str(download_cloud_file(endpoint, url, dest, token=token))
   return written
 

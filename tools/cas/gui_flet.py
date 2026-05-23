@@ -854,12 +854,12 @@ def main(page: ft.Page):
       if state.get("cancel"):
         append_log("[download] 중단됨")
         break
-      device_id = str(route.get("device_id", ""))
       route_id  = str(route.get("route_id", ""))
       segments  = route.get("segments", []) or []
       for seg in segments:
         segment = str(seg.get("segment", "") if isinstance(seg, dict) else seg)
-        files = cloud_sync.cloud_route_files(str(rlog_dir()), device_id, route_id, segment)
+        # Phase 7: cache + download keyed by car_key (server stores under car/).
+        files = cloud_sync.cloud_route_files(str(rlog_dir()), car_key, route_id, segment)
         rlog_dest = Path(files.get("rlog", ""))
         if rlog_dest.exists() and rlog_dest.stat().st_size > 0:
           skipped += 1
@@ -870,7 +870,7 @@ def main(page: ft.Page):
         try:
           cloud_sync.download_segment(
             endpoint=endpoint, rlogs=str(rlog_dir()),
-            device_id=device_id, route_id=route_id, segment=segment,
+            car_key=car_key, route_id=route_id, segment=segment,
             token=token,
           )
           downloaded += 1
@@ -894,12 +894,11 @@ def main(page: ft.Page):
     segs = 0
     total_bytes = 0
     for route in routes_data.get("routes", []) or []:
-      device_id = str(route.get("device_id", ""))
       route_id  = str(route.get("route_id", ""))
       segments  = route.get("segments", []) or []
       for seg in segments:
         segment = str(seg.get("segment", "") if isinstance(seg, dict) else seg)
-        route_dir = cloud_sync.cloud_route_dir(str(rlog_dir()), device_id, route_id, segment)
+        route_dir = cloud_sync.cloud_route_dir(str(rlog_dir()), car_key, route_id, segment)
         if route_dir.exists():
           try:
             for f in route_dir.rglob("*"):

@@ -37,12 +37,15 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 SECRET_PATH = Path("/etc/carrot-upload/secret")
 READ_TOKEN_PATH = Path("/etc/carrot-upload/read_token")
 BASE = Path("/srv/carrot_rlogs")
-# Phase 6 folder structure: device/ (canonical raw), car/ (per-platform view),
-# model/ (OTA-distributable trained models). Names match the cas_server_
-# operations.md doc. BY_DEVICE/BY_CAR variable names kept for diff continuity.
-BY_DEVICE   = BASE / "device"                                # was "by-device"
-BY_CAR      = BASE / "car"                                   # was "by-car"
-MODELS_BASE = BASE / "model"                                 # was Path("/srv/carrot_models")
+# Phase 7 folder structure:
+#   car/<carname>/<route>/   ← canonical raw storage (organized by car type, ACTIVE)
+#   device/<device_id>/      ← reserved for future per-device personalization (EMPTY now)
+#   model/<carname>/<kind>/  ← OTA-distributable trained models
+# Variable names kept (BY_CAR/BY_DEVICE) for diff continuity, but semantics
+# changed: BY_CAR is now canonical (not symlink view), BY_DEVICE is empty.
+BY_CAR      = BASE / "car"                                   # ★ canonical raw storage
+BY_DEVICE   = BASE / "device"                                # empty placeholder for future
+MODELS_BASE = BASE / "model"
 TRAIN_RUNS_PATH = BASE / "server_train_runs.json"
 MAX_MODEL_BYTES = 4 * 1024 * 1024     # 4 MB — typical CAS JSON is < 200 KB
 VERSION_RE = re.compile(r"^[0-9]{8}_[0-9]{6}$")
@@ -136,37 +139,9 @@ def _cleanup_if_needed():
       print(f"[cleanup] failed {route_dir}: {e}", flush=True)
 
 
-def car_links_for(route_dir: Path):
-  if not BY_CAR.exists():
-    return
-  device_id = route_dir.parent.name
-  route_id = route_dir.name
-  link_name = f"{device_id}__{route_id}"
-  for car_dir in BY_CAR.iterdir():
-    if not car_dir.is_dir():
-      continue
-    link = car_dir / link_name
-    if link.is_symlink() or link.exists():
-      try:
-        link.unlink()
-      except OSError:
-        pass
-
-
-def _ensure_car_symlink(route_dir: Path, car: str):
-  if not car or not CAR_RE.match(car):
-    return
-  car_dir = BY_CAR / car
-  car_dir.mkdir(parents=True, exist_ok=True)
-  link_name = f"{route_dir.parent.name}__{route_dir.name}"
-  link = car_dir / link_name
-  if link.is_symlink() or link.exists():
-    return
-  try:
-    rel = os.path.relpath(route_dir, car_dir)
-    link.symlink_to(rel)
-  except OSError as e:
-    print(f"[symlink] failed {link} -> {route_dir}: {e}", flush=True)
+# Phase 7: symlink helpers removed. BY_CAR now holds canonical files directly,
+# no by-device shadow. (Previous _ensure_car_symlink / car_links_for were used
+# to build the by-car/ view over by-device/ canonical storage.)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -184,9 +159,10 @@ def _write_json_atomic(path: Path, payload: dict[str, Any]):
 
 
 def _route_meta(route_dir: Path) -> dict[str, Any]:
+  # Phase 7: route_dir is car/<carname>/<route_id>/, so route_dir.parent.name
+  # is the CAR_KEY (was device_id in Phase 6). device_id now must come from
+  # the meta file itself (device always populates it in build_route_meta).
   meta = _read_json(route_dir / "route_meta.json")
-  if "device_id" not in meta:
-    meta["device_id"] = route_dir.parent.name
   if "route_id" not in meta:
     meta["route_id"] = route_dir.name
   return meta
@@ -232,12 +208,13 @@ def _norm_car_key(value: str) -> str:
 
 
 def _iter_route_dirs():
-  if not BY_DEVICE.exists():
+  # Phase 7: walks BY_CAR/<car_key>/<route_id>/. (Was BY_DEVICE/<device>/<route>.)
+  if not BY_CAR.exists():
     return
-  for device_dir in sorted(BY_DEVICE.iterdir(), key=lambda p: p.name):
-    if not device_dir.is_dir():
+  for car_dir in sorted(BY_CAR.iterdir(), key=lambda p: p.name):
+    if not car_dir.is_dir():
       continue
-    for route_dir in sorted(device_dir.iterdir(), key=lambda p: p.name):
+    for route_dir in sorted(car_dir.iterdir(), key=lambda p: p.name):
       if route_dir.is_dir():
         yield route_dir
 
@@ -274,10 +251,13 @@ def _duration_hours(meta: dict[str, Any]) -> float:
 
 
 def _route_record(route_dir: Path) -> dict[str, Any]:
+  # Phase 7: route_dir is BY_CAR/<car_key>/<route_id>/.
   meta = _route_meta(route_dir)
-  device_id = str(meta.get("device_id", route_dir.parent.name))
   route_id = str(meta.get("route_id", route_dir.name))
-  car_key = _car_key_from_meta(route_dir, meta)
+  # car_key from path (canonical), falling back to meta lookup chain if needed.
+  car_key = _norm_car_key(route_dir.parent.name) or _car_key_from_meta(route_dir, meta)
+  # device_id from meta (was: from path). Always populated by device's build_route_meta.
+  device_id = str(meta.get("device_id", ""))
   kind = _kind_from_meta(meta)
   eps_hash = str(meta.get("eps_firmware_hash", "")).strip()
   segments = []
@@ -292,7 +272,8 @@ def _route_record(route_dir: Path) -> dict[str, Any]:
         total_bytes += size
         files[filename] = {
           "bytes": size,
-          "download_url": f"/download/{device_id}/{route_id}/{seg_dir.name}/{filename}",
+          # Phase 7: download URL keyed by car_key (was device_id).
+          "download_url": f"/download/{car_key}/{route_id}/{seg_dir.name}/{filename}",
         }
     segments.append({
       "segment": seg_dir.name,
@@ -521,24 +502,26 @@ async def api_latest_train_run(
   return JSONResponse({"run": matches[0] if matches else None})
 
 
-@app.get("/download/{device_id}/{route_id}/{segment}/{filename}")
+@app.get("/download/{car_key}/{route_id}/{segment}/{filename}")
 async def download(
-  device_id: str,
+  car_key: str,
   route_id: str,
   segment: str,
   filename: str,
   authorization: str = Header(default=""),
 ):
+  # Phase 7: URL path uses car_key (was device_id). PC builds URL from car_key
+  # in route records returned by /api/datasets and /api/routes.
   _require_read_auth(authorization)
-  if not DEVICE_RE.match(device_id):
-    raise HTTPException(status_code=400, detail="bad device_id")
+  if not CAR_RE.match(car_key):
+    raise HTTPException(status_code=400, detail="bad car_key")
   if not ROUTE_RE.match(route_id):
     raise HTTPException(status_code=400, detail="bad route_id")
   if not SEGMENT_RE.match(segment):
     raise HTTPException(status_code=400, detail="bad segment")
   if filename not in DOWNLOAD_FILES:
     raise HTTPException(status_code=400, detail="bad filename")
-  root = BY_DEVICE / device_id / route_id
+  root = BY_CAR / car_key / route_id
   path = root / filename if segment == "meta" else root / segment / filename
   try:
     path.resolve().relative_to(root.resolve())
@@ -583,7 +566,14 @@ async def upload(
     except Exception as e:
       print(f"[cleanup] error: {e}", flush=True)
 
-  route_dir = BY_DEVICE / device_id / route_id
+  # Phase 7: car/<car_key>/<route_id>/... canonical storage.
+  # car_key determined from X-Carrot-Car header (device metadata) at first
+  # file. If header is empty, file lands under UNKNOWN_CAR. When route_meta
+  # arrives later with a different car_key in the JSON body, we DON'T move
+  # the dir (would risk mid-route splits) — just log the mismatch.
+  car_key = _norm_car_key(x_carrot_car) or "UNKNOWN_CAR"
+
+  route_dir = BY_CAR / car_key / route_id
   seg_dir = route_dir if segment == "meta" else route_dir / segment
   seg_dir.mkdir(parents=True, exist_ok=True)
   dest = seg_dir / filename
@@ -605,22 +595,17 @@ async def upload(
     tmp.unlink(missing_ok=True)
     raise HTTPException(status_code=500, detail=f"write failed: {e}")
 
-  car_file = route_dir / "car.txt"
-  car_for_link = _norm_car_key(x_carrot_car)
+  # When route_meta arrives, sanity-check car_key against meta. Mismatch is
+  # informational only — folder stays where it was first placed.
   if filename == "route_meta.json":
-    meta = _read_json(dest)
-    car_for_link = _car_key_from_meta(route_dir, meta) or car_for_link
-  if car_for_link and not car_file.exists():
     try:
-      car_file.write_text(car_for_link, encoding="utf-8")
-    except OSError:
+      meta = _read_json(dest)
+      meta_car = _car_key_from_meta(route_dir, meta)
+      if meta_car and meta_car != car_key:
+        print(f"[upload] car_key mismatch route={route_id} header={car_key} meta={meta_car}",
+              flush=True)
+    except Exception:
       pass
-  if not car_for_link and car_file.exists():
-    try:
-      car_for_link = _norm_car_key(car_file.read_text(encoding="utf-8").strip())
-    except OSError:
-      car_for_link = ""
-  _ensure_car_symlink(route_dir, car_for_link)
 
   return JSONResponse({
     "ok": True,
