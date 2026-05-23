@@ -215,6 +215,8 @@ def main(page: ft.Page):
     "selected_index":   0,
     "proc":             None,              # current subprocess.Popen
     "proc_lock":        threading.Lock(),
+    "busy":             False,             # command/pipeline running; primary button becomes Stop
+    "cancel":           False,
     "log":              [],
     "current_run_dir":  None,              # Path of timestamped run folder
     "current_run_log":  None,              # Path of run.log file inside it
@@ -276,7 +278,6 @@ def main(page: ft.Page):
   status   = ft.Text("서버 연결 중", size=15, weight=ft.FontWeight.W_500)
   progress = ft.ProgressBar(visible=False, value=None, bar_height=4)
   primary_button  = ft.FilledButton("학습 시작", icon=ft.Icons.PLAY_ARROW_ROUNDED, height=56, disabled=True)
-  stop_button     = ft.OutlinedButton("중지", icon=ft.Icons.STOP_CIRCLE_ROUNDED, visible=False, height=44)
   # Small one-line deploy status under the button.
   deploy_status   = ft.Text("", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
   refresh_button  = ft.IconButton(ft.Icons.REFRESH_ROUNDED, tooltip="새로고침")
@@ -512,7 +513,14 @@ def main(page: ft.Page):
       headline.value = "데이터 없음"
       status.value = "새로고침 후 다시 확인하세요."
       deploy_status.value = ""
-      primary_button.disabled = True
+      if state.get("busy"):
+        primary_button.text = "중지"
+        primary_button.icon = ft.Icons.STOP_CIRCLE_ROUNDED
+        primary_button.disabled = False
+      else:
+        primary_button.text = "학습 시작"
+        primary_button.icon = ft.Icons.PLAY_ARROW_ROUNDED
+        primary_button.disabled = True
       vehicle_menu.visible = False
       detail_tile.visible = False
       page.update()
@@ -549,7 +557,14 @@ def main(page: ft.Page):
     else:
       deploy_status.value = "📦 배포된 모델 없음"
 
-    primary_button.disabled = not can_train
+    if state.get("busy"):
+      primary_button.text = "중지"
+      primary_button.icon = ft.Icons.STOP_CIRCLE_ROUNDED
+      primary_button.disabled = False
+    else:
+      primary_button.text = "학습 시작"
+      primary_button.icon = ft.Icons.PLAY_ARROW_ROUNDED
+      primary_button.disabled = not can_train
     # Count untrained datasets across all cars for the "all" button.
     untrained = [
       d for d in state["datasets"]
@@ -560,7 +575,7 @@ def main(page: ft.Page):
     if len(untrained) >= 2:
       train_all_button.visible = True
       train_all_button.text = f"모든 새 데이터 학습 ({len(untrained)}대)"
-      train_all_button.disabled = False
+      train_all_button.disabled = bool(state.get("busy"))
     else:
       train_all_button.visible = False
     vehicle_menu.visible = len(state["datasets"]) > 1
@@ -837,11 +852,44 @@ def main(page: ft.Page):
         append_log(f"[history] server error: {e}")
 
   # ── Subprocess runner ──
+  def _set_primary_start_enabled(enabled: bool):
+    primary_button.text = "학습 시작"
+    primary_button.icon = ft.Icons.PLAY_ARROW_ROUNDED
+    primary_button.disabled = not enabled
+
+  def _set_primary_stop_enabled():
+    primary_button.text = "중지"
+    primary_button.icon = ft.Icons.STOP_CIRCLE_ROUNDED
+    primary_button.disabled = False
+
+  def _terminate_proc_tree(proc: subprocess.Popen | None) -> bool:
+    if proc is None or proc.poll() is not None:
+      return False
+    try:
+      if os.name == "nt":
+        subprocess.run(
+          ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+          stdout=subprocess.DEVNULL,
+          stderr=subprocess.DEVNULL,
+          timeout=5,
+        )
+      else:
+        proc.terminate()
+      return True
+    except Exception as e:
+      append_log(f"[중지] 종료 요청 실패: {e}")
+      try:
+        proc.kill()
+        return True
+      except Exception as e2:
+        append_log(f"[중지] 강제 종료 실패: {e2}")
+        return False
+
   def _set_busy_ui():
-    stop_button.visible      = True
+    state["busy"]            = True
     progress.visible         = True
     progress.value           = None
-    primary_button.disabled  = True
+    _set_primary_stop_enabled()
     train_all_button.disabled = True
     refresh_button.disabled  = True
     download_button.disabled = True
@@ -850,10 +898,12 @@ def main(page: ft.Page):
     except Exception: pass
 
   def _set_idle_ui():
-    stop_button.visible      = False
+    state["busy"]            = False
     progress.visible         = False
     refresh_button.disabled  = False
-    primary_button.disabled  = False
+    ds = selected_dataset()
+    _total, _trained, new_hours = dataset_hours(ds) if ds is not None else (0.0, 0.0, 0.0)
+    _set_primary_start_enabled(ds is not None and _total > 0.0 and new_hours > 0.05)
     train_all_button.disabled = False
     download_button.disabled = False
     cleanup_button.disabled  = False
@@ -863,7 +913,7 @@ def main(page: ft.Page):
   def _execute_commands_inline(commands: list[tuple[list[str], str]]) -> bool:
     """Sync: run commands sequentially, return overall_ok.
     Updates per-command status/log but does NOT toggle pipeline-level UI.
-    Cancellable via state['cancel'] flag (and stop_button → terminate)."""
+    Cancellable via state['cancel'] flag (primary button becomes Stop)."""
     state["cancel"] = False
     overall_ok = True
     for raw_cmd, label in commands:
@@ -882,19 +932,27 @@ def main(page: ft.Page):
 
       code = -1
       try:
+        popen_kwargs: dict[str, Any] = {
+          "cwd": str(REPO_ROOT),
+          "stdout": subprocess.PIPE,
+          "stderr": subprocess.STDOUT,
+          "text": True,
+          "bufsize": 1,
+        }
+        if os.name == "nt":
+          popen_kwargs["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
         with state["proc_lock"]:
-          state["proc"] = subprocess.Popen(
-            effective,
-            cwd=str(REPO_ROOT),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
-          )
+          state["proc"] = subprocess.Popen(effective, **popen_kwargs)
         proc = state["proc"]
         assert proc.stdout is not None
         for line in proc.stdout:
           append_log(line)
+          if state.get("cancel"):
+            _terminate_proc_tree(proc)
+            status.value = "중단 요청 중"
+            try: page.update()
+            except Exception: pass
+            break
         code = proc.wait()
         append_log(f"[{label}] exit={code}")
       except Exception as e:
@@ -903,6 +961,10 @@ def main(page: ft.Page):
         with state["proc_lock"]:
           state["proc"] = None
 
+      if state.get("cancel"):
+        overall_ok = False
+        status.value = "중단됨"
+        break
       if code != 0:
         overall_ok = False
         status.value = f"{label} 실패 (exit={code})"
@@ -916,6 +978,9 @@ def main(page: ft.Page):
     if ok:
       status.value = "완료"
       show_toast(f"{commands[-1][1]} 완료" if commands else "완료")
+    elif state.get("cancel"):
+      status.value = "중단됨"
+      show_toast("중단됨")
     else:
       show_toast(f"실행 실패: {commands[-1][1] if commands else 'unknown'}", error=True)
     _set_idle_ui()
@@ -1100,6 +1165,10 @@ def main(page: ft.Page):
     append_log(f"\n[run] {run_dir}")
 
     ok = _execute_commands_inline([(train_cmd, "Train"), (val_cmd, "Validate")])
+    if state.get("cancel"):
+      state["current_run_dir"] = None
+      state["current_run_log"] = None
+      return False
 
     # Phase 3: record train run
     if ok:
@@ -1167,15 +1236,20 @@ def main(page: ft.Page):
 
     ok_n = sum(1 for _, ok in results if ok)
     fail_n = len(results) - ok_n
-    if len(ds_list) == 1:
+    if state.get("cancel"):
+      msg = "중단됨"
+      show_toast(msg, error=False)
+    elif len(ds_list) == 1:
       msg = "학습 완료" if results and results[0][1] else "학습 실패"
       show_toast(msg, error=not (results and results[0][1]))
     else:
       msg = f"{ok_n}/{len(ds_list)} 차량 학습 완료"
       show_toast(msg, error=fail_n > 0)
-    status.value = msg
 
     refresh_data_status()
+    status.value = msg
+    try: page.update()
+    except Exception: pass
     threading.Thread(target=load_server_data, daemon=True).start()
 
   # ── Backfill server route_meta (re-bin UNKNOWN → chosen car) ──
@@ -1359,6 +1433,8 @@ def main(page: ft.Page):
 
   # ── Click handlers ──
   def train_clicked(_event=None):
+    if state.get("busy"):
+      return
     ds = selected_dataset()
     if ds is None:
       show_toast("선택된 차량이 없습니다", error=True)
@@ -1377,6 +1453,8 @@ def main(page: ft.Page):
     ).start()
 
   def train_all_clicked(_event=None):
+    if state.get("busy"):
+      return
     untrained = []
     for d in state["datasets"]:
       _t, _tr, new_h = dataset_hours(d)
@@ -1397,16 +1475,24 @@ def main(page: ft.Page):
 
   def stop_clicked(_event=None):
     # Flag is checked by the multi-phase pipeline between phases (download /
-    # train / validate / next car). subprocess.terminate covers the running
-    # external process for immediate stop.
+    # train / validate / next car). The active subprocess tree is killed for
+    # immediate stop, which matters on Windows/WSL where children may survive.
     state["cancel"] = True
+    status.value = "중단 요청 중"
     with state["proc_lock"]:
       proc = state["proc"]
-      if proc is not None and proc.poll() is None:
-        proc.terminate()
-        append_log("[중지] terminate 신호 전송")
-      else:
-        append_log("[중지] 다음 단계 진입 시 중단됩니다")
+    if _terminate_proc_tree(proc):
+      append_log("[중지] 실행 중인 프로세스 종료 요청")
+    else:
+      append_log("[중지] 다음 단계 진입 시 중단됩니다")
+    try: page.update()
+    except Exception: pass
+
+  def primary_clicked(_event=None):
+    if state.get("busy"):
+      stop_clicked(_event)
+    else:
+      train_clicked(_event)
 
   # ── Snackbar ──
   def show_toast(msg: str, error: bool = False):
@@ -1667,8 +1753,7 @@ def main(page: ft.Page):
   vehicle_menu.on_change   = vehicle_changed
   refresh_button.on_click  = refresh_clicked
   settings_button.on_click = settings_clicked
-  primary_button.on_click  = train_clicked
-  stop_button.on_click     = stop_clicked
+  primary_button.on_click  = primary_clicked
   download_button.on_click   = download_clicked
   cleanup_button.on_click    = cleanup_clicked
   history_button.on_click    = history_clicked
@@ -1701,7 +1786,6 @@ def main(page: ft.Page):
           ft.Container(height=12),
           primary_button,                       # 큰 주 버튼
           train_all_button,                     # (다차량일 때만 보임)
-          ft.Row([stop_button], alignment=ft.MainAxisAlignment.CENTER),
           ft.Container(height=4),
           deploy_status,                        # 배포 상태 한 줄
         ],
