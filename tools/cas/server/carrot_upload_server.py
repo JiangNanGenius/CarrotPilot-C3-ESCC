@@ -37,12 +37,13 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 SECRET_PATH = Path("/etc/carrot-upload/secret")
 READ_TOKEN_PATH = Path("/etc/carrot-upload/read_token")
 BASE = Path("/srv/carrot_rlogs")
-BY_DEVICE = BASE / "by-device"
-BY_CAR = BASE / "by-car"
+# Phase 6 folder structure: device/ (canonical raw), car/ (per-platform view),
+# model/ (OTA-distributable trained models). Names match the cas_server_
+# operations.md doc. BY_DEVICE/BY_CAR variable names kept for diff continuity.
+BY_DEVICE   = BASE / "device"                                # was "by-device"
+BY_CAR      = BASE / "car"                                   # was "by-car"
+MODELS_BASE = BASE / "model"                                 # was Path("/srv/carrot_models")
 TRAIN_RUNS_PATH = BASE / "server_train_runs.json"
-# OTA model distribution: PC publishes trained models here, devices pull the
-# latest. Versioned by trained_at (YYYYMMDD_HHMMSS) for human-readable history.
-MODELS_BASE = Path("/srv/carrot_models")
 MAX_MODEL_BYTES = 4 * 1024 * 1024     # 4 MB — typical CAS JSON is < 200 KB
 VERSION_RE = re.compile(r"^[0-9]{8}_[0-9]{6}$")
 
@@ -192,12 +193,11 @@ def _route_meta(route_dir: Path) -> dict[str, Any]:
 
 
 def _car_key_from_meta(route_dir: Path, meta: dict[str, Any]) -> str:
-  # car_key first: that's the device's already-normalized result (which itself
-  # prioritizes CarSelected3 — the user-explicit menu choice). Then car_selected
-  # explicitly (in case the device shipped meta from an older client that didn't
-  # promote it to car_key). Then openpilot-side fields. last_known_car is the
-  # device's persisted "previous good CarName" — lets routes uploaded before
-  # this boot's CarParams arrived still bin to the right car.
+  # car_key first — device-normalized result. With the Phase 6 priority, the
+  # device puts CarSelected3 (CarrotWeb's "Hyundai Casper EV 2024" style) at
+  # the top of its chain, so car_key already reflects the user's explicit
+  # menu choice with year preserved. car_selected next as direct fallback if
+  # an older client didn't promote it to car_key. Other fields after.
   # EPS firmware hash is intentionally NOT in this chain — reference diagnostic
   # only (matches runtime's behavior of treating EPS as a tiebreaker bonus,
   # never a disqualifier).

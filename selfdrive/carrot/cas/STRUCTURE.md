@@ -232,3 +232,4 @@ CAS를 폐기하려면 다음 순서로 정리. 모든 변경은 file/line 단�
 | `docs/cas_handoff_20260520.md` | 502 | 가장 최근 운영 상태 핸드오프 |
 | `docs/cas_conversation.md` | 208 | 의사결정/패러다임 전환 이력 |
 | `docs/cas_data_upload_design.md` | 725 | 업로더 + NAS 서버 + Cloudflare Tunnel 설계 |
+| `docs/cas_server_operations.md` | 434 | **서버 운영 종합 가이드** — 인프라/폴더구조/명명규칙/API/배포/마이그레이션/런북 |

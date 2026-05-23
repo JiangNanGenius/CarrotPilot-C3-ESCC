@@ -332,9 +332,12 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
     year_attr = getattr(car_params, "year", "")
     car_model_year = str(year_attr).strip() if year_attr else ""
 
-  # CarSelected3 first: it's the user-explicit choice in Carrot's car menu,
-  # so it's the most authoritative identifier. Fall back to openpilot's
-  # fingerprint/CarName, then to the persisted last-known.
+  # Phase 6: CarSelected3 is the source of truth. It's what the user picked in
+  # CarrotWeb ("Hyundai Casper EV 2024"), so it captures generation/year info
+  # exactly the way the user (and the CarrotWeb car list) thinks of the car.
+  # carFingerprint/CarName are openpilot's internal platform keys — used as
+  # fallback when no CarSelected3 (uncommon, only pre-setup devices).
+  # last_known_car catches the very early-boot case where neither is populated.
   car_key = car_selected or car_fingerprint or car_name or last_known_car
 
   carrot_version  = _read_param_str(params, "GitCommit")[:12]
