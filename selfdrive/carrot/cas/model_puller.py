@@ -45,7 +45,8 @@ VERSIONS_PATH = WEIGHTS_DIR / "_versions.json"
 KINDS = ("torque", "angle")
 
 # Boot-once cadence
-NETWORK_WAIT_SEC      = 300                  # max wait for NTP/online
+CLOCK_POLL_SEC        = 15                   # how often to recheck clock sync
+CLOCK_HEARTBEAT_SEC   = 60                   # log every N seconds while waiting
 RETRY_DELAYS_SEC      = (10, 30, 90)         # backoff between retries
 SLEEP_AFTER_DONE_SEC  = 24 * 3600            # park until reboot
 
@@ -82,21 +83,26 @@ def _norm_car(name: str) -> str:
   return safe
 
 
-def _wait_for_network(timeout_sec: int) -> bool:
-  # Use monotonic time for the deadline so a wall-clock jump (NTP correcting
-  # a regressed RTC from 2025 to 2026) doesn't instantly trip the timeout.
-  # We still check wall clock (time.time) for "is time correct now?".
-  deadline_mono = time.monotonic() + timeout_sec
-  while time.monotonic() < deadline_mono:
+def _wait_for_clock_sync() -> None:
+  """Wait — indefinitely if needed — until NTP/carrot has set the clock.
+  Polls every CLOCK_POLL_SEC; logs a heartbeat every CLOCK_HEARTBEAT_SEC so
+  the user can see we're alive but waiting. Returns once the clock looks
+  trustworthy (either NTP flag set or wall time past MIN_VALID_EPOCH)."""
+  waited = 0
+  while True:
     try:
       if NTP_SYNCED_FLAG.exists():
-        return True
+        _log(f"NTP synced (waited {waited}s)")
+        return
     except OSError:
       pass
     if time.time() > MIN_VALID_EPOCH:
-      return True
-    time.sleep(10)
-  return False
+      _log(f"clock looks valid (waited {waited}s)")
+      return
+    time.sleep(CLOCK_POLL_SEC)
+    waited += CLOCK_POLL_SEC
+    if waited % CLOCK_HEARTBEAT_SEC == 0:
+      _log(f"still waiting for clock sync ({waited}s elapsed) — Carrot/NTP not done yet")
 
 
 def _read_versions() -> dict:
@@ -254,28 +260,27 @@ def run() -> None:
   WEIGHTS_DIR.mkdir(parents=True, exist_ok=True)
   params = Params()
 
-  _log(f"start — waiting for network (timeout {NETWORK_WAIT_SEC}s)")
-  if not _wait_for_network(NETWORK_WAIT_SEC):
-    _log("network/NTP not available — giving up this boot")
+  _log("start — waiting for clock sync (Carrot/NTP)")
+  _wait_for_clock_sync()                              # blocks indefinitely
+
+  candidates = _resolve_car_candidates(params)
+  if not candidates:
+    _log("no CarSelected3 / CarName / CarrotLastCarName — skip")
   else:
-    candidates = _resolve_car_candidates(params)
-    if not candidates:
-      _log("no CarSelected3 / CarName / CarrotLastCarName — skip")
-    else:
-      endpoint = upload_config.resolve_endpoint(params)
-      _log(f"car candidates={candidates} endpoint={endpoint}")
-      done = False
-      for attempt, delay in enumerate(RETRY_DELAYS_SEC, 1):
-        try:
-          n = check_and_install(params, candidates)
-          _log(f"boot-once done: {n} update(s)")
-          done = True
-          break
-        except Exception as e:
-          _log(f"attempt {attempt} error: {e} — retry in {delay}s")
-          time.sleep(delay)
-      if not done:
-        _log("all attempts exhausted — sleep until next boot")
+    endpoint = upload_config.resolve_endpoint(params)
+    _log(f"car candidates={candidates} endpoint={endpoint}")
+    done = False
+    for attempt, delay in enumerate(RETRY_DELAYS_SEC, 1):
+      try:
+        n = check_and_install(params, candidates)
+        _log(f"boot-once done: {n} update(s)")
+        done = True
+        break
+      except Exception as e:
+        _log(f"attempt {attempt} error: {e} — retry in {delay}s")
+        time.sleep(delay)
+    if not done:
+      _log("all attempts exhausted — sleep until next boot")
 
   # managed process: don't exit (would just be restarted). Park.
   while True:
