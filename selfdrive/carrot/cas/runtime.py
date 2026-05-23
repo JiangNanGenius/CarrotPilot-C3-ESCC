@@ -188,9 +188,12 @@ class CASRuntime:
     delta, max_abs_z = self.model.evaluate(features)
     alpha = self._alpha(CS, delta, max_abs_z)
     raw_delta = float(delta)
-    applied_delta = float(alpha * raw_delta)
+    residual_gain = self._residual_gain()
+    applied_delta = float(alpha * raw_delta * residual_gain)
     if alpha <= 0.0:
       delta = 0.0
+    else:
+      delta = float(raw_delta * residual_gain)
 
     # ── Centering / intervention bookkeeping ──
     # features layout (see features.py FEATURE_SPEC):
@@ -353,9 +356,9 @@ class CASRuntime:
   def _alpha(self, CS, delta: float, max_abs_z: float) -> float:
     # Multiplicative gate: alpha_final = alpha_max
     #   * gate_user (hard off if user pressed)
-    #   * gate_speed (ramp 5..7 m/s)
+    #   * gate_speed (soft moving-speed ramp; no hard cut at the training band)
     #   * gate_finite (hard off on NaN / extreme delta)
-    #   * gate_distribution (ramp |z| 2.5..3.5)
+    #   * gate_distribution (soft out-of-distribution taper)
     # Safety invariant I1 preserved: any factor 0 -> alpha 0 -> base output unchanged.
     if self.model is None:
       return 0.0
@@ -365,35 +368,51 @@ class CASRuntime:
     if not math.isfinite(delta) or abs(delta) > 3.0:
       return 0.0
 
-    # Speed ramp: 0 below vego_min, full +2 m/s above; taper near vego_max.
+    # Speed gate: user-facing CAS should feel present whenever openpilot is
+    # actually driving, not disappear just because the current speed is a bit
+    # outside the training percentile band. Keep hard-off only near standstill,
+    # then apply a small floor outside the learned band.
+    if CS.vEgo < 1.0:
+      return 0.0
     vego_min = self.model.vego_min
     vego_max = self.model.vego_max
-    if CS.vEgo < vego_min:
-      return 0.0
-    gate_speed_low = min(1.0, max(0.0, (CS.vEgo - vego_min) / 2.0))
-    # Taper down in the last 5 m/s before vego_max (so high-speed extrapolation is gentle).
-    if CS.vEgo >= vego_max:
-      gate_speed_high = 0.0
+    low_span = max(1.0, vego_min + 2.0 - 1.0)
+    gate_speed_low = min(1.0, max(0.15, (CS.vEgo - 1.0) / low_span))
+    # Above the trained band, taper gently but leave a weak residual unless
+    # the model's own z-score gate says the whole feature vector is unfamiliar.
+    if CS.vEgo > vego_max:
+      gate_speed_high = max(0.20, 1.0 - (CS.vEgo - vego_max) / 10.0)
     elif CS.vEgo > vego_max - 5.0:
-      gate_speed_high = max(0.0, (vego_max - CS.vEgo) / 5.0)
+      gate_speed_high = max(0.50, (vego_max - CS.vEgo) / 5.0)
     else:
       gate_speed_high = 1.0
     gate_speed = gate_speed_low * gate_speed_high
 
-    # Distribution ramp: full below |z|=2.5, taper to 0 by |z|=3.5.
+    # Distribution ramp: full below |z|=2.5, then weak-but-present until the
+    # input is very far from training. This keeps CAS perceptible on ordinary
+    # roads while still backing out of clearly unfamiliar states.
     # Widened from [2.0, 3.0] because short training runs (e.g. 5.98h Casper
     # candidate) produce narrow input_std, so ordinary corner/jerk inputs land
     # at |z|~2 and get aggressively damped right when CAS should help. The
     # output_clip and |delta|>3 hard cap above still bound any extrapolation.
-    if max_abs_z >= 3.5:
+    if max_abs_z >= 5.0:
       return 0.0
-    gate_distribution = 1.0 if max_abs_z <= 2.5 else max(0.0, (3.5 - max_abs_z))
+    gate_distribution = 1.0 if max_abs_z <= 2.5 else max(0.20, (5.0 - max_abs_z) / 2.5)
 
-    # CASAlphaOverride: 0 = use JSON default, 1~50 = override 0.01~0.50.
+    # CASAlphaOverride: 0 = use JSON default, 1~100 = override 0.01~1.00.
     # Safety gates (steeringPressed/NaN/speed/distribution) still apply on top.
     override = self.params.get_int("CASAlphaOverride")
     if override > 0:
-      alpha_max = max(0.0, min(0.5, override / 100.0))
+      alpha_max = max(0.0, min(1.0, override / 100.0))
     else:
       alpha_max = max(0.0, min(1.0, float(self.model.alpha_max)))
     return alpha_max * gate_speed * gate_distribution
+
+  def _residual_gain(self) -> float:
+    # Final CAS strength multiplier. This is intentionally outside alpha so the
+    # HUD can still show gate/alpha separately from the actual applied delta.
+    # 100 = 1.0x, 150 = 1.5x, 300 = 3.0x. Missing/legacy zero means neutral.
+    gain_pct = self.params.get_int("CASResidualGain")
+    if gain_pct <= 0:
+      gain_pct = 100
+    return max(0.25, min(3.0, gain_pct / 100.0))

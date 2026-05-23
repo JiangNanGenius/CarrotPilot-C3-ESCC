@@ -342,6 +342,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"CAS", {PERSISTENT, INT, "0"}},
     {"CASDebug", {PERSISTENT, INT, "1"}},
     {"CASAlphaOverride", {PERSISTENT, INT, "0"}},
+    {"CASResidualGain", {PERSISTENT, INT, "150"}},
     {"CASModelName", {CLEAR_ON_OFFROAD_TRANSITION, STRING}},
     {"CASModelHours", {CLEAR_ON_OFFROAD_TRANSITION, STRING}},
     {"CarrotDataUpload", {PERSISTENT, INT, "0"}},

@@ -827,10 +827,10 @@ def main():
   parser.add_argument("--no-cache", action="store_true",
                       help="disable feature cache (always re-parse rlogs)")
   parser.add_argument("--offset-horizon", type=float, default=0.5)
-  parser.add_argument("--offset-gain", type=float, default=0.35)
-  parser.add_argument("--driver-torque-scale", type=float, default=0.25)
+  parser.add_argument("--offset-gain", type=float, default=0.55)
+  parser.add_argument("--driver-torque-scale", type=float, default=0.35)
   parser.add_argument("--driver-torque-sign", type=float, default=1.0)
-  parser.add_argument("--target-clip", type=float, default=0.5)
+  parser.add_argument("--target-clip", type=float, default=0.8)
   # ── #2 training-data quality filters ──
   parser.add_argument("--filter-vego-min", type=float, default=5.0,
                       help="A: drop samples below this speed (m/s)")
@@ -844,7 +844,7 @@ def main():
                       help="C: 0=off; else drop |lateral accel| above this (m/s^2)")
   parser.add_argument("--dt-outlier-pct", type=float, default=0.0,
                       help="D: 0=off; else drop driver-torque targets above this percentile")
-  parser.add_argument("--alpha-max", type=float, default=0.5)
+  parser.add_argument("--alpha-max", type=float, default=1.0)
   parser.add_argument("--seed", type=int, default=0)
   parser.add_argument("--include-manual", action="store_true")
   parser.add_argument("--history-dir", default="~/.cas_train")

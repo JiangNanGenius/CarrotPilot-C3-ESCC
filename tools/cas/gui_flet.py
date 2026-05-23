@@ -47,7 +47,11 @@ DEFAULT_CONFIG: dict[str, Any] = {
   "rlogs":              "",                                  # auto-detect on first run
   "endpoint":           cloud_sync.DEFAULT_SERVER_ENDPOINT,
   "token":              "",
-  "alpha_max":          0.5,
+  "alpha_max":          1.0,
+  "offset_gain":        0.55,
+  "driver_torque_scale": 0.35,
+  "target_clip":        0.8,
+  "residual_gain":      1.5,
   "backend":            "auto",
   "device":             "auto",
   "workers":            4,
@@ -305,8 +309,12 @@ def main(page: ft.Page):
   rlogs_field    = ft.TextField(label="RLOG 폴더", dense=True, hint_text=detect_rlog_dir(), expand=True)
   endpoint_field = ft.TextField(label="서버 엔드포인트", dense=True)
   token_field    = ft.TextField(label="서버 토큰 (선택)", dense=True, password=True, can_reveal_password=True)
-  alpha_label    = ft.Text("Alpha max  0.50", size=12)
-  alpha_slider   = ft.Slider(min=0.0, max=1.0, divisions=20, value=0.5, label="{value}")
+  alpha_label    = ft.Text("Alpha max  1.00", size=12)
+  alpha_slider   = ft.Slider(min=0.0, max=1.0, divisions=20, value=1.0, label="{value}")
+  offset_gain_field = ft.TextField(label="Offset gain", dense=True, keyboard_type=ft.KeyboardType.NUMBER)
+  torque_scale_field = ft.TextField(label="Driver torque scale", dense=True, keyboard_type=ft.KeyboardType.NUMBER)
+  target_clip_field = ft.TextField(label="Target/output clip", dense=True, keyboard_type=ft.KeyboardType.NUMBER)
+  residual_gain_field = ft.TextField(label="Runtime residual gain", dense=True, keyboard_type=ft.KeyboardType.NUMBER)
   backend_dd     = ft.Dropdown(
     label="Backend", dense=True,
     options=[ft.dropdown.Option("auto"), ft.dropdown.Option("numpy"), ft.dropdown.Option("torch")],
@@ -338,6 +346,10 @@ def main(page: ft.Page):
       cfg["endpoint"]      = (endpoint_field.value or "").strip() or cloud_sync.DEFAULT_SERVER_ENDPOINT
       cfg["token"]         = (token_field.value or "").strip()
       cfg["alpha_max"]     = float(alpha_slider.value)
+      cfg["offset_gain"]   = float(offset_gain_field.value or "0.55")
+      cfg["driver_torque_scale"] = float(torque_scale_field.value or "0.35")
+      cfg["target_clip"]   = float(target_clip_field.value or "0.8")
+      cfg["residual_gain"] = float(residual_gain_field.value or "1.5")
       cfg["backend"]       = backend_dd.value or "auto"
       cfg["device"]        = (device_field.value or "").strip() or "auto"
       cfg["workers"]       = int(workers_slider.value)
@@ -365,7 +377,11 @@ def main(page: ft.Page):
     rlogs_field.value    = str(cfg.get("rlogs", ""))
     endpoint_field.value = str(cfg.get("endpoint", ""))
     token_field.value    = str(cfg.get("token", ""))
-    alpha_slider.value   = float(cfg.get("alpha_max", 0.5))
+    alpha_slider.value   = float(cfg.get("alpha_max", 1.0))
+    offset_gain_field.value = str(cfg.get("offset_gain", 0.55))
+    torque_scale_field.value = str(cfg.get("driver_torque_scale", 0.35))
+    target_clip_field.value = str(cfg.get("target_clip", 0.8))
+    residual_gain_field.value = str(cfg.get("residual_gain", 1.5))
     backend_dd.value     = str(cfg.get("backend", "auto"))
     device_field.value   = str(cfg.get("device", "auto"))
     workers_slider.value = int(cfg.get("workers", 4))
@@ -384,7 +400,7 @@ def main(page: ft.Page):
     modal=True,
     title=ft.Text("전문가 설정", size=18, weight=ft.FontWeight.W_600),
     content=ft.Container(
-      width=440, height=560,
+      width=440, height=640,
       content=ft.Column([
         ft.Text("연결", size=11, color=ft.Colors.ON_SURFACE_VARIANT, weight=ft.FontWeight.W_600),
         ft.Row(
@@ -402,6 +418,10 @@ def main(page: ft.Page):
         ft.Container(height=4),
         ft.Text("학습 옵션", size=11, color=ft.Colors.ON_SURFACE_VARIANT, weight=ft.FontWeight.W_600),
         alpha_label, alpha_slider,
+        offset_gain_field,
+        torque_scale_field,
+        target_clip_field,
+        residual_gain_field,
         backend_dd,
         device_field,
         workers_label, workers_slider,
@@ -576,7 +596,9 @@ def main(page: ft.Page):
         leading=ft.Icon(ft.Icons.SCIENCE_ROUNDED),
         title=ft.Text("학습 옵션"),
         subtitle=ft.Text(
-          f"α≤{cfg['alpha_max']:.2f} · backend={cfg['backend']} · device={cfg['device']}\n"
+          f"α≤{cfg['alpha_max']:.2f} · gain={cfg.get('residual_gain', 1.5):.1f}x · clip={cfg.get('target_clip', 0.8):.1f}\n"
+          f"offset={cfg.get('offset_gain', 0.55):.2f} · torque={cfg.get('driver_torque_scale', 0.35):.2f}\n"
+          f"backend={cfg['backend']} · device={cfg['device']}\n"
           f"workers={cfg['workers']} · epochs={cfg['epochs']} · stride={cfg['sample_stride']}"
           + (" · WSL" if cfg.get("use_wsl") else "")
         ),
@@ -684,6 +706,9 @@ def main(page: ft.Page):
       "--kind",          str(ds.get("kind", "torque")).strip() or "torque",
       "--output",        maybe_wsl_path(str(candidate)),
       "--alpha-max",     str(cfg["alpha_max"]),
+      "--offset-gain",   str(cfg.get("offset_gain", 0.55)),
+      "--driver-torque-scale", str(cfg.get("driver_torque_scale", 0.35)),
+      "--target-clip",   str(cfg.get("target_clip", 0.8)),
       "--epochs",        str(cfg["epochs"]),
       "--sample-stride", str(cfg["sample_stride"]),
       "--workers",       str(cfg["workers"]),
@@ -712,6 +737,10 @@ def main(page: ft.Page):
       "--rlogs",         maybe_wsl_path(str(rlog_dir())),
       "--workers",       str(cfg["workers"]),
       "--sample-stride", str(cfg["sample_stride"]),
+      "--offset-gain",   str(cfg.get("offset_gain", 0.55)),
+      "--driver-torque-scale", str(cfg.get("driver_torque_scale", 0.35)),
+      "--target-clip",   str(cfg.get("target_clip", 0.8)),
+      "--residual-gain", str(cfg.get("residual_gain", 1.5)),
       "--output",        maybe_wsl_path(str(validate_out)),
       "--audit-dir",     maybe_wsl_path(str(audit_dir)),
       "--audit-samples",

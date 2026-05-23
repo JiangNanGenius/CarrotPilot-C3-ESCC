@@ -69,7 +69,7 @@ def array_metrics(values, percentiles=(50, 90, 95, 99)) -> dict[str, float]:
   return out
 
 
-def evaluate_model(model, samples):
+def evaluate_model(model, samples, residual_gain: float = 1.0):
   from tools.cas.triage import TriageType
 
   deltas = []
@@ -77,6 +77,7 @@ def evaluate_model(model, samples):
   max_abs_zs = []
   blocked = Counter()
   gate_pass = 0
+  residual_gain = max(0.0, min(3.0, float(residual_gain)))
 
   for sample in samples:
     delta, max_abs_z = model.evaluate(sample.features)
@@ -89,22 +90,23 @@ def evaluate_model(model, samples):
     elif not np.isfinite(delta) or abs(delta) > 3.0:
       alpha = 0.0
       blocked["delta_limit"] += 1
-    elif v_ego < model.vego_min:
+    elif v_ego < 1.0:
       alpha = 0.0
       blocked["low_speed"] += 1
-    elif v_ego >= model.vego_max:
-      alpha = 0.0
-      blocked["high_speed"] += 1
-    elif max_abs_z >= 3.0:
+    elif max_abs_z >= 5.0:
       alpha = 0.0
       blocked["input_z_limit"] += 1
     else:
-      gate_speed_low = min(1.0, max(0.0, (v_ego - model.vego_min) / 2.0))
-      if v_ego > model.vego_max - 5.0:
-        gate_speed_high = max(0.0, (model.vego_max - v_ego) / 5.0)
+      low_span = max(1.0, model.vego_min + 2.0 - 1.0)
+      gate_speed_low = min(1.0, max(0.15, (v_ego - 1.0) / low_span))
+      if v_ego > model.vego_max:
+        gate_speed_high = max(0.20, 1.0 - (v_ego - model.vego_max) / 10.0)
+        blocked["high_speed_soft"] += 1
+      elif v_ego > model.vego_max - 5.0:
+        gate_speed_high = max(0.50, (model.vego_max - v_ego) / 5.0)
       else:
         gate_speed_high = 1.0
-      gate_distribution = 1.0 if max_abs_z <= 2.0 else max(0.0, 3.0 - max_abs_z)
+      gate_distribution = 1.0 if max_abs_z <= 2.5 else max(0.20, (5.0 - max_abs_z) / 2.5)
       alpha = max(0.0, min(1.0, alpha)) * gate_speed_low * gate_speed_high * gate_distribution
       if alpha > 0.0:
         gate_pass += 1
@@ -112,7 +114,7 @@ def evaluate_model(model, samples):
         blocked["soft_gate_zero"] += 1
 
     deltas.append(float(delta))
-    applied.append(float(alpha * delta))
+    applied.append(float(alpha * delta * residual_gain))
     max_abs_zs.append(float(max_abs_z))
 
   count = len(samples)
@@ -141,10 +143,12 @@ def main():
   parser.add_argument("--no-cache", action="store_true",
                       help="disable feature cache (always re-parse rlogs)")
   parser.add_argument("--offset-horizon", type=float, default=0.5)
-  parser.add_argument("--offset-gain", type=float, default=0.35)
-  parser.add_argument("--driver-torque-scale", type=float, default=0.25)
+  parser.add_argument("--offset-gain", type=float, default=0.55)
+  parser.add_argument("--driver-torque-scale", type=float, default=0.35)
   parser.add_argument("--driver-torque-sign", type=float, default=1.0)
-  parser.add_argument("--target-clip", type=float, default=0.5)
+  parser.add_argument("--target-clip", type=float, default=0.8)
+  parser.add_argument("--residual-gain", type=float, default=1.0,
+                      help="runtime CASResidualGain multiplier for applied_delta metrics")
   parser.add_argument("--include-manual", action="store_true")
   parser.add_argument("--output", help="optional JSON summary output path")
   parser.add_argument("--audit-dir", help="write detailed raw/audit logs to this directory")
@@ -209,7 +213,7 @@ def main():
     "target_triage_counts": format_counts(target_counts),
     "offset_metrics": lateral_offset_metrics(offsets),
     "target_metrics": target_metrics,
-    "output_metrics": evaluate_model(model, samples),
+    "output_metrics": evaluate_model(model, samples, residual_gain=args.residual_gain),
   }
 
   text = json.dumps(summary, indent=2, sort_keys=True)

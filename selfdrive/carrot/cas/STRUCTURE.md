@@ -24,6 +24,7 @@ selfdrive/carrot/cas/
     ├── cas_design.md          # 설계 윤곽
     ├── cas_roadmap.md         # Phase 0~5+ 체크리스트
     ├── cas_conversation.md    # 결정/패러다임 전환 이력
+    ├── cas_v2_strategy_20260523.md # NNFF 대비 고점/full-FF shadow 전략
     ├── cas_dataset_sync_plan.md # 업로드/학습 연동 단계별 작업계획
     ├── cas_server_phase6.md   # LXC 서버 API 배포/검증 메모
     ├── cas_handoff_20260520.md# 최근 운영 상태 핸드오프
@@ -105,7 +106,7 @@ selfdrive/carrot/cas/
 | `selfdrive/ui/carrot.cc` | 차량명에 `,CAS 6h` 접미 (`CASModelName`/`CASModelHours` 직접 읽음) |
 | `selfdrive/ui/qt/offroad/settings.cc` | `CAS`, `CASDebug` 토글 |
 | `cereal/log.capnp` | `LateralTorqueState.casLog` 필드 |
-| `common/params_keys.h` | `CAS`, `CASDebug`, `CASModelName`, `CASModelHours`, `CASAlphaOverride`, `CarrotDataUpload`, `CarrotUploadWifiOnly`, `CarrotUploadOnlyOffroad`, `CarrotUploadEndpoint`, `CarrotDeviceId` |
+| `common/params_keys.h` | `CAS`, `CASDebug`, `CASModelName`, `CASModelHours`, `CASAlphaOverride`, `CASResidualGain`, `CarrotDataUpload`, `CarrotUploadWifiOnly`, `CarrotUploadOnlyOffroad`, `CarrotUploadEndpoint`, `CarrotDeviceId` |
 
 ---
 
@@ -164,7 +165,8 @@ Phase 6 기준 서버 구현은 `tools/cas/server/carrot_upload_server.py`에 �
 | `CASDebug` | bool | HUD 위젯 표시 |
 | `CASModelName` | str | 매칭된 모델 이름 (런타임이 기록) |
 | `CASModelHours` | str | 현재 적용 모델 학습 시간 (차량명 `,CAS 6h` 및 HUD용) |
-| `CASAlphaOverride` | int | 0=JSON default, 1~50=0.01~0.50 override |
+| `CASAlphaOverride` | int | 0=JSON default, 1~100=0.01~1.00 override |
+| `CASResidualGain` | int | 최종 잔차 배율 percent. 100=1.0x, 150=1.5x |
 | `CarrotDataUpload` | bool | 업로더 토글 |
 | `CarrotUploadWifiOnly` | bool | WiFi 한정 게이트 |
 | `CarrotUploadOnlyOffroad` | bool | offroad 한정 게이트 |

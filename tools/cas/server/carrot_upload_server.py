@@ -27,7 +27,7 @@ import re
 import shutil
 import time
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -94,6 +94,7 @@ RECENT_UPLOADS: deque = deque(maxlen=300)   # {ts, device_id, car, ip, bytes, fi
 _inflight = 0
 _status_cache: dict[str, Any] = {"at": 0.0, "text": ""}
 STATUS_CACHE_SEC = 5.0   # disk scan is cheap but pointless to redo every 2s
+KST = timezone(timedelta(hours=9))
 
 
 def _verify_sig(device_id: str, ts: str, sig: str) -> bool:
@@ -250,6 +251,13 @@ def _file_size(path: Path) -> int:
     return 0
 
 
+def _file_mtime(path: Path) -> float:
+  try:
+    return path.stat().st_mtime
+  except OSError:
+    return 0.0
+
+
 def _duration_hours(meta: dict[str, Any]) -> float:
   for key, scale in (("duration_sec", 3600.0), ("duration_s", 3600.0), ("duration_hours", 1.0)):
     try:
@@ -273,6 +281,17 @@ def _route_record(route_dir: Path) -> dict[str, Any]:
   eps_hash = str(meta.get("eps_firmware_hash", "")).strip()
   segments = []
   total_bytes = 0
+  meta_path = route_dir / "route_meta.json"
+  has_meta = meta_path.exists()
+  last_upload_ts = _file_mtime(meta_path)
+  route_time_ts = 0
+  for key in ("route_start_ts", "uploaded_at"):
+    try:
+      route_time_ts = int(float(meta.get(key) or 0))
+    except (TypeError, ValueError):
+      route_time_ts = 0
+    if route_time_ts > 0:
+      break
 
   for seg_dir in _segment_dirs(route_dir):
     files = {}
@@ -280,6 +299,7 @@ def _route_record(route_dir: Path) -> dict[str, Any]:
       path = seg_dir / filename
       if path.exists():
         size = _file_size(path)
+        last_upload_ts = max(last_upload_ts, _file_mtime(path))
         total_bytes += size
         files[filename] = {
           "bytes": size,
@@ -313,6 +333,9 @@ def _route_record(route_dir: Path) -> dict[str, Any]:
     "segment_count": len(segments),
     "complete_segment_count": sum(1 for seg in segments if seg.get("complete")),
     "bytes": total_bytes,
+    "has_meta": has_meta,
+    "last_upload_ts": int(last_upload_ts),
+    "route_time_ts": route_time_ts,
     "segments": segments,
     "route_meta": meta,
   }
@@ -775,7 +798,16 @@ def _fmt_min(epoch) -> str:
   try:
     if not epoch:
       return "-"
-    return datetime.fromtimestamp(int(float(epoch))).strftime("%Y%m%d_%H%M")
+    return datetime.fromtimestamp(int(float(epoch)), KST).strftime("%Y%m%d_%H%M")
+  except Exception:
+    return "-"
+
+
+def _fmt_short(epoch) -> str:
+  try:
+    if not epoch:
+      return "-"
+    return datetime.fromtimestamp(int(float(epoch)), KST).strftime("%m-%d %H:%M")
   except Exception:
     return "-"
 
@@ -785,6 +817,14 @@ def _fmt_uptime(sec: float) -> str:
   h, rem = divmod(sec, 3600)
   m = rem // 60
   return f"{h}h{m:02d}m" if h else f"{m}m"
+
+
+def _fmt_meta_count(meta_count: int, route_count: int) -> str:
+  if meta_count <= 0:
+    return "no"
+  if meta_count >= route_count:
+    return "yes"
+  return f"{meta_count}/{route_count}"
 
 
 def _age_days(version: str):
@@ -838,19 +878,24 @@ def _disk_data() -> dict:
   for route_dir in _iter_route_dirs():
     rec = _route_record(route_dir)
     ck = rec["car_key"] or "UNKNOWN_CAR"
-    c = cars.setdefault(ck, {"routes": 0, "segs": 0, "hours": 0.0})
+    c = cars.setdefault(ck, {"routes": 0, "segs": 0, "hours": 0.0, "last_upload": 0, "route_time": 0, "meta": 0})
     c["routes"] += 1
     c["segs"] += int(rec["segment_count"])
     c["hours"] += float(rec["duration_hours"])
+    c["last_upload"] = max(c["last_upload"], int(rec.get("last_upload_ts") or 0))
+    c["route_time"] = max(c["route_time"], int(rec.get("route_time_ts") or 0))
+    c["meta"] += 1 if rec.get("has_meta") else 0
     did = rec["device_id"] or "?"
-    d = devices.setdefault((did, ck), {"routes": 0, "segs": 0, "hours": 0.0, "last": 0})
+    d = devices.setdefault((did, ck), {"routes": 0, "segs": 0, "hours": 0.0, "last_upload": 0, "route_time": 0, "meta": 0})
     d["routes"] += 1
     d["segs"] += int(rec["segment_count"])
     d["hours"] += float(rec["duration_hours"])
+    d["last_upload"] = max(d["last_upload"], int(rec.get("last_upload_ts") or 0))
+    d["route_time"] = max(d["route_time"], int(rec.get("route_time_ts") or 0))
+    d["meta"] += 1 if rec.get("has_meta") else 0
     meta = rec.get("route_meta", {})
     try:
-      ts = int(float(meta.get("route_start_ts") or meta.get("uploaded_at") or 0))
-      d["last"] = max(d["last"], ts)
+      ts = int(rec.get("route_time_ts") or 0)
     except Exception:
       ts = 0
     # #3 keep the newest route's runtime effectiveness snapshot per car.
@@ -867,6 +912,7 @@ def _disk_data() -> dict:
     snap = car_effect.get(ck, (0, None))[1] or {}
     car_rows.append({
       "car": ck, "routes": c["routes"], "segs": c["segs"], "hours": round(c["hours"], 1),
+      "last_upload": c["last_upload"], "route_time": c["route_time"], "meta": c["meta"],
       "model": version, "age_days": _age_days(version) if version else None,
       # #3 effectiveness from the most recent drive (None → '-' in UI)
       "gate": snap.get("gate_pass_pct"),
@@ -875,7 +921,8 @@ def _disk_data() -> dict:
     })
   dev_rows = [{
     "device": dev, "car": car, "routes": d["routes"], "segs": d["segs"],
-    "hours": round(d["hours"], 1), "last": d["last"],
+    "hours": round(d["hours"], 1), "last_upload": d["last_upload"],
+    "route_time": d["route_time"], "meta": d["meta"],
   } for (dev, car), d in devices.items()]
 
   data = {
@@ -901,7 +948,7 @@ def _status_text() -> str:
   last_activity = max((ev["ts"] for ev in RECENT_UPLOADS), default=0)
   live = _live_data()
   lines = [
-    f"CAS upload server   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}   "
+    f"CAS upload server   {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')} KST   "
     f"(auto 2s)   uptime {_fmt_uptime(time.time() - SERVER_START)}   "
     f"last activity {_fmt_min(last_activity)}",
     "",
@@ -921,26 +968,33 @@ def _status_text() -> str:
     f"segs {t['segs']}  {t['hours']}h  disk {t['disk']:.0f}%",
     "",
     "[ BY CAR ]",
-    f"{'CAR':<24}  {'ROUTES':>6}  {'SEGS':>5}  {'HOURS':>6}  {'MODEL':<14}  {'AGE':>5}  "
+    f"{'CAR':<24}  {'ROUTES':>6}  {'SEGS':>5}  {'HOURS':>6}  {'LAST UPLOAD':<11}  "
+    f"{'ROUTE TIME':<11}  {'META':<5}  {'MODEL':<14}  {'AGE':>5}  "
     f"{'GATE%':>5}  {'ACC%':>4}  {'APPLY':>6}",
   ]
   for r in sorted(d["cars"], key=lambda x: x["hours"], reverse=True):
     model = r["model"] or "(none)"
     age = "-" if r["age_days"] is None else (f"{r['age_days']}d*" if r["age_days"] > 14 else f"{r['age_days']}d")
+    meta = _fmt_meta_count(int(r.get("meta") or 0), int(r.get("routes") or 0))
     gate = "-" if r.get("gate") is None else f"{r['gate']:.0f}"
     acc  = "-" if r.get("acc") is None else f"{r['acc']:.0f}"
     appl = "-" if r.get("apply") is None else f"{r['apply']:.3f}"
     lines.append(f"{r['car'][:24]:<24}  {r['routes']:>6}  {r['segs']:>5}  "
-                 f"{r['hours']:>6.1f}  {model[:14]:<14}  {age:>5}  "
+                 f"{r['hours']:>6.1f}  {_fmt_short(r.get('last_upload')):<11}  "
+                 f"{_fmt_short(r.get('route_time')):<11}  {meta:<5}  "
+                 f"{model[:14]:<14}  {age:>5}  "
                  f"{gate:>5}  {acc:>4}  {appl:>6}")
   lines += [
     "",
     "[ BY DEVICE ]",
-    f"{'DEVICE':<12}  {'CAR':<24}  {'ROUTES':>6}  {'SEGS':>5}  {'HOURS':>6}  {'LAST UPLOAD':<13}",
+    f"{'DEVICE':<12}  {'CAR':<24}  {'ROUTES':>6}  {'SEGS':>5}  {'HOURS':>6}  "
+    f"{'LAST UPLOAD':<11}  {'ROUTE TIME':<11}  {'META':<5}",
   ]
   for r in sorted(d["devices"], key=lambda x: x["hours"], reverse=True):
+    meta = _fmt_meta_count(int(r.get("meta") or 0), int(r.get("routes") or 0))
     lines.append(f"{r['device'][:12]:<12}  {r['car'][:24]:<24}  {r['routes']:>6}  {r['segs']:>5}  "
-                 f"{r['hours']:>6.1f}  {_fmt_min(r['last']):<13}")
+                 f"{r['hours']:>6.1f}  {_fmt_short(r.get('last_upload')):<11}  "
+                 f"{_fmt_short(r.get('route_time')):<11}  {meta:<5}")
   return "\n".join(lines) + "\n"
 
 
@@ -980,6 +1034,9 @@ const CAR_COLS = [
   {k:'car',label:'CAR',cls:r=>r.car==='UNKNOWN_CAR'?'stale':''},
   {k:'routes',label:'ROUTES',num:1}, {k:'segs',label:'SEGS',num:1},
   {k:'hours',label:'HOURS',num:1,fmt:r=>r.hours.toFixed(1)},
+  {k:'last_upload',label:'LAST UPLOAD',get:r=>r.last_upload||0,fmt:r=>fmtLast(r.last_upload),cls:r=>r.last_upload?'':'muted'},
+  {k:'route_time',label:'ROUTE TIME',get:r=>r.route_time||0,fmt:r=>fmtLast(r.route_time),cls:r=>r.route_time?'':'muted'},
+  {k:'meta',label:'META',get:r=>r.meta||0,fmt:r=>fmtMeta(r.meta,r.routes),cls:r=>r.meta?'':'muted'},
   {k:'model',label:'MODEL',fmt:r=>r.model||'(none)',cls:r=>r.model?'':'muted'},
   {k:'age',label:'AGE',num:1,get:r=>r.age_days==null?-1:r.age_days,
    fmt:r=>r.age_days==null?'\\u2013':(r.age_days+'d'+(r.age_days>14?'*':'')),
@@ -999,13 +1056,18 @@ const DEV_COLS = [
   {k:'car',label:'CAR',cls:r=>r.car==='UNKNOWN_CAR'?'stale':''},
   {k:'routes',label:'ROUTES',num:1}, {k:'segs',label:'SEGS',num:1},
   {k:'hours',label:'HOURS',num:1,fmt:r=>r.hours.toFixed(1)},
-  {k:'last',label:'LAST UPLOAD',get:r=>r.last||0,fmt:r=>fmtLast(r.last),cls:r=>r.last?'':'muted'},
+  {k:'last_upload',label:'LAST UPLOAD',get:r=>r.last_upload||0,fmt:r=>fmtLast(r.last_upload),cls:r=>r.last_upload?'':'muted'},
+  {k:'route_time',label:'ROUTE TIME',get:r=>r.route_time||0,fmt:r=>fmtLast(r.route_time),cls:r=>r.route_time?'':'muted'},
+  {k:'meta',label:'META',get:r=>r.meta||0,fmt:r=>fmtMeta(r.meta,r.routes),cls:r=>r.meta?'':'muted'},
 ];
 let DATA = null;
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fmtLast(e){if(!e)return '\\u2013'; const d=new Date(e*1000); const p=n=>String(n).padStart(2,'0');
-  return `${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+function fmtLast(e){if(!e)return '\\u2013'; const d=new Date(e*1000);
+  const f=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
+  const p=Object.fromEntries(f.formatToParts(d).map(x=>[x.type,x.value]));
+  return `${p.month}-${p.day} ${p.hour}:${p.minute}`;}
+function fmtMeta(m,r){if(!m)return 'no'; if(m>=r)return 'yes'; return `${m}/${r}`;}
 
 function buildTable(tbl, cols, rows, sortable){
   let sorted;
@@ -1062,7 +1124,7 @@ async def status_json():
   d = _disk_data()
   last_activity = max((ev["ts"] for ev in RECENT_UPLOADS), default=0)
   return JSONResponse({
-    "server_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    "server_time": datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST"),
     "uptime": _fmt_uptime(time.time() - SERVER_START),
     "last_activity": _fmt_min(last_activity),
     "live": _live_data(),
@@ -1091,4 +1153,3 @@ async def root(request: Request):
   if host.startswith("casstatus."):
     return HTMLResponse(_STATUS_HTML)
   return PlainTextResponse("carrot-upload\n")
-
