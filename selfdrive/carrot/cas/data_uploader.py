@@ -114,6 +114,28 @@ def _car_key_from_name(name: str) -> str:
   return text
 
 
+def _resolve_car_key(params: Params) -> str:
+  """Single source of truth for the car_key, used for BOTH the per-file
+  X-Carrot-Car header and the route_meta.json. Priority: CarSelected3 (the
+  CarrotWeb menu choice) → carParams.carFingerprint → CarName → CarrotLastCarName.
+  Returns normalized car_key (UPPER_SNAKE) or '' if nothing identifies the car."""
+  car_selected = _read_param_str(params, "CarSelected3")
+  car_name = _read_param_str(params, "CarName")
+  # Persist last good CarName so a pre-fingerprint boot still has a hint.
+  if car_name and car_name.upper() != "MOCK":
+    try:
+      params.put("CarrotLastCarName", car_name)
+    except Exception:
+      pass
+  last_known = _read_param_str(params, "CarrotLastCarName")
+  car_fingerprint = ""
+  cp = _read_car_params(params)
+  if cp is not None:
+    car_fingerprint = str(getattr(cp, "carFingerprint", "")).strip()
+  raw = car_selected or car_fingerprint or car_name or last_known
+  return _car_key_from_name(raw)
+
+
 def _steer_kind_from_car_params(car_params) -> str:
   value = getattr(car_params, "steerControlType", "")
   text = str(value).lower()
@@ -308,16 +330,6 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
                      device_id: str) -> dict:
   car_name = _read_param_str(params, "CarName")
   car_selected = _read_param_str(params, "CarSelected3")
-
-  # Persist most-recent good CarName. Lets a future upload that happens before
-  # CarParams becomes available (e.g. just after boot) still carry a hint:
-  # 디바이스가 "지난 번엔 이 차였다"고 알려줌. Server side adds last_known_car to
-  # its car_key resolution chain so even pre-identification uploads bin correctly.
-  if car_name and car_name.upper() != "MOCK":
-    try:
-      params.put("CarrotLastCarName", car_name)
-    except Exception:
-      pass
   last_known_car = _read_param_str(params, "CarrotLastCarName")
 
   car_params = _read_car_params(params)
@@ -332,13 +344,10 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
     year_attr = getattr(car_params, "year", "")
     car_model_year = str(year_attr).strip() if year_attr else ""
 
-  # Phase 6: CarSelected3 is the source of truth. It's what the user picked in
-  # CarrotWeb ("Hyundai Casper EV 2024"), so it captures generation/year info
-  # exactly the way the user (and the CarrotWeb car list) thinks of the car.
-  # carFingerprint/CarName are openpilot's internal platform keys — used as
-  # fallback when no CarSelected3 (uncommon, only pre-setup devices).
-  # last_known_car catches the very early-boot case where neither is populated.
-  car_key = car_selected or car_fingerprint or car_name or last_known_car
+  # Single source of truth — same resolution as the X-Carrot-Car header so
+  # files and meta always agree on which car bin they belong to.
+  # (CarSelected3 → carFingerprint → CarName → CarrotLastCarName, normalized.)
+  car_key = _resolve_car_key(params)
 
   carrot_version  = _read_param_str(params, "GitCommit")[:12]
   carrot_branch   = _read_param_str(params, "GitBranch")
@@ -396,7 +405,7 @@ def build_route_meta(params: Params, route_id: str, segments: list[Path],
     "route_id":          route_id,
     # Car identity (most-specific first; server.lookup walks down this chain)
     "car":               car_fingerprint or car_name,
-    "car_key":           _car_key_from_name(car_key),
+    "car_key":           car_key,  # already normalized by _resolve_car_key
     "car_name_raw":      car_name,
     "car_selected":      car_selected,
     "last_known_car":    last_known_car,
@@ -464,11 +473,10 @@ def run() -> None:
       carrot_version = (params.get("GitCommit") or b"")[:12].decode("utf-8", "ignore").strip()
     except Exception:
       pass
-    car_name = ""
-    try:
-      car_name = (params.get("CarName") or b"").decode("utf-8", "ignore").strip()
-    except Exception:
-      pass
+    # X-Carrot-Car header MUST use the same resolution as route_meta's car_key
+    # (CarSelected3 first), otherwise files land in UNKNOWN_CAR while meta says
+    # the real car. Phase 7 server stores by this header → must be correct.
+    car_name = _resolve_car_key(params)
     eps_hash = _eps_hash_from_params(params)
     cas_model = ""
     try:
