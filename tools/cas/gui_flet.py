@@ -296,13 +296,43 @@ def main(page: ft.Page):
     visible=False,
   )
 
-  log_text = ft.Text("", selectable=True, size=11, font_family="Consolas")
+  log_follow_checkbox = ft.Checkbox(label="자동 스크롤", value=True, scale=0.85)
+  log_text = ft.Text("", selectable=True, size=11, font_family="Consolas", no_wrap=True)
+  log_list = ft.ListView(
+    [log_text],
+    spacing=2,
+    auto_scroll=True,
+    scroll=ft.Scrollbar(
+      thumb_visibility=True,
+      track_visibility=True,
+      thickness=8,
+      radius=4,
+      interactive=True,
+    ),
+    scroll_interval=20,
+    expand=True,
+    padding=ft.Padding.only(right=8),
+  )
   log_container = ft.Container(
-    content=ft.ListView([log_text], spacing=2, auto_scroll=True, expand=True),
+    content=ft.Column(
+      [
+        ft.Row(
+          [
+            ft.Text("실행 로그", size=12, weight=ft.FontWeight.W_600),
+            log_follow_checkbox,
+          ],
+          alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+        ),
+        ft.Container(height=1, bgcolor=ft.Colors.OUTLINE_VARIANT),
+        log_list,
+      ],
+      spacing=8,
+      expand=True,
+    ),
     bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
     border_radius=8,
-    padding=12,
-    height=220,
+    padding=ft.Padding.only(left=12, top=10, right=6, bottom=10),
+    height=280,
     visible=False,
   )
 
@@ -490,6 +520,7 @@ def main(page: ft.Page):
     log.append(line.rstrip("\n"))
     if len(log) > LOG_MAX_LINES:
       del log[: len(log) - LOG_MAX_LINES]
+    log_list.auto_scroll = bool(log_follow_checkbox.value)
     log_text.value = "\n".join(log)
     log_container.visible = True
     # Tee to run.log so the run dir captures everything even if the GUI
@@ -514,11 +545,11 @@ def main(page: ft.Page):
       status.value = "새로고침 후 다시 확인하세요."
       deploy_status.value = ""
       if state.get("busy"):
-        primary_button.text = "중지"
+        primary_button.content = "중지"
         primary_button.icon = ft.Icons.STOP_CIRCLE_ROUNDED
         primary_button.disabled = False
       else:
-        primary_button.text = "학습 시작"
+        primary_button.content = "학습 시작"
         primary_button.icon = ft.Icons.PLAY_ARROW_ROUNDED
         primary_button.disabled = True
       vehicle_menu.visible = False
@@ -558,11 +589,11 @@ def main(page: ft.Page):
       deploy_status.value = "📦 배포된 모델 없음"
 
     if state.get("busy"):
-      primary_button.text = "중지"
+      primary_button.content = "중지"
       primary_button.icon = ft.Icons.STOP_CIRCLE_ROUNDED
       primary_button.disabled = False
     else:
-      primary_button.text = "학습 시작"
+      primary_button.content = "학습 시작"
       primary_button.icon = ft.Icons.PLAY_ARROW_ROUNDED
       primary_button.disabled = not can_train
     # Count untrained datasets across all cars for the "all" button.
@@ -574,7 +605,7 @@ def main(page: ft.Page):
     ]
     if len(untrained) >= 2:
       train_all_button.visible = True
-      train_all_button.text = f"모든 새 데이터 학습 ({len(untrained)}대)"
+      train_all_button.content = f"모든 새 데이터 학습 ({len(untrained)}대)"
       train_all_button.disabled = bool(state.get("busy"))
     else:
       train_all_button.visible = False
@@ -853,12 +884,12 @@ def main(page: ft.Page):
 
   # ── Subprocess runner ──
   def _set_primary_start_enabled(enabled: bool):
-    primary_button.text = "학습 시작"
+    primary_button.content = "학습 시작"
     primary_button.icon = ft.Icons.PLAY_ARROW_ROUNDED
     primary_button.disabled = not enabled
 
   def _set_primary_stop_enabled():
-    primary_button.text = "중지"
+    primary_button.content = "중지"
     primary_button.icon = ft.Icons.STOP_CIRCLE_ROUNDED
     primary_button.disabled = False
 
@@ -925,8 +956,11 @@ def main(page: ft.Page):
       if cfg.get("use_wsl") and os.name == "nt" and label != "Apply":
         # Promote stays native; Train/Validate go through WSL.
         effective = wrap_for_wsl(effective)
+      display_label = {
+        "Validate(이전모델)": "이전 모델과 비교 검증",
+      }.get(label, label)
       append_log(f"\n[{label}] > " + " ".join(effective))
-      status.value = f"{label} 실행 중"
+      status.value = f"{display_label} 실행 중"
       progress.visible = True
       page.update()
 
@@ -967,7 +1001,7 @@ def main(page: ft.Page):
         break
       if code != 0:
         overall_ok = False
-        status.value = f"{label} 실패 (exit={code})"
+        status.value = f"{display_label} 실패 (exit={code})"
         break
     return overall_ok
 
@@ -1754,6 +1788,7 @@ def main(page: ft.Page):
   refresh_button.on_click  = refresh_clicked
   settings_button.on_click = settings_clicked
   primary_button.on_click  = primary_clicked
+  log_follow_checkbox.on_change = lambda _e: setattr(log_list, "auto_scroll", bool(log_follow_checkbox.value))
   download_button.on_click   = download_clicked
   cleanup_button.on_click    = cleanup_clicked
   history_button.on_click    = history_clicked
