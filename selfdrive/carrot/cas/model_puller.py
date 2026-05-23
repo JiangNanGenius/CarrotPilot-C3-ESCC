@@ -83,8 +83,11 @@ def _norm_car(name: str) -> str:
 
 
 def _wait_for_network(timeout_sec: int) -> bool:
-  deadline = time.time() + timeout_sec
-  while time.time() < deadline:
+  # Use monotonic time for the deadline so a wall-clock jump (NTP correcting
+  # a regressed RTC from 2025 to 2026) doesn't instantly trip the timeout.
+  # We still check wall clock (time.time) for "is time correct now?".
+  deadline_mono = time.monotonic() + timeout_sec
+  while time.monotonic() < deadline_mono:
     try:
       if NTP_SYNCED_FLAG.exists():
         return True
