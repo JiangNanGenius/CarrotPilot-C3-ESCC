@@ -52,6 +52,12 @@ git remote add dhvms https://github.com/dhvms/carrotpilot.git
 
 C4 旁支。当前本地暂按 `origin/carrot-wip` 跟踪；后续需要再确认这是否就是目标 C4 线。只有在维护成本不高时跟进。
 
+## GitHub 上游基准
+
+本地保留 `upstream/c3-wip` 和 `tracking/*` 分支，方便人工维护和 rebase。GitHub Actions 不直接依赖这些本地分支，而是读取 [UPSTREAM_BASELINES.json](UPSTREAM_BASELINES.json) 里的已审查 commit。
+
+`Upstream Watch` 每周自动拉取 ajouatom、jixiexiaoge、fishop 的最新分支，并用 `scripts/personal/update_audit.py --baseline-file docs/personal/UPSTREAM_BASELINES.json --strict` 和这些基准 commit 比较。工作流变红时，不代表当前车机分支坏了，而是提醒需要人工审查上游更新、高风险目录和是否更新基准清单。
+
 ## 合并顺序
 
 1. 运行 `python3 scripts/personal/update_audit.py --fetch`，确认哪些来源有新提交和高风险目录变化。

@@ -1,0 +1,12 @@
+{
+  "updated_at": "2026-06-18",
+  "project": "CarrotPilot-C3-ESCC",
+  "description": "Reviewed upstream/tracking baselines used by GitHub Actions Upstream Watch.",
+  "baselines": {
+    "upstream/c3-wip": "244b69b61b17921e2e05122a040f3614f0fb1c3d",
+    "tracking/c4": "0211a1cdc2209dfb06615d60a22e0be92fd05b39",
+    "tracking/jixie-atune": "c045fcabb8a1810c457ddd706346997101d997db",
+    "tracking/jixie-master": "3b039d270ff52973efd8112a3cbe86254e74e30e",
+    "tracking/fishop-cp": "aad13305f41cda16a466432f26f160db19676a5e"
+  }
+}

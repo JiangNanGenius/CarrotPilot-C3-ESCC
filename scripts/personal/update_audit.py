@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import argparse
+import json
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Sequence, Tuple
+from typing import Dict, Iterable, List, Sequence, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -72,23 +73,41 @@ def git(args: Sequence[str], check: bool = False) -> Tuple[int, str]:
   return proc.returncode, output
 
 
-def ref_exists(ref: str) -> bool:
-  code, _ = git(["rev-parse", "--verify", "--quiet", ref])
+def load_baselines(path: str) -> Dict[str, str]:
+  baseline_path = Path(path)
+  if not baseline_path.is_absolute():
+    baseline_path = ROOT / baseline_path
+  data = json.loads(baseline_path.read_text(encoding="utf-8"))
+  baselines = data.get("baselines", {})
+  if not isinstance(baselines, dict):
+    raise RuntimeError("baseline file must contain a baselines object")
+  return {str(ref): str(commit) for ref, commit in baselines.items()}
+
+
+def resolve_ref(ref: str, baselines: Dict[str, str]) -> str:
+  return baselines.get(ref, ref)
+
+
+def ref_exists(ref: str, baselines: Dict[str, str]) -> bool:
+  code, _ = git(["rev-parse", "--verify", "--quiet", resolve_ref(ref, baselines)])
   return code == 0
 
 
-def rev(ref: str) -> str:
-  code, output = git(["rev-parse", "--short=10", ref])
+def rev(ref: str, baselines: Dict[str, str]) -> str:
+  target = resolve_ref(ref, baselines)
+  code, output = git(["rev-parse", "--short=10", target])
+  if code != 0 and ref in baselines:
+    return baselines[ref][:10] + " (not fetched)"
   return output if code == 0 else "missing"
 
 
-def is_ancestor(base: str, tip: str) -> bool:
-  code, _ = git(["merge-base", "--is-ancestor", base, tip])
+def is_ancestor(base: str, tip: str, baselines: Dict[str, str]) -> bool:
+  code, _ = git(["merge-base", "--is-ancestor", resolve_ref(base, baselines), resolve_ref(tip, baselines)])
   return code == 0
 
 
-def ahead_count(base: str, tip: str) -> int:
-  code, output = git(["rev-list", "--count", f"{base}..{tip}"])
+def ahead_count(base: str, tip: str, baselines: Dict[str, str]) -> int:
+  code, output = git(["rev-list", "--count", f"{resolve_ref(base, baselines)}..{resolve_ref(tip, baselines)}"])
   if code != 0:
     return -1
   try:
@@ -97,15 +116,15 @@ def ahead_count(base: str, tip: str) -> int:
     return -1
 
 
-def commit_titles(base: str, tip: str, limit: int) -> List[str]:
-  code, output = git(["log", "--oneline", f"--max-count={limit}", f"{base}..{tip}"])
+def commit_titles(base: str, tip: str, baselines: Dict[str, str], limit: int) -> List[str]:
+  code, output = git(["log", "--oneline", f"--max-count={limit}", f"{resolve_ref(base, baselines)}..{resolve_ref(tip, baselines)}"])
   if code != 0 or not output:
     return []
   return output.splitlines()
 
 
-def changed_files(base: str, tip: str) -> List[str]:
-  code, output = git(["diff", "--name-only", f"{base}..{tip}"])
+def changed_files(base: str, tip: str, baselines: Dict[str, str]) -> List[str]:
+  code, output = git(["diff", "--name-only", f"{resolve_ref(base, baselines)}..{resolve_ref(tip, baselines)}"])
   if code != 0 or not output:
     return []
   return output.splitlines()
@@ -147,7 +166,7 @@ def print_list(title: str, items: Sequence[str], max_items: int) -> None:
     print(f"    - ... {remaining} more")
 
 
-def audit_worktree(report: Audit) -> str:
+def audit_worktree(report: Audit, baselines: Dict[str, str]) -> str:
   _, branch = git(["branch", "--show-current"])
   code, status = git(["status", "--short"])
   if code != 0:
@@ -155,37 +174,38 @@ def audit_worktree(report: Audit) -> str:
   elif status:
     report.warn("worktree has uncommitted changes")
 
-  if ref_exists("origin/c3-wip") and not is_ancestor("origin/c3-wip", "HEAD"):
+  if ref_exists("origin/c3-wip", baselines) and not is_ancestor("origin/c3-wip", "HEAD", baselines):
     report.fail("HEAD does not contain latest fetched origin/c3-wip")
-  if ref_exists("personal/c3-escc") and not is_ancestor("personal/c3-escc", "HEAD"):
+  if ref_exists("personal/c3-escc", baselines) and not is_ancestor("personal/c3-escc", "HEAD", baselines):
     report.fail("current branch does not contain personal/c3-escc protection line")
 
   return branch or "(detached)"
 
 
-def audit_source(source: Source, report: Audit, max_commits: int, max_files: int) -> None:
+def audit_source(source: Source, report: Audit, baselines: Dict[str, str], max_commits: int, max_files: int) -> None:
   print(f"\n## {source.name}")
   print(f"purpose: {source.purpose}")
-  print(f"local : {source.local_ref} @ {rev(source.local_ref)}")
-  print(f"remote: {source.remote_ref} @ {rev(source.remote_ref)}")
+  local_label = "baseline" if source.local_ref in baselines else "local"
+  print(f"{local_label:<6}: {source.local_ref} @ {rev(source.local_ref, baselines)}")
+  print(f"remote: {source.remote_ref} @ {rev(source.remote_ref, baselines)}")
 
-  missing = [ref for ref in (source.local_ref, source.remote_ref) if not ref_exists(ref)]
+  missing = [ref for ref in (source.local_ref, source.remote_ref) if not ref_exists(ref, baselines)]
   if missing:
     report.warn(f"{source.name}: missing ref(s): {', '.join(missing)}")
     return
 
-  if is_ancestor(source.remote_ref, source.local_ref) and is_ancestor(source.local_ref, source.remote_ref):
+  if is_ancestor(source.remote_ref, source.local_ref, baselines) and is_ancestor(source.local_ref, source.remote_ref, baselines):
     print("status: aligned")
     return
 
-  local_ahead = ahead_count(source.remote_ref, source.local_ref)
-  remote_ahead = ahead_count(source.local_ref, source.remote_ref)
+  local_ahead = ahead_count(source.remote_ref, source.local_ref, baselines)
+  remote_ahead = ahead_count(source.local_ref, source.remote_ref, baselines)
   print(f"status: local ahead {local_ahead}, remote ahead {remote_ahead}")
 
   if remote_ahead > 0:
     report.warn(f"{source.name}: remote has {remote_ahead} new commit(s) since local tracking ref")
-    print_list("new commits", commit_titles(source.local_ref, source.remote_ref, max_commits), max_commits)
-    files = changed_files(source.local_ref, source.remote_ref)
+    print_list("new commits", commit_titles(source.local_ref, source.remote_ref, baselines, max_commits), max_commits)
+    files = changed_files(source.local_ref, source.remote_ref, baselines)
     risky = high_risk_matches(files)
     if risky:
       report.warn(f"{source.name}: new commits touch high-risk paths")
@@ -223,12 +243,14 @@ def print_next_steps(report: Audit) -> None:
 def main() -> int:
   parser = argparse.ArgumentParser(description="Audit personal CarrotPilot upstream update state.")
   parser.add_argument("--fetch", action="store_true", help="fetch configured remotes before auditing")
+  parser.add_argument("--baseline-file", help="JSON file with baseline commits for CI or public-repo audits")
   parser.add_argument("--strict", action="store_true", help="return non-zero when warnings are present")
   parser.add_argument("--max-commits", type=int, default=8, help="number of new commit titles to print")
   parser.add_argument("--max-files", type=int, default=20, help="number of high-risk changed files to print")
   args = parser.parse_args()
 
   report = Audit()
+  baselines = load_baselines(args.baseline_file) if args.baseline_file else {}
 
   print("Personal upstream update audit")
   print(f"repo: {ROOT}")
@@ -236,11 +258,13 @@ def main() -> int:
   if args.fetch:
     fetch_sources(SOURCES)
 
-  branch = audit_worktree(report)
-  print(f"current branch: {branch} @ {rev('HEAD')}")
+  branch = audit_worktree(report, baselines)
+  print(f"current branch: {branch} @ {rev('HEAD', baselines)}")
+  if baselines:
+    print(f"baseline file: {args.baseline_file}")
 
   for source in SOURCES:
-    audit_source(source, report, args.max_commits, args.max_files)
+    audit_source(source, report, baselines, args.max_commits, args.max_files)
 
   print_next_steps(report)
 

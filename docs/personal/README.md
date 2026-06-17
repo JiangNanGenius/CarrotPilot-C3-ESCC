@@ -93,4 +93,12 @@ python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c
 - 触发：推送到 `personal/c3-escc`、`personal/c3-escc-atune`，PR 到这些分支，或手动触发。
 - 内容：运行 `smoke_check.py`、ESCC / Always Offline preflight、CP搭子 preflight。
 
+公开仓库还有一个上游监控工作流：
+
+- `.github/workflows/upstream-snapshot.yml`
+- 名称：`Upstream Watch`
+- 触发：每周自动运行，或手动触发。
+- 内容：比较 [UPSTREAM_BASELINES.json](UPSTREAM_BASELINES.json) 中记录的已审查 commit 和对应三方远端最新分支。
+- 如果工作流变红，通常表示上游有新提交或高风险目录变化，需要按 [以后更新检查单](UPDATE_CHECKLIST.md) 人工审查；这不是自动合并。
+
 Actions 通过只证明静态检查通过，不代表实车验证通过。

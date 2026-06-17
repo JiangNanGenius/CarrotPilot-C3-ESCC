@@ -530,3 +530,40 @@
 
 - `python3 scripts/personal/road_test_evidence_check.py --self-test` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-18: Upstream Watch 定期审计
+
+改动文件：
+
+- `.github/workflows/upstream-snapshot.yml`
+- `docs/personal/README.md`
+- `docs/personal/GITHUB_SETUP.md`
+- `docs/personal/BRANCH_STRATEGY.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `README.md`
+
+改动内容：
+
+- 将旧的 `Upstream Snapshot` 工作流升级为 `Upstream Watch`。
+- 使用 `actions/checkout@v6` 和 `actions/setup-python@v6`。
+- 增加 `docs/personal/UPSTREAM_BASELINES.json`，记录已审查的上游基准 commit：
+  - `upstream/c3-wip`
+  - `tracking/c4`
+  - `tracking/jixie-atune`
+  - `tracking/jixie-master`
+  - `tracking/fishop-cp`
+- 再拉取三方来源的最新远端分支：
+  - `ajouatom/openpilot:c3-wip`
+  - `ajouatom/openpilot:carrot-wip`
+  - `jixiexiaoge/openpilot:atune`
+  - `jixiexiaoge/openpilot:master`
+  - `fishop/openpilot:cp`
+- 运行 `python3 scripts/personal/update_audit.py --baseline-file docs/personal/UPSTREAM_BASELINES.json --strict`。
+- 如果上游有新提交、基准 commit 落后或高风险目录有变化，工作流会变红，作为人工更新审计提醒。
+- 明确该工作流只提醒，不自动合并，也不改变设备安装目标。
+
+验证：
+
+- 本地 `python3 scripts/personal/update_audit.py --fetch` 通过，当前三方来源均对齐。
+- 推送后需要手动触发或等待 `Upstream Watch` 确认 GitHub 侧基准清单可用。

@@ -1,16 +1,49 @@
-name: Upstream Snapshot
+name: Upstream Watch
 
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 18 * * 0"
 
+permissions:
+  contents: read
+
 jobs:
-  snapshot:
+  upstream-watch:
+    name: Upstream update audit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-      - name: Print upstream branch heads
-        run: bash scripts/personal/upstream_snapshot.sh
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Fetch personal protection ref
+        run: |
+          git fetch --no-tags origin \
+            +personal/c3-escc:refs/heads/personal/c3-escc
+
+      - name: Configure source remotes
+        run: |
+          git remote set-url origin https://github.com/ajouatom/openpilot.git
+          git remote add jixie https://github.com/jixiexiaoge/openpilot.git
+          git remote add fishop https://jihulab.com/fishop/openpilot.git
+
+      - name: Fetch source heads
+        run: |
+          git fetch --no-tags origin \
+            +c3-wip:refs/remotes/origin/c3-wip \
+            +carrot-wip:refs/remotes/origin/carrot-wip
+          git fetch --no-tags jixie \
+            +atune:refs/remotes/jixie/atune \
+            +master:refs/remotes/jixie/master
+          git fetch --no-tags fishop \
+            +cp:refs/remotes/fishop/cp
+
+      - name: Run upstream audit
+        run: python3 scripts/personal/update_audit.py --baseline-file docs/personal/UPSTREAM_BASELINES.json --strict

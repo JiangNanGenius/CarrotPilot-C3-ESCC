@@ -23,6 +23,7 @@
 
 - GitHub Actions 的 `Personal Smoke` 会在个人分支推送和手动触发时运行。
 - 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态和中文设置说明。
+- `Upstream Watch` 每周和手动触发时比较 ajouatom、jixiexiaoge、fishop 的最新分支和 [UPSTREAM_BASELINES.json](docs/personal/UPSTREAM_BASELINES.json)；变红通常表示有新上游提交需要审查。
 - Actions 通过不代表实车验证通过。
 
 安装、更新或上车前先看：

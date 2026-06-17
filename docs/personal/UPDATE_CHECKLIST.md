@@ -23,6 +23,7 @@
 - [ ] 拉取 `fishop/openpilot:cp`。
 - [ ] 拉取 `jixiexiaoge/openpilot:atune`。
 - [ ] 检查 `update_audit.py` 输出的 remote ahead、新提交标题和高风险目录。
+- [ ] 查看 GitHub Actions `Upstream Watch` 最近一次结果；如果变红，把输出当作更新审计入口。
 - [ ] 查看三方最近提交标题。
 - [ ] 判断这次是否涉及高风险目录。
 - [ ] 确认个人远端 `github` 可推送。
@@ -127,6 +128,7 @@
 - [ ] 检查 manager process 是否引用了存在的文件。
 - [ ] 检查中文设置说明是否仍和参数含义一致，不能改默认值或参数范围。
 - [ ] 推送后确认 GitHub Actions `Personal Smoke` 通过。
+- [ ] 同步 `upstream/c3-wip` 或 `tracking/*` 后，更新 `docs/personal/UPSTREAM_BASELINES.json` 并手动触发一次 GitHub Actions `Upstream Watch`。
 - [ ] 如环境允许，跑 Hyundai/opendbc 相关测试。
 - [ ] 如环境允许，跑 controls 相关测试。
 

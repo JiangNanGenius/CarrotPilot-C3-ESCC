@@ -43,14 +43,19 @@
 - `personal/c3-escc-atune`：当前整合分支，包含 Auto-Tuner 实验功能。
 - `docs/personal/`：整合计划、更新检查单、来源署名、安装和回滚说明。
 - `.github/ISSUE_TEMPLATE/`：上游更新和功能整合模板。
-- `.github/workflows/upstream-snapshot.yml`：上游分支快照工作流。
+- `.github/workflows/upstream-snapshot.yml`：上游更新审计工作流，显示名为 `Upstream Watch`。
 - `scripts/personal/upstream_snapshot.sh`：上游分支检查脚本。
+- `docs/personal/UPSTREAM_BASELINES.json`：GitHub Actions 使用的已审查上游基准 commit。
 
-后续再建立：
+本地仍保留这些基准分支，方便人工 rebase 和对比：
 
 - `upstream/c3-wip`
+- `tracking/c4`
 - `tracking/fishop-cp`
 - `tracking/jixie-atune`
+- `tracking/jixie-master`
+
+`Upstream Watch` 不需要把这些 tracking 分支推到 GitHub；它使用 [UPSTREAM_BASELINES.json](UPSTREAM_BASELINES.json) 比较三方远端是否有新提交。不要把 tracking 分支或基准 commit 当作设备安装目标。
 
 ## 创建后需要设置
 
@@ -61,6 +66,8 @@
 - [x] Issues 已开启。
 - [x] Actions 已开启。
 - [x] Wiki 已关闭。
+- [x] `Personal Smoke` 已接入。
+- [x] `Upstream Watch` 已接入。
 - [ ] 稳定版使用 tag 或 release。
 
 ## 推荐保护规则
