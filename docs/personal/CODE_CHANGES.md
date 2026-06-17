@@ -24,6 +24,7 @@
 - `README.md`
 - `docs/personal/INSTALL_TARGETS.json`
 - `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `.github/workflows/personal-smoke.yml`
 
 改动内容：
 
@@ -32,6 +33,7 @@
 - 审计 Navipilot APP 侧 `AutoOvertakeManager.kt`、7705/7706 网络通道和 `LANECHANGE` 命令出口。
 - 检查当前默认 C3 主线没有半截引入 `amap_navi.py`、`amapNavi`、外接转向灯参数、lidar 盲区参数、`OVERTAKE` 或 DEC/longcontrol 接入点。
 - 将新审计接入总 smoke、功能状态报告和更新检查单。
+- GitHub Actions `Personal Smoke` 补抓 `fishop/cp`，避免云端缺少来源参考线时误报失败。
 - 明确 P4 决策：ESCC 保留主线默认关闭；CP搭子核心协议保留主线；fishop AmapNavi、外接转向灯、lidar/侧向盲区、APP 自动超车和 DEC/longcontrol 放实验分支或暂缓。
 
 刻意没有改：

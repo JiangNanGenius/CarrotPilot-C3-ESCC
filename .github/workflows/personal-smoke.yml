@@ -40,6 +40,7 @@ jobs:
           git fetch --no-tags https://github.com/ajouatom/openpilot.git c3-wip:refs/remotes/origin/c3-wip happymaj11r/carrot-wip-model_selector:refs/remotes/origin/happymaj11r/carrot-wip-model_selector happymaj11r/carrot-wip-model_selector:refs/heads/tracking/model-selector || true
           git fetch --no-tags https://github.com/jixiexiaoge/openpilot.git master:refs/remotes/jixie/master master:refs/heads/tracking/jixie-master || true
           git fetch --no-tags https://github.com/jixiexiaoge/navipilot.git CPdazi:refs/remotes/jixie-navipilot/CPdazi CPdazi:refs/heads/tracking/jixie-navipilot || true
+          git fetch --no-tags https://jihulab.com/fishop/openpilot.git cp:refs/remotes/fishop/cp cp:refs/heads/tracking/fishop-cp || true
 
       - name: Run personal smoke check
         run: python3 scripts/personal/smoke_check.py
