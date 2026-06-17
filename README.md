@@ -12,11 +12,12 @@
 - Auto-Tuner：已接入学习和手动确认闭环，默认关闭，不自动应用
 - CP搭子 / Navipilot：核心 CarrotMan / CPlink 协议静态兼容，已增加 C3 侧 APP 端点 live check，手机 APP 实测未完成
 - 模型选择器：已跟踪参考线并增加源码审计，默认主线未启用模型下载或 modeld 切换
+- AmapNavi / 自动超车 / DEC：已跟踪 fishop 和 Navipilot APP 来源并增加源码审计，默认主线未启用
 
 当前可参考 tag：
 
-- 静态检查：`carrotpilot-c3-escc-20260618-static18`
-- 受控上车测试：`carrotpilot-c3-escc-20260618-test10`
+- 静态检查：`carrotpilot-c3-escc-20260618-static19`
+- 受控上车测试：`carrotpilot-c3-escc-20260618-test11`
 - `static` / `test` 都不代表实车验证完成或稳定版
 - 还没有 `stable` tag
 - 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空
@@ -24,7 +25,7 @@
 自动检查：
 
 - GitHub Actions 的 `Personal Smoke` 会在个人分支推送和手动触发时运行。
-- 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态、功能边界守卫、证据就绪度报告和中文设置说明。
+- 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态、模型选择器和 AmapNavi/自动超车来源审计、功能边界守卫、证据就绪度报告和中文设置说明。
 - `Upstream Watch` 每周和手动触发时比较 ajouatom、jixiexiaoge/openpilot、jixiexiaoge/navipilot、fishop 的最新分支和 [UPSTREAM_BASELINES.json](docs/personal/UPSTREAM_BASELINES.json)；变红通常表示有新上游提交需要审查。
 - Actions 通过不代表实车验证通过。
 

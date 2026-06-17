@@ -62,12 +62,14 @@ python3 scripts/personal/cplink_preflight.py
 
 ```bash
 python3 scripts/personal/feature_boundary_check.py
+python3 scripts/personal/app_navi_overtake_audit.py
 ```
 
-这个检查做两件事：
+这些检查做三件事：
 
 - 确认当前 C3 底座已有的 7000 Web、dashcam/screenrecord/tools、Auto-Tuner Web 面板仍存在。
 - 确认 cluster HUD 和 `xiaoge_data` 仍由 `ClusterHud` / `ShareData` 参数控制，同时自动超车 `OVERTAKE`、fishop `amap_navi.py`、独立 `xiaoge_web.py` / `xiaoge_sentryd.py` 不会无保护进入默认主线。
+- 确认 fishop `amap_navi.py`、外接转向灯、lidar 盲区、`OVERTAKE`、DEC/longcontrol 和 Navipilot APP `AutoOvertakeManager.kt` 的参考源仍可追踪，但默认主线没有半截启用。
 
 如果后续要迁移这些被拦截的功能，必须在同一个提交里补独立开关、文档、实车/设备验证计划，并同步更新这个脚本。
 
@@ -134,7 +136,7 @@ python3 scripts/personal/feature_boundary_check.py
 - fishop `amap_navi.py`。
 - 外接转向灯控制。
 - APP 命令变道增强。
-- 自动超车 / `OVERTAKE`。
+- 自动超车 / `OVERTAKE`。当前 Navipilot APP 端已有 `AutoOvertakeManager`，会通过 7706 发送 `LANECHANGE`；设备端 fishop 参考还支持 `OVERTAKE`，必须等独立安全门控后再碰。
 - 盲区、雷达、路沿概率回传。
 
 建议分支：

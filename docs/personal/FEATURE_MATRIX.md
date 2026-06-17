@@ -25,7 +25,8 @@
 | Navipilot APP 端点 live check | 本项目维护 | P1 | 已新增 C3 侧检查器，可验证 7000 参数接口、7705 状态广播和可选 7706 测试导航输入；不替代手机 APP 实测 |
 | 自动实验模式切换完整闭环 | 机械小哥 / Navipilot APP | P1 | C3 端参数接口已具备；APP 侧实测和策略闭环待验证 |
 | 模型选择切换器 | `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector` / Navipilot APP | P1 | 已跟踪参考线并增加源码审计；下载/编译/切 modeld 仍保持高风险独立批次 |
-| 自动超车 | 机械小哥 / fishop | P2 | 后置验证 |
+| AmapNavi / 自动超车来源审计 | `fishop/openpilot:cp` / `jixiexiaoge/navipilot:CPdazi` | P1 | 已新增源码审计，确认来源存在但默认 C3 主线隔离 |
+| 自动超车 | 机械小哥 / fishop | P2 | 后置验证；APP 可发 `LANECHANGE`，`OVERTAKE` 不进默认主线 |
 | LED / cluster HUD | 机械小哥 | P2 | 实验功能 |
 | 驾驶报告 | `jixiexiaoge/navipilot:CPdazi` | P2 | APP 端功能；C3 端保持 WebSocket/CarrotMan 数据兼容，待 APP 实测 |
 | 中文翻译和参数说明优化 | 本项目维护 | P2 | 不改默认值，只改菜单显示文字 |
@@ -42,6 +43,7 @@
 
 ```bash
 python3 scripts/personal/feature_status_report.py --strict
+python3 scripts/personal/app_navi_overtake_audit.py
 ```
 
 这个脚本把已静态具备、已有但需要实机验证、故意隔离和仍待迁移的功能分开列出。
@@ -50,12 +52,12 @@ python3 scripts/personal/feature_status_report.py --strict
 
 | 功能 | 来源 | 风险 | 计划 |
 | --- | --- | --- | --- |
-| fishop `amap_navi.py` | `fishop/openpilot:cp` | 中 | 与 CP搭子协议重叠，先放 `experimental/app-navi` |
-| APP 外接转向灯控制 | `fishop/openpilot:cp` | 中/高 | 需要硬件和上车验证，不进默认分支 |
-| `OVERTAKE` 命令 | `fishop/openpilot:cp` / `jixiexiaoge/navipilot:CPdazi` | 高 | 需要独立开关、速度/盲区/车道条件保护 |
+| fishop `amap_navi.py` | `fishop/openpilot:cp` | 中/高 | 与 CP搭子协议重叠，且耦合 4210-4213、7705/7706、`amapNavi`、盲区和 APP 命令；先放 `experimental/app-navi` |
+| APP 外接转向灯控制 | `fishop/openpilot:cp` | 高 | 需要外置硬件和上车验证，不进默认分支 |
+| `OVERTAKE` 命令 | `fishop/openpilot:cp` / `jixiexiaoge/navipilot:CPdazi` | 高 | APP 端已有状态机和 `LANECHANGE` 命令出口；设备端 `OVERTAKE` 需要独立开关、速度/盲区/车道条件保护 |
 | modeld 模型选择器 | `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector` | 高 | 已来源跟踪和静态审计；真正迁移放 `experimental/model-selector` |
 | 哨兵 Web 服务 | `jixiexiaoge/openpilot:master` | 高 | 含固定 secret 和外部资源，只做隔离参考 |
-| DEC / longcontrol 大改 | `fishop/openpilot:cp` | 高 | 不影响 ESCC 前暂不碰 |
+| DEC / longcontrol 大改 | `fishop/openpilot:cp` | 高 | 已纳入来源审计和边界守卫；不影响 ESCC 前暂不碰 |
 
 ## 先放旁边
 

@@ -189,6 +189,23 @@ def check_model_selector() -> FeatureStatus:
   return pending("Model selector", "not integrated; keep as a separate high-risk modeld/UI batch")
 
 
+def check_app_navi_overtake_audit() -> FeatureStatus:
+  condition = (
+    exists("scripts/personal/app_navi_overtake_audit.py")
+    and contains("scripts/personal/app_navi_overtake_audit.py", "selfdrive/carrot/amap_navi.py")
+    and contains("scripts/personal/app_navi_overtake_audit.py", "AutoOvertakeManager.kt")
+    and contains("scripts/personal/app_navi_overtake_audit.py", "DynamicExperimentalController")
+    and contains("scripts/personal/app_navi_overtake_audit.py", "current high-risk integration markers")
+  )
+  return FeatureStatus(
+    "AmapNavi / overtake source audit",
+    "SOURCE_TRACKED" if condition else "MISSING",
+    "fishop AmapNavi/external blinker/DEC and Navipilot AutoOvertake sources are audited while default C3 line keeps them isolated",
+    required=True,
+    ok=condition,
+  )
+
+
 def check_isolated_high_risk() -> List[FeatureStatus]:
   overtake_absent = (
     not contains("selfdrive/controls/lib/desire_helper.py", "OVERTAKE")
@@ -205,9 +222,22 @@ def check_isolated_high_risk() -> List[FeatureStatus]:
     and not exists("selfdrive/carrot/xiaoge_sentryd.py")
     and not contains("system/manager/process_config.py", "xiaoge_sentryd")
   )
+  external_blinker_absent = (
+    not contains("common/params_keys.h", "StockBlinkerCtrl")
+    and not contains("common/params_keys.h", "ExtBlinkerCtrlTest")
+    and not contains("selfdrive/carrot/carrot_serv.py", "extBlinker")
+    and not contains("selfdrive/controls/lib/desire_helper.py", "blinker_ctrl")
+  )
+  dec_absent = (
+    not exists("selfdrive/controls/lib/dec")
+    and not contains("selfdrive/controls/lib/longcontrol.py", "DynamicExperimentalController")
+    and not contains("selfdrive/controls/lib/longitudinal_planner.py", "selfdrive.controls.lib.dec")
+  )
   return [
     isolated("Automatic OVERTAKE command", "not integrated until it has its own safety gate and road-test plan", overtake_absent),
     isolated("fishop AmapNavi device service", "kept out of the main line because CP搭子 overlaps it", amap_absent),
+    isolated("External blinker / lidar blind path", "fishop APP hardware control stays out of the default line until hardware validation", external_blinker_absent),
+    isolated("fishop DEC / longcontrol rewrite", "not integrated before ESCC and Seltos road behavior are stable", dec_absent),
     isolated("standalone Xiaoge web/sentry services", "kept out of the main line because they need separate security review", sentry_absent),
   ]
 
@@ -224,6 +254,7 @@ def build_statuses() -> List[FeatureStatus]:
     check_share_data(),
     check_driving_report(),
     check_model_selector(),
+    check_app_navi_overtake_audit(),
     *check_isolated_high_risk(),
   ]
 

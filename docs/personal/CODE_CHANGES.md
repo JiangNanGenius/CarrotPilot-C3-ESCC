@@ -1,5 +1,53 @@
 # 当前代码改动记录
 
+## 2026-06-18: AmapNavi / 自动超车 / DEC 来源审计
+
+分支：
+
+- `personal/c3-escc-atune`
+
+主要来源：
+
+- `fishop/openpilot:cp`
+- `jixiexiaoge/navipilot:CPdazi`
+
+改动文件：
+
+- `scripts/personal/app_navi_overtake_audit.py`
+- `scripts/personal/smoke_check.py`
+- `scripts/personal/feature_status_report.py`
+- `scripts/personal/feature_boundary_check.py`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `README.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+
+改动内容：
+
+- 新增 AmapNavi / 自动超车 / DEC 来源审计脚本。
+- 审计 fishop 侧 `amap_navi.py`、`amapNavi` schema/service、外接转向灯、lidar 盲区、`OVERTAKE`、DEC/longcontrol 参考源。
+- 审计 Navipilot APP 侧 `AutoOvertakeManager.kt`、7705/7706 网络通道和 `LANECHANGE` 命令出口。
+- 检查当前默认 C3 主线没有半截引入 `amap_navi.py`、`amapNavi`、外接转向灯参数、lidar 盲区参数、`OVERTAKE` 或 DEC/longcontrol 接入点。
+- 将新审计接入总 smoke、功能状态报告和更新检查单。
+- 明确 P4 决策：ESCC 保留主线默认关闭；CP搭子核心协议保留主线；fishop AmapNavi、外接转向灯、lidar/侧向盲区、APP 自动超车和 DEC/longcontrol 放实验分支或暂缓。
+
+刻意没有改：
+
+- 没有把 fishop `amap_navi.py` 复制进默认主线。
+- 没有启用 APP 外接转向灯控制。
+- 没有启用 `OVERTAKE`。
+- 没有引入 DEC / longcontrol 大改。
+- 没有改变 Seltos 2023、ESCC、Always Offline 或 Auto-Tuner 默认行为。
+
+待后续：
+
+- 如要迁移 AmapNavi，先新开 `experimental/app-navi`。
+- 如要迁移自动超车，先新开 `experimental/auto-lanechange`，并补独立开关、停车态检查、低速验证和回滚策略。
+- DEC / longcontrol 等 ESCC 和 Seltos 实车表现稳定后再评估。
+
 ## 2026-06-17: 新增 Kia Seltos 2023
 
 项目：

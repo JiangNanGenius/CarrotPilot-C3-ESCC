@@ -53,9 +53,13 @@ def regex(relpath: str, pattern: str) -> bool:
 def check_absent_files(report: Report) -> None:
   forbidden_paths = [
     "selfdrive/carrot/amap_navi.py",
+    "selfdrive/carrot/lane.py",
+    "selfdrive/carrot/lidar_speed_test.py",
+    "selfdrive/carrot/auto_overtake.py",
     "selfdrive/carrot/web_interface.py",
     "selfdrive/carrot/xiaoge_web.py",
     "selfdrive/carrot/xiaoge_sentryd.py",
+    "selfdrive/controls/lib/dec",
     "amap_navi.py",
     "web_interface.py",
     "xiaoge_web.py",
@@ -72,14 +76,25 @@ def check_absent_files(report: Report) -> None:
 def check_absent_patterns(report: Report) -> None:
   forbidden_patterns: List[Tuple[str, str, str]] = [
     ("selfdrive/controls/lib/desire_helper.py", "OVERTAKE", "automatic overtake command not wired into desire helper"),
+    ("selfdrive/controls/lib/desire_helper.py", "amapNavi", "fishop AmapNavi blind data not wired into desire helper"),
+    ("selfdrive/controls/lib/desire_helper.py", "blinker_ctrl", "APP external blinker control not wired into desire helper"),
     ("selfdrive/controls/lib/desire_lib/blinker_manager.py", "OVERTAKE", "automatic overtake command not wired into blinker manager"),
     ("selfdrive/carrot/carrot_man.py", "AmapNaviServ", "fishop AmapNavi service not imported by CarrotMan"),
     ("selfdrive/carrot/carrot_man.py", "amap_navi", "fishop AmapNavi module not referenced by CarrotMan"),
     ("selfdrive/carrot/carrot_man.py", "web_interface", "legacy web_interface not referenced by CarrotMan"),
     ("selfdrive/carrot/carrot_man.py", "WebInterface", "legacy WebInterface not referenced by CarrotMan"),
     ("selfdrive/carrot/carrot_serv.py", "OVERTAKE", "automatic overtake command not parsed by carrot_serv"),
+    ("common/params_keys.h", "StockBlinkerCtrl", "external blinker stock-control param not present by default"),
+    ("common/params_keys.h", "ExtBlinkerCtrlTest", "external blinker test param not present by default"),
+    ("common/params_keys.h", "LidarBsdDelayTime", "lidar blind-spot tuning params not present by default"),
+    ("cereal/custom.capnp", "struct AmapNavi", "fishop AmapNavi schema not present by default"),
+    ("cereal/services.py", '"amapNavi"', "fishop AmapNavi service not registered by default"),
+    ("selfdrive/controls/lib/longcontrol.py", "DynamicExperimentalController", "fishop DEC not wired into longcontrol by default"),
+    ("selfdrive/controls/lib/longitudinal_planner.py", "selfdrive.controls.lib.dec", "fishop DEC not wired into longitudinal planner by default"),
     ("system/manager/process_config.py", "amap_navi", "fishop AmapNavi service not managed by default"),
     ("system/manager/process_config.py", "AmapNaviServ", "fishop AmapNavi class not managed by default"),
+    ("system/manager/process_config.py", "selfdrive.carrot.lane", "fishop lane camera stream not managed by default"),
+    ("system/manager/process_config.py", "auto_overtake", "fishop auto_overtake process not managed by default"),
     ("system/manager/process_config.py", "web_interface", "legacy web_interface service not managed by default"),
     ("system/manager/process_config.py", "WebInterface", "legacy WebInterface service not managed by default"),
     ("system/manager/process_config.py", "xiaoge_web", "standalone xiaoge web service not managed by default"),
@@ -155,7 +170,7 @@ def check_gated_existing_features(report: Report) -> None:
 def manual_items() -> List[str]:
   return [
     "Treat 7000 Web, cluster HUD, and ShareData as existing gated features, not proof of real device validation.",
-    "Keep OVERTAKE, AmapNavi device service, external blinker control, and standalone sentry/web services out of the main branch until each has its own switch and test plan.",
+    "Keep OVERTAKE, AmapNavi device service, external blinker control, lidar blind paths, DEC/longcontrol rewrites, and standalone sentry/web services out of the main branch until each has its own switch and test plan.",
     "If a future upstream update adds any blocked feature intentionally, update this check in the same commit that adds the safety gate and documentation.",
   ]
 
