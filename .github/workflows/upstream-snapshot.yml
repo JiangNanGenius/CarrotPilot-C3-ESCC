@@ -39,7 +39,8 @@ jobs:
         run: |
           git fetch --no-tags origin \
             +c3-wip:refs/remotes/origin/c3-wip \
-            +carrot-wip:refs/remotes/origin/carrot-wip
+            +carrot-wip:refs/remotes/origin/carrot-wip \
+            +happymaj11r/carrot-wip-model_selector:refs/remotes/origin/happymaj11r/carrot-wip-model_selector
           git fetch --no-tags jixie \
             +atune:refs/remotes/jixie/atune \
             +master:refs/remotes/jixie/master

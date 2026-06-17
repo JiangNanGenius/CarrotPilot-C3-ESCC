@@ -11,11 +11,12 @@
 - 离线模式：`AlwaysOffline` 默认开启，用于 ACC/CAN 供电、无法在线注册的设备
 - Auto-Tuner：已接入学习和手动确认闭环，默认关闭，不自动应用
 - CP搭子 / Navipilot：核心 CarrotMan / CPlink 协议静态兼容，已增加 C3 侧 APP 端点 live check，手机 APP 实测未完成
+- 模型选择器：已跟踪参考线并增加源码审计，默认主线未启用模型下载或 modeld 切换
 
 当前可参考 tag：
 
-- 静态检查：`carrotpilot-c3-escc-20260618-static17`
-- 受控上车测试：`carrotpilot-c3-escc-20260618-test9`
+- 静态检查：`carrotpilot-c3-escc-20260618-static18`
+- 受控上车测试：`carrotpilot-c3-escc-20260618-test10`
 - `static` / `test` 都不代表实车验证完成或稳定版
 - 还没有 `stable` tag
 - 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空

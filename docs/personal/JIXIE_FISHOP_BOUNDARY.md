@@ -102,6 +102,7 @@ python3 scripts/personal/feature_boundary_check.py
 - Navipilot APP 来源跟踪和驾驶报告边界确认。
 - Navipilot APP 参数读写接口静态守卫。
 - Navipilot APP 端点 live check 和证据包集成。
+- Model selector 参考线跟踪和源码审计。
 
 ### B. 下一批，低风险
 
@@ -144,7 +145,7 @@ python3 scripts/personal/feature_boundary_check.py
 ### D. 高风险，暂不进主用线
 
 - DEC / longcontrol 大改。
-- modeld 模型选择器和多模型资产。
+- modeld 模型选择器和多模型资产。当前只跟踪 `tracking/model-selector` 并运行 `model_selector_audit.py`，不启用下载、编译或 modeld 切换。
 - cluster HUD / USB 小屏重构。
 - 哨兵模式 Web 服务。
 - C4 专项线。

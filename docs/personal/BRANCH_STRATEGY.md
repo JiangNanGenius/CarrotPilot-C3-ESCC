@@ -53,6 +53,10 @@ git remote add dhvms https://github.com/dhvms/carrotpilot.git
 
 跟踪 `jixiexiaoge/navipilot:CPdazi`，用于检查 Android CP搭子 APP、驾驶报告、WebSocket 需求、模型/参数管理和自动超车 UI 的变动。不把 Android 项目直接合进 openpilot 主分支。
 
+`tracking/model-selector`
+
+跟踪 `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector`，用于研究 modeld 模型选择器、模型下载/签名校验、编译和回滚策略。当前只作为参考线和静态审计来源，不进入默认 C3/Seltos/ESCC 主线。
+
 `tracking/c4`
 
 C4 旁支。当前本地暂按 `origin/carrot-wip` 跟踪；后续需要再确认这是否就是目标 C4 线。只有在维护成本不高时跟进。

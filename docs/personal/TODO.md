@@ -23,6 +23,7 @@
   - `tracking/jixie-atune`
   - `tracking/jixie-master`
   - `tracking/jixie-navipilot`
+  - `tracking/model-selector`
   - `tracking/c4`
 
 ## P1: 用户车辆优先支持
@@ -101,6 +102,8 @@
 - [x] 增加 Navipilot APP 参数读写接口静态守卫，确认 7000 端口 `/api/params_bulk` 和 `/api/param_set` 兼容 APP 的 `CarrotParamClient`。
 - [x] 增加 CP搭子 / Navipilot 设备端采样字段和可选证据校验门槛。
 - [x] 增加 Navipilot APP 端点 live check，可在 C3 上验证 7000 参数接口、7705 状态广播和可选 7706 测试导航输入。
+- [x] 建立 `tracking/model-selector`，跟踪 `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector` 作为模型选择器参考线。
+- [x] 增加模型选择器源码审计脚本，确认参考线安全条件存在且当前默认 C3 主线未半截启用模型切换。
 - [x] 增加机械小哥 / fishop 功能边界静态检查，防止自动超车、AmapNavi、独立 Web/哨兵服务无保护进入主线。
 - [x] 增加个人功能状态报告，区分已静态具备、已有但待实机验证、故意隔离和未迁移功能。
 - [ ] 机械小哥功能分批迁移：
@@ -149,8 +152,8 @@
 - [x] 增加 C3 首次安装/迁移向导，把旧配置 dry-run/import、静态检查、证据采集和 readiness 报告串成一条设备端流程。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static17` tag。
-- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test9` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static18` tag。
+- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test10` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。
@@ -158,6 +161,7 @@
 - [x] 增加 GitHub Actions `Personal Smoke`，推送后自动跑个人静态检查。
 - [x] 增加 GitHub Actions `Upstream Watch`，定期比较上游远端和 `UPSTREAM_BASELINES.json` 基准。
 - [x] `Upstream Watch` 纳入 `jixiexiaoge/navipilot:CPdazi`，防止 APP 协议和驾驶报告更新漏审。
+- [x] `Upstream Watch` 纳入 `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector`，防止模型选择器参考线更新漏审。
 - [x] 在 `INSTALL_TARGETS.json` 中预留 `previous_stable_tag` 和 `rollback_base_ref`。
 - [x] 只把稳定 tag 作为设备日常安装目标；当前没有稳定 tag，所以 `daily_install_target` 必须为空。
 - [ ] 第一次实车验证通过后，创建首个 `stable` tag，并更新 `INSTALL_TARGETS.json`。

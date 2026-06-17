@@ -1321,3 +1321,58 @@
 
 - 包含 Navipilot APP 端点 live check 和证据包校验。
 - 不代表 stable，不应作为日常稳定安装目标。
+
+## 2026-06-18: Model selector 参考线跟踪和审计
+
+改动文件：
+
+- `scripts/personal/model_selector_audit.py`
+- `scripts/personal/smoke_check.py`
+- `scripts/personal/feature_status_report.py`
+- `scripts/personal/update_audit.py`
+- `.github/workflows/personal-smoke.yml`
+- `.github/workflows/upstream-snapshot.yml`
+- `docs/personal/MODEL_SELECTOR_RESEARCH.md`
+- `docs/personal/UPSTREAM_BASELINES.json`
+- `docs/personal/BRANCH_STRATEGY.md`
+- `docs/personal/SOURCES_AND_CREDITS.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/TODO.md`
+- `docs/personal/README.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `README.md`
+
+改动内容：
+
+- 新建 `tracking/model-selector`，跟踪 `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector`。
+- `UPSTREAM_BASELINES.json` 新增已审查基准 `d4ed4fa165f019618791b8590f82f4cc115f7c5f`。
+- `update_audit.py` 和 GitHub Actions `Upstream Watch` 纳入模型选择器参考线。
+- 新增 `model_selector_audit.py`，检查参考分支是否仍具备：
+  - canonical JSON + Ed25519 manifest 校验。
+  - ONNX 文件 allowlist。
+  - 下载 URL prefix allowlist。
+  - size / SHA256 校验。
+  - `/data/models` validator。
+  - tinygrad 编译、warp pkl、atomic swap 和 backup 恢复。
+  - 无有效自定义模型时回退 upstream `modeld`。
+  - reset 恢复默认模型。
+- `model_selector_audit.py` 同时检查当前默认 C3 主线没有半截启用模型下载、模型安装、Web 模型页或 `modeld_runner`。
+- `smoke_check.py` 纳入模型选择器审计。
+- `feature_status_report.py` 将模型选择器状态标为 `SOURCE_TRACKED`。
+- 新增 `MODEL_SELECTOR_RESEARCH.md`，明确真正迁移必须放到 `experimental/model-selector` 这类独立分支。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static18`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test10`
+
+含义：
+
+- 包含模型选择器参考线跟踪和源码审计。
+- 不启用模型下载、模型安装或 `modeld` 切换。
+- 不代表 stable，不应作为日常稳定安装目标。

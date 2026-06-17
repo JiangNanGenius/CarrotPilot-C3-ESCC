@@ -44,6 +44,17 @@ fishop / 码上飞扬 / 飞扬
   - `CPdazi`: Android CP搭子 APP、驾驶报告、摄像头预览、APP 侧参数/模型/超车 UI 和协议说明。
 - 用途：CP搭子、Navipilot、在线调参、7000 Web、自动实验模式、模型切换、自动超车、驾驶报告、LED/cluster HUD 等。
 
+## 模型选择器参考线
+
+ajouatom / happymaj11r model selector
+
+- 来源：`ajouatom/openpilot`
+- URL: `https://github.com/ajouatom/openpilot`
+- 参考分支：`happymaj11r/carrot-wip-model_selector`
+- 本地跟踪分支：`tracking/model-selector`
+- 用途：研究 modeld 模型选择器、远程模型 manifest、签名校验、下载校验、tinygrad 编译、默认模型回退和 Web UI 策略。
+- 当前状态：只做来源跟踪和静态审计，不作为默认 C3/Seltos/ESCC 主线功能。
+
 ## 历史参考
 
 dhvms

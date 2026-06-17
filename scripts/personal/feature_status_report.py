@@ -178,6 +178,14 @@ def check_model_selector() -> FeatureStatus:
   ]
   if any(contains(relpath, needle) for relpath, needle in patterns):
     return FeatureStatus("Model selector", "READY_STATIC", "model selector references are present", required=False, ok=True)
+  if exists("scripts/personal/model_selector_audit.py"):
+    return FeatureStatus(
+      "Model selector",
+      "SOURCE_TRACKED",
+      "reference branch is audited, but modeld switching/downloading is not integrated into the default C3 line",
+      required=False,
+      ok=True,
+    )
   return pending("Model selector", "not integrated; keep as a separate high-risk modeld/UI batch")
 
 

@@ -24,7 +24,7 @@
 | Navipilot APP 参数接口 | `jixiexiaoge/navipilot:CPdazi` / 当前 C3 Web API | P1 | 已静态确认 `/api/params_bulk`、`/api/param_set` 和 APP `CarrotParamClient` 契约 |
 | Navipilot APP 端点 live check | 本项目维护 | P1 | 已新增 C3 侧检查器，可验证 7000 参数接口、7705 状态广播和可选 7706 测试导航输入；不替代手机 APP 实测 |
 | 自动实验模式切换完整闭环 | 机械小哥 / Navipilot APP | P1 | C3 端参数接口已具备；APP 侧实测和策略闭环待验证 |
-| 模型选择切换器 | 机械小哥 / Navipilot APP | P1 | 未找到可直接迁移的安全 C3 端实现，保持高风险独立批次 |
+| 模型选择切换器 | `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector` / Navipilot APP | P1 | 已跟踪参考线并增加源码审计；下载/编译/切 modeld 仍保持高风险独立批次 |
 | 自动超车 | 机械小哥 / fishop | P2 | 后置验证 |
 | LED / cluster HUD | 机械小哥 | P2 | 实验功能 |
 | 驾驶报告 | `jixiexiaoge/navipilot:CPdazi` | P2 | APP 端功能；C3 端保持 WebSocket/CarrotMan 数据兼容，待 APP 实测 |
@@ -53,6 +53,7 @@ python3 scripts/personal/feature_status_report.py --strict
 | fishop `amap_navi.py` | `fishop/openpilot:cp` | 中 | 与 CP搭子协议重叠，先放 `experimental/app-navi` |
 | APP 外接转向灯控制 | `fishop/openpilot:cp` | 中/高 | 需要硬件和上车验证，不进默认分支 |
 | `OVERTAKE` 命令 | `fishop/openpilot:cp` / `jixiexiaoge/navipilot:CPdazi` | 高 | 需要独立开关、速度/盲区/车道条件保护 |
+| modeld 模型选择器 | `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector` | 高 | 已来源跟踪和静态审计；真正迁移放 `experimental/model-selector` |
 | 哨兵 Web 服务 | `jixiexiaoge/openpilot:master` | 高 | 含固定 secret 和外部资源，只做隔离参考 |
 | DEC / longcontrol 大改 | `fishop/openpilot:cp` | 高 | 不影响 ESCC 前暂不碰 |
 

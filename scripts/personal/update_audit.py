@@ -40,6 +40,7 @@ SOURCES = [
   Source("jixie atune", "jixie", "jixie/atune", "tracking/jixie-atune", "Auto-Tuner and web features"),
   Source("jixie CP app", "jixie", "jixie/master", "tracking/jixie-master", "CP搭子 / Navipilot app reference"),
   Source("jixie Navipilot Android app", "jixie-navipilot", "jixie-navipilot/CPdazi", "tracking/jixie-navipilot", "Android CP搭子 app, driving report, model switcher, and overtake UI"),
+  Source("ajouatom model selector reference", "origin", "origin/happymaj11r/carrot-wip-model_selector", "tracking/model-selector", "model selector reference line; source-tracked only, not default C3 integration"),
   Source("fishop cp", "fishop", "fishop/cp", "tracking/fishop-cp", "ESCC and China app/nav reference"),
 ]
 

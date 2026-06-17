@@ -120,6 +120,13 @@
 - [ ] `xiaoge_data` 仍由 `ShareData` 参数控制，不默认常驻。
 - [ ] `OVERTAKE`、fishop `amap_navi.py`、独立 `xiaoge_web.py` / `xiaoge_sentryd.py` 没有进入默认主线。
 
+## 3.9. 模型选择器参考线
+
+- [ ] 运行 `python3 scripts/personal/model_selector_audit.py`。
+- [ ] `tracking/model-selector` 仍指向已审查的 `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector`。
+- [ ] 默认 C3 主线没有半截启用模型下载、模型安装、Web 模型页或 `modeld_runner`。
+- [ ] 如果准备迁移，必须新开 `experimental/model-selector`，并先验证签名、hash/size、allowlist、剩余空间、编译失败恢复和 reset 回默认模型。
+
 ## 4. Seltos 专项检查
 
 - [ ] Seltos 2023 独立车型仍能识别。
@@ -143,6 +150,7 @@
 - [ ] 运行 `python3 scripts/personal/install_target_check.py` 并确认安装目标、稳定 tag 和回滚基线一致。
 - [ ] 运行 `python3 scripts/personal/seltos_profile_check.py` 并确认车型配置没有被更新合并改成 CANFD/HDA2 或其它车型特判。
 - [ ] 运行 `python3 scripts/personal/navipilot_live_check.py --self-test` 并确认 C3 侧 APP 端点检查器正常。
+- [ ] 运行 `python3 scripts/personal/model_selector_audit.py` 并确认模型选择器参考线和默认主线边界正常。
 - [ ] 运行 `python3 scripts/personal/evidence_readiness_report.py --self-test` 并确认证据就绪度报告正常。
 - [ ] 检查 Python 语法。
 - [ ] 检查 JSON 配置格式。
