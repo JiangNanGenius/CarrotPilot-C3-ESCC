@@ -356,3 +356,8 @@
 验证：
 
 - `python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-20260617-static1 --kind static --run-checks` 通过后，才能创建当前静态测试 tag。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260617-static1`
+- 含义：静态检查通过，不代表实车验证或稳定版本。
