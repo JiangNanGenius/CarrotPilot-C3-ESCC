@@ -14,6 +14,7 @@
     "Do not use daily development branches as long-term on-device install targets.",
     "A static tag only proves local static checks; it is not a road-tested stable version.",
     "A stable tag requires a completed road-test log and a recorded previous stable or rollback base.",
+    "A stable tag also requires a checked C3 device snapshot with ESCC 0x2AB evidence.",
     "Until current_stable_tag is set, daily_install_target must stay null."
   ]
 }

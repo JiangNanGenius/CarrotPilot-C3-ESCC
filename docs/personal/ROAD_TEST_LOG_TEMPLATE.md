@@ -2,6 +2,8 @@
 
 本模板用于把 `static` 或 `test` tag 升级为 `stable` tag 前的实车证据。没有完成这些项目时，不要打 `stable` tag。
 
+`stable` 发布闸门会同时检查本记录和 C3 上生成的设备快照。路测记录里填的 `设备快照文件` 应对应本地传给 `--device-snapshot` 的文件。
+
 ## 基本信息
 
 - 日期：
@@ -31,6 +33,7 @@ Rollback target recorded: PENDING
 - [ ] 记录当前可用版本。
 - [ ] 备份 `/data/params` 关键参数。
 - [ ] 运行 `python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c3-escc-snapshot.md`。
+- [ ] 把快照文件保存到电脑本地，准备给 `road_test_evidence_check.py` 或 `release_gate.py --device-snapshot` 使用。
 - [ ] 准备回滚安装地址或回滚 tag。
 - [ ] 确认 `AlwaysOffline=1`。
 - [ ] 确认 `EnableEscc=0`。
@@ -63,6 +66,7 @@ Rollback target recorded: PENDING
 - [ ] `EnableEscc=0` 时行为接近原 Seltos 2021 可用配置。
 - [ ] 开启 `EnableEscc=1` 后能看到 ESCC 0x2AB。
 - [ ] 使用 `device_snapshot.py --sample-seconds 20` 记录 0x2AB 计数。
+- [ ] 把包含 `EnableEscc=1` 且 `escc_0x2ab_bus0 > 0` 的快照作为 stable 证据保留。
 - [ ] ESCC lead / radarState 字段稳定。
 - [ ] AEB/FCW/SCC 状态无异常。
 - [ ] 刹车、油门、Cancel、人工接管均正常。
@@ -89,3 +93,26 @@ Rollback target recorded: PENDING
 - 问题记录：
 - 是否回滚：
 - 回滚后状态：
+
+## 8. 证据检查命令
+
+把本模板复制成实际记录并填好后，在电脑本地仓库运行：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --road-test-log docs/personal/road_tests/你的记录.md \
+  --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
+  --require-device-snapshot \
+  --require-escc-sample
+```
+
+创建 stable tag 时也要传入同一个快照文件：
+
+```bash
+python3 scripts/personal/release_gate.py \
+  --tag carrotpilot-c3-escc-YYYYMMDD-stable \
+  --kind stable \
+  --road-test-log docs/personal/road_tests/你的记录.md \
+  --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
+  --run-checks
+```

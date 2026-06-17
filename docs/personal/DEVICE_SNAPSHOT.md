@@ -24,6 +24,16 @@ python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c
 python3 scripts/personal/device_snapshot.py --sample-seconds 20 --output /data/media/0/carrotpilot-c3-escc-snapshot.md
 ```
 
+准备升 `stable` 时，把这个 markdown 文件保存到电脑本地，后续传给：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --road-test-log docs/personal/road_tests/你的记录.md \
+  --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
+  --require-device-snapshot \
+  --require-escc-sample
+```
+
 ## 什么时候采集
 
 建议至少采三次：
@@ -48,6 +58,17 @@ python3 scripts/personal/device_snapshot.py --sample-seconds 20 --output /data/m
 - `DisableUpdates`、`EnableConnect`：离线模式下应符合预期。
 - `escc_0x2ab_bus0`：开启 ESCC 后用于确认 0x2AB 是否真的出现在 bus 0。
 - `carrotMan_updates` / `navInstructionCarrot_updates`：用于确认 CP搭子 / Navipilot 数据是否进入系统。
+
+`stable` 发布要求至少有一个快照满足：
+
+- `AlwaysOffline=1`
+- `EnableConnect=0`
+- `CanfdHDA2=0`
+- `HyundaiCameraSCC=0`
+- `EnableEscc=1`
+- `enabled=True`
+- `ok=True`
+- `escc_0x2ab_bus0 > 0`
 
 ## 不要公开的内容
 

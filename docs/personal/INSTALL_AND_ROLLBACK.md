@@ -147,6 +147,15 @@ carrotpilot-c3-escc-YYYYMMDD-stable
 python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-static1 --kind static --run-checks
 ```
 
-升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，再用 `release_gate.py --kind stable --road-test-log <记录文件>` 检查。
+升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，并把 C3 生成的设备快照文件保存到电脑本地。`stable` gate 会要求设备快照里有 `AlwaysOffline=1`、`CanfdHDA2=0`、`EnableConnect=0`，并且至少有一次 `EnableEscc=1`、`enabled=True`、`ok=True` 且 `escc_0x2ab_bus0 > 0` 的采样。
+
+```bash
+python3 scripts/personal/release_gate.py \
+  --tag carrotpilot-c3-escc-YYYYMMDD-stable \
+  --kind stable \
+  --road-test-log docs/personal/road_tests/你的记录.md \
+  --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
+  --run-checks
+```
 
 发布 `stable` 后再更新 [INSTALL_TARGETS.json](INSTALL_TARGETS.json)：把 `current_stable_tag` 和 `daily_install_target` 指向新的稳定 tag，并把旧稳定 tag 写入 `previous_stable_tag`。没有旧稳定 tag 时，回滚目标至少保留 `rollback_base_ref`。

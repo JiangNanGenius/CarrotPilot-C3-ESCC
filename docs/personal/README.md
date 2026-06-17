@@ -50,6 +50,7 @@ python3 scripts/personal/cplink_preflight.py
 python3 scripts/personal/settings_cn_audit.py
 python3 scripts/personal/install_target_check.py
 python3 scripts/personal/seltos_profile_check.py
+python3 scripts/personal/road_test_evidence_check.py --self-test
 ```
 
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
@@ -67,6 +68,16 @@ python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-stat
 ```
 
 `stable` tag 必须先填写上车测试记录，不能只靠静态检查。
+
+升 `stable` 前还必须把 C3 设备快照传给证据检查器：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --road-test-log docs/personal/road_tests/你的记录.md \
+  --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
+  --require-device-snapshot \
+  --require-escc-sample
+```
 
 在 C3 设备上采集当前参数和静态状态：
 

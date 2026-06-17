@@ -491,3 +491,42 @@
 
 - `python3 scripts/personal/seltos_profile_check.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-17: 路测证据检查器
+
+新增文件：
+
+- `scripts/personal/road_test_evidence_check.py`
+
+改动文件：
+
+- `scripts/personal/release_gate.py`
+- `scripts/personal/smoke_check.py`
+- `docs/personal/ROAD_TEST_LOG_TEMPLATE.md`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+
+改动内容：
+
+- 增加路测证据检查脚本，用于把 `static` / `test` 推进到 `stable` 前检查实车证据。
+- 检查上车测试记录中必填字段和必填 `PASS` 结论行。
+- 支持读取一个或多个 C3 设备快照 markdown。
+- `stable` 证据要求至少一个快照满足：
+  - `AlwaysOffline=1`
+  - `EnableConnect=0`
+  - `CanfdHDA2=0`
+  - `HyundaiCameraSCC=0`
+  - `EnableEscc=1`
+  - `enabled=True`
+  - `ok=True`
+  - `escc_0x2ab_bus0 > 0`
+- `release_gate.py --kind stable` 现在必须传入 `--road-test-log` 和至少一个 `--device-snapshot`。
+- 将证据检查器自检接入 `smoke_check.py`。
+- 更新安装说明、设备快照说明、路测模板和更新检查单。
+
+验证：
+
+- `python3 scripts/personal/road_test_evidence_check.py --self-test` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。
