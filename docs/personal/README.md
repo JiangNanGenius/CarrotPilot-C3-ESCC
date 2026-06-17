@@ -37,4 +37,10 @@
 python3 scripts/personal/smoke_check.py
 ```
 
-这个检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、关键 Python/JS 语法和 Auto-Tuner mock 回归。
+上车前也可以单独跑更详细的 ESCC / 离线模式预检：
+
+```bash
+python3 scripts/personal/escc_offline_preflight.py
+```
+
+这些检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖，以及仍需实车确认的项目。

@@ -50,6 +50,7 @@
 
 ## 3. ESCC 回归检查
 
+- [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`。
 - [ ] `EnableEscc` 仍存在。
 - [ ] ESCC 默认关闭，必须显式开启。
 - [ ] ESCC 只在预期 Hyundai/Kia 路径启用。
@@ -61,6 +62,7 @@
 
 ## 3.5. 离线模式回归检查
 
+- [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`。
 - [ ] `AlwaysOffline` 仍存在，个人 C3 克隆版默认开启。
 - [ ] 设置菜单仍显示“离线使用模式”。
 - [ ] 开启后跳过在线注册。
@@ -97,6 +99,7 @@
 ## 5. 构建和静态检查
 
 - [ ] 运行 `python3 scripts/personal/smoke_check.py` 并确认全部通过。
+- [ ] 单独运行 `python3 scripts/personal/escc_offline_preflight.py` 并确认没有失败项。
 - [ ] 检查 Python 语法。
 - [ ] 检查 JSON 配置格式。
 - [ ] 检查 capnp 是否需要重新生成。
@@ -109,6 +112,7 @@
 ## 6. 上车前检查
 
 - [ ] 先打测试 tag，不直接装开发分支。
+- [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`，逐条处理脚本输出的 Manual checks。
 - [ ] 安装前记录当前可用版本。
 - [ ] 准备回滚 URL 或回滚分支。
 - [ ] 第一次启动只静态检查，不开车。

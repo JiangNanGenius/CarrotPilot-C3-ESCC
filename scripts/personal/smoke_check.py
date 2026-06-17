@@ -311,6 +311,7 @@ def check_learning_service_mock() -> None:
 def check_py_compile() -> None:
   files = [
     "scripts/personal/smoke_check.py",
+    "scripts/personal/escc_offline_preflight.py",
     "opendbc_repo/opendbc/car/hyundai/values.py",
     "opendbc_repo/opendbc/car/hyundai/interface.py",
     "opendbc_repo/opendbc/car/hyundai/radar_interface.py",
@@ -354,6 +355,7 @@ def main() -> int:
     ("Seltos 2023 static checks", check_seltos_static),
     ("ESCC static checks", check_escc_static),
     ("Always Offline static checks", check_offline_static),
+    ("ESCC / Always Offline preflight", lambda: run([sys.executable, "scripts/personal/escc_offline_preflight.py", "--no-manual"], "ESCC / Always Offline preflight")),
     ("Auto-Tuner learner mock", check_carrot_learning_mock),
     ("Auto-Tuner service mock", check_learning_service_mock),
   ]

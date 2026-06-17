@@ -16,6 +16,17 @@
 
 日常开发和功能整合可以在分支上推进，但设备长期安装目标建议使用经过静态检查和实车验证后的 tag。
 
+## 本地预检
+
+更新、合并或上车前先跑：
+
+```bash
+python3 scripts/personal/smoke_check.py
+python3 scripts/personal/escc_offline_preflight.py
+```
+
+`escc_offline_preflight.py` 只能证明代码里的 capnp、DBC、Params key、设置默认值和 ESCC/离线路径引用完整；它不能替代实车确认 0x2AB、ACC 断电重启、SCC/AEB 状态。
+
 ## 安装前
 
 先记录当前设备可用版本和关键参数：

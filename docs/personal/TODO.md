@@ -59,7 +59,8 @@
 - [x] 给 Seltos 2023 优先加默认保护：默认关闭 ESCC，必须显式参数开启。
 - [x] Seltos 2023 不默认开启 CANFD、HDA2、CanfdHDA2 相关 flag。
 - [x] 做一次静态检查：所有 ESCC 路径都必须有参数开关保护。
-- [ ] 做一次上车前 dry-run：确认无缺失 capnp、DBC、Params key。
+- [x] 做一次上车前静态 dry-run：确认无缺失 capnp、DBC、Params key。
+- [ ] 上车确认 ESCC 0x2AB、lead、AEB/FCW 和 SCC 状态真实正常。
 
 ## P2.5: C3 克隆版离线模式
 
@@ -109,6 +110,7 @@
 ## P6: 发布和安装
 
 - [x] 增加个人版本地 smoke 检查脚本。
+- [x] 增加 ESCC / Always Offline 上车前静态 preflight 脚本。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
 - [ ] 给每个可上车版本打 tag，例如 `seltos-c3-escc-YYYYMMDD`.

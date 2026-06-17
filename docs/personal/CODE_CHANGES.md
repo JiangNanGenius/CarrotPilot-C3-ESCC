@@ -232,14 +232,18 @@
 新增文件：
 
 - `scripts/personal/smoke_check.py`
+- `scripts/personal/escc_offline_preflight.py`
 
 用途：
 
 - 更新、合并或上车前一键检查个人版关键保护项。
 - 覆盖 Seltos 2023 独立车型、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、Python/JS 语法和 Auto-Tuner mock 回归。
+- 单独 preflight 检查 ESCC / Always Offline 的 capnp、DBC、Params key、设置默认值、Seltos 2023 非 CANFD/HDA2 路径、ESCC 0x2AB 解析链路和离线注册/更新/连接禁用链路。
+- preflight 明确保留实车待验证项，不把静态检查当成路测结论。
 
 验证：
 
+- `python3 scripts/personal/escc_offline_preflight.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
 
 ## 2026-06-17: GitHub 私有仓库建立
@@ -268,3 +272,22 @@
 - GitHub CLI 凭据保存在本机 keyring，不写入代码仓库。
 - 推送前已确认项目文件中没有个人 GitHub token。
 - 设备安装仍建议使用经过验证的 tag，不直接长期安装日常开发分支。
+
+## 2026-06-17: 同步最新 C3 底座
+
+上游：
+
+- `ajouatom/openpilot:c3-wip`
+- 新底座 commit：`244b69b6 Restore AutoGasCancelSpeed param key`
+
+改动内容：
+
+- 将 `upstream/c3-wip` 更新到最新 `origin/c3-wip`。
+- 将 `personal/c3-escc` 变基到最新 C3 底座。
+- 将 `personal/c3-escc-atune` 继续变基到新的 `personal/c3-escc`。
+- 保留 ESCC、Always Offline、Seltos 2023 和 Auto-Tuner 改动。
+
+验证：
+
+- `python3 scripts/personal/escc_offline_preflight.py` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。
