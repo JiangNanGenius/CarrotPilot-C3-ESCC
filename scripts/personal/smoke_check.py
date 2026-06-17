@@ -353,6 +353,25 @@ def check_js_syntax() -> str:
   return "checked"
 
 
+def check_c3_static_dry_run() -> None:
+  run([
+    sys.executable,
+    "scripts/personal/c3_static_check.py",
+    "--output",
+    "/tmp/carrotpilot-c3-escc-static-check-smoke.md",
+    "--snapshot-output",
+    "/tmp/carrotpilot-c3-escc-snapshot-smoke.md",
+    "--allow-branch",
+    "--skip-preflight",
+  ], "C3 static check dry-run")
+  report = Path("/tmp/carrotpilot-c3-escc-static-check-smoke.md")
+  snapshot = Path("/tmp/carrotpilot-c3-escc-snapshot-smoke.md")
+  if not report.exists() or "# CarrotPilot-C3-ESCC Static Check" not in report.read_text(encoding="utf-8"):
+    raise CheckFailure("C3 static dry-run did not create a valid report")
+  if not snapshot.exists() or "# CarrotPilot-C3-ESCC Device Snapshot" not in snapshot.read_text(encoding="utf-8"):
+    raise CheckFailure("C3 static dry-run did not create a valid snapshot")
+
+
 def main() -> int:
   checks: List[Tuple[str, Callable[[], Any]]] = [
     ("git diff whitespace", lambda: run(["git", "diff", "--check"], "git diff --check")),
@@ -370,6 +389,7 @@ def main() -> int:
     ("CPlink / Navipilot preflight", lambda: run([sys.executable, "scripts/personal/cplink_preflight.py", "--no-manual"], "CPlink / Navipilot preflight")),
     ("Chinese settings audit", lambda: run([sys.executable, "scripts/personal/settings_cn_audit.py"], "Chinese settings audit")),
     ("Install target manifest", lambda: run([sys.executable, "scripts/personal/install_target_check.py"], "Install target manifest")),
+    ("C3 static check dry-run", check_c3_static_dry_run),
     ("Auto-Tuner learner mock", check_carrot_learning_mock),
     ("Auto-Tuner service mock", check_learning_service_mock),
   ]

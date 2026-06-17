@@ -86,6 +86,8 @@ def check_target_tag(target_tag: str, allow_branch: bool) -> CheckResult:
     pending_tag = os.environ.get("CARROTPILOT_PENDING_RELEASE_TAG")
     if allow_branch and pending_tag == target_tag:
       return CheckResult("target tag", True, f"{target_tag} is pending at current HEAD")
+    if allow_branch:
+      return CheckResult("target tag", True, f"{target_tag} is missing, but --allow-branch was used")
     return CheckResult("target tag exists", False, tag_commit)
   code, tags = git(["tag", "--points-at", "HEAD"])
   if code != 0:

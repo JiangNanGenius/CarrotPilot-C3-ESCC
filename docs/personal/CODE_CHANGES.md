@@ -629,3 +629,30 @@
 
 - `python3 scripts/personal/c3_static_check.py --output /tmp/carrotpilot-c3-escc-static-check.md --snapshot-output /tmp/carrotpilot-c3-escc-snapshot.md --allow-branch --skip-preflight` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-18: C3 静态检查向导 smoke 覆盖
+
+改动文件：
+
+- `scripts/personal/c3_static_check.py`
+- `scripts/personal/smoke_check.py`
+
+改动内容：
+
+- `c3_static_check.py --allow-branch` 现在可用于开发分支和 CI dry-run，即使下一版 `static` tag 尚未创建也能验证脚本流程。
+- `smoke_check.py` 新增 C3 静态检查向导 dry-run。
+- dry-run 会写入 `/tmp/carrotpilot-c3-escc-static-check-smoke.md` 和 `/tmp/carrotpilot-c3-escc-snapshot-smoke.md`，并确认二者是有效报告。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static3`
+
+含义：
+
+- 包含 C3 静态检查向导的 CI 运行覆盖。
+- 静态检查通过，不代表实车验证。
+- 还没有 `stable` tag。
+
+验证：
+
+- `python3 scripts/personal/smoke_check.py` 通过，包含 `C3 static check dry-run`。
