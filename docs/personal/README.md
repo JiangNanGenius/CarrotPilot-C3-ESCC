@@ -5,6 +5,7 @@
 ## 先看
 
 - [安装和回滚说明](INSTALL_AND_ROLLBACK.md)
+- [从旧版本迁移安全参数](CONFIG_MIGRATION.md)
 - [当前代码改动记录](CODE_CHANGES.md)
 - [以后更新检查单](UPDATE_CHECKLIST.md)
 - [TODO 主计划](TODO.md)
@@ -27,7 +28,7 @@
 
 ## 当前原则
 
-- 底座跟随 `ajouatom/openpilot:c3-wip`。
+- 底座跟随 `ajouatom/openpilot:c3-wip`，当前按 CarrotPilot / CarPad 韩国主源处理。
 - 用户主车优先：C3 克隆版、Kia Seltos 2023、纯 CAN。
 - Seltos 2023 初期复用 Seltos 2021，不额外调转向或纵控默认值。
 - ESCC 默认关闭，必须手动开启。
@@ -62,6 +63,15 @@ python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpi
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
 
 其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、功能边界守卫、功能状态报告、证据就绪度报告、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
+
+如果要从当前可工作的 fishop / 飞扬版本迁移设置，使用：
+
+```bash
+python3 scripts/personal/params_migration.py export --output /data/media/0/carrotpilot-fishop-working-params.json
+python3 scripts/personal/params_migration.py import --input /data/media/0/carrotpilot-fishop-working-params.json
+```
+
+第二条默认只是 dry-run，确认无误后才加 `--apply`。
 
 `seltos_profile_check.py` 专门守住 Seltos 2023 当前策略：经典 CAN、复用 Seltos 2021 harness/specs/flags、不引入 CANFD/HDA2 特判、不复制未验证 FW fingerprint。
 

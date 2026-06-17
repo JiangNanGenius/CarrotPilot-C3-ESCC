@@ -1,7 +1,7 @@
 {
   "updated_at": "2026-06-18",
   "project": "CarrotPilot-C3-ESCC",
-  "description": "Reviewed upstream/tracking baselines used by GitHub Actions Upstream Watch.",
+  "description": "Reviewed upstream/tracking baselines used by GitHub Actions Upstream Watch. ajouatom/openpilot:c3-wip is treated as the current CarrotPilot / CarPad C3 main source.",
   "baselines": {
     "upstream/c3-wip": "244b69b61b17921e2e05122a040f3614f0fb1c3d",
     "tracking/c4": "0211a1cdc2209dfb06615d60a22e0be92fd05b39",

@@ -23,7 +23,7 @@
 - `carrot-wip`: `0211a1c`，2026-06-17，`Remove cluster libyuv H264 dependency (#402)`
 - `c3`: `fe21f2d`，2026-05-20，`carrot_v260520`
 
-判断：用户主线应跟 `c3-wip`。
+判断：按用户后续核对和公开仓库信息，`ajouatom/openpilot` 应作为 CarrotPilot / CarPad 韩国主源处理；用户主线应跟 `c3-wip`。
 
 `jixiexiaoge/openpilot`
 
@@ -56,7 +56,8 @@
 
 判断：
 
-- 这是旧 CarrotPilot 线，不适合作为当前底座。
+- 这是旧 CarrotPilot 参考线，不适合作为当前底座。
+- README 自己写到 CarrotPilot 直接安装地址已从 `ajouatom/carrotpilot.git` 改到 `ajouatom/openpilot.git`。
 - 可参考 Radar Tracks、SCC 改线 BUS2、APM/APN 的历史说明。
 
 ## 发现的关键事实

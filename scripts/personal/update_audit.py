@@ -35,7 +35,7 @@ class Source:
 
 
 SOURCES = [
-  Source("C3 CarrotPilot base", "origin", "origin/c3-wip", "upstream/c3-wip", "main base for C3 clone"),
+  Source("ajouatom CarrotPilot / CarPad C3 base", "origin", "origin/c3-wip", "upstream/c3-wip", "current C3 main source"),
   Source("C4 side line", "origin", "origin/carrot-wip", "tracking/c4", "low-priority side line"),
   Source("jixie atune", "jixie", "jixie/atune", "tracking/jixie-atune", "Auto-Tuner and web features"),
   Source("jixie CP app", "jixie", "jixie/master", "tracking/jixie-master", "CP搭子 / Navipilot app reference"),

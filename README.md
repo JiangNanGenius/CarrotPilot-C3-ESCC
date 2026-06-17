@@ -14,8 +14,8 @@
 
 当前可参考 tag：
 
-- 静态检查：`carrotpilot-c3-escc-20260618-static13`
-- 受控上车测试：`carrotpilot-c3-escc-20260618-test5`
+- 静态检查：`carrotpilot-c3-escc-20260618-static14`
+- 受控上车测试：`carrotpilot-c3-escc-20260618-test6`
 - `static` / `test` 都不代表实车验证完成或稳定版
 - 还没有 `stable` tag
 - 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空
@@ -30,6 +30,7 @@
 安装、更新或上车前先看：
 
 - [安装和回滚说明](docs/personal/INSTALL_AND_ROLLBACK.md)
+- [从旧版本迁移安全参数](docs/personal/CONFIG_MIGRATION.md)
 - [安装目标清单](docs/personal/INSTALL_TARGETS.json)
 - [设备端快照采集](docs/personal/DEVICE_SNAPSHOT.md)
 - [上车测试记录模板](docs/personal/ROAD_TEST_LOG_TEMPLATE.md)
@@ -48,10 +49,10 @@
 
 来源和署名：
 
-- 基于 ajouatom 维护的 CarrotPilot C3 分支。
+- 基于 ajouatom 维护的 CarrotPilot / CarPad 当前 C3 主源分支。
 - ESCC 及部分 Hyundai/Kia 国内硬件支持参考 fishop / 飞扬（码上飞扬，名称待确认）的实现。
 - CP搭子、Navipilot、在线调参、7000 Web 等功能参考机械小哥 / JixieXiaoGe 的实现，包括 `jixiexiaoge/openpilot` 和 `jixiexiaoge/navipilot`。
-- 同时参考 dhvms/carrotpilot 的历史实现说明。
+- `dhvms/carrotpilot` 当前只作为旧 CarrotPilot 说明和历史实现参考，不作为主底座。
 - 所有上游许可证、免责声明和贡献署名均保留。
 
 下面保留上游 CarrotPilot / openpilot 原始说明。上游文档中的 `openpilot.comma.ai` 是官方 openpilot 安装入口，不是本个人分支的安装目标。

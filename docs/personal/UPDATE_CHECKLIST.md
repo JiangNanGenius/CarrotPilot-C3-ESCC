@@ -15,6 +15,7 @@
 - [ ] 确认车辆仍按纯 CAN 路径运行，不是 CANFD。
 - [ ] 记录 ESCC 相关参数当前值。
 - [ ] 记录 `AlwaysOffline`、`DisableUpdates`、`EnableConnect` 当前值。
+- [ ] 如果当前设备版本能正常跑，先运行 `python3 scripts/personal/params_migration.py export --output /data/media/0/carrotpilot-working-params.json` 导出安全设置白名单。
 - [ ] 如果使用 atune 分支，记录 `CarrotLearningActive`、`CarrotLearningAutoApply` 和当前推荐值快照。
 - [ ] 如果使用 CP搭子，记录手机 APP 版本、导航源、同 WiFi 状态和 7705/7706 连接结果。
 
@@ -159,6 +160,8 @@
 - [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`，逐条处理脚本输出的 Manual checks。
 - [ ] 安装前记录当前可用版本。
 - [ ] 安装前保存设备证据包或设备快照文件。
+- [ ] 如有旧版本设置导出文件，安装后先运行 `python3 scripts/personal/params_migration.py import --input /data/media/0/carrotpilot-working-params.json` dry-run。
+- [ ] dry-run 输出里重点核对 `EnableEscc`、`HyundaiCameraSCC`、`EnableRadarTracks`、`AlwaysOffline`、Seltos/转向/纵控/导航调参项，再决定是否加 `--apply`。
 - [ ] 准备回滚 URL 或回滚分支。
 - [ ] 第一次启动只静态检查，不开车。
 - [ ] 确认无 manager crash、无循环重启、无缺失模块。

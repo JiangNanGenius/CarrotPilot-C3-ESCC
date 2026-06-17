@@ -5,6 +5,7 @@
 - [x] 确认 GitHub 仓库名称、公开或私有状态。
 - [x] 正式创建 GitHub 仓库：`JiangNanGenius/CarrotPilot-C3-ESCC`，公开。
 - [x] 以 `ajouatom/openpilot:c3-wip` 建立本地主底座。
+- [x] 核对来源关系：`ajouatom/openpilot` 作为 CarrotPilot / CarPad 韩国主源底座；`dhvms/carrotpilot` 只做旧版历史参考。
 - [x] 添加本地远端：
   - `origin`: `https://github.com/ajouatom/openpilot.git`
   - `github`: `https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git`
@@ -33,6 +34,7 @@
 - [x] 记录车辆为纯 CAN，不是 CANFD。
 - [ ] 确认 fingerprint、FW 查询、SCC/ESCC 硬件接线方式。
 - [x] 确认代码改动没有覆盖原有 Seltos 2021 条目。
+- [x] 增加安全参数迁移脚本，用于从当前可工作的 fishop / 飞扬版本导出设置白名单，再导入本项目版本。
 - [ ] 确认当前设备上可工作的 CarrotPilot 版本和参数快照。
 - [x] 增加 C3 设备端快照脚本，用于记录安全参数、分支、tag、进程状态和可选 0x2AB / CP搭子消息计数。
 - [x] 设备快照新增隐私安全 CarParams 摘要，用于确认 Seltos 车型路径和 safety 配置。
@@ -144,8 +146,8 @@
 - [x] 增加证据就绪度报告脚本，stable 前可先看阶段缺口再跑严格 gate。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static13` tag。
-- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test5` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static14` tag。
+- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test6` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。

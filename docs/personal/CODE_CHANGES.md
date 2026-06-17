@@ -1138,3 +1138,52 @@
 
 - 包含 Navipilot 驾驶报告实测前的 7705 状态广播守卫。
 - 不代表 stable，不应作为日常稳定安装目标。
+
+## 2026-06-18: 来源关系修正和安全参数迁移
+
+新增文件：
+
+- `scripts/personal/params_migration.py`
+- `docs/personal/CONFIG_MIGRATION.md`
+
+改动文件：
+
+- `scripts/personal/smoke_check.py`
+- `scripts/personal/update_audit.py`
+- `docs/personal/SOURCES_AND_CREDITS.md`
+- `docs/personal/RESEARCH_SNAPSHOT_2026-06-17.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/BRANCH_STRATEGY.md`
+- `docs/personal/UPSTREAM_BASELINES.json`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/TODO.md`
+- `docs/personal/README.md`
+- `README.md`
+
+改动内容：
+
+- 将 `ajouatom/openpilot` 明确记录为当前按 CarrotPilot / CarPad 韩国主源处理的 C3 底座。
+- 将 `dhvms/carrotpilot` 降级为旧 CarrotPilot 参考线，不作为官方主源或当前底座。
+- 记录 `gitop.vip/cp` 实际下载的是 ARM64 ELF 安装器，静态字符串显示它拉取 `https://jihulab.com/fishop/openpilot.git` 的 `cp` 分支。
+- 增加安全参数迁移脚本：
+  - `export` 从当前版本导出设置白名单。
+  - `import` 默认 dry-run，必须加 `--apply` 才写入。
+  - `self-test` 确认安全 key 可导出、敏感 key 会被过滤。
+- 迁移脚本过滤 token、password、private、dongle、github、athena、ssh、api key、oauth、credential、email、account 等敏感 key。
+- 不迁移 `IsOnroad`、`EnableRadarTracksResult` 这类运行状态或启动后检测结果。
+- 将迁移脚本接入 `smoke_check.py`。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static14`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test6`
+
+含义：
+
+- 包含来源关系修正和从 fishop / 飞扬工作版本迁移安全设置的工具。
+- 不代表 stable，不应作为日常稳定安装目标。

@@ -4,7 +4,7 @@
 
 | 功能 | 来源 | 优先级 | 计划 |
 | --- | --- | --- | --- |
-| C3 最新 CarrotPilot 底座 | `ajouatom/openpilot:c3-wip` | P0 | 主线底座 |
+| C3 最新 CarrotPilot / CarPad 底座 | `ajouatom/openpilot:c3-wip` | P0 | 当前按韩国主源处理，作为主线底座 |
 | Seltos 2023 独立车型条目 | 用户车辆 | P0 | 新建车型，初期复用 Seltos 2021 配置 |
 | Seltos 2023 纯 CAN 路径 | 用户车辆 | P0 | 不走 CANFD/HDA2 |
 | ESCC 硬件支持 | `fishop/openpilot:cp` | P0 | 拆成独立补丁 |
@@ -60,4 +60,4 @@ python3 scripts/personal/feature_status_report.py --strict
 | --- | --- | --- |
 | C4 支持 | 上游/机械小哥相关分支 | 用户硬件不是 C4，维护成本可能高 |
 | 非 Seltos 的车型特调 | fishop / jixie | 不影响用户主车时再处理 |
-| dhvms 旧版整包代码 | `dhvms/carrotpilot` | 2024 旧线，只做历史参考 |
+| dhvms 旧版整包代码 | `dhvms/carrotpilot` | 旧 CarrotPilot 参考线，只做历史参考 |

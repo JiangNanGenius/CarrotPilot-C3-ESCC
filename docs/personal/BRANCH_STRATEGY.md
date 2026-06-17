@@ -27,7 +27,7 @@ git remote add dhvms https://github.com/dhvms/carrotpilot.git
 
 `upstream/c3-wip`
 
-只同步 `ajouatom/openpilot:c3-wip`，不手改。
+只同步 `ajouatom/openpilot:c3-wip`，不手改。当前按 CarrotPilot / CarPad 韩国主源处理。
 
 `personal/c3-escc`
 
@@ -39,7 +39,7 @@ git remote add dhvms https://github.com/dhvms/carrotpilot.git
 
 `tracking/fishop-cp`
 
-跟踪 `fishop/openpilot:cp`，用于提取 ESCC 和国内硬件功能。
+跟踪 `fishop/openpilot:cp`，用于提取 ESCC 和国内硬件功能。`gitop.vip/cp` 静态检查显示实际安装器拉取的就是这条线。
 
 `tracking/jixie-atune`
 
@@ -78,5 +78,6 @@ C4 旁支。当前本地暂按 `origin/carrot-wip` 跟踪；后续需要再确�
 
 - 不建议直接 fork `fishop/cp` 当底子，因为它和最新 C3 CarrotPilot 差距较大。
 - 不建议直接把 `fishop/cp` 整个 merge 到 C3 最新版，因为会混入大量非 ESCC 改动。
+- 不建议把 `dhvms/carrotpilot` 当作当前官方底座；它只保留旧版说明和历史实现参考价值。
 - 不建议把 C4 和 C3 放在同一个实车主分支里维护。
 - 不建议自动把上游更新推到设备安装分支。
