@@ -447,3 +447,25 @@
 
 - `carrotpilot-c3-escc-20260617-static3`
 - 含义：包含设备端快照采集脚本，静态检查通过，不代表实车验证或稳定版本。
+
+## 2026-06-17: 安装目标清单和回滚护栏
+
+新增文件：
+
+- `docs/personal/INSTALL_TARGETS.json`
+- `scripts/personal/install_target_check.py`
+
+改动内容：
+
+- 增加机器可检查的安装目标清单，记录当前 `static` tag、未来 `stable` tag、上一稳定 tag 和回滚底座。
+- 当前还没有完成实车验证，所以 `daily_install_target` 必须保持为空。
+- `stable` 发布后必须把 `daily_install_target` 指向 `current_stable_tag`，不能指向开发分支。
+- 没有首个 `stable` 前，回滚底座先保留为 `origin/c3-wip`。
+- 检查脚本会验证 tag 命名、tag 是否存在、tag 是否在当前分支历史里、回滚 ref 是否存在，以及 stable 路测记录是否齐全。
+- 将安装目标检查接入 `scripts/personal/smoke_check.py`。
+- 在安装说明、更新检查单和 TODO 中加入安装目标清单维护步骤。
+
+验证：
+
+- `python3 scripts/personal/install_target_check.py` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。

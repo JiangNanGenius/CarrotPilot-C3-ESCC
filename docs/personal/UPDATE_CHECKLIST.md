@@ -5,6 +5,7 @@
 ## 0. 更新前记录
 
 - [ ] 记录当前稳定 tag。
+- [ ] 查看 `docs/personal/INSTALL_TARGETS.json`，确认 `daily_install_target` 不是日常开发分支。
 - [ ] 记录当前上车分支和 commit。
 - [ ] 备份设备 `/data/params` 关键参数。
 - [ ] 运行 `python3 scripts/personal/device_snapshot.py` 采集设备端安全快照。
@@ -116,6 +117,7 @@
 - [ ] 单独运行 `python3 scripts/personal/escc_offline_preflight.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/cplink_preflight.py` 并确认没有失败项。
 - [ ] 运行 `python3 scripts/personal/settings_cn_audit.py` 并确认高风险中文说明没有缺失。
+- [ ] 运行 `python3 scripts/personal/install_target_check.py` 并确认安装目标、稳定 tag 和回滚基线一致。
 - [ ] 检查 Python 语法。
 - [ ] 检查 JSON 配置格式。
 - [ ] 检查 capnp 是否需要重新生成。
@@ -178,4 +180,5 @@
 - [ ] 发布前再次确认没有个人 token、私钥或设备隐私参数进入仓库。
 - [ ] `stable` 前填写上车测试记录，并通过 `release_gate.py --kind stable --road-test-log <记录文件>`。
 - [ ] 打稳定 tag。
-- [ ] 保留上一稳定 tag。
+- [ ] 更新 `docs/personal/INSTALL_TARGETS.json`，把新稳定 tag 设为 `current_stable_tag` 和 `daily_install_target`。
+- [ ] 保留上一稳定 tag，并写入 `previous_stable_tag`。

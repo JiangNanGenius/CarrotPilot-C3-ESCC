@@ -22,6 +22,8 @@
 - 只代表静态检查通过，不代表实车验证。
 - 目前还没有 `stable` tag。
 
+机器可检查的安装目标记录在 [INSTALL_TARGETS.json](INSTALL_TARGETS.json)。当前 `daily_install_target` 必须为空，因为还没有完成 Seltos 实车验证和 `stable` 发布。
+
 ## 本地预检
 
 更新、合并或上车前先跑：
@@ -51,6 +53,12 @@ python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c
 不要把日常开发分支直接作为长期安装目标。建议只安装已经打过 tag 的测试版或稳定版。
 
 如果为了准备上车静态检查而安装 `static` tag，先把它当作“受控测试版本”，不要把它当作日常稳定版本。
+
+安装前可在本地仓库先确认安装目标清单没有误写成开发分支：
+
+```bash
+python3 scripts/personal/install_target_check.py
+```
 
 ## 建议参数
 
@@ -140,3 +148,5 @@ python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-stat
 ```
 
 升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，再用 `release_gate.py --kind stable --road-test-log <记录文件>` 检查。
+
+发布 `stable` 后再更新 [INSTALL_TARGETS.json](INSTALL_TARGETS.json)：把 `current_stable_tag` 和 `daily_install_target` 指向新的稳定 tag，并把旧稳定 tag 写入 `previous_stable_tag`。没有旧稳定 tag 时，回滚目标至少保留 `rollback_base_ref`。

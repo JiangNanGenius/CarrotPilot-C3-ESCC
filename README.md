@@ -17,6 +17,7 @@
 - `carrotpilot-c3-escc-20260617-static3`
 - 只代表静态检查通过，不代表实车验证或稳定版
 - 还没有 `stable` tag
+- 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空
 
 自动检查：
 
@@ -27,6 +28,7 @@
 安装、更新或上车前先看：
 
 - [安装和回滚说明](docs/personal/INSTALL_AND_ROLLBACK.md)
+- [安装目标清单](docs/personal/INSTALL_TARGETS.json)
 - [设备端快照采集](docs/personal/DEVICE_SNAPSHOT.md)
 - [上车测试记录模板](docs/personal/ROAD_TEST_LOG_TEMPLATE.md)
 - [以后更新检查单](docs/personal/UPDATE_CHECKLIST.md)

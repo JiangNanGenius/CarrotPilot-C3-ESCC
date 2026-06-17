@@ -121,6 +121,7 @@
 - [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight 脚本。
 - [x] 增加上游更新审计脚本，检查三方来源、tracking 分支和高风险目录变化。
 - [x] 增加发布前 release gate，区分 static/test/stable tag。
+- [x] 增加安装目标清单和检查脚本，防止把开发分支当成日常安装目标。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
 - [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260617-static3` tag。
@@ -129,8 +130,9 @@
 - [x] 写上车测试记录模板。
 - [x] 整理公开仓库根 README，明确当前状态、static tag、署名和安全边界。
 - [x] 增加 GitHub Actions `Personal Smoke`，推送后自动跑个人静态检查。
-- [ ] 保留上一个稳定版本。
-- [ ] 只把稳定 tag 作为设备安装目标，不直接安装日常开发分支。
+- [x] 在 `INSTALL_TARGETS.json` 中预留 `previous_stable_tag` 和 `rollback_base_ref`。
+- [x] 只把稳定 tag 作为设备日常安装目标；当前没有稳定 tag，所以 `daily_install_target` 必须为空。
+- [ ] 第一次实车验证通过后，创建首个 `stable` tag，并更新 `INSTALL_TARGETS.json`。
 
 ## P7: 中文翻译和参数说明优化
 

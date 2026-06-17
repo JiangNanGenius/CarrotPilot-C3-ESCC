@@ -317,6 +317,7 @@ def check_py_compile() -> None:
     "scripts/personal/release_gate.py",
     "scripts/personal/settings_cn_audit.py",
     "scripts/personal/device_snapshot.py",
+    "scripts/personal/install_target_check.py",
     "opendbc_repo/opendbc/car/hyundai/values.py",
     "opendbc_repo/opendbc/car/hyundai/interface.py",
     "opendbc_repo/opendbc/car/hyundai/radar_interface.py",
@@ -363,6 +364,7 @@ def main() -> int:
     ("ESCC / Always Offline preflight", lambda: run([sys.executable, "scripts/personal/escc_offline_preflight.py", "--no-manual"], "ESCC / Always Offline preflight")),
     ("CPlink / Navipilot preflight", lambda: run([sys.executable, "scripts/personal/cplink_preflight.py", "--no-manual"], "CPlink / Navipilot preflight")),
     ("Chinese settings audit", lambda: run([sys.executable, "scripts/personal/settings_cn_audit.py"], "Chinese settings audit")),
+    ("Install target manifest", lambda: run([sys.executable, "scripts/personal/install_target_check.py"], "Install target manifest")),
     ("Auto-Tuner learner mock", check_carrot_learning_mock),
     ("Auto-Tuner service mock", check_learning_service_mock),
   ]
