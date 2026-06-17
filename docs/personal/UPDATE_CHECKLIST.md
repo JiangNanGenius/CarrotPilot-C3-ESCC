@@ -67,6 +67,17 @@
 - [ ] 驻车按 Cancel 不触发主动关机。
 - [ ] manager process 没有引用当前代码树不存在的模块。
 
+## 3.6. Auto-Tuner / atune 回归检查
+
+- [ ] `CarrotLearningActive` 默认关闭。
+- [ ] `CarrotLearningAutoApply` 默认关闭。
+- [ ] 默认关闭时不收集学习数据，不写入推荐参数。
+- [ ] 开启学习时，学习器异常不会导致 planner 或 manager 崩溃。
+- [ ] 推荐值和实际控制参数分开保存。
+- [ ] 未经手动确认，不写入 `CruiseMaxVals*`、`TFollowGap*`、`PathOffset`、`SteerActuatorDelay`、`SteerRatioRate`。
+- [ ] Auto-Tuner 改动没有夹带 Web、cluster HUD、地图、Tesla、CANFD/HDA2 等无关功能。
+- [ ] Seltos 2023、ESCC、Always Offline 的默认行为没有变化。
+
 ## 4. Seltos 专项检查
 
 - [ ] Seltos 2023 独立车型仍能识别。

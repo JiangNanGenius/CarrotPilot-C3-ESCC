@@ -8,6 +8,7 @@
 - [当前代码改动记录](CODE_CHANGES.md)
 - [以后更新检查单](UPDATE_CHECKLIST.md)
 - [TODO 主计划](TODO.md)
+- [机械小哥 atune 整合计划](ATUNE_INTEGRATION_PLAN.md)
 
 ## 背景
 
