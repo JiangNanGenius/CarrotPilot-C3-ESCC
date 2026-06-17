@@ -8,10 +8,11 @@ ESCC 和 Always Offline 是主线必保留功能。机械小哥和 fishop 的其
 
 ## 远端
 
-建议远端命名：
+当前远端命名：
 
 ```bash
-git remote add upstream-carrot https://github.com/ajouatom/openpilot.git
+git remote add origin https://github.com/ajouatom/openpilot.git
+git remote add github https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC.git
 git remote add jixie https://github.com/jixiexiaoge/openpilot.git
 git remote add fishop https://jihulab.com/fishop/openpilot.git
 git remote add dhvms https://github.com/dhvms/carrotpilot.git
@@ -21,7 +22,7 @@ git remote add dhvms https://github.com/dhvms/carrotpilot.git
 
 `main`
 
-项目说明和管理文档。可以不放 openpilot 全量代码。
+预留给项目说明和管理文档。当前 GitHub 仓库还没有单独 `main`，默认分支临时使用 `personal/c3-escc-atune`，方便先看到最新整合文档。
 
 `upstream/c3-wip`
 
@@ -33,7 +34,7 @@ git remote add dhvms https://github.com/dhvms/carrotpilot.git
 
 `personal/c3-escc-atune`
 
-在 `personal/c3-escc` 稳定后，继续集成机械小哥 atune/在线调参。
+在 `personal/c3-escc` 稳定保护线上继续集成机械小哥 atune/在线调参。当前 GitHub 默认分支指向这里，但上车安装仍应优先使用验证过的 tag。
 
 `tracking/fishop-cp`
 

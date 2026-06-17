@@ -241,3 +241,30 @@
 验证：
 
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-17: GitHub 私有仓库建立
+
+仓库：
+
+- `https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`
+
+本地远端：
+
+- `github`
+
+已推送分支：
+
+- `personal/c3-escc`
+- `personal/c3-escc-atune`
+
+仓库设置：
+
+- 私有仓库。
+- 默认分支：`personal/c3-escc-atune`。
+- topic：`carrotpilot`, `openpilot`, `c3`, `seltos`, `escc`。
+
+说明：
+
+- GitHub CLI 凭据保存在本机 keyring，不写入代码仓库。
+- 推送前已确认项目文件中没有个人 GitHub token。
+- 设备安装仍建议使用经过验证的 tag，不直接长期安装日常开发分支。

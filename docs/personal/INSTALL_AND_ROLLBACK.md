@@ -8,6 +8,14 @@
 - ESCC：有硬件才开启，默认关闭。
 - 离线模式：`AlwaysOffline` 默认开启。
 
+## GitHub 仓库
+
+- 仓库：`https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`
+- 主用保护分支：`personal/c3-escc`
+- 当前整合分支：`personal/c3-escc-atune`
+
+日常开发和功能整合可以在分支上推进，但设备长期安装目标建议使用经过静态检查和实车验证后的 tag。
+
 ## 安装前
 
 先记录当前设备可用版本和关键参数：

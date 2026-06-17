@@ -1,4 +1,17 @@
-# GitHub 建仓计划
+# GitHub 建仓记录
+
+## 当前状态
+
+- 仓库：`JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`
+- 地址：`https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`
+- 可见性：私有。
+- 本地远端名：`github`
+- 默认分支：`personal/c3-escc-atune`
+- 已推送分支：
+  - `personal/c3-escc`：Seltos 2023 + ESCC + Always Offline 主用保护线。
+  - `personal/c3-escc-atune`：在主用保护线上继续集成 Auto-Tuner。
+- GitHub CLI 已登录 `JiangNanGenius`，凭据保存在本机 GitHub CLI/keyring，不写入仓库。
+- 仓库先从 `ajouatom/openpilot` 种入上游历史，再转为私有仓库；GitHub 页面不再显示 fork 关系，但远端仍保留上游分支历史，方便后续只推个人改动。
 
 ## 建议仓库名
 
@@ -26,7 +39,8 @@
 
 初始仓库直接放可安装的 openpilot 代码分支，并保留个人维护文档：
 
-- `personal/c3-escc`：当前主用代码分支。
+- `personal/c3-escc`：主用保护分支，适合做后续测试 tag 的来源。
+- `personal/c3-escc-atune`：当前整合分支，包含 Auto-Tuner 实验功能。
 - `docs/personal/`：整合计划、更新检查单、来源署名、安装和回滚说明。
 - `.github/ISSUE_TEMPLATE/`：上游更新和功能整合模板。
 - `.github/workflows/upstream-snapshot.yml`：上游分支快照工作流。
@@ -35,18 +49,18 @@
 后续再建立：
 
 - `upstream/c3-wip`
-- `personal/c3-escc-atune`
 - `tracking/fishop-cp`
 - `tracking/jixie-atune`
 
 ## 创建后需要设置
 
-- [ ] 默认分支使用 `main`。
-- [ ] 打开 Issues。
-- [ ] 打开 Actions。
-- [ ] 添加 topic：`carrotpilot`, `openpilot`, `c3`, `seltos`, `escc`。
-- [ ] README 保留上游来源。
-- [ ] 不把安装 URL 指到开发分支。
+- [x] 默认分支使用 `personal/c3-escc-atune`，方便先看到当前整合文档。
+- [x] 添加 topic：`carrotpilot`, `openpilot`, `c3`, `seltos`, `escc`。
+- [x] README 保留上游来源。
+- [x] 不把安装 URL 指到未验证开发分支。
+- [x] Issues 已开启。
+- [x] Actions 已开启。
+- [x] Wiki 已关闭。
 - [ ] 稳定版使用 tag 或 release。
 
 ## 推荐保护规则

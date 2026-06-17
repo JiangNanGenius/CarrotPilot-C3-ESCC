@@ -20,6 +20,7 @@
 - [ ] 拉取 `jixiexiaoge/openpilot:atune`。
 - [ ] 查看三方最近提交标题。
 - [ ] 判断这次是否涉及高风险目录。
+- [ ] 确认个人远端 `github` 可推送。
 
 高风险目录：
 
@@ -149,5 +150,7 @@
 - [ ] 标注来源：CarrotPilot、机械小哥、fishop/码上飞扬。
 - [ ] 标注是否经过 Seltos 实车验证。
 - [ ] 标注是否经过 Always Offline 启动验证。
+- [ ] 推送 `personal/c3-escc` 或 `personal/c3-escc-atune` 到 `github`。
+- [ ] 发布前再次确认没有个人 token、私钥或设备隐私参数进入仓库。
 - [ ] 打稳定 tag。
 - [ ] 保留上一稳定 tag。

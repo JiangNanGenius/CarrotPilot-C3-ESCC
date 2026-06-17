@@ -2,11 +2,12 @@
 
 ## P0: 项目底座
 
-- [ ] 确认 GitHub 仓库名称、公开或私有状态。
-- [ ] 正式创建 GitHub 仓库。
+- [x] 确认 GitHub 仓库名称、公开或私有状态。
+- [x] 正式创建 GitHub 仓库：`JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`，私有。
 - [x] 以 `ajouatom/openpilot:c3-wip` 建立本地主底座。
 - [x] 添加本地远端：
   - `origin`: `https://github.com/ajouatom/openpilot.git`
+  - `github`: `https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC.git`
   - `jixie`: `https://github.com/jixiexiaoge/openpilot.git`
   - `fishop`: `https://jihulab.com/fishop/openpilot.git`
   - `dhvms`: `https://github.com/dhvms/carrotpilot.git`
@@ -108,9 +109,11 @@
 ## P6: 发布和安装
 
 - [x] 增加个人版本地 smoke 检查脚本。
+- [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
+- [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
 - [ ] 给每个可上车版本打 tag，例如 `seltos-c3-escc-YYYYMMDD`.
-- [ ] 写安装说明。
-- [ ] 写回滚说明。
+- [x] 写安装说明。
+- [x] 写回滚说明。
 - [ ] 保留上一个稳定版本。
 - [ ] 只把稳定 tag 作为设备安装目标，不直接安装日常开发分支。
 
