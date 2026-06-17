@@ -1009,3 +1009,34 @@
 
 - `python3 scripts/personal/feature_status_report.py --strict` 通过。
 - `CARROTPILOT_PENDING_RELEASE_TAGS=carrotpilot-c3-escc-20260618-static10,carrotpilot-c3-escc-20260618-test2 python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-18: 中文设置说明第二批
+
+改动文件：
+
+- `selfdrive/carrot_settings.json`
+- `scripts/personal/settings_cn_audit.py`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/TODO.md`
+- `README.md`
+
+改动内容：
+
+- 继续只修改中文显示字段，不修改参数名、范围、默认值或控制逻辑。
+- 补清导航减速、转弯减速、路径颜色、雷达显示、限速摄像头提醒和外部 HUD 相关说明。
+- 对没有外接 HUD/小屏硬件时应保持关闭的项目增加说明。
+- 对 C3/C3 克隆版容易误调的外部 HUD FPS、实时优先级、编码器选项增加提示。
+- 扩展 `settings_cn_audit.py`，把第二批关键说明加入审计，防止后续更新退化。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static11`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test3`
+
+含义：
+
+- 包含第二批中文设置说明优化，静态检查通过，不代表实车验证或稳定版本。
