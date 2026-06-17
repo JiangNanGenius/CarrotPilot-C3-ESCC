@@ -22,7 +22,7 @@
 自动检查：
 
 - GitHub Actions 的 `Personal Smoke` 会在个人分支推送和手动触发时运行。
-- 它覆盖 Seltos 2023、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态和中文设置说明。
+- 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态和中文设置说明。
 - Actions 通过不代表实车验证通过。
 
 安装、更新或上车前先看：

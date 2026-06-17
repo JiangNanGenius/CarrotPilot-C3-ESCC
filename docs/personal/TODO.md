@@ -33,7 +33,8 @@
 - [x] 确认代码改动没有覆盖原有 Seltos 2021 条目。
 - [ ] 确认当前设备上可工作的 CarrotPilot 版本和参数快照。
 - [x] 增加 C3 设备端快照脚本，用于记录安全参数、分支、tag、进程状态和可选 0x2AB / CP搭子消息计数。
-- [ ] 列出并修改 Seltos 2021/2023 相关 Hyundai 文件：
+- [x] 增加 Seltos 2023 车型复用检查脚本，防止更新后误改 CANFD/HDA2 或打破 2021 兼容路径。
+- [x] 列出 Seltos 2021/2023 相关 Hyundai 文件；当前只有 `values.py` 需要显式 2023 车型条目，其它文件保持通用 Hyundai/Kia CAN 路径：
   - `opendbc_repo/opendbc/car/hyundai/values.py`
   - `opendbc_repo/opendbc/car/hyundai/interface.py`
   - `opendbc_repo/opendbc/car/hyundai/carstate.py`
@@ -41,6 +42,7 @@
   - `opendbc_repo/opendbc/car/hyundai/hyundaican.py`
   - `opendbc_repo/opendbc/car/hyundai/hyundaicanfd.py`
   - `opendbc_repo/opendbc/car/hyundai/radar_interface.py`
+  - `opendbc_repo/opendbc/car/hyundai/fingerprints.py`
 
 ## P2: ESCC 必迁
 

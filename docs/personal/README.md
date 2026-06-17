@@ -49,11 +49,14 @@ python3 scripts/personal/escc_offline_preflight.py
 python3 scripts/personal/cplink_preflight.py
 python3 scripts/personal/settings_cn_audit.py
 python3 scripts/personal/install_target_check.py
+python3 scripts/personal/seltos_profile_check.py
 ```
 
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
 
 其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
+
+`seltos_profile_check.py` 专门守住 Seltos 2023 当前策略：经典 CAN、复用 Seltos 2021 harness/specs/flags、不引入 CANFD/HDA2 特判、不复制未验证 FW fingerprint。
 
 安装目标以 [INSTALL_TARGETS.json](INSTALL_TARGETS.json) 为准：当前只有 `static` 预检 tag，没有 `stable` tag，所以日常稳定安装目标必须保持为空。
 

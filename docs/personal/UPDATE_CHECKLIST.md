@@ -103,6 +103,7 @@
 ## 4. Seltos 专项检查
 
 - [ ] Seltos 2023 独立车型仍能识别。
+- [ ] 运行 `python3 scripts/personal/seltos_profile_check.py`，确认 Seltos 2023 仍严格复用 Seltos 2021 经典 CAN 配置。
 - [ ] Seltos 2023 默认配置仍等同已验证的 Seltos 2021 路径。
 - [ ] 不引入只适合其它 Hyundai/Kia 车型的默认值。
 - [ ] 不默认开启 HDA2/CANFD 路径。
@@ -118,6 +119,7 @@
 - [ ] 单独运行 `python3 scripts/personal/cplink_preflight.py` 并确认没有失败项。
 - [ ] 运行 `python3 scripts/personal/settings_cn_audit.py` 并确认高风险中文说明没有缺失。
 - [ ] 运行 `python3 scripts/personal/install_target_check.py` 并确认安装目标、稳定 tag 和回滚基线一致。
+- [ ] 运行 `python3 scripts/personal/seltos_profile_check.py` 并确认车型配置没有被更新合并改成 CANFD/HDA2 或其它车型特判。
 - [ ] 检查 Python 语法。
 - [ ] 检查 JSON 配置格式。
 - [ ] 检查 capnp 是否需要重新生成。

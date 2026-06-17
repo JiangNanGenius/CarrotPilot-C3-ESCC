@@ -469,3 +469,25 @@
 
 - `python3 scripts/personal/install_target_check.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-17: Seltos 2023 车型复用护栏
+
+新增文件：
+
+- `scripts/personal/seltos_profile_check.py`
+
+改动内容：
+
+- 增加 Seltos 2023 专项静态检查，防止后续更新合并时把用户主车路径改歪。
+- 检查 `CAR.KIA_SELTOS_2023` 仍使用经典 CAN `HyundaiPlatformConfig`，不能变成 `HyundaiCanFDPlatformConfig`。
+- 检查 Seltos 2023 的 harness、物理参数和 flags 仍与 `CAR.KIA_SELTOS` 完全一致。
+- 检查 Seltos 2023 不默认设置 CANFD、HDA2、Camera SCC、Radar SCC 相关 flag。
+- 检查当前没有复制未经实车 FW dump 证明的 Seltos 2023 fingerprint。
+- 检查 Hyundai 目录里没有新增未审查的 `KIA_SELTOS_2023` 特判引用。
+- 将脚本接入 `scripts/personal/smoke_check.py`。
+- 更新车辆档案、更新检查单和 TODO。
+
+验证：
+
+- `python3 scripts/personal/seltos_profile_check.py` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。

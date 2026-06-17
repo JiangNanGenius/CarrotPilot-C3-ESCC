@@ -45,9 +45,10 @@ ESCC 必须作为可开关功能迁入，默认关闭，避免影响其它车型
 - [x] 复用 Seltos 2021 DBC 映射。
 - [x] 复用 Seltos 2021 lateral/longitudinal 基础参数。
 - [x] 复用 Seltos 2021 safety 基础配置，但明确不设置 CANFD/HDA2 flag。
+- [x] 增加 `scripts/personal/seltos_profile_check.py`，自动检查 Seltos 2023 仍是经典 CAN、仍复用 Seltos 2021 harness/specs/flags。
 - [ ] 加入 Seltos 2023 fingerprint/FW；如果暂时没有完整 dump，先用 2021 兼容路径并记录 TODO。
-- [ ] 保证 Seltos 2021 原车型不受影响。
-- [ ] 在 ESCC 参数开启前，Seltos 2023 行为应等同原上游 CAN Seltos 路径。
+- [x] 保证 Seltos 2021 原车型不受影响。
+- [x] 在 ESCC 参数开启前，Seltos 2023 静态配置等同原上游 CAN Seltos 路径。
 
 ## 当前代码改动
 
@@ -68,6 +69,14 @@ ESCC 必须作为可开关功能迁入，默认关闭，避免影响其它车型
 - 未改 DBC。
 - 未加 CANFD/HDA2。
 - 未复制 FW fingerprint，避免没有实车 dump 时制造 2021/2023 自动识别歧义。
+
+自动检查：
+
+- `scripts/personal/seltos_profile_check.py`
+- 检查 `CAR.KIA_SELTOS_2023` 必须继续使用 `HyundaiPlatformConfig`，不能变成 `HyundaiCanFDPlatformConfig`。
+- 检查 2023 的 harness、物理参数、flags 必须和 `CAR.KIA_SELTOS` 一致。
+- 检查 2023 不出现 CANFD/HDA2/Camera SCC/Radar SCC 这类默认 flag。
+- 检查当前没有复制未经实车 dump 证明的 `CAR.KIA_SELTOS_2023` FW fingerprint。
 
 ## 优先测试路径
 
@@ -90,6 +99,8 @@ ESCC 必须作为可开关功能迁入，默认关闭，避免影响其它车型
 - `opendbc_repo/opendbc/car/hyundai/fingerprints.py`
 - `opendbc_repo/opendbc/dbc/`
 - `panda/board/safety/safety_hyundai*.h`
+
+当前 Seltos 2023 只有 `values.py` 需要显式车型条目。其它 Hyundai 文件由通用 Hyundai/Kia CAN 路径和 ESCC 参数开关覆盖；如果以后上游合并后出现新的 `KIA_SELTOS_2023` 特判，必须先重新审查是否仍符合纯 CAN 复用策略。
 
 ## 明确不适用
 
