@@ -80,6 +80,7 @@
 - [ ] 开启后跳过在线注册。
 - [ ] 开启后不启动后台更新。
 - [ ] 开启后不启动远程连接和上传流程。
+- [ ] 设备快照里 `offline_forbidden_processes_seen=False`，且 `updated_process_seen`、`connect_process_seen`、`uploader_process_seen` 均为 `False`。
 - [ ] 驻车按 Cancel 不触发主动关机。
 - [ ] manager process 没有引用当前代码树不存在的模块。
 
@@ -200,6 +201,7 @@
 - [ ] 如测试 Navipilot 驾驶报告，确认 APP 端先收到 7705 的 `IsOnroad=True` 和车速字段，再在 onroad 后开始采集，并在停车后生成评分。
 - [ ] 如测试 CP搭子，运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-cplink-sample --require-navipilot-live-check`。
 - [ ] 如测试只读 AmapNavi 状态桥，停车开启 `EnableAmapNaviStatus=1` 后采样，并运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-amap-navi-sample`。
+- [ ] 如验证 C3 克隆版离线稳定性，运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-offline-process-guard`。
 - [ ] 如证据包还没满足 stable，先看 `evidence_readiness_report.py` 输出的缺口，不要直接打 stable tag。
 
 ## 7. 路测分级
@@ -240,7 +242,7 @@
 - [ ] `stable` 前填写上车测试记录，并把 C3 快照文件保存到电脑本地。
 - [ ] 如使用证据包，把 `road-test-log-draft.md` 和 `device-snapshot.md` 一起保存到电脑本地。
 - [ ] 先运行 `python3 scripts/personal/evidence_readiness_report.py --evidence-dir <证据包目录>`，确认 stable 必需阶段都通过。
-- [ ] 运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-carparams-summary --require-escc-sample`。
+- [ ] 运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-carparams-summary --require-offline-process-guard --require-escc-sample`。
 - [ ] 通过 `release_gate.py --kind stable --evidence-dir <证据包目录>`。
 - [ ] 打稳定 tag。
 - [ ] 更新 `docs/personal/INSTALL_TARGETS.json`，把新稳定 tag 设为 `current_stable_tag` 和 `daily_install_target`。

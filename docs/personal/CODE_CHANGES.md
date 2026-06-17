@@ -1,5 +1,51 @@
 # 当前代码改动记录
 
+## 2026-06-18: Always Offline 进程证据守卫
+
+改动文件：
+
+- `scripts/personal/device_snapshot.py`
+- `scripts/personal/road_test_evidence_check.py`
+- `scripts/personal/evidence_readiness_report.py`
+- `scripts/personal/release_gate.py`
+- `scripts/personal/collect_real_car_evidence.py`
+- `scripts/personal/smoke_check.py`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/README.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `README.md`
+
+改动内容：
+
+- 设备快照新增 `Process Summary`，机器可读地记录关键进程是否出现。
+- 新增 `process_snapshot_available`、`updated_process_seen`、`connect_process_seen`、`uploader_process_seen` 和 `offline_forbidden_processes_seen` 字段。
+- `road_test_evidence_check.py` 新增 `--require-offline-process-guard`，要求 `AlwaysOffline=1`、`EnableConnect=0`、可读取进程列表，且更新/远程连接/上传进程都不可见。
+- `evidence_readiness_report.py` 把 `Always Offline process guard` 设为 stable 必需阶段。
+- `release_gate.py --kind stable` 自动要求 `--require-offline-process-guard`。
+- 证据包和文档更新 stable 校验命令，避免 C3 克隆版 ACC/CAN 断电使用场景漏掉离线模式证据。
+
+刻意没有改：
+
+- 没有改 manager 启动逻辑。
+- 没有改 AlwaysOffline 默认值。
+- 没有用进程名判断替代实车 ACC/CAN 断电重启验证；断电重启仍需人工实际确认。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static25`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test17`
+
+含义：
+
+- 包含 Always Offline 进程证据守卫，静态检查通过，不代表实车断电重启或稳定版本。
+
 ## 2026-06-18: AmapNavi 只读状态桥实机采样证据
 
 改动文件：

@@ -62,6 +62,7 @@ def check_device_snapshot(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=False,
     require_cplink_sample=False,
     require_amap_navi_sample=False,
+    require_offline_guard=False,
     require_carparams=False,
   )
   return f"validated snapshots: {len(snapshots)}"
@@ -74,6 +75,7 @@ def check_carparams(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=False,
     require_cplink_sample=False,
     require_amap_navi_sample=False,
+    require_offline_guard=False,
     require_carparams=True,
   )
   return "decoded Seltos CarParams summary present"
@@ -86,6 +88,7 @@ def check_escc_sample(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=True,
     require_cplink_sample=False,
     require_amap_navi_sample=False,
+    require_offline_guard=False,
     require_carparams=False,
   )
   return "EnableEscc=1 sample with escc_0x2ab_bus0 > 0 present"
@@ -98,6 +101,7 @@ def check_cplink_sample(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=False,
     require_cplink_sample=True,
     require_amap_navi_sample=False,
+    require_offline_guard=False,
     require_carparams=False,
   )
   return "CP搭子/Navipilot sampled navigation data present"
@@ -110,9 +114,23 @@ def check_amap_navi_sample(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=False,
     require_cplink_sample=False,
     require_amap_navi_sample=True,
+    require_offline_guard=False,
     require_carparams=False,
   )
   return "read-only AmapNavi status bridge sample present"
+
+
+def check_offline_process_guard(snapshot_paths: Sequence[str]) -> str:
+  rtc.validate_snapshots(
+    snapshot_paths,
+    require_device_snapshot=True,
+    require_escc_sample=False,
+    require_cplink_sample=False,
+    require_amap_navi_sample=False,
+    require_offline_guard=True,
+    require_carparams=False,
+  )
+  return "AlwaysOffline active with no updated/connect/uploader process visible"
 
 
 def check_navipilot_live(navipilot_paths: Sequence[str]) -> str:
@@ -139,6 +157,7 @@ def check_stable_ready(road_test_log: Optional[str], snapshot_paths: Sequence[st
     require_escc_sample=True,
     require_cplink_sample=False,
     require_amap_navi_sample=False,
+    require_offline_guard=True,
     require_carparams=True,
   )
   return "stable evidence gate requirements are satisfied"
@@ -166,6 +185,7 @@ def build_results(
     stage_result("evidence inputs", True, lambda: (_raise(input_error) if input_error else check_inputs(selected_log, snapshot_paths))),
     stage_result("device snapshot", True, lambda: check_device_snapshot(snapshot_paths)),
     stage_result("CarParams summary", True, lambda: check_carparams(snapshot_paths)),
+    stage_result("Always Offline process guard", True, lambda: check_offline_process_guard(snapshot_paths)),
     stage_result("ESCC 0x2AB sample", True, lambda: check_escc_sample(snapshot_paths)),
     stage_result("completed road-test log", True, lambda: check_road_log(selected_log)),
     stage_result("stable gate readiness", True, lambda: check_stable_ready(selected_log, snapshot_paths)),
@@ -233,6 +253,11 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `HyundaiCameraSCC` | 0 |
 | `EnableAmapNaviStatus` | 1 |
 | `CarParams` | 200 bytes, sha256:abc |
+| `process_snapshot_available` | True |
+| `offline_forbidden_processes_seen` | False |
+| `updated_process_seen` | False |
+| `connect_process_seen` | False |
+| `uploader_process_seen` | False |
 | `enabled` | True |
 | `ok` | True |
 | `escc_0x2ab_bus0` | 12 |

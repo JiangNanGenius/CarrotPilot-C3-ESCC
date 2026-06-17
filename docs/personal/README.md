@@ -107,6 +107,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --road-test-log docs/personal/road_tests/你的记录.md \
   --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
   --require-device-snapshot \
+  --require-offline-process-guard \
   --require-escc-sample
 ```
 
@@ -122,6 +123,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
   --require-carparams-summary \
+  --require-offline-process-guard \
   --require-escc-sample
 ```
 

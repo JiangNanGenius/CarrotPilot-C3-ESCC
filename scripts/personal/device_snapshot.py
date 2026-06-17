@@ -50,6 +50,24 @@ PARAM_ROOTS = [
   Path("/persist/comma/params/d"),
 ]
 
+PROCESS_PATTERNS = {
+  "manager_process_seen": r"(^|[ /])manager(\.py)?($|[ \t])",
+  "controlsd_process_seen": r"(^|[ /])controlsd(\.py)?($|[ \t])",
+  "plannerd_process_seen": r"(^|[ /])plannerd(\.py)?($|[ \t])",
+  "radard_process_seen": r"(^|[ /])radard(\.py)?($|[ \t])",
+  "carrot_man_process_seen": r"(^|[ /])carrot_man(\.py)?($|[ \t])",
+  "carrot_server_process_seen": r"(^|[ /])carrot_server(\.py)?($|[ \t])",
+  "updated_process_seen": r"(^|[ /])updated(\.py)?($|[ \t])",
+  "connect_process_seen": r"(^|[ /])(manage_athenad|athenad)($|[ \t])",
+  "uploader_process_seen": r"(^|[ /])uploader($|[ \t])",
+}
+
+OFFLINE_FORBIDDEN_PROCESS_KEYS = [
+  "updated_process_seen",
+  "connect_process_seen",
+  "uploader_process_seen",
+]
+
 
 def run(cmd: Sequence[str], cwd: Optional[Path] = None) -> Tuple[int, str]:
   try:
@@ -175,24 +193,23 @@ def process_snapshot() -> List[str]:
   code, output = run(["ps", "-A"])
   if code != 0:
     return ["<ps unavailable>"]
-  patterns = [
-    r"(^|[ /])manager(\.py)?($|[ \t])",
-    r"(^|[ /])controlsd(\.py)?($|[ \t])",
-    r"(^|[ /])plannerd(\.py)?($|[ \t])",
-    r"(^|[ /])radard(\.py)?($|[ \t])",
-    r"(^|[ /])carrot_man(\.py)?($|[ \t])",
-    r"(^|[ /])carrot_server(\.py)?($|[ \t])",
-    r"(^|[ /])updated(\.py)?($|[ \t])",
-    r"(^|[ /])manage_athenad($|[ \t])",
-    r"(^|[ /])uploader($|[ \t])",
-  ]
   lines = []
   for line in output.splitlines():
     if "py_compile" in line or "device_snapshot.py" in line:
       continue
-    if any(re.search(pattern, line) for pattern in patterns):
+    if any(re.search(pattern, line) for pattern in PROCESS_PATTERNS.values()):
       lines.append(line.strip())
   return lines or ["<no matching processes>"]
+
+
+def process_diagnostics(lines: Sequence[str]) -> Dict[str, object]:
+  text = "\n".join(lines)
+  available = "<ps unavailable>" not in text
+  values: Dict[str, object] = {"process_snapshot_available": available}
+  for key, pattern in PROCESS_PATTERNS.items():
+    values[key] = available and bool(re.search(pattern, text))
+  values["offline_forbidden_processes_seen"] = any(bool(values[key]) for key in OFFLINE_FORBIDDEN_PROCESS_KEYS)
+  return values
 
 
 def safe_attr(obj: object, name: str, default: object = None) -> object:
@@ -387,6 +404,8 @@ def build_report(sample_seconds: int) -> str:
   safe_params = read_safe_params()
   binary_params = read_binary_param_summaries()
   car_params = summarize_car_params()
+  processes = process_snapshot()
+  process_summary = process_diagnostics(processes)
   sample = sample_messaging(sample_seconds)
 
   lines: List[str] = []
@@ -420,8 +439,11 @@ def build_report(sample_seconds: int) -> str:
   lines.append("## CarParams Summary")
   lines.extend(markdown_table(car_params))
   lines.append("")
+  lines.append("## Process Summary")
+  lines.extend(markdown_table(process_summary))
+  lines.append("")
   lines.append("## Process Snapshot")
-  for line in process_snapshot():
+  for line in processes:
     lines.append(f"- `{line}`")
   lines.append("")
   lines.append("## Messaging Sample")

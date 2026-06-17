@@ -4,8 +4,8 @@
   "device": "C3 Chinese clone, not C3X",
   "vehicle": "Kia Seltos 2023 pure CAN",
   "daily_install_target": null,
-  "current_static_tag": "carrotpilot-c3-escc-20260618-static24",
-  "current_test_tag": "carrotpilot-c3-escc-20260618-test16",
+  "current_static_tag": "carrotpilot-c3-escc-20260618-static25",
+  "current_test_tag": "carrotpilot-c3-escc-20260618-test17",
   "current_stable_tag": null,
   "previous_stable_tag": null,
   "rollback_base_ref": "origin/c3-wip",
@@ -14,7 +14,7 @@
     "Do not use daily development branches as long-term on-device install targets.",
     "A static tag only proves local static checks; it is not a road-tested stable version.",
     "A stable tag requires a completed road-test log and a recorded previous stable or rollback base.",
-    "A stable tag also requires a checked C3 device snapshot with ESCC 0x2AB evidence.",
+    "A stable tag also requires a checked C3 device snapshot with ESCC 0x2AB evidence and offline process guard evidence.",
     "Until current_stable_tag is set, daily_install_target must stay null."
   ]
 }

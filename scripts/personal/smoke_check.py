@@ -451,6 +451,11 @@ def check_c3_static_dry_run() -> None:
   for key in [
     "CarParamsDecoded",
     "EnableAmapNaviStatus",
+    "process_snapshot_available",
+    "offline_forbidden_processes_seen",
+    "updated_process_seen",
+    "connect_process_seen",
+    "uploader_process_seen",
     "cplink_updates_seen",
     "cplink_speed_limit_seen",
     "last_navInstructionCarrot",

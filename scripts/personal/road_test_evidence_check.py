@@ -239,6 +239,15 @@ def require_carparams_summary(values: Dict[str, str], label: str) -> None:
     raise EvidenceError(f"{label}: safetyConfigs summary is missing")
 
 
+def require_offline_process_guard(values: Dict[str, str], label: str) -> None:
+  require_bool(values, "AlwaysOffline", True, label)
+  require_bool(values, "EnableConnect", False, label)
+  require_bool(values, "process_snapshot_available", True, label)
+  require_bool(values, "offline_forbidden_processes_seen", False, label)
+  for key in ["updated_process_seen", "connect_process_seen", "uploader_process_seen"]:
+    require_bool(values, key, False, label)
+
+
 def validate_snapshot_text(name: str, text: str) -> Dict[str, str]:
   if "# CarrotPilot-C3-ESCC Device Snapshot" not in text:
     raise EvidenceError(f"{name}: not a CarrotPilot-C3-ESCC device snapshot")
@@ -255,6 +264,11 @@ def validate_snapshot_text(name: str, text: str) -> Dict[str, str]:
     "CanfdHDA2",
     "HyundaiCameraSCC",
     "CarParams",
+    "process_snapshot_available",
+    "offline_forbidden_processes_seen",
+    "updated_process_seen",
+    "connect_process_seen",
+    "uploader_process_seen",
     "enabled",
     "ok",
     "escc_0x2ab_bus0",
@@ -267,6 +281,7 @@ def validate_snapshot_text(name: str, text: str) -> Dict[str, str]:
     raise EvidenceError(f"{name}: snapshot must include a real branch and commit")
   require_bool(values, "AlwaysOffline", True, name)
   require_bool(values, "EnableConnect", False, name)
+  require_bool(values, "process_snapshot_available", True, name)
   require_bool(values, "CanfdHDA2", False, name)
   require_bool(values, "HyundaiCameraSCC", False, name)
   if values.get("CarParams") == "<missing>":
@@ -280,6 +295,7 @@ def validate_snapshots(
   require_escc_sample: bool,
   require_cplink_sample: bool,
   require_amap_navi_sample: bool,
+  require_offline_guard: bool,
   require_carparams: bool,
 ) -> List[Dict[str, str]]:
   if require_device_snapshot and not snapshot_paths:
@@ -354,6 +370,21 @@ def validate_snapshots(
         continue
     if not found:
       raise EvidenceError("evidence requires a decoded Seltos CarParams summary")
+
+  if require_offline_guard:
+    found = False
+    for values in snapshots:
+      try:
+        require_offline_process_guard(values, "offline process guard")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError(
+        "offline evidence requires AlwaysOffline=1, EnableConnect=0, process snapshot available, "
+        "and no updated/connect/uploader process visible"
+      )
   return snapshots
 
 
@@ -442,6 +473,11 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `HyundaiCameraSCC` | 0 |
 | `EnableAmapNaviStatus` | 1 |
 | `CarParams` | 200 bytes, sha256:abc |
+| `process_snapshot_available` | True |
+| `offline_forbidden_processes_seen` | False |
+| `updated_process_seen` | False |
+| `connect_process_seen` | False |
+| `uploader_process_seen` | False |
 | `enabled` | True |
 | `ok` | True |
 | `escc_0x2ab_bus0` | 12 |
@@ -478,6 +514,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_escc_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_cplink_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_amap_navi_sample=True)
+  validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_offline_guard=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_carparams=True)
   validate_navipilot_live_checks_from_objects([good_navipilot], require_navipilot_live_check=True)
 
@@ -500,6 +537,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
       require_escc_sample=True,
       require_cplink_sample=True,
       require_amap_navi_sample=True,
+      require_offline_guard=True,
       require_carparams=True,
     )
     validate_navipilot_live_checks(bundle_navipilot, require_navipilot_live_check=True)
@@ -524,6 +562,7 @@ def validate_snapshots_from_text(
   require_escc_sample: bool = False,
   require_cplink_sample: bool = False,
   require_amap_navi_sample: bool = False,
+  require_offline_guard: bool = False,
   require_carparams: bool = False,
 ) -> List[Dict[str, str]]:
   snapshots = [validate_snapshot_text(name, text) for name, text in items]
@@ -577,6 +616,17 @@ def validate_snapshots_from_text(
         continue
     if not found:
       raise EvidenceError("self-test failed: CarParams summary was not detected")
+  if require_offline_guard:
+    found = False
+    for values in snapshots:
+      try:
+        require_offline_process_guard(values, "self-test snapshot")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError("self-test failed: offline process guard was not detected")
   return snapshots
 
 
@@ -614,6 +664,7 @@ def main() -> int:
   parser.add_argument("--require-escc-sample", action="store_true", help="require EnableEscc=1 and sampled 0x2AB bus0 count > 0")
   parser.add_argument("--require-cplink-sample", action="store_true", help="require a sampled CP搭子/Navipilot update with speed/TBT/SDI/GPS data")
   parser.add_argument("--require-amap-navi-sample", action="store_true", help="require a sampled read-only AmapNavi status bridge update")
+  parser.add_argument("--require-offline-process-guard", action="store_true", help="require AlwaysOffline with no updated/connect/uploader process visible")
   parser.add_argument("--require-navipilot-live-check", action="store_true", help="require C3-side 7000/7705 Navipilot endpoint check to pass")
   parser.add_argument("--require-carparams-summary", action="store_true", help="require a decoded Seltos CarParams summary")
   parser.add_argument("--self-test", action="store_true", help="run built-in parser checks")
@@ -638,6 +689,7 @@ def main() -> int:
       args.require_escc_sample,
       args.require_cplink_sample,
       args.require_amap_navi_sample,
+      args.require_offline_process_guard,
       args.require_carparams_summary,
     )
     navipilot_reports = validate_navipilot_live_checks(navipilot_paths, args.require_navipilot_live_check)
@@ -657,6 +709,8 @@ def main() -> int:
       print("CPlink sample: required and present")
     if args.require_amap_navi_sample:
       print("AmapNavi sample: required and present")
+    if args.require_offline_process_guard:
+      print("Offline process guard: required and present")
     if args.require_carparams_summary:
       print("CarParams summary: required and present")
     if args.require_navipilot_live_check:
