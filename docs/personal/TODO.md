@@ -12,7 +12,7 @@
   - `dhvms`: `https://github.com/dhvms/carrotpilot.git`
 - [x] 建立当前开发分支：
   - `personal/c3-escc`
-- [ ] 建立完整长期分支：
+- [x] 建立完整长期分支：
   - `upstream/c3-wip`
   - `personal/c3-escc`
   - `personal/c3-escc-atune`
@@ -100,7 +100,8 @@
 ## P5: C4 旁支
 
 - [ ] 不作为主线目标。
-- [ ] 建立 `tracking/c4` 或 `experimental/c4` 分支。
+- [x] 建立 `tracking/c4` 分支，暂按 `origin/carrot-wip` 跟踪。
+- [ ] 后续确认 `origin/carrot-wip` 是否就是需要维护的 C4 线。
 - [ ] 只在低成本时跟踪，不影响 C3/Seltos/ESCC 主线。
 
 ## P6: 发布和安装

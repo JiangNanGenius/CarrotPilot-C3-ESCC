@@ -47,9 +47,9 @@ git remote add dhvms https://github.com/dhvms/carrotpilot.git
 
 跟踪 CP搭子 / Navipilot 文档和应用方向，不一定直接合进 openpilot 代码。
 
-`experimental/c4`
+`tracking/c4`
 
-C4 旁支。只有在维护成本不高时跟进。
+C4 旁支。当前本地暂按 `origin/carrot-wip` 跟踪；后续需要再确认这是否就是目标 C4 线。只有在维护成本不高时跟进。
 
 ## 合并顺序
 
