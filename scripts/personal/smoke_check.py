@@ -320,6 +320,7 @@ def check_py_compile() -> None:
     "scripts/personal/install_target_check.py",
     "scripts/personal/seltos_profile_check.py",
     "scripts/personal/road_test_evidence_check.py",
+    "scripts/personal/c3_static_check.py",
     "opendbc_repo/opendbc/car/hyundai/values.py",
     "opendbc_repo/opendbc/car/hyundai/interface.py",
     "opendbc_repo/opendbc/car/hyundai/radar_interface.py",

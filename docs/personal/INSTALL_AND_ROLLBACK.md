@@ -18,7 +18,7 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260618-static1`
+- `carrotpilot-c3-escc-20260618-static2`
 - 只代表静态检查通过，不代表实车验证。
 - 目前还没有 `stable` tag。
 
@@ -59,6 +59,17 @@ python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c
 ```bash
 python3 scripts/personal/install_target_check.py
 ```
+
+安装到 C3 后，可以在设备上运行静态检查向导。它会确认当前 tag、跑预检、检查建议参数，并生成设备快照：
+
+```bash
+cd /data/openpilot
+python3 scripts/personal/c3_static_check.py \
+  --output /data/media/0/carrotpilot-c3-escc-static-check.md \
+  --snapshot-output /data/media/0/carrotpilot-c3-escc-snapshot.md
+```
+
+停车并准备采样 ESCC 0x2AB 时，再加 `--sample-seconds 20`。
 
 ## 建议参数
 

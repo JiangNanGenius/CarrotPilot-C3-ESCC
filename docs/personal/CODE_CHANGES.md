@@ -592,3 +592,40 @@
 
 - `python3 scripts/personal/update_audit.py --baseline-file docs/personal/UPSTREAM_BASELINES.json --strict` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-18: C3 静态检查向导
+
+新增文件：
+
+- `scripts/personal/c3_static_check.py`
+
+改动内容：
+
+- 增加 C3 设备端静态检查向导，默认只读，不修改参数。
+- 检查当前安装是否匹配 `INSTALL_TARGETS.json` 的 `current_static_tag`。
+- 运行安装目标、Seltos 车型复用、ESCC / Always Offline、CP搭子静态预检。
+- 读取安全参数并提示是否符合停车上车前建议：
+  - `AlwaysOffline=1`
+  - `EnableConnect=0`
+  - `EnableEscc=0`
+  - `HyundaiCameraSCC=0`
+  - `CanfdHDA2=0`
+  - `EnableRadarTracks=0`
+- 调用 `device_snapshot.py` 生成隐私安全快照。
+- 生成 `/data/media/0/carrotpilot-c3-escc-static-check.md` 检查报告。
+- 将脚本加入 `smoke_check.py` 的 Python 语法检查。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static2`
+
+含义：
+
+- 包含 C3 静态检查向导。
+- 静态检查通过，不代表实车验证。
+- 还没有 `stable` tag。
+
+验证：
+
+- `python3 scripts/personal/c3_static_check.py --output /tmp/carrotpilot-c3-escc-static-check.md --snapshot-output /tmp/carrotpilot-c3-escc-snapshot.md --allow-branch --skip-preflight` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。

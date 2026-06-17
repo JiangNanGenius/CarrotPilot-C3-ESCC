@@ -24,6 +24,12 @@ python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c
 python3 scripts/personal/device_snapshot.py --sample-seconds 20 --output /data/media/0/carrotpilot-c3-escc-snapshot.md
 ```
 
+安装后也可以运行更完整的静态检查向导，它会调用本快照脚本并生成一份检查报告：
+
+```bash
+python3 scripts/personal/c3_static_check.py --output /data/media/0/carrotpilot-c3-escc-static-check.md
+```
+
 准备升 `stable` 时，把这个 markdown 文件保存到电脑本地，后续传给：
 
 ```bash
