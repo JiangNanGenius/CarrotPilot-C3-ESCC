@@ -52,13 +52,14 @@ python3 scripts/personal/settings_cn_audit.py
 python3 scripts/personal/install_target_check.py
 python3 scripts/personal/seltos_profile_check.py
 python3 scripts/personal/road_test_evidence_check.py --self-test
+python3 scripts/personal/evidence_readiness_report.py --self-test
 python3 scripts/personal/c3_static_check.py --output /tmp/carrotpilot-c3-escc-static-check.md --snapshot-output /tmp/carrotpilot-c3-escc-snapshot.md --allow-branch --skip-preflight
 python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpilot-c3-escc-evidence --allow-branch --skip-preflight --force
 ```
 
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
 
-其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、功能边界守卫、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
+其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、功能边界守卫、证据就绪度报告、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
 
 `seltos_profile_check.py` 专门守住 Seltos 2023 当前策略：经典 CAN、复用 Seltos 2021 harness/specs/flags、不引入 CANFD/HDA2 特判、不复制未验证 FW fingerprint。
 
@@ -83,6 +84,11 @@ python3 scripts/personal/road_test_evidence_check.py \
 ```
 
 如果使用一键证据采集器，可以直接传整个证据目录：
+
+```bash
+python3 scripts/personal/evidence_readiness_report.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS
+```
 
 ```bash
 python3 scripts/personal/road_test_evidence_check.py \

@@ -101,6 +101,14 @@ Rollback target recorded: PENDING
 把本模板复制成实际记录并填好后，在电脑本地仓库运行：
 
 ```bash
+python3 scripts/personal/evidence_readiness_report.py \
+  --road-test-log docs/personal/road_tests/你的记录.md \
+  --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md
+```
+
+这个报告用于看阶段缺口。准备正式升 `stable` 时，再运行严格校验：
+
+```bash
 python3 scripts/personal/road_test_evidence_check.py \
   --road-test-log docs/personal/road_tests/你的记录.md \
   --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
@@ -109,6 +117,11 @@ python3 scripts/personal/road_test_evidence_check.py \
 ```
 
 如果你用 `collect_real_car_evidence.py` 生成了完整证据包，解压后可直接传目录：
+
+```bash
+python3 scripts/personal/evidence_readiness_report.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS
+```
 
 ```bash
 python3 scripts/personal/road_test_evidence_check.py \

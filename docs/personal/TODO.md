@@ -36,6 +36,7 @@
 - [x] 设备快照新增隐私安全 CarParams 摘要，用于确认 Seltos 车型路径和 safety 配置。
 - [x] 增加一键实车证据采集脚本，用于把静态检查、设备快照、路测草稿和清单放进同一个文件夹。
 - [x] 证据检查器支持直接读取一键采集生成的证据包目录。
+- [x] 增加实车证据就绪度报告，分阶段提示设备快照、CarParams、ESCC 0x2AB、路测记录和 stable gate 缺口。
 - [x] 增加 Seltos 2023 车型复用检查脚本，防止更新后误改 CANFD/HDA2 或打破 2021 兼容路径。
 - [x] 列出 Seltos 2021/2023 相关 Hyundai 文件；当前只有 `values.py` 需要显式 2023 车型条目，其它文件保持通用 Hyundai/Kia CAN 路径：
   - `opendbc_repo/opendbc/car/hyundai/values.py`
@@ -131,9 +132,10 @@
 - [x] 增加发布前 release gate，区分 static/test/stable tag。
 - [x] 增加安装目标清单和检查脚本，防止把开发分支当成日常安装目标。
 - [x] 增加路测证据检查脚本，stable 前强制检查路测记录、设备快照和 ESCC 0x2AB 采样。
+- [x] 增加证据就绪度报告脚本，stable 前可先看阶段缺口再跑严格 gate。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static8` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static9` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。

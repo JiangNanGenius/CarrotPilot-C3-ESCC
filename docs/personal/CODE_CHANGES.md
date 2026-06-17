@@ -878,3 +878,51 @@
 
 - `python3 scripts/personal/feature_boundary_check.py --no-manual` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-18: 实车证据就绪度报告
+
+新增文件：
+
+- `scripts/personal/evidence_readiness_report.py`
+
+改动文件：
+
+- `scripts/personal/smoke_check.py`
+- `scripts/personal/collect_real_car_evidence.py`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/ROAD_TEST_LOG_TEMPLATE.md`
+- `docs/personal/README.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `README.md`
+
+改动内容：
+
+- 新增证据就绪度报告脚本，可读取单个快照、路测记录或一键证据包目录。
+- 分阶段显示：
+  - 证据输入是否存在。
+  - C3 设备快照是否可解析。
+  - Seltos CarParams 摘要是否存在。
+  - ESCC 0x2AB 采样是否满足 stable 要求。
+  - 路测记录 PASS 结论是否完整。
+  - stable gate 是否已准备好。
+  - CP搭子 / Navipilot 采样是否存在。
+- 证据采集器生成的 README 中新增就绪度报告命令。
+- 将就绪度报告自检接入 `smoke_check.py`。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static9`
+
+含义：
+
+- 包含实车证据就绪度报告。
+- 静态检查通过，不代表实车验证。
+- 还没有 `stable` tag。
+
+验证：
+
+- `python3 scripts/personal/evidence_readiness_report.py --self-test` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。

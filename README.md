@@ -14,7 +14,7 @@
 
 当前可参考 tag：
 
-- `carrotpilot-c3-escc-20260618-static8`
+- `carrotpilot-c3-escc-20260618-static9`
 - 只代表静态检查通过，不代表实车验证或稳定版
 - 还没有 `stable` tag
 - 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空
@@ -22,7 +22,7 @@
 自动检查：
 
 - GitHub Actions 的 `Personal Smoke` 会在个人分支推送和手动触发时运行。
-- 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态、功能边界守卫和中文设置说明。
+- 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态、功能边界守卫、证据就绪度报告和中文设置说明。
 - `Upstream Watch` 每周和手动触发时比较 ajouatom、jixiexiaoge、fishop 的最新分支和 [UPSTREAM_BASELINES.json](docs/personal/UPSTREAM_BASELINES.json)；变红通常表示有新上游提交需要审查。
 - Actions 通过不代表实车验证通过。
 

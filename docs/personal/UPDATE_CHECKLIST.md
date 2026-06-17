@@ -10,6 +10,7 @@
 - [ ] 备份设备 `/data/params` 关键参数。
 - [ ] 运行 `python3 scripts/personal/collect_real_car_evidence.py --archive` 采集设备端安全证据包。
 - [ ] 如只需要单份快照，可运行 `python3 scripts/personal/device_snapshot.py`。
+- [ ] 证据包拷回电脑后，运行 `python3 scripts/personal/evidence_readiness_report.py --evidence-dir <证据包目录>` 看阶段缺口。
 - [ ] 记录当前车款识别结果：Seltos 2023 独立车型，初期复用 Seltos 2021 配置。
 - [ ] 确认车辆仍按纯 CAN 路径运行，不是 CANFD。
 - [ ] 记录 ESCC 相关参数当前值。
@@ -132,6 +133,7 @@
 - [ ] 运行 `python3 scripts/personal/settings_cn_audit.py` 并确认高风险中文说明没有缺失。
 - [ ] 运行 `python3 scripts/personal/install_target_check.py` 并确认安装目标、稳定 tag 和回滚基线一致。
 - [ ] 运行 `python3 scripts/personal/seltos_profile_check.py` 并确认车型配置没有被更新合并改成 CANFD/HDA2 或其它车型特判。
+- [ ] 运行 `python3 scripts/personal/evidence_readiness_report.py --self-test` 并确认证据就绪度报告正常。
 - [ ] 检查 Python 语法。
 - [ ] 检查 JSON 配置格式。
 - [ ] 检查 capnp 是否需要重新生成。
@@ -158,6 +160,7 @@
 - [ ] 确认离线模式开启时不会卡注册，也不会尝试联网更新。
 - [ ] 如测试 CP搭子，确认 Android APP 能发现 C3 并发送导航数据。
 - [ ] 如测试 CP搭子，运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-cplink-sample`。
+- [ ] 如证据包还没满足 stable，先看 `evidence_readiness_report.py` 输出的缺口，不要直接打 stable tag。
 
 ## 7. 路测分级
 
@@ -196,6 +199,7 @@
 - [ ] 发布前再次确认没有个人 token、私钥或设备隐私参数进入仓库。
 - [ ] `stable` 前填写上车测试记录，并把 C3 快照文件保存到电脑本地。
 - [ ] 如使用证据包，把 `road-test-log-draft.md` 和 `device-snapshot.md` 一起保存到电脑本地。
+- [ ] 先运行 `python3 scripts/personal/evidence_readiness_report.py --evidence-dir <证据包目录>`，确认 stable 必需阶段都通过。
 - [ ] 运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-carparams-summary --require-escc-sample`。
 - [ ] 通过 `release_gate.py --kind stable --evidence-dir <证据包目录>`。
 - [ ] 打稳定 tag。

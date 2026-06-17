@@ -18,7 +18,7 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260618-static8`
+- `carrotpilot-c3-escc-20260618-static9`
 - 只代表静态检查通过，不代表实车验证。
 - 目前还没有 `stable` tag。
 
@@ -85,6 +85,13 @@ python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --arch
 ```
 
 把证据包拷回电脑并解压后，可以直接让校验器读取整个目录：
+
+```bash
+python3 scripts/personal/evidence_readiness_report.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS
+```
+
+这个报告会分阶段告诉你设备快照、CarParams、ESCC 0x2AB、路测记录和 stable gate 还缺哪一项。准备正式升 `stable` 时，再跑严格校验：
 
 ```bash
 python3 scripts/personal/road_test_evidence_check.py \

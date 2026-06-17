@@ -55,6 +55,13 @@ python3 scripts/personal/road_test_evidence_check.py \
 如果使用 `collect_real_car_evidence.py` 生成的完整证据包，解压后可以直接传整个目录：
 
 ```bash
+python3 scripts/personal/evidence_readiness_report.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS
+```
+
+这个报告不会创建 tag，只会告诉你当前证据包已经满足哪些阶段、还缺哪些 stable 必需项。
+
+```bash
 python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
