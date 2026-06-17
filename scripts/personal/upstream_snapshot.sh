@@ -7,6 +7,7 @@ refs=(
   "https://github.com/jixiexiaoge/openpilot.git CP"
   "https://github.com/jixiexiaoge/openpilot.git atune"
   "https://github.com/jixiexiaoge/openpilot.git master"
+  "https://github.com/jixiexiaoge/navipilot.git CPdazi"
   "https://jihulab.com/fishop/openpilot.git cp"
   "https://jihulab.com/fishop/openpilot.git escc-cpv9"
   "https://github.com/dhvms/carrotpilot.git master"

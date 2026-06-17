@@ -32,6 +32,7 @@ jobs:
         run: |
           git remote set-url origin https://github.com/ajouatom/openpilot.git
           git remote add jixie https://github.com/jixiexiaoge/openpilot.git
+          git remote add jixie-navipilot https://github.com/jixiexiaoge/navipilot.git
           git remote add fishop https://jihulab.com/fishop/openpilot.git
 
       - name: Fetch source heads
@@ -42,6 +43,8 @@ jobs:
           git fetch --no-tags jixie \
             +atune:refs/remotes/jixie/atune \
             +master:refs/remotes/jixie/master
+          git fetch --no-tags jixie-navipilot \
+            +CPdazi:refs/remotes/jixie-navipilot/CPdazi
           git fetch --no-tags fishop \
             +cp:refs/remotes/fishop/cp
 

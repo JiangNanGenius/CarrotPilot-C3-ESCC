@@ -9,6 +9,7 @@
   - `origin`: `https://github.com/ajouatom/openpilot.git`
   - `github`: `https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git`
   - `jixie`: `https://github.com/jixiexiaoge/openpilot.git`
+  - `jixie-navipilot`: `https://github.com/jixiexiaoge/navipilot.git`
   - `fishop`: `https://jihulab.com/fishop/openpilot.git`
   - `dhvms`: `https://github.com/dhvms/carrotpilot.git`
 - [x] 建立当前开发分支：
@@ -20,6 +21,7 @@
   - `tracking/fishop-cp`
   - `tracking/jixie-atune`
   - `tracking/jixie-master`
+  - `tracking/jixie-navipilot`
   - `tracking/c4`
 
 ## P1: 用户车辆优先支持
@@ -91,6 +93,8 @@
 - [x] 第二批完成 Web 推荐值面板和手动确认流程。
 - [x] 从 `jixiexiaoge/openpilot:master` 记录 CP搭子 / Navipilot 功能边界。
 - [x] 建立 `tracking/jixie-master`，跟踪 CP搭子 / Navipilot 项目说明和应用方向。
+- [x] 从 `jixiexiaoge/navipilot:CPdazi` 完成第一轮 APP / 驾驶报告 / WebSocket 需求研究。
+- [x] 建立 `tracking/jixie-navipilot`，跟踪 Android CP搭子 APP 来源。
 - [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight。
 - [x] 增加 CP搭子 / Navipilot 设备端采样字段和可选证据校验门槛。
 - [x] 增加机械小哥 / fishop 功能边界静态检查，防止自动超车、AmapNavi、独立 Web/哨兵服务无保护进入主线。
@@ -104,7 +108,7 @@
   - [ ] 自动实验模式切换完整闭环。
   - [ ] 模型选择切换器。
   - [ ] 自动超车。
-  - [ ] 驾驶报告。
+  - [ ] Navipilot APP 驾驶报告实测。
   - [x] LED / cluster HUD 代码和 manager 参数门控静态确认。
   - [ ] LED / cluster HUD 实机验证和默认策略。
   - [x] Auto-Tuner / atune 第一批核心学习器。
@@ -140,14 +144,15 @@
 - [x] 增加证据就绪度报告脚本，stable 前可先看阶段缺口再跑严格 gate。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static11` tag。
-- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test3` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static12` tag。
+- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test4` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。
 - [x] 整理公开仓库根 README，明确当前状态、static tag、署名和安全边界。
 - [x] 增加 GitHub Actions `Personal Smoke`，推送后自动跑个人静态检查。
 - [x] 增加 GitHub Actions `Upstream Watch`，定期比较上游远端和 `UPSTREAM_BASELINES.json` 基准。
+- [x] `Upstream Watch` 纳入 `jixiexiaoge/navipilot:CPdazi`，防止 APP 协议和驾驶报告更新漏审。
 - [x] 在 `INSTALL_TARGETS.json` 中预留 `previous_stable_tag` 和 `rollback_base_ref`。
 - [x] 只把稳定 tag 作为设备日常安装目标；当前没有稳定 tag，所以 `daily_install_target` 必须为空。
 - [ ] 第一次实车验证通过后，创建首个 `stable` tag，并更新 `INSTALL_TARGETS.json`。

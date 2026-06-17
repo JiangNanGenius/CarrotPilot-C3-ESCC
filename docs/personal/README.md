@@ -16,6 +16,7 @@
 - [分支策略](BRANCH_STRATEGY.md)
 - [功能整合矩阵](FEATURE_MATRIX.md)
 - [机械小哥 / fishop 功能边界](JIXIE_FISHOP_BOUNDARY.md)
+- [Navipilot APP 研究记录](NAVIPILOT_APP_RESEARCH.md)
 - [Seltos 2023 车辆档案](VEHICLE_PROFILE_SELTOS_2023.md)
 - [车型配置说明](CAR_CONFIG_EXPLAINER.md)
 - [设备端快照采集](DEVICE_SNAPSHOT.md)

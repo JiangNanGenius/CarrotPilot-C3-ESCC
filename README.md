@@ -14,8 +14,8 @@
 
 当前可参考 tag：
 
-- 静态检查：`carrotpilot-c3-escc-20260618-static11`
-- 受控上车测试：`carrotpilot-c3-escc-20260618-test3`
+- 静态检查：`carrotpilot-c3-escc-20260618-static12`
+- 受控上车测试：`carrotpilot-c3-escc-20260618-test4`
 - `static` / `test` 都不代表实车验证完成或稳定版
 - 还没有 `stable` tag
 - 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空
@@ -24,7 +24,7 @@
 
 - GitHub Actions 的 `Personal Smoke` 会在个人分支推送和手动触发时运行。
 - 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态、功能边界守卫、证据就绪度报告和中文设置说明。
-- `Upstream Watch` 每周和手动触发时比较 ajouatom、jixiexiaoge、fishop 的最新分支和 [UPSTREAM_BASELINES.json](docs/personal/UPSTREAM_BASELINES.json)；变红通常表示有新上游提交需要审查。
+- `Upstream Watch` 每周和手动触发时比较 ajouatom、jixiexiaoge/openpilot、jixiexiaoge/navipilot、fishop 的最新分支和 [UPSTREAM_BASELINES.json](docs/personal/UPSTREAM_BASELINES.json)；变红通常表示有新上游提交需要审查。
 - Actions 通过不代表实车验证通过。
 
 安装、更新或上车前先看：
@@ -50,7 +50,7 @@
 
 - 基于 ajouatom 维护的 CarrotPilot C3 分支。
 - ESCC 及部分 Hyundai/Kia 国内硬件支持参考 fishop / 飞扬（码上飞扬，名称待确认）的实现。
-- CP搭子、Navipilot、在线调参、7000 Web 等功能参考机械小哥 / JixieXiaoGe 的实现。
+- CP搭子、Navipilot、在线调参、7000 Web 等功能参考机械小哥 / JixieXiaoGe 的实现，包括 `jixiexiaoge/openpilot` 和 `jixiexiaoge/navipilot`。
 - 同时参考 dhvms/carrotpilot 的历史实现说明。
 - 所有上游许可证、免责声明和贡献署名均保留。
 

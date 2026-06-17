@@ -39,6 +39,7 @@ SOURCES = [
   Source("C4 side line", "origin", "origin/carrot-wip", "tracking/c4", "low-priority side line"),
   Source("jixie atune", "jixie", "jixie/atune", "tracking/jixie-atune", "Auto-Tuner and web features"),
   Source("jixie CP app", "jixie", "jixie/master", "tracking/jixie-master", "CP搭子 / Navipilot app reference"),
+  Source("jixie Navipilot Android app", "jixie-navipilot", "jixie-navipilot/CPdazi", "tracking/jixie-navipilot", "Android CP搭子 app, driving report, model switcher, and overtake UI"),
   Source("fishop cp", "fishop", "fishop/cp", "tracking/fishop-cp", "ESCC and China app/nav reference"),
 ]
 

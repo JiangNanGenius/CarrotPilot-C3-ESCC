@@ -11,16 +11,18 @@
 
 - `jixie/master`: `3b039d270ff5`
 - `jixie/atune`: `c045fcabb8a1`
+- `jixie-navipilot/CPdazi`: `c2a1028f22e`
 - `fishop/cp`: `aad13305f41c`
 - 底座：`origin/c3-wip` `244b69b61b17`
 
 ## 当前结论
 
-不能整包合并 `jixie/atune`、`jixie/master` 或 `fishop/cp`。
+不能整包合并 `jixie/atune`、`jixie/master`、`jixie-navipilot/CPdazi` 或 `fishop/cp`。
 
 原因：
 
-- `jixie/master` 不是 openpilot 主代码树，主要是 CP搭子 / Navipilot 的 Android 应用说明、发布脚本、独立 Python 服务和网页资源。
+- `jixie/master` 包含 CP搭子 / Navipilot 的设备端、网页、脚本和实验服务参考。
+- `jixie-navipilot/CPdazi` 是 Android APP 主线，包含 CP搭子 APP、驾驶评分、摄像头预览、模型/参数管理和自动超车 UI，不应直接混入 openpilot 车机代码。
 - `jixie/atune` 与当前分支相比仍包含大批 cluster HUD、USB 小屏、Qt 设置页、loggerd、Web 控制台和翻译改动。
 - `fishop/cp` 与当前 C3 底座差距更大，夹带 AmapNavi、外接转向灯控制、盲区/雷达、自动变道、DEC、longcontrol、模型资产、UI 和大量非 Seltos 改动。
 - fishop 分支还基于较旧代码线，直接合并会破坏当前 `selfdrive/carrot/server`、Web、cluster 和 Auto-Tuner 手动确认闭环。
@@ -38,6 +40,8 @@
   - 导航转向：`nTBTDist`, `nTBTTurnType`, `nTBTDistNext`, `nTBTTurnTypeNext`
   - GPS：`vpPosPointLat`, `vpPosPointLon`, `latitude`, `longitude`
   - 命令：`carrotCmd`, `carrotArg`
+- 已修复 APP 字段兼容：`szTBTMainTextNext` 现在读取 APP 的 `szTBTMainTextNext` 键。
+- `selfdrive/carrot/server/features/ws.py` 提供 `/ws/raw_multiplex`、`/ws/raw/{service}`、`/ws/camera/{camera}`，满足 Navipilot APP 读取车辆数据和摄像头的基础入口。
 - `selfdrive/controls/lib/desire_helper.py` 已处理 CP搭子 `LANECHANGE` 命令。
 - `selfdrive/carrot/web` 和 cluster/realtime 侧已经读取 `carrotMan` / `navInstructionCarrot`，用于 Web HUD 和导航显示。
 
@@ -76,8 +80,11 @@ python3 scripts/personal/feature_boundary_check.py
 - 机械小哥哨兵模式 Web 服务。
 - 机械小哥 cluster HUD / USB 小屏大改。
 - 机械小哥模型切换器和自动实验模式完整闭环。
+- Navipilot APP 驾驶报告实测。
 
 其中 `jixie/master:xiaoge_web.py` 是独立 Flask Web 服务，含固定 secret key 和外部 CDN 页面资源，只能作为隔离实验参考，不能直接进默认车机主线。
+
+驾驶报告目前按 APP 侧功能处理：C3 端负责提供 `carrotMan`、raw multiplex、摄像头和导航字段；评分计算、报告 UI 和历史记录留在 `jixiexiaoge/navipilot` Android APP 里。
 
 ## 推荐迁移顺序
 
@@ -89,6 +96,7 @@ python3 scripts/personal/feature_boundary_check.py
 - Auto-Tuner 第一批核心学习器。
 - Auto-Tuner 第二批 Web 推荐面板和手动确认。
 - CP搭子核心协议静态预检。
+- Navipilot APP 来源跟踪和驾驶报告边界确认。
 
 ### B. 下一批，低风险
 
@@ -104,6 +112,10 @@ python3 scripts/personal/feature_boundary_check.py
   - 用 `collect_real_car_evidence.py --sample-seconds 20 --archive` 采集。
   - 电脑端运行 `road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-cplink-sample`。
   - 快照只记录导航字段是否出现，不记录 GPS 坐标、路线点或街道名。
+- Navipilot APP 驾驶报告实测：
+  - onroad 后 APP 开始采集。
+  - 停车后 APP 保存一次驾驶报告。
+  - C3 侧不新增本地驾驶报告网页，除非以后明确要做独立设备端报告。
 - 中文说明补全：
   - CP搭子需要手机 APP 和同一 WiFi。
   - 7000 Web 只是设备端控制台，不等于手机导航桥。

@@ -32,7 +32,11 @@ fishop / 码上飞扬 / 飞扬
 - 计划参考分支：
   - `CP`: C3 CarrotPilot 线，当前基本已被 `ajouatom/c3-wip` 包含。
   - `atune`: 自动/在线调参。
-  - `master`: CP搭子 / Navipilot 项目说明和应用方向。
+    - `master`: CP搭子 / Navipilot 设备端和 Web 参考。
+- 来源：`jixiexiaoge/navipilot`
+- URL: `https://github.com/jixiexiaoge/navipilot`
+- 计划参考分支：
+  - `CPdazi`: Android CP搭子 APP、驾驶报告、摄像头预览、APP 侧参数/模型/超车 UI 和协议说明。
 - 用途：CP搭子、Navipilot、在线调参、7000 Web、自动实验模式、模型切换、自动超车、驾驶报告、LED/cluster HUD 等。
 
 ## 历史参考
@@ -51,7 +55,7 @@ dhvms
 ```text
 Based on CarrotPilot by ajouatom and contributors.
 ESCC and related Hyundai/Kia hardware support references fishop / 飞扬（码上飞扬，名称待确认）.
-Navipilot / CPlink / atune related ideas and code reference JixieXiaoGe / 机械小哥.
+Navipilot / CPlink / atune related ideas and code reference JixieXiaoGe / 机械小哥, including jixiexiaoge/openpilot and jixiexiaoge/navipilot.
 Historical CarrotPilot references include dhvms/carrotpilot.
 All original licenses and notices are preserved.
 ```
@@ -61,7 +65,7 @@ All original licenses and notices are preserved.
 ```text
 本项目基于 ajouatom 维护的 CarrotPilot C3 分支。
 ESCC 及部分 Hyundai/Kia 国内硬件支持参考 fishop / 飞扬（码上飞扬，名称待确认）的实现。
-CP搭子、Navipilot、在线调参、7000 Web 等功能参考机械小哥 / JixieXiaoGe 的实现。
+CP搭子、Navipilot、在线调参、7000 Web 等功能参考机械小哥 / JixieXiaoGe 的实现，包括 `jixiexiaoge/openpilot` 和 `jixiexiaoge/navipilot`。
 同时参考 dhvms/carrotpilot 的历史实现说明。
 所有上游许可证、免责声明和贡献署名均会保留。
 ```

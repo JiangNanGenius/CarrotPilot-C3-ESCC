@@ -115,14 +115,27 @@ def check_share_data() -> FeatureStatus:
 
 
 def check_driving_report() -> FeatureStatus:
-  candidates = [
-    "selfdrive/carrot/server/features/driving_report.py",
-    "selfdrive/carrot/server/features/drive_report.py",
-    "selfdrive/carrot/web/js/pages/report.js",
-  ]
-  if any(exists(candidate) for candidate in candidates):
-    return FeatureStatus("Driving report", "READY_STATIC", "a dedicated driving report module exists", required=False, ok=True)
-  return pending("Driving report", "no dedicated driving report module yet; dashcam route browser is present but is not the same feature")
+  condition = (
+    contains("selfdrive/carrot/server/features/ws.py", '"/ws/raw_multiplex"')
+    and contains("selfdrive/carrot/server/features/ws.py", '"/ws/camera/{camera}"')
+    and contains("selfdrive/carrot/server/live_runtime/services.py", '"carrotMan"')
+    and contains("selfdrive/carrot/server/live_runtime/services.py", '"gpsLocationExternal"')
+  )
+  if condition:
+    return FeatureStatus(
+      "Navipilot app driving report support",
+      "READY_STATIC",
+      "driving score/report lives in the Android app; C3 exposes WebSocket raw/camera and carrotMan data",
+      required=True,
+      ok=True,
+    )
+  return FeatureStatus(
+    "Navipilot app driving report support",
+    "MISSING",
+    "Android app scoring needs /ws/raw_multiplex, /ws/camera/road, carrotMan, and gpsLocationExternal",
+    required=True,
+    ok=False,
+  )
 
 
 def check_model_selector() -> FeatureStatus:

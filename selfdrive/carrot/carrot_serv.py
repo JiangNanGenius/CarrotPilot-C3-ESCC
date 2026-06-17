@@ -1268,7 +1268,7 @@ class CarrotServ:
       self.nTBTNextRoadWidth = int(json.get("nTBTNextRoadWidth", 0))
       self.nTBTDistNext = int(json.get("nTBTDistNext", 0))
       self.nTBTTurnTypeNext = int(json.get("nTBTTurnTypeNext", -1))
-      self.szTBTMainTextNext = json.get("szTBTMainText", "")
+      self.szTBTMainTextNext = _s(json.get("szTBTMainTextNext"))
 
       self.nGoPosDist = int(json.get("nGoPosDist", 0))
       self.nGoPosTime = int(json.get("nGoPosTime", 0))

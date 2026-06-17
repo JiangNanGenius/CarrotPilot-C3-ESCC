@@ -14,6 +14,7 @@ ESCC 和 Always Offline 是主线必保留功能。机械小哥和 fishop 的其
 git remote add origin https://github.com/ajouatom/openpilot.git
 git remote add github https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git
 git remote add jixie https://github.com/jixiexiaoge/openpilot.git
+git remote add jixie-navipilot https://github.com/jixiexiaoge/navipilot.git
 git remote add fishop https://jihulab.com/fishop/openpilot.git
 git remote add dhvms https://github.com/dhvms/carrotpilot.git
 ```
@@ -47,6 +48,10 @@ git remote add dhvms https://github.com/dhvms/carrotpilot.git
 `tracking/jixie-master`
 
 跟踪 CP搭子 / Navipilot 文档和应用方向，不一定直接合进 openpilot 代码。
+
+`tracking/jixie-navipilot`
+
+跟踪 `jixiexiaoge/navipilot:CPdazi`，用于检查 Android CP搭子 APP、驾驶报告、WebSocket 需求、模型/参数管理和自动超车 UI 的变动。不把 Android 项目直接合进 openpilot 主分支。
 
 `tracking/c4`
 

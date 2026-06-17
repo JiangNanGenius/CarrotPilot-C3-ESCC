@@ -1040,3 +1040,58 @@
 含义：
 
 - 包含第二批中文设置说明优化，静态检查通过，不代表实车验证或稳定版本。
+
+## 2026-06-18: Navipilot APP 来源跟踪和 TBT 字段修复
+
+新增文件：
+
+- `docs/personal/NAVIPILOT_APP_RESEARCH.md`
+
+改动文件：
+
+- `.github/workflows/personal-smoke.yml`
+- `.github/workflows/upstream-snapshot.yml`
+- `selfdrive/carrot/carrot_serv.py`
+- `scripts/personal/cplink_preflight.py`
+- `scripts/personal/feature_status_report.py`
+- `scripts/personal/update_audit.py`
+- `scripts/personal/upstream_snapshot.sh`
+- `docs/personal/UPSTREAM_BASELINES.json`
+- `docs/personal/BRANCH_STRATEGY.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `docs/personal/README.md`
+- `docs/personal/SOURCES_AND_CREDITS.md`
+- `docs/personal/TODO.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+
+改动内容：
+
+- 新增 `jixie-navipilot` 来源，跟踪 `jixiexiaoge/navipilot:CPdazi`。
+- `UPSTREAM_BASELINES.json` 记录 Navipilot APP 当前已审查 commit：`c2a1028f22e47b3c4838b9e2a320966a0529cc03`。
+- `Upstream Watch` 和 `Personal Smoke` 会抓取 Navipilot APP 分支，防止驾驶报告、WebSocket、APP 协议、模型/参数管理和自动超车 UI 更新漏审。
+- 明确驾驶报告属于 Navipilot Android APP 侧功能；C3 端保持 `carrotMan`、`/ws/raw_multiplex`、`/ws/camera/road` 和导航字段兼容。
+- 修复 `szTBTMainTextNext`：车机端现在读取 APP 发来的 `szTBTMainTextNext` 键，不再误读 `szTBTMainText`。
+- `cplink_preflight.py` 增加 raw multiplex、camera WebSocket、Navipilot 默认服务和 TBT 下一路口字段守卫。
+- 功能状态报告把“驾驶报告”改为“Navipilot APP 驾驶报告支持”，避免误判为 C3 本体缺少本地报告网页。
+
+待实测：
+
+- Android Navipilot APP 连接 C3 7000 端口。
+- APP 通过 `/ws/raw_multiplex` 读取车辆数据，通过 `/ws/camera/road` 读取摄像头。
+- 开车结束后 APP 端生成驾驶评分报告。
+- 不启用自动超车时，确认 `OVERTAKE` / ZMQ 7710 不进入默认主线。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static12`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test4`
+
+含义：
+
+- 包含 Navipilot APP 来源跟踪和 TBT 下一路口字段修复。
+- 静态检查通过后才可用于停车检查或低速受控测试。
+- 不代表 stable，不应作为日常稳定安装目标。

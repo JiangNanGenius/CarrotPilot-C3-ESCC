@@ -24,6 +24,7 @@
 - [ ] 拉取 `ajouatom/openpilot:c3-wip`。
 - [ ] 拉取 `fishop/openpilot:cp`。
 - [ ] 拉取 `jixiexiaoge/openpilot:atune`。
+- [ ] 拉取 `jixiexiaoge/navipilot:CPdazi`。
 - [ ] 检查 `update_audit.py` 输出的 remote ahead、新提交标题和高风险目录。
 - [ ] 查看 GitHub Actions `Upstream Watch` 最近一次结果；如果变红，把输出当作更新审计入口。
 - [ ] 查看三方最近提交标题。
@@ -99,9 +100,12 @@
 - [ ] 运行 `python3 scripts/personal/cplink_preflight.py`。
 - [ ] `carrotMan` 和 `navInstructionCarrot` 服务仍存在。
 - [ ] 7705 广播和 7706 接收逻辑仍存在。
+- [ ] 7000 WebSocket `/ws/raw_multiplex` 和 `/ws/camera/road` 仍存在，满足 Navipilot APP 车辆数据和摄像头预览。
 - [ ] `nRoadLimitSpeed`、TBT、SDI、GPS 字段仍被解析。
+- [ ] `szTBTMainTextNext` 仍从 APP 的 `szTBTMainTextNext` 键读取，不退回误读 `szTBTMainText`。
 - [ ] `LANECHANGE` 命令仍只走现有安全变道逻辑。
 - [ ] `OVERTAKE`、外接转向灯、AmapNavi、哨兵模式没有被无保护夹带进主线。
+- [ ] 如 Navipilot APP 更新了 `CarrotWsClient.kt`、`DrivingDataCollector.kt`、`DrivingScoreEngine.kt` 或字段清单，重新核对 C3 端数据字段。
 
 ## 3.8. 功能边界守卫
 
@@ -161,6 +165,7 @@
 - [ ] 确认 ESCC 参数默认状态符合预期。
 - [ ] 确认离线模式开启时不会卡注册，也不会尝试联网更新。
 - [ ] 如测试 CP搭子，确认 Android APP 能发现 C3 并发送导航数据。
+- [ ] 如测试 Navipilot 驾驶报告，确认 APP 端能在 onroad 后开始采集，并在停车后生成评分。
 - [ ] 如测试 CP搭子，运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-cplink-sample`。
 - [ ] 如证据包还没满足 stable，先看 `evidence_readiness_report.py` 输出的缺口，不要直接打 stable tag。
 

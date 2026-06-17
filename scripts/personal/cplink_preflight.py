@@ -70,6 +70,16 @@ def check_tracking_refs(report: Report) -> None:
   else:
     report.warn("tracking/jixie-master missing", "create it before the next source review")
 
+  if ref_exists("jixie-navipilot/CPdazi"):
+    report.pass_("jixie-navipilot/CPdazi fetched")
+  else:
+    report.warn("jixie-navipilot/CPdazi not fetched", "run git fetch jixie-navipilot before reviewing the Android CP搭子 app")
+
+  if ref_exists("tracking/jixie-navipilot"):
+    report.pass_("tracking branch exists: tracking/jixie-navipilot")
+  else:
+    report.warn("tracking/jixie-navipilot missing", "create it before the next Navipilot app source review")
+
 
 def check_cereal_protocol(report: Report) -> None:
   report.contains("custom.capnp has CarrotMan struct", "cereal/custom.capnp", "struct CarrotMan")
@@ -126,6 +136,7 @@ def check_cplink_payload(report: Report) -> None:
     "nTBTTurnType",
     "nTBTDistNext",
     "nTBTTurnTypeNext",
+    "szTBTMainTextNext",
     "nGoPosDist",
     "nGoPosTime",
     "vpPosPointLat",
@@ -148,6 +159,28 @@ def check_cplink_payload(report: Report) -> None:
     "pm.send('navInstructionCarrot'",
   ]:
     report.contains(f"CarrotMan output field: {field}", "selfdrive/carrot/carrot_serv.py", field)
+
+  report.regex(
+    "TBT next text reads the correct app key",
+    "selfdrive/carrot/carrot_serv.py",
+    r"szTBTMainTextNext\s*=\s*_s\(json\.get\(\"szTBTMainTextNext\"\)\)",
+  )
+
+
+def check_navipilot_websocket(report: Report) -> None:
+  report.contains("WebSocket raw multiplex endpoint exists", "selfdrive/carrot/server/features/ws.py", '"/ws/raw_multiplex"')
+  report.contains("WebSocket raw service endpoint exists", "selfdrive/carrot/server/features/ws.py", '"/ws/raw/{service}"')
+  report.contains("WebSocket camera endpoint exists", "selfdrive/carrot/server/features/ws.py", '"/ws/camera/{camera}"')
+  for service in [
+    "carState",
+    "modelV2",
+    "controlsState",
+    "selfdriveState",
+    "deviceState",
+    "carrotMan",
+    "gpsLocationExternal",
+  ]:
+    report.contains(f"Navipilot default WS service allowed: {service}", "selfdrive/carrot/server/live_runtime/services.py", f'"{service}"')
 
 
 def check_controls_consumers(report: Report) -> None:
@@ -198,6 +231,7 @@ def main() -> int:
   check_cereal_protocol(report)
   check_carrotman_runtime(report)
   check_cplink_payload(report)
+  check_navipilot_websocket(report)
   check_controls_consumers(report)
 
   print_report(report, show_manual=not args.no_manual)

@@ -19,13 +19,13 @@
 | --- | --- | --- | --- |
 | Auto-Tuner / 在线调参 | `jixiexiaoge/openpilot:atune` | P1 | 已迁移核心学习器和 Web 手动确认，默认关闭 |
 | 7000 Web 控制台增强 | `jixiexiaoge/openpilot:atune` / `master` | P1 | 当前 C3 底座已有 7000 Web、录像/截屏/工具/Auto-Tuner 面板；剩余增强分批迁移 |
-| CP搭子 / Navipilot 核心协议 | `jixiexiaoge/openpilot:master` | P1 | 已做静态预检，待 APP 实测 |
+| CP搭子 / Navipilot 核心协议 | `jixiexiaoge/openpilot:master` / `jixiexiaoge/navipilot:CPdazi` | P1 | 已做静态预检，待 APP 实测 |
 | 实验模式 Web 开关 | 当前 C3 底座 | P1 | 已静态确认，可在 Web 设备页操作 `ExperimentalMode` |
 | 自动实验模式切换完整闭环 | 机械小哥 | P1 | 独立开关，后续单批迁移 |
 | 模型选择切换器 | 机械小哥 | P1 | 独立开关 |
 | 自动超车 | 机械小哥 / fishop | P2 | 后置验证 |
 | LED / cluster HUD | 机械小哥 | P2 | 实验功能 |
-| 驾驶报告 | 机械小哥 | P2 | 低风险，可后置 |
+| 驾驶报告 | `jixiexiaoge/navipilot:CPdazi` | P2 | APP 端功能；C3 端保持 WebSocket/CarrotMan 数据兼容，待 APP 实测 |
 | 中文翻译和参数说明优化 | 本项目维护 | P2 | 不改默认值，只改菜单显示文字 |
 
 ## 当前主线已有但必须守住边界
@@ -50,7 +50,7 @@ python3 scripts/personal/feature_status_report.py --strict
 | --- | --- | --- | --- |
 | fishop `amap_navi.py` | `fishop/openpilot:cp` | 中 | 与 CP搭子协议重叠，先放 `experimental/app-navi` |
 | APP 外接转向灯控制 | `fishop/openpilot:cp` | 中/高 | 需要硬件和上车验证，不进默认分支 |
-| `OVERTAKE` 命令 | `fishop/openpilot:cp` / 机械小哥 | 高 | 需要独立开关、速度/盲区/车道条件保护 |
+| `OVERTAKE` 命令 | `fishop/openpilot:cp` / `jixiexiaoge/navipilot:CPdazi` | 高 | 需要独立开关、速度/盲区/车道条件保护 |
 | 哨兵 Web 服务 | `jixiexiaoge/openpilot:master` | 高 | 含固定 secret 和外部资源，只做隔离参考 |
 | DEC / longcontrol 大改 | `fishop/openpilot:cp` | 高 | 不影响 ESCC 前暂不碰 |
 
