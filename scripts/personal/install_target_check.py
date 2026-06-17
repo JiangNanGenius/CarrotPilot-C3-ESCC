@@ -71,14 +71,24 @@ def require_commit_ref(ref: str, label: str) -> str:
   return output
 
 
+def pending_release_tags() -> set[str]:
+  tags = set()
+  single = os.environ.get("CARROTPILOT_PENDING_RELEASE_TAG")
+  if single:
+    tags.add(single)
+  many = os.environ.get("CARROTPILOT_PENDING_RELEASE_TAGS")
+  if many:
+    tags.update(tag.strip() for tag in many.split(",") if tag.strip())
+  return tags
+
+
 def require_tag_exists(tag: Optional[str], key: str) -> Optional[str]:
   if tag is None:
     return None
   try:
     return require_commit_ref(f"refs/tags/{tag}", key)
   except InstallTargetError:
-    pending_tag = os.environ.get("CARROTPILOT_PENDING_RELEASE_TAG")
-    if key in {"current_static_tag", "current_test_tag"} and pending_tag == tag:
+    if key in {"current_static_tag", "current_test_tag"} and tag in pending_release_tags():
       return require_commit_ref("HEAD", key)
     raise
 

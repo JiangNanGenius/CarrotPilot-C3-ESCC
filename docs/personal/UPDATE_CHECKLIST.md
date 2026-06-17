@@ -106,6 +106,7 @@
 ## 3.8. 功能边界守卫
 
 - [ ] 运行 `python3 scripts/personal/feature_boundary_check.py`。
+- [ ] 运行 `python3 scripts/personal/feature_status_report.py --strict`。
 - [ ] 7000 Web 当前入口仍为 `carrot_server.py` 默认 7000 端口。
 - [ ] dashcam、screenrecord、tools、Auto-Tuner Web 面板关键路由仍存在。
 - [ ] `carrot_cluster` 仍由 `ClusterHud` 参数控制，不默认常驻。
@@ -130,6 +131,7 @@
 - [ ] 单独运行 `python3 scripts/personal/escc_offline_preflight.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/cplink_preflight.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/feature_boundary_check.py` 并确认没有失败项。
+- [ ] 单独运行 `python3 scripts/personal/feature_status_report.py --strict` 并确认没有失败项。
 - [ ] 运行 `python3 scripts/personal/settings_cn_audit.py` 并确认高风险中文说明没有缺失。
 - [ ] 运行 `python3 scripts/personal/install_target_check.py` 并确认安装目标、稳定 tag 和回滚基线一致。
 - [ ] 运行 `python3 scripts/personal/seltos_profile_check.py` 并确认车型配置没有被更新合并改成 CANFD/HDA2 或其它车型特判。

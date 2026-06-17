@@ -48,6 +48,7 @@ python3 scripts/personal/smoke_check.py
 python3 scripts/personal/escc_offline_preflight.py
 python3 scripts/personal/cplink_preflight.py
 python3 scripts/personal/feature_boundary_check.py
+python3 scripts/personal/feature_status_report.py --strict
 python3 scripts/personal/settings_cn_audit.py
 python3 scripts/personal/install_target_check.py
 python3 scripts/personal/seltos_profile_check.py
@@ -59,7 +60,7 @@ python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpi
 
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
 
-其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、功能边界守卫、证据就绪度报告、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
+其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、功能边界守卫、功能状态报告、证据就绪度报告、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
 
 `seltos_profile_check.py` 专门守住 Seltos 2023 当前策略：经典 CAN、复用 Seltos 2021 harness/specs/flags、不引入 CANFD/HDA2 特判、不复制未验证 FW fingerprint。
 
@@ -125,6 +126,7 @@ python3 scripts/personal/collect_real_car_evidence.py --archive
 - `.github/workflows/personal-smoke.yml`
 - 触发：推送到 `personal/c3-escc`、`personal/c3-escc-atune`，PR 到这些分支，或手动触发。
 - 内容：运行 `smoke_check.py`、ESCC / Always Offline preflight、CP搭子 preflight 和功能边界守卫。
+- `smoke_check.py` 里也会运行功能状态报告，确认 7000 Web、实验模式开关、Auto-Tuner、CP搭子核心、cluster HUD gate、ShareData gate 和高风险隔离状态没有漂移。
 
 公开仓库还有一个上游监控工作流：
 

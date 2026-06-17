@@ -963,3 +963,49 @@
 
 - `CARROTPILOT_PENDING_RELEASE_TAG=carrotpilot-c3-escc-20260618-test1 python3 scripts/personal/install_target_check.py` 通过。
 - `CARROTPILOT_PENDING_RELEASE_TAG=carrotpilot-c3-escc-20260618-test1 python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-18: 功能状态报告
+
+新增文件：
+
+- `scripts/personal/feature_status_report.py`
+
+改动文件：
+
+- `scripts/personal/smoke_check.py`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/README.md`
+- `docs/personal/TODO.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `README.md`
+
+改动内容：
+
+- 新增个人功能状态报告，输出当前功能分组状态：
+  - 7000 Web console：`READY_STATIC`
+  - 实验模式 Web 开关：`READY_STATIC`
+  - Auto-Tuner 手动确认闭环：`READY_STATIC`
+  - CP搭子 / Navipilot 核心协议：`READY_STATIC`
+  - cluster HUD / USB display：`GATED`
+  - `xiaoge_data`：`GATED`
+  - 驾驶报告：`PENDING`
+  - 模型选择器：`PENDING`
+  - 自动超车、fishop AmapNavi、独立 Xiaoge web/sentry：`ISOLATED`
+- 将功能状态报告接入 `smoke_check.py` 和更新检查单。
+- 更新 TODO，把已有 Web/实验模式/cluster 静态能力和仍待实测/迁移的项目分开。
+- `install_target_check.py` 支持 `CARROTPILOT_PENDING_RELEASE_TAGS`，用于同一次提交里同时验证待创建的 static/test tag。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static10`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test2`
+
+验证：
+
+- `python3 scripts/personal/feature_status_report.py --strict` 通过。
+- `CARROTPILOT_PENDING_RELEASE_TAGS=carrotpilot-c3-escc-20260618-static10,carrotpilot-c3-escc-20260618-test2 python3 scripts/personal/smoke_check.py` 通过。

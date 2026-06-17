@@ -94,14 +94,18 @@
 - [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight。
 - [x] 增加 CP搭子 / Navipilot 设备端采样字段和可选证据校验门槛。
 - [x] 增加机械小哥 / fishop 功能边界静态检查，防止自动超车、AmapNavi、独立 Web/哨兵服务无保护进入主线。
+- [x] 增加个人功能状态报告，区分已静态具备、已有但待实机验证、故意隔离和未迁移功能。
 - [ ] 机械小哥功能分批迁移：
   - [x] CP搭子 CarrotMan / Navipilot 核心协议静态兼容。
   - [ ] CP搭子 Android APP 实测连接和导航数据流。
-  - [ ] 7000 Web 控制台增强（当前 C3 底座已有 7000 Web、录像/截屏/工具/Auto-Tuner 面板，剩余增强和实机验证待做）。
-  - [ ] 自动实验模式切换。
+  - [x] 7000 Web 控制台现有能力静态确认：端口 7000、dashcam、screenrecord、tools、terminal、vision diagnostics、Auto-Tuner 面板。
+  - [ ] 7000 Web 剩余增强和实机验证。
+  - [x] 实验模式 Web 开关静态确认。
+  - [ ] 自动实验模式切换完整闭环。
   - [ ] 模型选择切换器。
   - [ ] 自动超车。
   - [ ] 驾驶报告。
+  - [x] LED / cluster HUD 代码和 manager 参数门控静态确认。
   - [ ] LED / cluster HUD 实机验证和默认策略。
   - [x] Auto-Tuner / atune 第一批核心学习器。
   - [x] Auto-Tuner / atune 第二批手动确认闭环。
@@ -128,6 +132,7 @@
 - [x] 增加 ESCC / Always Offline 上车前静态 preflight 脚本。
 - [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight 脚本。
 - [x] 增加功能边界守卫脚本，确认未验证高风险入口不在默认主线，已有 Web/cluster/ShareData 入口保持开关控制。
+- [x] 增加功能状态报告脚本，防止 TODO 和实际代码能力脱节。
 - [x] 增加上游更新审计脚本，检查三方来源、tracking 分支和高风险目录变化。
 - [x] 增加发布前 release gate，区分 static/test/stable tag。
 - [x] 增加安装目标清单和检查脚本，防止把开发分支当成日常安装目标。
@@ -135,8 +140,8 @@
 - [x] 增加证据就绪度报告脚本，stable 前可先看阶段缺口再跑严格 gate。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static9` tag。
-- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test1` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static10` tag。
+- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test2` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。
