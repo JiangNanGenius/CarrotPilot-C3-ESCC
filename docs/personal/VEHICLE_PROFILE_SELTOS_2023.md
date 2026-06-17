@@ -52,7 +52,7 @@ ESCC 必须作为可开关功能迁入，默认关闭，避免影响其它车型
 
 ## 当前代码改动
 
-已在 `openpilot-c3-seltos-escc/opendbc_repo/opendbc/car/hyundai/values.py` 新增：
+已在 `opendbc_repo/opendbc/car/hyundai/values.py` 新增：
 
 - `CAR.KIA_SELTOS_2023`
 - 显示名：`Kia Seltos 2023`

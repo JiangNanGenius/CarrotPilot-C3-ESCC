@@ -2,9 +2,9 @@
 
 ## 2026-06-17: 新增 Kia Seltos 2023
 
-代码目录：
+项目：
 
-- `openpilot-c3-seltos-escc`
+- `CarrotPilot-C3-ESCC`
 
 改动文件：
 
@@ -43,9 +43,9 @@
 
 ## 2026-06-17: ESCC 最小补丁
 
-代码目录：
+项目：
 
-- `openpilot-c3-seltos-escc`
+- `CarrotPilot-C3-ESCC`
 
 主要来源：
 
