@@ -139,6 +139,92 @@ def process_snapshot() -> List[str]:
   return lines or ["<no matching processes>"]
 
 
+def safe_attr(obj: object, name: str, default: object = None) -> object:
+  try:
+    return getattr(obj, name, default)
+  except Exception:
+    return default
+
+
+def safe_int(value: object, default: int = 0) -> int:
+  try:
+    return int(value)  # type: ignore[arg-type]
+  except Exception:
+    return default
+
+
+def safe_float(value: object, default: float = 0.0) -> float:
+  try:
+    return float(value)  # type: ignore[arg-type]
+  except Exception:
+    return default
+
+
+def safe_text(value: object) -> str:
+  try:
+    return str(value or "")
+  except Exception:
+    return ""
+
+
+def update_cplink_diagnostics(result: Dict[str, object], carrot_msg: object) -> None:
+  road_limit = safe_int(safe_attr(carrot_msg, "nRoadLimitSpeed"))
+  x_spd_type = safe_int(safe_attr(carrot_msg, "xSpdType"), -1)
+  x_spd_dist = safe_int(safe_attr(carrot_msg, "xSpdDist"))
+  x_turn_info = safe_int(safe_attr(carrot_msg, "xTurnInfo"), -1)
+  x_dist_to_turn = safe_int(safe_attr(carrot_msg, "xDistToTurn"))
+  carrot_cmd = safe_text(safe_attr(carrot_msg, "carrotCmd")).strip()
+  lat = safe_float(safe_attr(carrot_msg, "xPosLat"))
+  lon = safe_float(safe_attr(carrot_msg, "xPosLon"))
+
+  result["cplink_updates_seen"] = True
+  if road_limit > 0:
+    result["cplink_speed_limit_seen"] = True
+  if x_spd_type >= 0 or x_spd_dist > 0:
+    result["cplink_sdi_seen"] = True
+  if x_turn_info > 0 or x_dist_to_turn > 0:
+    result["cplink_tbt_seen"] = True
+  if abs(lat) > 0.0001 and abs(lon) > 0.0001:
+    result["cplink_gps_seen"] = True
+  if carrot_cmd == "LANECHANGE":
+    result["cplink_lanechange_cmd_seen"] = True
+
+  result["last_carrotMan"] = {
+    "activeCarrot": safe_int(safe_attr(carrot_msg, "activeCarrot")),
+    "nRoadLimitSpeed": road_limit,
+    "xSpdType": x_spd_type,
+    "xSpdLimit": safe_int(safe_attr(carrot_msg, "xSpdLimit")),
+    "xSpdDist": x_spd_dist,
+    "xTurnInfo": x_turn_info,
+    "xDistToTurn": x_dist_to_turn,
+    "carrotCmdIndex": safe_int(safe_attr(carrot_msg, "carrotCmdIndex")),
+    "carrotCmd": carrot_cmd,
+    "trafficState": safe_int(safe_attr(carrot_msg, "trafficState")),
+  }
+
+
+def update_nav_instruction_diagnostics(result: Dict[str, object], nav_msg: object) -> None:
+  maneuver_distance = safe_float(safe_attr(nav_msg, "maneuverDistance"))
+  speed_limit = safe_float(safe_attr(nav_msg, "speedLimit"))
+  maneuver_type = safe_text(safe_attr(nav_msg, "maneuverType")).strip()
+  maneuver_modifier = safe_text(safe_attr(nav_msg, "maneuverModifier")).strip()
+
+  result["cplink_updates_seen"] = True
+  if speed_limit > 0:
+    result["cplink_speed_limit_seen"] = True
+  if maneuver_distance > 0 or maneuver_type not in {"", "invalid"}:
+    result["cplink_tbt_seen"] = True
+
+  result["last_navInstructionCarrot"] = {
+    "maneuverDistance": round(maneuver_distance, 1),
+    "maneuverType": maneuver_type,
+    "maneuverModifier": maneuver_modifier,
+    "distanceRemaining": round(safe_float(safe_attr(nav_msg, "distanceRemaining")), 1),
+    "timeRemaining": round(safe_float(safe_attr(nav_msg, "timeRemaining")), 1),
+    "speedLimit": round(speed_limit, 2),
+  }
+
+
 def sample_messaging(seconds: int) -> Dict[str, object]:
   result: Dict[str, object] = {
     "enabled": seconds > 0,
@@ -150,7 +236,14 @@ def sample_messaging(seconds: int) -> Dict[str, object]:
     "escc_0x2ab_all_buses": 0,
     "carrotMan_updates": 0,
     "navInstructionCarrot_updates": 0,
+    "cplink_updates_seen": False,
+    "cplink_speed_limit_seen": False,
+    "cplink_sdi_seen": False,
+    "cplink_tbt_seen": False,
+    "cplink_gps_seen": False,
+    "cplink_lanechange_cmd_seen": False,
     "last_carrotMan": {},
+    "last_navInstructionCarrot": {},
   }
   if seconds <= 0:
     return result
@@ -175,15 +268,10 @@ def sample_messaging(seconds: int) -> Dict[str, object]:
               result["escc_0x2ab_bus0"] = int(result["escc_0x2ab_bus0"]) + 1
       if sm.updated.get("carrotMan", False):
         result["carrotMan_updates"] = int(result["carrotMan_updates"]) + 1
-        msg = sm["carrotMan"]
-        result["last_carrotMan"] = {
-          "nRoadLimitSpeed": getattr(msg, "nRoadLimitSpeed", None),
-          "xSpdType": getattr(msg, "xSpdType", None),
-          "xTurnInfo": getattr(msg, "xTurnInfo", None),
-          "carrotCmd": getattr(msg, "carrotCmd", None),
-        }
+        update_cplink_diagnostics(result, sm["carrotMan"])
       if sm.updated.get("navInstructionCarrot", False):
         result["navInstructionCarrot_updates"] = int(result["navInstructionCarrot_updates"]) + 1
+        update_nav_instruction_diagnostics(result, sm["navInstructionCarrot"])
     result["ok"] = True
   except Exception as exc:
     result["error"] = str(exc)

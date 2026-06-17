@@ -202,6 +202,10 @@ def require_bool(values: Dict[str, str], key: str, expected: bool, label: str) -
     raise EvidenceError(f"{label}: snapshot `{key}` must be {want}, got {raw!r}")
 
 
+def bool_value(values: Dict[str, str], key: str) -> bool:
+  return values.get(key, "").strip() in TRUE_VALUES
+
+
 def validate_snapshot_text(name: str, text: str) -> Dict[str, str]:
   if "# CarrotPilot-C3-ESCC Device Snapshot" not in text:
     raise EvidenceError(f"{name}: not a CarrotPilot-C3-ESCC device snapshot")
@@ -237,7 +241,12 @@ def validate_snapshot_text(name: str, text: str) -> Dict[str, str]:
   return values
 
 
-def validate_snapshots(snapshot_paths: Sequence[str], require_device_snapshot: bool, require_escc_sample: bool) -> List[Dict[str, str]]:
+def validate_snapshots(
+  snapshot_paths: Sequence[str],
+  require_device_snapshot: bool,
+  require_escc_sample: bool,
+  require_cplink_sample: bool,
+) -> List[Dict[str, str]]:
   if require_device_snapshot and not snapshot_paths:
     raise EvidenceError("stable evidence requires at least one --device-snapshot copied from the C3")
 
@@ -249,15 +258,38 @@ def validate_snapshots(snapshot_paths: Sequence[str], require_device_snapshot: b
   if require_escc_sample:
     found = False
     for values in snapshots:
-      enable_escc = values.get("EnableEscc", "").strip() in TRUE_VALUES
+      enable_escc = bool_value(values, "EnableEscc")
       escc_bus0 = int_value(values, "escc_0x2ab_bus0")
-      sample_enabled = values.get("enabled", "").strip() in TRUE_VALUES
-      sample_ok = values.get("ok", "").strip() in TRUE_VALUES
+      sample_enabled = bool_value(values, "enabled")
+      sample_ok = bool_value(values, "ok")
       if enable_escc and sample_enabled and sample_ok and escc_bus0 > 0:
         found = True
         break
     if not found:
       raise EvidenceError("stable evidence requires a sampled snapshot with EnableEscc=1, enabled=True, ok=True, and escc_0x2ab_bus0 > 0")
+
+  if require_cplink_sample:
+    found = False
+    for values in snapshots:
+      sample_enabled = bool_value(values, "enabled")
+      sample_ok = bool_value(values, "ok")
+      updates_seen = bool_value(values, "cplink_updates_seen")
+      nav_seen = any(bool_value(values, key) for key in [
+        "cplink_speed_limit_seen",
+        "cplink_sdi_seen",
+        "cplink_tbt_seen",
+        "cplink_gps_seen",
+      ])
+      carrot_updates = int_value(values, "carrotMan_updates")
+      nav_updates = int_value(values, "navInstructionCarrot_updates")
+      if sample_enabled and sample_ok and updates_seen and nav_seen and (carrot_updates > 0 or nav_updates > 0):
+        found = True
+        break
+    if not found:
+      raise EvidenceError(
+        "CPlink evidence requires a sampled snapshot with enabled=True, ok=True, "
+        "CPlink updates, and at least one speed/TBT/SDI/GPS navigation field"
+      )
   return snapshots
 
 
@@ -296,10 +328,19 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `enabled` | True |
 | `ok` | True |
 | `escc_0x2ab_bus0` | 12 |
+| `carrotMan_updates` | 4 |
+| `navInstructionCarrot_updates` | 2 |
+| `cplink_updates_seen` | True |
+| `cplink_speed_limit_seen` | True |
+| `cplink_sdi_seen` | False |
+| `cplink_tbt_seen` | True |
+| `cplink_gps_seen` | False |
+| `cplink_lanechange_cmd_seen` | False |
 """
   validate_log(good_log)
   validate_snapshot_text("self-test snapshot", good_snapshot)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_escc_sample=True)
+  validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_cplink_sample=True)
 
   with tempfile.TemporaryDirectory() as tmp:
     bundle = Path(tmp)
@@ -310,7 +351,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
     if not bundle_log or len(bundle_snapshots) != 1:
       raise EvidenceError("self-test failed: evidence bundle was not discovered")
     validate_log(read_text(bundle_log)[1])
-    validate_snapshots(bundle_snapshots, require_device_snapshot=True, require_escc_sample=True)
+    validate_snapshots(bundle_snapshots, require_device_snapshot=True, require_escc_sample=True, require_cplink_sample=True)
 
   try:
     validate_log(good_log.replace("ESCC 0x2AB observed: PASS", "ESCC 0x2AB observed: PENDING"))
@@ -320,19 +361,37 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
     raise EvidenceError("self-test failed: missing PASS line was accepted")
 
 
-def validate_snapshots_from_text(items: Sequence[Tuple[str, str]], require_escc_sample: bool) -> List[Dict[str, str]]:
+def validate_snapshots_from_text(
+  items: Sequence[Tuple[str, str]],
+  require_escc_sample: bool = False,
+  require_cplink_sample: bool = False,
+) -> List[Dict[str, str]]:
   snapshots = [validate_snapshot_text(name, text) for name, text in items]
   if require_escc_sample:
     found = False
     for values in snapshots:
-      enable_escc = values.get("EnableEscc", "").strip() in TRUE_VALUES
-      sample_enabled = values.get("enabled", "").strip() in TRUE_VALUES
-      sample_ok = values.get("ok", "").strip() in TRUE_VALUES
+      enable_escc = bool_value(values, "EnableEscc")
+      sample_enabled = bool_value(values, "enabled")
+      sample_ok = bool_value(values, "ok")
       if enable_escc and sample_enabled and sample_ok and int_value(values, "escc_0x2ab_bus0") > 0:
         found = True
         break
     if not found:
       raise EvidenceError("self-test failed: ESCC sample was not detected")
+  if require_cplink_sample:
+    found = False
+    for values in snapshots:
+      nav_seen = any(bool_value(values, key) for key in [
+        "cplink_speed_limit_seen",
+        "cplink_sdi_seen",
+        "cplink_tbt_seen",
+        "cplink_gps_seen",
+      ])
+      if bool_value(values, "enabled") and bool_value(values, "ok") and bool_value(values, "cplink_updates_seen") and nav_seen:
+        found = True
+        break
+    if not found:
+      raise EvidenceError("self-test failed: CPlink sample was not detected")
   return snapshots
 
 
@@ -343,6 +402,7 @@ def main() -> int:
   parser.add_argument("--evidence-dir", action="append", default=[], help="unpacked folder generated by collect_real_car_evidence.py; may be repeated")
   parser.add_argument("--require-device-snapshot", action="store_true", help="fail when no device snapshot is supplied")
   parser.add_argument("--require-escc-sample", action="store_true", help="require EnableEscc=1 and sampled 0x2AB bus0 count > 0")
+  parser.add_argument("--require-cplink-sample", action="store_true", help="require a sampled CP搭子/Navipilot update with speed/TBT/SDI/GPS data")
   parser.add_argument("--self-test", action="store_true", help="run built-in parser checks")
   args = parser.parse_args()
 
@@ -358,7 +418,7 @@ def main() -> int:
 
     log_path, log_text = read_text(road_test_log)
     fields = validate_log(log_text)
-    snapshots = validate_snapshots(snapshot_paths, args.require_device_snapshot, args.require_escc_sample)
+    snapshots = validate_snapshots(snapshot_paths, args.require_device_snapshot, args.require_escc_sample, args.require_cplink_sample)
 
     print("Road-test evidence check")
     print(f"repo: {ROOT}")
@@ -370,6 +430,8 @@ def main() -> int:
     print(f"device snapshots checked: {len(snapshots)}")
     if args.require_escc_sample:
       print("ESCC sample: required and present")
+    if args.require_cplink_sample:
+      print("CPlink sample: required and present")
     print("OK: road-test evidence is sufficient for the requested gate")
     return 0
   except EvidenceError as exc:

@@ -90,6 +90,8 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-escc-sample
 ```
 
+如果这次测 CP搭子 / Navipilot，可把 `--require-escc-sample` 换成或另加 `--require-cplink-sample`。
+
 在 C3 设备上采集当前参数和静态状态：
 
 ```bash

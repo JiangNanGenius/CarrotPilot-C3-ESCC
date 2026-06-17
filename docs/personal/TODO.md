@@ -90,6 +90,7 @@
 - [x] 从 `jixiexiaoge/openpilot:master` 记录 CP搭子 / Navipilot 功能边界。
 - [x] 建立 `tracking/jixie-master`，跟踪 CP搭子 / Navipilot 项目说明和应用方向。
 - [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight。
+- [x] 增加 CP搭子 / Navipilot 设备端采样字段和可选证据校验门槛。
 - [ ] 机械小哥功能分批迁移：
   - [x] CP搭子 CarrotMan / Navipilot 核心协议静态兼容。
   - [ ] CP搭子 Android APP 实测连接和导航数据流。
@@ -129,7 +130,7 @@
 - [x] 增加路测证据检查脚本，stable 前强制检查路测记录、设备快照和 ESCC 0x2AB 采样。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static5` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static6` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。

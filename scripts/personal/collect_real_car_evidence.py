@@ -129,6 +129,8 @@ def build_checklist(output_dir: Path, sample_seconds: int, archive_path: Optiona
   lines.append("  --require-escc-sample")
   lines.append("```")
   lines.append("")
+  lines.append("For CP搭子 / Navipilot validation, add `--require-cplink-sample` to the same command.")
+  lines.append("")
   return "\n".join(lines)
 
 

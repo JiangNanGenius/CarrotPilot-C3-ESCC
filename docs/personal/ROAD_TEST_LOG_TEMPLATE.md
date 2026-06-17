@@ -117,6 +117,15 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-escc-sample
 ```
 
+如果这次同时测试 CP搭子 / Navipilot，可额外要求证据包里有实际导航数据流：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
+  --require-device-snapshot \
+  --require-cplink-sample
+```
+
 创建 stable tag 时也要传入同一个快照文件：
 
 ```bash

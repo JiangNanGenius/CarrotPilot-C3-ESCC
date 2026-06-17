@@ -76,6 +76,7 @@ python3 scripts/personal/road_test_evidence_check.py \
 - C3 和手机在同一 WiFi。
 - CP搭子 APP 正在发送导航数据。
 - `--sample-seconds 20` 期间观察 `carrotMan_updates`、`navInstructionCarrot_updates` 和导航字段。
+- 需要机器检查 CP搭子实连时，可在电脑端证据检查命令里加 `--require-cplink-sample`。
 
 ## 快照里重点看什么
 
@@ -87,6 +88,13 @@ python3 scripts/personal/road_test_evidence_check.py \
 - `DisableUpdates`、`EnableConnect`：离线模式下应符合预期。
 - `escc_0x2ab_bus0`：开启 ESCC 后用于确认 0x2AB 是否真的出现在 bus 0。
 - `carrotMan_updates` / `navInstructionCarrot_updates`：用于确认 CP搭子 / Navipilot 数据是否进入系统。
+- `cplink_updates_seen`：采样期间是否收到 CP搭子 / Navipilot 消息。
+- `cplink_speed_limit_seen`：是否看到限速字段。
+- `cplink_sdi_seen`：是否看到摄像头 / 限速提醒字段。
+- `cplink_tbt_seen`：是否看到转向 / 诱导字段。
+- `cplink_gps_seen`：是否看到 GPS 字段。快照只记录是否出现，不记录坐标。
+- `cplink_lanechange_cmd_seen`：是否看到 `LANECHANGE` 命令。
+- `last_carrotMan` / `last_navInstructionCarrot`：最后一帧非敏感字段摘要，不包含 GPS 坐标、路线点或街道名。
 
 `stable` 发布要求至少有一个快照满足：
 

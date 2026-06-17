@@ -147,6 +147,7 @@
 - [ ] 确认 ESCC 参数默认状态符合预期。
 - [ ] 确认离线模式开启时不会卡注册，也不会尝试联网更新。
 - [ ] 如测试 CP搭子，确认 Android APP 能发现 C3 并发送导航数据。
+- [ ] 如测试 CP搭子，运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-cplink-sample`。
 
 ## 7. 路测分级
 

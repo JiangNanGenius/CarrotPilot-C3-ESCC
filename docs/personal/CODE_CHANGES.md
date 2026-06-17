@@ -737,3 +737,51 @@
 - `python3 scripts/personal/road_test_evidence_check.py --self-test` 通过，包含证据包目录自测。
 - 未填写的证据包会被拒绝，并列出缺少的 `PASS` 结论行。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-18: CP搭子 / Navipilot 实连证据增强
+
+改动文件：
+
+- `scripts/personal/device_snapshot.py`
+- `scripts/personal/road_test_evidence_check.py`
+- `scripts/personal/smoke_check.py`
+- `scripts/personal/collect_real_car_evidence.py`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/ROAD_TEST_LOG_TEMPLATE.md`
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `docs/personal/README.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `README.md`
+
+改动内容：
+
+- 设备快照新增 CP搭子 / Navipilot 采样诊断：
+  - `cplink_updates_seen`
+  - `cplink_speed_limit_seen`
+  - `cplink_sdi_seen`
+  - `cplink_tbt_seen`
+  - `cplink_gps_seen`
+  - `cplink_lanechange_cmd_seen`
+  - `last_carrotMan`
+  - `last_navInstructionCarrot`
+- 快照只记录导航字段是否出现和非敏感摘要，不记录 GPS 坐标、路线点或街道名。
+- `road_test_evidence_check.py` 新增 `--require-cplink-sample`，用于 CP搭子实测时检查证据包里是否有实际导航数据流。
+- `smoke_check.py` 新增对 CP搭子诊断字段的 dry-run 覆盖。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static6`
+
+含义：
+
+- 包含 CP搭子 / Navipilot 实连证据增强。
+- 静态检查通过，不代表实车验证。
+- 还没有 `stable` tag。
+
+验证：
+
+- `python3 scripts/personal/road_test_evidence_check.py --self-test` 通过，包含 `--require-cplink-sample` 自测。
+- `python3 scripts/personal/smoke_check.py` 通过，确认快照包含 CP搭子诊断字段。

@@ -85,6 +85,10 @@ python3 scripts/personal/cplink_preflight.py
 - `LANECHANGE` 命令实测：
   - 只在安全变道条件下响应。
   - 不响应 `OVERTAKE`，直到单独迁移该逻辑。
+- 设备证据包实测：
+  - 用 `collect_real_car_evidence.py --sample-seconds 20 --archive` 采集。
+  - 电脑端运行 `road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-cplink-sample`。
+  - 快照只记录导航字段是否出现，不记录 GPS 坐标、路线点或街道名。
 - 中文说明补全：
   - CP搭子需要手机 APP 和同一 WiFi。
   - 7000 Web 只是设备端控制台，不等于手机导航桥。
@@ -129,6 +133,7 @@ nRoadLimitSpeed 更新：是/否
 TBT 更新：是/否
 SDI 更新：是/否
 GPS 更新：是/否
+证据包 `--require-cplink-sample`：通过/失败
 LANECHANGE 命令：未测/通过/失败
 异常：
 回滚目标：
