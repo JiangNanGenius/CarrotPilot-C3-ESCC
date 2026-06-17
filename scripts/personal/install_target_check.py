@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import re
 import subprocess
 import sys
@@ -73,7 +74,13 @@ def require_commit_ref(ref: str, label: str) -> str:
 def require_tag_exists(tag: Optional[str], key: str) -> Optional[str]:
   if tag is None:
     return None
-  return require_commit_ref(f"refs/tags/{tag}", key)
+  try:
+    return require_commit_ref(f"refs/tags/{tag}", key)
+  except InstallTargetError:
+    pending_tag = os.environ.get("CARROTPILOT_PENDING_RELEASE_TAG")
+    if key in {"current_static_tag", "current_test_tag"} and pending_tag == tag:
+      return require_commit_ref("HEAD", key)
+    raise
 
 
 def require_ancestor(base: str, tip: str, label: str) -> None:

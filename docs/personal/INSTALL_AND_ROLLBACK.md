@@ -18,7 +18,7 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260617-static3`
+- `carrotpilot-c3-escc-20260618-static1`
 - 只代表静态检查通过，不代表实车验证。
 - 目前还没有 `stable` tag。
 

@@ -567,3 +567,28 @@
 
 - 本地 `python3 scripts/personal/update_audit.py --fetch` 通过，当前三方来源均对齐。
 - 推送后需要手动触发或等待 `Upstream Watch` 确认 GitHub 侧基准清单可用。
+
+## 2026-06-18: 当前静态检查 tag
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static1`
+
+包含范围：
+
+- `carrotpilot-c3-escc-20260617-static3` 之后的维护护栏：
+  - 安装目标清单和检查脚本。
+  - Seltos 2023 纯 CAN / Seltos 2021 复用护栏。
+  - 路测证据检查器和 `stable` gate 加严。
+  - `Upstream Watch` 定期上游审计。
+
+含义：
+
+- 静态检查通过，不代表实车验证。
+- 还没有 `stable` tag。
+- `daily_install_target` 仍为空。
+
+验证：
+
+- `python3 scripts/personal/update_audit.py --baseline-file docs/personal/UPSTREAM_BASELINES.json --strict` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。

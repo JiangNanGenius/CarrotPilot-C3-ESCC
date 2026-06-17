@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -38,11 +39,15 @@ def git(args: Sequence[str], check: bool = False) -> Tuple[int, str]:
   return proc.returncode, output
 
 
-def run(cmd: Sequence[str]) -> None:
+def run(cmd: Sequence[str], extra_env: Optional[dict[str, str]] = None) -> None:
   print("$ " + " ".join(cmd))
+  env = os.environ.copy()
+  if extra_env:
+    env.update(extra_env)
   proc = subprocess.run(
     list(cmd),
     cwd=str(ROOT),
+    env=env,
     text=True,
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,
@@ -104,9 +109,10 @@ def validate_stable_evidence(path: Optional[str], snapshots: Sequence[str]) -> N
   run(cmd)
 
 
-def run_static_checks() -> None:
+def run_static_checks(pending_tag: Optional[str]) -> None:
+  env = {"CARROTPILOT_PENDING_RELEASE_TAG": pending_tag} if pending_tag else None
   run([sys.executable, "scripts/personal/update_audit.py"])
-  run([sys.executable, "scripts/personal/smoke_check.py"])
+  run([sys.executable, "scripts/personal/smoke_check.py"], extra_env=env)
   run([sys.executable, "scripts/personal/escc_offline_preflight.py", "--no-manual"])
   run([sys.executable, "scripts/personal/cplink_preflight.py", "--no-manual"])
   run(["git", "diff", "--check"])
@@ -163,7 +169,8 @@ def main() -> int:
       print("note: static/test tags are not stable and do not prove real-car validation")
 
     if args.run_checks:
-      run_static_checks()
+      pending_tag = args.tag if args.kind in {"static", "test"} else None
+      run_static_checks(pending_tag)
 
     if args.create_tag:
       create_tag(args.tag, args.kind, args.road_test_log, args.device_snapshot)
