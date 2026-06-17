@@ -1,5 +1,35 @@
 # 当前代码改动记录
 
+## 2026-06-18: 中文设置说明第三批
+
+改动文件：
+
+- `selfdrive/carrot_settings.json`
+- `scripts/personal/settings_cn_audit.py`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/TODO.md`
+- `README.md`
+
+改动内容：
+
+- 继续只修改中文显示字段，不修改参数名、范围、默认值或控制逻辑。
+- 清理巡航、ATC、纵向增益、巡航按键模拟、动能回收拨片、自动巡航轻点油门、HDP、低速转向、关机时间、驾驶员监控、道路限速调整、路径显示和跟车时间说明。
+- 把容易误解的 `胡萝卜巡航`、`HKG 推荐`、`GasTab`、`smdps`、`TimeFollow`、`t_follow` 等中文展示改成更明确的用车描述。
+- 扩展 `settings_cn_audit.py`，把第三批关键说明加入审计，防止后续更新退化。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static21`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test13`
+
+含义：
+
+- 包含第三批中文设置说明优化，静态检查通过，不代表实车验证或稳定版本。
+
 ## 2026-06-18: AmapNavi / 自动超车 / DEC 来源审计
 
 分支：
