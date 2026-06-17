@@ -413,6 +413,7 @@
 
 - 新增轻量 GitHub Actions 工作流 `Personal Smoke`。
 - 触发范围限制在 `personal/c3-escc`、`personal/c3-escc-atune`、对应 PR 和手动触发。
+- 使用 `actions/checkout@v6`、`actions/setup-python@v6`、`actions/setup-node@v6` 和 Node.js 24，避免 Node 20 退役警告。
 - 工作流会补齐个人脚本需要的 `personal/c3-escc`、`origin/c3-wip`、`jixie/master` / `tracking/jixie-master` 参考 ref。
 - 运行 `scripts/personal/smoke_check.py`、`scripts/personal/escc_offline_preflight.py --no-manual` 和 `scripts/personal/cplink_preflight.py --no-manual`。
 - README 和更新检查单增加 Actions 说明。
