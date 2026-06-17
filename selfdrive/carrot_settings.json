@@ -2307,6 +2307,22 @@
     },
     {
       "group": "감속제어",
+      "name": "EnableAmapNaviStatus",
+      "title": "AmapNavi 상태 호환(0)",
+      "descr": "fishop AmapNavi 호환 상태를 게시합니다. 명령/외부 방향지시등/자동추월은 사용하지 않습니다.",
+      "egroup": "SPEED",
+      "etitle": "AmapNavi Status Compat(0)",
+      "edescr": "Publishes read-only fishop AmapNavi-compatible lane/blind status. Does not enable app commands, external blinker control, or overtake.",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "unit": 1,
+      "cgroup": "速度控制",
+      "ctitle": "AmapNavi 状态兼容(0)",
+      "cdescr": "实验兼容项，默认关闭。开启后只把现有车道线和原车盲区状态发布为 AmapNavi 兼容消息；不接收 APP 命令，不控制外接转向灯，不启用自动超车。"
+    },
+    {
+      "group": "감속제어",
       "name": "AutoRoadSpeedLimitOffset",
       "title": "도로제한속도맞춤(-1)",
       "descr": "도로제한속도 + 설정값\n -1: 안함,",

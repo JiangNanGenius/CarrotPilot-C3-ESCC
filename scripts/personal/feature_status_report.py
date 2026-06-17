@@ -104,6 +104,28 @@ def check_navipilot_live_check() -> FeatureStatus:
   )
 
 
+def check_app_navi_status_bridge() -> FeatureStatus:
+  condition = (
+    contains("cereal/custom.capnp", "struct AmapNavi @0xaedffd8f31e7b55d")
+    and contains("cereal/log.capnp", "amapNavi @108 :Custom.AmapNavi")
+    and contains("cereal/services.py", '"amapNavi": (True, 20., 5)')
+    and exists("selfdrive/carrot/app_navi_status.py")
+    and contains("selfdrive/carrot/app_navi_status.py", 'PubMaster(["amapNavi"])')
+    and contains("selfdrive/carrot/app_navi_status.py", 'SubMaster(["carState"])')
+    and contains("common/params_keys.h", "EnableAmapNaviStatus")
+    and regex("system/manager/process_config.py", r'PythonProcess\("app_navi_status",\s*"selfdrive\.carrot\.app_navi_status",\s*enable_app_navi_status\)')
+    and not contains("selfdrive/controls/lib/desire_helper.py", "amapNavi")
+    and not contains("selfdrive/carrot/app_navi_status.py", "OVERTAKE")
+    and not contains("selfdrive/carrot/app_navi_status.py", "carrotCmd")
+    and not contains("selfdrive/carrot/app_navi_status.py", "blinker_ctrl")
+  )
+  return gated(
+    "AmapNavi read-only status bridge",
+    "default-off publisher mirrors carState lane/blind data without APP commands, external blinkers, or overtake hooks",
+    condition,
+  )
+
+
 def check_auto_tuner() -> FeatureStatus:
   condition = (
     exists("selfdrive/carrot/carrot_learning.py")
@@ -248,6 +270,7 @@ def build_statuses() -> List[FeatureStatus]:
     check_experimental_toggle(),
     check_navipilot_param_api(),
     check_navipilot_live_check(),
+    check_app_navi_status_bridge(),
     check_auto_tuner(),
     check_cplink(),
     check_cluster_hud(),

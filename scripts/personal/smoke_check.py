@@ -197,6 +197,7 @@ def check_settings_defaults() -> None:
     "CarrotLearningApply": 0,
     "CarrotLearningIgnore": 0,
     "CarrotLearningClear": 0,
+    "EnableAmapNaviStatus": 0,
   }
   for name, default in expected.items():
     if name not in by_name:
@@ -217,6 +218,7 @@ def check_params_defaults() -> None:
     "CarrotLearningIgnore action": r'\{"CarrotLearningIgnore", \{PERSISTENT, BOOL, "0"\}\}',
     "CarrotTunerApplyLat default on": r'\{"CarrotTunerApplyLat", \{PERSISTENT, INT, "1"\}\}',
     "CarrotTunerApplyLong default on": r'\{"CarrotTunerApplyLong", \{PERSISTENT, INT, "1"\}\}',
+    "EnableAmapNaviStatus default off": r'\{"EnableAmapNaviStatus", \{PERSISTENT, INT, "0"\}\}',
   }
   for label, pattern in patterns.items():
     expect_regex(params_keys, pattern, label)
@@ -391,6 +393,7 @@ def check_py_compile() -> None:
     "scripts/personal/navipilot_live_check.py",
     "scripts/personal/model_selector_audit.py",
     "scripts/personal/app_navi_overtake_audit.py",
+    "scripts/personal/amap_navi_status_check.py",
     "scripts/personal/c3_static_check.py",
     "scripts/personal/collect_real_car_evidence.py",
     "opendbc_repo/opendbc/car/hyundai/values.py",
@@ -405,6 +408,7 @@ def check_py_compile() -> None:
     "selfdrive/car/car_specific.py",
     "selfdrive/carrot/carrot_functions.py",
     "selfdrive/carrot/carrot_learning.py",
+    "selfdrive/carrot/app_navi_status.py",
     "selfdrive/carrot/server/services/carrot_learning.py",
     "selfdrive/carrot/server/features/carrot_learning.py",
     "selfdrive/carrot/server/features/params.py",
@@ -532,6 +536,7 @@ def main() -> int:
     ("Navipilot live check self-test", lambda: run([sys.executable, "scripts/personal/navipilot_live_check.py", "--self-test"], "Navipilot live check self-test")),
     ("Model selector audit", lambda: run([sys.executable, "scripts/personal/model_selector_audit.py"], "Model selector audit")),
     ("App navigation / overtake audit", lambda: run([sys.executable, "scripts/personal/app_navi_overtake_audit.py"], "App navigation / overtake audit")),
+    ("AmapNavi status compatibility", lambda: run([sys.executable, "scripts/personal/amap_navi_status_check.py"], "AmapNavi status compatibility")),
     ("Seltos 2023 static checks", check_seltos_static),
     ("ESCC static checks", check_escc_static),
     ("Always Offline static checks", check_offline_static),

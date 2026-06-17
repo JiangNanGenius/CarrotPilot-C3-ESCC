@@ -25,7 +25,8 @@
 | Navipilot APP 端点 live check | 本项目维护 | P1 | 已新增 C3 侧检查器，可验证 7000 参数接口、7705 状态广播和可选 7706 测试导航输入；不替代手机 APP 实测 |
 | 自动实验模式切换完整闭环 | 机械小哥 / Navipilot APP | P1 | C3 端参数接口已具备；APP 侧实测和策略闭环待验证 |
 | 模型选择切换器 | `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector` / Navipilot APP | P1 | 已跟踪参考线并增加源码审计；下载/编译/切 modeld 仍保持高风险独立批次 |
-| AmapNavi / 自动超车来源审计 | `fishop/openpilot:cp` / `jixiexiaoge/navipilot:CPdazi` | P1 | 已新增源码审计，确认来源存在但默认 C3 主线隔离 |
+| AmapNavi 只读状态桥 | `fishop/openpilot:cp` / 本项目维护 | P1 | 已接入默认关闭的 `EnableAmapNaviStatus`，只发布车道线和原车盲区状态，不接收 APP 命令 |
+| AmapNavi / 自动超车来源审计 | `fishop/openpilot:cp` / `jixiexiaoge/navipilot:CPdazi` | P1 | 已新增源码审计，确认完整 AmapNavi、外设控制、自动超车和 DEC 仍隔离 |
 | 自动超车 | 机械小哥 / fishop | P2 | 后置验证；APP 可发 `LANECHANGE`，`OVERTAKE` 不进默认主线 |
 | LED / cluster HUD | 机械小哥 | P2 | 实验功能 |
 | 驾驶报告 | `jixiexiaoge/navipilot:CPdazi` | P2 | APP 端功能；C3 端保持 WebSocket/CarrotMan 数据兼容，待 APP 实测 |
@@ -36,6 +37,7 @@
 | 功能 | 当前状态 | 守卫 |
 | --- | --- | --- |
 | 7000 Web 本地控制台 | `carrot_server.py` 默认 7000 端口，已有 dashcam、screenrecord、tools、Auto-Tuner 面板 | `scripts/personal/feature_boundary_check.py` 确认入口和关键文件仍存在 |
+| AmapNavi 只读状态桥 | `app_navi_status.py` 默认关闭，只镜像 `carState` 车道线和原车盲区到 `amapNavi` | `scripts/personal/amap_navi_status_check.py` 和 `feature_boundary_check.py` 确认不接收命令、不接外设、不进变道逻辑 |
 | cluster HUD / USB 小屏代码 | 当前代码树已有，manager 只在 `ClusterHud` 为 1 或 2 时启动 | `feature_boundary_check.py` 确认 `carrot_cluster` 仍由 `enable_cluster_hud` 控制 |
 | 机械小哥数据广播 | 当前代码树已有 `xiaoge_data`，manager 只在 `ShareData` 开启时启动 | `feature_boundary_check.py` 确认不默认常驻 |
 
@@ -52,7 +54,7 @@ python3 scripts/personal/app_navi_overtake_audit.py
 
 | 功能 | 来源 | 风险 | 计划 |
 | --- | --- | --- | --- |
-| fishop `amap_navi.py` | `fishop/openpilot:cp` | 中/高 | 与 CP搭子协议重叠，且耦合 4210-4213、7705/7706、`amapNavi`、盲区和 APP 命令；先放 `experimental/app-navi` |
+| fishop 完整 `amap_navi.py` | `fishop/openpilot:cp` | 中/高 | 与 CP搭子协议重叠，且耦合 4210-4213、7705/7706、盲区、外设和 APP 命令；只读状态桥已进主线，完整服务先放 `experimental/app-navi` |
 | APP 外接转向灯控制 | `fishop/openpilot:cp` | 高 | 需要外置硬件和上车验证，不进默认分支 |
 | `OVERTAKE` 命令 | `fishop/openpilot:cp` / `jixiexiaoge/navipilot:CPdazi` | 高 | APP 端已有状态机和 `LANECHANGE` 命令出口；设备端 `OVERTAKE` 需要独立开关、速度/盲区/车道条件保护 |
 | modeld 模型选择器 | `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector` | 高 | 已来源跟踪和静态审计；真正迁移放 `experimental/model-selector` |

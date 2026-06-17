@@ -105,6 +105,7 @@ python3 scripts/personal/app_navi_overtake_audit.py
 - Navipilot APP 参数读写接口静态守卫。
 - Navipilot APP 端点 live check 和证据包集成。
 - Model selector 参考线跟踪和源码审计。
+- AmapNavi 只读状态桥：默认关闭，只把 `carState` 车道线和原车盲区状态发布为 `amapNavi`，不接收 APP 命令、不控制外接转向灯、不启用自动超车。
 
 ### B. 下一批，低风险
 
@@ -130,10 +131,14 @@ python3 scripts/personal/app_navi_overtake_audit.py
 - 中文说明补全：
   - CP搭子需要手机 APP 和同一 WiFi。
   - 7000 Web 只是设备端控制台，不等于手机导航桥。
+- AmapNavi 只读状态桥实测：
+  - 停车状态开启 `EnableAmapNaviStatus=1`。
+  - 确认 `amapNavi` 服务发布车道线和原车盲区状态。
+  - 确认 `carrotCmd`、`OVERTAKE`、外接转向灯和变道逻辑没有被触发。
 
 ### C. 中风险，单独分支
 
-- fishop `amap_navi.py`。
+- fishop 完整 `amap_navi.py`。
 - 外接转向灯控制。
 - APP 命令变道增强。
 - 自动超车 / `OVERTAKE`。当前 Navipilot APP 端已有 `AutoOvertakeManager`，会通过 7706 发送 `LANECHANGE`；设备端 fishop 参考还支持 `OVERTAKE`，必须等独立安全门控后再碰。

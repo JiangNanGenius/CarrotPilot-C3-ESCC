@@ -297,8 +297,6 @@ def check_current_branch_boundary() -> List[Check]:
   ))
 
   markers = [
-    ("cereal/custom.capnp", "struct AmapNavi", "AmapNavi schema"),
-    ("cereal/services.py", '"amapNavi"', "amapNavi service"),
     ("common/params_keys.h", "StockBlinkerCtrl", "external blinker stock control param"),
     ("common/params_keys.h", "ExtBlinkerCtrlTest", "external blinker test param"),
     ("common/params_keys.h", "LidarBsdDelayTime", "lidar blind delay param"),
@@ -326,9 +324,28 @@ def check_current_branch_boundary() -> List[Check]:
   checks.append(Check(
     "current high-risk integration markers",
     not present_markers and not missing_files,
-    "no AmapNavi, external blinker, lidar, OVERTAKE, or DEC markers in default C3 line" if not present_markers and not missing_files else (
+    "no fishop command AmapNavi, external blinker, lidar, OVERTAKE, or DEC markers in default C3 line" if not present_markers and not missing_files else (
       ("present: " + ", ".join(present_markers)) + ("; missing files: " + ", ".join(sorted(set(missing_files))) if missing_files else "")
     ),
+  ))
+
+  app_navi_status_ok = (
+    "struct AmapNavi @0xaedffd8f31e7b55d" in worktree_text("cereal/custom.capnp")
+    and "amapNavi @108 :Custom.AmapNavi" in worktree_text("cereal/log.capnp")
+    and '"amapNavi": (True, 20., 5)' in worktree_text("cereal/services.py")
+    and path_exists("selfdrive/carrot/app_navi_status.py")
+    and 'PubMaster(["amapNavi"])' in worktree_text("selfdrive/carrot/app_navi_status.py")
+    and 'SubMaster(["carState"])' in worktree_text("selfdrive/carrot/app_navi_status.py")
+    and "carrotCmd" not in worktree_text("selfdrive/carrot/app_navi_status.py")
+    and "OVERTAKE" not in worktree_text("selfdrive/carrot/app_navi_status.py")
+    and "blinker_ctrl" not in worktree_text("selfdrive/carrot/app_navi_status.py")
+    and "EnableAmapNaviStatus" in worktree_text("common/params_keys.h")
+    and "enable_app_navi_status" in worktree_text("system/manager/process_config.py")
+  )
+  checks.append(Check(
+    "current read-only AmapNavi status bridge",
+    app_navi_status_ok,
+    "default-off bridge publishes lane/blind status only; fishop command, external blinker, lidar, and OVERTAKE remain isolated",
   ))
 
   lanechange_ok = (

@@ -90,6 +90,9 @@ def enable_cluster_hud(started, params, CP: car.CarParams) -> bool:
   except Exception:
     return False
 
+def enable_app_navi_status(started, params, CP: car.CarParams) -> bool:
+  return params.get_bool("EnableAmapNaviStatus")
+
 procs = [
   DaemonProcess("manage_athenad", "system.athena.manage_athenad", "AthenadPid"),
 
@@ -150,6 +153,7 @@ procs = [
   PythonProcess("carrot_server", "selfdrive.carrot.carrot_server", always_run),
   PythonProcess("cweb_push", "selfdrive.carrot.cweb_push", always_run, enabled=not PC),
   PythonProcess("carrot_cluster", "selfdrive.carrot.cluster_autorun", enable_cluster_hud),
+  PythonProcess("app_navi_status", "selfdrive.carrot.app_navi_status", enable_app_navi_status),
 
   #Xiaoge data broadcaster (conditional on ShareData param)
   PythonProcess("xiaoge_data", "selfdrive.carrot.xiaoge_data", enable_xiaoge_data),

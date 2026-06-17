@@ -1,5 +1,60 @@
 # 当前代码改动记录
 
+## 2026-06-18: AmapNavi 只读状态桥
+
+改动文件：
+
+- `cereal/custom.capnp`
+- `cereal/log.capnp`
+- `cereal/services.py`
+- `common/params_keys.h`
+- `system/manager/process_config.py`
+- `selfdrive/carrot/app_navi_status.py`
+- `selfdrive/carrot_settings.json`
+- `scripts/personal/amap_navi_status_check.py`
+- `scripts/personal/feature_boundary_check.py`
+- `scripts/personal/app_navi_overtake_audit.py`
+- `scripts/personal/feature_status_report.py`
+- `scripts/personal/settings_cn_audit.py`
+- `scripts/personal/smoke_check.py`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `README.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+
+改动内容：
+
+- 新增 `AmapNavi` custom schema 和 `amapNavi` service，复用 fishop 兼容字段：左右盲区、车道线有效、左右车道线类型。
+- 新增 `selfdrive/carrot/app_navi_status.py`，只读取 `carState`，把原车盲区和车道线状态发布为 `amapNavi`。
+- 新增 `EnableAmapNaviStatus` 参数和设置项，默认关闭。
+- manager 只在 `EnableAmapNaviStatus` 开启时启动 `app_navi_status`。
+- 新增 `amap_navi_status_check.py`，确认该桥只读、默认关闭、不接收 APP 命令、不控制外接转向灯、不启用自动超车、不接入 `desire_helper`。
+- 更新功能边界守卫：允许只读状态桥，继续禁止 fishop 完整 `amap_navi.py`、`OVERTAKE`、外接转向灯、lidar 盲区和 DEC/longcontrol 进入默认主线。
+
+刻意没有改：
+
+- 没有复制 fishop 完整 `selfdrive/carrot/amap_navi.py`。
+- 没有开启 APP 命令控制。
+- 没有引入外接转向灯控制。
+- 没有把 `amapNavi` 接入 `desire_helper` 或变道逻辑。
+- 没有启用 `OVERTAKE`。
+- 没有引入 DEC / longcontrol 大改。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static22`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test14`
+
+含义：
+
+- 包含只读 AmapNavi 状态桥，静态检查通过，不代表手机 APP 实测、AmapNavi 完整功能或实车验证完成。
+
 ## 2026-06-18: 中文设置说明第三批
 
 改动文件：

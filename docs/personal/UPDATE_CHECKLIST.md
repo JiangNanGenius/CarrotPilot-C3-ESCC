@@ -130,9 +130,10 @@
 ## 3.10. AmapNavi / 自动超车 / DEC 来源参考线
 
 - [ ] 运行 `python3 scripts/personal/app_navi_overtake_audit.py`。
+- [ ] 运行 `python3 scripts/personal/amap_navi_status_check.py`。
 - [ ] `fishop/cp` 仍包含 `selfdrive/carrot/amap_navi.py`、`amapNavi` schema/service、外接转向灯、lidar 盲区、`OVERTAKE` 和 DEC/longcontrol 参考源。
 - [ ] `tracking/jixie-navipilot` 仍包含 `AutoOvertakeManager.kt`、7705/7706 网络通道和 `LANECHANGE` 命令出口。
-- [ ] 默认 C3 主线仍没有 `amap_navi.py`、`amapNavi` service、外接转向灯参数、`OVERTAKE`、lidar 盲区参数或 DEC 接入点。
+- [ ] 默认 C3 主线允许只读 `amapNavi` 状态桥，但仍没有 fishop 完整 `amap_navi.py`、外接转向灯参数、`OVERTAKE`、lidar 盲区参数或 DEC 接入点。
 - [ ] 如准备迁移，必须新开 `experimental/app-navi` 或 `experimental/auto-lanechange`，并先补独立开关、停车态验证、低速验证和回滚策略。
 
 ## 4. Seltos 专项检查
@@ -159,6 +160,7 @@
 - [ ] 运行 `python3 scripts/personal/seltos_profile_check.py` 并确认车型配置没有被更新合并改成 CANFD/HDA2 或其它车型特判。
 - [ ] 运行 `python3 scripts/personal/navipilot_live_check.py --self-test` 并确认 C3 侧 APP 端点检查器正常。
 - [ ] 运行 `python3 scripts/personal/model_selector_audit.py` 并确认模型选择器参考线和默认主线边界正常。
+- [ ] 运行 `python3 scripts/personal/amap_navi_status_check.py` 并确认只读 AmapNavi 状态桥仍默认关闭且不接入控制链路。
 - [ ] 运行 `python3 scripts/personal/app_navi_overtake_audit.py` 并确认 AmapNavi / 自动超车 / DEC 来源参考和默认主线边界正常。
 - [ ] 运行 `python3 scripts/personal/evidence_readiness_report.py --self-test` 并确认证据就绪度报告正常。
 - [ ] 检查 Python 语法。

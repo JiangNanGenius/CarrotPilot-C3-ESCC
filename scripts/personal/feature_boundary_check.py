@@ -87,8 +87,6 @@ def check_absent_patterns(report: Report) -> None:
     ("common/params_keys.h", "StockBlinkerCtrl", "external blinker stock-control param not present by default"),
     ("common/params_keys.h", "ExtBlinkerCtrlTest", "external blinker test param not present by default"),
     ("common/params_keys.h", "LidarBsdDelayTime", "lidar blind-spot tuning params not present by default"),
-    ("cereal/custom.capnp", "struct AmapNavi", "fishop AmapNavi schema not present by default"),
-    ("cereal/services.py", '"amapNavi"', "fishop AmapNavi service not registered by default"),
     ("selfdrive/controls/lib/longcontrol.py", "DynamicExperimentalController", "fishop DEC not wired into longcontrol by default"),
     ("selfdrive/controls/lib/longitudinal_planner.py", "selfdrive.controls.lib.dec", "fishop DEC not wired into longitudinal planner by default"),
     ("system/manager/process_config.py", "amap_navi", "fishop AmapNavi service not managed by default"),
@@ -138,6 +136,41 @@ def check_required_web_features(report: Report) -> None:
   )
 
 
+def check_gated_app_navi_status(report: Report) -> None:
+  report.require(
+    "read-only AmapNavi status schema exists",
+    contains("cereal/custom.capnp", "struct AmapNavi @0xaedffd8f31e7b55d")
+    and contains("cereal/log.capnp", "amapNavi @108 :Custom.AmapNavi")
+    and contains("cereal/services.py", '"amapNavi": (True, 20., 5)'),
+    "this should be the small status-only compatibility contract, not fishop's full command service",
+  )
+  report.require(
+    "read-only AmapNavi status module exists",
+    exists("selfdrive/carrot/app_navi_status.py")
+    and contains("selfdrive/carrot/app_navi_status.py", 'PubMaster(["amapNavi"])')
+    and contains("selfdrive/carrot/app_navi_status.py", 'SubMaster(["carState"])'),
+    "module should only mirror carState lane/blind data",
+  )
+  report.require(
+    "read-only AmapNavi status module has no command/control markers",
+    not contains("selfdrive/carrot/app_navi_status.py", "carrotCmd")
+    and not contains("selfdrive/carrot/app_navi_status.py", "OVERTAKE")
+    and not contains("selfdrive/carrot/app_navi_status.py", "blinker_ctrl")
+    and not contains("selfdrive/carrot/app_navi_status.py", "7706"),
+    "keep APP commands, external blinkers, and overtake out of this bridge",
+  )
+  report.require(
+    "read-only AmapNavi status process is gated",
+    regex("system/manager/process_config.py", r'PythonProcess\("app_navi_status",\s*"selfdrive\.carrot\.app_navi_status",\s*enable_app_navi_status\)'),
+    "the bridge must not run unless EnableAmapNaviStatus is enabled",
+  )
+  report.require(
+    "read-only AmapNavi status gate reads EnableAmapNaviStatus",
+    regex("system/manager/process_config.py", r"def enable_app_navi_status\(.*?EnableAmapNaviStatus"),
+    "gate must remain default-off and independent of driving state",
+  )
+
+
 def check_gated_existing_features(report: Report) -> None:
   process_config = "system/manager/process_config.py"
   report.require(
@@ -170,7 +203,7 @@ def check_gated_existing_features(report: Report) -> None:
 def manual_items() -> List[str]:
   return [
     "Treat 7000 Web, cluster HUD, and ShareData as existing gated features, not proof of real device validation.",
-    "Keep OVERTAKE, AmapNavi device service, external blinker control, lidar blind paths, DEC/longcontrol rewrites, and standalone sentry/web services out of the main branch until each has its own switch and test plan.",
+    "Keep OVERTAKE, fishop full AmapNavi command service, external blinker control, lidar blind paths, DEC/longcontrol rewrites, and standalone sentry/web services out of the main branch until each has its own switch and test plan.",
     "If a future upstream update adds any blocked feature intentionally, update this check in the same commit that adds the safety gate and documentation.",
   ]
 
@@ -203,6 +236,7 @@ def main() -> int:
   check_absent_files(report)
   check_absent_patterns(report)
   check_required_web_features(report)
+  check_gated_app_navi_status(report)
   check_gated_existing_features(report)
   print_report(report, show_manual=not args.no_manual)
   return 1 if report.failed else 0

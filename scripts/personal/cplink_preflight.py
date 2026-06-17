@@ -301,7 +301,7 @@ def manual_items() -> List[str]:
     "During navigation, confirm nRoadLimitSpeed, TBT, SDI, and GPS fields change in carrotMan.",
     "For Navipilot driving report, confirm the Android app starts collection only after connected + IsOnroad and saves a score after stopping.",
     "Send a LANECHANGE command from the app and confirm the command is accepted only under safe lane-change conditions.",
-    "Do not treat OVERTAKE, external blinker control, AmapNavi device service, or sentry mode as integrated until they get separate guarded commits.",
+    "Do not treat OVERTAKE, external blinker control, fishop full AmapNavi command service, or sentry mode as integrated until they get separate guarded commits.",
   ]
 
 

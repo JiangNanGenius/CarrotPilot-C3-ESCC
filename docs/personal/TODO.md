@@ -128,11 +128,12 @@
 - [x] 评估 `amap_navi.py` 与机械小哥 CP搭子的功能重叠。
 - [x] 评估转向灯板控制、雷达/激光雷达盲区、APP 控制变道、纵控平顺停车等功能。
 - [x] 增加 AmapNavi / 自动超车 / DEC 来源审计脚本，确认 fishop 和 Navipilot APP 参考源存在，同时默认 C3 主线保持隔离。
-- [ ] 单独迁移 fishop `amap_navi.py` 或 APP/导航增强，不能整包合并。
+- [x] 单独迁移只读 AmapNavi 状态兼容桥，默认关闭，只发布车道线和原车盲区状态，不接收 APP 命令。
+- [ ] 单独迁移 fishop 完整 `amap_navi.py` 或 APP/导航增强，不能整包合并。
 - [x] 决定哪些进入主分支，哪些放到实验分支：
   - ESCC 继续保留在主分支，默认关闭。
   - CP搭子 / Navipilot 核心协议保留在主分支，`LANECHANGE` 只走现有安全变道链路。
-  - fishop `amap_navi.py`、外接转向灯、lidar/侧向盲区、APP 自动超车和 `OVERTAKE` 放实验分支候选。
+  - 只读 AmapNavi 状态桥保留主线默认关闭；fishop 完整 `amap_navi.py`、外接转向灯、lidar/侧向盲区、APP 自动超车和 `OVERTAKE` 放实验分支候选。
   - DEC / longcontrol 大改在 ESCC 和 Seltos 实车表现稳定前先不迁移。
 
 ## P5: C4 旁支
@@ -157,8 +158,8 @@
 - [x] 增加 C3 首次安装/迁移向导，把旧配置 dry-run/import、静态检查、证据采集和 readiness 报告串成一条设备端流程。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static21` tag。
-- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test13` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static22` tag。
+- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test14` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。
