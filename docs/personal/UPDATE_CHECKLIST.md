@@ -11,6 +11,7 @@
 - [ ] 确认车辆仍按纯 CAN 路径运行，不是 CANFD。
 - [ ] 记录 ESCC 相关参数当前值。
 - [ ] 记录 `AlwaysOffline`、`DisableUpdates`、`EnableConnect` 当前值。
+- [ ] 如果使用 atune 分支，记录 `CarrotLearningActive`、`CarrotLearningAutoApply` 和当前推荐值快照。
 
 ## 1. 拉取上游
 
@@ -75,6 +76,7 @@
 - [ ] 开启学习时，学习器异常不会导致 planner 或 manager 崩溃。
 - [ ] 推荐值和实际控制参数分开保存。
 - [ ] 未经手动确认，不写入 `CruiseMaxVals*`、`TFollowGap*`、`PathOffset`、`SteerActuatorDelay`、`SteerRatioRate`。
+- [ ] 本地 smoke 覆盖：默认关闭不写数据，开启学习可生成推荐，推荐不会直接改控制参数。
 - [ ] Auto-Tuner 改动没有夹带 Web、cluster HUD、地图、Tesla、CANFD/HDA2 等无关功能。
 - [ ] Seltos 2023、ESCC、Always Offline 的默认行为没有变化。
 

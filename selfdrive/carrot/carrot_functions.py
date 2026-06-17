@@ -1,13 +1,19 @@
 import time
 from enum import Enum
 
-from cereal import log
+from cereal import car, log
 from openpilot.common.params import Params
 import numpy as np
 from openpilot.common.realtime import DT_MDL
 from openpilot.common.conversions import Conversions as CV
 from openpilot.common.filter_simple import MyMovingAverage
+from openpilot.common.swaglog import cloudlog
 from openpilot.selfdrive.selfdrived.events import Events
+
+try:
+  from openpilot.selfdrive.carrot.carrot_learning import CarrotLearner
+except Exception:
+  CarrotLearner = None
 
 EventName = log.OnroadEvent.EventName
 LaneChangeState = log.LaneChangeState
@@ -139,6 +145,7 @@ class CarrotPlanner:
 
     self._stop_x_rl = None
     self.last_event_time = 0.0
+    self.learner = CarrotLearner() if CarrotLearner is not None else None
 
   def _params_update(self):
     self.frame += 1
@@ -443,6 +450,46 @@ class CarrotPlanner:
       self.events.add(event_name)
       self.last_event_time = now
 
+  def _update_learning(self, sm, carstate, lead, v_ego_kph, a_ego, v_cruise_kph):
+    if self.learner is None:
+      return
+
+    try:
+      selfdrive_alive = sm.alive.get('selfdriveState', False)
+      engaged = selfdrive_alive and sm['selfdriveState'].enabled
+      gear_park = carstate.gearShifter == car.CarState.GearShifter.park
+
+      current_gap = 2
+      if selfdrive_alive:
+        personality = sm['selfdriveState'].personality
+        if personality == log.LongitudinalPersonality.moreRelaxed:
+          current_gap = 4
+        elif personality == log.LongitudinalPersonality.relaxed:
+          current_gap = 3
+        elif personality == log.LongitudinalPersonality.aggressive:
+          current_gap = 1
+      self.learner.set_current_gap(current_gap)
+
+      lead_status = bool(lead.status)
+      self.learner.update(
+        v_ego_kph,
+        carstate.gasPressed,
+        engaged,
+        gear_park,
+        steer_deg=carstate.steeringAngleDeg,
+        steer_pressed=carstate.steeringPressed,
+        brake_pressed=carstate.brakePressed,
+        lead_drel=lead.dRel if lead_status else 0.0,
+        lead_v_kph=lead.vLead * CV.MS_TO_KPH if lead_status else 0.0,
+        a_ego=a_ego,
+        lead_jlead=lead.jLead if lead_status else 0.0,
+        v_cruise_kph=v_cruise_kph,
+        gas_val=getattr(carstate, "gas", 0.0),
+        brake_val=getattr(carstate, "brake", 0.0),
+      )
+    except Exception:
+      cloudlog.exception("CarrotLearner update failed")
+
   def update(self, sm, v_cruise_kph, mode):
     self._params_update()
     self._update_model_desire(sm)
@@ -627,6 +674,7 @@ class CarrotPlanner:
     self.stop_dist = stop_dist
     self.mode = mode
     #return v_cruise, stop_dist, mode
+    self._update_learning(sm, carstate, leadOne, v_ego_kph, a_ego, v_cruise_kph)
 
     return v_cruise_kph
 

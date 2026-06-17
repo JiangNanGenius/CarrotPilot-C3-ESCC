@@ -75,8 +75,8 @@
 - [x] `jixiexiaoge/openpilot:CP` 已基本进入 `ajouatom/c3-wip`，先不重复合并。
 - [x] 从 `jixiexiaoge/openpilot:atune` 完成初步拆分评估。
 - [x] 写入 [机械小哥 atune 整合计划](ATUNE_INTEGRATION_PLAN.md)。
-- [ ] 新开 `personal/c3-escc-atune` 分支。
-- [ ] 第一批只迁移 Auto-Tuner 核心，默认关闭，禁止自动应用。
+- [x] 新开 `personal/c3-escc-atune` 分支。
+- [x] 第一批只迁移 Auto-Tuner 核心，默认关闭，禁止自动应用。
 - [ ] 第二批再做推荐值 UI 和手动确认流程。
 - [ ] 从 `jixiexiaoge/openpilot:master` 记录 CP搭子 / Navipilot 功能边界。
 - [ ] 机械小哥功能分批迁移：
@@ -87,7 +87,7 @@
   - [ ] 自动超车。
   - [ ] 驾驶报告。
   - [ ] LED / cluster HUD。
-  - [ ] Auto-Tuner / atune。
+  - [x] Auto-Tuner / atune 第一批核心学习器。
 - [ ] 每批迁移都单独提交，避免以后更新冲突时无法回滚。
 
 ## P4: fishop 非 ESCC 功能整合

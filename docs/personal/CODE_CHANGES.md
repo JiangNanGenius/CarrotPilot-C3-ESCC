@@ -121,3 +121,52 @@
 - 开机不再卡注册。
 - 断电重启后能直接进入系统。
 - 离线模式开启时不启动更新和远程连接。
+
+## 2026-06-17: Auto-Tuner 第一批实验接入
+
+分支：
+
+- `personal/c3-escc-atune`
+
+主要来源：
+
+- `jixiexiaoge/openpilot:atune`
+
+改动文件：
+
+- `selfdrive/carrot/carrot_learning.py`
+- `selfdrive/carrot/carrot_functions.py`
+- `common/params_keys.h`
+- `selfdrive/carrot_settings.json`
+
+改动内容：
+
+- 新增轻量 Auto-Tuner 学习器。
+- 学习器默认关闭，必须手动开启 `CarrotLearningActive`。
+- 开启后记录加速、刹车、跟车距离和转向接管模式。
+- 停车后生成 `CarrotLearningRecommend` 推荐数据。
+- 推荐值和实际控制参数分开保存。
+- 补齐 `CarrotLearningAutoApply`、`CarrotTunerApplyLat`、`CarrotTunerApplyLong`、`CarrotTunerFactoryReset` 等保护参数。
+- `CarrotPlanner` 里加入 guarded hook，学习器异常不会让 planner 崩溃。
+- 设置菜单新增“自动调参”分组。
+
+刻意没有改：
+
+- 没有整包合并 `jixiexiaoge/openpilot:atune`。
+- 没有加入 Web 控制台、地图、cluster HUD、USB 小屏、视觉诊断、Tesla 或 CANFD/HDA2 无关功能。
+- 没有默认开启学习。
+- 没有默认自动应用推荐。
+- 没有改变 Seltos 2023、ESCC、Always Offline 的默认行为。
+
+验证：
+
+- `git diff --check` 通过。
+- `python3 -m json.tool selfdrive/carrot_settings.json` 通过。
+- `python3 -m py_compile selfdrive/carrot/carrot_learning.py selfdrive/carrot/carrot_functions.py` 通过。
+- mock smoke 通过：默认关闭时不写 `CarrotLearningData`；开启学习后能生成推荐；不会直接修改 `CruiseMaxVals4`。
+
+待后续：
+
+- 做推荐值查看/确认 UI。
+- 做手动应用流程。
+- 上车前先只开启学习，不开启自动应用。
