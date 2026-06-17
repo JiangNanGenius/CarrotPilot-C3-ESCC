@@ -1235,6 +1235,22 @@
     },
     {
       "group": "시작",
+      "name": "AlwaysOffline",
+      "title": "Always Offline",
+      "descr": "오프라인 장치용. 온라인 등록, 업데이트, 업로드를 건너뜁니다.",
+      "egroup": "START",
+      "etitle": "Always Offline",
+      "edescr": "For offline clone devices. Skips online registration, updates, uploads, and remote connection.",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "unit": 1,
+      "cgroup": "启动设置",
+      "ctitle": "离线使用模式",
+      "cdescr": "克隆 C3/ACC 供电推荐。开启后跳过在线注册、后台更新、上传和远程连接，熄火断电后下次也能直接启动。"
+    },
+    {
+      "group": "시작",
       "name": "DisableDM",
       "title": "DisableDM",
       "descr": "1.DisableDM, 2: +EnableWebRTC, reboot required",
@@ -1760,6 +1776,22 @@
       "cgroup": "启动设置",
       "ctitle": "现代: 摄像头 SCC (0)",
       "cdescr": "1: 纵向控制车辆, 2: 巡航状态同步 (CAN-FD 车辆), 3: 原厂巡航 (CANFD 纵向线束)"
+    },
+    {
+      "group": "레이더설정",
+      "name": "EnableEscc",
+      "title": "HYUNDAI: ESCC",
+      "descr": "ESCC 하드웨어가 장착된 순정 CAN 현대/기아 차량 전용",
+      "egroup": "RADAR",
+      "etitle": "HYUNDAI: ESCC",
+      "edescr": "For classic CAN Hyundai/Kia vehicles with ESCC hardware installed. Uses ESCC message 0x2AB for lead and AEB status.",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "unit": 1,
+      "cgroup": "雷达设置",
+      "ctitle": "启用 ESCC 硬件",
+      "cdescr": "仅用于已安装 ESCC 模块的纯 CAN 现代/起亚车辆。开启后读取 0x2AB 的前车和 AEB 状态；未检测到 ESCC 消息时不会启用。"
     },
     {
       "group": "시작",

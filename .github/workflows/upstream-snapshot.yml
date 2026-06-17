@@ -1,0 +1,16 @@
+name: Upstream Snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 18 * * 0"
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Print upstream branch heads
+        run: bash scripts/personal/upstream_snapshot.sh

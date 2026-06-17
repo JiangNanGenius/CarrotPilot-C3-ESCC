@@ -37,6 +37,10 @@ def register(show_spinner=False) -> str | None:
   """
   params = Params()
 
+  if params.get_bool("AlwaysOffline"):
+    params.put("DongleId", UNREGISTERED_DONGLE_ID)
+    cloudlog.warning("AlwaysOffline enabled: using local unregistered dongle id")
+    return UNREGISTERED_DONGLE_ID
 
   #return UNREGISTERED_DONGLE_ID  # for c3lite, clone
   dongle_id: str | None = params.get("DongleId")

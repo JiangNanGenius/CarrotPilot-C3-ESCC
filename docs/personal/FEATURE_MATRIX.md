@@ -1,0 +1,36 @@
+# 功能整合矩阵
+
+## 必须进入主分支
+
+| 功能 | 来源 | 优先级 | 计划 |
+| --- | --- | --- | --- |
+| C3 最新 CarrotPilot 底座 | `ajouatom/openpilot:c3-wip` | P0 | 主线底座 |
+| Seltos 2023 独立车型条目 | 用户车辆 | P0 | 新建车型，初期复用 Seltos 2021 配置 |
+| Seltos 2023 纯 CAN 路径 | 用户车辆 | P0 | 不走 CANFD/HDA2 |
+| ESCC 硬件支持 | `fishop/openpilot:cp` | P0 | 拆成独立补丁 |
+| ESCC 参数开关 | `fishop/openpilot:cp` | P0 | 默认关闭 |
+| Hyundai Camera SCC 相关兼容 | `fishop/openpilot:cp` | P0 | 按 Seltos 纯 CAN 接线验证 |
+| Radar tracks / ESCC lead 解析 | `fishop/openpilot:cp` | P0 | 优先迁移 |
+| Always Offline 离线使用模式 | 用户硬件约束 / fishop 思路 | P0 | C3 克隆版、ACC/CAN 供电、无法注册时使用 |
+
+## 计划进入扩展分支
+
+| 功能 | 来源 | 优先级 | 计划 |
+| --- | --- | --- | --- |
+| Auto-Tuner / 在线调参 | `jixiexiaoge/openpilot:atune` | P1 | ESCC 稳定后迁移 |
+| 7000 Web 控制台增强 | `jixiexiaoge/openpilot:atune` / `master` | P1 | 分批迁移 |
+| CP搭子 / Navipilot 兼容 | `jixiexiaoge/openpilot:master` | P1 | 先保持协议兼容 |
+| 自动实验模式切换 | 机械小哥 | P1 | 独立开关 |
+| 模型选择切换器 | 机械小哥 | P1 | 独立开关 |
+| 自动超车 | 机械小哥 / fishop | P2 | 后置验证 |
+| LED / cluster HUD | 机械小哥 | P2 | 实验功能 |
+| 驾驶报告 | 机械小哥 | P2 | 低风险，可后置 |
+| 中文翻译和参数说明优化 | 本项目维护 | P2 | 不改默认值，只改菜单显示文字 |
+
+## 先放旁边
+
+| 功能 | 来源 | 原因 |
+| --- | --- | --- |
+| C4 支持 | 上游/机械小哥相关分支 | 用户硬件不是 C4，维护成本可能高 |
+| 非 Seltos 的车型特调 | fishop / jixie | 不影响用户主车时再处理 |
+| dhvms 旧版整包代码 | `dhvms/carrotpilot` | 2024 旧线，只做历史参考 |

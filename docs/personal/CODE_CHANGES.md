@@ -1,0 +1,123 @@
+# 当前代码改动记录
+
+## 2026-06-17: 新增 Kia Seltos 2023
+
+代码目录：
+
+- `openpilot-c3-seltos-escc`
+
+改动文件：
+
+- `opendbc_repo/opendbc/car/hyundai/values.py`
+
+改动内容：
+
+- 新增 `CAR.KIA_SELTOS_2023`。
+- 显示名为 `Kia Seltos 2023`。
+- 直接复用 `KIA_SELTOS` 的基础配置：
+  - `CarHarness.hyundai_a`
+  - `mass=1337`
+  - `wheelbase=2.63`
+  - `steerRatio=14.56`
+  - `HyundaiFlags.CHECKSUM_CRC8`
+- 将 `CAR.KIA_SELTOS_2023` 加入 ABS 非必要 ECU 列表，保持和 `CAR.KIA_SELTOS` 一致。
+
+刻意没有改：
+
+- 没有改 Seltos 2021。
+- 没有改 DBC。
+- 没有改转向参数。
+- 没有改纵控参数。
+- 没有设置 CANFD。
+- 没有设置 HDA2。
+- 没有复制 FW fingerprint；等拿到 Seltos 2023 实车 dump 后再补。
+
+验证：
+
+- `py_compile` 语法检查通过。
+- 已安装最小本地验证依赖：`numpy`、`pycapnp`。
+- 完整导入检查通过。
+- `CAR.KIA_SELTOS_2023` 可读取。
+- `CAR.KIA_SELTOS_2023` 与 `CAR.KIA_SELTOS` 的 specs、flags、DBC 完全一致。
+- `CANFD=False`，`HDA2=False`，`CRC8=True`。
+
+## 2026-06-17: ESCC 最小补丁
+
+代码目录：
+
+- `openpilot-c3-seltos-escc`
+
+主要来源：
+
+- `fishop/openpilot:cp`
+
+改动文件：
+
+- `common/params_keys.h`
+- `cereal/car.capnp`
+- `opendbc_repo/opendbc/car/car.capnp`
+- `opendbc_repo/opendbc/dbc/hyundai_kia_generic.dbc`
+- `opendbc_repo/opendbc/car/hyundai/values.py`
+- `opendbc_repo/opendbc/car/hyundai/interface.py`
+- `opendbc_repo/opendbc/car/hyundai/radar_interface.py`
+- `opendbc_repo/opendbc/car/hyundai/carstate.py`
+- `opendbc_repo/opendbc/car/hyundai/carcontroller.py`
+- `opendbc_repo/opendbc/car/hyundai/hyundaican.py`
+- `opendbc_repo/opendbc/safety/safety/safety_hyundai_common.h`
+- `selfdrive/carrot_settings.json`
+
+改动内容：
+
+- 新增 `EnableEscc` 参数，默认关闭。
+- 新增 `spFlags`，用于保存 ESCC 这类 Carrot/sunnypilot 兼容标志。
+- 新增 Hyundai ESCC 标志，避免 ESCC 模式下继续向 SCC ECU 发送禁用消息。
+- panda safety 仍保持 0x7D0 诊断消息限制，不为 ESCC 放宽诊断发送边界。
+- DBC 中补入 `ESCC` 0x2AB 消息。
+- ESCC 开启且实车指纹检测到 0x2AB 时，启用 ESCC lead/AEB 状态读取。
+- radar interface 增加 ESCC lead 点。
+- carstate 增加 ESCC AEB/FCW 状态缓存。
+- 纵控消息保留 ESCC 读取到的 AEB 状态。
+- 设置菜单加入“启用 ESCC 硬件”。
+
+刻意没有改：
+
+- 没有默认开启 ESCC。
+- 没有把 Seltos 2023 改成 CANFD 或 HDA2。
+- 没有整包合并 fishop 分支。
+- 没有合并 fishop 的 APP、导航、转向灯板和其它非 ESCC 功能。
+
+待实车验证：
+
+- 开启 `EnableEscc=1` 后，确认 C3 能稳定看到 0x2AB。
+- 确认 ESCC lead 距离、相对速度和 AEB 状态显示正常。
+- 确认不会触发 SCC/AEB 相关故障。
+
+## 2026-06-17: Always Offline 模式
+
+改动文件：
+
+- `common/params_keys.h`
+- `system/manager/manager.py`
+- `system/manager/process_config.py`
+- `system/athena/registration.py`
+- `selfdrive/car/car_specific.py`
+- `selfdrive/carrot_settings.json`
+
+改动内容：
+
+- 新增 `AlwaysOffline` 参数，个人 C3 克隆版默认开启。
+- 设置菜单加入“离线使用模式”。
+- 开启后跳过在线注册，使用本地 `UnregisteredDevice`。
+- 开启后关闭后台更新和远程连接相关流程。
+- 开启后驻车按 Cancel 不再触发主动关机。
+- 新增 `EnableConnect` 参数，默认关闭，避免未定义参数被写入。
+
+用途：
+
+- 适配 C3 中国克隆版、ACC/CAN 供电、熄火直接断电、无法注册 openpilot/comma 账号的使用方式。
+
+待实车验证：
+
+- 开机不再卡注册。
+- 断电重启后能直接进入系统。
+- 离线模式开启时不启动更新和远程连接。

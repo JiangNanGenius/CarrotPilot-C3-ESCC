@@ -68,6 +68,7 @@ pandaextra
 
 .mypy_cache/
 flycheck_*
+.venv312/
 
 cppcheck_report.txt
 comma*.sh

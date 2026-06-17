@@ -3,12 +3,13 @@ import math
 from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
-from opendbc.car.hyundai.values import DBC, HyundaiFlags, HyundaiExtFlags
+from opendbc.car.hyundai.values import DBC, HyundaiFlags, HyundaiExtFlags, HyundaiFlagsSP
 from openpilot.common.params import Params
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from openpilot.common.filter_simple import MyMovingAverage
 
 SCC_TID = 0
+ESCC_TID = 1
 RADAR_START_ADDR = 0x500
 RADAR_MSG_COUNT = 32
 RADAR_START_ADDR_CANFD1 = 0x210
@@ -18,7 +19,11 @@ RADAR_MSG_COUNT2 = 32
 
 # POC for parsing corner radars: https://github.com/commaai/openpilot/pull/24221/
 
-def get_radar_can_parser(CP, radar_tracks, msg_start_addr, msg_count):
+def get_radar_can_parser(CP, radar_tracks, escc, msg_start_addr, msg_count):
+  if escc:
+    print("RadarInterface: ESCC lead...")
+    return CANParser(DBC[CP.carFingerprint][Bus.pt], [("ESCC", 50)], 0)
+
   if not radar_tracks:
     return None
   #if Bus.radar not in DBC[CP.carFingerprint]:
@@ -67,9 +72,10 @@ class RadarInterface(RadarInterfaceBase):
       
     self.params = Params()
     self.radar_tracks = self.params.get_int("EnableRadarTracks") >= 1
+    self.enhanced_scc = bool((CP.spFlags & HyundaiFlagsSP.SP_ENHANCED_SCC.value) and (Bus.radar not in DBC[CP.carFingerprint] or not self.radar_tracks))
     self.updated_tracks = set()
     self.updated_scc = set()
-    self.rcp_tracks = get_radar_can_parser(CP, self.radar_tracks, self.radar_start_addr, self.radar_msg_count)
+    self.rcp_tracks = get_radar_can_parser(CP, self.radar_tracks, self.enhanced_scc, self.radar_start_addr, self.radar_msg_count)
     self.rcp_scc = get_radar_can_parser_scc(CP)
     self.trigger_msg_scc = 416 if self.canfd else 0x420
 
@@ -77,6 +83,8 @@ class RadarInterface(RadarInterfaceBase):
     self.track_id = 0
 
     self.radar_off_can = CP.radarUnavailable
+    if self.enhanced_scc and self.rcp_tracks is not None:
+      self.trigger_msg_tracks = 0x2AB
 
     self.vRel_last = 0
     self.dRel_last = 0
@@ -92,6 +100,9 @@ class RadarInterface(RadarInterfaceBase):
     self.pts[SCC_TID] = structs.RadarData.RadarPoint()
     self.pts[SCC_TID].trackId = SCC_TID
 
+    self.pts[ESCC_TID] = structs.RadarData.RadarPoint()
+    self.pts[ESCC_TID].trackId = ESCC_TID
+
     self.frame = 0
 
 
@@ -103,7 +114,7 @@ class RadarInterface(RadarInterfaceBase):
     if self.rcp_scc is not None:
       vls_s = self.rcp_scc.update(can_strings)
       self.updated_scc.update(vls_s)
-      if not self.radar_tracks and self.frame % 5 == 0:
+      if not self.radar_tracks and not self.enhanced_scc and self.frame % 5 == 0:
         self._update_scc(self.updated_scc)
         self.updated_scc.clear()
         ret = structs.RadarData()
@@ -111,7 +122,7 @@ class RadarInterface(RadarInterfaceBase):
           ret.errors.canError = True
         ret.points = list(self.pts.values())
         return ret
-    if self.radar_tracks and self.rcp_tracks is not None:
+    if (self.radar_tracks or self.enhanced_scc) and self.rcp_tracks is not None:
       vls_t = self.rcp_tracks.update(can_strings)
       self.updated_tracks.update(vls_t)
       if self.trigger_msg_tracks in self.updated_tracks:
@@ -128,6 +139,28 @@ class RadarInterface(RadarInterfaceBase):
     return None      
 
   def _update(self, updated_messages):
+    if self.enhanced_scc:
+      msg = self.rcp_tracks.vl["ESCC"]
+      valid = msg["ACC_ObjStatus"] and msg["ACC_ObjDist"] < 204.6
+      t_id = ESCC_TID
+
+      self.pts[t_id].measured = bool(valid)
+      if not valid:
+        self.pts[t_id].dRel = 0
+        self.pts[t_id].yRel = 0
+        self.pts[t_id].vRel = 0
+        self.pts[t_id].vLead = 0
+        self.pts[t_id].aRel = float('nan')
+        self.pts[t_id].yvRel = 0
+      else:
+        self.pts[t_id].trackId = ESCC_TID
+        self.pts[t_id].dRel = msg["ACC_ObjDist"]
+        self.pts[t_id].yRel = -msg["ACC_ObjLatPos"]
+        self.pts[t_id].vRel = msg["ACC_ObjRelSpd"]
+        self.pts[t_id].vLead = self.pts[t_id].vRel + self.v_ego
+        self.pts[t_id].aRel = 0.0
+        self.pts[t_id].yvRel = 0.0
+      return
 
     t_id = 32
     for addr in range(self.radar_start_addr, self.radar_start_addr + self.radar_msg_count):

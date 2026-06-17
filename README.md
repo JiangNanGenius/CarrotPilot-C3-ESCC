@@ -22,6 +22,17 @@ The developer does **not take any responsibility** for real-world installation o
 * **CAN FD vehicles with HDA2 (ADAS module equipped)** Use an aftermarket harness, connected to the ADAS module.
 * Please note that not all vehicles are supported.
 
+## Personal C3 / Seltos / ESCC Notes
+
+This branch is a personal C3 build for a pure-CAN Kia Seltos 2023 using the Seltos 2021 base configuration, with ESCC hardware support kept behind `EnableEscc` and `AlwaysOffline` enabled by default for clone C3 / ACC-powered use.
+
+Start here before installing or updating:
+
+- [Install and rollback notes](docs/personal/INSTALL_AND_ROLLBACK.md)
+- [Current code changes](docs/personal/CODE_CHANGES.md)
+- [Update checklist](docs/personal/UPDATE_CHECKLIST.md)
+- [Sources and credits](docs/personal/SOURCES_AND_CREDITS.md)
+
 
 <div align="center" style="text-align: center;">
 

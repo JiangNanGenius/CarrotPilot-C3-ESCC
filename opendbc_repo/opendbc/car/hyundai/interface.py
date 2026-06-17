@@ -1,6 +1,6 @@
 from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CANFD_RADAR_SCC_CAR, \
+from opendbc.car.hyundai.values import HyundaiFlags, HyundaiFlagsSP, CAR, DBC, CANFD_RADAR_SCC_CAR, \
                                                    CANFD_UNSUPPORTED_LONGITUDINAL_CAR, \
                                                    UNSUPPORTED_LONGITUDINAL_CAR, HyundaiSafetyFlags, HyundaiExtFlags
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
@@ -138,6 +138,13 @@ class CarInterface(CarInterfaceBase):
         ret.flags |= HyundaiFlags.USE_FCA.value
         print("$$$USE_FCA")
 
+      if params.get_int("EnableEscc") == 1:
+        if 0x2AB in fingerprint[0]:
+          ret.spFlags |= HyundaiFlagsSP.SP_ENHANCED_SCC.value
+          print("$$$ESCC")
+        else:
+          print("$$$ESCC requested, but ESCC message 0x2AB was not detected")
+
       if ret.flags & HyundaiFlags.LEGACY:
         # these cars require a special panda safety mode due to missing counters and checksums in the messages
         ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiLegacy)]
@@ -148,6 +155,8 @@ class CarInterface(CarInterfaceBase):
       if ret.flags & HyundaiFlags.CAMERA_SCC:
         ret.safetyConfigs[0].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
         print("$$$CAMERA_SCC")
+      if ret.spFlags & HyundaiFlagsSP.SP_ENHANCED_SCC.value:
+        ret.safetyConfigs[0].safetyParam |= HyundaiSafetyFlags.ESCC.value
 
     # Common lateral control setup
 
@@ -169,12 +178,13 @@ class CarInterface(CarInterfaceBase):
 
     # carrot, if camera_scc enabled, enable openpilotLongitudinalControl
     enable_radar_tracks = params.get_int("EnableRadarTracks")
-    if ret.flags & HyundaiFlags.CAMERA_SCC.value or enable_radar_tracks > 0 or enable_radar_tracks == -2:
+    enable_escc = bool(ret.spFlags & HyundaiFlagsSP.SP_ENHANCED_SCC.value)
+    if ret.flags & HyundaiFlags.CAMERA_SCC.value or enable_radar_tracks > 0 or enable_radar_tracks == -2 or enable_escc:
       ret.radarUnavailable = False
       ret.openpilotLongitudinalControl = True if camera_scc < 3 else False
-      print(f"$$$OenpilotLongitudinalControl = True, CAMERA_SCC({ret.flags & HyundaiFlags.CAMERA_SCC.value}) or RadarTracks{enable_radar_tracks}")
+      print(f"$$$OpenpilotLongitudinalControl = True, CAMERA_SCC({ret.flags & HyundaiFlags.CAMERA_SCC.value}) or RadarTracks{enable_radar_tracks} or ESCC{enable_escc}")
     else:
-      print(f"$$$OenpilotLongitudinalControl = {alpha_long}")
+      print(f"$$$OpenpilotLongitudinalControl = {alpha_long}")
 
     #ret.radarUnavailable = False  # TODO: canfd... carrot, hyundai cars have radar
 
@@ -236,7 +246,7 @@ class CarInterface(CarInterfaceBase):
 
     Params().put_int('LongitudinalPersonalityMax', 4)
 
-    if CP.openpilotLongitudinalControl and not (CP.flags & HyundaiFlags.CANFD_CAMERA_SCC):
+    if CP.openpilotLongitudinalControl and not ((CP.flags & HyundaiFlags.CANFD_CAMERA_SCC.value) or (CP.spFlags & HyundaiFlagsSP.SP_ENHANCED_SCC.value)):
       addr, bus = 0x7d0, 0
       if CP.flags & HyundaiFlags.CANFD_HDA2.value:
         addr, bus = 0x730, CanBus(CP).ECAN

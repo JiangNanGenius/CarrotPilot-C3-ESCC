@@ -78,11 +78,18 @@ def manager_init() -> None:
   params.put("HardwareSerial", serial)
 
   # set dongle id
-  reg_res = register(show_spinner=True)
-  if reg_res:
-    dongle_id = reg_res
+  if params.get_bool("AlwaysOffline"):
+    dongle_id = params.get("DongleId", encoding="utf8") or UNREGISTERED_DONGLE_ID
+    params.put("DongleId", dongle_id)
+    params.put_bool("DisableUpdates", True)
+    params.put_int("EnableConnect", 0)
+    cloudlog.warning("AlwaysOffline enabled: skipping online registration")
   else:
-    raise Exception(f"Registration failed for device {serial}")
+    reg_res = register(show_spinner=True)
+    if reg_res:
+      dongle_id = reg_res
+    else:
+      raise Exception(f"Registration failed for device {serial}")
   os.environ['DONGLE_ID'] = dongle_id  # Needed for swaglog
   os.environ['GIT_ORIGIN'] = build_metadata.openpilot.git_normalized_origin # Needed for swaglog
   os.environ['GIT_BRANCH'] = build_metadata.channel # Needed for swaglog
@@ -137,6 +144,8 @@ def manager_thread() -> None:
   ignore: list[str] = []
   if params.get("DongleId") in (None, UNREGISTERED_DONGLE_ID):
     ignore += ["manage_athenad", "uploader"]
+  if params.get_bool("AlwaysOffline"):
+    ignore += ["manage_athenad", "uploader", "updated"]
   if os.getenv("NOBOARD") is not None:
     ignore.append("pandad")
   ignore += [x for x in os.getenv("BLOCK", "").split(",") if len(x) > 0]

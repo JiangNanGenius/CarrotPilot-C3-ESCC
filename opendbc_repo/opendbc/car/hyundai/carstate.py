@@ -8,7 +8,7 @@ from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs, DT_CTRL
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, Buttons, CarControllerParams, CAMERA_SCC_CAR, HyundaiExtFlags
+from opendbc.car.hyundai.values import HyundaiFlags, HyundaiFlagsSP, CAR, DBC, Buttons, CarControllerParams, CAMERA_SCC_CAR, HyundaiExtFlags
 from opendbc.car.interfaces import CarStateBase
 
 from openpilot.common.params import Params
@@ -166,6 +166,11 @@ class CarState(CarStateBase):
     self.cp_alt = None
     self.controls_ready_count = 0
 
+    self.escc_aeb_warning = 0
+    self.escc_aeb_dec_cmd_act = 0
+    self.escc_cmd_act = 0
+    self.escc_aeb_dec_cmd = 0
+
   def monitor_fingerprint(self, can_parsers, canfd):
     if self.controls_ready_count <= READY_COUNT_OK:
       if Params().get_bool("ControlsReady"):
@@ -222,6 +227,8 @@ class CarState(CarStateBase):
           add_and_cache(cp_cruise, "SCC12", "scc12")
           add_and_cache(cp_cruise, "SCC13", "scc13")
           add_and_cache(cp_cruise, "SCC14", "scc14")
+          if self.CP.spFlags & HyundaiFlagsSP.SP_ENHANCED_SCC.value:
+            add_and_cache(self.cp, "ESCC", "escc")
       else: # canfd
         if self.controls_ready_count == 120:
           cp_cruise = self.cp_cam if self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC else self.cp
@@ -404,6 +411,20 @@ class CarState(CarStateBase):
           aeb_braking = False
       ret.stockFcw = (aeb_warning or scc_warning) and not aeb_braking
       ret.stockAeb = aeb_warning and aeb_braking
+    elif self.CP.spFlags & HyundaiFlagsSP.SP_ENHANCED_SCC.value:
+      try:
+        escc_data = cp.vl["ESCC"]
+        aeb_warning = escc_data["CF_VSM_Warn_SCC12"] != 0
+        aeb_braking = escc_data["CF_VSM_DecCmdAct_SCC12"] != 0 or escc_data["AEB_CmdAct"] != 0
+        ret.stockFcw = aeb_warning and not aeb_braking
+        ret.stockAeb = aeb_warning and aeb_braking
+
+        self.escc_aeb_warning = escc_data["CF_VSM_Warn_SCC12"]
+        self.escc_aeb_dec_cmd_act = escc_data["CF_VSM_DecCmdAct_SCC12"]
+        self.escc_cmd_act = escc_data["AEB_CmdAct"]
+        self.escc_aeb_dec_cmd = escc_data["CR_VSM_DecCmd_SCC12"]
+      except KeyError:
+        pass
 
     if self.CP.enableBsm:
       ret.leftBlindspot = cp.vl["LCA11"]["CF_Lca_IndLeft"] != 0
@@ -748,7 +769,8 @@ class CarState(CarStateBase):
     if CP.flags & HyundaiFlags.CANFD:
       return self.get_can_parsers_canfd(CP)
 
+    messages = [("ESCC", 50)] if CP.spFlags & HyundaiFlagsSP.SP_ENHANCED_SCC.value else []
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], messages, 0),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
     }

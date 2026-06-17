@@ -546,6 +546,7 @@ struct CarParams {
   flags @64 :UInt32;         # flags for car specific quirks
   alphaLongitudinalAvailable @71 :Bool;
   extFlags @78 :UInt32;     # carrot ext car flags
+  spFlags @79 :UInt32;      # flags for sunnypilot/carrot-specific quirks
 
   minEnableSpeed @7 :Float32;
   minSteerSpeed @8 :Float32;
