@@ -3,11 +3,11 @@
 ## P0: 项目底座
 
 - [x] 确认 GitHub 仓库名称、公开或私有状态。
-- [x] 正式创建 GitHub 仓库：`JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`，私有。
+- [x] 正式创建 GitHub 仓库：`JiangNanGenius/CarrotPilot-C3-ESCC`，公开。
 - [x] 以 `ajouatom/openpilot:c3-wip` 建立本地主底座。
 - [x] 添加本地远端：
   - `origin`: `https://github.com/ajouatom/openpilot.git`
-  - `github`: `https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC.git`
+  - `github`: `https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git`
   - `jixie`: `https://github.com/jixiexiaoge/openpilot.git`
   - `fishop`: `https://jihulab.com/fishop/openpilot.git`
   - `dhvms`: `https://github.com/dhvms/carrotpilot.git`
@@ -19,6 +19,7 @@
   - `personal/c3-escc-atune`
   - `tracking/fishop-cp`
   - `tracking/jixie-atune`
+  - `tracking/jixie-master`
   - `tracking/c4`
 
 ## P1: 用户车辆优先支持
@@ -80,9 +81,12 @@
 - [x] 新开 `personal/c3-escc-atune` 分支。
 - [x] 第一批只迁移 Auto-Tuner 核心，默认关闭，禁止自动应用。
 - [x] 第二批完成 Web 推荐值面板和手动确认流程。
-- [ ] 从 `jixiexiaoge/openpilot:master` 记录 CP搭子 / Navipilot 功能边界。
+- [x] 从 `jixiexiaoge/openpilot:master` 记录 CP搭子 / Navipilot 功能边界。
+- [x] 建立 `tracking/jixie-master`，跟踪 CP搭子 / Navipilot 项目说明和应用方向。
+- [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight。
 - [ ] 机械小哥功能分批迁移：
-  - [ ] CP搭子导航桥接兼容。
+  - [x] CP搭子 CarrotMan / Navipilot 核心协议静态兼容。
+  - [ ] CP搭子 Android APP 实测连接和导航数据流。
   - [ ] 7000 Web 控制台增强。
   - [ ] 自动实验模式切换。
   - [ ] 模型选择切换器。
@@ -95,9 +99,10 @@
 
 ## P4: fishop 非 ESCC 功能整合
 
-- [ ] 从 `fishop/openpilot:cp` 拆出国内导航/APP 控制功能。
-- [ ] 评估 `amap_navi.py` 与机械小哥 CP搭子的功能重叠。
-- [ ] 评估转向灯板控制、雷达/激光雷达盲区、APP 控制变道、纵控平顺停车等功能。
+- [x] 从 `fishop/openpilot:cp` 完成第一轮国内导航/APP 控制功能边界拆分。
+- [x] 评估 `amap_navi.py` 与机械小哥 CP搭子的功能重叠。
+- [x] 评估转向灯板控制、雷达/激光雷达盲区、APP 控制变道、纵控平顺停车等功能。
+- [ ] 单独迁移 fishop `amap_navi.py` 或 APP/导航增强，不能整包合并。
 - [ ] 决定哪些进入主分支，哪些放到实验分支。
 
 ## P5: C4 旁支
@@ -111,6 +116,7 @@
 
 - [x] 增加个人版本地 smoke 检查脚本。
 - [x] 增加 ESCC / Always Offline 上车前静态 preflight 脚本。
+- [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight 脚本。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
 - [ ] 给每个可上车版本打 tag，例如 `seltos-c3-escc-YYYYMMDD`.

@@ -1,0 +1,135 @@
+# 机械小哥 / fishop 功能边界
+
+记录日期：2026-06-17
+
+分析基线：
+
+- `personal/c3-escc-atune`
+- commit: `9ab8fee6e208`
+
+对比来源：
+
+- `jixie/master`: `3b039d270ff5`
+- `jixie/atune`: `c045fcabb8a1`
+- `fishop/cp`: `aad13305f41c`
+- 底座：`origin/c3-wip` `244b69b61b17`
+
+## 当前结论
+
+不能整包合并 `jixie/atune`、`jixie/master` 或 `fishop/cp`。
+
+原因：
+
+- `jixie/master` 不是 openpilot 主代码树，主要是 CP搭子 / Navipilot 的 Android 应用说明、发布脚本、独立 Python 服务和网页资源。
+- `jixie/atune` 与当前分支相比仍包含大批 cluster HUD、USB 小屏、Qt 设置页、loggerd、Web 控制台和翻译改动。
+- `fishop/cp` 与当前 C3 底座差距更大，夹带 AmapNavi、外接转向灯控制、盲区/雷达、自动变道、DEC、longcontrol、模型资产、UI 和大量非 Seltos 改动。
+- fishop 分支还基于较旧代码线，直接合并会破坏当前 `selfdrive/carrot/server`、Web、cluster 和 Auto-Tuner 手动确认闭环。
+
+## 已经具备的 CP搭子核心兼容
+
+当前分支已经保留 CarrotMan / CPlink 核心协议链路：
+
+- `cereal/custom.capnp` 有 `CarrotMan` 自定义消息。
+- `cereal/log.capnp` 和 `cereal/services.py` 有 `carrotMan`、`navInstructionCarrot`。
+- `selfdrive/carrot/carrot_man.py` 使用 UDP 7705 广播、UDP 7706 接收。
+- `selfdrive/carrot/carrot_serv.py` 能解析 CP搭子常用导航数据：
+  - 限速：`nRoadLimitSpeed`
+  - 摄像头/限速提醒：`nSdiType`, `nSdiSpeedLimit`, `nSdiDist`
+  - 导航转向：`nTBTDist`, `nTBTTurnType`, `nTBTDistNext`, `nTBTTurnTypeNext`
+  - GPS：`vpPosPointLat`, `vpPosPointLon`, `latitude`, `longitude`
+  - 命令：`carrotCmd`, `carrotArg`
+- `selfdrive/controls/lib/desire_helper.py` 已处理 CP搭子 `LANECHANGE` 命令。
+- `selfdrive/carrot/web` 和 cluster/realtime 侧已经读取 `carrotMan` / `navInstructionCarrot`，用于 Web HUD 和导航显示。
+
+新增静态检查：
+
+```bash
+python3 scripts/personal/cplink_preflight.py
+```
+
+这个检查证明当前代码仍保留 CP搭子核心协议接口，但不能替代手机 APP 实测。
+
+## 尚未具备或不应默认启用
+
+这些功能后续必须单独提交、单独开关、单独验证：
+
+- `OVERTAKE` 命令。
+- APP 直接控制外接转向灯。
+- fishop `amap_navi.py` 设备端 AmapNavi 服务。
+- fishop 盲区 / lidar / side radar 逻辑。
+- fishop DEC / longcontrol 大改。
+- 机械小哥哨兵模式 Web 服务。
+- 机械小哥 cluster HUD / USB 小屏大改。
+- 机械小哥模型切换器和自动实验模式完整闭环。
+
+其中 `jixie/master:xiaoge_web.py` 是独立 Flask Web 服务，含固定 secret key 和外部 CDN 页面资源，只能作为隔离实验参考，不能直接进默认车机主线。
+
+## 推荐迁移顺序
+
+### A. 当前已完成
+
+- Seltos 2023 独立车型。
+- ESCC 最小补丁。
+- Always Offline。
+- Auto-Tuner 第一批核心学习器。
+- Auto-Tuner 第二批 Web 推荐面板和手动确认。
+- CP搭子核心协议静态预检。
+
+### B. 下一批，低风险
+
+- CP搭子 Android APP 实测连接：
+  - 手机和 C3 在同一 WiFi。
+  - APP 能发现 7705 广播。
+  - APP 能向 7706 发送导航数据。
+  - `carrotMan` 中限速、TBT、SDI、GPS 字段随导航变化。
+- `LANECHANGE` 命令实测：
+  - 只在安全变道条件下响应。
+  - 不响应 `OVERTAKE`，直到单独迁移该逻辑。
+- 中文说明补全：
+  - CP搭子需要手机 APP 和同一 WiFi。
+  - 7000 Web 只是设备端控制台，不等于手机导航桥。
+
+### C. 中风险，单独分支
+
+- fishop `amap_navi.py`。
+- 外接转向灯控制。
+- APP 命令变道增强。
+- 自动超车 / `OVERTAKE`。
+- 盲区、雷达、路沿概率回传。
+
+建议分支：
+
+- `experimental/app-navi`
+- `experimental/auto-lanechange`
+
+### D. 高风险，暂不进主用线
+
+- DEC / longcontrol 大改。
+- modeld 模型选择器和多模型资产。
+- cluster HUD / USB 小屏重构。
+- 哨兵模式 Web 服务。
+- C4 专项线。
+
+## CP搭子实测记录模板
+
+每次测试记录：
+
+```text
+日期：
+设备：
+车：
+分支 / commit：
+手机系统：
+CP搭子版本：
+导航源：
+同 WiFi：是/否
+7705 广播发现：是/否
+7706 数据接收：是/否
+nRoadLimitSpeed 更新：是/否
+TBT 更新：是/否
+SDI 更新：是/否
+GPS 更新：是/否
+LANECHANGE 命令：未测/通过/失败
+异常：
+回滚目标：
+```

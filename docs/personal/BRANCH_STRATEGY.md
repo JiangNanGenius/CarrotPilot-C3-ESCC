@@ -12,7 +12,7 @@ ESCC 和 Always Offline 是主线必保留功能。机械小哥和 fishop 的其
 
 ```bash
 git remote add origin https://github.com/ajouatom/openpilot.git
-git remote add github https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC.git
+git remote add github https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git
 git remote add jixie https://github.com/jixiexiaoge/openpilot.git
 git remote add fishop https://jihulab.com/fishop/openpilot.git
 git remote add dhvms https://github.com/dhvms/carrotpilot.git

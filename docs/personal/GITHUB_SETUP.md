@@ -2,38 +2,38 @@
 
 ## 当前状态
 
-- 仓库：`JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`
-- 地址：`https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`
-- 可见性：私有。
+- 仓库：`JiangNanGenius/CarrotPilot-C3-ESCC`
+- 地址：`https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC`
+- 可见性：公开。
 - 本地远端名：`github`
 - 默认分支：`personal/c3-escc-atune`
 - 已推送分支：
   - `personal/c3-escc`：Seltos 2023 + ESCC + Always Offline 主用保护线。
   - `personal/c3-escc-atune`：在主用保护线上继续集成 Auto-Tuner。
 - GitHub CLI 已登录 `JiangNanGenius`，凭据保存在本机 GitHub CLI/keyring，不写入仓库。
-- 仓库先从 `ajouatom/openpilot` 种入上游历史，再转为私有仓库；GitHub 页面不再显示 fork 关系，但远端仍保留上游分支历史，方便后续只推个人改动。
+- 仓库先从 `ajouatom/openpilot` 种入上游历史，再转为独立公开仓库；GitHub 页面不再显示 fork 关系，但远端仍保留上游分支历史，方便后续只推个人改动。
 
 ## 建议仓库名
 
 首选：
 
-- `CarrotPilot-C3-Seltos-ESCC`
+- `CarrotPilot-C3-ESCC`
 
 备选：
 
 - `carrotpilot-c3-escc`
-- `carrotpilot-seltos-escc`
 - `CarrotPilot-ESCC-AutoAdjust`
 
-## 建议可见性
+## 公开后注意事项
 
-先建私有仓库，等署名、许可证、安装说明、免责声明都整理好后，再决定是否公开。
+当前仓库已公开。后续每次推送前都要先做来源署名、安装说明、免责声明和敏感信息检查。
 
-原因：
+公开状态下尤其注意：
 
-- 还没有完成 ESCC 实车验证。
-- 会涉及车辆安全相关修改。
-- 需要保留并核对多个上游来源的署名。
+- ESCC 还没有完成实车验证，不能把静态检查写成实车结论。
+- 车辆安全相关修改必须保留默认关闭或明确的回滚路径。
+- 继续核对多个上游来源的署名和许可证边界。
+- 不把个人令牌、设备信息、车辆 VIN 或其它隐私内容写入仓库。
 
 ## 初始仓库内容
 

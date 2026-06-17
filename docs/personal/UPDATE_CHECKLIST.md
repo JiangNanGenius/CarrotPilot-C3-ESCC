@@ -12,6 +12,7 @@
 - [ ] 记录 ESCC 相关参数当前值。
 - [ ] 记录 `AlwaysOffline`、`DisableUpdates`、`EnableConnect` 当前值。
 - [ ] 如果使用 atune 分支，记录 `CarrotLearningActive`、`CarrotLearningAutoApply` 和当前推荐值快照。
+- [ ] 如果使用 CP搭子，记录手机 APP 版本、导航源、同 WiFi 状态和 7705/7706 连接结果。
 
 ## 1. 拉取上游
 
@@ -86,6 +87,15 @@
 - [ ] Auto-Tuner 改动没有夹带 Web、cluster HUD、地图、Tesla、CANFD/HDA2 等无关功能。
 - [ ] Seltos 2023、ESCC、Always Offline 的默认行为没有变化。
 
+## 3.7. CP搭子 / Navipilot 回归检查
+
+- [ ] 运行 `python3 scripts/personal/cplink_preflight.py`。
+- [ ] `carrotMan` 和 `navInstructionCarrot` 服务仍存在。
+- [ ] 7705 广播和 7706 接收逻辑仍存在。
+- [ ] `nRoadLimitSpeed`、TBT、SDI、GPS 字段仍被解析。
+- [ ] `LANECHANGE` 命令仍只走现有安全变道逻辑。
+- [ ] `OVERTAKE`、外接转向灯、AmapNavi、哨兵模式没有被无保护夹带进主线。
+
 ## 4. Seltos 专项检查
 
 - [ ] Seltos 2023 独立车型仍能识别。
@@ -100,6 +110,7 @@
 
 - [ ] 运行 `python3 scripts/personal/smoke_check.py` 并确认全部通过。
 - [ ] 单独运行 `python3 scripts/personal/escc_offline_preflight.py` 并确认没有失败项。
+- [ ] 单独运行 `python3 scripts/personal/cplink_preflight.py` 并确认没有失败项。
 - [ ] 检查 Python 语法。
 - [ ] 检查 JSON 配置格式。
 - [ ] 检查 capnp 是否需要重新生成。
@@ -120,6 +131,7 @@
 - [ ] 确认车辆识别正确。
 - [ ] 确认 ESCC 参数默认状态符合预期。
 - [ ] 确认离线模式开启时不会卡注册，也不会尝试联网更新。
+- [ ] 如测试 CP搭子，确认 Android APP 能发现 C3 并发送导航数据。
 
 ## 7. 路测分级
 

@@ -10,7 +10,7 @@
 
 ## GitHub 仓库
 
-- 仓库：`https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`
+- 仓库：`https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC`
 - 主用保护分支：`personal/c3-escc`
 - 当前整合分支：`personal/c3-escc-atune`
 

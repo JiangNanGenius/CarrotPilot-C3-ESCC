@@ -246,11 +246,11 @@
 - `python3 scripts/personal/escc_offline_preflight.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
 
-## 2026-06-17: GitHub 私有仓库建立
+## 2026-06-17: GitHub 公开仓库建立
 
 仓库：
 
-- `https://github.com/JiangNanGenius/CarrotPilot-C3-Seltos-ESCC`
+- `https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC`
 
 本地远端：
 
@@ -263,7 +263,7 @@
 
 仓库设置：
 
-- 私有仓库。
+- 公开仓库。
 - 默认分支：`personal/c3-escc-atune`。
 - topic：`carrotpilot`, `openpilot`, `c3`, `seltos`, `escc`。
 
@@ -290,4 +290,28 @@
 验证：
 
 - `python3 scripts/personal/escc_offline_preflight.py` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-17: CP搭子 / fishop 功能边界
+
+新增文件：
+
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `scripts/personal/cplink_preflight.py`
+
+改动内容：
+
+- 建立 `tracking/jixie-master`，跟踪 `jixiexiaoge/openpilot:master`。
+- 记录机械小哥 `master` 是 CP搭子 / Navipilot 应用和说明方向，不是 openpilot 整包代码线。
+- 记录当前分支已具备 CarrotMan / CPlink 核心协议静态兼容：
+  - `carrotMan`
+  - `navInstructionCarrot`
+  - UDP 7705 / 7706
+  - 限速、TBT、SDI、GPS、`LANECHANGE`。
+- 记录 fishop `amap_navi.py`、APP 外接转向灯、`OVERTAKE`、盲区/雷达、DEC/longcontrol 等功能必须单独分支迁移。
+- 将 `cplink_preflight.py` 接入 `scripts/personal/smoke_check.py`。
+
+验证：
+
+- `python3 scripts/personal/cplink_preflight.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。

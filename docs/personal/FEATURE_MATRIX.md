@@ -19,13 +19,23 @@
 | --- | --- | --- | --- |
 | Auto-Tuner / 在线调参 | `jixiexiaoge/openpilot:atune` | P1 | ESCC 稳定后迁移 |
 | 7000 Web 控制台增强 | `jixiexiaoge/openpilot:atune` / `master` | P1 | 分批迁移 |
-| CP搭子 / Navipilot 兼容 | `jixiexiaoge/openpilot:master` | P1 | 先保持协议兼容 |
+| CP搭子 / Navipilot 核心协议 | `jixiexiaoge/openpilot:master` | P1 | 已做静态预检，待 APP 实测 |
 | 自动实验模式切换 | 机械小哥 | P1 | 独立开关 |
 | 模型选择切换器 | 机械小哥 | P1 | 独立开关 |
 | 自动超车 | 机械小哥 / fishop | P2 | 后置验证 |
 | LED / cluster HUD | 机械小哥 | P2 | 实验功能 |
 | 驾驶报告 | 机械小哥 | P2 | 低风险，可后置 |
 | 中文翻译和参数说明优化 | 本项目维护 | P2 | 不改默认值，只改菜单显示文字 |
+
+## 单独实验分支评估
+
+| 功能 | 来源 | 风险 | 计划 |
+| --- | --- | --- | --- |
+| fishop `amap_navi.py` | `fishop/openpilot:cp` | 中 | 与 CP搭子协议重叠，先放 `experimental/app-navi` |
+| APP 外接转向灯控制 | `fishop/openpilot:cp` | 中/高 | 需要硬件和上车验证，不进默认分支 |
+| `OVERTAKE` 命令 | `fishop/openpilot:cp` / 机械小哥 | 高 | 需要独立开关、速度/盲区/车道条件保护 |
+| 哨兵 Web 服务 | `jixiexiaoge/openpilot:master` | 高 | 含固定 secret 和外部资源，只做隔离参考 |
+| DEC / longcontrol 大改 | `fishop/openpilot:cp` | 高 | 不影响 ESCC 前暂不碰 |
 
 ## 先放旁边
 

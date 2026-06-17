@@ -15,6 +15,7 @@
 - [研究快照](RESEARCH_SNAPSHOT_2026-06-17.md)
 - [分支策略](BRANCH_STRATEGY.md)
 - [功能整合矩阵](FEATURE_MATRIX.md)
+- [机械小哥 / fishop 功能边界](JIXIE_FISHOP_BOUNDARY.md)
 - [Seltos 2023 车辆档案](VEHICLE_PROFILE_SELTOS_2023.md)
 - [车型配置说明](CAR_CONFIG_EXPLAINER.md)
 - [来源和署名](SOURCES_AND_CREDITS.md)
@@ -41,6 +42,7 @@ python3 scripts/personal/smoke_check.py
 
 ```bash
 python3 scripts/personal/escc_offline_preflight.py
+python3 scripts/personal/cplink_preflight.py
 ```
 
-这些检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖，以及仍需实车确认的项目。
+这些检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。

@@ -312,6 +312,7 @@ def check_py_compile() -> None:
   files = [
     "scripts/personal/smoke_check.py",
     "scripts/personal/escc_offline_preflight.py",
+    "scripts/personal/cplink_preflight.py",
     "opendbc_repo/opendbc/car/hyundai/values.py",
     "opendbc_repo/opendbc/car/hyundai/interface.py",
     "opendbc_repo/opendbc/car/hyundai/radar_interface.py",
@@ -356,6 +357,7 @@ def main() -> int:
     ("ESCC static checks", check_escc_static),
     ("Always Offline static checks", check_offline_static),
     ("ESCC / Always Offline preflight", lambda: run([sys.executable, "scripts/personal/escc_offline_preflight.py", "--no-manual"], "ESCC / Always Offline preflight")),
+    ("CPlink / Navipilot preflight", lambda: run([sys.executable, "scripts/personal/cplink_preflight.py", "--no-manual"], "CPlink / Navipilot preflight")),
     ("Auto-Tuner learner mock", check_carrot_learning_mock),
     ("Auto-Tuner service mock", check_learning_service_mock),
   ]
