@@ -166,6 +166,7 @@ def main() -> int:
     print(f"repo: {ROOT}")
     print(f"manifest: {MANIFEST.relative_to(ROOT)}")
     print(f"static tag: {data.get('current_static_tag')}")
+    print(f"test tag: {data.get('current_test_tag') or 'none'}")
     print(f"stable tag: {data.get('current_stable_tag') or 'none'}")
     print(f"daily install target: {data.get('daily_install_target') or 'none'}")
     print("OK: install targets are internally consistent")

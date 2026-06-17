@@ -134,6 +134,13 @@ def create_tag(tag: str, kind: str, road_test_log: Optional[str], snapshots: Seq
       f"Evidence dirs: {', '.join(evidence_dirs) if evidence_dirs else '<none>'}\n"
       "Use only after matching the recorded hardware and vehicle setup."
     )
+  elif kind == "test":
+    message = (
+      f"{tag}\n\n"
+      "Controlled-test personal CarrotPilot C3 ESCC tag.\n"
+      "Not a stable release and not a completed real-car validation result.\n"
+      "Use only for parked checks, evidence collection, and limited low-speed testing with a ready rollback target."
+    )
   else:
     message = (
       f"{tag}\n\n"

@@ -926,3 +926,40 @@
 
 - `python3 scripts/personal/evidence_readiness_report.py --self-test` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-18: 受控上车测试 tag
+
+改动文件：
+
+- `scripts/personal/install_target_check.py`
+- `scripts/personal/release_gate.py`
+- `scripts/personal/device_snapshot.py`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/README.md`
+- `docs/personal/TODO.md`
+- `README.md`
+
+改动内容：
+
+- 在安装目标清单中记录当前受控上车测试 tag：
+  - `carrotpilot-c3-escc-20260618-test1`
+- `install_target_check.py` 输出当前 `test` tag，方便区分静态预检、受控测试和稳定版本。
+- `release_gate.py --kind test` 的 tag message 改为受控测试说明，不再复用 static 文案。
+- `device_snapshot.py` 在系统命令不可用时继续生成快照，避免受限环境里 `ps` 被拒绝导致 dry-run 失败。
+- 文档明确 `test1` 只用于停车静态检查、证据采集和低速短程验证，不是日常稳定安装目标。
+
+当前测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test1`
+
+含义：
+
+- 已通过当前个人静态检查链。
+- 准备给 C3 / Seltos 2023 做受控上车测试和证据采集。
+- 不代表 stable，不应作为日常稳定安装目标。
+
+验证：
+
+- `CARROTPILOT_PENDING_RELEASE_TAG=carrotpilot-c3-escc-20260618-test1 python3 scripts/personal/install_target_check.py` 通过。
+- `CARROTPILOT_PENDING_RELEASE_TAG=carrotpilot-c3-escc-20260618-test1 python3 scripts/personal/smoke_check.py` 通过。

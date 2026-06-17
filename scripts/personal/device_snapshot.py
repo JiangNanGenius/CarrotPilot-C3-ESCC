@@ -51,14 +51,17 @@ PARAM_ROOTS = [
 
 
 def run(cmd: Sequence[str], cwd: Optional[Path] = None) -> Tuple[int, str]:
-  proc = subprocess.run(
-    list(cmd),
-    cwd=str(cwd or ROOT),
-    text=True,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-  )
-  return proc.returncode, proc.stdout.strip()
+  try:
+    proc = subprocess.run(
+      list(cmd),
+      cwd=str(cwd or ROOT),
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+    )
+    return proc.returncode, proc.stdout.strip()
+  except OSError as exc:
+    return 127, f"{cmd[0]} unavailable: {exc}"
 
 
 def git_value(args: Sequence[str]) -> str:

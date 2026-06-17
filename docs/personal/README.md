@@ -63,7 +63,7 @@ python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpi
 
 `seltos_profile_check.py` 专门守住 Seltos 2023 当前策略：经典 CAN、复用 Seltos 2021 harness/specs/flags、不引入 CANFD/HDA2 特判、不复制未验证 FW fingerprint。
 
-安装目标以 [INSTALL_TARGETS.json](INSTALL_TARGETS.json) 为准：当前只有 `static` 预检 tag，没有 `stable` tag，所以日常稳定安装目标必须保持为空。
+安装目标以 [INSTALL_TARGETS.json](INSTALL_TARGETS.json) 为准：当前有 `static` 预检 tag 和 `test` 受控上车测试 tag，没有 `stable` tag，所以日常稳定安装目标必须保持为空。
 
 打安装 tag 前先跑：
 

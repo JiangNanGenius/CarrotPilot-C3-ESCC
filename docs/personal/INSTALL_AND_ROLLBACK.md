@@ -20,6 +20,13 @@
 
 - `carrotpilot-c3-escc-20260618-static9`
 - 只代表静态检查通过，不代表实车验证。
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test1`
+- 用于停车静态检查、证据采集和低速短程验证。
+- 不作为日常稳定安装目标。
+
 - 目前还没有 `stable` tag。
 
 机器可检查的安装目标记录在 [INSTALL_TARGETS.json](INSTALL_TARGETS.json)。当前 `daily_install_target` 必须为空，因为还没有完成 Seltos 实车验证和 `stable` 发布。
