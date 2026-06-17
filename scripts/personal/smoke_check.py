@@ -321,6 +321,7 @@ def check_py_compile() -> None:
     "scripts/personal/seltos_profile_check.py",
     "scripts/personal/road_test_evidence_check.py",
     "scripts/personal/c3_static_check.py",
+    "scripts/personal/collect_real_car_evidence.py",
     "opendbc_repo/opendbc/car/hyundai/values.py",
     "opendbc_repo/opendbc/car/hyundai/interface.py",
     "opendbc_repo/opendbc/car/hyundai/radar_interface.py",
@@ -372,6 +373,37 @@ def check_c3_static_dry_run() -> None:
     raise CheckFailure("C3 static dry-run did not create a valid snapshot")
 
 
+def check_real_car_evidence_dry_run() -> None:
+  output_dir = Path("/tmp/carrotpilot-c3-escc-evidence-smoke")
+  run([
+    sys.executable,
+    "scripts/personal/collect_real_car_evidence.py",
+    "--output-dir",
+    str(output_dir),
+    "--allow-branch",
+    "--skip-preflight",
+    "--force",
+  ], "real-car evidence bundle dry-run")
+
+  expected_files = [
+    "README.md",
+    "manifest.json",
+    "static-check.md",
+    "static-check-output.txt",
+    "device-snapshot.md",
+    "road-test-log-draft.md",
+  ]
+  for name in expected_files:
+    if not (output_dir / name).exists():
+      raise CheckFailure("real-car evidence bundle missing " + name)
+
+  if "# CarrotPilot-C3-ESCC Evidence Bundle" not in (output_dir / "README.md").read_text(encoding="utf-8"):
+    raise CheckFailure("real-car evidence README has wrong title")
+  manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+  if manifest.get("static_check_exit_code") != 0:
+    raise CheckFailure("real-car evidence manifest recorded a failed static check")
+
+
 def main() -> int:
   checks: List[Tuple[str, Callable[[], Any]]] = [
     ("git diff whitespace", lambda: run(["git", "diff", "--check"], "git diff --check")),
@@ -390,6 +422,7 @@ def main() -> int:
     ("Chinese settings audit", lambda: run([sys.executable, "scripts/personal/settings_cn_audit.py"], "Chinese settings audit")),
     ("Install target manifest", lambda: run([sys.executable, "scripts/personal/install_target_check.py"], "Install target manifest")),
     ("C3 static check dry-run", check_c3_static_dry_run),
+    ("Real-car evidence bundle dry-run", check_real_car_evidence_dry_run),
     ("Auto-Tuner learner mock", check_carrot_learning_mock),
     ("Auto-Tuner service mock", check_learning_service_mock),
   ]

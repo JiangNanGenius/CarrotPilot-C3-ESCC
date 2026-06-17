@@ -52,6 +52,7 @@ python3 scripts/personal/install_target_check.py
 python3 scripts/personal/seltos_profile_check.py
 python3 scripts/personal/road_test_evidence_check.py --self-test
 python3 scripts/personal/c3_static_check.py --output /tmp/carrotpilot-c3-escc-static-check.md --snapshot-output /tmp/carrotpilot-c3-escc-snapshot.md --allow-branch --skip-preflight
+python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpilot-c3-escc-evidence --allow-branch --skip-preflight --force
 ```
 
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
@@ -90,6 +91,12 @@ C3 安装后推荐直接跑：
 
 ```bash
 python3 scripts/personal/c3_static_check.py --output /data/media/0/carrotpilot-c3-escc-static-check.md
+```
+
+如果准备实车验证，推荐用一键证据采集器生成同一个文件夹：
+
+```bash
+python3 scripts/personal/collect_real_car_evidence.py --archive
 ```
 
 ## GitHub Actions

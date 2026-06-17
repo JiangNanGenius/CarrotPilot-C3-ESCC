@@ -33,6 +33,7 @@ Rollback target recorded: PENDING
 - [ ] 记录当前可用版本。
 - [ ] 备份 `/data/params` 关键参数。
 - [ ] 运行 `python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c3-escc-snapshot.md`。
+- [ ] 或运行 `python3 scripts/personal/collect_real_car_evidence.py --archive` 生成完整证据包。
 - [ ] 把快照文件保存到电脑本地，准备给 `road_test_evidence_check.py` 或 `release_gate.py --device-snapshot` 使用。
 - [ ] 准备回滚安装地址或回滚 tag。
 - [ ] 确认 `AlwaysOffline=1`。
@@ -66,6 +67,7 @@ Rollback target recorded: PENDING
 - [ ] `EnableEscc=0` 时行为接近原 Seltos 2021 可用配置。
 - [ ] 开启 `EnableEscc=1` 后能看到 ESCC 0x2AB。
 - [ ] 使用 `device_snapshot.py --sample-seconds 20` 记录 0x2AB 计数。
+- [ ] 或使用 `collect_real_car_evidence.py --sample-seconds 20 --archive` 生成包含 0x2AB 采样的证据包。
 - [ ] 把包含 `EnableEscc=1` 且 `escc_0x2ab_bus0 > 0` 的快照作为 stable 证据保留。
 - [ ] ESCC lead / radarState 字段稳定。
 - [ ] AEB/FCW/SCC 状态无异常。

@@ -656,3 +656,44 @@
 验证：
 
 - `python3 scripts/personal/smoke_check.py` 通过，包含 `C3 static check dry-run`。
+
+## 2026-06-18: 一键实车证据采集器
+
+新增文件：
+
+- `scripts/personal/collect_real_car_evidence.py`
+
+改动文件：
+
+- `scripts/personal/smoke_check.py`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/ROAD_TEST_LOG_TEMPLATE.md`
+- `docs/personal/README.md`
+- `docs/personal/TODO.md`
+- `README.md`
+
+改动内容：
+
+- 增加 C3 设备端一键证据采集器，默认只读，不修改参数。
+- 自动调用 `c3_static_check.py` 生成 `static-check.md` 和 `device-snapshot.md`。
+- 自动生成 `road-test-log-draft.md`、`README.md`、`manifest.json` 和 `static-check-output.txt`。
+- 支持 `--sample-seconds 20`，停车时采集 ESCC 0x2AB / CP搭子消息计数。
+- 支持 `--archive`，把证据目录打成 tar.gz，方便从 C3 拷出。
+- 将证据包 dry-run 加入 `smoke_check.py`，确认每次推送都能生成完整证据目录。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static4`
+
+含义：
+
+- 包含实车证据采集器。
+- 静态检查通过，不代表实车验证。
+- 还没有 `stable` tag。
+
+验证：
+
+- `python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpilot-c3-escc-evidence --allow-branch --skip-preflight --force` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过，包含 `Real-car evidence bundle dry-run`。

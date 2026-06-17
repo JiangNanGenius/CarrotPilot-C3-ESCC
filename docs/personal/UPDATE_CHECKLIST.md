@@ -8,7 +8,8 @@
 - [ ] 查看 `docs/personal/INSTALL_TARGETS.json`，确认 `daily_install_target` 不是日常开发分支。
 - [ ] 记录当前上车分支和 commit。
 - [ ] 备份设备 `/data/params` 关键参数。
-- [ ] 运行 `python3 scripts/personal/device_snapshot.py` 采集设备端安全快照。
+- [ ] 运行 `python3 scripts/personal/collect_real_car_evidence.py --archive` 采集设备端安全证据包。
+- [ ] 如只需要单份快照，可运行 `python3 scripts/personal/device_snapshot.py`。
 - [ ] 记录当前车款识别结果：Seltos 2023 独立车型，初期复用 Seltos 2021 配置。
 - [ ] 确认车辆仍按纯 CAN 路径运行，不是 CANFD。
 - [ ] 记录 ESCC 相关参数当前值。
@@ -138,7 +139,7 @@
 - [ ] 先打 `static` 或 `test` tag，不直接装开发分支。
 - [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`，逐条处理脚本输出的 Manual checks。
 - [ ] 安装前记录当前可用版本。
-- [ ] 安装前保存设备快照文件。
+- [ ] 安装前保存设备证据包或设备快照文件。
 - [ ] 准备回滚 URL 或回滚分支。
 - [ ] 第一次启动只静态检查，不开车。
 - [ ] 确认无 manager crash、无循环重启、无缺失模块。
@@ -183,6 +184,7 @@
 - [ ] 推送 `personal/c3-escc` 或 `personal/c3-escc-atune` 到 `github`。
 - [ ] 发布前再次确认没有个人 token、私钥或设备隐私参数进入仓库。
 - [ ] `stable` 前填写上车测试记录，并把 C3 快照文件保存到电脑本地。
+- [ ] 如使用证据包，把 `road-test-log-draft.md` 和 `device-snapshot.md` 一起保存到电脑本地。
 - [ ] 运行 `python3 scripts/personal/road_test_evidence_check.py --road-test-log <记录文件> --device-snapshot <快照文件> --require-device-snapshot --require-escc-sample`。
 - [ ] 通过 `release_gate.py --kind stable --road-test-log <记录文件> --device-snapshot <快照文件>`。
 - [ ] 打稳定 tag。

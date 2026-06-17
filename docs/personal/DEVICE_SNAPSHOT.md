@@ -30,6 +30,18 @@ python3 scripts/personal/device_snapshot.py --sample-seconds 20 --output /data/m
 python3 scripts/personal/c3_static_check.py --output /data/media/0/carrotpilot-c3-escc-static-check.md
 ```
 
+实车验证时更推荐一键采集证据包。它会把静态检查、设备快照、路测记录草稿、清单和可选压缩包放在同一个目录：
+
+```bash
+python3 scripts/personal/collect_real_car_evidence.py --archive
+```
+
+停车并准备采样 ESCC 0x2AB 时：
+
+```bash
+python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --archive
+```
+
 准备升 `stable` 时，把这个 markdown 文件保存到电脑本地，后续传给：
 
 ```bash
@@ -47,6 +59,8 @@ python3 scripts/personal/road_test_evidence_check.py \
 - 安装 `static` tag 后、第一次上车前，`EnableEscc=0`。
 - 停车静态检查时，`EnableEscc=0`。
 - 停车静态检查时，手动开启 `EnableEscc=1` 后，确认是否看到 ESCC 0x2AB。
+
+每次都可以优先使用 `collect_real_car_evidence.py`，这样后续升 `stable` 时不用再手动拼文件。
 
 如果测试 CP搭子 / Navipilot，再额外采一次：
 

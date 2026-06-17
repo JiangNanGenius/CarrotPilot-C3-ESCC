@@ -18,7 +18,7 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260618-static3`
+- `carrotpilot-c3-escc-20260618-static4`
 - 只代表静态检查通过，不代表实车验证。
 - 目前还没有 `stable` tag。
 
@@ -70,6 +70,19 @@ python3 scripts/personal/c3_static_check.py \
 ```
 
 停车并准备采样 ESCC 0x2AB 时，再加 `--sample-seconds 20`。
+
+如果想把静态检查、设备快照、路测模板和清单放到同一个文件夹，推荐直接运行证据采集器：
+
+```bash
+cd /data/openpilot
+python3 scripts/personal/collect_real_car_evidence.py --archive
+```
+
+停车并准备采样 ESCC 0x2AB 时：
+
+```bash
+python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --archive
+```
 
 ## 建议参数
 
