@@ -1,3 +1,49 @@
+# CarrotPilot-C3-ESCC
+
+这是一个面向个人 C3 中国克隆版和 Kia Seltos 2023 纯 CAN 车辆的 CarrotPilot 整合分支。
+
+当前状态：
+
+- 底座：`ajouatom/openpilot:c3-wip`
+- 主车：Kia Seltos 2023，初期复用 Seltos 2021 配置
+- 硬件：C3 中国克隆版，不是 C3X
+- ESCC：已接入最小支持，默认关闭，必须手动开启 `EnableEscc`
+- 离线模式：`AlwaysOffline` 默认开启，用于 ACC/CAN 供电、无法在线注册的设备
+- Auto-Tuner：已接入学习和手动确认闭环，默认关闭，不自动应用
+- CP搭子 / Navipilot：核心 CarrotMan / CPlink 协议静态兼容，手机 APP 实测未完成
+
+当前可参考 tag：
+
+- `carrotpilot-c3-escc-20260617-static2`
+- 只代表静态检查通过，不代表实车验证或稳定版
+- 还没有 `stable` tag
+
+安装、更新或上车前先看：
+
+- [安装和回滚说明](docs/personal/INSTALL_AND_ROLLBACK.md)
+- [上车测试记录模板](docs/personal/ROAD_TEST_LOG_TEMPLATE.md)
+- [以后更新检查单](docs/personal/UPDATE_CHECKLIST.md)
+- [当前代码改动记录](docs/personal/CODE_CHANGES.md)
+- [来源和署名](docs/personal/SOURCES_AND_CREDITS.md)
+
+重要边界：
+
+- 不要把日常开发分支当长期安装目标。
+- `static` tag 不能替代实车验证。
+- ESCC 需要确认车上能稳定看到 0x2AB，并确认 lead、AEB/FCW、SCC 状态正常。
+- Seltos 2023 是纯 CAN，默认不要开启 CANFD/HDA2 相关路径。
+- 任何异常加减速、SCC/AEB 报错或车型路径错误，都应立即关闭 ESCC 并回滚。
+
+来源和署名：
+
+- 基于 ajouatom 维护的 CarrotPilot C3 分支。
+- ESCC 及部分 Hyundai/Kia 国内硬件支持参考 fishop / 飞扬（码上飞扬，名称待确认）的实现。
+- CP搭子、Navipilot、在线调参、7000 Web 等功能参考机械小哥 / JixieXiaoGe 的实现。
+- 同时参考 dhvms/carrotpilot 的历史实现说明。
+- 所有上游许可证、免责声明和贡献署名均保留。
+
+下面保留上游 CarrotPilot / openpilot 原始说明。上游文档中的 `openpilot.comma.ai` 是官方 openpilot 安装入口，不是本个人分支的安装目标。
+
 ## ⚠️ 법적 안내 / Legal Notice
 
 🚫 대한민국 자동차관리법 개정안에 따라, 본 소프트웨어를 실제 차량에 장착하거나 주행에 사용하는 것은 법률에 위배될 수 있습니다.  
@@ -21,18 +67,6 @@ The developer does **not take any responsibility** for real-world installation o
 * **CAN FD (standard) vehicles** Use the official Comma harness, connected to the camera.
 * **CAN FD vehicles with HDA2 (ADAS module equipped)** Use an aftermarket harness, connected to the ADAS module.
 * Please note that not all vehicles are supported.
-
-## Personal C3 / Seltos / ESCC Notes
-
-This branch is a personal C3 build for a pure-CAN Kia Seltos 2023 using the Seltos 2021 base configuration, with ESCC hardware support kept behind `EnableEscc` and `AlwaysOffline` enabled by default for clone C3 / ACC-powered use.
-
-Start here before installing or updating:
-
-- [Install and rollback notes](docs/personal/INSTALL_AND_ROLLBACK.md)
-- [Current code changes](docs/personal/CODE_CHANGES.md)
-- [Update checklist](docs/personal/UPDATE_CHECKLIST.md)
-- [Sources and credits](docs/personal/SOURCES_AND_CREDITS.md)
-
 
 <div align="center" style="text-align: center;">
 

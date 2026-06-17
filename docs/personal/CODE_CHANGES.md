@@ -386,3 +386,19 @@
 
 - `carrotpilot-c3-escc-20260617-static2`
 - 含义：包含第一批中文设置说明优化，静态检查通过，不代表实车验证或稳定版本。
+
+## 2026-06-17: 公开仓库首页整理
+
+改动内容：
+
+- 将根 README 开头改为 `CarrotPilot-C3-ESCC` 项目说明。
+- 明确当前目标硬件和车型：C3 中国克隆版、Kia Seltos 2023、纯 CAN。
+- 明确当前功能状态：ESCC 默认关闭、Always Offline 默认开启、Auto-Tuner 默认关闭、CP搭子核心协议静态兼容但 APP 未实测。
+- 标出当前可参考 `static` tag：`carrotpilot-c3-escc-20260617-static2`，并说明它不是稳定版。
+- 在首页保留 ajouatom、fishop / 飞扬（码上飞扬，名称待确认）、机械小哥 / JixieXiaoGe、dhvms 的来源署名。
+- 标明上游 README 中的 `openpilot.comma.ai` 是官方 openpilot 安装入口，不是本个人分支安装目标。
+- 在安装说明中加入当前 `static2` tag 和“没有 stable tag”的状态。
+
+验证：
+
+- `python3 scripts/personal/smoke_check.py` 通过。
