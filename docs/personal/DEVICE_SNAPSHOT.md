@@ -52,6 +52,15 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-escc-sample
 ```
 
+如果使用 `collect_real_car_evidence.py` 生成的完整证据包，解压后可以直接传整个目录：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
+  --require-device-snapshot \
+  --require-escc-sample
+```
+
 ## 什么时候采集
 
 建议至少采三次：

@@ -18,7 +18,7 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260618-static4`
+- `carrotpilot-c3-escc-20260618-static5`
 - 只代表静态检查通过，不代表实车验证。
 - 目前还没有 `stable` tag。
 
@@ -82,6 +82,15 @@ python3 scripts/personal/collect_real_car_evidence.py --archive
 
 ```bash
 python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --archive
+```
+
+把证据包拷回电脑并解压后，可以直接让校验器读取整个目录：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
+  --require-device-snapshot \
+  --require-escc-sample
 ```
 
 ## 建议参数
@@ -169,6 +178,16 @@ carrotpilot-c3-escc-YYYYMMDD-stable
 
 ```bash
 python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-static1 --kind static --run-checks
+```
+
+创建 `stable` tag 时可以直接使用同一个证据包目录：
+
+```bash
+python3 scripts/personal/release_gate.py \
+  --tag carrotpilot-c3-escc-YYYYMMDD-stable \
+  --kind stable \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
+  --run-checks
 ```
 
 升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，并把 C3 生成的设备快照文件保存到电脑本地。`stable` gate 会要求设备快照里有 `AlwaysOffline=1`、`CanfdHDA2=0`、`EnableConnect=0`，并且至少有一次 `EnableEscc=1`、`enabled=True`、`ok=True` 且 `escc_0x2ab_bus0 > 0` 的采样。

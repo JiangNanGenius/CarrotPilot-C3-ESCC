@@ -81,6 +81,15 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-escc-sample
 ```
 
+如果使用一键证据采集器，可以直接传整个证据目录：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
+  --require-device-snapshot \
+  --require-escc-sample
+```
+
 在 C3 设备上采集当前参数和静态状态：
 
 ```bash

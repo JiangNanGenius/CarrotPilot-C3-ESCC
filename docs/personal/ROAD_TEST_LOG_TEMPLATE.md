@@ -108,13 +108,21 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-escc-sample
 ```
 
+如果你用 `collect_real_car_evidence.py` 生成了完整证据包，解压后可直接传目录：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
+  --require-device-snapshot \
+  --require-escc-sample
+```
+
 创建 stable tag 时也要传入同一个快照文件：
 
 ```bash
 python3 scripts/personal/release_gate.py \
   --tag carrotpilot-c3-escc-YYYYMMDD-stable \
   --kind stable \
-  --road-test-log docs/personal/road_tests/你的记录.md \
-  --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --run-checks
 ```

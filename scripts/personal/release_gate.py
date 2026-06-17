@@ -93,19 +93,21 @@ def validate_tag(tag: str, kind: str) -> None:
     raise GateError(f"tag already exists: {tag}")
 
 
-def validate_stable_evidence(path: Optional[str], snapshots: Sequence[str]) -> None:
-  if not path:
-    raise GateError("stable tags require --road-test-log")
+def validate_stable_evidence(path: Optional[str], snapshots: Sequence[str], evidence_dirs: Sequence[str]) -> None:
+  if not path and not evidence_dirs:
+    raise GateError("stable tags require --road-test-log or --evidence-dir")
   cmd = [
     sys.executable,
     "scripts/personal/road_test_evidence_check.py",
-    "--road-test-log",
-    path,
     "--require-device-snapshot",
     "--require-escc-sample",
   ]
+  if path:
+    cmd.extend(["--road-test-log", path])
   for snapshot in snapshots:
     cmd.extend(["--device-snapshot", snapshot])
+  for evidence_dir in evidence_dirs:
+    cmd.extend(["--evidence-dir", evidence_dir])
   run(cmd)
 
 
@@ -118,7 +120,7 @@ def run_static_checks(pending_tag: Optional[str]) -> None:
   run(["git", "diff", "--check"])
 
 
-def create_tag(tag: str, kind: str, road_test_log: Optional[str], snapshots: Sequence[str]) -> None:
+def create_tag(tag: str, kind: str, road_test_log: Optional[str], snapshots: Sequence[str], evidence_dirs: Sequence[str]) -> None:
   head_code, head = git(["rev-parse", "--short=10", "HEAD"], check=True)
   if head_code != 0:
     raise GateError("cannot read HEAD")
@@ -126,8 +128,9 @@ def create_tag(tag: str, kind: str, road_test_log: Optional[str], snapshots: Seq
     message = (
       f"{tag}\n\n"
       "Stable personal CarrotPilot C3 ESCC tag.\n"
-      f"Road-test log: {road_test_log}\n"
-      f"Device snapshots: {', '.join(snapshots)}\n"
+      f"Road-test log: {road_test_log or '<from evidence dir>'}\n"
+      f"Device snapshots: {', '.join(snapshots) if snapshots else '<from evidence dir>'}\n"
+      f"Evidence dirs: {', '.join(evidence_dirs) if evidence_dirs else '<none>'}\n"
       "Use only after matching the recorded hardware and vehicle setup."
     )
   else:
@@ -146,6 +149,7 @@ def main() -> int:
   parser.add_argument("--kind", choices=["static", "test", "stable"], required=True)
   parser.add_argument("--road-test-log", help="required for stable tags")
   parser.add_argument("--device-snapshot", action="append", default=[], help="required for stable tags; may be repeated")
+  parser.add_argument("--evidence-dir", action="append", default=[], help="unpacked collect_real_car_evidence.py folder; may be repeated")
   parser.add_argument("--run-checks", action="store_true", help="run all static checks before allowing tag")
   parser.add_argument("--create-tag", action="store_true", help="create annotated local tag after checks pass")
   args = parser.parse_args()
@@ -164,7 +168,7 @@ def main() -> int:
     require_no_grep(OLD_NAME_RE, "old repo/project name")
 
     if args.kind == "stable":
-      validate_stable_evidence(args.road_test_log, args.device_snapshot)
+      validate_stable_evidence(args.road_test_log, args.device_snapshot, args.evidence_dir)
     else:
       print("note: static/test tags are not stable and do not prove real-car validation")
 
@@ -173,7 +177,7 @@ def main() -> int:
       run_static_checks(pending_tag)
 
     if args.create_tag:
-      create_tag(args.tag, args.kind, args.road_test_log, args.device_snapshot)
+      create_tag(args.tag, args.kind, args.road_test_log, args.device_snapshot, args.evidence_dir)
       print(f"created local tag: {args.tag}")
     else:
       print("gate passed; no tag created")

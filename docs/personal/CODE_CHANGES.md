@@ -697,3 +697,43 @@
 
 - `python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpilot-c3-escc-evidence --allow-branch --skip-preflight --force` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过，包含 `Real-car evidence bundle dry-run`。
+
+## 2026-06-18: Stable 证据包目录校验
+
+改动文件：
+
+- `scripts/personal/road_test_evidence_check.py`
+- `scripts/personal/release_gate.py`
+- `scripts/personal/collect_real_car_evidence.py`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/ROAD_TEST_LOG_TEMPLATE.md`
+- `docs/personal/README.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `README.md`
+
+改动内容：
+
+- `road_test_evidence_check.py` 新增 `--evidence-dir`，可直接读取一键证据采集器生成的目录。
+- 证据目录中如果有 `manifest.json`，会确认 `static_check_exit_code=0`。
+- 自动从证据目录中读取 `road-test-log-draft.md` 和 `device-snapshot.md`。
+- `release_gate.py --kind stable` 新增 `--evidence-dir`，可直接用同一个证据包创建 stable tag。
+- 证据包 README 改为推荐 `--evidence-dir` 命令，减少手工拼路径出错。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static5`
+
+含义：
+
+- 包含证据包目录校验和 stable 发布闸门目录输入。
+- 静态检查通过，不代表实车验证。
+- 还没有 `stable` tag。
+
+验证：
+
+- `python3 scripts/personal/road_test_evidence_check.py --self-test` 通过，包含证据包目录自测。
+- 未填写的证据包会被拒绝，并列出缺少的 `PASS` 结论行。
+- `python3 scripts/personal/smoke_check.py` 通过。
