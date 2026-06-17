@@ -18,6 +18,12 @@
 - 只代表静态检查通过，不代表实车验证或稳定版
 - 还没有 `stable` tag
 
+自动检查：
+
+- GitHub Actions 的 `Personal Smoke` 会在个人分支推送和手动触发时运行。
+- 它覆盖 Seltos 2023、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态和中文设置说明。
+- Actions 通过不代表实车验证通过。
+
 安装、更新或上车前先看：
 
 - [安装和回滚说明](docs/personal/INSTALL_AND_ROLLBACK.md)
@@ -30,6 +36,7 @@
 
 - 不要把日常开发分支当长期安装目标。
 - `static` tag 不能替代实车验证。
+- GitHub Actions / smoke check 不能替代上车静态检查和低速路测。
 - ESCC 需要确认车上能稳定看到 0x2AB，并确认 lead、AEB/FCW、SCC 状态正常。
 - Seltos 2023 是纯 CAN，默认不要开启 CANFD/HDA2 相关路径。
 - 任何异常加减速、SCC/AEB 报错或车型路径错误，都应立即关闭 ESCC 并回滚。

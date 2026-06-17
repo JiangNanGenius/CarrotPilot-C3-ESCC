@@ -59,3 +59,13 @@ python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-stat
 ```
 
 `stable` tag 必须先填写上车测试记录，不能只靠静态检查。
+
+## GitHub Actions
+
+公开仓库有一个轻量工作流：
+
+- `.github/workflows/personal-smoke.yml`
+- 触发：推送到 `personal/c3-escc`、`personal/c3-escc-atune`，PR 到这些分支，或手动触发。
+- 内容：运行 `smoke_check.py`、ESCC / Always Offline preflight、CP搭子 preflight。
+
+Actions 通过只证明静态检查通过，不代表实车验证通过。

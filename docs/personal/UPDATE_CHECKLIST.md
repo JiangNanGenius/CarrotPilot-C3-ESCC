@@ -121,6 +121,7 @@
 - [ ] 检查新增 Params key 是否在 UI 和默认配置中一致。
 - [ ] 检查 manager process 是否引用了存在的文件。
 - [ ] 检查中文设置说明是否仍和参数含义一致，不能改默认值或参数范围。
+- [ ] 推送后确认 GitHub Actions `Personal Smoke` 通过。
 - [ ] 如环境允许，跑 Hyundai/opendbc 相关测试。
 - [ ] 如环境允许，跑 controls 相关测试。
 

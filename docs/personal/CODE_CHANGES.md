@@ -402,3 +402,22 @@
 验证：
 
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-17: GitHub Actions 个人静态检查
+
+新增文件：
+
+- `.github/workflows/personal-smoke.yml`
+
+改动内容：
+
+- 新增轻量 GitHub Actions 工作流 `Personal Smoke`。
+- 触发范围限制在 `personal/c3-escc`、`personal/c3-escc-atune`、对应 PR 和手动触发。
+- 工作流会补齐个人脚本需要的 `personal/c3-escc`、`origin/c3-wip`、`jixie/master` / `tracking/jixie-master` 参考 ref。
+- 运行 `scripts/personal/smoke_check.py`、`scripts/personal/escc_offline_preflight.py --no-manual` 和 `scripts/personal/cplink_preflight.py --no-manual`。
+- README 和更新检查单增加 Actions 说明。
+
+验证：
+
+- `python3 scripts/personal/smoke_check.py` 本地通过。
+- 推送后需要确认 GitHub Actions `Personal Smoke` 通过。

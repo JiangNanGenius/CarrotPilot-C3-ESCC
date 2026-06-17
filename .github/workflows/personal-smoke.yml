@@ -1,0 +1,50 @@
+name: Personal Smoke
+
+on:
+  push:
+    branches:
+      - "personal/c3-escc"
+      - "personal/c3-escc-atune"
+  pull_request:
+    branches:
+      - "personal/c3-escc"
+      - "personal/c3-escc-atune"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  personal-smoke:
+    name: Personal static checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch personal comparison refs
+        run: |
+          git fetch --no-tags origin personal/c3-escc:refs/heads/personal/c3-escc || true
+          git fetch --no-tags https://github.com/ajouatom/openpilot.git c3-wip:refs/remotes/origin/c3-wip || true
+          git fetch --no-tags https://github.com/jixiexiaoge/openpilot.git master:refs/remotes/jixie/master master:refs/heads/tracking/jixie-master || true
+
+      - name: Run personal smoke check
+        run: python3 scripts/personal/smoke_check.py
+
+      - name: Run ESCC and offline preflight
+        run: python3 scripts/personal/escc_offline_preflight.py --no-manual
+
+      - name: Run CPlink preflight
+        run: python3 scripts/personal/cplink_preflight.py --no-manual
