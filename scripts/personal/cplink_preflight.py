@@ -206,6 +206,20 @@ def check_navipilot_websocket(report: Report) -> None:
     report.contains(f"Navipilot default WS service allowed: {service}", "selfdrive/carrot/server/live_runtime/services.py", f'"{service}"')
 
 
+def check_navipilot_param_api(report: Report) -> None:
+  report.contains("Params REST bulk endpoint handler exists", "selfdrive/carrot/server/features/params.py", "async def api_params_bulk")
+  report.contains("Params REST set endpoint handler exists", "selfdrive/carrot/server/features/params.py", "async def api_param_set")
+  report.contains("Params REST bulk route exists", "selfdrive/carrot/server/features/params.py", 'app.router.add_get("/api/params_bulk"')
+  report.contains("Params REST set route exists", "selfdrive/carrot/server/features/params.py", 'app.router.add_post("/api/param_set"')
+  report.contains("Params REST returns values object", "selfdrive/carrot/server/features/params.py", '"values": values')
+  report.contains("Params REST writes named param", "selfdrive/carrot/server/features/params.py", "set_param_value(name, value)")
+  report.contains("Params service supports bulk reads", "selfdrive/carrot/server/services/params.py", "def get_param_values")
+  report.contains("Params service supports typed writes", "selfdrive/carrot/server/services/params.py", "def set_param_value")
+  report.contains("Params service uses typed put", "selfdrive/carrot/server/services/params.py", "put_typed(params, name, value)")
+  report.contains("ExperimentalMode is a Web device control param", "selfdrive/carrot/server/features/system.py", '"ExperimentalMode"')
+  report.contains("ExperimentalMode confirmation param exists", "selfdrive/carrot/server/features/system.py", '"ExperimentalModeConfirmed"')
+
+
 def check_navipilot_app_source_contract(report: Report) -> None:
   if not ref_exists("tracking/jixie-navipilot"):
     report.warn("Navipilot app source contract not checked", "tracking/jixie-navipilot is not available")
@@ -245,6 +259,15 @@ def check_navipilot_app_source_contract(report: Report) -> None:
       "drivingDataCollector?.startCollecting()",
       "drivingDataCollector?.stopCollecting()",
       "drivingDataCollector?.updateData(",
+    ],
+    "app/src/main/java/com/example/navipilot/CarrotParamClient.kt": [
+      'private const val PORT = 7000',
+      'url("$baseUrl/api/param_set")',
+      'url("$baseUrl/api/params_bulk?names=$namesStr")',
+      'put("name", name)',
+      'put("value", value)',
+      'resp.getJSONObject("values")',
+      'setParam("ExperimentalMode"',
     ],
   }
 
@@ -313,6 +336,7 @@ def main() -> int:
   check_status_broadcast(report)
   check_cplink_payload(report)
   check_navipilot_websocket(report)
+  check_navipilot_param_api(report)
   check_navipilot_app_source_contract(report)
   check_controls_consumers(report)
 

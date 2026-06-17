@@ -12,6 +12,17 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[2]
+WHITESPACE_CANDIDATES = [
+  "README.md",
+  ".github/workflows/personal-smoke.yml",
+  "docs/personal",
+  "scripts/personal",
+  "selfdrive/carrot",
+  "selfdrive/carrot_settings.json",
+  "selfdrive/car/hyundai",
+  "opendbc_repo/opendbc/dbc/hyundai_kia_generic.dbc",
+  "panda/board/safety/safety_hyundai.h",
+]
 
 
 class CheckFailure(Exception):
@@ -95,6 +106,58 @@ def run(cmd: List[str], label: str, optional: bool = False) -> Tuple[bool, str]:
   if proc.returncode != 0:
     raise CheckFailure(label + " failed:\n" + proc.stdout[-4000:])
   return True, proc.stdout.strip()
+
+
+def changed_candidate_paths(cached: bool = False) -> List[Path]:
+  cmd = ["git", "diff", "--name-only"]
+  if cached:
+    cmd.append("--cached")
+  cmd.extend(["--", *WHITESPACE_CANDIDATES])
+  try:
+    proc = subprocess.run(
+      cmd,
+      cwd=str(ROOT),
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      timeout=20,
+    )
+  except subprocess.TimeoutExpired:
+    return []
+  if proc.returncode != 0:
+    return []
+  return [ROOT / line for line in proc.stdout.splitlines() if line.strip()]
+
+
+def check_worktree_whitespace() -> str:
+  paths = set(changed_candidate_paths()) | set(changed_candidate_paths(cached=True))
+  if not paths:
+    return "no personal-path changes"
+
+  failures = []
+  for path in sorted(paths):
+    if not path.exists() or not path.is_file():
+      continue
+    try:
+      with path.open("rb") as f:
+        data = f.read()
+    except OSError as exc:
+      raise CheckFailure("failed reading %s: %s" % (rel(path), exc)) from exc
+    if b"\0" in data:
+      continue
+    text = data.decode("utf-8", errors="ignore")
+    for line_no, line in enumerate(text.splitlines(), start=1):
+      trailing = len(line) - len(line.rstrip(" \t"))
+      if trailing == 0:
+        continue
+      if path.suffix.lower() == ".md" and trailing == 2 and line.endswith("  "):
+        continue
+      else:
+        failures.append("%s:%d: trailing whitespace" % (rel(path), line_no))
+
+  if failures:
+    raise CheckFailure("worktree whitespace failed:\n" + "\n".join(failures[:80]))
+  return "%d file(s)" % len(paths)
 
 
 def read_text(path: str) -> str:
@@ -454,7 +517,7 @@ def check_c3_commissioning_dry_run() -> None:
 
 def main() -> int:
   checks: List[Tuple[str, Callable[[], Any]]] = [
-    ("git diff whitespace", lambda: run(["git", "diff", "--check"], "git diff --check")),
+    ("worktree whitespace", check_worktree_whitespace),
     ("settings JSON", lambda: run([sys.executable, "-m", "json.tool", "selfdrive/carrot_settings.json"], "settings JSON")),
     ("python syntax", check_py_compile),
     ("javascript syntax", check_js_syntax),

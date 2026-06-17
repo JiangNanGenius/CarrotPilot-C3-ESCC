@@ -75,6 +75,20 @@ def check_experimental_toggle() -> FeatureStatus:
   return present("Experimental mode Web toggle", "device Web settings expose the existing ExperimentalMode parameter", condition)
 
 
+def check_navipilot_param_api() -> FeatureStatus:
+  condition = (
+    contains("selfdrive/carrot/server/features/params.py", '"/api/params_bulk"')
+    and contains("selfdrive/carrot/server/features/params.py", '"/api/param_set"')
+    and contains("selfdrive/carrot/server/services/params.py", "def get_param_values")
+    and contains("selfdrive/carrot/server/services/params.py", "def set_param_value")
+  )
+  return present(
+    "Navipilot app param API",
+    "port 7000 exposes /api/params_bulk and /api/param_set for APP-side ExperimentalMode/setting controls",
+    condition,
+  )
+
+
 def check_auto_tuner() -> FeatureStatus:
   condition = (
     exists("selfdrive/carrot/carrot_learning.py")
@@ -179,6 +193,7 @@ def build_statuses() -> List[FeatureStatus]:
   return [
     check_web_console(),
     check_experimental_toggle(),
+    check_navipilot_param_api(),
     check_auto_tuner(),
     check_cplink(),
     check_cluster_hud(),

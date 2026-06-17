@@ -1229,3 +1229,45 @@
 
 - 包含首装/迁移/证据采集一体化设备端向导。
 - 不代表 stable，不应作为日常稳定安装目标。
+
+## 2026-06-18: Navipilot APP 参数接口守卫
+
+改动文件：
+
+- `scripts/personal/cplink_preflight.py`
+- `scripts/personal/feature_status_report.py`
+- `scripts/personal/smoke_check.py`
+- `docs/personal/NAVIPILOT_APP_RESEARCH.md`
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/TODO.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `README.md`
+
+改动内容：
+
+- `cplink_preflight.py` 新增 C3 端 7000 参数 REST API 检查：
+  - `/api/params_bulk`
+  - `/api/param_set`
+  - `get_param_values`
+  - `set_param_value`
+  - `ExperimentalMode`
+  - `ExperimentalModeConfirmed`
+- `cplink_preflight.py` 新增对 Navipilot APP `CarrotParamClient.kt` 的源码契约检查，确认 APP 仍使用 7000 端口和上述参数接口。
+- `feature_status_report.py` 新增 `Navipilot app param API` 状态。
+- `smoke_check.py` 将空白检查改为个人维护路径的工作区扫描，避免 partial clone 下全仓 `git diff --check` 等待旧 blob。
+- 文档明确：APP 侧实验模式/参数控制接口已静态兼容；模型选择器仍是高风险独立批次，不随本次进入主线。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static16`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test8`
+
+含义：
+
+- 包含 Navipilot APP 参数接口静态契约守卫。
+- 不代表 stable，不应作为日常稳定安装目标。

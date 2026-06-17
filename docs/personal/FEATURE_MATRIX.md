@@ -21,8 +21,9 @@
 | 7000 Web 控制台增强 | `jixiexiaoge/openpilot:atune` / `master` | P1 | 当前 C3 底座已有 7000 Web、录像/截屏/工具/Auto-Tuner 面板；剩余增强分批迁移 |
 | CP搭子 / Navipilot 核心协议 | `jixiexiaoge/openpilot:master` / `jixiexiaoge/navipilot:CPdazi` | P1 | 已做静态预检，待 APP 实测 |
 | 实验模式 Web 开关 | 当前 C3 底座 | P1 | 已静态确认，可在 Web 设备页操作 `ExperimentalMode` |
-| 自动实验模式切换完整闭环 | 机械小哥 | P1 | 独立开关，后续单批迁移 |
-| 模型选择切换器 | 机械小哥 | P1 | 独立开关 |
+| Navipilot APP 参数接口 | `jixiexiaoge/navipilot:CPdazi` / 当前 C3 Web API | P1 | 已静态确认 `/api/params_bulk`、`/api/param_set` 和 APP `CarrotParamClient` 契约 |
+| 自动实验模式切换完整闭环 | 机械小哥 / Navipilot APP | P1 | C3 端参数接口已具备；APP 侧实测和策略闭环待验证 |
+| 模型选择切换器 | 机械小哥 / Navipilot APP | P1 | 未找到可直接迁移的安全 C3 端实现，保持高风险独立批次 |
 | 自动超车 | 机械小哥 / fishop | P2 | 后置验证 |
 | LED / cluster HUD | 机械小哥 | P2 | 实验功能 |
 | 驾驶报告 | `jixiexiaoge/navipilot:CPdazi` | P2 | APP 端功能；C3 端保持 WebSocket/CarrotMan 数据兼容，待 APP 实测 |

@@ -43,6 +43,22 @@ APP README 和代码显示的核心能力：
 - 自动超车命令：ZMQ 7710，当前本项目主线不启用。
 - 驾驶评分：APP 端五维评分，包含平稳性、预判力、接管依赖、节能、NOO 稳定度。
 
+## 参数控制接口
+
+APP 侧 `CarrotParamClient.kt` 当前使用 C3 的 7000 端口：
+
+- `GET /api/params_bulk?names=ExperimentalMode`
+- `POST /api/param_set`，JSON body: `{"name":"ExperimentalMode","value":1}`
+
+本项目 C3 端已有对应接口：
+
+- `selfdrive/carrot/server/features/params.py`
+- `selfdrive/carrot/server/services/params.py`
+
+这些接口可支撑 APP 侧实验模式开关和后续普通设置控制。当前静态守卫会同时检查 C3 路由和 Navipilot APP 源码中的 `CarrotParamClient` 契约。
+
+注意：这不等于模型选择器已经可用。模型选择器涉及 `modeld`、模型资产、下载/校验、重启或热切换策略，必须作为高风险独立批次处理。
+
 ## 驾驶评分数据来源
 
 APP 侧 `DrivingDataCollector` 每秒更新一次，主要输入包括：
@@ -101,7 +117,8 @@ python3 scripts/personal/cplink_preflight.py
 - C3 端 UDP 7705 状态广播字段。
 - C3 端 UDP 7706 导航 JSON 字段。
 - C3 端 `/ws/raw_multiplex` 和 `/ws/camera/road`。
-- Navipilot APP 当前源码对 7705、raw multiplex、camera WebSocket 和驾驶评分启动条件的字段需求。
+- C3 端 `/api/params_bulk` 和 `/api/param_set`。
+- Navipilot APP 当前源码对 7705、raw multiplex、camera WebSocket、`CarrotParamClient` 和驾驶评分启动条件的字段需求。
 
 ## 更新维护
 
@@ -116,6 +133,7 @@ python3 scripts/personal/cplink_preflight.py
 
 - `CarrotManNetworkClient.kt`
 - `CarrotWsClient.kt`
+- `CarrotParamClient.kt`
 - `DrivingDataCollector.kt`
 - `DrivingScoreEngine.kt`
 - `DrivingReportScreen.kt`
@@ -125,6 +143,7 @@ python3 scripts/personal/cplink_preflight.py
 
 - Android 设备和 C3 在同一 WiFi。
 - APP 能连接 C3 的 7000 端口。
+- APP 能通过 7000 端口读取并切换 `ExperimentalMode`。
 - APP 能收到 C3 的 7705 状态广播，且 `IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph` 有正确值。
 - `/ws/raw_multiplex` 有 `carState`、`controlsState`、`selfdriveState`、`deviceState`、`carrotMan`、`gpsLocationExternal`。
 - `/ws/camera/road` 能显示摄像头画面。

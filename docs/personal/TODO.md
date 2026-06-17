@@ -98,6 +98,7 @@
 - [x] 从 `jixiexiaoge/navipilot:CPdazi` 完成第一轮 APP / 驾驶报告 / WebSocket 需求研究。
 - [x] 建立 `tracking/jixie-navipilot`，跟踪 Android CP搭子 APP 来源。
 - [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight。
+- [x] 增加 Navipilot APP 参数读写接口静态守卫，确认 7000 端口 `/api/params_bulk` 和 `/api/param_set` 兼容 APP 的 `CarrotParamClient`。
 - [x] 增加 CP搭子 / Navipilot 设备端采样字段和可选证据校验门槛。
 - [x] 增加机械小哥 / fishop 功能边界静态检查，防止自动超车、AmapNavi、独立 Web/哨兵服务无保护进入主线。
 - [x] 增加个人功能状态报告，区分已静态具备、已有但待实机验证、故意隔离和未迁移功能。
@@ -147,8 +148,8 @@
 - [x] 增加 C3 首次安装/迁移向导，把旧配置 dry-run/import、静态检查、证据采集和 readiness 报告串成一条设备端流程。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static15` tag。
-- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test7` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static16` tag。
+- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test8` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。

@@ -43,6 +43,7 @@
 - 已修复 APP 字段兼容：`szTBTMainTextNext` 现在读取 APP 的 `szTBTMainTextNext` 键。
 - `selfdrive/carrot/carrot_man.py` 的 UDP 7705 状态广播提供 Navipilot 驾驶评分启动需要的 `IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph`、`carcruiseSpeed`、`tbt_dist`、`sdi_dist`。
 - `selfdrive/carrot/server/features/ws.py` 提供 `/ws/raw_multiplex`、`/ws/raw/{service}`、`/ws/camera/{camera}`，满足 Navipilot APP 读取车辆数据和摄像头的基础入口。
+- `selfdrive/carrot/server/features/params.py` 提供 `/api/params_bulk` 和 `/api/param_set`，满足 Navipilot APP `CarrotParamClient` 读取/切换 `ExperimentalMode` 等参数的基础入口。
 - `selfdrive/controls/lib/desire_helper.py` 已处理 CP搭子 `LANECHANGE` 命令。
 - `selfdrive/carrot/web` 和 cluster/realtime 侧已经读取 `carrotMan` / `navInstructionCarrot`，用于 Web HUD 和导航显示。
 
@@ -98,12 +99,14 @@ python3 scripts/personal/feature_boundary_check.py
 - Auto-Tuner 第二批 Web 推荐面板和手动确认。
 - CP搭子核心协议静态预检。
 - Navipilot APP 来源跟踪和驾驶报告边界确认。
+- Navipilot APP 参数读写接口静态守卫。
 
 ### B. 下一批，低风险
 
 - CP搭子 Android APP 实测连接：
   - 手机和 C3 在同一 WiFi。
   - APP 能发现 7705 广播。
+  - APP 能通过 7000 端口读取/切换 `ExperimentalMode`。
   - APP 能向 7706 发送导航数据。
   - `carrotMan` 中限速、TBT、SDI、GPS 字段随导航变化。
 - `LANECHANGE` 命令实测：
@@ -158,6 +161,7 @@ CP搭子版本：
 同 WiFi：是/否
 7705 广播发现：是/否
 7706 数据接收：是/否
+7000 参数读写：是/否
 nRoadLimitSpeed 更新：是/否
 TBT 更新：是/否
 SDI 更新：是/否
