@@ -9,10 +9,11 @@ async function bulkGet(names) {
 
 async function setParam(name, value) {
   const j = await postJson("/api/param_set", { name, value });
+  const writtenValue = j.value ?? value;
   window.dispatchEvent(new CustomEvent("carrot:paramchange", {
-    detail: { name, value: j.value ?? value },
+    detail: { name, value: writtenValue },
   }));
-  return true;
+  return writtenValue;
 }
 
 

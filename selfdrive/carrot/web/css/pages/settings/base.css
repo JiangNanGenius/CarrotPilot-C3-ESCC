@@ -23,6 +23,73 @@
   color: color-mix(in srgb, #a9e8b2 82%, var(--md-on-surface));
 }
 
+.page--setting .carrot-learning-panel {
+  border-color: color-mix(in srgb, var(--md-primary) 34%, var(--md-outline-var));
+  background: color-mix(in srgb, var(--md-primary) 7%, var(--md-surface-cont-h));
+}
+
+.page--setting .carrot-learning-panel__top {
+  align-items: flex-start;
+}
+
+.page--setting .carrot-learning-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.page--setting .carrot-learning-panel__actions .smallBtn {
+  min-width: 58px;
+}
+
+.page--setting .carrot-learning-panel__body {
+  display: grid;
+  gap: 6px;
+}
+
+.page--setting .carrot-learning-rec {
+  display: grid;
+  grid-template-columns: minmax(96px, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+  padding: 5px 7px;
+  border: 1px solid color-mix(in srgb, var(--md-outline-var) 30%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--md-surface-cont) 88%, transparent);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.page--setting .carrot-learning-rec__key {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--md-on-surface);
+  font-weight: 800;
+}
+
+.page--setting .carrot-learning-rec__values {
+  color: var(--md-on-surface-var);
+  font-variant-numeric: tabular-nums;
+}
+
+.page--setting .carrot-learning-rec__delta {
+  min-width: 34px;
+  color: var(--md-primary);
+  font-weight: 900;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.page--setting .carrot-learning-rec--more {
+  grid-template-columns: 1fr;
+  color: var(--md-on-surface-var);
+  text-align: center;
+}
+
 .page--setting #items > .setting.ui-stagger-item,
 .page--setting #items > .setting-profile-section.ui-stagger-item,
 .page--setting #deviceItems > .setting.ui-stagger-item {

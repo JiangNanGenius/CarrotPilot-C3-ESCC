@@ -22,6 +22,13 @@ from ..services.params import (
 from ..services.settings import get_settings_cached
 
 
+LEARNING_ACTION_PARAMS = {
+  "CarrotLearningApply": "apply",
+  "CarrotLearningIgnore": "ignore",
+  "CarrotLearningClear": "clear",
+}
+
+
 async def api_params_bulk(request: web.Request) -> web.Response:
   names = request.query.get("names", "")
   if not names:
@@ -64,6 +71,14 @@ async def api_param_set(request: web.Request) -> web.Response:
 
   if not name:
     return web.json_response({"ok": False, "error": "missing name"}, status=400)
+
+  if name in LEARNING_ACTION_PARAMS and str(value).lower() not in ("", "0", "false", "off", "none"):
+    try:
+      from ..services.carrot_learning import handle_learning_action
+      result = handle_learning_action(LEARNING_ACTION_PARAMS[name])
+      return web.json_response({"ok": True, "name": name, "value": 0, "has_params": HAS_PARAMS, "result": result})
+    except Exception as e:
+      return web.json_response({"ok": False, "error": str(e)}, status=500)
 
   # clamp using settings if numeric
   p = None

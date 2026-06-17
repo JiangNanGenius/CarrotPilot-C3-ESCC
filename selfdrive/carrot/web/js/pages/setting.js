@@ -288,6 +288,121 @@ function getSettingGroupParamNames(group) {
   return list.map((item) => item.name).filter(Boolean);
 }
 
+function isCarrotLearningGroup(group) {
+  const list = SETTINGS?.items_by_group?.[group] || [];
+  return list.some((item) => item?.name === "CarrotLearningActive");
+}
+
+function carrotLearningText(zh, en, ko = en) {
+  if (LANG === "zh") return zh;
+  if (LANG === "ko") return ko;
+  return en;
+}
+
+function formatCarrotLearningTime(value) {
+  const ts = Number(value || 0);
+  if (!Number.isFinite(ts) || ts <= 0) return "";
+  try {
+    return new Date(ts * 1000).toLocaleString();
+  } catch {
+    return "";
+  }
+}
+
+async function loadCarrotLearningState() {
+  try {
+    return await getJson("/api/carrot_learning");
+  } catch (e) {
+    return {
+      ok: false,
+      pending: false,
+      recommendations: [],
+      error: e?.message || String(e),
+    };
+  }
+}
+
+function renderCarrotLearningPanel(state, options = {}) {
+  const panel = document.createElement("div");
+  panel.className = options.animateItems ? "setting carrot-learning-panel ui-stagger-item" : "setting carrot-learning-panel";
+  if (options.animateItems) panel.style.setProperty("--i", "0");
+
+  const pending = Boolean(state?.pending);
+  const recommendations = Array.isArray(state?.recommendations) ? state.recommendations : [];
+  const createdAt = formatCarrotLearningTime(state?.created_at);
+  const statusText = state?.ok === false
+    ? (state.error || carrotLearningText("读取建议失败", "Failed to load recommendations", "추천값을 읽지 못했습니다"))
+    : pending
+      ? carrotLearningText("有待确认建议", "Pending recommendations", "대기 중인 추천값")
+      : carrotLearningText("暂无待处理建议", "No pending recommendations", "대기 중인 추천값 없음");
+
+  const recRows = recommendations.slice(0, 8).map((rec) => {
+    const delta = Number(rec.delta || 0);
+    const deltaText = delta > 0 ? `+${delta}` : String(delta);
+    return `
+      <div class="carrot-learning-rec">
+        <span class="carrot-learning-rec__key">${escapeHtml(rec.key || "-")}</span>
+        <span class="carrot-learning-rec__values">${escapeHtml(String(rec.current))} -> ${escapeHtml(String(rec.recommended))}</span>
+        <span class="carrot-learning-rec__delta">${escapeHtml(deltaText)}</span>
+      </div>`;
+  }).join("");
+
+  const extraCount = recommendations.length > 8 ? recommendations.length - 8 : 0;
+  panel.innerHTML = `
+    <div class="settingTop carrot-learning-panel__top">
+      <div class="setting-copy">
+        <div class="title">${escapeHtml(carrotLearningText("Auto-Tuner 建议", "Auto-Tuner Recommendations", "오토튜너 추천"))}</div>
+        <div class="name">${escapeHtml(statusText)}</div>
+        ${createdAt ? `<div class="muted mt-sm">${escapeHtml(createdAt)}</div>` : ""}
+      </div>
+      <div class="ctrl carrot-learning-panel__actions">
+        <button type="button" class="smallBtn btn--filled" data-learning-action="apply" ${pending ? "" : "disabled"}>${escapeHtml(carrotLearningText("应用", "Apply", "적용"))}</button>
+        <button type="button" class="smallBtn" data-learning-action="ignore" ${pending ? "" : "disabled"}>${escapeHtml(carrotLearningText("忽略", "Ignore", "무시"))}</button>
+        <button type="button" class="smallBtn btn--danger" data-learning-action="clear">${escapeHtml(carrotLearningText("清空", "Clear", "초기화"))}</button>
+      </div>
+    </div>
+    <div class="descr carrot-learning-panel__body">
+      ${recRows || escapeHtml(carrotLearningText("停车后如果有新建议，会显示在这里。", "New recommendations will appear here after parking.", "주차 후 새 추천값이 여기에 표시됩니다."))}
+      ${extraCount ? `<div class="carrot-learning-rec carrot-learning-rec--more">${escapeHtml(carrotLearningText(`还有 ${extraCount} 项`, `${extraCount} more`, `${extraCount}개 더 있음`))}</div>` : ""}
+    </div>
+  `;
+
+  panel.querySelectorAll("[data-learning-action]").forEach((button) => {
+    button.addEventListener("click", () => runCarrotLearningAction(button.dataset.learningAction).catch((err) => {
+      showAppToast(err?.message || String(err), { tone: "error" });
+    }));
+  });
+  return panel;
+}
+
+async function runCarrotLearningAction(action) {
+  if (!action) return;
+  if (action === "apply") {
+    const ok = await appConfirm(carrotLearningText(
+      "确定应用当前 Auto-Tuner 建议吗？请只在停车安全状态下使用。",
+      "Apply current Auto-Tuner recommendations? Use only while parked.",
+      "현재 오토튜너 추천값을 적용할까요? 주차 상태에서만 사용하세요.",
+    ), {
+      title: carrotLearningText("应用建议", "Apply Recommendations", "추천값 적용"),
+      confirmLabel: carrotLearningText("应用", "Apply", "적용"),
+    });
+    if (!ok) return;
+  }
+
+  const result = await postJson("/api/carrot_learning", { action });
+  const message = action === "apply"
+    ? carrotLearningText(`已应用 ${result.applied_count || 0} 项`, `${result.applied_count || 0} recommendations applied`, `${result.applied_count || 0}개 적용됨`)
+    : action === "ignore"
+      ? carrotLearningText("已忽略当前建议", "Recommendations ignored", "추천값 무시됨")
+      : carrotLearningText("学习数据已清空", "Learning data cleared", "학습 데이터 초기화됨");
+  showAppToast(message, { tone: action === "apply" ? "success" : "info" });
+  settingValueCache.clear();
+  settingGroupValueCache.clear();
+  if (CURRENT_GROUP) {
+    await renderItems(CURRENT_GROUP, { forceValues: true, scrollMode: "restore", scrollTop: getSettingItemsScrollTop(), animateItems: false });
+  }
+}
+
 function cacheSettingValue(name, value, group = null) {
   if (!name) return;
   const loadedAt = Date.now();
@@ -2193,6 +2308,11 @@ async function renderItems(group, options = {}) {
     values = {};
   }
 
+  let carrotLearningState = null;
+  if (!profile && isCarrotLearningGroup(group)) {
+    carrotLearningState = await loadCarrotLearningState();
+  }
+
   if (renderToken !== settingRenderToken || CURRENT_GROUP !== group || !isCarrotSettingTabActive() || screenItems?.style.display === "none") {
     return;
   }
@@ -2218,6 +2338,9 @@ async function renderItems(group, options = {}) {
   }
 
   if (profile) appendSettingProfileHeader(profile, itemsBox);
+  if (!profile && isCarrotLearningGroup(group)) {
+    itemsBox.appendChild(renderCarrotLearningPanel(carrotLearningState, { animateItems }));
+  }
 
   const profileSectionCounts = new Map();
   if (profile) {
@@ -2384,7 +2507,8 @@ async function renderItems(group, options = {}) {
             profile.values = nextValues;
           }
         } else {
-          await setParam(name, next);
+          const written = await setParam(name, next);
+          if (written !== true && written !== undefined) next = written;
         }
         val.textContent = String(next);
         if (!profile) {
@@ -2663,4 +2787,3 @@ if (window.visualViewport) {
 }
 
 initSettingOverflowObservers();
-

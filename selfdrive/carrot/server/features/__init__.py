@@ -1,6 +1,7 @@
 from aiohttp import web
 
 from . import (
+  carrot_learning,
   cars,
   dashcam,
   params,
@@ -27,6 +28,7 @@ def register_all(app: web.Application) -> None:
   ws.register(app)
   settings.register(app)
   params.register(app)
+  carrot_learning.register(app)
   setting_favorites.register(app)
   setting_profiles.register(app)
   web_settings.register(app)

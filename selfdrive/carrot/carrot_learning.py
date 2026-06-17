@@ -132,6 +132,14 @@ class CarrotLearner:
       self._clear_learning_data()
       self.params.put_bool("CarrotLearningClear", False)
 
+    if self.params.get_bool("CarrotLearningApply"):
+      self.apply_recommendations(manual=True)
+      self.params.put_bool("CarrotLearningApply", False)
+
+    if self.params.get_bool("CarrotLearningIgnore"):
+      self._clear_pending_recommendation()
+      self.params.put_bool("CarrotLearningIgnore", False)
+
     if self.params.get_bool("CarrotTunerFactoryReset"):
       self._clear_learning_data()
       self.params.remove("CarrotLearningHistory")
@@ -325,6 +333,8 @@ class CarrotLearner:
     self.params.put("CarrotLearningRecommend", json.dumps(payload, separators=(",", ":")).encode("utf-8"))
     self.params.put("CarrotLearningPopupSource", source)
     self.params.put_bool("CarrotLearningPopupReady", True)
+    if self.params.get_bool("CarrotLearningAutoApply"):
+      self.apply_recommendations(manual=False)
 
   def apply_recommendations(self, manual=False):
     if not manual and not self.params.get_bool("CarrotLearningAutoApply"):
@@ -375,6 +385,9 @@ class CarrotLearner:
     self.data = _default_data()
     self.has_driven = False
     self.params.remove("CarrotLearningData")
+    self._clear_pending_recommendation()
+
+  def _clear_pending_recommendation(self):
     self.params.remove("CarrotLearningRecommend")
     self.params.remove("CarrotLearningPopupSource")
     self.params.put_bool("CarrotLearningPopupReady", False)

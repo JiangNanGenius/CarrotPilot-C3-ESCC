@@ -167,6 +167,62 @@
 
 待后续：
 
-- 做推荐值查看/确认 UI。
-- 做手动应用流程。
 - 上车前先只开启学习，不开启自动应用。
+
+## 2026-06-17: Auto-Tuner 手动确认闭环
+
+分支：
+
+- `personal/c3-escc-atune`
+
+改动文件：
+
+- `selfdrive/carrot/server/services/carrot_learning.py`
+- `selfdrive/carrot/server/features/carrot_learning.py`
+- `selfdrive/carrot/server/features/params.py`
+- `selfdrive/carrot/server/features/__init__.py`
+- `selfdrive/carrot/web/js/pages/setting.js`
+- `selfdrive/carrot/web/js/shared/api.js`
+- `selfdrive/carrot/web/css/pages/settings/base.css`
+- `selfdrive/carrot/carrot_learning.py`
+- `common/params_keys.h`
+- `selfdrive/carrot_settings.json`
+
+改动内容：
+
+- 新增 `/api/carrot_learning`，用于读取待处理推荐。
+- 新增 `/api/carrot_learning` POST action：
+  - `apply`: 手动应用推荐。
+  - `ignore`: 忽略当前推荐。
+  - `clear`: 清空学习数据和推荐。
+- 应用推荐时检查 `IsOnroad`，行驶中拒绝写入控制参数。
+- 设置页“自动调参”分组顶部新增推荐面板。
+- 推荐面板显示参数名、当前值、建议值和变化量。
+- 推荐面板提供应用、忽略、清空按钮。
+- 普通参数写入接口拦截 `CarrotLearningApply`、`CarrotLearningIgnore`、`CarrotLearningClear`，让普通设置页的一次性开关也能真正执行动作。
+- 学习器自身也支持 `CarrotLearningApply`、`CarrotLearningIgnore` 一次性开关。
+
+验证：
+
+- `git diff --check` 通过。
+- `python3 -m json.tool selfdrive/carrot_settings.json` 通过。
+- `py_compile` 通过：
+  - `selfdrive/carrot/carrot_learning.py`
+  - `selfdrive/carrot/carrot_functions.py`
+  - `selfdrive/carrot/server/services/carrot_learning.py`
+  - `selfdrive/carrot/server/features/carrot_learning.py`
+  - `selfdrive/carrot/server/features/params.py`
+  - `selfdrive/carrot/server/features/__init__.py`
+- `node --check` 通过：
+  - `selfdrive/carrot/web/js/pages/setting.js`
+  - `selfdrive/carrot/web/js/shared/api.js`
+- mock smoke 通过：
+  - 学习器一次性 apply/ignore 开关。
+  - Web 服务手动应用推荐。
+  - 行驶中拒绝应用推荐。
+
+待实车验证：
+
+- Web 设置页能显示 Auto-Tuner 推荐面板。
+- 停车状态下应用推荐能正确写入参数。
+- 行驶中应用推荐会被拒绝。

@@ -65,7 +65,7 @@
 
 第一批稳定后，再做可读的推荐值入口。
 
-状态：未开始。
+状态：已在 `personal/c3-escc-atune` 接入 Web 推荐面板和手动应用 API。实车浏览器验证未完成。
 
 目标：
 
@@ -75,7 +75,7 @@
 - 记录应用历史到 `CarrotLearningHistory`。
 - 不在行驶中弹出遮挡式交互。
 
-这一步可能需要看 `carrot_man.py`、Carrot Web 设置页面和现有弹窗机制，但不先合入整套 Web 控制台。
+当前实现不合入整套 Web 控制台，只在已有 Carrot 设置页的“自动调参”分组顶部增加一个轻量推荐面板。
 
 ## 第三批：驾驶风格画像 DSP
 
@@ -136,6 +136,8 @@
 - [ ] 开启学习后，模拟输入能写入推荐数据，但不自动改 `CruiseMaxVals*`、`TFollowGap*`、`PathOffset` 等实际控制参数。
 - [ ] `CarrotLearningAutoApply=0` 时，推荐值只进入推荐区。
 - [ ] `CarrotLearningClear` 能清空学习数据。
+- [ ] Web API 行驶中拒绝应用推荐。
+- [ ] Web 设置页能显示并手动应用推荐。
 
 上车前检查：
 

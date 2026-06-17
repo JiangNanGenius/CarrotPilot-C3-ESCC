@@ -77,6 +77,9 @@
 - [ ] 推荐值和实际控制参数分开保存。
 - [ ] 未经手动确认，不写入 `CruiseMaxVals*`、`TFollowGap*`、`PathOffset`、`SteerActuatorDelay`、`SteerRatioRate`。
 - [ ] 本地 smoke 覆盖：默认关闭不写数据，开启学习可生成推荐，推荐不会直接改控制参数。
+- [ ] Web 推荐面板能读取 `/api/carrot_learning`。
+- [ ] 手动应用推荐时，`IsOnroad=True` 会拒绝写入。
+- [ ] `CarrotLearningApply`、`CarrotLearningIgnore`、`CarrotLearningClear` 都是一触发即复位的一次性动作。
 - [ ] Auto-Tuner 改动没有夹带 Web、cluster HUD、地图、Tesla、CANFD/HDA2 等无关功能。
 - [ ] Seltos 2023、ESCC、Always Offline 的默认行为没有变化。
 

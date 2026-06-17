@@ -172,6 +172,8 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"CarrotLearningClear", {PERSISTENT, BOOL, "0"}},          // Auto-Tuner: 데이터 초기화 신호
     {"CarrotLearningHistory", {PERSISTENT, BYTES, ""}},        // Auto-Tuner: 튜닝 이력 (JSON)
     {"CarrotLearningPopupSource", {PERSISTENT, STRING, ""}},
+    {"CarrotLearningApply", {PERSISTENT, BOOL, "0"}},
+    {"CarrotLearningIgnore", {PERSISTENT, BOOL, "0"}},
     {"CarrotLearningAutoApply", {PERSISTENT, BOOL, "0"}},
     {"CarrotTunerApplyLat", {PERSISTENT, INT, "1"}},
     {"CarrotTunerApplyLong", {PERSISTENT, INT, "1"}},
