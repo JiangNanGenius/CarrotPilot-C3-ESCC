@@ -18,6 +18,7 @@
 - [机械小哥 / fishop 功能边界](JIXIE_FISHOP_BOUNDARY.md)
 - [Seltos 2023 车辆档案](VEHICLE_PROFILE_SELTOS_2023.md)
 - [车型配置说明](CAR_CONFIG_EXPLAINER.md)
+- [设备端快照采集](DEVICE_SNAPSHOT.md)
 - [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)
 - [来源和署名](SOURCES_AND_CREDITS.md)
 - [GitHub 建仓计划](GITHUB_SETUP.md)
@@ -59,6 +60,12 @@ python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-stat
 ```
 
 `stable` tag 必须先填写上车测试记录，不能只靠静态检查。
+
+在 C3 设备上采集当前参数和静态状态：
+
+```bash
+python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c3-escc-snapshot.md
+```
 
 ## GitHub Actions
 

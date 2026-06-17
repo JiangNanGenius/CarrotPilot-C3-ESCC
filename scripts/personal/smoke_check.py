@@ -316,6 +316,7 @@ def check_py_compile() -> None:
     "scripts/personal/update_audit.py",
     "scripts/personal/release_gate.py",
     "scripts/personal/settings_cn_audit.py",
+    "scripts/personal/device_snapshot.py",
     "opendbc_repo/opendbc/car/hyundai/values.py",
     "opendbc_repo/opendbc/car/hyundai/interface.py",
     "opendbc_repo/opendbc/car/hyundai/radar_interface.py",

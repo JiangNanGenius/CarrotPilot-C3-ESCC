@@ -32,6 +32,7 @@
 - [ ] 确认 fingerprint、FW 查询、SCC/ESCC 硬件接线方式。
 - [x] 确认代码改动没有覆盖原有 Seltos 2021 条目。
 - [ ] 确认当前设备上可工作的 CarrotPilot 版本和参数快照。
+- [x] 增加 C3 设备端快照脚本，用于记录安全参数、分支、tag、进程状态和可选 0x2AB / CP搭子消息计数。
 - [ ] 列出并修改 Seltos 2021/2023 相关 Hyundai 文件：
   - `opendbc_repo/opendbc/car/hyundai/values.py`
   - `opendbc_repo/opendbc/car/hyundai/interface.py`
@@ -62,6 +63,7 @@
 - [x] 做一次静态检查：所有 ESCC 路径都必须有参数开关保护。
 - [x] 做一次上车前静态 dry-run：确认无缺失 capnp、DBC、Params key。
 - [ ] 上车确认 ESCC 0x2AB、lead、AEB/FCW 和 SCC 状态真实正常。
+- [ ] 用 `device_snapshot.py --sample-seconds 20` 保存 ESCC 0x2AB 静态采样结果。
 
 ## P2.5: C3 克隆版离线模式
 
@@ -121,7 +123,7 @@
 - [x] 增加发布前 release gate，区分 static/test/stable tag。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260617-static2` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260617-static3` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。

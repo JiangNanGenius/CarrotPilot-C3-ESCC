@@ -422,3 +422,28 @@
 
 - `python3 scripts/personal/smoke_check.py` 本地通过。
 - 推送后需要确认 GitHub Actions `Personal Smoke` 通过。
+
+## 2026-06-17: C3 设备端快照采集
+
+新增文件：
+
+- `scripts/personal/device_snapshot.py`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+
+改动内容：
+
+- 增加设备端只读快照脚本，用于在 C3 上记录当前分支、commit、tag、安全参数、关键二进制参数 hash、相关进程状态。
+- 默认不采集 VIN、dongle id、token、路线 id 或完整 `/data/params`。
+- 支持 `--sample-seconds`，停车时可短时间统计 CAN 里的 ESCC `0x2AB` 和 CP搭子 / Navipilot 的 `carrotMan`、`navInstructionCarrot` 更新次数。
+- 将脚本加入 `smoke_check.py` 的 Python 语法检查。
+- 在 README、安装说明、更新检查单和上车测试模板里加入设备快照步骤。
+
+验证：
+
+- `python3 scripts/personal/device_snapshot.py` 本地可运行。
+- `python3 scripts/personal/smoke_check.py` 通过。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260617-static3`
+- 含义：包含设备端快照采集脚本，静态检查通过，不代表实车验证或稳定版本。

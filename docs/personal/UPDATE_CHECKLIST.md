@@ -7,6 +7,7 @@
 - [ ] 记录当前稳定 tag。
 - [ ] 记录当前上车分支和 commit。
 - [ ] 备份设备 `/data/params` 关键参数。
+- [ ] 运行 `python3 scripts/personal/device_snapshot.py` 采集设备端安全快照。
 - [ ] 记录当前车款识别结果：Seltos 2023 独立车型，初期复用 Seltos 2021 配置。
 - [ ] 确认车辆仍按纯 CAN 路径运行，不是 CANFD。
 - [ ] 记录 ESCC 相关参数当前值。
@@ -131,6 +132,7 @@
 - [ ] 先打 `static` 或 `test` tag，不直接装开发分支。
 - [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`，逐条处理脚本输出的 Manual checks。
 - [ ] 安装前记录当前可用版本。
+- [ ] 安装前保存设备快照文件。
 - [ ] 准备回滚 URL 或回滚分支。
 - [ ] 第一次启动只静态检查，不开车。
 - [ ] 确认无 manager crash、无循环重启、无缺失模块。

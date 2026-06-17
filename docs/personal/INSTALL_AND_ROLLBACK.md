@@ -18,7 +18,7 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260617-static2`
+- `carrotpilot-c3-escc-20260617-static3`
 - 只代表静态检查通过，不代表实车验证。
 - 目前还没有 `stable` tag。
 
@@ -41,6 +41,12 @@ python3 scripts/personal/escc_offline_preflight.py
 - 当前能正常使用的车型选择。
 - `/data/params` 中和车辆、ESCC、离线模式相关的参数。
 - 上一个稳定 tag 或可回滚安装地址。
+
+可在 C3 上运行设备快照脚本，生成不含 VIN / dongle id / token 的状态记录：
+
+```bash
+python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c3-escc-snapshot.md
+```
 
 不要把日常开发分支直接作为长期安装目标。建议只安装已经打过 tag 的测试版或稳定版。
 
@@ -81,6 +87,12 @@ Seltos 2023 初期建议：
 - `EnableEscc=0` 时，行为应接近原 Seltos 2021 可用配置。
 - `EnableEscc=1` 后，确认 CAN 中能稳定看到 ESCC 0x2AB。
 - 没有 manager crash、CAN error、SCC/AEB 故障提示。
+
+如需记录 0x2AB 和 CP搭子消息计数，可停车后运行：
+
+```bash
+python3 scripts/personal/device_snapshot.py --sample-seconds 20 --output /data/media/0/carrotpilot-c3-escc-snapshot.md
+```
 
 ## 低速验证
 

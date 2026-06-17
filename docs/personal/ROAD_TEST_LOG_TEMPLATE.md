@@ -10,6 +10,7 @@
 - 分支：
 - commit：
 - tag：
+- 设备快照文件：
 - 回滚目标：
 - 测试地点 / 路况：
 
@@ -29,6 +30,7 @@ Rollback target recorded: PENDING
 
 - [ ] 记录当前可用版本。
 - [ ] 备份 `/data/params` 关键参数。
+- [ ] 运行 `python3 scripts/personal/device_snapshot.py --output /data/media/0/carrotpilot-c3-escc-snapshot.md`。
 - [ ] 准备回滚安装地址或回滚 tag。
 - [ ] 确认 `AlwaysOffline=1`。
 - [ ] 确认 `EnableEscc=0`。
@@ -60,6 +62,7 @@ Rollback target recorded: PENDING
 
 - [ ] `EnableEscc=0` 时行为接近原 Seltos 2021 可用配置。
 - [ ] 开启 `EnableEscc=1` 后能看到 ESCC 0x2AB。
+- [ ] 使用 `device_snapshot.py --sample-seconds 20` 记录 0x2AB 计数。
 - [ ] ESCC lead / radarState 字段稳定。
 - [ ] AEB/FCW/SCC 状态无异常。
 - [ ] 刹车、油门、Cancel、人工接管均正常。
