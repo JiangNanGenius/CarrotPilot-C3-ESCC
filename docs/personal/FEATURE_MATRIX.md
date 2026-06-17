@@ -17,8 +17,8 @@
 
 | 功能 | 来源 | 优先级 | 计划 |
 | --- | --- | --- | --- |
-| Auto-Tuner / 在线调参 | `jixiexiaoge/openpilot:atune` | P1 | ESCC 稳定后迁移 |
-| 7000 Web 控制台增强 | `jixiexiaoge/openpilot:atune` / `master` | P1 | 分批迁移 |
+| Auto-Tuner / 在线调参 | `jixiexiaoge/openpilot:atune` | P1 | 已迁移核心学习器和 Web 手动确认，默认关闭 |
+| 7000 Web 控制台增强 | `jixiexiaoge/openpilot:atune` / `master` | P1 | 当前 C3 底座已有 7000 Web、录像/截屏/工具/Auto-Tuner 面板；剩余增强分批迁移 |
 | CP搭子 / Navipilot 核心协议 | `jixiexiaoge/openpilot:master` | P1 | 已做静态预检，待 APP 实测 |
 | 自动实验模式切换 | 机械小哥 | P1 | 独立开关 |
 | 模型选择切换器 | 机械小哥 | P1 | 独立开关 |
@@ -26,6 +26,14 @@
 | LED / cluster HUD | 机械小哥 | P2 | 实验功能 |
 | 驾驶报告 | 机械小哥 | P2 | 低风险，可后置 |
 | 中文翻译和参数说明优化 | 本项目维护 | P2 | 不改默认值，只改菜单显示文字 |
+
+## 当前主线已有但必须守住边界
+
+| 功能 | 当前状态 | 守卫 |
+| --- | --- | --- |
+| 7000 Web 本地控制台 | `carrot_server.py` 默认 7000 端口，已有 dashcam、screenrecord、tools、Auto-Tuner 面板 | `scripts/personal/feature_boundary_check.py` 确认入口和关键文件仍存在 |
+| cluster HUD / USB 小屏代码 | 当前代码树已有，manager 只在 `ClusterHud` 为 1 或 2 时启动 | `feature_boundary_check.py` 确认 `carrot_cluster` 仍由 `enable_cluster_hud` 控制 |
+| 机械小哥数据广播 | 当前代码树已有 `xiaoge_data`，manager 只在 `ShareData` 开启时启动 | `feature_boundary_check.py` 确认不默认常驻 |
 
 ## 单独实验分支评估
 

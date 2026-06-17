@@ -49,6 +49,21 @@ python3 scripts/personal/cplink_preflight.py
 
 这个检查证明当前代码仍保留 CP搭子核心协议接口，但不能替代手机 APP 实测。
 
+## 当前主线功能边界守卫
+
+新增静态检查：
+
+```bash
+python3 scripts/personal/feature_boundary_check.py
+```
+
+这个检查做两件事：
+
+- 确认当前 C3 底座已有的 7000 Web、dashcam/screenrecord/tools、Auto-Tuner Web 面板仍存在。
+- 确认 cluster HUD 和 `xiaoge_data` 仍由 `ClusterHud` / `ShareData` 参数控制，同时自动超车 `OVERTAKE`、fishop `amap_navi.py`、独立 `xiaoge_web.py` / `xiaoge_sentryd.py` 不会无保护进入默认主线。
+
+如果后续要迁移这些被拦截的功能，必须在同一个提交里补独立开关、文档、实车/设备验证计划，并同步更新这个脚本。
+
 ## 尚未具备或不应默认启用
 
 这些功能后续必须单独提交、单独开关、单独验证：

@@ -838,3 +838,43 @@
 
 - `python3 scripts/personal/road_test_evidence_check.py --self-test` 通过，包含 `--require-carparams-summary` 自测。
 - `python3 scripts/personal/smoke_check.py` 通过，确认快照包含 `CarParamsDecoded`。
+
+## 2026-06-18: 功能边界守卫
+
+新增文件：
+
+- `scripts/personal/feature_boundary_check.py`
+
+改动文件：
+
+- `scripts/personal/smoke_check.py`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `docs/personal/README.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `README.md`
+
+改动内容：
+
+- 新增主线功能边界静态检查，确认未验证的 `OVERTAKE`、fishop `amap_navi.py`、独立 `xiaoge_web.py` / `xiaoge_sentryd.py` 没有进入默认主线。
+- 确认当前 C3 底座已有的 7000 Web、dashcam、screenrecord、tools 和 Auto-Tuner Web 面板仍存在。
+- 确认 cluster HUD 仍由 `ClusterHud` 参数控制，`xiaoge_data` 仍由 `ShareData` 参数控制，不默认常驻。
+- 将功能边界守卫加入 `smoke_check.py` 和更新检查单。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static8`
+
+含义：
+
+- 包含功能边界守卫。
+- 静态检查通过，不代表实车验证。
+- 还没有 `stable` tag。
+
+验证：
+
+- `python3 scripts/personal/feature_boundary_check.py --no-manual` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。
