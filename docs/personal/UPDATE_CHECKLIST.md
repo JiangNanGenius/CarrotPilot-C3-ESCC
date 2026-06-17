@@ -162,6 +162,7 @@
 - [ ] 安装前保存设备证据包或设备快照文件。
 - [ ] 如有旧版本设置导出文件，安装后先运行 `python3 scripts/personal/params_migration.py import --input /data/media/0/carrotpilot-working-params.json` dry-run。
 - [ ] dry-run 输出里重点核对 `EnableEscc`、`HyundaiCameraSCC`、`EnableRadarTracks`、`AlwaysOffline`、Seltos/转向/纵控/导航调参项，再决定是否加 `--apply`。
+- [ ] 更推荐安装后先运行 `python3 scripts/personal/c3_commissioning.py --migration-input /data/media/0/carrotpilot-working-params.json --archive`，把 dry-run、静态检查、证据包和 readiness 报告放到一个目录。
 - [ ] 准备回滚 URL 或回滚分支。
 - [ ] 第一次启动只静态检查，不开车。
 - [ ] 确认无 manager crash、无循环重启、无缺失模块。

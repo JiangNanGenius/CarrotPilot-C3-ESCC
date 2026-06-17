@@ -18,12 +18,12 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260618-static14`
+- `carrotpilot-c3-escc-20260618-static15`
 - 只代表静态检查通过，不代表实车验证。
 
 当前受控上车测试 tag：
 
-- `carrotpilot-c3-escc-20260618-test6`
+- `carrotpilot-c3-escc-20260618-test7`
 - 用于停车静态检查、证据采集和低速短程验证。
 - 不作为日常稳定安装目标。
 
@@ -52,6 +52,17 @@ python3 scripts/personal/escc_offline_preflight.py
 - 上一个稳定 tag 或可回滚安装地址。
 
 如果当前设备上正在跑 fishop / 飞扬版本且状态正常，优先按 [从旧版本迁移安全参数](CONFIG_MIGRATION.md) 导出一份设置白名单。这样安装本项目版本后，可以先 dry-run 对比，再只导入 ESCC、Camera SCC、雷达、离线模式和调参相关设置。
+
+安装本项目版本后，可以先跑一次首装向导。它默认不会写参数，只会把迁移 dry-run、静态检查、设备快照、证据包和 readiness 报告放进同一个目录：
+
+```bash
+cd /data/openpilot
+python3 scripts/personal/c3_commissioning.py \
+  --migration-input /data/media/0/carrotpilot-fishop-working-params.json \
+  --archive
+```
+
+确认 `migration-import-output.txt` 没有异常后，才考虑加 `--apply-migration` 重新运行。
 
 可在 C3 上运行设备快照脚本，生成不含 VIN / dongle id / token 的状态记录：
 
@@ -85,6 +96,12 @@ python3 scripts/personal/c3_static_check.py \
 ```bash
 cd /data/openpilot
 python3 scripts/personal/collect_real_car_evidence.py --archive
+```
+
+如果是刚安装完本项目版本，更推荐先用首装向导：
+
+```bash
+python3 scripts/personal/c3_commissioning.py --archive
 ```
 
 停车并准备采样 ESCC 0x2AB 时：

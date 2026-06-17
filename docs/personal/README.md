@@ -58,6 +58,7 @@ python3 scripts/personal/road_test_evidence_check.py --self-test
 python3 scripts/personal/evidence_readiness_report.py --self-test
 python3 scripts/personal/c3_static_check.py --output /tmp/carrotpilot-c3-escc-static-check.md --snapshot-output /tmp/carrotpilot-c3-escc-snapshot.md --allow-branch --skip-preflight
 python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpilot-c3-escc-evidence --allow-branch --skip-preflight --force
+python3 scripts/personal/c3_commissioning.py --output-dir /tmp/carrotpilot-c3-escc-commissioning --allow-branch --skip-preflight --force
 ```
 
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
@@ -72,6 +73,14 @@ python3 scripts/personal/params_migration.py import --input /data/media/0/carrot
 ```
 
 第二条默认只是 dry-run，确认无误后才加 `--apply`。
+
+刚安装到 C3 后，可以用首装向导一次性跑迁移 dry-run、静态检查、设备快照、证据包和 readiness 报告：
+
+```bash
+python3 scripts/personal/c3_commissioning.py \
+  --migration-input /data/media/0/carrotpilot-fishop-working-params.json \
+  --archive
+```
 
 `seltos_profile_check.py` 专门守住 Seltos 2023 当前策略：经典 CAN、复用 Seltos 2021 harness/specs/flags、不引入 CANFD/HDA2 特判、不复制未验证 FW fingerprint。
 

@@ -1187,3 +1187,45 @@
 
 - 包含来源关系修正和从 fishop / 飞扬工作版本迁移安全设置的工具。
 - 不代表 stable，不应作为日常稳定安装目标。
+
+## 2026-06-18: C3 首次安装/迁移向导
+
+新增文件：
+
+- `scripts/personal/c3_commissioning.py`
+
+改动文件：
+
+- `scripts/personal/smoke_check.py`
+- `docs/personal/CONFIG_MIGRATION.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/TODO.md`
+- `docs/personal/README.md`
+- `README.md`
+
+改动内容：
+
+- 增加 C3 设备端首装向导，用于安装本项目版本后的第一轮停车准备。
+- 默认流程：
+  - 可选读取旧 fishop / 飞扬版本导出的安全参数 JSON。
+  - 未加 `--apply-migration` 时只做参数导入 dry-run。
+  - 调用 `collect_real_car_evidence.py` 生成 `evidence/` 证据包。
+  - 调用 `evidence_readiness_report.py` 生成 `evidence-readiness.txt`。
+  - 生成 `README.md` 和 `manifest.json`，记录迁移模式、命令、退出码、commit、tag 和证据目录。
+- 支持 `--archive` 打包整个首装向导目录，方便从 C3 拷回电脑。
+- 将首装向导 dry-run 接入 `smoke_check.py`。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static15`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test7`
+
+含义：
+
+- 包含首装/迁移/证据采集一体化设备端向导。
+- 不代表 stable，不应作为日常稳定安装目标。

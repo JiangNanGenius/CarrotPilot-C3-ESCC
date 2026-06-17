@@ -52,6 +52,17 @@ python3 scripts/personal/params_migration.py import \
 
 Seltos 2023 是纯 CAN，`CanfdHDA2` 应保持 `0`。如果 dry-run 准备把它改成 `1`，不要 apply。
 
+也可以用首装向导把 dry-run、静态检查和证据包一次跑完：
+
+```bash
+cd /data/openpilot
+python3 scripts/personal/c3_commissioning.py \
+  --migration-input /data/media/0/carrotpilot-fishop-working-params.json \
+  --archive
+```
+
+向导会生成 `migration-import-output.txt`、`evidence/` 和 `evidence-readiness.txt`。
+
 ## 确认后写入
 
 确认 dry-run 没有异常后，再写入：
@@ -68,6 +79,15 @@ python3 scripts/personal/params_migration.py import \
 python3 scripts/personal/c3_static_check.py \
   --output /data/media/0/carrotpilot-c3-escc-static-check.md \
   --snapshot-output /data/media/0/carrotpilot-c3-escc-snapshot.md
+```
+
+或者用首装向导直接做写入后检查：
+
+```bash
+python3 scripts/personal/c3_commissioning.py \
+  --migration-input /data/media/0/carrotpilot-fishop-working-params.json \
+  --apply-migration \
+  --archive
 ```
 
 ## 不会自动迁移的内容

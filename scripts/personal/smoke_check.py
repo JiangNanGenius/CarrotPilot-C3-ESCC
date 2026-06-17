@@ -321,6 +321,7 @@ def check_py_compile() -> None:
     "scripts/personal/device_snapshot.py",
     "scripts/personal/install_target_check.py",
     "scripts/personal/params_migration.py",
+    "scripts/personal/c3_commissioning.py",
     "scripts/personal/seltos_profile_check.py",
     "scripts/personal/road_test_evidence_check.py",
     "scripts/personal/evidence_readiness_report.py",
@@ -412,6 +413,45 @@ def check_real_car_evidence_dry_run() -> None:
     raise CheckFailure("real-car evidence manifest recorded a failed static check")
 
 
+def check_c3_commissioning_dry_run() -> None:
+  output_dir = Path("/tmp/carrotpilot-c3-escc-commissioning-smoke")
+  run([
+    sys.executable,
+    "scripts/personal/c3_commissioning.py",
+    "--output-dir",
+    str(output_dir),
+    "--allow-branch",
+    "--skip-preflight",
+    "--force",
+  ], "C3 commissioning dry-run")
+
+  expected_files = [
+    "README.md",
+    "manifest.json",
+    "migration-import-output.txt",
+    "evidence-collection-output.txt",
+    "evidence-readiness.txt",
+  ]
+  for name in expected_files:
+    if not (output_dir / name).exists():
+      raise CheckFailure("C3 commissioning output missing " + name)
+  for name in ["manifest.json", "static-check.md", "device-snapshot.md", "road-test-log-draft.md"]:
+    if not (output_dir / "evidence" / name).exists():
+      raise CheckFailure("C3 commissioning evidence folder missing " + name)
+
+  if "# CarrotPilot-C3-ESCC C3 Commissioning" not in (output_dir / "README.md").read_text(encoding="utf-8"):
+    raise CheckFailure("C3 commissioning README has wrong title")
+  if "SKIPPED: no --migration-input" not in (output_dir / "migration-import-output.txt").read_text(encoding="utf-8"):
+    raise CheckFailure("C3 commissioning missing migration skip output")
+  if "CarrotPilot-C3-ESCC evidence readiness report" not in (output_dir / "evidence-readiness.txt").read_text(encoding="utf-8"):
+    raise CheckFailure("C3 commissioning missing readiness output")
+  manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+  if manifest.get("migration_mode") != "skipped":
+    raise CheckFailure("C3 commissioning manifest did not record skipped migration")
+  if manifest.get("evidence_exit_code") != 0 or manifest.get("readiness_exit_code") != 0:
+    raise CheckFailure("C3 commissioning manifest recorded failed evidence/readiness step")
+
+
 def main() -> int:
   checks: List[Tuple[str, Callable[[], Any]]] = [
     ("git diff whitespace", lambda: run(["git", "diff", "--check"], "git diff --check")),
@@ -435,6 +475,7 @@ def main() -> int:
     ("Params migration self-test", lambda: run([sys.executable, "scripts/personal/params_migration.py", "self-test"], "Params migration self-test")),
     ("C3 static check dry-run", check_c3_static_dry_run),
     ("Real-car evidence bundle dry-run", check_real_car_evidence_dry_run),
+    ("C3 commissioning dry-run", check_c3_commissioning_dry_run),
     ("Auto-Tuner learner mock", check_carrot_learning_mock),
     ("Auto-Tuner service mock", check_learning_service_mock),
   ]
