@@ -28,3 +28,13 @@
 - ESCC 默认关闭，必须手动开启。
 - Always Offline 默认开启，适配 ACC/CAN 供电和无法在线注册的使用方式。
 - 机械小哥/fishop 其它功能分批迁移，每批可单独回滚。
+
+## 本地检查
+
+更新、合并或上车前先跑：
+
+```bash
+python3 scripts/personal/smoke_check.py
+```
+
+这个检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、关键 Python/JS 语法和 Auto-Tuner mock 回归。

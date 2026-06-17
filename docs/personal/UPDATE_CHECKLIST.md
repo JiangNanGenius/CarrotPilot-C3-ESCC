@@ -95,6 +95,7 @@
 
 ## 5. 构建和静态检查
 
+- [ ] 运行 `python3 scripts/personal/smoke_check.py` 并确认全部通过。
 - [ ] 检查 Python 语法。
 - [ ] 检查 JSON 配置格式。
 - [ ] 检查 capnp 是否需要重新生成。

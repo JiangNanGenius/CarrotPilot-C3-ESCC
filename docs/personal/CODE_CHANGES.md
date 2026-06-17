@@ -226,3 +226,18 @@
 - Web 设置页能显示 Auto-Tuner 推荐面板。
 - 停车状态下应用推荐能正确写入参数。
 - 行驶中应用推荐会被拒绝。
+
+## 2026-06-17: 个人版 smoke 检查脚本
+
+新增文件：
+
+- `scripts/personal/smoke_check.py`
+
+用途：
+
+- 更新、合并或上车前一键检查个人版关键保护项。
+- 覆盖 Seltos 2023 独立车型、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、Python/JS 语法和 Auto-Tuner mock 回归。
+
+验证：
+
+- `python3 scripts/personal/smoke_check.py` 通过。
