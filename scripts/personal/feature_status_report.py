@@ -89,6 +89,21 @@ def check_navipilot_param_api() -> FeatureStatus:
   )
 
 
+def check_navipilot_live_check() -> FeatureStatus:
+  condition = (
+    exists("scripts/personal/navipilot_live_check.py")
+    and contains("scripts/personal/navipilot_live_check.py", "/api/params_bulk")
+    and contains("scripts/personal/navipilot_live_check.py", "/api/param_set")
+    and contains("scripts/personal/navipilot_live_check.py", "udp_7705_required_keys_ok")
+    and contains("scripts/personal/navipilot_live_check.py", "build_test_nav_payload")
+  )
+  return present(
+    "Navipilot live endpoint check",
+    "C3-side checker can validate 7000 params, 7705 status, and optional parked 7706 test nav input",
+    condition,
+  )
+
+
 def check_auto_tuner() -> FeatureStatus:
   condition = (
     exists("selfdrive/carrot/carrot_learning.py")
@@ -194,6 +209,7 @@ def build_statuses() -> List[FeatureStatus]:
     check_web_console(),
     check_experimental_toggle(),
     check_navipilot_param_api(),
+    check_navipilot_live_check(),
     check_auto_tuner(),
     check_cplink(),
     check_cluster_hud(),

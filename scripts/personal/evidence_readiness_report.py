@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import json
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -33,6 +34,13 @@ def collect_inputs(
   evidence_dirs: Sequence[str],
 ) -> Tuple[Optional[str], List[str]]:
   return rtc.collect_evidence_inputs(road_test_log, device_snapshots, evidence_dirs)
+
+
+def collect_navipilot_inputs(
+  navipilot_live_checks: Sequence[str],
+  evidence_dirs: Sequence[str],
+) -> List[str]:
+  return rtc.collect_navipilot_inputs(navipilot_live_checks, evidence_dirs)
 
 
 def check_inputs(road_test_log: Optional[str], snapshot_paths: Sequence[str]) -> str:
@@ -91,6 +99,11 @@ def check_cplink_sample(snapshot_paths: Sequence[str]) -> str:
   return "CP搭子/Navipilot sampled navigation data present"
 
 
+def check_navipilot_live(navipilot_paths: Sequence[str]) -> str:
+  reports = rtc.validate_navipilot_live_checks(navipilot_paths, require_navipilot_live_check=True)
+  return f"C3-side Navipilot endpoint check present: {len(reports)} report(s)"
+
+
 def check_road_log(road_test_log: Optional[str]) -> str:
   if not road_test_log:
     raise rtc.EvidenceError("road-test log is missing")
@@ -117,6 +130,7 @@ def check_stable_ready(road_test_log: Optional[str], snapshot_paths: Sequence[st
 def build_results(
   road_test_log: Optional[str],
   device_snapshots: Sequence[str],
+  navipilot_live_checks: Sequence[str],
   evidence_dirs: Sequence[str],
 ) -> List[StageResult]:
   try:
@@ -126,6 +140,10 @@ def build_results(
     input_error = str(exc)
   else:
     input_error = ""
+  try:
+    navipilot_paths = collect_navipilot_inputs(navipilot_live_checks, evidence_dirs)
+  except Exception:
+    navipilot_paths = []
 
   results = [
     stage_result("evidence inputs", True, lambda: (_raise(input_error) if input_error else check_inputs(selected_log, snapshot_paths))),
@@ -135,6 +153,7 @@ def build_results(
     stage_result("completed road-test log", True, lambda: check_road_log(selected_log)),
     stage_result("stable gate readiness", True, lambda: check_stable_ready(selected_log, snapshot_paths)),
     stage_result("CP搭子/Navipilot sample", False, lambda: check_cplink_sample(snapshot_paths)),
+    stage_result("Navipilot live endpoint check", False, lambda: check_navipilot_live(navipilot_paths)),
   ]
   return results
 
@@ -214,21 +233,31 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `safetyConfigs` | hyundaiLegacy:1024 |
 | `spFlags` | 1 |
 """
+  good_navipilot = {
+    "overall_ok": True,
+    "param_bulk_ok": True,
+    "udp_7705_listen_requested": True,
+    "udp_7705_seen": True,
+    "udp_7705_required_keys_ok": True,
+  }
   with tempfile.TemporaryDirectory() as tmp:
     bundle = Path(tmp)
     (bundle / "road-test-log-draft.md").write_text(good_log, encoding="utf-8")
     (bundle / "device-snapshot.md").write_text(good_snapshot, encoding="utf-8")
+    (bundle / "navipilot-live-check.json").write_text(json.dumps(good_navipilot), encoding="utf-8")
     (bundle / "manifest.json").write_text('{"static_check_exit_code": 0}\n', encoding="utf-8")
-    results = build_results(None, [], [str(bundle)])
+    results = build_results(None, [], [], [str(bundle)])
     required_failures = [r for r in results if r.required_for_stable and not r.ok]
     if required_failures:
       raise rtc.EvidenceError("self-test failed: good bundle was not stable-ready")
+    if not any(r.name == "Navipilot live endpoint check" and r.ok for r in results):
+      raise rtc.EvidenceError("self-test failed: Navipilot endpoint check did not pass")
 
     partial = Path(tmp) / "partial"
     partial.mkdir()
     (partial / "device-snapshot.md").write_text(good_snapshot.replace("| `escc_0x2ab_bus0` | 12 |", "| `escc_0x2ab_bus0` | 0 |"), encoding="utf-8")
     (partial / "manifest.json").write_text('{"static_check_exit_code": 0}\n', encoding="utf-8")
-    partial_results = build_results(None, [], [str(partial)])
+    partial_results = build_results(None, [], [], [str(partial)])
     if not any(r.name == "stable gate readiness" and not r.ok for r in partial_results):
       raise rtc.EvidenceError("self-test failed: partial bundle looked stable-ready")
 
@@ -237,6 +266,7 @@ def main() -> int:
   parser = argparse.ArgumentParser(description="Summarize which real-car evidence stages are ready before a stable tag.")
   parser.add_argument("--road-test-log", help="completed road-test markdown log")
   parser.add_argument("--device-snapshot", action="append", default=[], help="privacy-safe snapshot generated on the C3; may be repeated")
+  parser.add_argument("--navipilot-live-check", action="append", default=[], help="JSON report from navipilot_live_check.py; may be repeated")
   parser.add_argument("--evidence-dir", action="append", default=[], help="unpacked collect_real_car_evidence.py folder; may be repeated")
   parser.add_argument("--fail-when-not-ready", action="store_true", help="exit non-zero when stable readiness is incomplete")
   parser.add_argument("--self-test", action="store_true", help="run built-in readiness checks")
@@ -247,7 +277,7 @@ def main() -> int:
     print("OK: evidence readiness report self-test passed")
     return 0
 
-  results = build_results(args.road_test_log, args.device_snapshot, args.evidence_dir)
+  results = build_results(args.road_test_log, args.device_snapshot, args.navipilot_live_check, args.evidence_dir)
   print_results(results)
   stable_ready = all(r.ok for r in results if r.required_for_stable)
   return 2 if args.fail_when_not_ready and not stable_ready else 0

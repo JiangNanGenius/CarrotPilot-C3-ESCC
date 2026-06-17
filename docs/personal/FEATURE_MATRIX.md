@@ -22,6 +22,7 @@
 | CP搭子 / Navipilot 核心协议 | `jixiexiaoge/openpilot:master` / `jixiexiaoge/navipilot:CPdazi` | P1 | 已做静态预检，待 APP 实测 |
 | 实验模式 Web 开关 | 当前 C3 底座 | P1 | 已静态确认，可在 Web 设备页操作 `ExperimentalMode` |
 | Navipilot APP 参数接口 | `jixiexiaoge/navipilot:CPdazi` / 当前 C3 Web API | P1 | 已静态确认 `/api/params_bulk`、`/api/param_set` 和 APP `CarrotParamClient` 契约 |
+| Navipilot APP 端点 live check | 本项目维护 | P1 | 已新增 C3 侧检查器，可验证 7000 参数接口、7705 状态广播和可选 7706 测试导航输入；不替代手机 APP 实测 |
 | 自动实验模式切换完整闭环 | 机械小哥 / Navipilot APP | P1 | C3 端参数接口已具备；APP 侧实测和策略闭环待验证 |
 | 模型选择切换器 | 机械小哥 / Navipilot APP | P1 | 未找到可直接迁移的安全 C3 端实现，保持高风险独立批次 |
 | 自动超车 | 机械小哥 / fishop | P2 | 后置验证 |

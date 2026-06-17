@@ -1271,3 +1271,53 @@
 
 - 包含 Navipilot APP 参数接口静态契约守卫。
 - 不代表 stable，不应作为日常稳定安装目标。
+
+## 2026-06-18: Navipilot APP 端点 live check
+
+改动文件：
+
+- `scripts/personal/navipilot_live_check.py`
+- `scripts/personal/collect_real_car_evidence.py`
+- `scripts/personal/road_test_evidence_check.py`
+- `scripts/personal/evidence_readiness_report.py`
+- `scripts/personal/feature_status_report.py`
+- `scripts/personal/smoke_check.py`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/ROAD_TEST_LOG_TEMPLATE.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/NAVIPILOT_APP_RESEARCH.md`
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/TODO.md`
+- `docs/personal/README.md`
+- `README.md`
+
+改动内容：
+
+- 新增 `navipilot_live_check.py`，用于在 C3 上检查 Navipilot APP 依赖的车机端点：
+  - 7000 `/api/params_bulk`
+  - 7000 `/api/param_set` 同值写回探针
+  - UDP 7705 状态广播及 APP 评分关键字段
+  - 可选 UDP 7706 测试导航输入
+- 7706 测试包不发送 `LANECHANGE` 或 `OVERTAKE`，仍建议只在停车状态下使用。
+- `collect_real_car_evidence.py` 新增 `--navipilot-check`、`--navipilot-param-write-probe` 和 `--navipilot-send-test-nav`，可把 `navipilot-live-check.md/json` 放入证据包。
+- `road_test_evidence_check.py` 新增 `--navipilot-live-check` 和 `--require-navipilot-live-check`，可检查证据包内 live check 是否通过。
+- `evidence_readiness_report.py` 新增可选阶段 `Navipilot live endpoint check`。
+- `feature_status_report.py` 新增 `Navipilot live endpoint check` 状态。
+- `smoke_check.py` 纳入 `navipilot_live_check.py --self-test`。
+- 文档明确：该检查只证明 C3 侧端点可用，不代表 Android APP UI、导航发送、摄像头预览或驾驶报告已经实测通过。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static17`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test9`
+
+含义：
+
+- 包含 Navipilot APP 端点 live check 和证据包校验。
+- 不代表 stable，不应作为日常稳定安装目标。

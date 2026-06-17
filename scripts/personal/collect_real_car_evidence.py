@@ -82,7 +82,7 @@ def build_road_test_draft(snapshot_name: str) -> str:
   return template
 
 
-def build_checklist(output_dir: Path, sample_seconds: int, archive_path: Optional[Path]) -> str:
+def build_checklist(output_dir: Path, sample_seconds: int, archive_path: Optional[Path], navipilot_check: bool) -> str:
   files = [
     "`static-check.md`: C3 parked static check report",
     "`device-snapshot.md`: privacy-safe device snapshot",
@@ -90,6 +90,11 @@ def build_checklist(output_dir: Path, sample_seconds: int, archive_path: Optiona
     "`manifest.json`: command, commit, tag, and file summary",
     "`static-check-output.txt`: raw output from the static check command",
   ]
+  if navipilot_check:
+    files.extend([
+      "`navipilot-live-check.md`: C3-side 7000/7705/7706 endpoint check for the Navipilot APP",
+      "`navipilot-live-check.json`: machine-readable Navipilot endpoint check result",
+    ])
   if archive_path is not None:
     files.append(f"`{archive_path.name}`: optional tar.gz copy of this evidence folder")
 
@@ -142,6 +147,9 @@ def build_checklist(output_dir: Path, sample_seconds: int, archive_path: Optiona
   lines.append("```")
   lines.append("")
   lines.append("For CP搭子 / Navipilot validation, add `--require-cplink-sample` to the same command.")
+  if navipilot_check:
+    lines.append("")
+    lines.append("For C3-side Navipilot APP endpoint validation, also add `--require-navipilot-live-check`.")
   lines.append("")
   return "\n".join(lines)
 
@@ -175,7 +183,36 @@ def build_static_command(args: argparse.Namespace, output_dir: Path) -> List[str
   return cmd
 
 
-def build_manifest(output_dir: Path, static_cmd: Sequence[str], static_code: int, archive_path: Optional[Path]) -> Dict[str, object]:
+def build_navipilot_command(args: argparse.Namespace, output_dir: Path) -> Optional[List[str]]:
+  if not args.navipilot_check:
+    return None
+  cmd = [
+    sys.executable,
+    "scripts/personal/navipilot_live_check.py",
+    "--host",
+    args.navipilot_host,
+    "--listen-seconds",
+    str(max(args.navipilot_listen_seconds, 0)),
+    "--output",
+    str(output_dir / "navipilot-live-check.md"),
+    "--json-output",
+    str(output_dir / "navipilot-live-check.json"),
+  ]
+  if args.navipilot_param_write_probe:
+    cmd.append("--param-write-probe")
+  if args.navipilot_send_test_nav:
+    cmd.append("--send-test-nav")
+  return cmd
+
+
+def build_manifest(
+  output_dir: Path,
+  static_cmd: Sequence[str],
+  static_code: int,
+  archive_path: Optional[Path],
+  navipilot_cmd: Optional[Sequence[str]],
+  navipilot_code: Optional[int],
+) -> Dict[str, object]:
   targets = read_install_targets()
   files = sorted(p.name for p in output_dir.iterdir() if p.is_file())
   if archive_path is not None:
@@ -193,6 +230,8 @@ def build_manifest(output_dir: Path, static_cmd: Sequence[str], static_code: int
     "rollback_base_ref": targets.get("rollback_base_ref"),
     "static_check_command": list(static_cmd),
     "static_check_exit_code": static_code,
+    "navipilot_live_check_command": list(navipilot_cmd) if navipilot_cmd is not None else None,
+    "navipilot_live_check_exit_code": navipilot_code,
     "files": files,
   }
 
@@ -204,6 +243,11 @@ def main() -> int:
   parser.add_argument("--target-tag", help="expected static/test tag for c3_static_check.py")
   parser.add_argument("--allow-branch", action="store_true", help="allow running from a branch instead of the target tag")
   parser.add_argument("--skip-preflight", action="store_true", help="skip repository preflight checks inside c3_static_check.py")
+  parser.add_argument("--navipilot-check", action="store_true", help="also run C3-side Navipilot APP endpoint check and store its report")
+  parser.add_argument("--navipilot-host", default="127.0.0.1", help="host for navipilot_live_check.py; use 127.0.0.1 on the C3")
+  parser.add_argument("--navipilot-listen-seconds", type=float, default=3.0, help="seconds to listen for UDP 7705 during --navipilot-check")
+  parser.add_argument("--navipilot-param-write-probe", action="store_true", help="probe /api/param_set by writing ExperimentalMode back to its current value")
+  parser.add_argument("--navipilot-send-test-nav", action="store_true", help="send parked test navigation packets to UDP 7706 during --navipilot-check")
   parser.add_argument("--archive", action="store_true", help="also create a tar.gz archive beside the evidence folder")
   parser.add_argument("--force", action="store_true", help="replace output directory when it already exists")
   args = parser.parse_args()
@@ -218,17 +262,24 @@ def main() -> int:
     static_cmd = build_static_command(args, output_dir)
     static_code, static_output = run(static_cmd)
     write_text(output_dir / "static-check-output.txt", static_output + "\n")
+
+    navipilot_cmd = build_navipilot_command(args, output_dir)
+    navipilot_code: Optional[int] = None
+    if navipilot_cmd is not None:
+      navipilot_code, navipilot_output = run(navipilot_cmd)
+      write_text(output_dir / "navipilot-live-check-output.txt", navipilot_output + "\n")
+
     write_text(output_dir / "road-test-log-draft.md", build_road_test_draft("device-snapshot.md"))
 
     archive_path: Optional[Path] = None
-    write_text(output_dir / "README.md", build_checklist(output_dir, max(args.sample_seconds, 0), archive_path))
-    manifest = build_manifest(output_dir, static_cmd, static_code, archive_path)
+    write_text(output_dir / "README.md", build_checklist(output_dir, max(args.sample_seconds, 0), archive_path, bool(navipilot_cmd)))
+    manifest = build_manifest(output_dir, static_cmd, static_code, archive_path, navipilot_cmd, navipilot_code)
     write_text(output_dir / "manifest.json", json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
 
     if args.archive:
       archive_path = make_archive(output_dir)
-      write_text(output_dir / "README.md", build_checklist(output_dir, max(args.sample_seconds, 0), archive_path))
-      manifest = build_manifest(output_dir, static_cmd, static_code, archive_path)
+      write_text(output_dir / "README.md", build_checklist(output_dir, max(args.sample_seconds, 0), archive_path, bool(navipilot_cmd)))
+      manifest = build_manifest(output_dir, static_cmd, static_code, archive_path, navipilot_cmd, navipilot_code)
       write_text(output_dir / "manifest.json", json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
 
     print(f"wrote evidence folder: {output_dir}")
@@ -237,6 +288,9 @@ def main() -> int:
     if static_code != 0:
       print("static check failed; inspect static-check.md and static-check-output.txt before driving")
       return static_code
+    if navipilot_code not in (None, 0):
+      print("Navipilot endpoint check failed; inspect navipilot-live-check.md/json before APP testing")
+      return navipilot_code
     print("OK: evidence folder collected")
     return 0
   except Exception as exc:

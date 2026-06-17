@@ -42,6 +42,18 @@ python3 scripts/personal/collect_real_car_evidence.py --archive
 python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --archive
 ```
 
+如果同时准备验证 CP搭子 / Navipilot，可在停车状态下加入 C3 侧 APP 端点检查：
+
+```bash
+python3 scripts/personal/collect_real_car_evidence.py \
+  --sample-seconds 20 \
+  --navipilot-check \
+  --navipilot-param-write-probe \
+  --archive
+```
+
+需要确认 7706 导航输入链路时，再加 `--navipilot-send-test-nav`。该测试不会发送 `LANECHANGE` 或 `OVERTAKE`。
+
 准备升 `stable` 时，把这个 markdown 文件保存到电脑本地，后续传给：
 
 ```bash
@@ -84,6 +96,7 @@ python3 scripts/personal/road_test_evidence_check.py \
 - CP搭子 APP 正在发送导航数据。
 - `--sample-seconds 20` 期间观察 `carrotMan_updates`、`navInstructionCarrot_updates` 和导航字段。
 - 需要机器检查 CP搭子实连时，可在电脑端证据检查命令里加 `--require-cplink-sample`。
+- 需要机器检查 C3 侧 APP 端点时，可运行证据包时加 `--navipilot-check`，电脑端校验时加 `--require-navipilot-live-check`。
 
 ## 快照里重点看什么
 

@@ -44,6 +44,7 @@
 - `selfdrive/carrot/carrot_man.py` 的 UDP 7705 状态广播提供 Navipilot 驾驶评分启动需要的 `IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph`、`carcruiseSpeed`、`tbt_dist`、`sdi_dist`。
 - `selfdrive/carrot/server/features/ws.py` 提供 `/ws/raw_multiplex`、`/ws/raw/{service}`、`/ws/camera/{camera}`，满足 Navipilot APP 读取车辆数据和摄像头的基础入口。
 - `selfdrive/carrot/server/features/params.py` 提供 `/api/params_bulk` 和 `/api/param_set`，满足 Navipilot APP `CarrotParamClient` 读取/切换 `ExperimentalMode` 等参数的基础入口。
+- `scripts/personal/navipilot_live_check.py` 可在 C3 上实际检查 7000 参数接口、7705 状态广播和可选 7706 测试导航输入。
 - `selfdrive/controls/lib/desire_helper.py` 已处理 CP搭子 `LANECHANGE` 命令。
 - `selfdrive/carrot/web` 和 cluster/realtime 侧已经读取 `carrotMan` / `navInstructionCarrot`，用于 Web HUD 和导航显示。
 
@@ -100,6 +101,7 @@ python3 scripts/personal/feature_boundary_check.py
 - CP搭子核心协议静态预检。
 - Navipilot APP 来源跟踪和驾驶报告边界确认。
 - Navipilot APP 参数读写接口静态守卫。
+- Navipilot APP 端点 live check 和证据包集成。
 
 ### B. 下一批，低风险
 
@@ -109,6 +111,7 @@ python3 scripts/personal/feature_boundary_check.py
   - APP 能通过 7000 端口读取/切换 `ExperimentalMode`。
   - APP 能向 7706 发送导航数据。
   - `carrotMan` 中限速、TBT、SDI、GPS 字段随导航变化。
+  - C3 上运行 `navipilot_live_check.py --param-write-probe` 通过，证据包可用 `--require-navipilot-live-check` 校验。
 - `LANECHANGE` 命令实测：
   - 只在安全变道条件下响应。
   - 不响应 `OVERTAKE`，直到单独迁移该逻辑。
@@ -162,6 +165,7 @@ CP搭子版本：
 7705 广播发现：是/否
 7706 数据接收：是/否
 7000 参数读写：是/否
+Navipilot live check：通过/失败/未测
 nRoadLimitSpeed 更新：是/否
 TBT 更新：是/否
 SDI 更新：是/否

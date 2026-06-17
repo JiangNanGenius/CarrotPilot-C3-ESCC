@@ -18,12 +18,12 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260618-static16`
+- `carrotpilot-c3-escc-20260618-static17`
 - 只代表静态检查通过，不代表实车验证。
 
 当前受控上车测试 tag：
 
-- `carrotpilot-c3-escc-20260618-test8`
+- `carrotpilot-c3-escc-20260618-test9`
 - 用于停车静态检查、证据采集和低速短程验证。
 - 不作为日常稳定安装目标。
 
@@ -110,6 +110,18 @@ python3 scripts/personal/c3_commissioning.py --archive
 python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --archive
 ```
 
+如果这次同时准备验证 CP搭子 / Navipilot，停车状态下可让证据包额外检查 C3 侧 APP 端点：
+
+```bash
+python3 scripts/personal/collect_real_car_evidence.py \
+  --sample-seconds 20 \
+  --navipilot-check \
+  --navipilot-param-write-probe \
+  --archive
+```
+
+如需同时验证 7706 导航输入链路，再加 `--navipilot-send-test-nav`。该测试包不会发送 `LANECHANGE` 或 `OVERTAKE`，但仍建议只在停车状态下使用。
+
 把证据包拷回电脑并解压后，可以直接让校验器读取整个目录：
 
 ```bash
@@ -125,6 +137,17 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-device-snapshot \
   --require-carparams-summary \
   --require-escc-sample
+```
+
+验证 CP搭子 / Navipilot 端点时，可额外要求 live check 通过：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
+  --require-device-snapshot \
+  --require-carparams-summary \
+  --require-cplink-sample \
+  --require-navipilot-live-check
 ```
 
 ## 建议参数

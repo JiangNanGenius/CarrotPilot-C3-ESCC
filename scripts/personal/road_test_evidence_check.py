@@ -50,6 +50,9 @@ EVIDENCE_SNAPSHOT_CANDIDATES = [
   "device-snapshot.md",
   "carrotpilot-c3-escc-snapshot.md",
 ]
+EVIDENCE_NAVIPILOT_CANDIDATES = [
+  "navipilot-live-check.json",
+]
 
 
 class EvidenceError(Exception):
@@ -124,6 +127,14 @@ def inspect_evidence_dir(path: str) -> Tuple[Optional[str], List[str]]:
   return str(log_path) if log_path is not None else None, snapshots
 
 
+def inspect_navipilot_evidence_dir(path: str) -> List[str]:
+  base = resolve_path(path)
+  if not base.exists() or not base.is_dir():
+    raise EvidenceError(f"evidence directory must be an unpacked folder, got: {path}")
+  nav_path = find_first_file(base, EVIDENCE_NAVIPILOT_CANDIDATES)
+  return [str(nav_path)] if nav_path is not None else []
+
+
 def collect_evidence_inputs(
   road_test_log: Optional[str],
   device_snapshots: Sequence[str],
@@ -140,6 +151,13 @@ def collect_evidence_inputs(
   selected_log = road_test_log or (bundle_logs[0] if bundle_logs else None)
   snapshots = unique_paths([*device_snapshots, *bundle_snapshots])
   return selected_log, snapshots
+
+
+def collect_navipilot_inputs(navipilot_live_checks: Sequence[str], evidence_dirs: Sequence[str]) -> List[str]:
+  bundle_navipilot: List[str] = []
+  for evidence_dir in evidence_dirs:
+    bundle_navipilot.extend(inspect_navipilot_evidence_dir(evidence_dir))
+  return unique_paths([*navipilot_live_checks, *bundle_navipilot])
 
 
 def parse_log_fields(text: str) -> Dict[str, str]:
@@ -321,6 +339,58 @@ def validate_snapshots(
   return snapshots
 
 
+def validate_navipilot_live_checks(paths: Sequence[str], require_navipilot_live_check: bool) -> List[Dict[str, object]]:
+  if require_navipilot_live_check and not paths:
+    raise EvidenceError("Navipilot evidence requires navipilot-live-check.json from the C3")
+
+  reports: List[Dict[str, object]] = []
+  for path in paths:
+    resolved = resolve_path(path)
+    if not resolved.exists():
+      raise EvidenceError(f"Navipilot live check file not found: {path}")
+    try:
+      data = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception as exc:
+      raise EvidenceError(f"{resolved}: cannot read Navipilot live check JSON: {exc}") from exc
+    if not isinstance(data, dict):
+      raise EvidenceError(f"{resolved}: Navipilot live check JSON must be an object")
+    reports.append(data)
+
+  if require_navipilot_live_check:
+    found = False
+    errors: List[str] = []
+    for data in reports:
+      overall_ok = bool_value_obj(data.get("overall_ok"))
+      param_ok = bool_value_obj(data.get("param_bulk_ok"))
+      status_requested = bool_value_obj(data.get("udp_7705_listen_requested"))
+      status_ok = not status_requested or (
+        bool_value_obj(data.get("udp_7705_seen")) and bool_value_obj(data.get("udp_7705_required_keys_ok"))
+      )
+      if overall_ok and param_ok and status_ok:
+        found = True
+        break
+      errors.append(
+        "overall_ok=%r param_bulk_ok=%r udp_7705_seen=%r udp_7705_required_keys_ok=%r"
+        % (
+          data.get("overall_ok"),
+          data.get("param_bulk_ok"),
+          data.get("udp_7705_seen"),
+          data.get("udp_7705_required_keys_ok"),
+        )
+      )
+    if not found:
+      raise EvidenceError("Navipilot live check did not pass: " + "; ".join(errors))
+  return reports
+
+
+def bool_value_obj(value: object) -> bool:
+  if isinstance(value, bool):
+    return value
+  if isinstance(value, (int, float)):
+    return value != 0
+  return str(value).strip() in TRUE_VALUES
+
+
 def self_test() -> None:
   good_log = """
 # Test
@@ -372,20 +442,32 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `safetyConfigs` | hyundaiLegacy:1024 |
 | `spFlags` | 1 |
 """
+  good_navipilot = {
+    "overall_ok": True,
+    "param_bulk_ok": True,
+    "udp_7705_listen_requested": True,
+    "udp_7705_seen": True,
+    "udp_7705_required_keys_ok": True,
+  }
   validate_log(good_log)
   validate_snapshot_text("self-test snapshot", good_snapshot)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_escc_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_cplink_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_carparams=True)
+  validate_navipilot_live_checks_from_objects([good_navipilot], require_navipilot_live_check=True)
 
   with tempfile.TemporaryDirectory() as tmp:
     bundle = Path(tmp)
     (bundle / "road-test-log-draft.md").write_text(good_log, encoding="utf-8")
     (bundle / "device-snapshot.md").write_text(good_snapshot, encoding="utf-8")
+    (bundle / "navipilot-live-check.json").write_text(json.dumps(good_navipilot), encoding="utf-8")
     (bundle / "manifest.json").write_text('{"static_check_exit_code": 0}\n', encoding="utf-8")
     bundle_log, bundle_snapshots = collect_evidence_inputs(None, [], [str(bundle)])
+    bundle_navipilot = collect_navipilot_inputs([], [str(bundle)])
     if not bundle_log or len(bundle_snapshots) != 1:
       raise EvidenceError("self-test failed: evidence bundle was not discovered")
+    if len(bundle_navipilot) != 1:
+      raise EvidenceError("self-test failed: Navipilot live check was not discovered")
     validate_log(read_text(bundle_log)[1])
     validate_snapshots(
       bundle_snapshots,
@@ -394,6 +476,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
       require_cplink_sample=True,
       require_carparams=True,
     )
+    validate_navipilot_live_checks(bundle_navipilot, require_navipilot_live_check=True)
 
   try:
     validate_log(good_log.replace("ESCC 0x2AB observed: PASS", "ESCC 0x2AB observed: PENDING"))
@@ -401,6 +484,13 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
     pass
   else:
     raise EvidenceError("self-test failed: missing PASS line was accepted")
+
+  try:
+    validate_navipilot_live_checks_from_objects([{**good_navipilot, "overall_ok": False}], require_navipilot_live_check=True)
+  except EvidenceError:
+    pass
+  else:
+    raise EvidenceError("self-test failed: bad Navipilot live check was accepted")
 
 
 def validate_snapshots_from_text(
@@ -449,14 +539,40 @@ def validate_snapshots_from_text(
   return snapshots
 
 
+def validate_navipilot_live_checks_from_objects(
+  reports: Sequence[Dict[str, object]],
+  require_navipilot_live_check: bool = False,
+) -> List[Dict[str, object]]:
+  if require_navipilot_live_check and not reports:
+    raise EvidenceError("self-test failed: missing Navipilot live check was accepted")
+  if require_navipilot_live_check:
+    for data in reports:
+      if (
+        bool_value_obj(data.get("overall_ok"))
+        and bool_value_obj(data.get("param_bulk_ok"))
+        and (
+          not bool_value_obj(data.get("udp_7705_listen_requested"))
+          or (
+            bool_value_obj(data.get("udp_7705_seen"))
+            and bool_value_obj(data.get("udp_7705_required_keys_ok"))
+          )
+        )
+      ):
+        return list(reports)
+    raise EvidenceError("self-test failed: Navipilot live check was not detected")
+  return list(reports)
+
+
 def main() -> int:
   parser = argparse.ArgumentParser(description="Validate real-car evidence before promoting a personal C3 ESCC tag.")
   parser.add_argument("--road-test-log", help="completed road-test markdown log")
   parser.add_argument("--device-snapshot", action="append", default=[], help="privacy-safe snapshot generated on the C3; may be repeated")
+  parser.add_argument("--navipilot-live-check", action="append", default=[], help="JSON report from navipilot_live_check.py; may be repeated")
   parser.add_argument("--evidence-dir", action="append", default=[], help="unpacked folder generated by collect_real_car_evidence.py; may be repeated")
   parser.add_argument("--require-device-snapshot", action="store_true", help="fail when no device snapshot is supplied")
   parser.add_argument("--require-escc-sample", action="store_true", help="require EnableEscc=1 and sampled 0x2AB bus0 count > 0")
   parser.add_argument("--require-cplink-sample", action="store_true", help="require a sampled CP搭子/Navipilot update with speed/TBT/SDI/GPS data")
+  parser.add_argument("--require-navipilot-live-check", action="store_true", help="require C3-side 7000/7705 Navipilot endpoint check to pass")
   parser.add_argument("--require-carparams-summary", action="store_true", help="require a decoded Seltos CarParams summary")
   parser.add_argument("--self-test", action="store_true", help="run built-in parser checks")
   args = parser.parse_args()
@@ -468,6 +584,7 @@ def main() -> int:
       return 0
 
     road_test_log, snapshot_paths = collect_evidence_inputs(args.road_test_log, args.device_snapshot, args.evidence_dir)
+    navipilot_paths = collect_navipilot_inputs(args.navipilot_live_check, args.evidence_dir)
     if not road_test_log:
       raise EvidenceError("--road-test-log or --evidence-dir is required unless --self-test is used")
 
@@ -480,6 +597,7 @@ def main() -> int:
       args.require_cplink_sample,
       args.require_carparams_summary,
     )
+    navipilot_reports = validate_navipilot_live_checks(navipilot_paths, args.require_navipilot_live_check)
 
     print("Road-test evidence check")
     print(f"repo: {ROOT}")
@@ -489,12 +607,15 @@ def main() -> int:
     print(f"vehicle: {fields.get('车辆')}")
     print(f"tag: {fields.get('tag')}")
     print(f"device snapshots checked: {len(snapshots)}")
+    print(f"Navipilot live checks checked: {len(navipilot_reports)}")
     if args.require_escc_sample:
       print("ESCC sample: required and present")
     if args.require_cplink_sample:
       print("CPlink sample: required and present")
     if args.require_carparams_summary:
       print("CarParams summary: required and present")
+    if args.require_navipilot_live_check:
+      print("Navipilot live endpoint check: required and present")
     print("OK: road-test evidence is sufficient for the requested gate")
     return 0
   except EvidenceError as exc:

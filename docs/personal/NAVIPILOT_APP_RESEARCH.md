@@ -59,6 +59,33 @@ APP 侧 `CarrotParamClient.kt` 当前使用 C3 的 7000 端口：
 
 注意：这不等于模型选择器已经可用。模型选择器涉及 `modeld`、模型资产、下载/校验、重启或热切换策略，必须作为高风险独立批次处理。
 
+## C3 侧 live check
+
+本项目新增设备端检查器：
+
+```bash
+python3 scripts/personal/navipilot_live_check.py --param-write-probe
+```
+
+它用于停车状态确认：
+
+- 7000 端口 `/api/params_bulk` 能读取 `ExperimentalMode`、`AlwaysOffline`、`EnableEscc` 等参数。
+- 7000 端口 `/api/param_set` 能把 `ExperimentalMode` 同值写回，证明 APP 参数写入口可用但不改变实际语义。
+- UDP 7705 能收到状态广播，并包含 APP 驾驶评分需要的关键字段。
+- 加 `--send-test-nav` 后，可向 UDP 7706 发送不含 `LANECHANGE` / `OVERTAKE` 的测试导航包。
+
+证据包可这样采集：
+
+```bash
+python3 scripts/personal/collect_real_car_evidence.py \
+  --sample-seconds 20 \
+  --navipilot-check \
+  --navipilot-param-write-probe \
+  --archive
+```
+
+这个检查只证明 C3 端点可用；Android APP 是否能发现 C3、显示画面、发送导航、生成驾驶报告仍必须用手机实测。
+
 ## 驾驶评分数据来源
 
 APP 侧 `DrivingDataCollector` 每秒更新一次，主要输入包括：
@@ -144,6 +171,7 @@ python3 scripts/personal/cplink_preflight.py
 - Android 设备和 C3 在同一 WiFi。
 - APP 能连接 C3 的 7000 端口。
 - APP 能通过 7000 端口读取并切换 `ExperimentalMode`。
+- C3 上 `navipilot_live_check.py --param-write-probe` 通过。
 - APP 能收到 C3 的 7705 状态广播，且 `IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph` 有正确值。
 - `/ws/raw_multiplex` 有 `carState`、`controlsState`、`selfdriveState`、`deviceState`、`carrotMan`、`gpsLocationExternal`。
 - `/ws/camera/road` 能显示摄像头画面。

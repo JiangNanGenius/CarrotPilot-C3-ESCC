@@ -85,6 +85,8 @@ Rollback target recorded: PENDING
 ## 6. CP搭子 / Navipilot 可选记录
 
 - [ ] Android APP 能发现 C3。
+- [ ] C3 侧 `navipilot_live_check.py` 通过 7000 参数读取。
+- [ ] 如已运行写探针，`/api/param_set` 同值写回通过。
 - [ ] 同 WiFi 7705/7706 通信正常。
 - [ ] `nRoadLimitSpeed` 更新正常。
 - [ ] TBT / SDI / GPS 更新正常。
@@ -138,7 +140,8 @@ python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
   --require-carparams-summary \
-  --require-cplink-sample
+  --require-cplink-sample \
+  --require-navipilot-live-check
 ```
 
 创建 stable tag 时也要传入同一个快照文件：

@@ -56,6 +56,7 @@ python3 scripts/personal/install_target_check.py
 python3 scripts/personal/seltos_profile_check.py
 python3 scripts/personal/road_test_evidence_check.py --self-test
 python3 scripts/personal/evidence_readiness_report.py --self-test
+python3 scripts/personal/navipilot_live_check.py --self-test
 python3 scripts/personal/c3_static_check.py --output /tmp/carrotpilot-c3-escc-static-check.md --snapshot-output /tmp/carrotpilot-c3-escc-snapshot.md --allow-branch --skip-preflight
 python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpilot-c3-escc-evidence --allow-branch --skip-preflight --force
 python3 scripts/personal/c3_commissioning.py --output-dir /tmp/carrotpilot-c3-escc-commissioning --allow-branch --skip-preflight --force
@@ -119,7 +120,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-escc-sample
 ```
 
-如果这次测 CP搭子 / Navipilot，可把 `--require-escc-sample` 换成或另加 `--require-cplink-sample`。
+如果这次测 CP搭子 / Navipilot，可把 `--require-escc-sample` 换成或另加 `--require-cplink-sample`。如果证据包里也运行了 `--navipilot-check`，再加 `--require-navipilot-live-check`。
 
 在 C3 设备上采集当前参数和静态状态：
 
