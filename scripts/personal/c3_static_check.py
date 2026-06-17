@@ -25,6 +25,7 @@ EXPECTED_PARKED_PARAMS = {
   "HyundaiCameraSCC": "0",
   "CanfdHDA2": "0",
   "EnableRadarTracks": "0",
+  "EnableAmapNaviStatus": "0",
 }
 
 

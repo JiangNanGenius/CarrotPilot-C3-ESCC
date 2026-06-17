@@ -126,6 +126,7 @@ python3 scripts/personal/road_test_evidence_check.py \
 ```
 
 如果这次测 CP搭子 / Navipilot，可把 `--require-escc-sample` 换成或另加 `--require-cplink-sample`。如果证据包里也运行了 `--navipilot-check`，再加 `--require-navipilot-live-check`。
+如果这次测只读 AmapNavi 状态桥，停车开启 `EnableAmapNaviStatus=1` 后采样，再额外加 `--require-amap-navi-sample`。
 
 在 C3 设备上采集当前参数和静态状态：
 

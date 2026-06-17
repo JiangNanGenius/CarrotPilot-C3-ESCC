@@ -42,6 +42,7 @@
 - [x] 增加一键实车证据采集脚本，用于把静态检查、设备快照、路测草稿和清单放进同一个文件夹。
 - [x] 证据检查器支持直接读取一键采集生成的证据包目录。
 - [x] 增加实车证据就绪度报告，分阶段提示设备快照、CarParams、ESCC 0x2AB、路测记录和 stable gate 缺口。
+- [x] 设备快照和证据检查器支持只读 AmapNavi 状态桥采样，可选要求 `EnableAmapNaviStatus=1` 和 `amapNavi_updates > 0`。
 - [x] 增加 Seltos 2023 车型复用检查脚本，防止更新后误改 CANFD/HDA2 或打破 2021 兼容路径。
 - [x] 列出 Seltos 2021/2023 相关 Hyundai 文件；当前只有 `values.py` 需要显式 2023 车型条目，其它文件保持通用 Hyundai/Kia CAN 路径：
   - `opendbc_repo/opendbc/car/hyundai/values.py`
@@ -129,6 +130,7 @@
 - [x] 评估转向灯板控制、雷达/激光雷达盲区、APP 控制变道、纵控平顺停车等功能。
 - [x] 增加 AmapNavi / 自动超车 / DEC 来源审计脚本，确认 fishop 和 Navipilot APP 参考源存在，同时默认 C3 主线保持隔离。
 - [x] 单独迁移只读 AmapNavi 状态兼容桥，默认关闭，只发布车道线和原车盲区状态，不接收 APP 命令。
+- [x] 给只读 AmapNavi 状态桥补设备端采样和可选证据检查，不把它作为 stable 必需项。
 - [ ] 单独迁移 fishop 完整 `amap_navi.py` 或 APP/导航增强，不能整包合并。
 - [x] 决定哪些进入主分支，哪些放到实验分支：
   - ESCC 继续保留在主分支，默认关闭。
@@ -159,8 +161,8 @@
 - [x] 增加 C3 首次安装/迁移向导，把旧配置 dry-run/import、静态检查、证据采集和 readiness 报告串成一条设备端流程。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static23` tag。
-- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test15` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static24` tag。
+- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test16` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。

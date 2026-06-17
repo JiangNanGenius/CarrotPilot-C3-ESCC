@@ -61,6 +61,7 @@ def check_device_snapshot(snapshot_paths: Sequence[str]) -> str:
     require_device_snapshot=True,
     require_escc_sample=False,
     require_cplink_sample=False,
+    require_amap_navi_sample=False,
     require_carparams=False,
   )
   return f"validated snapshots: {len(snapshots)}"
@@ -72,6 +73,7 @@ def check_carparams(snapshot_paths: Sequence[str]) -> str:
     require_device_snapshot=True,
     require_escc_sample=False,
     require_cplink_sample=False,
+    require_amap_navi_sample=False,
     require_carparams=True,
   )
   return "decoded Seltos CarParams summary present"
@@ -83,6 +85,7 @@ def check_escc_sample(snapshot_paths: Sequence[str]) -> str:
     require_device_snapshot=True,
     require_escc_sample=True,
     require_cplink_sample=False,
+    require_amap_navi_sample=False,
     require_carparams=False,
   )
   return "EnableEscc=1 sample with escc_0x2ab_bus0 > 0 present"
@@ -94,9 +97,22 @@ def check_cplink_sample(snapshot_paths: Sequence[str]) -> str:
     require_device_snapshot=True,
     require_escc_sample=False,
     require_cplink_sample=True,
+    require_amap_navi_sample=False,
     require_carparams=False,
   )
   return "CP搭子/Navipilot sampled navigation data present"
+
+
+def check_amap_navi_sample(snapshot_paths: Sequence[str]) -> str:
+  rtc.validate_snapshots(
+    snapshot_paths,
+    require_device_snapshot=True,
+    require_escc_sample=False,
+    require_cplink_sample=False,
+    require_amap_navi_sample=True,
+    require_carparams=False,
+  )
+  return "read-only AmapNavi status bridge sample present"
 
 
 def check_navipilot_live(navipilot_paths: Sequence[str]) -> str:
@@ -122,6 +138,7 @@ def check_stable_ready(road_test_log: Optional[str], snapshot_paths: Sequence[st
     require_device_snapshot=True,
     require_escc_sample=True,
     require_cplink_sample=False,
+    require_amap_navi_sample=False,
     require_carparams=True,
   )
   return "stable evidence gate requirements are satisfied"
@@ -153,6 +170,7 @@ def build_results(
     stage_result("completed road-test log", True, lambda: check_road_log(selected_log)),
     stage_result("stable gate readiness", True, lambda: check_stable_ready(selected_log, snapshot_paths)),
     stage_result("CP搭子/Navipilot sample", False, lambda: check_cplink_sample(snapshot_paths)),
+    stage_result("AmapNavi status bridge sample", False, lambda: check_amap_navi_sample(snapshot_paths)),
     stage_result("Navipilot live endpoint check", False, lambda: check_navipilot_live(navipilot_paths)),
   ]
   return results
@@ -213,18 +231,24 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `EnableEscc` | 1 |
 | `CanfdHDA2` | 0 |
 | `HyundaiCameraSCC` | 0 |
+| `EnableAmapNaviStatus` | 1 |
 | `CarParams` | 200 bytes, sha256:abc |
 | `enabled` | True |
 | `ok` | True |
 | `escc_0x2ab_bus0` | 12 |
 | `carrotMan_updates` | 4 |
 | `navInstructionCarrot_updates` | 2 |
+| `amapNavi_updates` | 3 |
 | `cplink_updates_seen` | True |
 | `cplink_speed_limit_seen` | True |
 | `cplink_sdi_seen` | False |
 | `cplink_tbt_seen` | True |
 | `cplink_gps_seen` | False |
 | `cplink_lanechange_cmd_seen` | False |
+| `amap_navi_updates_seen` | True |
+| `amap_navi_lane_seen` | True |
+| `amap_navi_left_blind_seen` | False |
+| `amap_navi_right_blind_seen` | False |
 | `CarParamsDecoded` | ok |
 | `carName` | hyundai |
 | `carFingerprint` | KIA_SELTOS_2023 |
@@ -252,6 +276,8 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
       raise rtc.EvidenceError("self-test failed: good bundle was not stable-ready")
     if not any(r.name == "Navipilot live endpoint check" and r.ok for r in results):
       raise rtc.EvidenceError("self-test failed: Navipilot endpoint check did not pass")
+    if not any(r.name == "AmapNavi status bridge sample" and r.ok for r in results):
+      raise rtc.EvidenceError("self-test failed: AmapNavi status bridge sample did not pass")
 
     partial = Path(tmp) / "partial"
     partial.mkdir()

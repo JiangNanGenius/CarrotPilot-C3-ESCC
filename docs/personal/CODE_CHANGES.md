@@ -1,5 +1,53 @@
 # 当前代码改动记录
 
+## 2026-06-18: AmapNavi 只读状态桥实机采样证据
+
+改动文件：
+
+- `scripts/personal/device_snapshot.py`
+- `scripts/personal/c3_static_check.py`
+- `scripts/personal/collect_real_car_evidence.py`
+- `scripts/personal/road_test_evidence_check.py`
+- `scripts/personal/evidence_readiness_report.py`
+- `scripts/personal/smoke_check.py`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `docs/personal/README.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `README.md`
+
+改动内容：
+
+- 设备快照新增 `EnableAmapNaviStatus` 安全参数记录。
+- `device_snapshot.py --sample-seconds` 现在同时采样 `amapNavi`，记录 `amapNavi_updates`、`amap_navi_updates_seen`、车道线/盲区是否出现和 `last_amapNavi` 摘要。
+- `c3_static_check.py` 停车默认参数检查增加 `EnableAmapNaviStatus=0`。
+- `road_test_evidence_check.py` 新增可选 `--require-amap-navi-sample`，要求停车采样里 `EnableAmapNaviStatus=1` 且 `amapNavi_updates > 0`。
+- `evidence_readiness_report.py` 新增可选阶段 `AmapNavi status bridge sample`，不作为 stable 必需项。
+- 证据包 README、设备快照文档、更新检查单和功能矩阵补充 AmapNavi 停车采样流程。
+
+刻意没有改：
+
+- 没有改变 `app_navi_status.py` 的运行逻辑。
+- 没有把 `EnableAmapNaviStatus` 默认改成开启。
+- 没有把 AmapNavi 样本变成 stable 必需项。
+- 没有引入 APP 命令、外接转向灯、自动超车或 desire helper 接入。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static24`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test16`
+
+含义：
+
+- 包含只读 AmapNavi 状态桥的设备端采样和可选证据校验，静态检查通过，不代表实车验证或稳定版本。
+
 ## 2026-06-18: 上游更新计划工具
 
 改动文件：

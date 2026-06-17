@@ -37,7 +37,7 @@
 | 功能 | 当前状态 | 守卫 |
 | --- | --- | --- |
 | 7000 Web 本地控制台 | `carrot_server.py` 默认 7000 端口，已有 dashcam、screenrecord、tools、Auto-Tuner 面板 | `scripts/personal/feature_boundary_check.py` 确认入口和关键文件仍存在 |
-| AmapNavi 只读状态桥 | `app_navi_status.py` 默认关闭，只镜像 `carState` 车道线和原车盲区到 `amapNavi` | `scripts/personal/amap_navi_status_check.py` 和 `feature_boundary_check.py` 确认不接收命令、不接外设、不进变道逻辑 |
+| AmapNavi 只读状态桥 | `app_navi_status.py` 默认关闭，只镜像 `carState` 车道线和原车盲区到 `amapNavi`；设备快照可选采样 `amapNavi_updates` | `scripts/personal/amap_navi_status_check.py` 和 `feature_boundary_check.py` 确认不接收命令、不接外设、不进变道逻辑；`road_test_evidence_check.py --require-amap-navi-sample` 可验证停车采样 |
 | cluster HUD / USB 小屏代码 | 当前代码树已有，manager 只在 `ClusterHud` 为 1 或 2 时启动 | `feature_boundary_check.py` 确认 `carrot_cluster` 仍由 `enable_cluster_hud` 控制 |
 | 机械小哥数据广播 | 当前代码树已有 `xiaoge_data`，manager 只在 `ShareData` 开启时启动 | `feature_boundary_check.py` 确认不默认常驻 |
 

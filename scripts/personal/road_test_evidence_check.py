@@ -279,6 +279,7 @@ def validate_snapshots(
   require_device_snapshot: bool,
   require_escc_sample: bool,
   require_cplink_sample: bool,
+  require_amap_navi_sample: bool,
   require_carparams: bool,
 ) -> List[Dict[str, str]]:
   if require_device_snapshot and not snapshot_paths:
@@ -323,6 +324,23 @@ def validate_snapshots(
       raise EvidenceError(
         "CPlink evidence requires a sampled snapshot with enabled=True, ok=True, "
         "CPlink updates, and at least one speed/TBT/SDI/GPS navigation field"
+      )
+
+  if require_amap_navi_sample:
+    found = False
+    for values in snapshots:
+      sample_enabled = bool_value(values, "enabled")
+      sample_ok = bool_value(values, "ok")
+      bridge_enabled = bool_value(values, "EnableAmapNaviStatus")
+      updates_seen = bool_value(values, "amap_navi_updates_seen")
+      amap_updates = int_value(values, "amapNavi_updates")
+      if sample_enabled and sample_ok and bridge_enabled and updates_seen and amap_updates > 0:
+        found = True
+        break
+    if not found:
+      raise EvidenceError(
+        "AmapNavi evidence requires a sampled snapshot with EnableAmapNaviStatus=1, "
+        "enabled=True, ok=True, and amapNavi_updates > 0"
       )
 
   if require_carparams:
@@ -422,18 +440,24 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `EnableEscc` | 1 |
 | `CanfdHDA2` | 0 |
 | `HyundaiCameraSCC` | 0 |
+| `EnableAmapNaviStatus` | 1 |
 | `CarParams` | 200 bytes, sha256:abc |
 | `enabled` | True |
 | `ok` | True |
 | `escc_0x2ab_bus0` | 12 |
 | `carrotMan_updates` | 4 |
 | `navInstructionCarrot_updates` | 2 |
+| `amapNavi_updates` | 3 |
 | `cplink_updates_seen` | True |
 | `cplink_speed_limit_seen` | True |
 | `cplink_sdi_seen` | False |
 | `cplink_tbt_seen` | True |
 | `cplink_gps_seen` | False |
 | `cplink_lanechange_cmd_seen` | False |
+| `amap_navi_updates_seen` | True |
+| `amap_navi_lane_seen` | True |
+| `amap_navi_left_blind_seen` | False |
+| `amap_navi_right_blind_seen` | False |
 | `CarParamsDecoded` | ok |
 | `carName` | hyundai |
 | `carFingerprint` | KIA_SELTOS_2023 |
@@ -453,6 +477,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
   validate_snapshot_text("self-test snapshot", good_snapshot)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_escc_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_cplink_sample=True)
+  validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_amap_navi_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_carparams=True)
   validate_navipilot_live_checks_from_objects([good_navipilot], require_navipilot_live_check=True)
 
@@ -474,6 +499,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
       require_device_snapshot=True,
       require_escc_sample=True,
       require_cplink_sample=True,
+      require_amap_navi_sample=True,
       require_carparams=True,
     )
     validate_navipilot_live_checks(bundle_navipilot, require_navipilot_live_check=True)
@@ -497,6 +523,7 @@ def validate_snapshots_from_text(
   items: Sequence[Tuple[str, str]],
   require_escc_sample: bool = False,
   require_cplink_sample: bool = False,
+  require_amap_navi_sample: bool = False,
   require_carparams: bool = False,
 ) -> List[Dict[str, str]]:
   snapshots = [validate_snapshot_text(name, text) for name, text in items]
@@ -525,6 +552,20 @@ def validate_snapshots_from_text(
         break
     if not found:
       raise EvidenceError("self-test failed: CPlink sample was not detected")
+  if require_amap_navi_sample:
+    found = False
+    for values in snapshots:
+      if (
+        bool_value(values, "enabled")
+        and bool_value(values, "ok")
+        and bool_value(values, "EnableAmapNaviStatus")
+        and bool_value(values, "amap_navi_updates_seen")
+        and int_value(values, "amapNavi_updates") > 0
+      ):
+        found = True
+        break
+    if not found:
+      raise EvidenceError("self-test failed: AmapNavi sample was not detected")
   if require_carparams:
     found = False
     for values in snapshots:
@@ -572,6 +613,7 @@ def main() -> int:
   parser.add_argument("--require-device-snapshot", action="store_true", help="fail when no device snapshot is supplied")
   parser.add_argument("--require-escc-sample", action="store_true", help="require EnableEscc=1 and sampled 0x2AB bus0 count > 0")
   parser.add_argument("--require-cplink-sample", action="store_true", help="require a sampled CP搭子/Navipilot update with speed/TBT/SDI/GPS data")
+  parser.add_argument("--require-amap-navi-sample", action="store_true", help="require a sampled read-only AmapNavi status bridge update")
   parser.add_argument("--require-navipilot-live-check", action="store_true", help="require C3-side 7000/7705 Navipilot endpoint check to pass")
   parser.add_argument("--require-carparams-summary", action="store_true", help="require a decoded Seltos CarParams summary")
   parser.add_argument("--self-test", action="store_true", help="run built-in parser checks")
@@ -595,6 +637,7 @@ def main() -> int:
       args.require_device_snapshot,
       args.require_escc_sample,
       args.require_cplink_sample,
+      args.require_amap_navi_sample,
       args.require_carparams_summary,
     )
     navipilot_reports = validate_navipilot_live_checks(navipilot_paths, args.require_navipilot_live_check)
@@ -612,6 +655,8 @@ def main() -> int:
       print("ESCC sample: required and present")
     if args.require_cplink_sample:
       print("CPlink sample: required and present")
+    if args.require_amap_navi_sample:
+      print("AmapNavi sample: required and present")
     if args.require_carparams_summary:
       print("CarParams summary: required and present")
     if args.require_navipilot_live_check:

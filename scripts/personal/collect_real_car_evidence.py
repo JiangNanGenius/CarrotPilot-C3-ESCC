@@ -113,6 +113,7 @@ def build_checklist(output_dir: Path, sample_seconds: int, archive_path: Optiona
   lines.append("- Keep `EnableEscc=0` for the first static and low-risk checks.")
   lines.append("- Only enable `EnableEscc=1` while parked and ready to observe ESCC 0x2AB.")
   lines.append("- For a stable tag, rerun collection with `--sample-seconds 20` after ESCC is enabled and visible.")
+  lines.append("- For read-only AmapNavi status bridge validation, enable `EnableAmapNaviStatus=1` while parked and collect with `--sample-seconds 20`.")
   lines.append("- Fill `road-test-log-draft.md` only after the matching test has really passed.")
   lines.append("- Do not publicly share manually added VIN, dongle id, tokens, WiFi secrets, or route data.")
   lines.append("")
@@ -147,6 +148,7 @@ def build_checklist(output_dir: Path, sample_seconds: int, archive_path: Optiona
   lines.append("```")
   lines.append("")
   lines.append("For CP搭子 / Navipilot validation, add `--require-cplink-sample` to the same command.")
+  lines.append("For read-only AmapNavi status bridge validation, add `--require-amap-navi-sample`.")
   if navipilot_check:
     lines.append("")
     lines.append("For C3-side Navipilot APP endpoint validation, also add `--require-navipilot-live-check`.")

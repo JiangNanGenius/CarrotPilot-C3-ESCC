@@ -105,7 +105,7 @@ python3 scripts/personal/app_navi_overtake_audit.py
 - Navipilot APP 参数读写接口静态守卫。
 - Navipilot APP 端点 live check 和证据包集成。
 - Model selector 参考线跟踪和源码审计。
-- AmapNavi 只读状态桥：默认关闭，只把 `carState` 车道线和原车盲区状态发布为 `amapNavi`，不接收 APP 命令、不控制外接转向灯、不启用自动超车。
+- AmapNavi 只读状态桥：默认关闭，只把 `carState` 车道线和原车盲区状态发布为 `amapNavi`，不接收 APP 命令、不控制外接转向灯、不启用自动超车；设备快照和证据检查器已支持可选采样。
 
 ### B. 下一批，低风险
 
@@ -133,6 +133,8 @@ python3 scripts/personal/app_navi_overtake_audit.py
   - 7000 Web 只是设备端控制台，不等于手机导航桥。
 - AmapNavi 只读状态桥实测：
   - 停车状态开启 `EnableAmapNaviStatus=1`。
+  - 用 `collect_real_car_evidence.py --sample-seconds 20 --archive` 采集。
+  - 电脑端运行 `road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-amap-navi-sample`。
   - 确认 `amapNavi` 服务发布车道线和原车盲区状态。
   - 确认 `carrotCmd`、`OVERTAKE`、外接转向灯和变道逻辑没有被触发。
 

@@ -133,6 +133,7 @@
 
 - [ ] 运行 `python3 scripts/personal/app_navi_overtake_audit.py`。
 - [ ] 运行 `python3 scripts/personal/amap_navi_status_check.py`。
+- [ ] 如果验证只读 AmapNavi 状态桥，停车开启 `EnableAmapNaviStatus=1`，采样 `python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --archive`，回电脑后加 `--require-amap-navi-sample` 校验。
 - [ ] `fishop/cp` 仍包含 `selfdrive/carrot/amap_navi.py`、`amapNavi` schema/service、外接转向灯、lidar 盲区、`OVERTAKE` 和 DEC/longcontrol 参考源。
 - [ ] `tracking/jixie-navipilot` 仍包含 `AutoOvertakeManager.kt`、7705/7706 网络通道和 `LANECHANGE` 命令出口。
 - [ ] 默认 C3 主线允许只读 `amapNavi` 状态桥，但仍没有 fishop 完整 `amap_navi.py`、外接转向灯参数、`OVERTAKE`、lidar 盲区参数或 DEC 接入点。
@@ -165,6 +166,7 @@
 - [ ] 运行 `python3 scripts/personal/model_selector_audit.py` 并确认模型选择器参考线和默认主线边界正常。
 - [ ] 运行 `python3 scripts/personal/amap_navi_status_check.py` 并确认只读 AmapNavi 状态桥仍默认关闭且不接入控制链路。
 - [ ] 运行 `python3 scripts/personal/app_navi_overtake_audit.py` 并确认 AmapNavi / 自动超车 / DEC 来源参考和默认主线边界正常。
+- [ ] 运行 `python3 scripts/personal/road_test_evidence_check.py --self-test` 并确认 AmapNavi 可选采样门槛仍被覆盖。
 - [ ] 运行 `python3 scripts/personal/evidence_readiness_report.py --self-test` 并确认证据就绪度报告正常。
 - [ ] 检查 Python 语法。
 - [ ] 检查 JSON 配置格式。
@@ -197,6 +199,7 @@
 - [ ] 如测试 CP搭子，确认 Android APP 能发现 C3 并发送导航数据。
 - [ ] 如测试 Navipilot 驾驶报告，确认 APP 端先收到 7705 的 `IsOnroad=True` 和车速字段，再在 onroad 后开始采集，并在停车后生成评分。
 - [ ] 如测试 CP搭子，运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-cplink-sample --require-navipilot-live-check`。
+- [ ] 如测试只读 AmapNavi 状态桥，停车开启 `EnableAmapNaviStatus=1` 后采样，并运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-amap-navi-sample`。
 - [ ] 如证据包还没满足 stable，先看 `evidence_readiness_report.py` 输出的缺口，不要直接打 stable tag。
 
 ## 7. 路测分级

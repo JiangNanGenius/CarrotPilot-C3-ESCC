@@ -24,6 +24,7 @@ SAFE_PARAM_KEYS = [
   "CanfdHDA2",
   "EnableRadarTracks",
   "EnableRadarTracksResult",
+  "EnableAmapNaviStatus",
   "RadarLatFactor",
   "EnableCornerRadar",
   "CarrotLearningActive",
@@ -287,6 +288,30 @@ def update_nav_instruction_diagnostics(result: Dict[str, object], nav_msg: objec
   }
 
 
+def update_amap_navi_diagnostics(result: Dict[str, object], amap_msg: object) -> None:
+  left_blind = safe_int(safe_attr(amap_msg, "leftBlind"))
+  right_blind = safe_int(safe_attr(amap_msg, "rightBlind"))
+  line_valid = bool(safe_attr(amap_msg, "lineValid", False))
+  left_line = safe_int(safe_attr(amap_msg, "leftLine"), -1)
+  right_line = safe_int(safe_attr(amap_msg, "rightLine"), -1)
+
+  result["amap_navi_updates_seen"] = True
+  if line_valid or left_line >= 0 or right_line >= 0:
+    result["amap_navi_lane_seen"] = True
+  if left_blind != 0:
+    result["amap_navi_left_blind_seen"] = True
+  if right_blind != 0:
+    result["amap_navi_right_blind_seen"] = True
+
+  result["last_amapNavi"] = {
+    "leftBlind": left_blind,
+    "rightBlind": right_blind,
+    "lineValid": line_valid,
+    "leftLine": left_line,
+    "rightLine": right_line,
+  }
+
+
 def sample_messaging(seconds: int) -> Dict[str, object]:
   result: Dict[str, object] = {
     "enabled": seconds > 0,
@@ -298,14 +323,20 @@ def sample_messaging(seconds: int) -> Dict[str, object]:
     "escc_0x2ab_all_buses": 0,
     "carrotMan_updates": 0,
     "navInstructionCarrot_updates": 0,
+    "amapNavi_updates": 0,
     "cplink_updates_seen": False,
     "cplink_speed_limit_seen": False,
     "cplink_sdi_seen": False,
     "cplink_tbt_seen": False,
     "cplink_gps_seen": False,
     "cplink_lanechange_cmd_seen": False,
+    "amap_navi_updates_seen": False,
+    "amap_navi_lane_seen": False,
+    "amap_navi_left_blind_seen": False,
+    "amap_navi_right_blind_seen": False,
     "last_carrotMan": {},
     "last_navInstructionCarrot": {},
+    "last_amapNavi": {},
   }
   if seconds <= 0:
     return result
@@ -317,7 +348,7 @@ def sample_messaging(seconds: int) -> Dict[str, object]:
     return result
 
   try:
-    sm = messaging.SubMaster(["can", "carrotMan", "navInstructionCarrot"])
+    sm = messaging.SubMaster(["can", "carrotMan", "navInstructionCarrot", "amapNavi"])
     deadline = time.monotonic() + seconds
     while time.monotonic() < deadline:
       sm.update(100)
@@ -334,6 +365,9 @@ def sample_messaging(seconds: int) -> Dict[str, object]:
       if sm.updated.get("navInstructionCarrot", False):
         result["navInstructionCarrot_updates"] = int(result["navInstructionCarrot_updates"]) + 1
         update_nav_instruction_diagnostics(result, sm["navInstructionCarrot"])
+      if sm.updated.get("amapNavi", False):
+        result["amapNavi_updates"] = int(result["amapNavi_updates"]) + 1
+        update_amap_navi_diagnostics(result, sm["amapNavi"])
     result["ok"] = True
   except Exception as exc:
     result["error"] = str(exc)

@@ -1,6 +1,6 @@
 # 设备端快照采集
 
-这个快照用于上车前后把 C3 设备上的关键状态记录下来，方便判断 ESCC、离线模式、车型路径和 CP搭子协议是否正常。
+这个快照用于上车前后把 C3 设备上的关键状态记录下来，方便判断 ESCC、离线模式、车型路径、CP搭子协议和只读 AmapNavi 状态桥是否正常。
 
 脚本默认不采集 VIN、dongle id、token、路线 id，也不读取完整 `CarParams` 内容，只记录安全参数和二进制参数的大小/hash。
 
@@ -54,6 +54,14 @@ python3 scripts/personal/collect_real_car_evidence.py \
 
 需要确认 7706 导航输入链路时，再加 `--navipilot-send-test-nav`。该测试不会发送 `LANECHANGE` 或 `OVERTAKE`。
 
+如果要验证只读 AmapNavi 状态桥，停车状态下先开启 `EnableAmapNaviStatus=1`，再采样：
+
+```bash
+python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --archive
+```
+
+拷回电脑后，证据校验命令额外加 `--require-amap-navi-sample`。
+
 准备升 `stable` 时，把这个 markdown 文件保存到电脑本地，后续传给：
 
 ```bash
@@ -98,6 +106,13 @@ python3 scripts/personal/road_test_evidence_check.py \
 - 需要机器检查 CP搭子实连时，可在电脑端证据检查命令里加 `--require-cplink-sample`。
 - 需要机器检查 C3 侧 APP 端点时，可运行证据包时加 `--navipilot-check`，电脑端校验时加 `--require-navipilot-live-check`。
 
+如果测试只读 AmapNavi 状态桥，再额外采一次：
+
+- 停车状态。
+- 手动开启 `EnableAmapNaviStatus=1`。
+- `--sample-seconds 20` 期间观察 `amapNavi_updates` 和 `last_amapNavi`。
+- 需要机器检查时，可在电脑端证据检查命令里加 `--require-amap-navi-sample`。
+
 ## 快照里重点看什么
 
 - `branch` / `commit` / `tags`：确认安装的是预期 tag 或分支。
@@ -111,13 +126,19 @@ python3 scripts/personal/road_test_evidence_check.py \
 - `DisableUpdates`、`EnableConnect`：离线模式下应符合预期。
 - `escc_0x2ab_bus0`：开启 ESCC 后用于确认 0x2AB 是否真的出现在 bus 0。
 - `carrotMan_updates` / `navInstructionCarrot_updates`：用于确认 CP搭子 / Navipilot 数据是否进入系统。
+- `EnableAmapNaviStatus`：只读 AmapNavi 状态桥开关，默认应为 `0`。
 - `cplink_updates_seen`：采样期间是否收到 CP搭子 / Navipilot 消息。
 - `cplink_speed_limit_seen`：是否看到限速字段。
 - `cplink_sdi_seen`：是否看到摄像头 / 限速提醒字段。
 - `cplink_tbt_seen`：是否看到转向 / 诱导字段。
 - `cplink_gps_seen`：是否看到 GPS 字段。快照只记录是否出现，不记录坐标。
 - `cplink_lanechange_cmd_seen`：是否看到 `LANECHANGE` 命令。
+- `amapNavi_updates`：采样期间是否收到只读 AmapNavi 状态桥消息。
+- `amap_navi_updates_seen`：是否至少收到一次 AmapNavi 状态。
+- `amap_navi_lane_seen`：是否看到车道线状态。
+- `amap_navi_left_blind_seen` / `amap_navi_right_blind_seen`：是否看到原车盲区状态为触发。
 - `last_carrotMan` / `last_navInstructionCarrot`：最后一帧非敏感字段摘要，不包含 GPS 坐标、路线点或街道名。
+- `last_amapNavi`：最后一帧只读 AmapNavi 状态摘要，只含左右盲区和车道线状态，不含 APP 命令。
 
 `stable` 发布要求至少有一个快照满足：
 
