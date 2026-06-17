@@ -1095,3 +1095,46 @@
 - 包含 Navipilot APP 来源跟踪和 TBT 下一路口字段修复。
 - 静态检查通过后才可用于停车检查或低速受控测试。
 - 不代表 stable，不应作为日常稳定安装目标。
+
+## 2026-06-18: Navipilot 驾驶报告实测前守卫补强
+
+改动文件：
+
+- `scripts/personal/cplink_preflight.py`
+- `scripts/personal/feature_status_report.py`
+- `docs/personal/NAVIPILOT_APP_RESEARCH.md`
+- `docs/personal/JIXIE_FISHOP_BOUNDARY.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/TODO.md`
+- `README.md`
+
+改动内容：
+
+- `cplink_preflight.py` 新增 UDP 7705 状态广播字段检查：
+  - `IsOnroad`
+  - `active`
+  - `v_ego_kph`
+  - `v_cruise_kph`
+  - `carcruiseSpeed`
+  - `tbt_dist`
+  - `sdi_dist`
+  - `xState`
+  - `trafficState`
+- `cplink_preflight.py` 新增对 `tracking/jixie-navipilot` APP 源码的契约检查，确认 APP 仍使用 `/ws/raw_multiplex`、`/ws/camera/road`、7705 状态字段和 `startOnroadMonitoring()`。
+- 文档明确当前 Navipilot APP 的 raw `carrotMan` 解码仍不完整，驾驶评分启动应优先核对 7705 状态广播，而不是只看 WebSocket 是否连接。
+- 功能状态报告把 Navipilot 驾驶报告支持条件扩展为 7705 状态广播 + WebSocket raw/camera。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static13`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test5`
+
+含义：
+
+- 包含 Navipilot 驾驶报告实测前的 7705 状态广播守卫。
+- 不代表 stable，不应作为日常稳定安装目标。

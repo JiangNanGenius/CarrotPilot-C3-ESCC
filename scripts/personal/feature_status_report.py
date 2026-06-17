@@ -120,19 +120,22 @@ def check_driving_report() -> FeatureStatus:
     and contains("selfdrive/carrot/server/features/ws.py", '"/ws/camera/{camera}"')
     and contains("selfdrive/carrot/server/live_runtime/services.py", '"carrotMan"')
     and contains("selfdrive/carrot/server/live_runtime/services.py", '"gpsLocationExternal"')
+    and contains("selfdrive/carrot/carrot_man.py", "'IsOnroad'")
+    and contains("selfdrive/carrot/carrot_man.py", "'v_ego_kph'")
+    and contains("selfdrive/carrot/carrot_man.py", "'v_cruise_kph'")
   )
   if condition:
     return FeatureStatus(
       "Navipilot app driving report support",
       "READY_STATIC",
-      "driving score/report lives in the Android app; C3 exposes WebSocket raw/camera and carrotMan data",
+      "driving score/report lives in the Android app; C3 exposes 7705 status plus WebSocket raw/camera data",
       required=True,
       ok=True,
     )
   return FeatureStatus(
     "Navipilot app driving report support",
     "MISSING",
-    "Android app scoring needs /ws/raw_multiplex, /ws/camera/road, carrotMan, and gpsLocationExternal",
+    "Android app scoring needs 7705 IsOnroad/speed status plus /ws/raw_multiplex and /ws/camera/road",
     required=True,
     ok=False,
   )

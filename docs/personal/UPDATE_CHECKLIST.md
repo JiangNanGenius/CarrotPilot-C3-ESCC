@@ -100,6 +100,7 @@
 - [ ] 运行 `python3 scripts/personal/cplink_preflight.py`。
 - [ ] `carrotMan` 和 `navInstructionCarrot` 服务仍存在。
 - [ ] 7705 广播和 7706 接收逻辑仍存在。
+- [ ] 7705 广播仍包含 Navipilot APP 驾驶评分需要的 `IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph`、`carcruiseSpeed`、`tbt_dist`、`sdi_dist`。
 - [ ] 7000 WebSocket `/ws/raw_multiplex` 和 `/ws/camera/road` 仍存在，满足 Navipilot APP 车辆数据和摄像头预览。
 - [ ] `nRoadLimitSpeed`、TBT、SDI、GPS 字段仍被解析。
 - [ ] `szTBTMainTextNext` 仍从 APP 的 `szTBTMainTextNext` 键读取，不退回误读 `szTBTMainText`。
@@ -165,7 +166,7 @@
 - [ ] 确认 ESCC 参数默认状态符合预期。
 - [ ] 确认离线模式开启时不会卡注册，也不会尝试联网更新。
 - [ ] 如测试 CP搭子，确认 Android APP 能发现 C3 并发送导航数据。
-- [ ] 如测试 Navipilot 驾驶报告，确认 APP 端能在 onroad 后开始采集，并在停车后生成评分。
+- [ ] 如测试 Navipilot 驾驶报告，确认 APP 端先收到 7705 的 `IsOnroad=True` 和车速字段，再在 onroad 后开始采集，并在停车后生成评分。
 - [ ] 如测试 CP搭子，运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-cplink-sample`。
 - [ ] 如证据包还没满足 stable，先看 `evidence_readiness_report.py` 输出的缺口，不要直接打 stable tag。
 

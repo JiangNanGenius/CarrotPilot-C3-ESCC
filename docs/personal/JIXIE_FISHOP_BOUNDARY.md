@@ -41,6 +41,7 @@
   - GPS：`vpPosPointLat`, `vpPosPointLon`, `latitude`, `longitude`
   - 命令：`carrotCmd`, `carrotArg`
 - 已修复 APP 字段兼容：`szTBTMainTextNext` 现在读取 APP 的 `szTBTMainTextNext` 键。
+- `selfdrive/carrot/carrot_man.py` 的 UDP 7705 状态广播提供 Navipilot 驾驶评分启动需要的 `IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph`、`carcruiseSpeed`、`tbt_dist`、`sdi_dist`。
 - `selfdrive/carrot/server/features/ws.py` 提供 `/ws/raw_multiplex`、`/ws/raw/{service}`、`/ws/camera/{camera}`，满足 Navipilot APP 读取车辆数据和摄像头的基础入口。
 - `selfdrive/controls/lib/desire_helper.py` 已处理 CP搭子 `LANECHANGE` 命令。
 - `selfdrive/carrot/web` 和 cluster/realtime 侧已经读取 `carrotMan` / `navInstructionCarrot`，用于 Web HUD 和导航显示。
@@ -84,7 +85,7 @@ python3 scripts/personal/feature_boundary_check.py
 
 其中 `jixie/master:xiaoge_web.py` 是独立 Flask Web 服务，含固定 secret key 和外部 CDN 页面资源，只能作为隔离实验参考，不能直接进默认车机主线。
 
-驾驶报告目前按 APP 侧功能处理：C3 端负责提供 `carrotMan`、raw multiplex、摄像头和导航字段；评分计算、报告 UI 和历史记录留在 `jixiexiaoge/navipilot` Android APP 里。
+驾驶报告目前按 APP 侧功能处理：C3 端负责提供 7705 状态广播、`carrotMan`、raw multiplex、摄像头和导航字段；评分计算、报告 UI 和历史记录留在 `jixiexiaoge/navipilot` Android APP 里。当前 APP 的 raw `carrotMan` 解码仍不完整，所以驾驶评分启动要优先看 7705 状态广播是否进入 APP。
 
 ## 推荐迁移顺序
 
@@ -113,6 +114,7 @@ python3 scripts/personal/feature_boundary_check.py
   - 电脑端运行 `road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-cplink-sample`。
   - 快照只记录导航字段是否出现，不记录 GPS 坐标、路线点或街道名。
 - Navipilot APP 驾驶报告实测：
+  - APP 能收到 7705 中的 `IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph`。
   - onroad 后 APP 开始采集。
   - 停车后 APP 保存一次驾驶报告。
   - C3 侧不新增本地驾驶报告网页，除非以后明确要做独立设备端报告。

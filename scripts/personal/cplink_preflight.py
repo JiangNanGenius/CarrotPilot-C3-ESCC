@@ -120,6 +120,29 @@ def check_carrotman_runtime(report: Report) -> None:
   report.contains("manager runs carrot_server", "system/manager/process_config.py", 'PythonProcess("carrot_server"')
 
 
+def check_status_broadcast(report: Report) -> None:
+  report.contains("CarrotMan broadcasts discovery/status on 7705", "selfdrive/carrot/carrot_man.py", "self.broadcast_port = 7705")
+  report.contains("CarrotMan status message builder exists", "selfdrive/carrot/carrot_man.py", "def make_send_message")
+  for key in [
+    "Carrot2",
+    "IsOnroad",
+    "CarrotRouteActive",
+    "ip",
+    "port",
+    "navi_http_port",
+    "log_carrot",
+    "v_cruise_kph",
+    "carcruiseSpeed",
+    "v_ego_kph",
+    "tbt_dist",
+    "sdi_dist",
+    "active",
+    "xState",
+    "trafficState",
+  ]:
+    report.contains(f"7705 status key for Navipilot app: {key}", "selfdrive/carrot/carrot_man.py", f"'{key}'")
+
+
 def check_cplink_payload(report: Report) -> None:
   for key in [
     "carrotIndex",
@@ -183,6 +206,61 @@ def check_navipilot_websocket(report: Report) -> None:
     report.contains(f"Navipilot default WS service allowed: {service}", "selfdrive/carrot/server/live_runtime/services.py", f'"{service}"')
 
 
+def check_navipilot_app_source_contract(report: Report) -> None:
+  if not ref_exists("tracking/jixie-navipilot"):
+    report.warn("Navipilot app source contract not checked", "tracking/jixie-navipilot is not available")
+    return
+
+  files = {
+    "app/src/main/java/com/example/navipilot/data/CarrotWsClient.kt": [
+      'private const val WS_RAW_PATH = "/ws/raw_multiplex"',
+      'private const val WS_CAMERA_PATH = "/ws/camera/road"',
+      "object MultiplexFrame",
+      "readUnsignedByte()",
+      "object CameraWsFrame",
+      "dis.readInt()",
+      '"carState"',
+      '"modelV2"',
+      '"controlsState"',
+      '"selfdriveState"',
+      '"deviceState"',
+      '"carrotMan"',
+      '"gpsLocationExternal"',
+    ],
+    "app/src/main/java/com/example/navipilot/NetworkManager.kt": [
+      'optBoolean("IsOnroad", false)',
+      'optDouble("v_cruise_kph", 0.0)',
+      'optDouble("carcruiseSpeed", 0.0)',
+      'optInt("v_ego_kph", 0)',
+      'optInt("tbt_dist", 0)',
+      'optInt("sdi_dist", 0)',
+      'optBoolean("active", false)',
+      'optInt("xState", 0)',
+      'optInt("trafficState", 0)',
+      "setOnDeviceIPUpdated",
+    ],
+    "app/src/main/java/com/example/navipilot/MainActivityLifecycle.kt": [
+      "startOnroadMonitoring",
+      "shouldCollect = isConnected && isOnroad",
+      "drivingDataCollector?.startCollecting()",
+      "drivingDataCollector?.stopCollecting()",
+      "drivingDataCollector?.updateData(",
+    ],
+  }
+
+  for relpath, needles in files.items():
+    code, text = git(["show", f"tracking/jixie-navipilot:{relpath}"])
+    if code != 0:
+      report.warn(f"Navipilot app source missing: {relpath}", "update tracking/jixie-navipilot before reviewing app compatibility")
+      continue
+    for needle in needles:
+      report.require(f"Navipilot app expects: {needle}", needle in text, f"missing {needle!r} in tracking/jixie-navipilot:{relpath}")
+
+  code, text = git(["show", "tracking/jixie-navipilot:app/src/main/java/com/example/navipilot/data/CarrotWsClient.kt"])
+  if code == 0 and "private fun decodeCarrotMan" in text and "return null" in text:
+    report.warn("Navipilot app carrotMan raw decoder is incomplete", "7705 status broadcast remains the reliable source for onroad/active/speed in the current app")
+
+
 def check_controls_consumers(report: Report) -> None:
   report.contains("controlsd subscribes carrotMan", "selfdrive/controls/controlsd.py", "'carrotMan'")
   report.contains("plannerd subscribes carrotMan", "selfdrive/controls/plannerd.py", "'carrotMan'")
@@ -195,8 +273,10 @@ def check_controls_consumers(report: Report) -> None:
 def manual_items() -> List[str]:
   return [
     "Install CP搭子 on Android and confirm the phone and C3 are on the same WiFi.",
-    "Confirm CP搭子 discovers the C3 broadcast on UDP 7705 and sends data to UDP 7706.",
+    "Confirm CP搭子 discovers the C3 broadcast on UDP 7705 and receives IsOnroad, active, v_ego_kph, and v_cruise_kph.",
+    "Confirm CP搭子 sends navigation data to UDP 7706.",
     "During navigation, confirm nRoadLimitSpeed, TBT, SDI, and GPS fields change in carrotMan.",
+    "For Navipilot driving report, confirm the Android app starts collection only after connected + IsOnroad and saves a score after stopping.",
     "Send a LANECHANGE command from the app and confirm the command is accepted only under safe lane-change conditions.",
     "Do not treat OVERTAKE, external blinker control, AmapNavi device service, or sentry mode as integrated until they get separate guarded commits.",
   ]
@@ -230,8 +310,10 @@ def main() -> int:
   check_tracking_refs(report)
   check_cereal_protocol(report)
   check_carrotman_runtime(report)
+  check_status_broadcast(report)
   check_cplink_payload(report)
   check_navipilot_websocket(report)
+  check_navipilot_app_source_contract(report)
   check_controls_consumers(report)
 
   print_report(report, show_manual=not args.no_manual)

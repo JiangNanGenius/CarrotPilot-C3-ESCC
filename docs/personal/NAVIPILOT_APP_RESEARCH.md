@@ -21,7 +21,7 @@
 本项目主线应做的是：
 
 - 保持 C3 端 `carrotMan` / `navInstructionCarrot` 数据完整。
-- 保持 UDP 7705/7706、TCP 7709 路线、HTTP 7000 参数接口兼容。
+- 保持 UDP 7705 状态广播、UDP 7706 导航输入、TCP 7709 路线、HTTP 7000 参数接口兼容。
 - 保持 `/ws/raw_multiplex` 和 `/ws/camera/road` 给 APP 读取车辆数据和摄像头。
 - 用实机测试确认 APP 连接、导航数据、驾驶评分采集能正常工作。
 
@@ -53,6 +53,25 @@ APP 侧 `DrivingDataCollector` 每秒更新一次，主要输入包括：
 - 限速、TBT 距离、道路类型、道路名。
 - 前车距离目前在 APP 中仍是 TODO。
 
+APP 启动驾驶评分采集的直接条件：
+
+- 网络状态显示已连接。
+- `CarrotManFields.isOnroad` 为 true。
+
+当前 APP 的 `CarrotManFields.isOnroad`、`active`、`vEgoKph`、`vCruiseKph` 等主要来自 C3 端 UDP 7705 状态广播，而不是 `/ws/raw_multiplex` 中的 `carrotMan`。`CarrotWsClient.kt` 目前订阅了 `carrotMan` 和 `gpsLocationExternal`，但 `decodeCarrotMan()` 仍返回 `null`，`gpsLocationExternal` 也未进入 `updateVehicleData()` 分支。
+
+因此驾驶报告实测时不要只看 WebSocket 是否连接，还要确认 APP 已收到 7705 状态字段：
+
+- `IsOnroad`
+- `active`
+- `v_ego_kph`
+- `v_cruise_kph`
+- `carcruiseSpeed`
+- `tbt_dist`
+- `sdi_dist`
+- `xState`
+- `trafficState`
+
 APP 侧 `DrivingScoreEngine` 的总分权重：
 
 - 平稳性 30%。
@@ -77,6 +96,13 @@ Navipilot 的 `carrotcode/App发往Comma3数据字段清单.md` 标出车机端�
 python3 scripts/personal/cplink_preflight.py
 ```
 
+该守卫现在同时检查：
+
+- C3 端 UDP 7705 状态广播字段。
+- C3 端 UDP 7706 导航 JSON 字段。
+- C3 端 `/ws/raw_multiplex` 和 `/ws/camera/road`。
+- Navipilot APP 当前源码对 7705、raw multiplex、camera WebSocket 和驾驶评分启动条件的字段需求。
+
 ## 更新维护
 
 本项目已新增来源跟踪：
@@ -99,6 +125,7 @@ python3 scripts/personal/cplink_preflight.py
 
 - Android 设备和 C3 在同一 WiFi。
 - APP 能连接 C3 的 7000 端口。
+- APP 能收到 C3 的 7705 状态广播，且 `IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph` 有正确值。
 - `/ws/raw_multiplex` 有 `carState`、`controlsState`、`selfdriveState`、`deviceState`、`carrotMan`、`gpsLocationExternal`。
 - `/ws/camera/road` 能显示摄像头画面。
 - UDP 7706 导航字段进入 C3，`nRoadLimitSpeed`、TBT、SDI、GPS 字段变化。

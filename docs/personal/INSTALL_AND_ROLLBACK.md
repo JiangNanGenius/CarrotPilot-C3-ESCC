@@ -18,12 +18,12 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260618-static12`
+- `carrotpilot-c3-escc-20260618-static13`
 - 只代表静态检查通过，不代表实车验证。
 
 当前受控上车测试 tag：
 
-- `carrotpilot-c3-escc-20260618-test4`
+- `carrotpilot-c3-escc-20260618-test5`
 - 用于停车静态检查、证据采集和低速短程验证。
 - 不作为日常稳定安装目标。
 
