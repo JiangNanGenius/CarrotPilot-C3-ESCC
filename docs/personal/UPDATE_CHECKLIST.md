@@ -125,7 +125,8 @@
 
 ## 6. 上车前检查
 
-- [ ] 先打测试 tag，不直接装开发分支。
+- [ ] 先跑 `python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-static1 --kind static --run-checks`。
+- [ ] 先打 `static` 或 `test` tag，不直接装开发分支。
 - [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`，逐条处理脚本输出的 Manual checks。
 - [ ] 安装前记录当前可用版本。
 - [ ] 准备回滚 URL 或回滚分支。
@@ -171,5 +172,6 @@
 - [ ] 标注是否经过 Always Offline 启动验证。
 - [ ] 推送 `personal/c3-escc` 或 `personal/c3-escc-atune` 到 `github`。
 - [ ] 发布前再次确认没有个人 token、私钥或设备隐私参数进入仓库。
+- [ ] `stable` 前填写上车测试记录，并通过 `release_gate.py --kind stable --road-test-log <记录文件>`。
 - [ ] 打稳定 tag。
 - [ ] 保留上一稳定 tag。

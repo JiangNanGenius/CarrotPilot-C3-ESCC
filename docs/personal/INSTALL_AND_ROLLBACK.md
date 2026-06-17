@@ -102,8 +102,21 @@ Seltos 2023 初期建议：
 命名格式：
 
 ```text
-seltos-c3-escc-YYYYMMDD-testN
-seltos-c3-escc-YYYYMMDD-stable
+carrotpilot-c3-escc-YYYYMMDD-staticN
+carrotpilot-c3-escc-YYYYMMDD-testN
+carrotpilot-c3-escc-YYYYMMDD-stable
 ```
 
-只有完成静态启动、低速验证和多次短程验证后，才使用 `stable`。
+含义：
+
+- `staticN`：只代表静态检查通过，不代表实车验证。
+- `testN`：代表准备用于受控上车测试。
+- `stable`：只有完成静态启动、低速验证和多次短程验证后才使用。
+
+打 tag 前先运行：
+
+```bash
+python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-static1 --kind static --run-checks
+```
+
+升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，再用 `release_gate.py --kind stable --road-test-log <记录文件>` 检查。

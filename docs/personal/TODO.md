@@ -118,11 +118,13 @@
 - [x] 增加 ESCC / Always Offline 上车前静态 preflight 脚本。
 - [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight 脚本。
 - [x] 增加上游更新审计脚本，检查三方来源、tracking 分支和高风险目录变化。
+- [x] 增加发布前 release gate，区分 static/test/stable tag。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [ ] 给每个可上车版本打 tag，例如 `seltos-c3-escc-YYYYMMDD`.
+- [ ] 给当前静态预检通过版本打 `carrotpilot-c3-escc-YYYYMMDD-staticN` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
+- [x] 写上车测试记录模板。
 - [ ] 保留上一个稳定版本。
 - [ ] 只把稳定 tag 作为设备安装目标，不直接安装日常开发分支。
 

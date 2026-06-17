@@ -336,3 +336,23 @@
 
 - `python3 scripts/personal/update_audit.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-17: 发布 gate 和上车记录模板
+
+新增文件：
+
+- `scripts/personal/release_gate.py`
+- `docs/personal/ROAD_TEST_LOG_TEMPLATE.md`
+
+改动内容：
+
+- 增加发布前 gate，统一检查 tag 命名、干净工作区、上游底座包含关系、ESCC/离线保护线、个人 token 扫描、旧仓库名扫描。
+- 支持 `static`、`test`、`stable` 三类 tag。
+- `static` / `test` 明确不代表实车验证。
+- `stable` 必须提供上车测试记录，并包含 Seltos 实车、ACC 断电启动、ESCC 0x2AB、低速路测和回滚目标的 `PASS` 结论行。
+- 将 release gate 加入 smoke 的 Python 语法检查。
+- 更新安装说明、更新检查单和 TODO。
+
+验证：
+
+- `python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-20260617-static1 --kind static --run-checks` 通过后，才能创建当前静态测试 tag。

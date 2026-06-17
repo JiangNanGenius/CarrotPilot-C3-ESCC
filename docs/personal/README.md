@@ -18,6 +18,7 @@
 - [机械小哥 / fishop 功能边界](JIXIE_FISHOP_BOUNDARY.md)
 - [Seltos 2023 车辆档案](VEHICLE_PROFILE_SELTOS_2023.md)
 - [车型配置说明](CAR_CONFIG_EXPLAINER.md)
+- [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)
 - [来源和署名](SOURCES_AND_CREDITS.md)
 - [GitHub 建仓计划](GITHUB_SETUP.md)
 
@@ -49,3 +50,11 @@ python3 scripts/personal/cplink_preflight.py
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
 
 其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
+
+打安装 tag 前先跑：
+
+```bash
+python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-static1 --kind static --run-checks
+```
+
+`stable` tag 必须先填写上车测试记录，不能只靠静态检查。
