@@ -67,9 +67,11 @@ C4 旁支。当前本地暂按 `origin/carrot-wip` 跟踪；后续需要再确�
 
 `Upstream Watch` 每周自动拉取 ajouatom、jixiexiaoge、fishop 的最新分支，并用 `scripts/personal/update_audit.py --baseline-file docs/personal/UPSTREAM_BASELINES.json --strict` 和这些基准 commit 比较。工作流变红时，不代表当前车机分支坏了，而是提醒需要人工审查上游更新、高风险目录和是否更新基准清单。
 
+本地维护时先跑 `python3 scripts/personal/upstream_update_plan.py --fetch`。它不会默认改代码，只把每条来源的 remote/local 状态、高风险文件和建议命令列出来。审查后如果只是 tracking 分支严格落后，可以运行 `python3 scripts/personal/upstream_update_plan.py --fetch --apply-tracking` 快进本地 `upstream/*` / `tracking/*`；确认后再用 `--write-baselines` 更新 GitHub Actions 使用的基准文件。
+
 ## 合并顺序
 
-1. 运行 `python3 scripts/personal/update_audit.py --fetch`，确认哪些来源有新提交和高风险目录变化。
+1. 运行 `python3 scripts/personal/update_audit.py --fetch` 和 `python3 scripts/personal/upstream_update_plan.py --fetch`，确认哪些来源有新提交、高风险目录变化，以及哪些 tracking 分支可快进。
 2. `upstream/c3-wip` 同步最新版。
 3. `personal/c3-escc` rebase 或 merge 上游。
 4. 解决 ESCC 冲突。

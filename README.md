@@ -16,8 +16,8 @@
 
 当前可参考 tag：
 
-- 静态检查：`carrotpilot-c3-escc-20260618-static22`
-- 受控上车测试：`carrotpilot-c3-escc-20260618-test14`
+- 静态检查：`carrotpilot-c3-escc-20260618-static23`
+- 受控上车测试：`carrotpilot-c3-escc-20260618-test15`
 - `static` / `test` 都不代表实车验证完成或稳定版
 - 还没有 `stable` tag
 - 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空
@@ -25,8 +25,9 @@
 自动检查：
 
 - GitHub Actions 的 `Personal Smoke` 会在个人分支推送和手动触发时运行。
-- 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态、模型选择器、只读 AmapNavi 状态桥、AmapNavi/自动超车来源审计、功能边界守卫、证据就绪度报告和中文设置说明。
+- 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline、CP搭子核心协议、Auto-Tuner 默认安全状态、上游更新计划工具、模型选择器、只读 AmapNavi 状态桥、AmapNavi/自动超车来源审计、功能边界守卫、证据就绪度报告和中文设置说明。
 - `Upstream Watch` 每周和手动触发时比较 ajouatom、jixiexiaoge/openpilot、jixiexiaoge/navipilot、fishop 的最新分支和 [UPSTREAM_BASELINES.json](docs/personal/UPSTREAM_BASELINES.json)；变红通常表示有新上游提交需要审查。
+- 本地更新前可先运行 `python3 scripts/personal/upstream_update_plan.py --fetch`，它会给出 tracking 分支快进计划、高风险目录和后续门禁命令，默认不修改代码。
 - Actions 通过不代表实车验证通过。
 
 安装、更新或上车前先看：

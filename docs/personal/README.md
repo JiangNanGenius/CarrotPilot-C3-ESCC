@@ -42,6 +42,7 @@
 
 ```bash
 python3 scripts/personal/update_audit.py
+python3 scripts/personal/upstream_update_plan.py
 python3 scripts/personal/smoke_check.py
 ```
 
@@ -59,14 +60,16 @@ python3 scripts/personal/road_test_evidence_check.py --self-test
 python3 scripts/personal/evidence_readiness_report.py --self-test
 python3 scripts/personal/navipilot_live_check.py --self-test
 python3 scripts/personal/model_selector_audit.py
+python3 scripts/personal/upstream_update_plan.py --self-test
 python3 scripts/personal/c3_static_check.py --output /tmp/carrotpilot-c3-escc-static-check.md --snapshot-output /tmp/carrotpilot-c3-escc-snapshot.md --allow-branch --skip-preflight
 python3 scripts/personal/collect_real_car_evidence.py --output-dir /tmp/carrotpilot-c3-escc-evidence --allow-branch --skip-preflight --force
 python3 scripts/personal/c3_commissioning.py --output-dir /tmp/carrotpilot-c3-escc-commissioning --allow-branch --skip-preflight --force
 ```
 
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
+`upstream_update_plan.py --fetch` 用于把这些更新转成可执行计划：哪些 tracking 分支可以快进、哪些来源触碰高风险目录、后续该跑哪些门禁。它默认只读，只有显式加 `--apply-tracking` 或 `--write-baselines` 才会改本地 tracking 分支或基准文件。
 
-其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、功能边界守卫、功能状态报告、证据就绪度报告、模型选择器参考线审计、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
+其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、上游更新计划工具、功能边界守卫、功能状态报告、证据就绪度报告、模型选择器参考线审计、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
 
 如果要从当前可工作的 fishop / 飞扬版本迁移设置，使用：
 

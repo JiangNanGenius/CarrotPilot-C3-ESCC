@@ -1,5 +1,47 @@
 # 当前代码改动记录
 
+## 2026-06-18: 上游更新计划工具
+
+改动文件：
+
+- `scripts/personal/upstream_update_plan.py`
+- `scripts/personal/smoke_check.py`
+- `docs/personal/BRANCH_STRATEGY.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/README.md`
+- `docs/personal/TODO.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `README.md`
+
+改动内容：
+
+- 新增 `upstream_update_plan.py`，用于本地更新前生成可执行计划。
+- 默认只读输出每条来源的 local/remote commit、状态、remote ahead 数量、新提交标题、高风险文件和建议命令。
+- 支持 `--fetch` 拉取来源远端。
+- 支持 `--apply-tracking`，只在本地 tracking ref 严格落后时快进 `upstream/*` / `tracking/*`，不自动合并个人上车分支。
+- 支持 `--write-baselines`，审查完成后从本地 tracking ref 重写 `UPSTREAM_BASELINES.json`，给 GitHub Actions `Upstream Watch` 使用。
+- 支持 `--self-test` 并纳入 `smoke_check.py`。
+- 更新维护文档，把以后更新流程拆成：先审计、再看计划、审查后快进 tracking、跑门禁、最后更新基准。
+
+刻意没有改：
+
+- 没有自动 rebase 或 merge `personal/c3-escc-atune`。
+- 没有自动推送到设备安装目标。
+- 没有把上游更新直接视为可上车版本。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static23`
+
+当前受控上车测试 tag：
+
+- `carrotpilot-c3-escc-20260618-test15`
+
+含义：
+
+- 包含上游更新计划工具，静态检查通过，不代表实车验证或稳定版本。
+
 ## 2026-06-18: AmapNavi 只读状态桥
 
 改动文件：

@@ -151,6 +151,7 @@
 - [x] 增加功能边界守卫脚本，确认未验证高风险入口不在默认主线，已有 Web/cluster/ShareData 入口保持开关控制。
 - [x] 增加功能状态报告脚本，防止 TODO 和实际代码能力脱节。
 - [x] 增加上游更新审计脚本，检查三方来源、tracking 分支和高风险目录变化。
+- [x] 增加上游更新计划脚本，默认只读输出 tracking 快进计划、高风险路径和后续门禁命令；显式加参数才同步 tracking 分支或更新基准文件。
 - [x] 增加发布前 release gate，区分 static/test/stable tag。
 - [x] 增加安装目标清单和检查脚本，防止把开发分支当成日常安装目标。
 - [x] 增加路测证据检查脚本，stable 前强制检查路测记录、设备快照和 ESCC 0x2AB 采样。
@@ -158,8 +159,8 @@
 - [x] 增加 C3 首次安装/迁移向导，把旧配置 dry-run/import、静态检查、证据采集和 readiness 报告串成一条设备端流程。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static22` tag。
-- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test14` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static23` tag。
+- [x] 给当前受控上车测试候选版本打 `carrotpilot-c3-escc-20260618-test15` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。

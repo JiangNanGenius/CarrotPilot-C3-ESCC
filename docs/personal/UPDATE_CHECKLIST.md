@@ -22,11 +22,13 @@
 ## 1. 拉取上游
 
 - [ ] 运行 `python3 scripts/personal/update_audit.py --fetch`。
+- [ ] 运行 `python3 scripts/personal/upstream_update_plan.py --fetch`，先看哪些来源需要快进、本次是否触碰高风险目录，以及脚本给出的下一步门禁命令。
 - [ ] 拉取 `ajouatom/openpilot:c3-wip`。
 - [ ] 拉取 `fishop/openpilot:cp`。
 - [ ] 拉取 `jixiexiaoge/openpilot:atune`。
 - [ ] 拉取 `jixiexiaoge/navipilot:CPdazi`。
 - [ ] 检查 `update_audit.py` 输出的 remote ahead、新提交标题和高风险目录。
+- [ ] 如 `upstream_update_plan.py` 显示只有 tracking 分支可安全快进，审查后再运行 `python3 scripts/personal/upstream_update_plan.py --fetch --apply-tracking`；不要让它替代 ESCC/Seltos 冲突审查。
 - [ ] 查看 GitHub Actions `Upstream Watch` 最近一次结果；如果变红，把输出当作更新审计入口。
 - [ ] 查看三方最近提交标题。
 - [ ] 判断这次是否涉及高风险目录。
@@ -150,6 +152,7 @@
 ## 5. 构建和静态检查
 
 - [ ] 运行 `python3 scripts/personal/update_audit.py` 并确认当前分支仍包含 `origin/c3-wip` 和 `personal/c3-escc`。
+- [ ] 运行 `python3 scripts/personal/upstream_update_plan.py --strict` 并确认已审查来源与本地 tracking/baseline 状态一致。
 - [ ] 运行 `python3 scripts/personal/smoke_check.py` 并确认全部通过。
 - [ ] 单独运行 `python3 scripts/personal/escc_offline_preflight.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/cplink_preflight.py` 并确认没有失败项。
@@ -170,7 +173,7 @@
 - [ ] 检查 manager process 是否引用了存在的文件。
 - [ ] 检查中文设置说明是否仍和参数含义一致，不能改默认值或参数范围。
 - [ ] 推送后确认 GitHub Actions `Personal Smoke` 通过。
-- [ ] 同步 `upstream/c3-wip` 或 `tracking/*` 后，更新 `docs/personal/UPSTREAM_BASELINES.json` 并手动触发一次 GitHub Actions `Upstream Watch`。
+- [ ] 同步 `upstream/c3-wip` 或 `tracking/*` 后，运行 `python3 scripts/personal/upstream_update_plan.py --write-baselines` 更新 `docs/personal/UPSTREAM_BASELINES.json`，再手动触发一次 GitHub Actions `Upstream Watch`。
 - [ ] 如环境允许，跑 Hyundai/opendbc 相关测试。
 - [ ] 如环境允许，跑 controls 相关测试。
 
