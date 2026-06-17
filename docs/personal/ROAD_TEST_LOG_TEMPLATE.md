@@ -114,6 +114,7 @@ python3 scripts/personal/road_test_evidence_check.py \
 python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
+  --require-carparams-summary \
   --require-escc-sample
 ```
 
@@ -123,6 +124,7 @@ python3 scripts/personal/road_test_evidence_check.py \
 python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
+  --require-carparams-summary \
   --require-cplink-sample
 ```
 

@@ -186,7 +186,7 @@
 - [ ] 发布前再次确认没有个人 token、私钥或设备隐私参数进入仓库。
 - [ ] `stable` 前填写上车测试记录，并把 C3 快照文件保存到电脑本地。
 - [ ] 如使用证据包，把 `road-test-log-draft.md` 和 `device-snapshot.md` 一起保存到电脑本地。
-- [ ] 运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-escc-sample`。
+- [ ] 运行 `python3 scripts/personal/road_test_evidence_check.py --evidence-dir <证据包目录> --require-device-snapshot --require-carparams-summary --require-escc-sample`。
 - [ ] 通过 `release_gate.py --kind stable --evidence-dir <证据包目录>`。
 - [ ] 打稳定 tag。
 - [ ] 更新 `docs/personal/INSTALL_TARGETS.json`，把新稳定 tag 设为 `current_stable_tag` 和 `daily_install_target`。

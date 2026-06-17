@@ -18,7 +18,7 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260618-static6`
+- `carrotpilot-c3-escc-20260618-static7`
 - 只代表静态检查通过，不代表实车验证。
 - 目前还没有 `stable` tag。
 
@@ -90,6 +90,7 @@ python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --arch
 python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
+  --require-carparams-summary \
   --require-escc-sample
 ```
 

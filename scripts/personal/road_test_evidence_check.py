@@ -206,6 +206,21 @@ def bool_value(values: Dict[str, str], key: str) -> bool:
   return values.get(key, "").strip() in TRUE_VALUES
 
 
+def require_carparams_summary(values: Dict[str, str], label: str) -> None:
+  decoded = values.get("CarParamsDecoded", "").strip()
+  fingerprint = values.get("carFingerprint", "").strip()
+  car_name = values.get("carName", "").strip()
+  safety = values.get("safetyConfigs", "").strip()
+  if decoded != "ok":
+    raise EvidenceError(f"{label}: CarParamsDecoded must be ok, got {decoded!r}")
+  if not is_filled(car_name):
+    raise EvidenceError(f"{label}: carName is missing from CarParams summary")
+  if not is_filled(fingerprint) or "SELTOS" not in fingerprint.upper():
+    raise EvidenceError(f"{label}: carFingerprint must identify Seltos, got {fingerprint!r}")
+  if not is_filled(safety) or safety == "<none>":
+    raise EvidenceError(f"{label}: safetyConfigs summary is missing")
+
+
 def validate_snapshot_text(name: str, text: str) -> Dict[str, str]:
   if "# CarrotPilot-C3-ESCC Device Snapshot" not in text:
     raise EvidenceError(f"{name}: not a CarrotPilot-C3-ESCC device snapshot")
@@ -246,6 +261,7 @@ def validate_snapshots(
   require_device_snapshot: bool,
   require_escc_sample: bool,
   require_cplink_sample: bool,
+  require_carparams: bool,
 ) -> List[Dict[str, str]]:
   if require_device_snapshot and not snapshot_paths:
     raise EvidenceError("stable evidence requires at least one --device-snapshot copied from the C3")
@@ -290,6 +306,18 @@ def validate_snapshots(
         "CPlink evidence requires a sampled snapshot with enabled=True, ok=True, "
         "CPlink updates, and at least one speed/TBT/SDI/GPS navigation field"
       )
+
+  if require_carparams:
+    found = False
+    for values in snapshots:
+      try:
+        require_carparams_summary(values, "CarParams summary")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError("evidence requires a decoded Seltos CarParams summary")
   return snapshots
 
 
@@ -336,11 +364,19 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `cplink_tbt_seen` | True |
 | `cplink_gps_seen` | False |
 | `cplink_lanechange_cmd_seen` | False |
+| `CarParamsDecoded` | ok |
+| `carName` | hyundai |
+| `carFingerprint` | KIA_SELTOS_2023 |
+| `fingerprintSource` | fixed |
+| `networkLocation` | fwdCamera |
+| `safetyConfigs` | hyundaiLegacy:1024 |
+| `spFlags` | 1 |
 """
   validate_log(good_log)
   validate_snapshot_text("self-test snapshot", good_snapshot)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_escc_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_cplink_sample=True)
+  validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_carparams=True)
 
   with tempfile.TemporaryDirectory() as tmp:
     bundle = Path(tmp)
@@ -351,7 +387,13 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
     if not bundle_log or len(bundle_snapshots) != 1:
       raise EvidenceError("self-test failed: evidence bundle was not discovered")
     validate_log(read_text(bundle_log)[1])
-    validate_snapshots(bundle_snapshots, require_device_snapshot=True, require_escc_sample=True, require_cplink_sample=True)
+    validate_snapshots(
+      bundle_snapshots,
+      require_device_snapshot=True,
+      require_escc_sample=True,
+      require_cplink_sample=True,
+      require_carparams=True,
+    )
 
   try:
     validate_log(good_log.replace("ESCC 0x2AB observed: PASS", "ESCC 0x2AB observed: PENDING"))
@@ -365,6 +407,7 @@ def validate_snapshots_from_text(
   items: Sequence[Tuple[str, str]],
   require_escc_sample: bool = False,
   require_cplink_sample: bool = False,
+  require_carparams: bool = False,
 ) -> List[Dict[str, str]]:
   snapshots = [validate_snapshot_text(name, text) for name, text in items]
   if require_escc_sample:
@@ -392,6 +435,17 @@ def validate_snapshots_from_text(
         break
     if not found:
       raise EvidenceError("self-test failed: CPlink sample was not detected")
+  if require_carparams:
+    found = False
+    for values in snapshots:
+      try:
+        require_carparams_summary(values, "self-test snapshot")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError("self-test failed: CarParams summary was not detected")
   return snapshots
 
 
@@ -403,6 +457,7 @@ def main() -> int:
   parser.add_argument("--require-device-snapshot", action="store_true", help="fail when no device snapshot is supplied")
   parser.add_argument("--require-escc-sample", action="store_true", help="require EnableEscc=1 and sampled 0x2AB bus0 count > 0")
   parser.add_argument("--require-cplink-sample", action="store_true", help="require a sampled CP搭子/Navipilot update with speed/TBT/SDI/GPS data")
+  parser.add_argument("--require-carparams-summary", action="store_true", help="require a decoded Seltos CarParams summary")
   parser.add_argument("--self-test", action="store_true", help="run built-in parser checks")
   args = parser.parse_args()
 
@@ -418,7 +473,13 @@ def main() -> int:
 
     log_path, log_text = read_text(road_test_log)
     fields = validate_log(log_text)
-    snapshots = validate_snapshots(snapshot_paths, args.require_device_snapshot, args.require_escc_sample, args.require_cplink_sample)
+    snapshots = validate_snapshots(
+      snapshot_paths,
+      args.require_device_snapshot,
+      args.require_escc_sample,
+      args.require_cplink_sample,
+      args.require_carparams_summary,
+    )
 
     print("Road-test evidence check")
     print(f"repo: {ROOT}")
@@ -432,6 +493,8 @@ def main() -> int:
       print("ESCC sample: required and present")
     if args.require_cplink_sample:
       print("CPlink sample: required and present")
+    if args.require_carparams_summary:
+      print("CarParams summary: required and present")
     print("OK: road-test evidence is sufficient for the requested gate")
     return 0
   except EvidenceError as exc:

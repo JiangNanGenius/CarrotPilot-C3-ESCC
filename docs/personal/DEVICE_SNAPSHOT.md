@@ -81,6 +81,9 @@ python3 scripts/personal/road_test_evidence_check.py \
 ## 快照里重点看什么
 
 - `branch` / `commit` / `tags`：确认安装的是预期 tag 或分支。
+- `CarParamsDecoded`：是否成功解码当前设备上的 `CarParams`。
+- `carFingerprint`：确认当前车型路径，应为 Seltos 相关车型。
+- `carName`、`networkLocation`、`safetyConfigs`、`spFlags`：确认 Hyundai/Kia safety、接线位置和 ESCC safety 参数摘要。
 - `AlwaysOffline`：个人 C3 克隆版建议为 `1`。
 - `EnableEscc`：第一次上车前应为 `0`。
 - `HyundaiCameraSCC`、`CanfdHDA2`：Seltos 2023 纯 CAN 初期应为 `0`。
@@ -98,6 +101,9 @@ python3 scripts/personal/road_test_evidence_check.py \
 
 `stable` 发布要求至少有一个快照满足：
 
+- `CarParamsDecoded=ok`
+- `carFingerprint` 包含 `SELTOS`
+- `safetyConfigs` 有有效摘要
 - `AlwaysOffline=1`
 - `EnableConnect=0`
 - `CanfdHDA2=0`

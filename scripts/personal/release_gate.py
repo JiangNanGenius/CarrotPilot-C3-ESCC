@@ -101,6 +101,7 @@ def validate_stable_evidence(path: Optional[str], snapshots: Sequence[str], evid
     "scripts/personal/road_test_evidence_check.py",
     "--require-device-snapshot",
     "--require-escc-sample",
+    "--require-carparams-summary",
   ]
   if path:
     cmd.extend(["--road-test-log", path])

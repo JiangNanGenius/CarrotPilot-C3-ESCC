@@ -33,6 +33,7 @@
 - [x] 确认代码改动没有覆盖原有 Seltos 2021 条目。
 - [ ] 确认当前设备上可工作的 CarrotPilot 版本和参数快照。
 - [x] 增加 C3 设备端快照脚本，用于记录安全参数、分支、tag、进程状态和可选 0x2AB / CP搭子消息计数。
+- [x] 设备快照新增隐私安全 CarParams 摘要，用于确认 Seltos 车型路径和 safety 配置。
 - [x] 增加一键实车证据采集脚本，用于把静态检查、设备快照、路测草稿和清单放进同一个文件夹。
 - [x] 证据检查器支持直接读取一键采集生成的证据包目录。
 - [x] 增加 Seltos 2023 车型复用检查脚本，防止更新后误改 CANFD/HDA2 或打破 2021 兼容路径。
@@ -130,7 +131,7 @@
 - [x] 增加路测证据检查脚本，stable 前强制检查路测记录、设备快照和 ESCC 0x2AB 采样。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
-- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static6` tag。
+- [x] 给当前静态预检通过版本打 `carrotpilot-c3-escc-20260618-static7` tag。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。
@@ -140,7 +141,7 @@
 - [x] 在 `INSTALL_TARGETS.json` 中预留 `previous_stable_tag` 和 `rollback_base_ref`。
 - [x] 只把稳定 tag 作为设备日常安装目标；当前没有稳定 tag，所以 `daily_install_target` 必须为空。
 - [ ] 第一次实车验证通过后，创建首个 `stable` tag，并更新 `INSTALL_TARGETS.json`。
-- [ ] 首个 `stable` 前，必须保存 C3 设备快照并通过 `road_test_evidence_check.py --require-escc-sample`。
+- [ ] 首个 `stable` 前，必须保存 C3 设备快照并通过 `road_test_evidence_check.py --require-carparams-summary --require-escc-sample`。
 
 ## P7: 中文翻译和参数说明优化
 

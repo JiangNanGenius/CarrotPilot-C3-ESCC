@@ -372,7 +372,7 @@ def check_c3_static_dry_run() -> None:
   if not snapshot.exists() or "# CarrotPilot-C3-ESCC Device Snapshot" not in snapshot.read_text(encoding="utf-8"):
     raise CheckFailure("C3 static dry-run did not create a valid snapshot")
   snapshot_text = snapshot.read_text(encoding="utf-8")
-  for key in ["cplink_updates_seen", "cplink_speed_limit_seen", "last_navInstructionCarrot"]:
+  for key in ["CarParamsDecoded", "cplink_updates_seen", "cplink_speed_limit_seen", "last_navInstructionCarrot"]:
     if key not in snapshot_text:
       raise CheckFailure("C3 static dry-run snapshot missing " + key)
 

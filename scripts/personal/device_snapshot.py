@@ -115,6 +115,58 @@ def read_binary_param_summaries() -> Dict[str, str]:
   return values
 
 
+def enum_name(value: object) -> str:
+  try:
+    return str(value).split(".")[-1]
+  except Exception:
+    return str(value)
+
+
+def read_binary_param(key: str) -> Optional[bytes]:
+  path = read_param_file(key)
+  if path is None:
+    return None
+  return path.read_bytes()
+
+
+def summarize_car_params() -> Dict[str, object]:
+  data = read_binary_param("CarParams")
+  if data is None:
+    return {"CarParamsDecoded": "<missing>"}
+  try:
+    from cereal import car  # type: ignore
+    cp = car.CarParams.from_bytes(data)
+  except Exception as exc:
+    return {
+      "CarParamsDecoded": "error",
+      "CarParamsDecodeError": str(exc)[:200],
+    }
+
+  safety_configs: List[str] = []
+  try:
+    for cfg in cp.safetyConfigs:
+      model = enum_name(safe_attr(cfg, "safetyModel"))
+      param = safe_int(safe_attr(cfg, "safetyParam"))
+      safety_configs.append(f"{model}:{param}")
+  except Exception:
+    safety_configs = []
+
+  return {
+    "CarParamsDecoded": "ok",
+    "carName": safe_text(safe_attr(cp, "carName")),
+    "carFingerprint": safe_text(safe_attr(cp, "carFingerprint")),
+    "fingerprintSource": enum_name(safe_attr(cp, "fingerprintSource")),
+    "networkLocation": enum_name(safe_attr(cp, "networkLocation")),
+    "openpilotLongitudinalControl": bool(safe_attr(cp, "openpilotLongitudinalControl", False)),
+    "pcmCruise": bool(safe_attr(cp, "pcmCruise", False)),
+    "dashcamOnly": bool(safe_attr(cp, "dashcamOnly", False)),
+    "flags": safe_int(safe_attr(cp, "flags")),
+    "spFlags": safe_int(safe_attr(cp, "spFlags")),
+    "safetyConfigs": ", ".join(safety_configs) if safety_configs else "<none>",
+    "carFwCount": safe_len(safe_attr(cp, "carFw", [])),
+  }
+
+
 def process_snapshot() -> List[str]:
   code, output = run(["ps", "-A"])
   if code != 0:
@@ -165,6 +217,13 @@ def safe_text(value: object) -> str:
     return str(value or "")
   except Exception:
     return ""
+
+
+def safe_len(value: object) -> int:
+  try:
+    return len(value)  # type: ignore[arg-type]
+  except Exception:
+    return 0
 
 
 def update_cplink_diagnostics(result: Dict[str, object], carrot_msg: object) -> None:
@@ -290,6 +349,7 @@ def build_report(sample_seconds: int) -> str:
   now = dt.datetime.now(dt.timezone.utc).astimezone().isoformat(timespec="seconds")
   safe_params = read_safe_params()
   binary_params = read_binary_param_summaries()
+  car_params = summarize_car_params()
   sample = sample_messaging(sample_seconds)
 
   lines: List[str] = []
@@ -319,6 +379,9 @@ def build_report(sample_seconds: int) -> str:
   lines.append("")
   lines.append("## Binary Param Summaries")
   lines.extend(markdown_table(binary_params))
+  lines.append("")
+  lines.append("## CarParams Summary")
+  lines.extend(markdown_table(car_params))
   lines.append("")
   lines.append("## Process Snapshot")
   for line in process_snapshot():

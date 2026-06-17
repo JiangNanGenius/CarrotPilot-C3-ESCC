@@ -785,3 +785,56 @@
 
 - `python3 scripts/personal/road_test_evidence_check.py --self-test` 通过，包含 `--require-cplink-sample` 自测。
 - `python3 scripts/personal/smoke_check.py` 通过，确认快照包含 CP搭子诊断字段。
+
+## 2026-06-18: CarParams 车型证据摘要
+
+改动文件：
+
+- `scripts/personal/device_snapshot.py`
+- `scripts/personal/road_test_evidence_check.py`
+- `scripts/personal/release_gate.py`
+- `scripts/personal/smoke_check.py`
+- `scripts/personal/collect_real_car_evidence.py`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/ROAD_TEST_LOG_TEMPLATE.md`
+- `docs/personal/README.md`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `README.md`
+
+改动内容：
+
+- 设备快照新增隐私安全 CarParams 摘要：
+  - `CarParamsDecoded`
+  - `carName`
+  - `carFingerprint`
+  - `fingerprintSource`
+  - `networkLocation`
+  - `openpilotLongitudinalControl`
+  - `pcmCruise`
+  - `dashcamOnly`
+  - `flags`
+  - `spFlags`
+  - `safetyConfigs`
+  - `carFwCount`
+- 不记录 VIN、完整 firmware、路线或完整参数内容。
+- `road_test_evidence_check.py` 新增 `--require-carparams-summary`，要求快照能解码 Seltos 相关 CarParams 并包含 safety 配置摘要。
+- `release_gate.py --kind stable` 默认要求 `--require-carparams-summary`。
+- `smoke_check.py` 确认新快照包含 `CarParamsDecoded` 字段。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260618-static7`
+
+含义：
+
+- 包含 Seltos / safety 车型证据摘要和 stable gate 加严。
+- 静态检查通过，不代表实车验证。
+- 还没有 `stable` tag。
+
+验证：
+
+- `python3 scripts/personal/road_test_evidence_check.py --self-test` 通过，包含 `--require-carparams-summary` 自测。
+- `python3 scripts/personal/smoke_check.py` 通过，确认快照包含 `CarParamsDecoded`。

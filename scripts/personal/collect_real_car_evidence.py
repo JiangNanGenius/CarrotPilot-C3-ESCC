@@ -126,6 +126,7 @@ def build_checklist(output_dir: Path, sample_seconds: int, archive_path: Optiona
   lines.append("python3 scripts/personal/road_test_evidence_check.py \\")
   lines.append("  --evidence-dir /path/to/this-evidence-folder \\")
   lines.append("  --require-device-snapshot \\")
+  lines.append("  --require-carparams-summary \\")
   lines.append("  --require-escc-sample")
   lines.append("```")
   lines.append("")
