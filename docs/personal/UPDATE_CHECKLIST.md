@@ -114,12 +114,13 @@
 - [ ] 运行 `python3 scripts/personal/smoke_check.py` 并确认全部通过。
 - [ ] 单独运行 `python3 scripts/personal/escc_offline_preflight.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/cplink_preflight.py` 并确认没有失败项。
+- [ ] 运行 `python3 scripts/personal/settings_cn_audit.py` 并确认高风险中文说明没有缺失。
 - [ ] 检查 Python 语法。
 - [ ] 检查 JSON 配置格式。
 - [ ] 检查 capnp 是否需要重新生成。
 - [ ] 检查新增 Params key 是否在 UI 和默认配置中一致。
 - [ ] 检查 manager process 是否引用了存在的文件。
-- [ ] 检查中文设置说明是否仍和参数含义一致。
+- [ ] 检查中文设置说明是否仍和参数含义一致，不能改默认值或参数范围。
 - [ ] 如环境允许，跑 Hyundai/opendbc 相关测试。
 - [ ] 如环境允许，跑 controls 相关测试。
 

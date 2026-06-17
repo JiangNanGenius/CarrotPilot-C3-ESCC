@@ -360,4 +360,29 @@
 当前静态测试 tag：
 
 - `carrotpilot-c3-escc-20260617-static1`
+- `carrotpilot-c3-escc-20260617-static2`
 - 含义：静态检查通过，不代表实车验证或稳定版本。
+
+## 2026-06-17: 中文设置说明第一批
+
+新增文件：
+
+- `scripts/personal/settings_cn_audit.py`
+
+改动内容：
+
+- 只修改 `selfdrive/carrot_settings.json` 的中文显示字段 `cgroup` / `ctitle` / `cdescr`，不修改参数名、范围、默认值或控制逻辑。
+- 第一批补充启动、现代/起亚、雷达、纵控、转向和外部 HUD 中容易误解的说明。
+- 给 ESCC、CANFD/HDA2、Camera SCC、雷达轨迹、角雷达、Always Offline、车门/安全带屏蔽等高风险项补充适用车型、默认建议和风险提示。
+- 补齐中文字段中的空说明，并将部分英文残留改为中文。
+- 将中文设置审计接入 `scripts/personal/smoke_check.py`。
+
+验证：
+
+- `python3 scripts/personal/settings_cn_audit.py` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。
+
+当前静态测试 tag：
+
+- `carrotpilot-c3-escc-20260617-static2`
+- 含义：包含第一批中文设置说明优化，静态检查通过，不代表实车验证或稳定版本。

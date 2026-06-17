@@ -30,8 +30,8 @@
       "default": 0,
       "unit": 1,
       "cgroup": "转向",
-      "ctitle": "摄像头YAW校正(0)",
-      "cdescr": "微调摄像头左右(YAW)值(+: right)"
+      "ctitle": "摄像头 YAW 校正(0)",
+      "cdescr": "微调摄像头左右偏航角；正数表示向右修正。"
     },
     {
       "group": "조향토크",
@@ -350,7 +350,7 @@
       "default": 13,
       "unit": 1,
       "cgroup": "转向",
-      "ctitle": "转向平滑时间(30)",
+      "ctitle": "转向平滑时间(13)",
       "cdescr": "转向平滑值 — 值越高越平滑"
     },
     {
@@ -366,8 +366,8 @@
       "default": 300,
       "unit": 10,
       "cgroup": "转向",
-      "ctitle": "AutoSteering Suspend Angle(300)",
-      "cdescr": "Auto steering pauses at large steering angles and resumes when it returns within 15."
+      "ctitle": "自动转向暂停角度(300)",
+      "cdescr": "方向盘角度超过设定值时暂停自动转向；回到约 15 度以内后恢复。"
     },
     {
       "group": "크루즈",
@@ -622,8 +622,8 @@
       "default": -150,
       "unit": 100,
       "cgroup": "纵向控制",
-      "ctitle": "交通信号停止距离调整",
-      "cdescr": ""
+      "ctitle": "红绿灯停止距离调整",
+      "cdescr": "调整识别红灯停车时的停止位置；负数更靠前，正数更靠后。"
     },
     {
       "group": "주행튜닝",
@@ -1247,7 +1247,7 @@
       "unit": 1,
       "cgroup": "启动设置",
       "ctitle": "离线使用模式",
-      "cdescr": "克隆 C3/ACC 供电推荐。开启后跳过在线注册、后台更新、上传和远程连接，熄火断电后下次也能直接启动。"
+      "cdescr": "克隆 C3/ACC 供电推荐的离线模式。开启后跳过在线注册、后台更新、上传和远程连接，熄火断电后下次也能直接启动。"
     },
     {
       "group": "시작",
@@ -1279,7 +1279,7 @@
       "unit": 1,
       "cgroup": "启动设置",
       "ctitle": "屏蔽车门感应",
-      "cdescr": ""
+      "cdescr": "忽略车门状态检测。只在车门信号异常时使用，正常车辆建议关闭。"
     },
     {
       "group": "시작",
@@ -1295,7 +1295,7 @@
       "unit": 1,
       "cgroup": "启动设置",
       "ctitle": "屏蔽安全带感应",
-      "cdescr": ""
+      "cdescr": "忽略安全带状态检测。只在安全带信号异常时使用，正常车辆建议关闭。"
     },
     {
       "group": "크루즈",
@@ -1375,7 +1375,7 @@
       "unit": 1,
       "cgroup": "显示设置",
       "ctitle": "显示调试信息",
-      "cdescr": ""
+      "cdescr": "在行车界面显示调试信息。日常使用建议保持默认，只在排查问题时调整。"
     },
     {
       "group": "화면",
@@ -1423,7 +1423,7 @@
       "unit": 1,
       "cgroup": "显示设置",
       "ctitle": "显示路径终点",
-      "cdescr": ""
+      "cdescr": "在路径线末端显示终点提示，方便观察模型规划范围。"
     },
     {
       "group": "화면",
@@ -1439,7 +1439,7 @@
       "unit": 1,
       "cgroup": "显示设置",
       "ctitle": "显示设备信息",
-      "cdescr": ""
+      "cdescr": "显示设备温度、资源或状态类信息，主要用于排查问题。"
     },
     {
       "group": "화면",
@@ -1886,8 +1886,8 @@
       "default": 0,
       "unit": 1,
       "cgroup": "启动设置",
-      "ctitle": "现代: 摄像头 SCC (0)",
-      "cdescr": "1: 纵向控制车辆, 2: 巡航状态同步 (CAN-FD 车辆), 3: 原厂巡航 (CANFD 纵向线束)"
+      "ctitle": "现代/起亚: 摄像头 SCC (0)",
+      "cdescr": "现代/起亚 SCC 接线模式。Seltos 2023 纯 CAN 默认保持 0；只有确认接线和车型路径后再改。1: 纵控车辆，2: 巡航状态同步(CAN-FD)，3: 原厂巡航(CANFD 纵向线束)。"
     },
     {
       "group": "레이더설정",
@@ -1934,8 +1934,8 @@
       "default": 0,
       "unit": 1,
       "cgroup": "启动设置",
-      "ctitle": "CANFD HDA2 (0)",
-      "cdescr": "0: HDA1, 1: HDA2"
+      "ctitle": "CANFD / HDA2 (0)",
+      "cdescr": "仅用于 CANFD/HDA2 车型。你的 Seltos 2023 是纯 CAN，应保持 0。"
     },
     {
       "group": "시작",
@@ -1951,7 +1951,7 @@
       "unit": 1,
       "cgroup": "启动设置",
       "ctitle": "CANFD 调试 (0)",
-      "cdescr": ""
+      "cdescr": "CANFD 车型调试参数。纯 CAN 车辆不要修改。"
     },
     {
       "group": "레이더설정",
@@ -1967,7 +1967,7 @@
       "unit": 1,
       "cgroup": "雷达设置",
       "ctitle": "开启雷达轨迹 (0)",
-      "cdescr": "-1: 始终使用 SCC\n0: 使用 SCC 雷达\n1: 使用雷达轨迹\n2: 雷达轨迹 + 低速 SCC\n3: 雷达轨迹 + 低速 SCC + 切入车辆 + 隐形车辆"
+      "cdescr": "-2: VOACC 纯视觉测试\n-1: 始终使用 SCC\n0: 使用 SCC 雷达\n1: 使用雷达轨迹\n2: 雷达轨迹 + 低速 SCC\n3: 雷达轨迹 + 低速 SCC + 切入车辆 + 隐形车辆"
     },
     {
       "group": "레이더설정",
@@ -1983,7 +1983,7 @@
       "unit": 10,
       "cgroup": "雷达设置",
       "ctitle": "切入检测灵敏度 (0)",
-      "cdescr": "值越高越早发现从旁边车道驶入的车辆，但太高可能把旁边车道车辆当作前车"
+      "cdescr": "值越高越早发现从旁边车道驶入的车辆；太高可能把旁边车道车辆误判为前车。"
     },
     {
       "group": "레이더설정",
@@ -1999,7 +1999,7 @@
       "unit": 1,
       "cgroup": "雷达设置",
       "ctitle": "开启角雷达 (0)",
-      "cdescr": "1: 开启角雷达, 2: CCNC 车辆的切入检测"
+      "cdescr": "需要车辆实际有角雷达硬件。0: 关闭，1: 开启角雷达，2: CCNC 车辆切入检测。Seltos 2023 未确认硬件前保持 0。"
     },
     {
       "group": "시작",
@@ -2047,7 +2047,7 @@
       "unit": 5,
       "cgroup": "启动设置",
       "ctitle": "音量调节 (100%)",
-      "cdescr": ""
+      "cdescr": "调整提示音整体音量比例。100% 表示默认音量。"
     },
     {
       "group": "시작",
@@ -2063,7 +2063,7 @@
       "unit": 5,
       "cgroup": "启动设置",
       "ctitle": "音量调节，激活音量 (10%)",
-      "cdescr": ""
+      "cdescr": "调整系统进入启用状态时的提示音音量。"
     },
     {
       "group": "차량간격",
@@ -2335,7 +2335,7 @@
       "unit": 1,
       "cgroup": "速度控制",
       "ctitle": "减速带结束点 (1秒)",
-      "cdescr": ""
+      "cdescr": "通过减速带后，按设定时间结束减速控制。"
     },
     {
       "group": "감속제어",
@@ -2351,7 +2351,7 @@
       "unit": 5,
       "cgroup": "速度控制",
       "ctitle": "减速带速度 (35km/h)",
-      "cdescr": ""
+      "cdescr": "导航识别到减速带时使用的目标通过速度。"
     },
     {
       "group": "감속제어",
@@ -2506,8 +2506,8 @@
       "descr": "0: \uc628\ub85c\ub4dc\uc5d0\uc11c\ub9cc\n1: \ud56d\uc0c1\n2: \ud56d\uc0c1+UI\n3: \ud56d\uc0c1+Navi",
       "etitle": "External HUD Debug(0)",
       "edescr": "0: Onroad only\n1: Always\n2: Always + UI\n3: Always + Navi",
-      "ctitle": "External HUD Debug(0)",
-      "cdescr": "0: Onroad only\n1: Always\n2: Always + UI\n3: Always + Navi",
+      "ctitle": "外部 HUD 调试模式(0)",
+      "cdescr": "0: 仅上路时启用\n1: 始终启用\n2: 始终启用 + UI\n3: 始终启用 + 导航",
       "min": 0,
       "max": 3,
       "default": 0,
@@ -2539,7 +2539,7 @@
       "etitle": "External HUD Encoder(0)",
       "edescr": "0: Auto (Hardware H264 -> Software H264 -> JPEG)\n1: JPEG\n2: Hardware H264\n3: Software H264 (ffmpeg/libx264)",
       "ctitle": "外部 HUD 编码器(0)",
-      "cdescr": "0: Auto (Hardware H264 -> Software H264 -> JPEG)\n1: JPEG\n2: Hardware H264\n3: Software H264 (ffmpeg/libx264)",
+      "cdescr": "0: 自动(硬件 H264 -> 软件 H264 -> JPEG)\n1: JPEG\n2: 硬件 H264\n3: 软件 H264(ffmpeg/libx264)",
       "min": 0,
       "max": 3,
       "default": 0,
@@ -2571,7 +2571,7 @@
       "etitle": "External HUD Live FPS Limit(1)",
       "edescr": "0: Uncapped (diagnostic)\n1: 10 FPS (default)\n2: 20 FPS\n3: 30 FPS\n4: 40 FPS\n5: 50 FPS\n6: 60 FPS",
       "ctitle": "外部 HUD 实时 FPS 限制(1)",
-      "cdescr": "0: Uncapped (diagnostic)\n1: 10 FPS (default)\n2: 20 FPS\n3: 30 FPS\n4: 40 FPS\n5: 50 FPS\n6: 60 FPS",
+      "cdescr": "0: 不限帧率(诊断用)\n1: 10 FPS(默认)\n2: 20 FPS\n3: 30 FPS\n4: 40 FPS\n5: 50 FPS\n6: 60 FPS",
       "min": 0,
       "max": 6,
       "default": 1,
@@ -2650,8 +2650,8 @@
       "descr": "CLUSTER_REALTIME=1\uc77c \ub54c\ub9cc \uc801\uc6a9\n0: 1,2,3,4\n1: \ubaa8\ub4e0 \ucf54\uc5b4\n\ubcc0\uacbd \uc2dc \ud074\ub7ec\uc2a4\ud130 HUD\ub97c \uc7ac\uc2dc\uc791\ud569\ub2c8\ub2e4.",
       "etitle": "External HUD CPU Core Mode(0)",
       "edescr": "Applies only when CLUSTER_REALTIME=1\n0: cores 1,2,3,4\n1: all cores\nChanging this restarts the cluster HUD process.",
-      "ctitle": "External HUD CPU Core Mode(0)",
-      "cdescr": "Applies only when CLUSTER_REALTIME=1\n0: cores 1,2,3,4\n1: all cores\nChanging this restarts the cluster HUD process.",
+      "ctitle": "外部 HUD CPU 核心模式(0)",
+      "cdescr": "仅在 CLUSTER_REALTIME=1 时生效。\n0: 使用核心 1,2,3,4\n1: 使用全部核心\n修改后会重启外部 HUD 进程。",
       "min": 0,
       "max": 1,
       "default": 0,
@@ -2666,8 +2666,8 @@
       "descr": "CLUSTER_REALTIME=1\uc77c \ub54c\ub9cc \uc801\uc6a9\n1-99\n\uae30\ubcf8 10\n\ubcc0\uacbd \uc2dc \ud074\ub7ec\uc2a4\ud130 HUD\ub97c \uc7ac\uc2dc\uc791\ud569\ub2c8\ub2e4.",
       "etitle": "External HUD Realtime Priority(10)",
       "edescr": "Applies only when CLUSTER_REALTIME=1\n1-99\nDefault 10\nChanging this restarts the cluster HUD process.",
-      "ctitle": "External HUD Realtime Priority(10)",
-      "cdescr": "Applies only when CLUSTER_REALTIME=1\n1-99\nDefault 10\nChanging this restarts the cluster HUD process.",
+      "ctitle": "外部 HUD 实时优先级(10)",
+      "cdescr": "仅在 CLUSTER_REALTIME=1 时生效。\n范围 1-99，默认 10。修改后会重启外部 HUD 进程。",
       "min": 1,
       "max": 99,
       "default": 10,
@@ -2682,8 +2682,8 @@
       "descr": "0: \uae30\ubcf8\n1: \ubaa8\ub4dc1(\ud558\ub2e8\ubdf0)",
       "etitle": "External HUD Camera View Mode(0)",
       "edescr": "0: Default\n1: Mode 1 (bottom view)",
-      "ctitle": "External HUD Camera View Mode(0)",
-      "cdescr": "0: Default\n1: Mode 1 (bottom view)",
+      "ctitle": "外部 HUD 摄像头视图模式(0)",
+      "cdescr": "0: 默认\n1: 模式 1(下方视图)",
       "min": 0,
       "max": 1,
       "default": 0,
