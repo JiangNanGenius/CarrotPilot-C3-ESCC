@@ -54,13 +54,14 @@ C4 旁支。当前本地暂按 `origin/carrot-wip` 跟踪；后续需要再确�
 
 ## 合并顺序
 
-1. `upstream/c3-wip` 同步最新版。
-2. `personal/c3-escc` rebase 或 merge 上游。
-3. 解决 ESCC 冲突。
-4. 跑检查单。
-5. 打测试 tag。
-6. 上车低风险验证。
-7. 稳定后再合 atune/CP搭子功能。
+1. 运行 `python3 scripts/personal/update_audit.py --fetch`，确认哪些来源有新提交和高风险目录变化。
+2. `upstream/c3-wip` 同步最新版。
+3. `personal/c3-escc` rebase 或 merge 上游。
+4. 解决 ESCC 冲突。
+5. 跑检查单。
+6. 打测试 tag。
+7. 上车低风险验证。
+8. 稳定后再合 atune/CP搭子功能。
 
 ## 不建议的做法
 

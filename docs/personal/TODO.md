@@ -117,6 +117,7 @@
 - [x] 增加个人版本地 smoke 检查脚本。
 - [x] 增加 ESCC / Always Offline 上车前静态 preflight 脚本。
 - [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight 脚本。
+- [x] 增加上游更新审计脚本，检查三方来源、tracking 分支和高风险目录变化。
 - [x] 推送主用分支 `personal/c3-escc` 到个人 GitHub 仓库。
 - [x] 推送整合分支 `personal/c3-escc-atune` 到个人 GitHub 仓库。
 - [ ] 给每个可上车版本打 tag，例如 `seltos-c3-escc-YYYYMMDD`.

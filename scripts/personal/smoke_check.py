@@ -313,6 +313,7 @@ def check_py_compile() -> None:
     "scripts/personal/smoke_check.py",
     "scripts/personal/escc_offline_preflight.py",
     "scripts/personal/cplink_preflight.py",
+    "scripts/personal/update_audit.py",
     "opendbc_repo/opendbc/car/hyundai/values.py",
     "opendbc_repo/opendbc/car/hyundai/interface.py",
     "opendbc_repo/opendbc/car/hyundai/radar_interface.py",

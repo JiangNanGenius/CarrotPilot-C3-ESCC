@@ -315,3 +315,24 @@
 
 - `python3 scripts/personal/cplink_preflight.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-17: 上游更新审计工具
+
+新增文件：
+
+- `scripts/personal/update_audit.py`
+
+改动内容：
+
+- 增加本地维护审计脚本，用于更新前检查：
+  - 当前分支是否仍包含 `origin/c3-wip` 和 `personal/c3-escc`。
+  - `upstream/c3-wip`、`tracking/c4`、`tracking/jixie-atune`、`tracking/jixie-master`、`tracking/fishop-cp` 是否落后对应远端。
+  - 新提交是否触碰 Hyundai、DBC、panda safety、params、cereal、controls、carrot、manager 等高风险目录。
+- 支持 `--fetch`，需要联网时先拉取各来源再审计。
+- 将脚本加入 `smoke_check.py` 的 Python 语法检查。
+- 在 README、分支策略和更新检查单中加入使用入口。
+
+验证：
+
+- `python3 scripts/personal/update_audit.py` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。

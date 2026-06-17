@@ -16,9 +16,11 @@
 
 ## 1. 拉取上游
 
+- [ ] 运行 `python3 scripts/personal/update_audit.py --fetch`。
 - [ ] 拉取 `ajouatom/openpilot:c3-wip`。
 - [ ] 拉取 `fishop/openpilot:cp`。
 - [ ] 拉取 `jixiexiaoge/openpilot:atune`。
+- [ ] 检查 `update_audit.py` 输出的 remote ahead、新提交标题和高风险目录。
 - [ ] 查看三方最近提交标题。
 - [ ] 判断这次是否涉及高风险目录。
 - [ ] 确认个人远端 `github` 可推送。
@@ -108,6 +110,7 @@
 
 ## 5. 构建和静态检查
 
+- [ ] 运行 `python3 scripts/personal/update_audit.py` 并确认当前分支仍包含 `origin/c3-wip` 和 `personal/c3-escc`。
 - [ ] 运行 `python3 scripts/personal/smoke_check.py` 并确认全部通过。
 - [ ] 单独运行 `python3 scripts/personal/escc_offline_preflight.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/cplink_preflight.py` 并确认没有失败项。

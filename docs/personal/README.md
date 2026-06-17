@@ -35,6 +35,7 @@
 更新、合并或上车前先跑：
 
 ```bash
+python3 scripts/personal/update_audit.py
 python3 scripts/personal/smoke_check.py
 ```
 
@@ -45,4 +46,6 @@ python3 scripts/personal/escc_offline_preflight.py
 python3 scripts/personal/cplink_preflight.py
 ```
 
-这些检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
+`update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
+
+其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
