@@ -18,12 +18,12 @@
 
 当前静态检查 tag：
 
-- `carrotpilot-c3-escc-20260618-static25`
+- `carrotpilot-c3-escc-20260618-static26`
 - 只代表静态检查通过，不代表实车验证。
 
 当前受控上车测试 tag：
 
-- `carrotpilot-c3-escc-20260618-test17`
+- `carrotpilot-c3-escc-20260618-test18`
 - 用于停车静态检查、证据采集和低速短程验证。
 - 不作为日常稳定安装目标。
 
@@ -41,6 +41,30 @@ python3 scripts/personal/escc_offline_preflight.py
 ```
 
 `escc_offline_preflight.py` 只能证明代码里的 capnp、DBC、Params key、设置默认值和 ESCC/离线路径引用完整；它不能替代实车确认 0x2AB、ACC 断电重启、SCC/AEB 状态。
+
+## Release 和安装器
+
+GitHub Release 只负责记录“这次可安装的版本、检查状态和注意事项”。Release 自动带的 zip/tar.gz 是源码快照，不是车机安装包；车机真正安装时仍然应该拉取一个 git tag 或运行安装器。
+
+`installer.comma.ai` 的公开入口提示格式是 `用户名或组织/分支`，例如 `commaai/master-ci`。这说明官方安装入口偏向固定仓库/分支格式；本项目仓库名是 `CarrotPilot-C3-ESCC`，所以不要假设官方入口能直接安装这个仓库名。
+
+鱼店/马上飞扬的 `gitop.vip/cp` 是一个 AArch64 ELF 安装器二进制，它内置了 `https://jihulab.com/fishop/openpilot.git` 和 `cp` 分支，并会把代码放到 `/data/openpilot`。本项目先提供一个更透明的脚本安装器，后续如果需要一键输入短链接，再单独做同款 C3 GUI 二进制安装器。
+
+当前脚本安装器：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/JiangNanGenius/CarrotPilot-C3-ESCC/carrotpilot-c3-escc-20260618-test18/scripts/personal/install_c3_escc.sh | sh
+```
+
+脚本默认安装 `carrotpilot-c3-escc-20260618-test18`，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffline=1`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。
+
+如果要先看它会做什么：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/JiangNanGenius/CarrotPilot-C3-ESCC/carrotpilot-c3-escc-20260618-test18/scripts/personal/install_c3_escc.sh | sh -s -- --dry-run
+```
+
+如果以后已经有 `stable` tag，脚本里的默认 ref 会改成 stable；在此之前，它只能作为受控测试安装入口。
 
 ## 安装前
 

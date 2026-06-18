@@ -374,6 +374,10 @@ def check_learning_service_mock() -> None:
 
 
 def check_py_compile() -> None:
+  pycache = Path("/tmp/carrotpilot-c3-escc-pycache")
+  pycache.mkdir(parents=True, exist_ok=True)
+  os.environ.setdefault("PYTHONPYCACHEPREFIX", str(pycache))
+
   files = [
     "scripts/personal/smoke_check.py",
     "scripts/personal/escc_offline_preflight.py",
@@ -428,6 +432,23 @@ def check_js_syntax() -> str:
   for f in files:
     run(["node", "--check", f], "js syntax " + f)
   return "checked"
+
+
+def check_install_script() -> None:
+  run(["sh", "-n", "scripts/personal/install_c3_escc.sh"], "C3 installer shell syntax")
+  run([
+    "scripts/personal/install_c3_escc.sh",
+    "--dry-run",
+    "--force",
+    "--install-dir",
+    "/data/openpilot-smoke",
+    "--tmp-dir",
+    "/data/tmppilot-smoke",
+    "--backup-root",
+    "/data/carrotpilot-backups-smoke",
+    "--no-params",
+    "--no-continue",
+  ], "C3 installer dry-run")
 
 
 def check_c3_static_dry_run() -> None:
@@ -562,6 +583,7 @@ def main() -> int:
     ("Feature status report", lambda: run([sys.executable, "scripts/personal/feature_status_report.py", "--strict"], "Feature status report")),
     ("Chinese settings audit", lambda: run([sys.executable, "scripts/personal/settings_cn_audit.py"], "Chinese settings audit")),
     ("Install target manifest", lambda: run([sys.executable, "scripts/personal/install_target_check.py"], "Install target manifest")),
+    ("C3 installer script", check_install_script),
     ("Params migration self-test", lambda: run([sys.executable, "scripts/personal/params_migration.py", "self-test"], "Params migration self-test")),
     ("C3 static check dry-run", check_c3_static_dry_run),
     ("Real-car evidence bundle dry-run", check_real_car_evidence_dry_run),
