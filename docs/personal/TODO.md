@@ -137,6 +137,18 @@
 - [x] 单独迁移只读 AmapNavi 状态兼容桥，默认关闭，只发布车道线和原车盲区状态，不接收 APP 命令。
 - [x] 给只读 AmapNavi 状态桥补设备端采样和可选证据检查，不把它作为 stable 必需项。
 - [ ] 单独迁移 fishop 完整 `amap_navi.py` 或 APP/导航增强，不能整包合并。
+- [ ] 跟踪 fishop/码上飞扬最新版“车道识线 / 车道曲线”功能，确认输入来源、坐标系、刷新率、可信度字段和失败状态。
+- [ ] 跟踪 fishop/码上飞扬外接激光雷达 / 侧向感知硬件，确认左右车道数据、左右盲区数据、目标距离/速度/置信度、传感器健康状态和断线行为。
+- [ ] 新增 fishop 硬件增强输入层，先只记录和显示，不进入控制：车道曲线、左右车道边界、左右盲区、侧向目标、传感器健康。
+- [ ] 新增 fishop 硬件增强参数门控，默认全部关闭：
+  - `FishopLaneCurveEnabled=0`
+  - `FishopLidarLaneDataEnabled=0`
+  - `FishopLidarBlindspotEnabled=0`
+  - `FishopAutoOvertakeEnabled=0`
+- [ ] 迁移 fishop 自动超车 / APP 控制变道 / `OVERTAKE` 逻辑，必须接入现有安全变道链路，不允许绕过 turn signal、BSM、驾驶员确认、Seltos 2023 车型门禁。
+- [ ] 自动超车第一阶段只做提示和日志，第二阶段只允许建议变道，第三阶段才允许受控执行；每阶段单独实车证据。
+- [ ] 国内导航 / 高德相关输入只能作为辅助来源；在澳洲或导航精度不足时，不能作为自动超车或侧向控制的唯一依据。
+- [ ] 设备快照和证据包新增 fishop 硬件采样：车道曲线、左右盲区、传感器在线、最近更新时间、自动超车状态。
 - [x] 决定哪些进入主分支，哪些放到实验分支：
   - ESCC 继续保留在主分支，默认关闭。
   - CP搭子 / Navipilot 核心协议保留在主分支，`LANECHANGE` 只走现有安全变道链路。
@@ -206,3 +218,207 @@
 - [x] 扩展本地化审计到 cluster HUD git 状态、Auto-Tuner 参数注释和日志诊断注释，避免这些可见/诊断路径重新出现韩文。
 - [x] 每批翻译单独提交，方便回滚。
 - [ ] 继续低优先级打磨纯显示类、非关键类参数说明；只改显示文字，不改默认值、范围或控制含义。
+
+## P8: SunnyPilot 0.11+ / C3 新架构完整开发线
+
+独立 alpha 线，不影响当前 CarrotPilot-C3-ESCC 日常安装入口。现有 `personal/c3-escc-atune`、`/i`、`latest`、`install-c3-escc-test` 保持稳定线；新架构只走 `experimental/sunnypilot-011-c3`、`alpha-sunnypilot-c3` 和 Pages `/x`。
+
+### P8.0: 研究结论和边界
+
+- [x] 确认 Mr.One `op.mr-one.cn` 安装链接需要 `AGNOSSetup-12.4` User-Agent。
+- [x] 确认 `op.mr-one.cn/res`、`release-new`、`devc3` 都指向 `jihulab.com/mr-one/openpilot.git` 的对应分支。
+- [x] 确认 `mr-one.cn/new/devc3` 指向 `jihulab.com/mr-one/onepilot.git:devc3`，与 `op.mr-one.cn/devc3` 不是同一个安装器。
+- [x] 确认官方 SunnyPilot `dev/staging/master` 当前是 `0.11.2`。
+- [x] 确认 Mr.One `openpilot/dev` 与官方 SunnyPilot `dev` 相同。
+- [x] 确认 Mr.One `openpilot/staging` 只接近官方 SunnyPilot `staging`，不是完整 C3 迁移基座。
+- [x] 确认 Mr.One `openpilot/devc3` 是 `0.11.1` C3 兼容补丁样本。
+- [x] 确认 Mr.One `openpilot/res` 是 `0.10.1` 旧 C3/TICI 兼容补丁样本。
+- [x] 确认 Mr.One `openpilot/release-new` 是 IQ.Pilot `0.10.4` 体系，不作为 SunnyPilot 主基座。
+- [x] 写入 `SUNNYPILOT_C3_LATEST_ARCHITECTURE_PLAN.md`。
+- [ ] 更新 `SUNNYPILOT_C3_LATEST_ARCHITECTURE_PLAN.md`，把本节完整开发计划同步进去。
+- [ ] 在 `AGENTS.md` 写清新架构线更新策略，后续用户说“继续更新新架构”时按本 P8 执行。
+
+### P8.1: 基座、远端和分支
+
+- [x] 新增远端 `sunnypilot`，指向官方 `https://github.com/sunnypilot/sunnypilot.git`。
+- [x] 新增远端 `mrone-openpilot`，指向 `https://jihulab.com/mr-one/openpilot.git`。
+- [ ] 只抓必要分支：SunnyPilot `staging/master/dev/release-tizi/staging-tici`；Mr.One `devc3/res/release-new/staging/dev`。
+- [x] 从官方 SunnyPilot `staging` 0.11.2 建立独立工作树或分支 `experimental/sunnypilot-011-c3`。
+- [ ] 建立短安装分支 `alpha-sunnypilot-c3`，用于安装器不能输入带 `/` 分支名的场景。
+- [ ] 新增 Pages 入口 `/x` 指向 `alpha-sunnypilot-c3`。
+- [ ] 明确确认 `/i`、`latest`、稳定 release、`install-c3-escc-test` 不改指向。
+- [x] 记录新架构基座提交、COMMA_VERSION、SunnyPilot 模型管理器版本和 Mr.One 参考提交。
+
+### P8.2: C3/TICI 兼容补丁
+
+- [ ] 对比 Mr.One `devc3` 与官方 SunnyPilot `release-tizi/staging`，列出 C3/TICI 必需补丁。
+- [ ] 对比 Mr.One `res` 与官方旧 TICI 线，列出旧 C3/TICI 可借鉴补丁。
+- [ ] 抽取硬件识别补丁，确认克隆 C3 设备字符串为 `tici` 时不会被误判为 C4/C3X。
+- [ ] 抽取启动和 UI setup 必需补丁，保证 C3 停车状态能进入 UI。
+- [ ] 抽取 installer 必需补丁，保证二进制安装器能拉 `alpha-sunnypilot-c3`。
+- [ ] 抽取 modeld/modeld_v2 兼容补丁，保证 stock modeld 在 C3 上可启动。
+- [ ] 明确拒绝 Mr.One 私有注册、额外 client、上传、云连接、禁用关机、大面积 safety/opendbc 改动。
+- [ ] 不照抄 Mr.One 永不关机逻辑；电源策略必须适配用户 ACC/CAN 熄火断电场景。
+
+### P8.3: 云服务移除和本地网络保留
+
+- [ ] 从 manager 注册中硬禁用 `manage_athenad`。
+- [ ] 从 manager 注册中硬禁用 `uploader`，不依赖 `OnroadUploads=0`。
+- [ ] 从 manager 注册中硬禁用 `manage_sunnylinkd`。
+- [ ] 从 manager 注册中硬禁用 `sunnylink_registration_manager`。
+- [ ] 从 manager 注册中硬禁用 `statsd_sp`。
+- [ ] 从 manager 注册中硬禁用 `backup_manager`。
+- [ ] 审查 `statsd`，若存在网络发送路径则禁用网络发送或从 manager 移除。
+- [ ] 移除 Sunnylink onboarding 同意页。
+- [ ] 移除 Sunnylink 设置页、侧边栏状态、配对按钮、赞助/远程访问 UI、云备份 UI。
+- [ ] 移除设备设置里的 `Onroad Uploads` 开关。
+- [ ] 旧参数 `SunnylinkEnabled`、`EnableSunnylinkUploader`、`OnroadUploads` 即使存在，也不能启动云服务。
+- [ ] 保留本地 Wi-Fi、SSH、Carrot Web、本地更新、GitHub 更新、模型清单和模型下载。
+
+### P8.4: C3 电源和 Always Offroad
+
+- [ ] 使用 SunnyPilot 原生 `OffroadMode` 承载 Always Offroad 语义，不新增 `AlwaysOffline` 或其它混淆别名。
+- [ ] 默认 `OffroadMode=0`。
+- [ ] 开启 `OffroadMode` 时保持 offroad，用于驻车更新和调试。
+- [ ] 开启 `OffroadMode` 时 panda 进入 no-output，避免 harness 继电器误动作。
+- [ ] 开启 `OffroadMode` 时本地网络、SSH、Web、GitHub 更新、模型下载仍可用。
+- [ ] 设备快照记录 `OffroadMode`、panda output 状态、电源策略和进程状态。
+
+### P8.5: Seltos 2023 SCC 和 ESCC 自动识别
+
+- [ ] 新增 `KIA_SELTOS_2023`。
+- [ ] `KIA_SELTOS_2023` 严格复用 `KIA_SELTOS` / 2021 SCC 纯 CAN specs。
+- [ ] `KIA_SELTOS_2023` 严格复用 Seltos 2021 DBC、harness、checksum、横纵控基础配置。
+- [ ] 不默认开启 CANFD、HDA2、Camera SCC 或 Non-SCC 路径。
+- [ ] 排除 `KIA_SELTOS_2023_NON_SCC` 自动识别。
+- [ ] 排除 `KIA_SELTOS_2023_NON_SCC` 手动选择；若匹配到 Non-SCC，fail-closed 提示车型冲突。
+- [ ] 确认 ESCC 只使用 SunnyPilot 原生 0x2AB 自动识别并置 `ENHANCED_SCC`。
+- [ ] 不新增普通用户 `EnableEscc` 手动开关；ESCC 是否存在由硬件消息决定。
+- [ ] 增加静态检查，确认 Seltos 2023 与 2021 SCC 等价且 Non-SCC 不参与个人版匹配。
+
+### P8.6: SunnyPilot 模型管理器
+
+- [ ] 采用 SunnyPilot 原生 `sunnypilot.models.manager`。
+- [ ] 采用 `ModelManager_ActiveBundle`、`ModelRunnerTypeCache` 和 `modeld_tinygrad`。
+- [ ] 默认 stock model。
+- [ ] 自定义模型下载、校验、切换只允许 offroad 执行。
+- [ ] active bundle 无效时回退 stock 或上一个有效 bundle。
+- [ ] 旧 Carrot model selector 只参考签名校验、hash/size、原子替换、失败回滚和状态记录。
+- [ ] 设备证据记录 active bundle、runner、modeld 状态、`modelV2`、`drivingModelData`、`cameraOdometry`。
+- [ ] 模型列表下载保留为用户主动维护功能，不归类为云连接服务。
+
+### P8.7: 限速、手机数据和地图覆盖
+
+- [ ] 扩展 Sunny speed limit schema，新增 `phone` 来源和来源说明标签。
+- [ ] 接入 APN/N、Navipilot、Carrot 手机实时限速数据。
+- [ ] 限速优先级实现为：新鲜手机数据 > 车机/仪表 `carStateSP.speedLimit` > Sunny OSM/mapd > 无来源。
+- [ ] 手机限速必须有超时保护；超时后退回车机或 mapd，不允许过期手机数据压住车辆限速。
+- [ ] Mapbox/Kakao/Carrot route 不作为默认限速真值，只做可选路线显示。
+- [ ] 新增 `CarrotMapOverlayEnabled=0`。
+- [ ] `CarrotMapOverlayEnabled=0` 时不加载地图 iframe、不请求外部地图 SDK、不遮挡 HUD。
+- [ ] 限速 fixed offset 默认 0。
+- [ ] 增加 percentage offset 支持，默认 0%。
+- [ ] UI 和证据里能看出当前限速来源、偏移模式、偏移值和数据新鲜度。
+
+### P8.8: Carrot / 机械小哥功能迁移
+
+- [ ] 迁移 CarrotMan。
+- [ ] 迁移 CP搭子 / Navipilot 参数接口。
+- [ ] 迁移 APN/N 输入。
+- [ ] 迁移导航事件。
+- [ ] 迁移 SDI/测速摄像头数据路径。
+- [ ] 迁移减速带数据路径。
+- [ ] 迁移 model speed。
+- [ ] 迁移 Carrot Web。
+- [ ] 迁移主动限速控制，独立开关默认关闭。
+- [ ] 迁移自动转弯减速，独立开关默认关闭。
+- [ ] 迁移红绿灯停车，独立开关默认关闭。
+- [ ] 每个高风险控制功能都要有实车门禁，不得随 Carrot 功能迁移自动改变控制目标。
+
+### P8.9: fishop / 码上飞扬硬件增强迁移
+
+- [ ] 研究 fishop 最新版车道识线 / 车道曲线实现，确认它是视觉、APP、雷达/激光雷达还是融合输出。
+- [ ] 研究 fishop 外接激光雷达左右车道数据，确认坐标系、单位、刷新率、时间戳、置信度和丢包处理。
+- [ ] 研究 fishop 外接激光雷达盲区数据，确认左右盲区、侧向目标、目标速度、距离、传感器在线和故障状态。
+- [ ] 设计统一硬件增强消息/参数桥，先接收并记录，不进入控制。
+- [ ] 增加 Web/UI 只读显示：车道曲线、左右车道数据、左右盲区、传感器健康、数据新鲜度。
+- [ ] 新增默认关闭参数：`FishopLaneCurveEnabled=0`、`FishopLidarLaneDataEnabled=0`、`FishopLidarBlindspotEnabled=0`、`FishopAutoOvertakeEnabled=0`。
+- [ ] 自动超车只接入现有安全变道链路；不得绕过转向灯、原车/外接盲区、驾驶员确认、速度范围、道路类型和 Seltos 2023 车型门禁。
+- [ ] 自动超车分阶段验证：只显示/只建议/受控执行，每阶段必须有单独日志和回滚点。
+- [ ] 高德 / 国内导航精度不足或地区不适配时，自动超车和侧向控制必须降级为不可用或只提示。
+- [ ] 每次启用 fishop 硬件控制相关功能前，证据包必须证明云进程不存在、ESCC 正常、基础横控正常、传感器数据新鲜且一致。
+
+### P8.10: Auto-Tuner 迁移
+
+- [ ] 迁移 `CarrotLearningActive`。
+- [ ] 迁移推荐值生成。
+- [ ] 迁移推荐值手动应用。
+- [ ] 迁移历史记录。
+- [ ] 默认 `CarrotLearningActive=0`。
+- [ ] 默认 `CarrotLearningAutoApply=0`。
+- [ ] 不允许自动学习结果默认改写转向、纵控或 ESCC 参数。
+- [ ] Web/UI 明确区分“推荐值”和“已应用值”。
+
+### P8.11: 本地化和说明
+
+- [ ] 清理新架构线韩文直出。
+- [ ] 补中文和英文说明，重点覆盖模型、限速、Offroad、Carrot 高级控制、fishop 硬件增强、自动超车、Auto-Tuner。
+- [ ] Sunnylink/comma connect 相关说明从用户 UI 移除，不再作为可配置云功能。
+- [ ] 风险项说明必须写清默认值、适用场景、何时不要打开。
+- [ ] 本地化审计覆盖 settings、sidebar、onboarding、Carrot Web、诊断输出和参数说明。
+
+### P8.12: 安装器、文档和署名
+
+- [ ] 更新安装说明，新增 `https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x`。
+- [ ] `/x` 安装器支持选择或切换 `alpha-sunnypilot-c3`。
+- [ ] 回滚说明保留 `/i`、当前 test tag 和 SSH 备用路径。
+- [ ] README 明确 alpha 新架构线不能当 stable/latest。
+- [ ] README 增加主要功能说明：ESCC、Seltos 2023、模型管理器、限速来源、Carrot Web、Auto-Tuner、Offroad。
+- [ ] README/credits 保留署名：机械小哥、码上飞扬/fishop、ajouatom/CarrotPilot、SunnyPilot、Mr.One 参考补丁。
+- [ ] 记录哪些功能来自移植、哪些只是参考、哪些暂未完成。
+
+### P8.13: 静态验证
+
+- [ ] 静态检查云进程不在 manager 注册表。
+- [ ] 静态检查 Sunnylink、Onroad Uploads 不出现在 onboarding、settings、sidebar。
+- [ ] 静态检查旧云参数不能启动云进程。
+- [ ] 静态检查 Seltos 2023 等价 2021 SCC。
+- [ ] 静态检查 Non-SCC Seltos 不参与匹配。
+- [ ] 静态检查 ESCC 0x2AB 自动置 flag。
+- [ ] 静态检查 fishop 硬件增强和自动超车参数默认关闭，且自动超车不能绕过安全变道链路。
+- [ ] schema 检查通过。
+- [ ] params 检查通过。
+- [ ] services 检查通过。
+- [ ] Hyundai interface 检查通过。
+- [ ] model manager 检查通过。
+- [ ] Carrot Web JS/JSON 语法检查通过。
+
+### P8.14: C3 停车验证
+
+- [ ] `/x` 安装后 UI 可启动。
+- [ ] manager 可启动。
+- [ ] stock modeld 可启动。
+- [ ] models_manager 可在 offroad 拉取模型清单。
+- [ ] mapd 可用但地图覆盖默认不加载。
+- [ ] 本地 Web 可用。
+- [ ] SSH 可用。
+- [ ] GitHub 更新可用。
+- [ ] 无 `athenad` 进程。
+- [ ] 无 `sunnylinkd` 进程。
+- [ ] 无 `uploader` 进程。
+- [ ] 无 `statsd_sp` 进程。
+- [ ] 无 `backup_manager` 进程。
+- [ ] 保存设备快照和日志证据。
+
+### P8.15: 实车验证顺序
+
+- [ ] 第一轮：stock model、Carrot 控制关闭，只测 C3 启动、Seltos 2023、ESCC 自动识别、基础横控。
+- [ ] 第二轮：限速只显示，验证 APN/N、车机、OSM/mapd 来源切换。
+- [ ] 第三轮：单独验证 Speed Limit Assist。
+- [ ] 第四轮：单独验证模型选择器。
+- [ ] 第五轮：单独验证 Carrot 红灯停车和自动转弯减速。
+- [ ] 第六轮：只读验证 fishop 车道曲线、左右车道数据、激光雷达盲区和传感器健康。
+- [ ] 第七轮：只提示/只建议验证 fishop 自动超车，不允许受控执行。
+- [ ] 第八轮：在前七轮全部通过后，才考虑受控自动超车实验。
+- [ ] 每轮证据都要求云进程不存在。
+- [ ] 每轮都保留回滚安装器和上一轮可用 tag。
