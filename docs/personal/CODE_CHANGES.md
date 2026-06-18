@@ -1,5 +1,32 @@
 # 当前代码改动记录
 
+## 2026-06-18: 模型选择器只读状态采集
+
+改动文件：
+
+- `scripts/personal/device_snapshot.py`
+- `scripts/personal/road_test_evidence_check.py`
+- `scripts/personal/evidence_readiness_report.py`
+- `scripts/personal/smoke_check.py`
+- `docs/personal/DEVICE_SNAPSHOT.md`
+- `docs/personal/MODEL_SELECTOR_RESEARCH.md`
+- `docs/personal/TODO.md`
+
+改动内容：
+
+- 设备快照新增 `DrivingModelName`、`PendingModelName` 参数记录。
+- 设备快照新增 `Model Selector Status` 表，读取 `/data/model_selector_status`，记录 engine、是否自定义 `carrot_modeld`、是否存在 pending 模型安装状态。
+- 默认主线没有模型选择器状态文件时显示 `model_selector_engine=default_upstream_assumed`，表示继续使用内置 upstream modeld。
+- `road_test_evidence_check.py` 新增可选 `--require-model-selector-status`，要求状态字段存在且没有 pending 模型安装/重启状态。
+- `evidence_readiness_report.py` 新增可选阶段 `Model selector status`。
+- `smoke_check.py` 检查 C3 静态 dry-run 快照必须包含模型选择器只读字段。
+
+刻意没有改：
+
+- 没有启用模型下载、安装、编译、Web 模型页或 `modeld_runner`。
+- 没有把模型选择器作为 stable 必需项。
+- 没有改变默认模型；这只是后续实验分支和上车排查用的证据口子。
+
 ## 2026-06-18: Always Offline 进程证据守卫
 
 改动文件：

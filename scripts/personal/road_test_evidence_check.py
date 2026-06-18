@@ -248,6 +248,29 @@ def require_offline_process_guard(values: Dict[str, str], label: str) -> None:
     require_bool(values, key, False, label)
 
 
+def require_model_selector_status(values: Dict[str, str], label: str) -> None:
+  required = [
+    "DrivingModelName",
+    "PendingModelName",
+    "model_selector_status_available",
+    "model_selector_engine",
+    "model_selector_custom_active",
+    "model_selector_pending_active",
+    "model_selector_current_model",
+    "model_selector_pending_model",
+    "model_selector_describe",
+  ]
+  missing = [key for key in required if key not in values]
+  if missing:
+    raise EvidenceError(f"{label}: model selector status is missing:\n" + "\n".join(missing))
+  if bool_value(values, "model_selector_pending_active"):
+    pending = values.get("model_selector_pending_model", "")
+    raise EvidenceError(f"{label}: model selector has pending model install/reboot state: {pending!r}")
+  engine = values.get("model_selector_engine", "").strip()
+  if engine not in {"default_upstream_assumed", "upstream_modeld", "carrot_modeld"}:
+    raise EvidenceError(f"{label}: unexpected model selector engine: {engine!r}")
+
+
 def validate_snapshot_text(name: str, text: str) -> Dict[str, str]:
   if "# CarrotPilot-C3-ESCC Device Snapshot" not in text:
     raise EvidenceError(f"{name}: not a CarrotPilot-C3-ESCC device snapshot")
@@ -295,6 +318,7 @@ def validate_snapshots(
   require_escc_sample: bool,
   require_cplink_sample: bool,
   require_amap_navi_sample: bool,
+  require_model_selector_status_flag: bool,
   require_offline_guard: bool,
   require_carparams: bool,
 ) -> List[Dict[str, str]]:
@@ -357,6 +381,21 @@ def validate_snapshots(
       raise EvidenceError(
         "AmapNavi evidence requires a sampled snapshot with EnableAmapNaviStatus=1, "
         "enabled=True, ok=True, and amapNavi_updates > 0"
+      )
+
+  if require_model_selector_status_flag:
+    found = False
+    for values in snapshots:
+      try:
+        require_model_selector_status(values, "model selector status")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError(
+        "model selector evidence requires a device snapshot with model selector status fields "
+        "and no pending model install/reboot state"
       )
 
   if require_carparams:
@@ -472,6 +511,8 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `CanfdHDA2` | 0 |
 | `HyundaiCameraSCC` | 0 |
 | `EnableAmapNaviStatus` | 1 |
+| `DrivingModelName` | <missing> |
+| `PendingModelName` | <missing> |
 | `CarParams` | 200 bytes, sha256:abc |
 | `process_snapshot_available` | True |
 | `offline_forbidden_processes_seen` | False |
@@ -494,6 +535,13 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `amap_navi_lane_seen` | True |
 | `amap_navi_left_blind_seen` | False |
 | `amap_navi_right_blind_seen` | False |
+| `model_selector_status_available` | False |
+| `model_selector_engine` | default_upstream_assumed |
+| `model_selector_custom_active` | False |
+| `model_selector_pending_active` | False |
+| `model_selector_current_model` | <missing> |
+| `model_selector_pending_model` | <missing> |
+| `model_selector_describe` | status file missing; default upstream modeld assumed |
 | `CarParamsDecoded` | ok |
 | `carName` | hyundai |
 | `carFingerprint` | KIA_SELTOS_2023 |
@@ -514,6 +562,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_escc_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_cplink_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_amap_navi_sample=True)
+  validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_model_selector_status_flag=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_offline_guard=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_carparams=True)
   validate_navipilot_live_checks_from_objects([good_navipilot], require_navipilot_live_check=True)
@@ -537,6 +586,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
       require_escc_sample=True,
       require_cplink_sample=True,
       require_amap_navi_sample=True,
+      require_model_selector_status_flag=True,
       require_offline_guard=True,
       require_carparams=True,
     )
@@ -562,6 +612,7 @@ def validate_snapshots_from_text(
   require_escc_sample: bool = False,
   require_cplink_sample: bool = False,
   require_amap_navi_sample: bool = False,
+  require_model_selector_status_flag: bool = False,
   require_offline_guard: bool = False,
   require_carparams: bool = False,
 ) -> List[Dict[str, str]]:
@@ -605,6 +656,17 @@ def validate_snapshots_from_text(
         break
     if not found:
       raise EvidenceError("self-test failed: AmapNavi sample was not detected")
+  if require_model_selector_status_flag:
+    found = False
+    for values in snapshots:
+      try:
+        require_model_selector_status(values, "self-test snapshot")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError("self-test failed: model selector status was not detected")
   if require_carparams:
     found = False
     for values in snapshots:
@@ -664,6 +726,7 @@ def main() -> int:
   parser.add_argument("--require-escc-sample", action="store_true", help="require EnableEscc=1 and sampled 0x2AB bus0 count > 0")
   parser.add_argument("--require-cplink-sample", action="store_true", help="require a sampled CP搭子/Navipilot update with speed/TBT/SDI/GPS data")
   parser.add_argument("--require-amap-navi-sample", action="store_true", help="require a sampled read-only AmapNavi status bridge update")
+  parser.add_argument("--require-model-selector-status", action="store_true", help="require read-only model selector status in the device snapshot")
   parser.add_argument("--require-offline-process-guard", action="store_true", help="require AlwaysOffline with no updated/connect/uploader process visible")
   parser.add_argument("--require-navipilot-live-check", action="store_true", help="require C3-side 7000/7705 Navipilot endpoint check to pass")
   parser.add_argument("--require-carparams-summary", action="store_true", help="require a decoded Seltos CarParams summary")
@@ -689,6 +752,7 @@ def main() -> int:
       args.require_escc_sample,
       args.require_cplink_sample,
       args.require_amap_navi_sample,
+      args.require_model_selector_status,
       args.require_offline_process_guard,
       args.require_carparams_summary,
     )
@@ -709,6 +773,8 @@ def main() -> int:
       print("CPlink sample: required and present")
     if args.require_amap_navi_sample:
       print("AmapNavi sample: required and present")
+    if args.require_model_selector_status:
+      print("Model selector status: required and present")
     if args.require_offline_process_guard:
       print("Offline process guard: required and present")
     if args.require_carparams_summary:

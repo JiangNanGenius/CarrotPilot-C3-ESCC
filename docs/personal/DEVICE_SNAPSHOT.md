@@ -2,6 +2,8 @@
 
 这个快照用于上车前后把 C3 设备上的关键状态记录下来，方便判断 ESCC、离线模式、车型路径、CP搭子协议和只读 AmapNavi 状态桥是否正常。
 
+快照也会记录模型选择器的只读状态，包括 `DrivingModelName`、`PendingModelName` 和 `/data/model_selector_status` 中的 engine。默认主线未启用模型选择器时，状态会显示为 `default_upstream_assumed`，这表示继续使用内置 upstream modeld。
+
 脚本默认不采集 VIN、dongle id、token、路线 id，也不读取完整 `CarParams` 内容，只记录安全参数和二进制参数的大小/hash。
 
 ## 在 C3 上运行
@@ -114,6 +116,15 @@ python3 scripts/personal/road_test_evidence_check.py \
 - `--sample-seconds 20` 期间观察 `amapNavi_updates` 和 `last_amapNavi`。
 - 需要机器检查时，可在电脑端证据检查命令里加 `--require-amap-navi-sample`。
 
+如果测试模型选择器参考线或实验分支，再额外看一次：
+
+- `DrivingModelName`：当前模型名；默认主线通常为 `<missing>`。
+- `PendingModelName`：等待重启编译/安装的模型；正常路测前不应有 pending。
+- `model_selector_status_available`：是否读到了 `/data/model_selector_status`。
+- `model_selector_engine`：`default_upstream_assumed`、`upstream_modeld` 或 `carrot_modeld`。
+- `model_selector_custom_active`：是否正在使用自定义 `carrot_modeld`。
+- 需要机器检查时，可在电脑端证据检查命令里加 `--require-model-selector-status`。该检查只要求状态字段存在且没有 pending 模型安装，不证明自定义模型安全。
+
 ## 快照里重点看什么
 
 - `branch` / `commit` / `tags`：确认安装的是预期 tag 或分支。
@@ -143,6 +154,9 @@ python3 scripts/personal/road_test_evidence_check.py \
 - `amap_navi_left_blind_seen` / `amap_navi_right_blind_seen`：是否看到原车盲区状态为触发。
 - `last_carrotMan` / `last_navInstructionCarrot`：最后一帧非敏感字段摘要，不包含 GPS 坐标、路线点或街道名。
 - `last_amapNavi`：最后一帧只读 AmapNavi 状态摘要，只含左右盲区和车道线状态，不含 APP 命令。
+- `DrivingModelName` / `PendingModelName`：模型选择器参数，只读记录。
+- `model_selector_engine`：当前模型 engine。默认主线没有模型选择器状态文件时显示 `default_upstream_assumed`。
+- `model_selector_pending_active`：是否存在等待重启处理的模型安装状态；上车前应为 `False`。
 
 `stable` 发布要求至少有一个快照满足：
 

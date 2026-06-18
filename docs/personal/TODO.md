@@ -106,6 +106,7 @@
 - [x] 增加 Navipilot APP 端点 live check，可在 C3 上验证 7000 参数接口、7705 状态广播和可选 7706 测试导航输入。
 - [x] 建立 `tracking/model-selector`，跟踪 `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector` 作为模型选择器参考线。
 - [x] 增加模型选择器源码审计脚本，确认参考线安全条件存在且当前默认 C3 主线未半截启用模型切换。
+- [x] 增加模型选择器设备端只读状态采集，记录 `DrivingModelName`、`PendingModelName` 和 `/data/model_selector_status` engine，不启用下载/安装/modeld 切换。
 - [x] 增加机械小哥 / fishop 功能边界静态检查，防止自动超车、AmapNavi、独立 Web/哨兵服务无保护进入主线。
 - [x] 增加个人功能状态报告，区分已静态具备、已有但待实机验证、故意隔离和未迁移功能。
 - [ ] 机械小哥功能分批迁移：

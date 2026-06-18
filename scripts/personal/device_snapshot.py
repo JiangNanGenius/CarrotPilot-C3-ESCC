@@ -32,6 +32,8 @@ SAFE_PARAM_KEYS = [
   "CarrotTunerApplyLat",
   "CarrotTunerApplyLong",
   "CarrotLearningPopupReady",
+  "DrivingModelName",
+  "PendingModelName",
   "IsOnroad",
   "Passive",
   "CompletedTrainingVersion",
@@ -67,6 +69,8 @@ OFFLINE_FORBIDDEN_PROCESS_KEYS = [
   "connect_process_seen",
   "uploader_process_seen",
 ]
+
+MODEL_SELECTOR_STATUS_FILE = Path("/data/model_selector_status")
 
 
 def run(cmd: Sequence[str], cwd: Optional[Path] = None) -> Tuple[int, str]:
@@ -135,6 +139,53 @@ def read_binary_param_summaries() -> Dict[str, str]:
     digest = hashlib.sha256(data).hexdigest()[:16]
     values[key] = f"{len(data)} bytes, sha256:{digest}"
   return values
+
+
+def param_is_present(value: object) -> bool:
+  text = safe_text(value).strip()
+  return bool(text) and not text.startswith("<missing")
+
+
+def read_model_selector_status(safe_params: Dict[str, str]) -> Dict[str, object]:
+  status: Dict[str, object] = {
+    "model_selector_status_available": False,
+    "model_selector_status_path": str(MODEL_SELECTOR_STATUS_FILE),
+    "model_selector_engine": "default_upstream_assumed",
+    "model_selector_custom_active": False,
+    "model_selector_pending_active": param_is_present(safe_params.get("PendingModelName")),
+    "model_selector_current_model": safe_params.get("DrivingModelName", "<missing>"),
+    "model_selector_pending_model": safe_params.get("PendingModelName", "<missing>"),
+    "model_selector_pid": "",
+    "model_selector_started": "",
+    "model_selector_describe": "status file missing; default upstream modeld assumed",
+  }
+  if not MODEL_SELECTOR_STATUS_FILE.exists() or not MODEL_SELECTOR_STATUS_FILE.is_file():
+    return status
+
+  try:
+    raw = MODEL_SELECTOR_STATUS_FILE.read_text(encoding="utf-8", errors="replace")
+  except OSError as exc:
+    status["model_selector_status_error"] = str(exc)[:160]
+    return status
+
+  parsed: Dict[str, str] = {}
+  for line in raw.splitlines():
+    if "=" not in line:
+      continue
+    key, value = line.split("=", 1)
+    parsed[key.strip()] = value.strip()
+
+  engine = sanitize_param_value(parsed.get("engine", "").encode("utf-8"))
+  describe = sanitize_param_value(parsed.get("describe", "").encode("utf-8"))
+  status.update({
+    "model_selector_status_available": True,
+    "model_selector_engine": engine or "unknown",
+    "model_selector_custom_active": engine == "carrot_modeld",
+    "model_selector_pid": sanitize_param_value(parsed.get("pid", "").encode("utf-8")),
+    "model_selector_started": sanitize_param_value(parsed.get("started", "").encode("utf-8")),
+    "model_selector_describe": describe or "<missing>",
+  })
+  return status
 
 
 def enum_name(value: object) -> str:
@@ -403,6 +454,7 @@ def build_report(sample_seconds: int) -> str:
   now = dt.datetime.now(dt.timezone.utc).astimezone().isoformat(timespec="seconds")
   safe_params = read_safe_params()
   binary_params = read_binary_param_summaries()
+  model_selector = read_model_selector_status(safe_params)
   car_params = summarize_car_params()
   processes = process_snapshot()
   process_summary = process_diagnostics(processes)
@@ -435,6 +487,9 @@ def build_report(sample_seconds: int) -> str:
   lines.append("")
   lines.append("## Binary Param Summaries")
   lines.extend(markdown_table(binary_params))
+  lines.append("")
+  lines.append("## Model Selector Status")
+  lines.extend(markdown_table(model_selector))
   lines.append("")
   lines.append("## CarParams Summary")
   lines.extend(markdown_table(car_params))

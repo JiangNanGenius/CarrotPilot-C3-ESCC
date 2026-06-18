@@ -486,6 +486,12 @@ def check_c3_static_dry_run() -> None:
     "amapNavi_updates",
     "amap_navi_updates_seen",
     "last_amapNavi",
+    "DrivingModelName",
+    "PendingModelName",
+    "model_selector_status_available",
+    "model_selector_engine",
+    "model_selector_pending_active",
+    "model_selector_describe",
   ]:
     if key not in snapshot_text:
       raise CheckFailure("C3 static dry-run snapshot missing " + key)

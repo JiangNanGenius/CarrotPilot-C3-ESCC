@@ -62,6 +62,7 @@ def check_device_snapshot(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=False,
     require_cplink_sample=False,
     require_amap_navi_sample=False,
+    require_model_selector_status_flag=False,
     require_offline_guard=False,
     require_carparams=False,
   )
@@ -75,6 +76,7 @@ def check_carparams(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=False,
     require_cplink_sample=False,
     require_amap_navi_sample=False,
+    require_model_selector_status_flag=False,
     require_offline_guard=False,
     require_carparams=True,
   )
@@ -88,6 +90,7 @@ def check_escc_sample(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=True,
     require_cplink_sample=False,
     require_amap_navi_sample=False,
+    require_model_selector_status_flag=False,
     require_offline_guard=False,
     require_carparams=False,
   )
@@ -101,6 +104,7 @@ def check_cplink_sample(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=False,
     require_cplink_sample=True,
     require_amap_navi_sample=False,
+    require_model_selector_status_flag=False,
     require_offline_guard=False,
     require_carparams=False,
   )
@@ -114,10 +118,25 @@ def check_amap_navi_sample(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=False,
     require_cplink_sample=False,
     require_amap_navi_sample=True,
+    require_model_selector_status_flag=False,
     require_offline_guard=False,
     require_carparams=False,
   )
   return "read-only AmapNavi status bridge sample present"
+
+
+def check_model_selector_status(snapshot_paths: Sequence[str]) -> str:
+  rtc.validate_snapshots(
+    snapshot_paths,
+    require_device_snapshot=True,
+    require_escc_sample=False,
+    require_cplink_sample=False,
+    require_amap_navi_sample=False,
+    require_model_selector_status_flag=True,
+    require_offline_guard=False,
+    require_carparams=False,
+  )
+  return "read-only model selector status captured with no pending model install"
 
 
 def check_offline_process_guard(snapshot_paths: Sequence[str]) -> str:
@@ -127,6 +146,7 @@ def check_offline_process_guard(snapshot_paths: Sequence[str]) -> str:
     require_escc_sample=False,
     require_cplink_sample=False,
     require_amap_navi_sample=False,
+    require_model_selector_status_flag=False,
     require_offline_guard=True,
     require_carparams=False,
   )
@@ -157,6 +177,7 @@ def check_stable_ready(road_test_log: Optional[str], snapshot_paths: Sequence[st
     require_escc_sample=True,
     require_cplink_sample=False,
     require_amap_navi_sample=False,
+    require_model_selector_status_flag=False,
     require_offline_guard=True,
     require_carparams=True,
   )
@@ -191,6 +212,7 @@ def build_results(
     stage_result("stable gate readiness", True, lambda: check_stable_ready(selected_log, snapshot_paths)),
     stage_result("CP搭子/Navipilot sample", False, lambda: check_cplink_sample(snapshot_paths)),
     stage_result("AmapNavi status bridge sample", False, lambda: check_amap_navi_sample(snapshot_paths)),
+    stage_result("Model selector status", False, lambda: check_model_selector_status(snapshot_paths)),
     stage_result("Navipilot live endpoint check", False, lambda: check_navipilot_live(navipilot_paths)),
   ]
   return results
@@ -252,6 +274,8 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `CanfdHDA2` | 0 |
 | `HyundaiCameraSCC` | 0 |
 | `EnableAmapNaviStatus` | 1 |
+| `DrivingModelName` | <missing> |
+| `PendingModelName` | <missing> |
 | `CarParams` | 200 bytes, sha256:abc |
 | `process_snapshot_available` | True |
 | `offline_forbidden_processes_seen` | False |
@@ -274,6 +298,13 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `amap_navi_lane_seen` | True |
 | `amap_navi_left_blind_seen` | False |
 | `amap_navi_right_blind_seen` | False |
+| `model_selector_status_available` | False |
+| `model_selector_engine` | default_upstream_assumed |
+| `model_selector_custom_active` | False |
+| `model_selector_pending_active` | False |
+| `model_selector_current_model` | <missing> |
+| `model_selector_pending_model` | <missing> |
+| `model_selector_describe` | status file missing; default upstream modeld assumed |
 | `CarParamsDecoded` | ok |
 | `carName` | hyundai |
 | `carFingerprint` | KIA_SELTOS_2023 |
@@ -303,6 +334,8 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
       raise rtc.EvidenceError("self-test failed: Navipilot endpoint check did not pass")
     if not any(r.name == "AmapNavi status bridge sample" and r.ok for r in results):
       raise rtc.EvidenceError("self-test failed: AmapNavi status bridge sample did not pass")
+    if not any(r.name == "Model selector status" and r.ok for r in results):
+      raise rtc.EvidenceError("self-test failed: model selector status did not pass")
 
     partial = Path(tmp) / "partial"
     partial.mkdir()

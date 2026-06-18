@@ -144,11 +144,12 @@ python3 scripts/personal/model_selector_audit.py
 
 ### B. 设备端只读状态
 
-后续可先加只读状态采集，不改变模型：
+已加只读状态采集，不改变模型：
 
 - 读取 `/data/model_selector_status`。
 - 读取 `DrivingModelName`、`PendingModelName`。
 - 在证据包中显示当前是否为默认模型。
+- `road_test_evidence_check.py --require-model-selector-status` 可检查状态字段存在且没有 pending 模型安装状态。
 
 ### C. 实验分支迁移
 
@@ -170,6 +171,6 @@ python3 scripts/personal/model_selector_audit.py
 
 ## 当前状态
 
-- `Model selector`: `SOURCE_TRACKED`
+- `Model selector`: `SOURCE_TRACKED + READ_ONLY_SNAPSHOT`
 - 默认 C3 主线未启用模型下载、模型安装或 modeld 切换。
 - 该状态是刻意选择，不是遗漏。
