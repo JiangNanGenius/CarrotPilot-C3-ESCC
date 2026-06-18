@@ -354,6 +354,42 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
   sys.modules["openpilot.common.params"] = params_mod
   try:
     server = import_file("alpha_carrot_server_status_static_check", "selfdrive/carrot/carrot_server.py")
+
+    class Obj:
+      def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+    class FakeSm:
+      alive = {
+        "carState": True,
+        "selfdriveState": True,
+        "controlsState": True,
+        "longitudinalPlanSP": True,
+        "carStateSP": True,
+      }
+
+      def __init__(self):
+        self.messages = {
+          "carState": Obj(vEgoCluster=10.0, vEgo=9.0, vCruiseCluster=88.0, vCruise=87.0,
+                          cruiseState=Obj(speedCluster=25.0, speed=24.0), standstill=False, canValid=True),
+          "selfdriveState": Obj(active=True, enabled=True),
+          "controlsState": Obj(deprecated=Obj(vCruiseCluster=0.0, vCruise=0.0)),
+          "longitudinalPlanSP": Obj(speedLimit=Obj(resolver=Obj(speedLimitValid=True, speedLimitFinal=20.0,
+                                                                 speedLimit=18.0, sourceLabel="phone"))),
+          "carStateSP": Obj(speedLimit=19.0),
+        }
+
+      def __getitem__(self, service):
+        return self.messages[service]
+
+    runtime = server.update_messaging_status_from_sm(FakeSm())
+    if runtime.get("vEgoKph") != 36.0 or runtime.get("vCruiseKph") != 88.0:
+      return False, "messaging status helper did not derive car speed or cruise speed"
+    if runtime.get("carCruiseSpeedKph") != 90.0 or runtime.get("speedLimitKph") != 72.0:
+      return False, "messaging status helper did not derive cluster cruise or speed-limit state"
+    if runtime.get("active") is not True or runtime.get("enabled") is not True or runtime.get("canValid") is not True:
+      return False, "messaging status helper did not derive selfdrive/CAN state"
+
     server.record_navigation_event({
       "nRoadLimitSpeed": 0,
       "nSdiSpeedLimit": 60,
@@ -362,14 +398,34 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       "nTBTTurnType": 12,
       "szTBTMainTextNext": "status check",
     }, "udp-7706")
-    payload = server.build_status_payload()
+    payload = server.build_status_payload({
+      "available": True,
+      "lastUpdateAt": 1234.0,
+      "vEgoKph": 48.6,
+      "vCruiseKph": 82.0,
+      "carCruiseSpeedKph": 80.0,
+      "active": True,
+      "enabled": True,
+      "standstill": False,
+      "canValid": True,
+      "speedLimitKph": 60.0,
+      "speedLimitSource": "phone",
+    })
     for key in ("Carrot2", "IsOnroad", "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "xState", "trafficState"):
       if key not in payload:
         return False, f"status payload missing {key}"
+    if payload.get("active") is not True or payload.get("v_ego_kph") != 48.6 or payload.get("v_cruise_kph") != 82.0:
+      return False, "status payload did not expose runtime messaging state"
+    if payload.get("carcruiseSpeed") != 80.0 or payload.get("speedLimitKph") != 60.0 or payload.get("speedLimitSource") != "phone":
+      return False, "status payload did not expose cruise/speed-limit messaging state"
+    if payload.get("messagingAvailable") is not True or payload.get("messagingLastUpdateAt") != 1234.0:
+      return False, "status payload did not expose messaging evidence"
     if payload.get("tbt_dist") != 500 or payload.get("sdi_dist") != 240:
       return False, "status payload did not expose latest navigation distances"
     if payload.get("sdi_speed") != 60 or payload.get("phoneSpeedLimitKph") != 60.0:
       return False, "status payload did not expose latest SDI/phone speed"
+    if payload.get("xState") != 0 or payload.get("trafficState") != 0:
+      return False, "xState and trafficState must stay inert until Carrot control migration"
     if payload.get("controlOutput") is not False:
       return False, "status payload must explicitly remain read-only"
     return True, ""
@@ -521,6 +577,14 @@ def main() -> int:
                           and "def build_status_payload" in carrot_server
                           and "status_broadcast_loop" in carrot_server,
                           "Carrot Web must provide a local UDP 7705 status broadcaster for Navipilot")
+  failures += not require("Carrot Web status broadcast reads messaging",
+                          "MESSAGING_STATUS_SERVICES" in carrot_server
+                          and '"carState"' in carrot_server and '"selfdriveState"' in carrot_server
+                          and '"longitudinalPlanSP"' in carrot_server and '"carStateSP"' in carrot_server
+                          and "from cereal import messaging" in carrot_server
+                          and "messaging.SubMaster(list(MESSAGING_STATUS_SERVICES))" in carrot_server
+                          and "update_messaging_status_from_sm" in carrot_server,
+                          "UDP 7705 status broadcast must read carState/selfdriveState/speed-limit state through a local SubMaster cache")
   for key in ("Carrot2", "IsOnroad", "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "xState", "trafficState"):
     failures += not require(f"7705 status key exists: {key}", f'"{key}"' in carrot_server,
                             f"UDP 7705 status broadcast must include {key}")

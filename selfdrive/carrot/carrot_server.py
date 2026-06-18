@@ -22,6 +22,14 @@ LOCAL_WEB_PORT = 7000
 STATUS_BROADCAST_PORT = 7705
 STATUS_BROADCAST_INTERVAL_S = 1.0
 STATUS_BROADCAST_TARGETS = ("255.255.255.255", "127.0.0.1")
+MESSAGING_STATUS_SERVICES = (
+  "carState",
+  "selfdriveState",
+  "controlsState",
+  "longitudinalPlanSP",
+  "carStateSP",
+)
+MESSAGING_STATUS_INTERVAL_S = 0.2
 NAVIGATION_UDP_PORT = 7706
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_FISHOP_JSONL = Path("/data/fishop_hardware.jsonl")
@@ -188,6 +196,26 @@ def _as_bool(value: Any) -> bool:
   if isinstance(value, bytes):
     value = value.decode("utf-8", errors="ignore")
   return str(value).strip().lower() in ("1", "true", "on", "yes", "y")
+
+
+def _safe_attr(obj: Any, name: str, default: Any = None) -> Any:
+  try:
+    return getattr(obj, name)
+  except Exception:
+    return default
+
+
+def _safe_nested(obj: Any, *names: str, default: Any = None) -> Any:
+  current = obj
+  for name in names:
+    current = _safe_attr(current, name, None)
+    if current is None:
+      return default
+  return current
+
+
+def _ms_to_kph(value: Any) -> float:
+  return _as_float(value) / KPH_TO_MS
 
 
 def _safe_source_text(value: Any) -> str:
@@ -427,23 +455,142 @@ def _status_payload_navigation_fields(event: dict[str, Any]) -> dict[str, Any]:
   }
 
 
-def build_status_payload() -> dict[str, Any]:
+def default_messaging_status() -> dict[str, Any]:
+  return {
+    "available": False,
+    "lastUpdateAt": 0.0,
+    "lastError": "",
+    "carStateAlive": False,
+    "selfdriveStateAlive": False,
+    "controlsStateAlive": False,
+    "longitudinalPlanSPAlive": False,
+    "carStateSPAlive": False,
+    "vEgoKph": 0.0,
+    "vCruiseKph": 0.0,
+    "carCruiseSpeedKph": 0.0,
+    "active": False,
+    "enabled": False,
+    "isOnroad": False,
+    "standstill": False,
+    "canValid": False,
+    "speedLimitKph": 0.0,
+    "speedLimitSource": "",
+  }
+
+
+def _sm_alive(sm: Any, service: str) -> bool:
+  try:
+    return bool(sm.alive.get(service, False))
+  except Exception:
+    try:
+      return bool(sm.alive[service])
+    except Exception:
+      return False
+
+
+def _sm_message(sm: Any, service: str) -> Any:
+  try:
+    return sm[service]
+  except Exception:
+    return None
+
+
+def _positive_float(*values: Any) -> float:
+  for value in values:
+    normalized = _as_float(value, 0.0)
+    if normalized > 0.0:
+      return normalized
+  return 0.0
+
+
+def _messaging_speed_limit_state(longitudinal_plan_sp: Any, car_state_sp: Any) -> tuple[float, str]:
+  resolver = _safe_nested(longitudinal_plan_sp, "speedLimit", "resolver")
+  source = ""
+  speed_limit_ms = 0.0
+  if resolver is not None:
+    source = str(_safe_attr(resolver, "sourceLabel", "") or _safe_attr(resolver, "source", "") or "")
+    if bool(_safe_attr(resolver, "speedLimitValid", False)):
+      speed_limit_ms = _positive_float(
+        _safe_attr(resolver, "speedLimitFinal", 0.0),
+        _safe_attr(resolver, "speedLimit", 0.0),
+      )
+    if speed_limit_ms <= 0.0:
+      speed_limit_ms = _positive_float(_safe_attr(resolver, "speedLimitFinalLast", 0.0), _safe_attr(resolver, "speedLimitLast", 0.0))
+
+  if speed_limit_ms <= 0.0 and car_state_sp is not None:
+    speed_limit_ms = _positive_float(_safe_attr(car_state_sp, "speedLimit", 0.0))
+    if speed_limit_ms > 0.0 and not source:
+      source = "car"
+
+  return (round(_ms_to_kph(speed_limit_ms), 3) if speed_limit_ms > 0.0 else 0.0, source[:48])
+
+
+def update_messaging_status_from_sm(sm: Any) -> dict[str, Any]:
+  car_state = _sm_message(sm, "carState")
+  selfdrive_state = _sm_message(sm, "selfdriveState")
+  controls_state = _sm_message(sm, "controlsState")
+  longitudinal_plan_sp = _sm_message(sm, "longitudinalPlanSP")
+  car_state_sp = _sm_message(sm, "carStateSP")
+
+  v_ego_ms = _positive_float(_safe_attr(car_state, "vEgoCluster", 0.0), _safe_attr(car_state, "vEgo", 0.0))
+  cruise_state = _safe_attr(car_state, "cruiseState")
+  v_cruise_kph = _positive_float(
+    _safe_attr(car_state, "vCruiseCluster", 0.0),
+    _safe_attr(car_state, "vCruise", 0.0),
+    _safe_nested(controls_state, "deprecated", "vCruiseCluster", default=0.0),
+    _safe_nested(controls_state, "deprecated", "vCruise", default=0.0),
+    _ms_to_kph(_safe_attr(cruise_state, "speedCluster", 0.0)),
+    _ms_to_kph(_safe_attr(cruise_state, "speed", 0.0)),
+  )
+  car_cruise_speed_kph = _positive_float(
+    _ms_to_kph(_safe_attr(cruise_state, "speedCluster", 0.0)),
+    _ms_to_kph(_safe_attr(cruise_state, "speed", 0.0)),
+    v_cruise_kph,
+  )
+  speed_limit_kph, speed_limit_source = _messaging_speed_limit_state(longitudinal_plan_sp, car_state_sp)
+
+  active = bool(_safe_attr(selfdrive_state, "active", False))
+  enabled = bool(_safe_attr(selfdrive_state, "enabled", False))
+  return {
+    **default_messaging_status(),
+    "available": True,
+    "lastUpdateAt": time.time(),
+    "carStateAlive": _sm_alive(sm, "carState"),
+    "selfdriveStateAlive": _sm_alive(sm, "selfdriveState"),
+    "controlsStateAlive": _sm_alive(sm, "controlsState"),
+    "longitudinalPlanSPAlive": _sm_alive(sm, "longitudinalPlanSP"),
+    "carStateSPAlive": _sm_alive(sm, "carStateSP"),
+    "vEgoKph": round(_ms_to_kph(v_ego_ms), 3) if v_ego_ms > 0.0 else 0.0,
+    "vCruiseKph": round(v_cruise_kph, 3) if v_cruise_kph > 0.0 else 0.0,
+    "carCruiseSpeedKph": round(car_cruise_speed_kph, 3) if car_cruise_speed_kph > 0.0 else 0.0,
+    "active": active,
+    "enabled": enabled,
+    "isOnroad": active or enabled,
+    "standstill": bool(_safe_attr(car_state, "standstill", False)),
+    "canValid": bool(_safe_attr(car_state, "canValid", False)),
+    "speedLimitKph": speed_limit_kph,
+    "speedLimitSource": speed_limit_source,
+  }
+
+
+def build_status_payload(runtime_status: dict[str, Any] | None = None) -> dict[str, Any]:
   params, _error = _params_state()
   event_state = navigation_event_state()
   event = event_state.get("event", {}) if isinstance(event_state, dict) else {}
   nav_fields = _status_payload_navigation_fields(event if isinstance(event, dict) else {})
+  runtime_status = {**default_messaging_status(), **(runtime_status or {})}
 
-  is_onroad = bool(params.get_bool("IsOnroad")) if params is not None else False
-  active = bool(params.get_bool("IsEngaged")) if params is not None else False
+  is_onroad = bool(params.get_bool("IsOnroad")) if params is not None else bool(runtime_status.get("isOnroad", False))
+  active = bool(runtime_status.get("active", False))
   speed_limit_state = phone_speed_state()
 
   return {
     "Carrot2": "CarrotPilot-C3-ESCC-alpha",
     "IsOnroad": is_onroad,
     "active": active,
-    "v_ego_kph": 0,
-    "v_cruise_kph": 0,
-    "carcruiseSpeed": 0,
+    "v_ego_kph": round(_as_float(runtime_status.get("vEgoKph")), 1),
+    "v_cruise_kph": round(_as_float(runtime_status.get("vCruiseKph")), 1),
+    "carcruiseSpeed": round(_as_float(runtime_status.get("carCruiseSpeedKph")), 1),
     "tbt_dist": nav_fields["tbt_dist"],
     "sdi_dist": nav_fields["sdi_dist"],
     "xState": 0,
@@ -456,6 +603,14 @@ def build_status_payload() -> dict[str, Any]:
     "phoneSpeedLimitKph": speed_limit_state.get("speedLimitKph", 0.0),
     "phoneSpeedLimitSource": speed_limit_state.get("source", ""),
     "phoneSpeedLimitFresh": bool(speed_limit_state.get("fresh", False)),
+    "speedLimitKph": _as_float(runtime_status.get("speedLimitKph"), 0.0),
+    "speedLimitSource": str(runtime_status.get("speedLimitSource", "")),
+    "messagingAvailable": bool(runtime_status.get("available", False)),
+    "messagingLastUpdateAt": _as_float(runtime_status.get("lastUpdateAt"), 0.0),
+    "messagingLastError": str(runtime_status.get("lastError", "")),
+    "canValid": bool(runtime_status.get("canValid", False)),
+    "standstill": bool(runtime_status.get("standstill", False)),
+    "enabled": bool(runtime_status.get("enabled", False)),
     "navigationUpdatedAt": event.get("updatedAt", 0.0) if isinstance(event, dict) else 0.0,
     "timestamp": time.time(),
     "controlOutput": False,
@@ -766,6 +921,7 @@ async def api_health(_request: web.Request) -> web.Response:
   status_state = _request.app["status_broadcast_state"]
   status_last_sent_at = float(status_state.get("lastSentAt", 0.0))
   status_last_error = str(status_state.get("lastError", ""))
+  messaging_state = _request.app["messaging_status_state"]
   return _json_response({
     "ok": True,
     "service": "carrot_server",
@@ -775,6 +931,9 @@ async def api_health(_request: web.Request) -> web.Response:
     "statusBroadcastTargets": list(STATUS_BROADCAST_TARGETS),
     "statusBroadcastLastSentAt": status_last_sent_at,
     "statusBroadcastError": status_last_error,
+    "messagingAvailable": bool(messaging_state.get("available", False)),
+    "messagingLastUpdateAt": float(messaging_state.get("lastUpdateAt", 0.0)),
+    "messagingLastError": str(messaging_state.get("lastError", "")),
     "navigationUdpPort": NAVIGATION_UDP_PORT,
     "navigationUdpError": udp_error,
     "navigationUdpLastError": udp_last_error,
@@ -830,13 +989,15 @@ async def api_param_set(request: web.Request) -> web.Response:
 
 async def api_status_broadcast(_request: web.Request) -> web.Response:
   status_state = _request.app["status_broadcast_state"]
+  messaging_state = _request.app["messaging_status_state"]
   return _json_response({
     "ok": True,
     "port": STATUS_BROADCAST_PORT,
     "targets": list(STATUS_BROADCAST_TARGETS),
     "lastSentAt": float(status_state.get("lastSentAt", 0.0)),
     "lastError": str(status_state.get("lastError", "")),
-    "payload": status_state.get("lastPayload") or build_status_payload(),
+    "messagingStatus": messaging_state,
+    "payload": status_state.get("lastPayload") or build_status_payload(messaging_state),
   })
 
 
@@ -975,15 +1136,52 @@ async def stop_navigation_udp(app: web.Application) -> None:
     transport.close()
 
 
+async def messaging_status_loop(app: web.Application) -> None:
+  messaging_state = app["messaging_status_state"]
+  try:
+    from cereal import messaging
+    sm = messaging.SubMaster(list(MESSAGING_STATUS_SERVICES))
+  except Exception as exc:
+    messaging_state.update(default_messaging_status())
+    messaging_state["lastError"] = str(exc)[:200]
+    return
+
+  while True:
+    try:
+      sm.update(0)
+      messaging_state.update(update_messaging_status_from_sm(sm))
+      messaging_state["lastError"] = ""
+    except Exception as exc:
+      messaging_state.update(default_messaging_status())
+      messaging_state["lastError"] = str(exc)[:200]
+    await asyncio.sleep(MESSAGING_STATUS_INTERVAL_S)
+
+
+async def start_messaging_status(app: web.Application) -> None:
+  app["background_tasks"]["messaging_status"] = asyncio.create_task(messaging_status_loop(app))
+
+
+async def stop_messaging_status(app: web.Application) -> None:
+  task = app["background_tasks"].get("messaging_status")
+  if task is not None:
+    task.cancel()
+    try:
+      await task
+    except asyncio.CancelledError:
+      pass
+    app["background_tasks"]["messaging_status"] = None
+
+
 async def status_broadcast_loop(app: web.Application) -> None:
   transport = app.get("status_broadcast_transport")
   if transport is None:
     return
   status_state = app["status_broadcast_state"]
+  messaging_state = app["messaging_status_state"]
 
   while True:
     try:
-      payload = build_status_payload()
+      payload = build_status_payload(dict(messaging_state))
       data = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
       for target in STATUS_BROADCAST_TARGETS:
         transport.sendto(data, (target, STATUS_BROADCAST_PORT))
@@ -1026,9 +1224,13 @@ async def stop_status_broadcast(app: web.Application) -> None:
 def make_app() -> web.Application:
   app = web.Application()
   app["status_broadcast_state"] = {"lastPayload": {}, "lastSentAt": 0.0, "lastError": ""}
+  app["messaging_status_state"] = default_messaging_status()
+  app["background_tasks"] = {"messaging_status": None}
+  app.on_startup.append(start_messaging_status)
   app.on_startup.append(start_status_broadcast)
   app.on_startup.append(start_navigation_udp)
   app.on_cleanup.append(stop_status_broadcast)
+  app.on_cleanup.append(stop_messaging_status)
   app.on_cleanup.append(stop_navigation_udp)
   app.router.add_get("/", index)
   app.router.add_get("/api/health", api_health)
