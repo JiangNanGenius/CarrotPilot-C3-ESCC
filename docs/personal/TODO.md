@@ -317,26 +317,26 @@ flowchart TD
 
 ### P8.5: Seltos 2023 SCC 和 ESCC 自动识别
 
-- [ ] 新增 `KIA_SELTOS_2023`。
-- [ ] `KIA_SELTOS_2023` 严格复用 `KIA_SELTOS` / 2021 SCC 纯 CAN specs。
-- [ ] `KIA_SELTOS_2023` 严格复用 Seltos 2021 DBC、harness、checksum、横纵控基础配置。
-- [ ] 不默认开启 CANFD、HDA2、Camera SCC 或 Non-SCC 路径。
-- [ ] 排除 `KIA_SELTOS_2023_NON_SCC` 自动识别。
-- [ ] 排除 `KIA_SELTOS_2023_NON_SCC` 手动选择；若匹配到 Non-SCC，fail-closed 提示车型冲突。
-- [ ] 确认 ESCC 只使用 SunnyPilot 原生 0x2AB 自动识别并置 `ENHANCED_SCC`。
-- [ ] 不新增普通用户 `EnableEscc` 手动开关；ESCC 是否存在由硬件消息决定。
-- [ ] 增加静态检查，确认 Seltos 2023 与 2021 SCC 等价且 Non-SCC 不参与个人版匹配。
+- [x] 新增 `KIA_SELTOS_2023`。
+- [x] `KIA_SELTOS_2023` 严格复用 `KIA_SELTOS` / 2021 SCC 纯 CAN specs。
+- [x] `KIA_SELTOS_2023` 严格复用 Seltos 2021 DBC、harness、checksum、横纵控基础配置。
+- [x] 不默认开启 CANFD、HDA2、Camera SCC 或 Non-SCC 路径。
+- [x] 排除 `KIA_SELTOS_2023_NON_SCC` 自动识别。
+- [x] 排除 `KIA_SELTOS_2023_NON_SCC` 手动选择；若匹配到 Non-SCC，fail-closed 提示车型冲突。
+- [x] 确认 ESCC 只使用 SunnyPilot 原生 0x2AB 自动识别并置 `ENHANCED_SCC`。
+- [x] 不新增普通用户 `EnableEscc` 手动开关；ESCC 是否存在由硬件消息决定。
+- [x] 增加静态检查，确认 Seltos 2023 与 2021 SCC 等价且 Non-SCC 不参与个人版匹配。
 
 ### P8.6: SunnyPilot 模型管理器
 
-- [ ] 采用 SunnyPilot 原生 `sunnypilot.models.manager`。
-- [ ] 采用 `ModelManager_ActiveBundle`、`ModelRunnerTypeCache` 和 `modeld_tinygrad`。
-- [ ] 默认 stock model。
-- [ ] 自定义模型下载、校验、切换只允许 offroad 执行。
-- [ ] active bundle 无效时回退 stock 或上一个有效 bundle。
+- [x] 采用 SunnyPilot 原生 `sunnypilot.models.manager`。
+- [x] 采用 `ModelManager_ActiveBundle`、`ModelRunnerTypeCache` 和 `modeld_tinygrad`。
+- [x] 默认 stock model。
+- [x] 自定义模型下载、校验、切换只允许 offroad 执行。
+- [x] active bundle 无效时回退 stock 或上一个有效 bundle。
 - [ ] 旧 Carrot model selector 只参考签名校验、hash/size、原子替换、失败回滚和状态记录。
 - [ ] 设备证据记录 active bundle、runner、modeld 状态、`modelV2`、`drivingModelData`、`cameraOdometry`。
-- [ ] 模型列表下载保留为用户主动维护功能，不归类为云连接服务。
+- [x] 模型列表下载保留为用户主动维护功能，不归类为云连接服务。
 
 ### P8.7: 限速、手机数据和地图覆盖
 
