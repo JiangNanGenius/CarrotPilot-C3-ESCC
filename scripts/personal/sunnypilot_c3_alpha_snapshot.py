@@ -258,6 +258,43 @@ def summarize_speed_limit(safe_params: dict[str, str], messaging: dict[str, Any]
   }
 
 
+def summarize_navigation_event() -> dict[str, Any]:
+  event = read_json_param("CarrotNavigationEvent")
+  if not isinstance(event, dict):
+    return {
+      "available": False,
+      "event": {},
+      "hazards": {},
+      "modelSpeed": {},
+      "controlPreview": {},
+      "controlOutput": False,
+      "readOnly": True,
+    }
+  hazards = event.get("hazards", {}) if isinstance(event.get("hazards"), dict) else {}
+  model_speed = event.get("modelSpeed", {}) if isinstance(event.get("modelSpeed"), dict) else {}
+  control_preview = event.get("controlPreview", {}) if isinstance(event.get("controlPreview"), dict) else {}
+  traffic = event.get("trafficLight", {}) if isinstance(event.get("trafficLight"), dict) else {}
+  numeric = event.get("numeric", {}) if isinstance(event.get("numeric"), dict) else {}
+  return {
+    "available": bool(event.get("updatedAt")),
+    "source": event.get("source", ""),
+    "updatedAt": event.get("updatedAt", 0.0),
+    "speedLimitKph": event.get("speedLimitKph", 0.0),
+    "speedLimitSourceField": event.get("speedLimitSourceField", ""),
+    "commandIgnored": bool(event.get("commandIgnored", False)),
+    "highRiskCommandSeen": bool(event.get("highRiskCommandSeen", False)),
+    "ignoredCommand": event.get("ignoredCommand", ""),
+    "tbtDistanceM": numeric.get("nTBTDist", 0),
+    "tbtTurnType": numeric.get("nTBTTurnType", 0),
+    "hazards": hazards,
+    "modelSpeed": model_speed,
+    "trafficLight": traffic,
+    "controlPreview": control_preview,
+    "controlOutput": bool(event.get("controlOutput", False)),
+    "readOnly": bool(event.get("readOnly", True)),
+  }
+
+
 def read_binary_param_summaries() -> dict[str, str]:
   values: dict[str, str] = {}
   for key in BINARY_PARAM_KEYS:
@@ -655,6 +692,7 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
       "activeBundle": parse_model_bundle(safe_params.get("ModelManager_ActiveBundle", "")),
     },
     "speedLimitEvidence": summarize_speed_limit(safe_params, messaging),
+    "navigationEvidence": summarize_navigation_event(),
     "autoTuner": summarize_auto_tuner(safe_params),
     "process": process,
     "cloudGuard": {
