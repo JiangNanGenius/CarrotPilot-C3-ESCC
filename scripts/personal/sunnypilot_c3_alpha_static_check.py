@@ -1045,6 +1045,40 @@ def check_fishop_release_gate_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def visible_korean_text_report() -> str:
+  korean_re = re.compile(r"[가-힣]")
+  scan_roots = (
+    "README.md",
+    "docs/personal",
+    "selfdrive/carrot",
+    "selfdrive/ui",
+    "system/ui",
+    "sunnypilot/sunnylink/settings_ui_src",
+  )
+  suffixes = {".cc", ".h", ".html", ".json", ".md", ".py", ".ts", ".tsx", ".yaml", ".yml"}
+  skipped = {
+    Path("selfdrive/ui/translations/app_ko.po"),
+  }
+  hits: list[str] = []
+
+  for root_rel in scan_roots:
+    root = ROOT / root_rel
+    paths = [root] if root.is_file() else sorted(root.rglob("*"))
+    for path in paths:
+      if not path.is_file() or path.suffix not in suffixes:
+        continue
+      rel = path.relative_to(ROOT)
+      if rel in skipped:
+        continue
+      text = path.read_text(encoding="utf-8", errors="ignore")
+      for line_no, line in enumerate(text.splitlines(), start=1):
+        if korean_re.search(line):
+          hits.append(f"{rel}:{line_no}: {line.strip()[:120]}")
+          if len(hits) >= 8:
+            return "; ".join(hits)
+  return ""
+
+
 def main() -> int:
   failures = 0
 
@@ -1411,6 +1445,9 @@ def main() -> int:
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
   settings_ui_device = read("sunnypilot/sunnylink/settings_ui_src/pages/device.yaml")
   settings_ui_json = read("sunnypilot/sunnylink/settings_ui.json")
+  languages_json = read("selfdrive/ui/translations/languages.json")
+  multilang = read("system/ui/lib/multilang.py")
+  font_process = read("selfdrive/assets/fonts/process.py")
   mici_settings = read("selfdrive/ui/sunnypilot/mici/layouts/settings.py")
   main_onboarding = read("selfdrive/ui/layouts/onboarding.py")
   mici_onboarding = read("selfdrive/ui/mici/layouts/onboarding.py")
@@ -1428,6 +1465,15 @@ def main() -> int:
                           "settings-ui source or compiled JSON still exposes OnroadUploads")
   failures += not require("Sunnylink removed from settings-ui", all(key not in settings_ui_device + settings_ui_json for key in ("SunnylinkEnabled", "EnableSunnylinkUploader")),
                           "settings-ui must not expose Sunnylink cloud toggles")
+  korean_report = visible_korean_text_report()
+  failures += not require("visible UI omits Korean text", not korean_report,
+                          korean_report or "default-visible UI/docs must not include Korean text")
+  failures += not require("Korean language option hidden", '"한국어"' not in languages_json
+                          and '"ko"' not in languages_json
+                          and '"ko"' not in multilang
+                          and "'ko':" not in multilang
+                          and '"ko"' not in font_process,
+                          "personal alpha should expose Chinese/English-oriented language choices without Korean as a visible option")
   failures += not require("TICI onboarding skips Sunnylink", "SunnylinkOnboarding" not in main_onboarding,
                           "Main onboarding still imports Sunnylink onboarding")
   failures += not require("MICI onboarding skips Sunnylink", "SunnylinkConsentPage" not in mici_onboarding,
