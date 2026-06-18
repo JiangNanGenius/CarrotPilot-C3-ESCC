@@ -47,6 +47,25 @@ MPH_TO_KPH = 1.609344
 PHONE_SPEED_LIMIT_MAX_KPH = 180.0
 PHONE_SPEED_LIMIT_MAX_AGE_S = 10.0
 PHONE_SPEED_LIMIT_SOURCE_MAX_CHARS = 48
+SPEED_LIMIT_POLICY_NAMES = {
+  0: "car_state_only",
+  1: "map_data_only",
+  2: "car_state_priority",
+  3: "map_data_priority",
+  4: "combined",
+  5: "phone_priority",
+}
+SPEED_LIMIT_OFFSET_TYPE_NAMES = {
+  0: "off",
+  1: "fixed",
+  2: "percentage",
+}
+SPEED_LIMIT_MODE_NAMES = {
+  0: "off",
+  1: "information",
+  2: "warning",
+  3: "assist",
+}
 
 PHONE_SPEED_LIMIT_MS_FIELDS = (
   "speedLimitMS",
@@ -236,6 +255,15 @@ def _safe_source_text(value: Any) -> str:
 
 def _put_float(params: Any, key: str, value: float) -> None:
   params.put(key, float(value))
+
+
+def _param_int(params: Any | None, key: str, default: int = 0) -> int:
+  if params is None:
+    return default
+  try:
+    return int(params.get_int(key))
+  except Exception:
+    return int(_as_float(_params_get(params, key, default), float(default)))
 
 
 def _clamp_param(key: str, value: Any) -> int:
@@ -609,6 +637,7 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None,
   is_onroad = bool(params.get_bool("IsOnroad")) if params is not None else bool(runtime_status.get("isOnroad", False))
   active = bool(runtime_status.get("active", False))
   speed_limit_state = phone_speed_state()
+  speed_limit_evidence = speed_limit_evidence_state(runtime_status)
 
   return {
     "Carrot2": "CarrotPilot-C3-ESCC-alpha",
@@ -644,8 +673,20 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None,
     "phoneSpeedLimitKph": speed_limit_state.get("speedLimitKph", 0.0),
     "phoneSpeedLimitSource": speed_limit_state.get("source", ""),
     "phoneSpeedLimitFresh": bool(speed_limit_state.get("fresh", False)),
+    "phoneSpeedLimitEnabled": bool(speed_limit_state.get("enabled", False)),
+    "phoneSpeedLimitAgeSec": speed_limit_state.get("ageSec", 0.0),
+    "phoneSpeedLimitMaxAgeSec": speed_limit_state.get("maxAgeSec", PHONE_SPEED_LIMIT_MAX_AGE_S),
     "speedLimitKph": _as_float(runtime_status.get("speedLimitKph"), 0.0),
     "speedLimitSource": str(runtime_status.get("speedLimitSource", "")),
+    "speedLimitPolicy": speed_limit_evidence["policy"],
+    "speedLimitPolicyName": speed_limit_evidence["policyName"],
+    "speedLimitMode": speed_limit_evidence["mode"],
+    "speedLimitModeName": speed_limit_evidence["modeName"],
+    "speedLimitOffsetType": speed_limit_evidence["offsetType"],
+    "speedLimitOffsetTypeName": speed_limit_evidence["offsetTypeName"],
+    "speedLimitOffsetValue": speed_limit_evidence["offsetValue"],
+    "speedLimitOffsetUnit": speed_limit_evidence["offsetUnit"],
+    "speedLimitEvidence": speed_limit_evidence,
     "messagingAvailable": bool(runtime_status.get("available", False)),
     "messagingLastUpdateAt": _as_float(runtime_status.get("lastUpdateAt"), 0.0),
     "messagingLastError": str(runtime_status.get("lastError", "")),
@@ -876,6 +917,39 @@ def phone_speed_state() -> dict[str, Any]:
     "updatedAt": updated_at,
     "ageSec": round(age_sec, 3),
     "maxAgeSec": PHONE_SPEED_LIMIT_MAX_AGE_S,
+  }
+
+
+def speed_limit_evidence_state(runtime_status: dict[str, Any] | None = None) -> dict[str, Any]:
+  params, error = _params_state()
+  runtime_status = runtime_status or {}
+  phone_state = phone_speed_state()
+  policy = _param_int(params, "SpeedLimitPolicy", 5)
+  mode = _param_int(params, "SpeedLimitMode", 1)
+  offset_type = _param_int(params, "SpeedLimitOffsetType", 0)
+  offset_value = _param_int(params, "SpeedLimitValueOffset", 0)
+  is_metric = bool(params.get_bool("IsMetric")) if params is not None else True
+  offset_unit = ""
+  if offset_type == 1:
+    offset_unit = "kph" if is_metric else "mph"
+  elif offset_type == 2:
+    offset_unit = "percent"
+
+  return {
+    "hasParams": params is not None,
+    "error": error if params is None else "",
+    "policy": policy,
+    "policyName": SPEED_LIMIT_POLICY_NAMES.get(policy, "unknown"),
+    "mode": mode,
+    "modeName": SPEED_LIMIT_MODE_NAMES.get(mode, "unknown"),
+    "offsetType": offset_type,
+    "offsetTypeName": SPEED_LIMIT_OFFSET_TYPE_NAMES.get(offset_type, "unknown"),
+    "offsetValue": offset_value,
+    "offsetUnit": offset_unit,
+    "isMetric": is_metric,
+    "resolvedSpeedLimitKph": round(_as_float(runtime_status.get("speedLimitKph"), 0.0), 3),
+    "resolvedSource": str(runtime_status.get("speedLimitSource", "")),
+    "phone": phone_state,
   }
 
 
@@ -1182,6 +1256,7 @@ async def api_health(_request: web.Request) -> web.Response:
     "messagingAvailable": bool(messaging_state.get("available", False)),
     "messagingLastUpdateAt": float(messaging_state.get("lastUpdateAt", 0.0)),
     "messagingLastError": str(messaging_state.get("lastError", "")),
+    "speedLimitEvidence": speed_limit_evidence_state(messaging_state),
     "navigationUdpPort": NAVIGATION_UDP_PORT,
     "navigationUdpError": udp_error,
     "navigationUdpLastError": udp_last_error,

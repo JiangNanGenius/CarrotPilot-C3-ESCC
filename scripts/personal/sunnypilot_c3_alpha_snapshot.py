@@ -55,6 +55,7 @@ SAFE_PARAM_KEYS = (
   "SpeedLimitMode",
   "SpeedLimitOffsetType",
   "SpeedLimitValueOffset",
+  "IsMetric",
   "ModelRunnerTypeCache",
   "ModelManager_ActiveBundle",
   "FishopAutoOvertakeEnabled",
@@ -156,6 +157,103 @@ def read_json_param(key: str) -> Any:
 
 def param_truthy(value: str | None) -> bool:
   return str(value or "").strip().lower() in ("1", "true", "on", "yes")
+
+
+def param_int(value: str | None, default: int = 0) -> int:
+  try:
+    return int(float(str(value or "").strip()))
+  except (TypeError, ValueError):
+    return default
+
+
+def param_float(value: str | None, default: float = 0.0) -> float:
+  try:
+    return float(str(value or "").strip())
+  except (TypeError, ValueError):
+    return default
+
+
+def offset_type_name(value: int) -> str:
+  return {
+    0: "off",
+    1: "fixed",
+    2: "percentage",
+  }.get(value, "unknown")
+
+
+def speed_limit_policy_name(value: int) -> str:
+  return {
+    0: "car_state_only",
+    1: "map_data_only",
+    2: "car_state_priority",
+    3: "map_data_priority",
+    4: "combined",
+    5: "phone_priority",
+  }.get(value, "unknown")
+
+
+def speed_limit_mode_name(value: int) -> str:
+  return {
+    0: "off",
+    1: "information",
+    2: "warning",
+    3: "assist",
+  }.get(value, "unknown")
+
+
+def summarize_speed_limit(safe_params: dict[str, str], messaging: dict[str, Any]) -> dict[str, Any]:
+  policy = param_int(safe_params.get("SpeedLimitPolicy"), 5)
+  mode = param_int(safe_params.get("SpeedLimitMode"), 1)
+  offset_type = param_int(safe_params.get("SpeedLimitOffsetType"), 0)
+  offset_value = param_int(safe_params.get("SpeedLimitValueOffset"), 0)
+  is_metric_raw = safe_params.get("IsMetric", "1")
+  is_metric = True if str(is_metric_raw).startswith("<missing") else param_truthy(is_metric_raw)
+  offset_unit = ""
+  if offset_type == 1:
+    offset_unit = "kph" if is_metric else "mph"
+  elif offset_type == 2:
+    offset_unit = "percent"
+
+  phone_speed_ms = param_float(safe_params.get("CarrotPhoneSpeedLimit"), 0.0)
+  phone_updated_at = param_float(safe_params.get("CarrotPhoneSpeedLimitUpdatedAt"), 0.0)
+  phone_age = max(0.0, time.time() - phone_updated_at) if phone_updated_at > 0.0 else 0.0
+  phone_enabled = param_truthy(safe_params.get("CarrotPhoneSpeedLimitEnabled"))
+  phone_fresh = phone_enabled and phone_speed_ms > 0.0 and phone_updated_at > 0.0 and phone_age <= 10.0
+  last = messaging.get("last", {}) if isinstance(messaging, dict) else {}
+  longitudinal = last.get("longitudinalPlanSP", {}) if isinstance(last, dict) else {}
+  car_state_sp = last.get("carStateSP", {}) if isinstance(last, dict) else {}
+
+  return {
+    "policy": policy,
+    "policyName": speed_limit_policy_name(policy),
+    "mode": mode,
+    "modeName": speed_limit_mode_name(mode),
+    "offsetType": offset_type,
+    "offsetTypeName": offset_type_name(offset_type),
+    "offsetValue": offset_value,
+    "offsetUnit": offset_unit,
+    "phone": {
+      "enabled": phone_enabled,
+      "fresh": phone_fresh,
+      "speedLimit": phone_speed_ms,
+      "speedLimitKph": round(phone_speed_ms * 3.6, 3) if phone_speed_ms > 0.0 else 0.0,
+      "source": safe_params.get("CarrotPhoneSpeedLimitSource", ""),
+      "updatedAt": phone_updated_at,
+      "ageSec": round(phone_age, 3),
+      "maxAgeSec": 10.0,
+    },
+    "resolver": {
+      "speedLimit": longitudinal.get("speedLimit", 0.0),
+      "speedLimitFinal": longitudinal.get("speedLimitFinal", 0.0),
+      "speedLimitOffset": longitudinal.get("speedLimitOffset", 0.0),
+      "speedLimitValid": longitudinal.get("speedLimitValid", False),
+      "source": longitudinal.get("source", ""),
+      "sourceLabel": longitudinal.get("sourceLabel", ""),
+    },
+    "carState": {
+      "speedLimit": car_state_sp.get("speedLimit", 0.0),
+    },
+  }
 
 
 def read_binary_param_summaries() -> dict[str, str]:
@@ -346,6 +444,9 @@ def sample_messaging(seconds: int) -> dict[str, Any]:
         result["last"]["longitudinalPlanSP"] = {
           "speedLimit": float(safe_attr(resolver, "speedLimit", 0.) or 0.),
           "speedLimitFinal": float(safe_attr(resolver, "speedLimitFinal", 0.) or 0.),
+          "speedLimitOffset": float(safe_attr(resolver, "speedLimitOffset", 0.) or 0.),
+          "speedLimitValid": bool(safe_attr(resolver, "speedLimitValid", False)),
+          "distToSpeedLimit": float(safe_attr(resolver, "distToSpeedLimit", 0.) or 0.),
           "source": enum_text(safe_attr(resolver, "source", "")),
           "sourceLabel": str(safe_attr(resolver, "sourceLabel", "")),
         }
@@ -376,6 +477,7 @@ def sample_messaging(seconds: int) -> dict[str, Any]:
 def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, Any]:
   safe_params = read_safe_params()
   process = process_snapshot()
+  messaging = sample_messaging(sample_seconds)
   cloud_params = {
     "SunnylinkEnabled": safe_params.get("SunnylinkEnabled"),
     "EnableSunnylinkUploader": safe_params.get("EnableSunnylinkUploader"),
@@ -400,13 +502,14 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
       "runnerCache": safe_params.get("ModelRunnerTypeCache"),
       "activeBundle": parse_model_bundle(safe_params.get("ModelManager_ActiveBundle", "")),
     },
+    "speedLimitEvidence": summarize_speed_limit(safe_params, messaging),
     "autoTuner": summarize_auto_tuner(safe_params),
     "process": process,
     "cloudGuard": {
       "cloudParams": cloud_params,
       "cloudForbiddenProcessesSeen": process.get("cloudForbiddenSeen", False),
     },
-    "messaging": sample_messaging(sample_seconds),
+    "messaging": messaging,
     "fishopHardware": fishop_snapshot(fishop_jsonl),
   }
 
