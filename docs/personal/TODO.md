@@ -402,8 +402,8 @@ flowchart TD
 - [ ] 研究动态盲区算法，确认 `DynamicBlindRange`、`DynamicBlindDistance`、`LidarBsdDelayTime`、前后目标时距参数是否适合 Seltos 2023。
 - [x] 设计统一硬件增强消息/参数桥，先接收并记录，不进入控制。
 - [x] 新增统一状态结构候选：设备在线、最后更新时间、左右车道线类型、左右车道曲率/宽度、左右前后目标距离、左右前后目标横向距离、左右前后相对速度、左右盲区、摄像头盲区、传感器健康。
-- [ ] 增加 Web/UI 只读显示：车道曲线、左右车道数据、左右盲区、传感器健康、数据新鲜度。
-- [x] alpha Web API 已提供 fishop 只读 JSON 状态；完整 Web 页面/车机 UI 显示仍未完成。
+- [x] 增加 Web/UI 只读显示：车道曲线、左右车道数据、左右盲区、传感器健康、数据新鲜度；alpha Carrot Web 首页已提供只读 fishop 硬件面板。
+- [x] alpha Web API 已提供 fishop 只读 JSON 状态；Web 首页已提供只读面板，车机 UI 显示仍未完成。
 - [x] 新增默认关闭参数：`FishopLaneCurveEnabled=0`、`FishopLidarLaneDataEnabled=0`、`FishopLidarBlindspotEnabled=0`、`FishopAutoOvertakeEnabled=0`。
 - [x] alpha 新增 fishop 硬件只读解析器：`selfdrive/carrot/fishop_hardware.py`，把 `lane`、`blindspot`、`cam_blind`、`overtake` JSON 归一化为 read-only 证据快照。
 - [x] alpha 新增 fishop 采样工具：`scripts/personal/fishop_hardware_sample.py`，可从 JSON Lines 或内置样例生成车道、盲区、目标距离和自动超车输入状态。
