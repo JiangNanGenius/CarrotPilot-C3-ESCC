@@ -6,7 +6,7 @@ from openpilot.selfdrive.ui.mici.widgets.dialog import BigDialog, BigInputDialog
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.selfdrive.ui.layouts.settings.common import restart_needed_callback
 from openpilot.selfdrive.ui.ui_state import ui_state
-from openpilot.selfdrive.ui.widgets.ssh_key import SshKeyFetcher
+from openpilot.selfdrive.ui.widgets.ssh_key import SshKeyFetcher, is_ssh_public_key_text, ssh_key_display_name
 
 
 class AlphaLongConfirmPage(NavScroller):
@@ -34,36 +34,46 @@ class DeveloperLayoutMici(NavScroller):
     super().__init__()
     self._ssh_fetcher = SshKeyFetcher(ui_state.params)
 
-    def github_username_callback(username: str):
-      if username:
+    def ssh_key_callback(value: str):
+      entry = value.strip()
+      if entry:
+        if is_ssh_public_key_text(entry):
+          error = self._ssh_fetcher.set_manual_keys(entry)
+          if error is None:
+            self._ssh_keys_btn.set_value(ssh_key_display_name(ui_state.params))
+          else:
+            self._ssh_keys_btn.set_value("Not set")
+            gui_app.push_widget(BigDialog("", error))
+          return
+
         self._ssh_keys_btn.set_value("Loading...")
         self._ssh_keys_btn.set_enabled(False)
 
         def on_response(error):
           self._ssh_keys_btn.set_enabled(True)
           if error is None:
-            self._ssh_keys_btn.set_value(username)
+            self._ssh_keys_btn.set_value(ssh_key_display_name(ui_state.params))
           else:
             self._ssh_keys_btn.set_value("Not set")
             gui_app.push_widget(BigDialog("", error))
 
-        self._ssh_fetcher.fetch(username, on_response)
+        self._ssh_fetcher.fetch(entry, on_response)
       else:
         self._ssh_fetcher.clear()
         self._ssh_keys_btn.set_value("Not set")
 
     def ssh_keys_callback():
       github_username = ui_state.params.get("GithubUsername") or ""
-      dlg = BigInputDialog("enter GitHub username...", github_username, minimum_length=0, confirm_callback=github_username_callback)
+      if isinstance(github_username, bytes):
+        github_username = github_username.decode("utf-8", errors="ignore")
+      dlg = BigInputDialog("GitHub username or SSH public key...", github_username, minimum_length=0, confirm_callback=ssh_key_callback)
       if not system_time_valid():
-        dlg = BigDialog("", "Please connect to Wi-Fi to fetch your key.")
-        gui_app.push_widget(dlg)
-        return
+        dlg = BigInputDialog("paste SSH public key...", "", minimum_length=0, confirm_callback=ssh_key_callback)
       gui_app.push_widget(dlg)
 
     txt_ssh = gui_app.texture("icons_mici/settings/developer/ssh.png", 56, 64)
-    github_username = ui_state.params.get("GithubUsername") or ""
-    self._ssh_keys_btn = BigButton("SSH keys", "Not set" if not github_username else github_username, icon=txt_ssh)
+    ssh_label = ssh_key_display_name(ui_state.params)
+    self._ssh_keys_btn = BigButton("SSH keys", "Not set" if not ssh_label else ssh_label, icon=txt_ssh)
     self._ssh_keys_btn.set_click_callback(ssh_keys_callback)
 
     # adb, ssh, ssh keys, debug mode, joystick debug mode, longitudinal maneuver mode, ip address

@@ -19,8 +19,8 @@ DESCRIPTIONS = {
     "See https://docs.comma.ai/how-to/connect-to-comma for more info."
   ),
   'ssh_key': tr_noop(
-    "Warning: This grants SSH access to all public keys in your GitHub settings. Never enter a GitHub username " +
-    "other than your own. A comma employee will NEVER ask you to add their GitHub username."
+    "This grants local SSH access to the configured public keys. Enter your own GitHub username to fetch keys " +
+    "from github.com, or paste a public SSH key directly for fully local setup. Never add keys you do not control."
   ),
   'alpha_longitudinal': tr_noop(
     "<b>WARNING: sunnypilot longitudinal control is in alpha for this car and may disable Automatic Emergency Braking (AEB).</b><br><br>" +
