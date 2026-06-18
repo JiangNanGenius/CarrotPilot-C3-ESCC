@@ -754,23 +754,35 @@ def check_params_api_runtime() -> tuple[bool, str]:
   sys.modules["openpilot.common.params"] = params_mod
   try:
     server = import_file("alpha_carrot_server_params_static_check", "selfdrive/carrot/carrot_server.py")
-    state = server.params_bulk_state(["ExperimentalMode", "OffroadMode", "AlwaysOffroad", "DeviceType"])
+    state = server.params_bulk_state(["ExperimentalMode", "ExperimentalModeConfirmed", "OffroadMode", "SpeedFromPCM", "AlwaysOffroad", "DeviceType"])
     if not state.get("hasParams"):
       return False, "params bulk state did not report fake Params"
     values = state.get("values", {})
     writable = state.get("writable", {})
+    read_only = state.get("readOnly", {})
     if values.get("ExperimentalMode") is not False or writable.get("ExperimentalMode") is not True:
       return False, "ExperimentalMode was not exposed as a writable bool"
+    if values.get("ExperimentalModeConfirmed") is not False or writable.get("ExperimentalModeConfirmed") is not True:
+      return False, "ExperimentalModeConfirmed was not exposed as a writable bool"
     if values.get("OffroadMode") is not False or writable.get("OffroadMode") is not False:
       return False, "OffroadMode must be read-only through local API"
+    if values.get("SpeedFromPCM") != 1 or writable.get("SpeedFromPCM") is not False or read_only.get("SpeedFromPCM") is not True:
+      return False, "SpeedFromPCM must be visible for Navipilot compatibility but read-only on this Kia build"
     if values.get("AlwaysOffroad") != 0 or writable.get("AlwaysOffroad") is not False:
       return False, "legacy unknown AlwaysOffroad must only read as an inert default"
     if values.get("DeviceType") != "unknown" or writable.get("DeviceType") is not False:
       return False, "DeviceType must be a read-only virtual value"
+    if state.get("has_params") is not True or "AlwaysOffroad" not in state.get("unknown", []):
+      return False, "params_bulk_state must expose jixie-compatible has_params and unknown metadata"
+    if server.get_param_values(["ExperimentalMode"]).get("ExperimentalMode") is not False:
+      return False, "get_param_values compatibility helper did not mirror bulk values"
 
     result = server.set_param_from_api("ExperimentalMode", 1)
     if not result.get("changed") or FakeParams.shared_store.get("ExperimentalMode") != b"1":
       return False, "param_set did not write ExperimentalMode"
+    compat_result = server.set_param_value("ExperimentalModeConfirmed", 1)
+    if not compat_result.get("changed") or FakeParams.shared_store.get("ExperimentalModeConfirmed") != b"1":
+      return False, "set_param_value compatibility helper did not write ExperimentalModeConfirmed"
     unchanged = server.set_param_from_api("ExperimentalMode", True)
     if unchanged.get("changed"):
       return False, "same-value param_set should report unchanged"
@@ -778,7 +790,7 @@ def check_params_api_runtime() -> tuple[bool, str]:
     if FakeParams.shared_store.get("SpeedLimitMode") != b"2":
       return False, "SpeedLimitMode must clamp local API writes to warning, not assist"
 
-    for blocked_name in ("OffroadMode", "CarrotTrafficStopEnabled", "FishopAutoOvertakeEnabled"):
+    for blocked_name in ("OffroadMode", "SpeedFromPCM", "CarrotTrafficStopEnabled", "FishopAutoOvertakeEnabled"):
       try:
         server.set_param_from_api(blocked_name, 1)
         return False, f"{blocked_name} should be read-only through local API"
@@ -1281,8 +1293,16 @@ def main() -> int:
   failures += not require("Carrot Web params API whitelist", "PARAM_API_DEFS" in carrot_server
                           and '"ExperimentalMode": {"type": "bool", "default": False, "writable": True}' in carrot_server
                           and '"OffroadMode": {"type": "bool", "default": False, "writable": False}' in carrot_server
+                          and '"SpeedFromPCM": {"type": "int", "default": 1, "writable": False' in carrot_server
                           and '"FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": False}' in carrot_server,
-                          "Carrot Web params API must expose only an explicit whitelist and keep high-risk params read-only")
+                          "Carrot Web params API must expose only an explicit whitelist and keep high-risk/Mazda-only params read-only")
+  failures += not require("Carrot Web params API preserves Navipilot response contract",
+                          'app.router.add_post("/api/params_bulk", api_params_bulk)' in carrot_server
+                          and '"has_params": params is not None' in carrot_server
+                          and '"source": "local_safe_whitelist"' in carrot_server
+                          and "def get_param_values" in carrot_server
+                          and "def set_param_value" in carrot_server,
+                          "local params API must remain compatible with jixie Navipilot /api/params_bulk and /api/param_set callers")
   failures += not require("Carrot Web params API blocks onroad changes", 'params.get_bool("IsOnroad") and changed' in carrot_server
                           and "Cannot change params while onroad" in carrot_server,
                           "param_set must reject changed values while onroad")

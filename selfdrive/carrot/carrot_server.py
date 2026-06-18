@@ -105,6 +105,7 @@ PARAM_API_DEFS: dict[str, dict[str, Any]] = {
   "IsOnroad": {"type": "bool", "default": False, "writable": False},
   "OpenpilotEnabledToggle": {"type": "bool", "default": True, "writable": False},
   "SshEnabled": {"type": "bool", "default": False, "writable": False},
+  "SpeedFromPCM": {"type": "int", "default": 1, "writable": False, "min": 0, "max": 1},
   "CarrotActiveSpeedControlEnabled": {"type": "bool", "default": False, "writable": False},
   "CarrotAutoTurnControlEnabled": {"type": "bool", "default": False, "writable": False},
   "CarrotTrafficStopEnabled": {"type": "bool", "default": False, "writable": False},
@@ -392,21 +393,57 @@ def _requested_param_names(raw_names: str) -> list[str]:
   return names
 
 
+def _requested_param_names_from_body(body: Any) -> list[str]:
+  if not isinstance(body, dict):
+    return []
+  raw_names = body.get("names")
+  if isinstance(raw_names, str):
+    return _requested_param_names(raw_names)
+  if isinstance(raw_names, list):
+    names: list[str] = []
+    for raw in raw_names:
+      name = str(raw).strip()
+      if name and name not in names:
+        names.append(name)
+      if len(names) >= PARAM_API_MAX_NAMES:
+        break
+    return names
+  raw_name = body.get("name")
+  return _requested_param_names(str(raw_name or ""))
+
+
+def _default_value_for_param(name: str) -> Any:
+  if name in VIRTUAL_PARAM_DEFAULTS:
+    return VIRTUAL_PARAM_DEFAULTS[name]
+  meta = _param_meta(name)
+  if meta is None:
+    return 0
+  return _json_safe_value(meta.get("default"))
+
+
 def params_bulk_state(names: Iterable[str]) -> dict[str, Any]:
   values: dict[str, Any] = {}
   writable: dict[str, bool] = {}
+  defaults: dict[str, Any] = {}
+  types: dict[str, str] = {}
+  unknown: list[str] = []
   params, error = _params_state()
 
   for name in names:
+    defaults[name] = _default_value_for_param(name)
     if name in VIRTUAL_PARAM_DEFAULTS:
       values[name] = VIRTUAL_PARAM_DEFAULTS[name]
       writable[name] = False
+      types[name] = "virtual"
       continue
 
     meta = _param_meta(name)
     if meta is None:
       values[name] = 0
       writable[name] = False
+      defaults[name] = 0
+      types[name] = "unknown"
+      unknown.append(name)
       continue
 
     value = meta.get("default")
@@ -414,13 +451,24 @@ def params_bulk_state(names: Iterable[str]) -> dict[str, Any]:
       value = _params_get(params, name, meta.get("default"))
     values[name] = _json_safe_value(_normalize_param_value(value, meta))
     writable[name] = bool(meta.get("writable", False))
+    types[name] = str(meta.get("type", "string"))
 
   return {
     "hasParams": params is not None,
+    "has_params": params is not None,
     "values": values,
     "writable": writable,
+    "readOnly": {name: not bool(writable.get(name, False)) for name in values},
+    "defaults": defaults,
+    "types": types,
+    "unknown": unknown,
+    "source": "local_safe_whitelist",
     "error": error if params is None else "",
   }
+
+
+def get_param_values(names: Iterable[str], _defaults: dict[str, Any] | None = None) -> dict[str, Any]:
+  return params_bulk_state(names)["values"]
 
 
 def set_param_from_api(name: str, value: Any) -> dict[str, Any]:
@@ -451,7 +499,13 @@ def set_param_from_api(name: str, value: Any) -> dict[str, Any]:
     "value": _json_safe_value(normalized),
     "changed": changed,
     "hasParams": True,
+    "has_params": True,
+    "writable": True,
   }
+
+
+def set_param_value(name: str, value: Any) -> dict[str, Any]:
+  return set_param_from_api(name, value)
 
 
 def _safe_navigation_text(value: Any) -> str:
@@ -1588,6 +1642,12 @@ async def api_carrot_learning(_request: web.Request) -> web.Response:
 
 async def api_params_bulk(request: web.Request) -> web.Response:
   names = _requested_param_names(request.query.get("names", ""))
+  if not names and request.method == "POST":
+    try:
+      body = await request.json()
+    except Exception:
+      body = {}
+    names = _requested_param_names_from_body(body)
   if not names:
     return _json_response({"ok": False, "error": "missing names"}, status=400)
   state = params_bulk_state(names)
@@ -1600,7 +1660,7 @@ async def api_param_set(request: web.Request) -> web.Response:
   except Exception:
     return _json_response({"ok": False, "error": "invalid json"}, status=400)
 
-  name = str(body.get("name", "")).strip()
+  name = str(body.get("name") or body.get("param") or body.get("key") or "").strip()
   try:
     result = set_param_from_api(name, body.get("value"))
     return _json_response({"ok": True, **result})
@@ -1610,6 +1670,7 @@ async def api_param_set(request: web.Request) -> web.Response:
       "ok": False,
       "name": name,
       "hasParams": params is not None,
+      "has_params": params is not None,
       "error": str(exc) if params is not None else f"Params unavailable: {error}",
     }, status=400)
 
@@ -2350,6 +2411,7 @@ def make_app() -> web.Application:
   app.router.add_get("/", index)
   app.router.add_get("/api/health", api_health)
   app.router.add_get("/api/params_bulk", api_params_bulk)
+  app.router.add_post("/api/params_bulk", api_params_bulk)
   app.router.add_post("/api/param_set", api_param_set)
   app.router.add_get("/api/status_broadcast", api_status_broadcast)
   app.router.add_get("/api/carrot_learning", api_carrot_learning)
