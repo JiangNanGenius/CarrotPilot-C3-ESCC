@@ -438,6 +438,10 @@ def check_fishop_overtake_safety_contract() -> tuple[bool, str]:
     '"readOnly": True',
     '"overtake": overtake',
     "OVERTAKE_MAX_AGE_S = 1.0",
+    '"dynamicBlind": self.dynamic_blind(targets_fresh)',
+    '"directionality": {',
+    '"alphaAction": "record_only"',
+    '"usesExistingLaneChangeChain": False',
   )
   for token in required_parser_tokens:
     if token not in fishop_hardware:
@@ -1237,6 +1241,9 @@ def main() -> int:
                           and 'id="fishop-lane-curve"' in carrot_server
                           and 'id="fishop-lidar-blind"' in carrot_server
                           and 'id="fishop-targets"' in carrot_server
+                          and 'id="fishop-dynamic-risk"' in carrot_server
+                          and 'id="fishop-overtake-path"' in carrot_server
+                          and "dynamicRiskSummary" in carrot_server
                           and "snapshot.controlOutputEnabled ? \"control enabled\" : \"read-only\"" in carrot_server
                           and 'method:' not in carrot_server[carrot_server.index('async function refreshFishopHardware'):carrot_server.index('setInterval(refreshFishopHardware')],
                           "Carrot Web must show fishop lane/curve/lidar/target evidence through read-only GET only")
@@ -1259,8 +1266,12 @@ def main() -> int:
                           and "rightCameraOnline" in fishop_hardware
                           and "lidar_car_lblind" in fishop_hardware
                           and "remoteCmd" in fishop_hardware
+                          and "DYNAMIC_BLIND_REFERENCE_DEFAULTS" in fishop_hardware
+                          and "def _side_object_risk" in fishop_hardware
+                          and '"dynamicBlind": self.dynamic_blind(targets_fresh)' in fishop_hardware
+                          and '"directionality": {' in fishop_hardware
                           and "fishop/openpilot:selfdrive/carrot/amap_navi.py" in fishop_hardware,
-                          "fishop hardware parser must preserve lane, lidar, camera, target, and command evidence fields from amap_navi.py")
+                          "fishop hardware parser must preserve lane, lidar, camera, target, dynamic-risk, and command evidence fields from amap_navi.py")
   for forbidden in ("socket", "PubMaster", "SubMaster", "CarControl", "CANParser", "sendto", ".bind(", "desire_helper", "blinker_ctrl"):
     failures += not require(f"fishop hardware parser omits {forbidden}", forbidden not in fishop_hardware,
                             "fishop hardware parser must not open network sockets, publish controls, or touch lane-change control")
@@ -1392,7 +1403,8 @@ def main() -> int:
     fishop_state.update_from_payload({"resp": "lane", "left_lane": 2, "right_lane": 1, "lineValid": True}, 1000.0)
     fishop_state.update_from_payload({"device": "lidar", "resp": "blindspot", "detect_side": 3, "lidar_id": 0,
                                       "dist_time": 123456, "lidar_lblind": True, "lidar_car_lblind": True,
-                                      "rf_drel": 4200, "rb_drel": -1800, "rf_xrel": 850, "rf_vrel": -1.2}, 1000.0)
+                                      "rf_drel": 4200, "rb_drel": -1800, "rf_xrel": 850, "rf_vrel": -1.2,
+                                      "v_ego_mps": 15.0}, 1000.0)
     fishop_state.update_from_payload({"device": "camera", "resp": "cam_blind", "detect_side": 2, "right_blind": True}, 1000.0)
     fishop_state.update_from_payload({"device": "overtake", "index": 7, "cmd": "OVERTAKE", "arg": "left",
                                       "request": True, "direction": "left"}, 1000.0)
@@ -1411,8 +1423,21 @@ def main() -> int:
                             and fishop_snapshot["blindspot"]["targets"]["rf_vrel"] == -1.2
                             and fishop_snapshot["blindspot"]["fresh"],
                             "fishop parser must expose blindspot evidence while fresh")
+    dynamic_blind = fishop_snapshot["blindspot"]["dynamicBlind"]
+    failures += not require("fishop dynamic blind preview stays read-only", dynamic_blind["readOnly"]
+                            and dynamic_blind["controlOutput"] is False
+                            and dynamic_blind["available"]
+                            and dynamic_blind["vEgoMps"] == 15.0
+                            and dynamic_blind["referenceDefaults"]["DynamicBlindRange"] == 0
+                            and dynamic_blind["referenceDefaults"]["LidarFrontVRelDistTimeSec"] == 3.0
+                            and dynamic_blind["riskPreview"]["rf"]["risk"]
+                            and dynamic_blind["activeRiskPreview"] == ["rf"],
+                            "dynamic blind preview must mirror fishop risk math as evidence only")
     failures += not require("fishop parser records overtake read-only", fishop_snapshot["overtake"]["commandSeen"]
                             and fishop_snapshot["overtake"]["readOnly"]
+                            and fishop_snapshot["overtake"]["directionality"]["alphaAction"] == "record_only"
+                            and fishop_snapshot["overtake"]["directionality"]["controlOutput"] is False
+                            and fishop_snapshot["overtake"]["directionality"]["usesExistingLaneChangeChain"] is False
                             and fishop_snapshot["overtake"]["cmdIndex"] == 7
                             and fishop_snapshot["overtake"]["remoteCmd"] == "OVERTAKE"
                             and not fishop_snapshot["controlOutputEnabled"],
@@ -1432,7 +1457,9 @@ def main() -> int:
     failures += not require("fishop stale blindspot clears active bits", not stale_snapshot["blindspot"]["fresh"]
                             and not stale_snapshot["blindspot"]["leftLidarBlind"]
                             and not stale_snapshot["blindspot"]["rightCameraBlind"]
-                            and not stale_snapshot["blindspot"]["targetsFresh"],
+                            and not stale_snapshot["blindspot"]["targetsFresh"]
+                            and not stale_snapshot["blindspot"]["dynamicBlind"]["available"]
+                            and stale_snapshot["blindspot"]["dynamicBlind"]["activeRiskPreview"] == [],
                             "stale fishop blindspot input must not stay active")
   except Exception as exc:
     failures += not require("fishop parser import/sample", False, f"fishop parser import/sample failed: {exc}")

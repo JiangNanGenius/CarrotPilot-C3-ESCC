@@ -1515,6 +1515,7 @@ async def index(_request: web.Request) -> web.Response:
           <div class="metric"><span class="label">Lidar</span><span class="value" id="fishop-lidar-blind">-</span></div>
           <div class="metric"><span class="label">Camera</span><span class="value" id="fishop-camera-blind">-</span></div>
           <div class="metric"><span class="label">Targets</span><span class="value" id="fishop-targets">-</span></div>
+          <div class="metric"><span class="label">Dynamic risk</span><span class="value" id="fishop-dynamic-risk">-</span></div>
           <div class="metric"><span class="label">Age</span><span class="value" id="fishop-blind-age">-</span></div>
         </div>
         <div class="panel">
@@ -1522,6 +1523,7 @@ async def index(_request: web.Request) -> web.Response:
           <div class="metric"><span class="label">Command</span><span class="value" id="fishop-overtake-command">-</span></div>
           <div class="metric"><span class="label">Request</span><span class="value" id="fishop-overtake-request">-</span></div>
           <div class="metric"><span class="label">Direction</span><span class="value" id="fishop-overtake-direction">-</span></div>
+          <div class="metric"><span class="label">Data path</span><span class="value" id="fishop-overtake-path">record only</span></div>
           <div class="metric"><span class="label">Boundary</span><span class="value" id="fishop-overtake-boundary">read-only</span></div>
         </div>
       </div>
@@ -1554,6 +1556,17 @@ async def index(_request: web.Request) -> web.Response:
         .map((key) => `${key}:${num(targets[key], 1)}`);
       return parts.length ? parts.join(" ") : "-";
     };
+    const dynamicRiskSummary = (dynamicBlind = {}) => {
+      const preview = dynamicBlind.riskPreview || {};
+      const active = Array.isArray(dynamicBlind.activeRiskPreview) ? dynamicBlind.activeRiskPreview : [];
+      if (!dynamicBlind.available) {
+        return dynamicBlind.vEgoMps === null || dynamicBlind.vEgoMps === undefined ? "waiting vEgo" : "-";
+      }
+      if (active.length) {
+        return `risk ${active.join(", ")} @ ${num(dynamicBlind.vEgoMps, 1)} m/s`;
+      }
+      return Object.keys(preview).length ? `clear @ ${num(dynamicBlind.vEgoMps, 1)} m/s` : "-";
+    };
     async function refreshFishopHardware() {
       try {
         const response = await fetch("/api/fishop_hardware", {cache: "no-store"});
@@ -1577,10 +1590,12 @@ async def index(_request: web.Request) -> web.Response:
         setText("fishop-lidar-blind", `L ${yesNo(blindspot.leftLidarBlind)} / R ${yesNo(blindspot.rightLidarBlind)}`);
         setText("fishop-camera-blind", `L ${yesNo(blindspot.leftCameraBlind)} / R ${yesNo(blindspot.rightCameraBlind)}`);
         setText("fishop-targets", targetSummary(blindspot.targets || {}));
+        setText("fishop-dynamic-risk", dynamicRiskSummary(blindspot.dynamicBlind || {}));
         setText("fishop-blind-age", age(blindspot.ageSec));
         setText("fishop-overtake-command", yesNo(overtake.commandSeen));
         setText("fishop-overtake-request", yesNo(overtake.requested));
         setText("fishop-overtake-direction", overtake.direction || "-");
+        setText("fishop-overtake-path", (overtake.directionality || {}).alphaAction || "record_only");
         setText("fishop-overtake-boundary", snapshot.controlOutputEnabled ? "control enabled" : "read-only");
         setText("fishop-error", data.parseError || "");
       } catch (err) {
