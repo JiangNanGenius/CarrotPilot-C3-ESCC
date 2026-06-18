@@ -8,6 +8,9 @@
   "current_test_tag": "carrotpilot-c3-escc-20260618-test25",
   "latest_install_release": "latest",
   "latest_install_channel": "test",
+  "alpha_install_channel": "alpha",
+  "alpha_install_ref": "experimental/latest-model-supercombo",
+  "alpha_purpose": "latest-model supercombo experiment only; not a daily driving target",
   "latest_binary_url": "https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/latest/installer_c3_escc",
   "latest_script_url": "https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/latest/install_c3_escc.sh",
   "short_binary_url": "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i",
@@ -21,6 +24,7 @@
     "A static tag only proves local static checks; it is not a road-tested stable version.",
     "A stable tag requires a completed road-test log and a recorded previous stable or rollback base.",
     "A stable tag also requires a checked C3 device snapshot with ESCC 0x2AB evidence, default boot/connect guard evidence, and ACC/CAN power-cycle evidence.",
-    "Until current_stable_tag is set, daily_install_target must stay null."
+    "Until current_stable_tag is set, daily_install_target must stay null.",
+    "The alpha channel may exist in the installer, but it must never be promoted to daily_install_target or latest without explicit road-test evidence."
   ]
 }

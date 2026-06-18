@@ -497,6 +497,7 @@ def check_install_script() -> None:
   expect_contains("scripts/personal/install_c3_escc.sh", 'write_param "AutoNaviSpeedLimitOffset" "0"', "installer neutral speed-camera fixed offset")
   expect_contains("scripts/personal/install_c3_escc.sh", 'write_param "AutoNaviSpeedSafetyFactor" "100"', "installer neutral speed-camera percentage")
   expect_contains("scripts/personal/install_c3_escc.sh", "install-c3-escc-test", "installer test channel")
+  expect_contains("scripts/personal/install_c3_escc.sh", "experimental/latest-model-supercombo", "installer alpha supercombo channel")
   expect_contains("scripts/personal/install_c3_escc.sh", "--list-channels", "installer channel listing")
   run([sys.executable, "scripts/personal/record_power_cycle_boot.py", "--self-test"], "power-cycle boot recorder self-test")
   run([sys.executable, "scripts/personal/build_binary_installer.py", "--self-test"], "C3 binary installer builder self-test")

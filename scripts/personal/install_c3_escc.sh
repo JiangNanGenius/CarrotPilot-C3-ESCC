@@ -6,6 +6,7 @@ DEFAULT_REPO_URL="https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
 DEFAULT_REF="install-c3-escc-test"
 TEST_CHANNEL_REF="install-c3-escc-test"
 DEV_CHANNEL_REF="personal/c3-escc-atune"
+ALPHA_CHANNEL_REF="experimental/latest-model-supercombo"
 STATIC_CHANNEL_REF="carrotpilot-c3-escc-20260618-static28"
 STABLE_CHANNEL_REF="install-c3-escc-stable"
 
@@ -34,7 +35,7 @@ Usage:
 
 Options:
   --ref REF              Install a tag or branch. Default: $DEFAULT_REF
-  --channel CHANNEL      Install channel: test, stable, dev, or static. Last --ref/--channel wins
+  --channel CHANNEL      Install channel: test, alpha, stable, dev, or static. Last --ref/--channel wins
   --repo URL             Git repository URL. Default: $DEFAULT_REPO_URL
   --install-dir PATH     Target directory. Default: /data/openpilot
   --tmp-dir PATH         Temporary clone directory. Default: /data/tmppilot-carrotpilot-c3-escc
@@ -70,12 +71,14 @@ list_channels() {
   cat <<EOF
 Available channels:
   test    -> $TEST_CHANNEL_REF
+  alpha   -> $ALPHA_CHANNEL_REF
   stable  -> $STABLE_CHANNEL_REF
   dev     -> $DEV_CHANNEL_REF
   static  -> $STATIC_CHANNEL_REF
 
 Notes:
   test is the current controlled-test install branch.
+  alpha is the latest-model supercombo experiment line; do not use it as a daily driving target.
   stable is intentionally unavailable until the first real-car stable tag exists.
   dev follows the integration branch and is not a daily install target.
   static points at the last static-check tag and is not road-tested.
@@ -86,6 +89,9 @@ resolve_channel_ref() {
   case "$1" in
     test)
       REF="$TEST_CHANNEL_REF"
+      ;;
+    alpha|experimental|supercombo)
+      REF="$ALPHA_CHANNEL_REF"
       ;;
     stable)
       REF="$STABLE_CHANNEL_REF"
@@ -99,7 +105,7 @@ resolve_channel_ref() {
     "")
       ;;
     *)
-      die "unknown channel: $1 (use test, stable, dev, or static)"
+      die "unknown channel: $1 (use test, alpha, stable, dev, or static)"
       ;;
   esac
 }

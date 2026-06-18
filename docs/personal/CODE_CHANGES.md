@@ -1,5 +1,20 @@
 # 当前代码改动记录
 
+## 2026-06-18: 安装器增加 latest-model alpha 通道和代理更新规则
+
+改动内容：
+
+- 脚本安装器新增 `--channel alpha` / `experimental` / `supercombo`，指向 `experimental/latest-model-supercombo`。
+- `alpha` 只用于官方 master 最新 `driving_supercombo` 模型运行栈实验，不作为默认安装目标。
+- `docs/personal/LATEST_MODEL_SUPERCOMBO_LINE.md` 记录第三条线开法、C3/C3X/C4 的 `tici` / `tizi` / `mici` 区分和验证门禁。
+- 根目录新增 `AGENTS.md`，记录以后按三方来源自动更新的策略、保护项、门禁和 release 规则。
+
+刻意没有改：
+
+- 没有移动 `latest` tag、`install-c3-escc-test` 分支或 release asset。
+- 没有把 alpha 设为日常安装目标。
+- 没有迁移 modeld/supercombo 代码到主线。
+
 ## 2026-06-18: 测速摄像头限速偏移改为可调
 
 改动内容：
