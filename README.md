@@ -16,8 +16,8 @@
 
 当前可参考 tag：
 
-- 静态检查：`carrotpilot-c3-escc-20260618-static26`
-- 受控上车测试：`carrotpilot-c3-escc-20260618-test18`
+- 静态检查：`carrotpilot-c3-escc-20260618-static27`
+- 受控上车测试：`carrotpilot-c3-escc-20260618-test19`
 - `static` / `test` 都不代表实车验证完成或稳定版
 - 还没有 `stable` tag
 - 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空
@@ -33,6 +33,7 @@
 安装、更新或上车前先看：
 
 - [安装和回滚说明](docs/personal/INSTALL_AND_ROLLBACK.md)
+- [C3 二进制安装器研究](docs/personal/BINARY_INSTALLER_RESEARCH.md)
 - [从旧版本迁移安全参数](docs/personal/CONFIG_MIGRATION.md)
 - [安装目标清单](docs/personal/INSTALL_TARGETS.json)
 - [设备端快照采集](docs/personal/DEVICE_SNAPSHOT.md)

@@ -386,6 +386,7 @@ def check_py_compile() -> None:
     "scripts/personal/feature_status_report.py",
     "scripts/personal/update_audit.py",
     "scripts/personal/upstream_update_plan.py",
+    "scripts/personal/build_binary_installer.py",
     "scripts/personal/release_gate.py",
     "scripts/personal/settings_cn_audit.py",
     "scripts/personal/device_snapshot.py",
@@ -435,6 +436,7 @@ def check_js_syntax() -> str:
 
 
 def check_install_script() -> None:
+  run([sys.executable, "scripts/personal/build_binary_installer.py", "--self-test"], "C3 binary installer builder self-test")
   run(["sh", "-n", "scripts/personal/install_c3_escc.sh"], "C3 installer shell syntax")
   run([
     "scripts/personal/install_c3_escc.sh",
