@@ -81,6 +81,7 @@ selfdrive/modeld/models/*.pkl
 *.zst
 
 build/
+device_backups/
 
 !**/.gitkeep
 

@@ -2,6 +2,13 @@
 
 本文件只定义第三条实验线怎么开，不代表当前可安装版本已经迁移到官方 master 最新模型栈。
 
+更新：2026-06-19 的 SunnyPilot / Mr.One 研究显示，新版目标应优先拆成两个层级：
+
+- 0.11+ 架构和 C3 兼容：见 `SUNNYPILOT_C3_LATEST_ARCHITECTURE_PLAN.md`。
+- 最新模型 / `modeld_v2` / 模型管理器：仍按本文作为 alpha 线推进。
+
+不要直接把 Mr.One 当基座。Mr.One `devc3` 和 `res` 只作为 C3/TICI 兼容补丁参考。
+
 ## 目标
 
 第三条线命名建议：
