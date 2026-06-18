@@ -450,7 +450,7 @@ flowchart LR
 - [x] alpha 静态守门覆盖：默认关闭不写学习数据、onroad 禁止应用、offroad 手动应用才改写参数。
 - [x] alpha 设备证据脚本新增 `autoTuner` 摘要：是否开启、是否自动应用、是否有待处理建议、推荐项数量和历史数量。
 - [x] alpha Carrot Web 已提供 Auto-Tuner 推荐读取和手动动作 API；完整 Web 面板仍未完成。
-- [ ] Web/UI 明确区分“推荐值”和“已应用值”。
+- [x] Web/UI 明确区分“推荐值”和“已应用值”：alpha `/api/carrot_learning` 和设备快照现在输出 `capturedCurrentValue`、`currentValue`、`recommendedValue`、`appliedValue`、`liveDelta`、`applied/state` 和推荐汇总。
 
 ### P8.11: 本地化和说明
 
