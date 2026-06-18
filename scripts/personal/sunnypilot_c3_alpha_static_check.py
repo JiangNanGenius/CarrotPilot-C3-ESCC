@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import importlib.util
+import json
 from pathlib import Path
 import sys
+import types
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -19,6 +22,137 @@ def require(name: str, condition: bool, detail: str) -> bool:
     return True
   print(f"FAIL {name}: {detail}")
   return False
+
+
+AUTO_TUNER_DEFAULTS = {
+  "CarrotLearningActive": 0,
+  "CarrotLearningAutoApply": 0,
+  "CarrotLearningApply": 0,
+  "CarrotLearningIgnore": 0,
+  "CarrotLearningClear": 0,
+  "CarrotLearningPopupReady": 0,
+  "CarrotTunerApplyLat": 1,
+  "CarrotTunerApplyLong": 1,
+  "CarrotTunerFactoryReset": 0,
+  "CruiseMaxVals0": 160,
+  "CruiseMaxVals1": 200,
+  "CruiseMaxVals2": 160,
+  "CruiseMaxVals3": 130,
+  "CruiseMaxVals4": 110,
+  "CruiseMaxVals5": 95,
+  "CruiseMaxVals6": 80,
+  "DynamicTFollow": 0,
+  "JLeadFactor3": 0,
+  "PathOffset": 0,
+  "SteerActuatorDelay": 0,
+  "SteerRatioRate": 100,
+  "StopDistanceCarrot": 550,
+  "TFollowDecelBoost": 10,
+  "TFollowGap1": 110,
+  "TFollowGap2": 120,
+  "TFollowGap3": 140,
+  "TFollowGap4": 160,
+}
+
+
+class FakeParams:
+  def __init__(self):
+    self.store = {key: str(value).encode("utf-8") for key, value in AUTO_TUNER_DEFAULTS.items()}
+
+  def get(self, key):
+    return self.store.get(key)
+
+  def get_int(self, key):
+    raw = self.get(key)
+    try:
+      return int((raw or b"0").decode("utf-8"))
+    except Exception:
+      return 0
+
+  def get_bool(self, key):
+    raw = self.get(key)
+    if raw is None:
+      return False
+    try:
+      return raw.decode("utf-8").strip().lower() in ("1", "true", "on", "yes")
+    except Exception:
+      return False
+
+  def put(self, key, value):
+    self.store[key] = value if isinstance(value, bytes) else str(value).encode("utf-8")
+
+  def put_int(self, key, value):
+    self.put(key, str(int(value)))
+
+  def put_bool(self, key, value):
+    self.put(key, "1" if value else "0")
+
+  def remove(self, key):
+    self.store.pop(key, None)
+
+
+def import_file(module_name: str, rel: str):
+  spec = importlib.util.spec_from_file_location(module_name, str(ROOT / rel))
+  if spec is None or spec.loader is None:
+    raise RuntimeError(f"unable to import {rel}")
+  module = importlib.util.module_from_spec(spec)
+  sys.modules[module_name] = module
+  spec.loader.exec_module(module)
+  return module
+
+
+def check_carrot_learning_runtime() -> tuple[bool, str]:
+  params_mod = types.ModuleType("openpilot.common.params")
+  params_mod.Params = FakeParams
+  previous_params = sys.modules.get("openpilot.common.params")
+  sys.modules["openpilot.common.params"] = params_mod
+  try:
+    learning = import_file("alpha_carrot_learning_static_check", "selfdrive/carrot/carrot_learning.py")
+    learner = learning.CarrotLearner()
+
+    learner.update(80, True, True, False, lead_drel=30, lead_v_kph=70, gas_val=0.3)
+    if learner.params.get("CarrotLearningData") is not None:
+      return False, "inactive learner wrote CarrotLearningData"
+
+    learner.params.put_bool("CarrotLearningActive", True)
+    for _ in range(160):
+      learner.update(80, True, True, False, lead_drel=40, lead_v_kph=75, gas_val=0.4)
+    learner.update(0, False, False, True)
+
+    raw = learner.params.get("CarrotLearningRecommend")
+    if not raw:
+      return False, "active learner did not create a recommendation"
+    payload = json.loads(raw.decode("utf-8"))
+    if "CruiseMaxVals4" not in payload.get("recommendations", {}):
+      return False, "learner recommendation missing CruiseMaxVals4"
+    if learner.params.get_int("CruiseMaxVals4") != 110:
+      return False, "learner changed target params before apply"
+
+    learner.params.put_bool("IsOnroad", True)
+    learner.params.put_bool("CarrotLearningApply", True)
+    learner.update(0, False, False, False)
+    if learner.params.get_int("CruiseMaxVals4") != 110:
+      return False, "learner applied recommendations while IsOnroad=1"
+    if learner.params.get_bool("CarrotLearningApply"):
+      return False, "CarrotLearningApply did not reset after blocked onroad apply"
+    if not learner.params.get("CarrotLearningRecommend"):
+      return False, "blocked onroad apply cleared the pending recommendation"
+
+    learner.params.put_bool("IsOnroad", False)
+    learner.params.put_bool("CarrotLearningApply", True)
+    learner.update(0, False, False, False)
+    if learner.params.get_int("CruiseMaxVals4") <= 110:
+      return False, "offroad manual apply did not apply recommendation"
+    if learner.params.get("CarrotLearningRecommend"):
+      return False, "manual apply did not clear pending recommendation"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+  finally:
+    if previous_params is None:
+      sys.modules.pop("openpilot.common.params", None)
+    else:
+      sys.modules["openpilot.common.params"] = previous_params
 
 
 def main() -> int:
@@ -59,6 +193,48 @@ def main() -> int:
                           "OnroadUploads must default to 0 even though uploader is removed")
   failures += not require("CarrotMapOverlay default off", '{"CarrotMapOverlayEnabled", {PERSISTENT | BACKUP, BOOL, "0"}}' in params,
                           "CarrotMapOverlayEnabled must default to 0")
+  failures += not require("Carrot learning active default off", '{"CarrotLearningActive", {PERSISTENT | BACKUP, BOOL, "0"}}' in params,
+                          "CarrotLearningActive must default to 0")
+  failures += not require("Carrot learning auto-apply default off", '{"CarrotLearningAutoApply", {PERSISTENT | BACKUP, BOOL, "0"}}' in params,
+                          "CarrotLearningAutoApply must default to 0")
+  for key in (
+    "CarrotLearningData",
+    "CarrotLearningRecommend",
+    "CarrotLearningPopupReady",
+    "CarrotLearningHistory",
+    "CarrotLearningPopupSource",
+    "CarrotLearningApply",
+    "CarrotLearningIgnore",
+    "CarrotLearningClear",
+    "CarrotTunerApplyLat",
+    "CarrotTunerApplyLong",
+    "CarrotTunerFactoryReset",
+    "CarrotDSPRecommend",
+  ):
+    failures += not require(f"Auto-Tuner param exists: {key}", f'{{"{key}", ' in params,
+                            f"{key} must be registered for Auto-Tuner migration")
+  for key in (
+    "CruiseMaxVals0",
+    "CruiseMaxVals1",
+    "CruiseMaxVals2",
+    "CruiseMaxVals3",
+    "CruiseMaxVals4",
+    "CruiseMaxVals5",
+    "CruiseMaxVals6",
+    "TFollowGap1",
+    "TFollowGap2",
+    "TFollowGap3",
+    "TFollowGap4",
+    "JLeadFactor3",
+    "PathOffset",
+    "SteerActuatorDelay",
+    "SteerRatioRate",
+    "DynamicTFollow",
+    "TFollowDecelBoost",
+    "StopDistanceCarrot",
+  ):
+    failures += not require(f"Auto-Tuner target param exists: {key}", f'{{"{key}", ' in params,
+                            f"{key} must be registered before Carrot control migration")
   failures += not require("Carrot phone limit enabled", '{"CarrotPhoneSpeedLimitEnabled", {PERSISTENT | BACKUP, BOOL, "1"}}' in params,
                           "CarrotPhoneSpeedLimitEnabled must exist and default to 1")
   failures += not require("SpeedLimitPolicy phone priority default", '{"SpeedLimitPolicy", {PERSISTENT | BACKUP, INT, "5"}}' in params,
@@ -77,8 +253,19 @@ def main() -> int:
                             f"{key} must exist and default to 0")
 
   fishop_hardware = read("selfdrive/carrot/fishop_hardware.py")
+  carrot_learning = read("selfdrive/carrot/carrot_learning.py")
   fishop_sample = read("scripts/personal/fishop_hardware_sample.py")
   alpha_snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
+  failures += not require("Auto-Tuner learner module exists", "class CarrotLearner" in carrot_learning
+                          and "def apply_recommendations" in carrot_learning,
+                          "CarrotLearner core module must exist in alpha")
+  failures += not require("Auto-Tuner learner default uses bool gate", 'get_bool("CarrotLearningActive")' in carrot_learning,
+                          "CarrotLearner must use the alpha bool default gate")
+  failures += not require("Auto-Tuner apply blocked onroad", 'get_bool("IsOnroad")' in carrot_learning
+                          and "if self.is_onroad()" in carrot_learning,
+                          "CarrotLearner must not apply recommendations while onroad")
+  ok, detail = check_carrot_learning_runtime()
+  failures += not require("Auto-Tuner runtime guard", ok, detail or "runtime guard check failed")
   failures += not require("fishop hardware read-only module exists", "class FishopHardwareState" in fishop_hardware
                           and "CONTROL_OUTPUT_ENABLED = False" in fishop_hardware,
                           "fishop hardware parser must exist and remain read-only")
@@ -90,6 +277,9 @@ def main() -> int:
   failures += not require("alpha snapshot tool exists", "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot" in alpha_snapshot
                           and "MESSAGING_SERVICES" in alpha_snapshot and "fishopHardware" in alpha_snapshot,
                           "alpha snapshot must collect model, process, params, and fishop evidence")
+  failures += not require("alpha snapshot records Auto-Tuner summary", '"CarrotLearningActive"' in alpha_snapshot
+                          and '"autoTuner"' in alpha_snapshot and "summarize_auto_tuner" in alpha_snapshot,
+                          "alpha snapshot must summarize Auto-Tuner state")
   for service_name in ("modelV2", "drivingModelData", "cameraOdometry", "modelManagerSP", "longitudinalPlanSP", "carStateSP", "pandaStates"):
     failures += not require(f"alpha snapshot samples {service_name}", f'"{service_name}"' in alpha_snapshot,
                             f"alpha snapshot must sample {service_name}")

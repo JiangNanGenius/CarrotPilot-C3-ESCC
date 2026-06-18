@@ -37,6 +37,16 @@ SAFE_PARAM_KEYS = (
   "CarrotPhoneSpeedLimit",
   "CarrotPhoneSpeedLimitSource",
   "CarrotPhoneSpeedLimitUpdatedAt",
+  "CarrotLearningActive",
+  "CarrotLearningApply",
+  "CarrotLearningAutoApply",
+  "CarrotLearningClear",
+  "CarrotLearningIgnore",
+  "CarrotLearningPopupReady",
+  "CarrotLearningPopupSource",
+  "CarrotTunerApplyLat",
+  "CarrotTunerApplyLong",
+  "CarrotTunerFactoryReset",
   "SpeedLimitPolicy",
   "SpeedLimitMode",
   "SpeedLimitOffsetType",
@@ -129,6 +139,20 @@ def read_safe_params() -> dict[str, str]:
   return values
 
 
+def read_json_param(key: str) -> Any:
+  path = read_param_file(key)
+  if path is None:
+    return None
+  try:
+    return json.loads(path.read_text(encoding="utf-8", errors="replace"))
+  except Exception:
+    return None
+
+
+def param_truthy(value: str | None) -> bool:
+  return str(value or "").strip().lower() in ("1", "true", "on", "yes")
+
+
 def read_binary_param_summaries() -> dict[str, str]:
   values: dict[str, str] = {}
   for key in BINARY_PARAM_KEYS:
@@ -156,6 +180,29 @@ def parse_model_bundle(raw: str) -> dict[str, Any]:
     "runner": bundle.get("runner", ""),
     "minimumSelectorVersion": bundle.get("minimumSelectorVersion", ""),
     "modelCount": len(bundle.get("models", [])) if isinstance(bundle.get("models"), list) else 0,
+  }
+
+
+def summarize_auto_tuner(safe_params: dict[str, str]) -> dict[str, Any]:
+  payload = read_json_param("CarrotLearningRecommend")
+  history = read_json_param("CarrotLearningHistory")
+  recommendations = payload.get("recommendations", {}) if isinstance(payload, dict) else {}
+  if not isinstance(recommendations, dict):
+    recommendations = {}
+
+  return {
+    "active": param_truthy(safe_params.get("CarrotLearningActive")),
+    "autoApply": param_truthy(safe_params.get("CarrotLearningAutoApply")),
+    "popupReady": param_truthy(safe_params.get("CarrotLearningPopupReady")),
+    "applyLat": safe_params.get("CarrotTunerApplyLat", "<missing>"),
+    "applyLong": safe_params.get("CarrotTunerApplyLong", "<missing>"),
+    "pending": bool(recommendations),
+    "recommendationCount": len(recommendations),
+    "recommendationKeys": sorted(str(key) for key in recommendations.keys())[:20],
+    "source": str(payload.get("source", "")) if isinstance(payload, dict) else "",
+    "createdAt": payload.get("created_at", 0) if isinstance(payload, dict) else 0,
+    "historyCount": len(history) if isinstance(history, list) else 0,
+    "learningDataPresent": read_param_file("CarrotLearningData") is not None,
   }
 
 
@@ -348,6 +395,7 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
       "runnerCache": safe_params.get("ModelRunnerTypeCache"),
       "activeBundle": parse_model_bundle(safe_params.get("ModelManager_ActiveBundle", "")),
     },
+    "autoTuner": summarize_auto_tuner(safe_params),
     "process": process,
     "cloudGuard": {
       "cloudParams": cloud_params,
