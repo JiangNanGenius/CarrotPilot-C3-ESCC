@@ -268,7 +268,7 @@ EOF
 apply_safe_params() {
   [ "$APPLY_PARAMS" = "1" ] || return 0
   log "Applying safe first-boot params"
-  write_param "AlwaysOffline" "0"
+  write_param "AlwaysOffroad" "0"
   write_param "EnableConnect" "0"
   write_param "EnableEscc" "0"
   write_param "CanfdHDA2" "0"
@@ -301,7 +301,7 @@ Installed repo:
   $REPO_URL
 
 Safe first-boot params written by the installer:
-  AlwaysOffline=0
+  AlwaysOffroad=0
   EnableConnect=0
   EnableEscc=0
   CanfdHDA2=0
