@@ -293,6 +293,8 @@ def main() -> int:
 
   settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
+  settings_ui_device = read("sunnypilot/sunnylink/settings_ui_src/pages/device.yaml")
+  settings_ui_json = read("sunnypilot/sunnylink/settings_ui.json")
   mici_settings = read("selfdrive/ui/sunnypilot/mici/layouts/settings.py")
   main_onboarding = read("selfdrive/ui/layouts/onboarding.py")
   mici_onboarding = read("selfdrive/ui/mici/layouts/onboarding.py")
@@ -306,6 +308,10 @@ def main() -> int:
                           "MICI Sunnylink panel is still wired into settings")
   failures += not require("Onroad Uploads setting removed", "Onroad Uploads" not in device_settings,
                           "Device settings still expose Onroad Uploads")
+  failures += not require("OnroadUploads removed from settings-ui", "OnroadUploads" not in settings_ui_device + settings_ui_json,
+                          "settings-ui source or compiled JSON still exposes OnroadUploads")
+  failures += not require("Sunnylink removed from settings-ui", all(key not in settings_ui_device + settings_ui_json for key in ("SunnylinkEnabled", "EnableSunnylinkUploader")),
+                          "settings-ui must not expose Sunnylink cloud toggles")
   failures += not require("TICI onboarding skips Sunnylink", "SunnylinkOnboarding" not in main_onboarding,
                           "Main onboarding still imports Sunnylink onboarding")
   failures += not require("MICI onboarding skips Sunnylink", "SunnylinkConsentPage" not in mici_onboarding,
