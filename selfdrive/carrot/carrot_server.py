@@ -1473,8 +1473,20 @@ async def index(_request: web.Request) -> web.Response:
     body { margin: 0; background: #101418; color: #eef4f8; }
     main { max-width: 760px; margin: 0 auto; padding: 32px 20px; }
     h1 { font-size: 28px; margin: 0 0 8px; font-weight: 680; }
+    h2 { font-size: 18px; margin: 0 0 12px; font-weight: 650; }
+    h3 { font-size: 15px; margin: 0 0 8px; color: #d7e5eb; }
     p { color: #b8c5cc; line-height: 1.5; }
     section { border: 1px solid #2f3b43; border-radius: 8px; padding: 18px; margin-top: 16px; background: #151b20; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .panel { border: 1px solid #27343c; border-radius: 8px; padding: 12px; background: #10161b; }
+    .metric { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #26323a; padding: 7px 0; font-size: 14px; }
+    .metric:first-of-type { border-top: 0; }
+    .label { color: #91a4ad; }
+    .value { color: #eef4f8; text-align: right; overflow-wrap: anywhere; }
+    .pill { display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: 999px; background: #26323a; color: #cfe3eb; font-size: 13px; }
+    .pill.ok { background: #12352c; color: #86efac; }
+    .pill.warn { background: #3a2b12; color: #facc15; }
+    .pill.off { background: #2a3035; color: #a8b4bb; }
     a { color: #7dd3fc; text-decoration: none; }
     code { background: #222b31; padding: 2px 6px; border-radius: 5px; }
     ul { padding-left: 20px; }
@@ -1484,6 +1496,37 @@ async def index(_request: web.Request) -> web.Response:
   <main>
     <h1>CarrotPilot C3 Local Web</h1>
     <p>Local-only alpha service for maintenance evidence, Auto-Tuner recommendations, and fishop hardware snapshots.</p>
+    <section id="fishop-panel">
+      <h2>fishop Hardware</h2>
+      <div class="metric"><span class="label">State</span><span class="value"><span id="fishop-state" class="pill off">loading</span></span></div>
+      <div class="metric"><span class="label">Input</span><span class="value" id="fishop-input">-</span></div>
+      <div class="metric"><span class="label">Payloads</span><span class="value" id="fishop-payloads">-</span></div>
+      <div class="metric"><span class="label">Last update</span><span class="value" id="fishop-last-update">-</span></div>
+      <div class="grid">
+        <div class="panel">
+          <h3>Lane</h3>
+          <div class="metric"><span class="label">Valid</span><span class="value" id="fishop-lane-valid">-</span></div>
+          <div class="metric"><span class="label">Left / right</span><span class="value" id="fishop-lane-lines">-</span></div>
+          <div class="metric"><span class="label">Curve</span><span class="value" id="fishop-lane-curve">-</span></div>
+          <div class="metric"><span class="label">Age</span><span class="value" id="fishop-lane-age">-</span></div>
+        </div>
+        <div class="panel">
+          <h3>Blindspot</h3>
+          <div class="metric"><span class="label">Lidar</span><span class="value" id="fishop-lidar-blind">-</span></div>
+          <div class="metric"><span class="label">Camera</span><span class="value" id="fishop-camera-blind">-</span></div>
+          <div class="metric"><span class="label">Targets</span><span class="value" id="fishop-targets">-</span></div>
+          <div class="metric"><span class="label">Age</span><span class="value" id="fishop-blind-age">-</span></div>
+        </div>
+        <div class="panel">
+          <h3>Overtake Input</h3>
+          <div class="metric"><span class="label">Command</span><span class="value" id="fishop-overtake-command">-</span></div>
+          <div class="metric"><span class="label">Request</span><span class="value" id="fishop-overtake-request">-</span></div>
+          <div class="metric"><span class="label">Direction</span><span class="value" id="fishop-overtake-direction">-</span></div>
+          <div class="metric"><span class="label">Boundary</span><span class="value" id="fishop-overtake-boundary">read-only</span></div>
+        </div>
+      </div>
+      <p id="fishop-error"></p>
+    </section>
     <section>
       <h2>APIs</h2>
       <ul>
@@ -1497,6 +1540,61 @@ async def index(_request: web.Request) -> web.Response:
       </ul>
     </section>
   </main>
+  <script>
+    const setText = (id, value) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    };
+    const yesNo = (value) => value ? "yes" : "no";
+    const age = (value) => Number.isFinite(Number(value)) ? `${Number(value).toFixed(2)} s` : "-";
+    const num = (value, digits = 3) => Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : "-";
+    const targetSummary = (targets = {}) => {
+      const keys = ["lf_drel", "lb_drel", "rf_drel", "rb_drel", "lf_xrel", "lb_xrel", "rf_xrel", "rb_xrel"];
+      const parts = keys.filter((key) => targets[key] !== null && targets[key] !== undefined)
+        .map((key) => `${key}:${num(targets[key], 1)}`);
+      return parts.length ? parts.join(" ") : "-";
+    };
+    async function refreshFishopHardware() {
+      try {
+        const response = await fetch("/api/fishop_hardware", {cache: "no-store"});
+        const data = await response.json();
+        const snapshot = data.snapshot || {};
+        const lane = snapshot.lane || {};
+        const blindspot = snapshot.blindspot || {};
+        const overtake = snapshot.overtake || {};
+        const state = document.getElementById("fishop-state");
+        if (state) {
+          state.textContent = snapshot.sensorOnline ? "online" : "offline";
+          state.className = `pill ${snapshot.sensorOnline ? "ok" : "off"}`;
+        }
+        setText("fishop-input", data.inputAvailable ? data.inputPath : "no input file");
+        setText("fishop-payloads", String(data.payloadCount || 0));
+        setText("fishop-last-update", age(snapshot.lastUpdateMonotonicSec));
+        setText("fishop-lane-valid", yesNo(lane.lineValid));
+        setText("fishop-lane-lines", `${lane.leftLine || 0} / ${lane.rightLine || 0}`);
+        setText("fishop-lane-curve", `curve ${num(lane.maxCurve)} / latA ${num(lane.latA)}`);
+        setText("fishop-lane-age", age(lane.ageSec));
+        setText("fishop-lidar-blind", `L ${yesNo(blindspot.leftLidarBlind)} / R ${yesNo(blindspot.rightLidarBlind)}`);
+        setText("fishop-camera-blind", `L ${yesNo(blindspot.leftCameraBlind)} / R ${yesNo(blindspot.rightCameraBlind)}`);
+        setText("fishop-targets", targetSummary(blindspot.targets || {}));
+        setText("fishop-blind-age", age(blindspot.ageSec));
+        setText("fishop-overtake-command", yesNo(overtake.commandSeen));
+        setText("fishop-overtake-request", yesNo(overtake.requested));
+        setText("fishop-overtake-direction", overtake.direction || "-");
+        setText("fishop-overtake-boundary", snapshot.controlOutputEnabled ? "control enabled" : "read-only");
+        setText("fishop-error", data.parseError || "");
+      } catch (err) {
+        const state = document.getElementById("fishop-state");
+        if (state) {
+          state.textContent = "error";
+          state.className = "pill warn";
+        }
+        setText("fishop-error", String(err).slice(0, 160));
+      }
+    }
+    refreshFishopHardware();
+    setInterval(refreshFishopHardware, 1000);
+  </script>
 </body>
 </html>
 """

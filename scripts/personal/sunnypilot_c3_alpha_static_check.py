@@ -1230,6 +1230,16 @@ def main() -> int:
                           and '"liveDelta"' in carrot_server
                           and '"recommendationSummary"' in carrot_server,
                           "Carrot Web must clearly distinguish captured/current, recommended, and applied Auto-Tuner values")
+  failures += not require("Carrot Web fishop hardware read-only panel",
+                          'id="fishop-panel"' in carrot_server
+                          and "refreshFishopHardware" in carrot_server
+                          and 'fetch("/api/fishop_hardware", {cache: "no-store"})' in carrot_server
+                          and 'id="fishop-lane-curve"' in carrot_server
+                          and 'id="fishop-lidar-blind"' in carrot_server
+                          and 'id="fishop-targets"' in carrot_server
+                          and "snapshot.controlOutputEnabled ? \"control enabled\" : \"read-only\"" in carrot_server
+                          and 'method:' not in carrot_server[carrot_server.index('async function refreshFishopHardware'):carrot_server.index('setInterval(refreshFishopHardware')],
+                          "Carrot Web must show fishop lane/curve/lidar/target evidence through read-only GET only")
   for forbidden in ("requests.", "urllib.", "websocket", "ClientSession", "common.api", "SunnylinkApi", "DongleId"):
     failures += not require(f"Carrot Web omits cloud client token {forbidden}", forbidden not in carrot_server,
                             "local Carrot Web must not include outbound cloud/client code")
