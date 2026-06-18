@@ -276,6 +276,12 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"CarrotMapOverlayEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"CarrotTrafficStopEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
 
+    // Fishop hardware inputs remain evidence-only until the sensors and gates are validated.
+    {"FishopAutoOvertakeEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
+    {"FishopLaneCurveEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
+    {"FishopLidarBlindspotEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
+    {"FishopLidarLaneDataEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
+
     // Smart Cruise Control
     {"MapTargetVelocities", {CLEAR_ON_ONROAD_TRANSITION, STRING}},
     {"SmartCruiseControlMap", {PERSISTENT | BACKUP, BOOL, "0"}},
