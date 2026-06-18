@@ -365,8 +365,10 @@ flowchart TD
 - [ ] alpha 7705 状态广播接入真正 CarrotMan / Carrot 控制运行态；在控制逻辑迁移前 `xState`、`trafficState` 必须继续保持 0。
 - [x] 迁移旧 CarrotMan 7713 导航 HTTP 兼容入口：`POST /api/navi`、`POST /api/navi/{version}` 和 `/health`，只记录 `rgdata`、`sinf`、`ssinf`、`vrtx/route`、`complexCrossroad` 证据，不发布控制。
 - [x] 迁移旧 CarrotMan 7712 TCP 导航输入兼容入口：接收行式 JSON `rgdata` / `vrtx`，只记录证据和安全导航摘要，不发布控制。
-- [ ] 迁移 CP搭子 / Navipilot 参数接口。
+- [x] 迁移 CP搭子 / Navipilot 参数接口：alpha 7000 端口兼容 `CarrotParamClient.kt` 的 `GET /api/params_bulk?names=...` 和 `POST /api/param_set`。
 - [x] alpha Carrot Web 新增受限 CP搭子 / Navipilot 参数接口：`GET /api/params_bulk` 和 `POST /api/param_set`，兼容 APP 读取/同值写回 `ExperimentalMode`。
+- [x] alpha 参数接口补齐机械小哥/APP 响应契约：返回 `ok`、`values`、`has_params`、`writable/readOnly/defaults/types/unknown`；支持 `POST /api/params_bulk` 兼容批量读取。
+- [x] alpha 参数接口保留 `SpeedFromPCM` 为 Mazda 条件实验兼容可见项，但在 Seltos/Kia 个人版中只读，不允许 APP 写入 Mazda 纵控路径。
 - [x] alpha 参数接口使用显式白名单；`OffroadMode`、Carrot 高风险控制、fishop 自动超车等只读或不暴露，不新增 `AlwaysOffroad` / `EnableEscc` 等混淆别名。
 - [x] alpha 参数接口 onroad 时禁止改值；`SpeedLimitMode` 通过本地 API 最高只能到 warning，不能直接启用 assist。
 - [x] 迁移 APN/N 输入：alpha 7706 UDP、`/api/navigation_event`、7712 TCP 和 7713 HTTP 兼容入口都会把白名单字段归一化为 `CarrotNavigationEvent`，只做本地证据和限速输入，不执行 APP 命令。
@@ -491,6 +493,7 @@ flowchart LR
 - [x] 静态检查 fishop 只读层没有控制输出路径，自动超车输入只记录为 read-only 证据。
 - [x] 静态检查 Carrot Web/UI 不默认加载 Mapbox/Kakao 外部地图 SDK 或 iframe 覆盖层。
 - [x] 静态检查 Carrot Web 参数接口白名单、onroad 改值保护、Offroad/fishop 高风险只读和 SpeedLimitMode assist 禁止。
+- [x] 静态检查 CP搭子 / Navipilot 参数接口兼容：`/api/params_bulk` 支持 GET/POST，响应保留 `has_params`，`ExperimentalMode`/`ExperimentalModeConfirmed` 可写，`SpeedFromPCM`、Offroad、Carrot 高风险项和 fishop 自动超车只读。
 - [x] 静态检查 UDP 7706 导航输入只记录证据、更新限速，不发布控制、不接入变道/planner。
 - [x] 静态检查 UDP 7705 状态广播必需字段、局域网目标、read-only 标记和运行时 payload。
 - [x] 静态检查 UDP 7705 状态广播从本地 messaging 只读缓存读取 `carState`、`selfdriveState`、`longitudinalPlanSP`、`carStateSP`，并确认 `xState` / `trafficState` 在 Carrot 控制迁移前保持惰性。
