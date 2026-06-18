@@ -293,27 +293,27 @@ flowchart TD
 
 ### P8.3: 云服务移除和本地网络保留
 
-- [ ] 从 manager 注册中硬禁用 `manage_athenad`。
-- [ ] 从 manager 注册中硬禁用 `uploader`，不依赖 `OnroadUploads=0`。
-- [ ] 从 manager 注册中硬禁用 `manage_sunnylinkd`。
-- [ ] 从 manager 注册中硬禁用 `sunnylink_registration_manager`。
-- [ ] 从 manager 注册中硬禁用 `statsd_sp`。
-- [ ] 从 manager 注册中硬禁用 `backup_manager`。
-- [ ] 审查 `statsd`，若存在网络发送路径则禁用网络发送或从 manager 移除。
-- [ ] 移除 Sunnylink onboarding 同意页。
-- [ ] 移除 Sunnylink 设置页、侧边栏状态、配对按钮、赞助/远程访问 UI、云备份 UI。
-- [ ] 移除设备设置里的 `Onroad Uploads` 开关。
-- [ ] 旧参数 `SunnylinkEnabled`、`EnableSunnylinkUploader`、`OnroadUploads` 即使存在，也不能启动云服务。
+- [x] 从 manager 注册中硬禁用 `manage_athenad`。
+- [x] 从 manager 注册中硬禁用 `uploader`，不依赖 `OnroadUploads=0`。
+- [x] 从 manager 注册中硬禁用 `manage_sunnylinkd`。
+- [x] 从 manager 注册中硬禁用 `sunnylink_registration_manager`。
+- [x] 从 manager 注册中硬禁用 `statsd_sp`。
+- [x] 从 manager 注册中硬禁用 `backup_manager`。
+- [x] 审查 `statsd`：保留 `system.statsd` 本地 ZMQ/本地文件统计；静态检查确认没有 requests/urllib/websocket/upload 网络发送路径。
+- [x] 移除 Sunnylink onboarding 同意页。
+- [x] 移除 Sunnylink 设置页、侧边栏状态、配对按钮、赞助/远程访问 UI、云备份 UI。
+- [x] 移除设备设置里的 `Onroad Uploads` 开关。
+- [x] 旧参数 `SunnylinkEnabled`、`EnableSunnylinkUploader`、`OnroadUploads` 即使存在，也不能启动云服务。
 - [ ] 保留本地 Wi-Fi、SSH、Carrot Web、本地更新、GitHub 更新、模型清单和模型下载。
 
 ### P8.4: C3 电源和 Always Offroad
 
-- [ ] 使用 SunnyPilot 原生 `OffroadMode` 承载 Always Offroad 语义，不新增 `AlwaysOffline` 或其它混淆别名。
-- [ ] 默认 `OffroadMode=0`。
-- [ ] 开启 `OffroadMode` 时保持 offroad，用于驻车更新和调试。
-- [ ] 开启 `OffroadMode` 时 panda 进入 no-output，避免 harness 继电器误动作。
-- [ ] 开启 `OffroadMode` 时本地网络、SSH、Web、GitHub 更新、模型下载仍可用。
-- [ ] 设备快照记录 `OffroadMode`、panda output 状态、电源策略和进程状态。
+- [x] 使用 SunnyPilot 原生 `OffroadMode` 承载 Always Offroad 语义，不新增 `AlwaysOffline` 或其它混淆别名。
+- [x] 默认 `OffroadMode=0`。
+- [x] 开启 `OffroadMode` 时保持 offroad，用于驻车更新和调试。
+- [x] 开启 `OffroadMode` 时 panda 进入 no-output，避免 harness 继电器误动作。
+- [x] 开启 `OffroadMode` 时本地网络、SSH、Web、GitHub 更新、模型下载仍可用。
+- [x] 设备快照记录 `OffroadMode`、panda output 状态、电源策略和进程状态。
 
 ### P8.5: Seltos 2023 SCC 和 ESCC 自动识别
 
