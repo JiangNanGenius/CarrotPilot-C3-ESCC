@@ -631,6 +631,47 @@ def check_route_speed_truth_contract() -> tuple[bool, str]:
   return True, ""
 
 
+def check_model_manager_download_contract() -> tuple[bool, str]:
+  manager = read("sunnypilot/models/manager.py")
+  helpers = read("sunnypilot/models/helpers.py")
+
+  required_manager_tokens = (
+    "_download_temp_path",
+    "temp_path = self._download_temp_path(full_path)",
+    "await self._download_chunked(url, temp_path, artifact)",
+    "await self._download_file(url, temp_path, artifact)",
+    "if not await verify_file(temp_path, expected_hash)",
+    "self._install_downloaded_artifact(temp_path, full_path)",
+    "self._cleanup_download_artifact(temp_path)",
+    "os.replace(temp_path, full_path)",
+    "os.replace(temp_chunk_path, final_chunk_path)",
+    "os.replace(temp_chunk_paths[0], final_manifest)",
+  )
+  for token in required_manager_tokens:
+    if token not in manager:
+      return False, f"models_manager missing atomic download token: {token}"
+
+  if "await self._download_chunked(url, full_path, artifact)" in manager or "await self._download_file(url, full_path, artifact)" in manager:
+    return False, "models_manager must not download directly into the active artifact path"
+  if "for f in [full_path]" in manager or "if filename in p" in manager:
+    return False, "download failure must not delete the existing active artifact path"
+
+  verify_index = manager.find("if not await verify_file(temp_path, expected_hash)")
+  install_index = manager.find("self._install_downloaded_artifact(temp_path, full_path)")
+  active_put_index = manager.find('self.params.put("ModelManager_ActiveBundle", self.active_bundle.to_dict(), block=True)')
+  if not (0 <= verify_index < install_index < active_put_index):
+    return False, "models_manager must hash-check temp artifacts before install and write active bundle only after bundle download succeeds"
+
+  if "validate_active_bundle(self.params, self.available_models)" not in manager:
+    return False, "models_manager must validate active bundle before publishing/downloading state"
+  if 'params.remove("ModelManager_ActiveBundle")' not in helpers or "ModelRunnerTypeCache" not in helpers:
+    return False, "invalid active bundle must reset to stock runner"
+  if "_bundle_is_valid_locally" not in helpers or "_verify_file(os.path.join(model_root, file_name), expected_hash)" not in helpers:
+    return False, "active bundle validation must re-hash local artifacts"
+
+  return True, ""
+
+
 def check_carrot_learning_api_runtime() -> tuple[bool, str]:
   FakeParams.reset()
   params_mod = types.ModuleType("openpilot.common.params")
@@ -1319,6 +1360,9 @@ def main() -> int:
                           "models_manager must validate active bundle before publishing state")
   failures += not require("model download request cleared", 'self.params.remove("ModelManager_DownloadIndex")' in models_manager,
                           "models_manager must clear download request after handling it")
+  ok, detail = check_model_manager_download_contract()
+  failures += not require("model manager atomic download and rollback contract", ok,
+                          detail or "model downloads must verify temp artifacts before replacing files or writing active bundle")
 
   try:
     from openpilot.selfdrive.carrot.fishop_hardware import FishopHardwareState
