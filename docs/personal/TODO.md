@@ -379,7 +379,7 @@ flowchart TD
 - [ ] 设计统一硬件增强消息/参数桥，先接收并记录，不进入控制。
 - [ ] 新增统一状态结构候选：设备在线、最后更新时间、左右车道线类型、左右车道曲率/宽度、左右前后目标距离、左右前后目标横向距离、左右前后相对速度、左右盲区、摄像头盲区、传感器健康。
 - [ ] 增加 Web/UI 只读显示：车道曲线、左右车道数据、左右盲区、传感器健康、数据新鲜度。
-- [ ] 新增默认关闭参数：`FishopLaneCurveEnabled=0`、`FishopLidarLaneDataEnabled=0`、`FishopLidarBlindspotEnabled=0`、`FishopAutoOvertakeEnabled=0`。
+- [x] 新增默认关闭参数：`FishopLaneCurveEnabled=0`、`FishopLidarLaneDataEnabled=0`、`FishopLidarBlindspotEnabled=0`、`FishopAutoOvertakeEnabled=0`。
 - [ ] 新增只读采样参数候选：`FishopHardwareReadOnly=1`、`FishopHardwareEvidenceMode=1`；若最终实现已有等价参数，不新增别名。
 - [ ] 自动超车只接入现有安全变道链路；不得绕过转向灯、原车/外接盲区、驾驶员确认、速度范围、道路类型和 Seltos 2023 车型门禁。
 - [ ] 研究 `overtake` / `navi` 客户端的数据方向：C3 发给外设、外设发给 C3、APP 发给 C3 要分清；任何 APP 命令默认只记录，不直接执行。
@@ -437,13 +437,14 @@ flowchart LR
 
 ### P8.13: 静态验证
 
-- [ ] 静态检查云进程不在 manager 注册表。
-- [ ] 静态检查 Sunnylink、Onroad Uploads 不出现在 onboarding、settings、sidebar。
-- [ ] 静态检查旧云参数不能启动云进程。
-- [ ] 静态检查 Seltos 2023 等价 2021 SCC。
-- [ ] 静态检查 Non-SCC Seltos 不参与匹配。
-- [ ] 静态检查 ESCC 0x2AB 自动置 flag。
-- [ ] 静态检查 fishop 硬件增强和自动超车参数默认关闭，且自动超车不能绕过安全变道链路。
+- [x] 静态检查云进程不在 manager 注册表。
+- [x] 静态检查 Sunnylink、Onroad Uploads 不出现在 onboarding、settings、sidebar。
+- [x] 静态检查旧云参数不能启动云进程。
+- [x] 静态检查 Seltos 2023 等价 2021 SCC。
+- [x] 静态检查 Non-SCC Seltos 不参与匹配。
+- [x] 静态检查 ESCC 0x2AB 自动置 flag。
+- [x] 静态检查 fishop 硬件增强和自动超车参数默认关闭。
+- [ ] 静态检查 fishop 自动超车不能绕过安全变道链路。
 - [ ] schema 检查通过。
 - [ ] params 检查通过。
 - [ ] services 检查通过。
