@@ -422,8 +422,12 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       "available": True,
       "port": server.NAVI_HTTP_PORT,
       "lastError": "",
+    }, {
+      "available": True,
+      "port": server.NAVI_TCP_PORT,
+      "lastError": "",
     })
-    for key in ("Carrot2", "IsOnroad", "CarrotRouteActive", "ip", "port", "navi_http_port", "log_carrot",
+    for key in ("Carrot2", "IsOnroad", "CarrotRouteActive", "ip", "port", "navi_http_port", "navi_tcp_port", "log_carrot",
                 "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "xState", "trafficState"):
       if key not in payload:
         return False, f"status payload missing {key}"
@@ -431,6 +435,8 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       return False, "status payload did not expose CarrotMan-compatible discovery fields"
     if payload.get("navi_http_port") != server.NAVI_HTTP_PORT or payload.get("naviHttpAvailable") is not True:
       return False, "status payload did not expose the active navigation HTTP compatibility server"
+    if payload.get("navi_tcp_port") != server.NAVI_TCP_PORT or payload.get("naviTcpAvailable") is not True:
+      return False, "status payload did not expose the active navigation TCP compatibility server"
     if payload.get("carrotManCompatible") is not True or payload.get("carrotManControlStateAvailable") is not False:
       return False, "status payload did not declare the read-only CarrotMan compatibility boundary"
     if payload.get("log_carrot") != "status ok":
@@ -462,6 +468,14 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
     raw_navi = json.loads(FakeParams.shared_store.get("CarrotNaviEvent", b"{}").decode("utf-8"))
     if raw_navi.get("type") != "sinf" or raw_navi.get("controlOutput") is not False:
       return False, "navigation HTTP compatibility handler did not persist a read-only event"
+    tcp_app = {"navi_tcp_state": server.default_navi_tcp_state()}
+    tcp_result = server.record_navi_tcp_event(tcp_app, {"rgdata": {"nRoadLimitSpeed": 70, "nSdiSpeedLimit": 60, "nTBTDist": 456}})
+    if not tcp_result.get("recorded") or tcp_result.get("type") != "rgdata":
+      return False, "navigation TCP compatibility handler did not record rgdata"
+    if tcp_result.get("controlOutput") is not False:
+      return False, "navigation TCP compatibility handler must remain read-only"
+    if tcp_app["navi_tcp_state"].get("receivedTypes", {}).get("rgdata") != 1:
+      return False, "navigation TCP compatibility handler did not update TCP evidence state"
     return True, ""
   except Exception as exc:
     return False, str(exc)
@@ -622,7 +636,7 @@ def main() -> int:
                           and "messaging.SubMaster(list(MESSAGING_STATUS_SERVICES))" in carrot_server
                           and "update_messaging_status_from_sm" in carrot_server,
                           "UDP 7705 status broadcast must read carState/selfdriveState/speed-limit state through a local SubMaster cache")
-  for key in ("Carrot2", "IsOnroad", "CarrotRouteActive", "ip", "port", "navi_http_port", "log_carrot",
+  for key in ("Carrot2", "IsOnroad", "CarrotRouteActive", "ip", "port", "navi_http_port", "navi_tcp_port", "log_carrot",
               "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "xState", "trafficState"):
     failures += not require(f"7705 status key exists: {key}", f'"{key}"' in carrot_server,
                             f"UDP 7705 status broadcast must include {key}")
@@ -631,9 +645,12 @@ def main() -> int:
                           and "carrotManControlStateAvailable" in carrot_server
                           and "naviHttpAvailable" in carrot_server
                           and "NAVI_HTTP_PORT = 7713" in carrot_server
+                          and "NAVI_TCP_PORT = 7712" in carrot_server
+                          and "start_navi_tcp" in carrot_server
+                          and "asyncio.start_server" in carrot_server
                           and "start_navi_http" in carrot_server
                           and "web.TCPSite(runner, DEFAULT_HOST, NAVI_HTTP_PORT)" in carrot_server,
-                          "UDP 7705 status must be compatible with CP app discovery and expose the bound 7713 HTTP service only when available")
+                          "UDP 7705 status must be compatible with CP app discovery and expose bound 7712/7713 services only when available")
   failures += not require("Carrot Web status broadcast local-only", "255.255.255.255" in carrot_server
                           and "127.0.0.1" in carrot_server and "allow_broadcast=True" in carrot_server
                           and "controlOutput" in carrot_server,
@@ -656,11 +673,17 @@ def main() -> int:
                           and "CarrotNaviDebug" in carrot_server
                           and "CarrotNaviImage" in carrot_server,
                           "Carrot Web must provide the old CarrotMan /api/navi HTTP compatibility entry points")
+  failures += not require("Carrot Web navigation TCP compatibility exists",
+                          "handle_navi_tcp_client" in carrot_server
+                          and "record_navi_tcp_event" in carrot_server
+                          and "NAVI_TCP_MAX_LINE_BYTES" in carrot_server
+                          and '"tcp-7712"' in carrot_server,
+                          "Carrot Web must provide the old CarrotMan 7712 line-delimited TCP navigation compatibility input")
   failures += not require("Carrot Web navigation HTTP remains evidence-only",
                           "controlOutput\": False" in carrot_server
                           and "record_navigation_event(nav_payload" in carrot_server
                           and "NAVI_IMAGE_BASE64_MAX_CHARS" in carrot_server,
-                          "navigation HTTP input must persist evidence and sanitized navigation state without control output")
+                          "navigation HTTP/TCP input must persist evidence and sanitized navigation state without control output")
   for forbidden in ("PubMaster", "CarControl", "sendcan", "desire_helper", "LateralPlan"):
     failures += not require(f"Carrot Web navigation omits control output {forbidden}", forbidden not in carrot_server,
                             "navigation UDP/API input must not publish controls or touch lane-change/planner outputs")
