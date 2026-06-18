@@ -441,6 +441,9 @@ def check_fishop_overtake_safety_contract() -> tuple[bool, str]:
     '"laneQuality": self.quality(fresh)',
     '"dynamicBlind": self.dynamic_blind(targets_fresh)',
     '"directionality": {',
+    '"suggestionPreview"',
+    '"stage": "display_only"',
+    '"emitsLateralCommand": False',
     '"alphaAction": "record_only"',
     '"usesExistingLaneChangeChain": False',
   )
@@ -1245,8 +1248,10 @@ def main() -> int:
                           and 'id="fishop-targets"' in carrot_server
                           and 'id="fishop-dynamic-risk"' in carrot_server
                           and 'id="fishop-overtake-path"' in carrot_server
+                          and 'id="fishop-overtake-suggestion"' in carrot_server
                           and "laneQualitySummary" in carrot_server
                           and "dynamicRiskSummary" in carrot_server
+                          and "suggestionSummary" in carrot_server
                           and "snapshot.controlOutputEnabled ? \"control enabled\" : \"read-only\"" in carrot_server
                           and 'method:' not in carrot_server[carrot_server.index('async function refreshFishopHardware'):carrot_server.index('setInterval(refreshFishopHardware')],
                           "Carrot Web must show fishop lane/curve/lidar/target evidence through read-only GET only")
@@ -1276,6 +1281,8 @@ def main() -> int:
                           and "DYNAMIC_BLIND_REFERENCE_DEFAULTS" in fishop_hardware
                           and "def _side_object_risk" in fishop_hardware
                           and '"dynamicBlind": self.dynamic_blind(targets_fresh)' in fishop_hardware
+                          and "_overtake_suggestion_preview" in fishop_hardware
+                          and '"suggestionPreview"]' in fishop_hardware
                           and '"directionality": {' in fishop_hardware
                           and "fishop/openpilot:selfdrive/carrot/amap_navi.py" in fishop_hardware,
                           "fishop hardware parser must preserve lane, lidar, camera, target, dynamic-risk, and command evidence fields from amap_navi.py")
@@ -1460,10 +1467,20 @@ def main() -> int:
                             and fishop_snapshot["overtake"]["directionality"]["alphaAction"] == "record_only"
                             and fishop_snapshot["overtake"]["directionality"]["controlOutput"] is False
                             and fishop_snapshot["overtake"]["directionality"]["usesExistingLaneChangeChain"] is False
+                            and fishop_snapshot["overtake"]["suggestionPreview"]["readOnly"]
+                            and fishop_snapshot["overtake"]["suggestionPreview"]["controlOutput"] is False
+                            and fishop_snapshot["overtake"]["suggestionPreview"]["emitsLateralCommand"] is False
                             and fishop_snapshot["overtake"]["cmdIndex"] == 7
                             and fishop_snapshot["overtake"]["remoteCmd"] == "OVERTAKE"
                             and not fishop_snapshot["controlOutputEnabled"],
                             "fishop overtake input must be evidence-only and never enable control output")
+    blocked_preview = fishop_snapshot["overtake"]["suggestionPreview"]
+    failures += not require("fishop overtake suggestion blocks unsafe evidence", blocked_preview["decision"] == "blocked"
+                            and blocked_preview["readyForSuggestion"] is False
+                            and blocked_preview["direction"] == "left"
+                            and "left lane line blocks the suggestion" in blocked_preview["reasons"]
+                            and "left blindspot evidence blocks the suggestion" in blocked_preview["reasons"],
+                            "fishop suggestion preview must block stale, lane-line, and blindspot evidence before any later stage")
     failures += not require("fishop parser omits overtake action output", all(key not in fishop_snapshot["overtake"] for key in ("desire", "laneChange", "execute", "control"))
                             and fishop_snapshot["overtake"]["requested"] and fishop_snapshot["overtake"]["direction"] == "left",
                             "fishop overtake evidence must not expose desire/lane-change/control action fields")
@@ -1485,6 +1502,26 @@ def main() -> int:
                             and not stale_snapshot["blindspot"]["dynamicBlind"]["available"]
                             and stale_snapshot["blindspot"]["dynamicBlind"]["activeRiskPreview"] == [],
                             "stale fishop blindspot input must not stay active")
+    failures += not require("fishop stale overtake suggestion blocks", not stale_snapshot["overtake"]["suggestionPreview"]["readyForSuggestion"]
+                            and "overtake command is stale" in stale_snapshot["overtake"]["suggestionPreview"]["reasons"],
+                            "stale overtake input must not stay suggestable")
+
+    clear_state = FishopHardwareState()
+    clear_state.update_from_payload({"resp": "lane", "left_lane": 0, "right_lane": 0, "lineValid": True}, 2000.0)
+    clear_state.update_from_payload({"device": "lidar", "resp": "blindspot", "detect_side": 3,
+                                     "lidar_lblind": False, "lidar_rblind": False,
+                                     "lidar_car_lblind": False, "lidar_car_rblind": False}, 2000.0)
+    clear_state.update_from_payload({"device": "camera", "resp": "cam_blind", "detect_side": 3,
+                                     "left_blind": False, "right_blind": False}, 2000.0)
+    clear_state.update_from_payload({"device": "overtake", "index": 8, "cmd": "OVERTAKE", "arg": "right",
+                                     "request": True}, 2000.0)
+    clear_preview = clear_state.to_dict(2000.2)["overtake"]["suggestionPreview"]
+    failures += not require("fishop overtake suggestion ready only when evidence is clear", clear_preview["decision"] == "ready_for_suggestion"
+                            and clear_preview["readyForSuggestion"] is True
+                            and clear_preview["direction"] == "right"
+                            and clear_preview["reasons"] == []
+                            and clear_preview["emitsLateralCommand"] is False,
+                            "clean fishop evidence may only produce a display-only suggestion preview")
   except Exception as exc:
     failures += not require("fishop parser import/sample", False, f"fishop parser import/sample failed: {exc}")
 
