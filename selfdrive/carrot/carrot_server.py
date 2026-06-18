@@ -1487,6 +1487,14 @@ async def index(_request: web.Request) -> web.Response:
     .pill.ok { background: #12352c; color: #86efac; }
     .pill.warn { background: #3a2b12; color: #facc15; }
     .pill.off { background: #2a3035; color: #a8b4bb; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    button { min-height: 34px; border: 1px solid #33434d; border-radius: 7px; padding: 0 12px; background: #1c252b; color: #eef4f8; font: inherit; cursor: pointer; }
+    button:hover:not(:disabled) { border-color: #4d6878; background: #23313a; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .list { display: grid; gap: 8px; margin-top: 12px; }
+    .rec { border: 1px solid #27343c; border-radius: 8px; padding: 10px; background: #10161b; }
+    .rec-head { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: #eef4f8; }
+    .rec-meta { color: #91a4ad; font-size: 13px; line-height: 1.45; margin-top: 6px; overflow-wrap: anywhere; }
     a { color: #7dd3fc; text-decoration: none; }
     code { background: #222b31; padding: 2px 6px; border-radius: 5px; }
     ul { padding-left: 20px; }
@@ -1530,6 +1538,21 @@ async def index(_request: web.Request) -> web.Response:
         </div>
       </div>
       <p id="fishop-error"></p>
+    </section>
+    <section id="auto-tuner-panel">
+      <h2>Auto-Tuner</h2>
+      <div class="metric"><span class="label">State</span><span class="value"><span id="auto-tuner-state" class="pill off">loading</span></span></div>
+      <div class="metric"><span class="label">Mode</span><span class="value" id="auto-tuner-mode">-</span></div>
+      <div class="metric"><span class="label">Apply scope</span><span class="value" id="auto-tuner-scope">-</span></div>
+      <div class="metric"><span class="label">Recommendations</span><span class="value" id="auto-tuner-summary">-</span></div>
+      <div class="metric"><span class="label">Source</span><span class="value" id="auto-tuner-source">-</span></div>
+      <div class="actions">
+        <button id="auto-tuner-apply" type="button">Apply</button>
+        <button id="auto-tuner-ignore" type="button">Ignore</button>
+        <button id="auto-tuner-clear" type="button">Clear</button>
+      </div>
+      <div id="auto-tuner-recommendations" class="list"></div>
+      <p id="auto-tuner-error"></p>
     </section>
     <section>
       <h2>APIs</h2>
@@ -1586,6 +1609,114 @@ async def index(_request: web.Request) -> web.Response:
       const reasons = Array.isArray(preview.reasons) ? preview.reasons.slice(0, 2) : [];
       return reasons.length ? `blocked: ${reasons.join("; ")}` : "blocked";
     };
+    const timeText = (value) => {
+      const timestamp = Number(value);
+      return Number.isFinite(timestamp) && timestamp > 0 ? new Date(timestamp * 1000).toLocaleString() : "-";
+    };
+    const valueText = (value) => {
+      if (value === null || value === undefined || value === "") return "-";
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? String(parsed) : String(value);
+    };
+    const summaryText = (summary = {}) => {
+      const total = Number(summary.total || 0);
+      if (!total) return "none";
+      return `${summary.pending || 0} pending / ${summary.applied || 0} applied / ${summary.changed || 0} changed`;
+    };
+    const setPill = (id, text, className) => {
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.textContent = text;
+      node.className = `pill ${className}`;
+    };
+    const renderRecommendations = (recommendations = []) => {
+      const list = document.getElementById("auto-tuner-recommendations");
+      if (!list) return;
+      list.textContent = "";
+      if (!recommendations.length) {
+        const empty = document.createElement("div");
+        empty.className = "rec-meta";
+        empty.textContent = "No pending recommendations";
+        list.appendChild(empty);
+        return;
+      }
+      for (const rec of recommendations.slice(0, 24)) {
+        const row = document.createElement("div");
+        row.className = "rec";
+
+        const head = document.createElement("div");
+        head.className = "rec-head";
+        const name = document.createElement("span");
+        name.textContent = `${rec.key || "-"} (${rec.category || "-"})`;
+        const state = document.createElement("span");
+        state.className = `pill ${rec.applied ? "ok" : rec.changedSinceRecommendation ? "warn" : "off"}`;
+        state.textContent = rec.state || (rec.applied ? "applied" : "pending");
+        head.appendChild(name);
+        head.appendChild(state);
+        row.appendChild(head);
+
+        const values = document.createElement("div");
+        values.className = "rec-meta";
+        values.textContent = `captured/current/recommended: ${valueText(rec.capturedCurrentValue)} / ${valueText(rec.currentValue)} / ${valueText(rec.recommendedValue)}; applied ${valueText(rec.appliedValue)}; live delta ${valueText(rec.liveDelta)}`;
+        row.appendChild(values);
+
+        if (rec.reason) {
+          const reason = document.createElement("div");
+          reason.className = "rec-meta";
+          reason.textContent = String(rec.reason);
+          row.appendChild(reason);
+        }
+        list.appendChild(row);
+      }
+    };
+    const renderAutoTuner = (data = {}) => {
+      if (!data.hasParams) {
+        setPill("auto-tuner-state", "unavailable", "warn");
+      } else if (data.pending) {
+        setPill("auto-tuner-state", "pending", "warn");
+      } else if (data.active) {
+        setPill("auto-tuner-state", "active", "ok");
+      } else {
+        setPill("auto-tuner-state", "off", "off");
+      }
+      setText("auto-tuner-mode", `${data.active ? "learning on" : "learning off"} / auto apply ${yesNo(data.autoApply)}`);
+      setText("auto-tuner-scope", `lat ${yesNo(data.applyLat)} / long ${yesNo(data.applyLong)}`);
+      setText("auto-tuner-summary", summaryText(data.recommendationSummary || {}));
+      setText("auto-tuner-source", `${data.source || "-"} @ ${timeText(data.createdAt)}`);
+      renderRecommendations(Array.isArray(data.recommendations) ? data.recommendations : []);
+      setText("auto-tuner-error", data.error || "");
+      const apply = document.getElementById("auto-tuner-apply");
+      const ignore = document.getElementById("auto-tuner-ignore");
+      const clear = document.getElementById("auto-tuner-clear");
+      if (apply) apply.disabled = !data.hasParams || !data.pending;
+      if (ignore) ignore.disabled = !data.hasParams || !data.pending;
+      if (clear) clear.disabled = !data.hasParams;
+    };
+    async function refreshAutoTuner() {
+      try {
+        const response = await fetch("/api/carrot_learning", {cache: "no-store"});
+        const data = await response.json();
+        renderAutoTuner(data);
+      } catch (err) {
+        setPill("auto-tuner-state", "error", "warn");
+        setText("auto-tuner-error", String(err).slice(0, 160));
+      }
+    }
+    async function postAutoTunerAction(action) {
+      try {
+        const response = await fetch("/api/carrot_learning", {
+          method: "POST",
+          headers: {"content-type": "application/json"},
+          body: JSON.stringify({action}),
+        });
+        const data = await response.json();
+        if (!data.ok) throw new Error(data.error || `Auto-Tuner ${action} failed`);
+        renderAutoTuner(data.state || {});
+      } catch (err) {
+        setPill("auto-tuner-state", "error", "warn");
+        setText("auto-tuner-error", String(err).slice(0, 160));
+      }
+    }
     async function refreshFishopHardware() {
       try {
         const response = await fetch("/api/fishop_hardware", {cache: "no-store"});
@@ -1628,6 +1759,12 @@ async def index(_request: web.Request) -> web.Response:
         setText("fishop-error", String(err).slice(0, 160));
       }
     }
+    for (const [id, action] of [["auto-tuner-apply", "apply"], ["auto-tuner-ignore", "ignore"], ["auto-tuner-clear", "clear"]]) {
+      const node = document.getElementById(id);
+      if (node) node.addEventListener("click", () => postAutoTunerAction(action));
+    }
+    refreshAutoTuner();
+    setInterval(refreshAutoTuner, 5000);
     refreshFishopHardware();
     setInterval(refreshFishopHardware, 1000);
   </script>

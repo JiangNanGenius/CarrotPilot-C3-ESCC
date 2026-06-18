@@ -1287,6 +1287,22 @@ def main() -> int:
                           and '"liveDelta"' in carrot_server
                           and '"recommendationSummary"' in carrot_server,
                           "Carrot Web must clearly distinguish captured/current, recommended, and applied Auto-Tuner values")
+  failures += not require("Carrot Web Auto-Tuner local panel",
+                          'id="auto-tuner-panel"' in carrot_server
+                          and "refreshAutoTuner" in carrot_server
+                          and "postAutoTunerAction" in carrot_server
+                          and 'fetch("/api/carrot_learning", {cache: "no-store"})' in carrot_server
+                          and 'fetch("/api/carrot_learning", {' in carrot_server
+                          and 'method: "POST"' in carrot_server
+                          and 'JSON.stringify({action})' in carrot_server
+                          and 'id="auto-tuner-apply"' in carrot_server
+                          and 'id="auto-tuner-ignore"' in carrot_server
+                          and 'id="auto-tuner-clear"' in carrot_server
+                          and 'id="auto-tuner-recommendations"' in carrot_server
+                          and "captured/current/recommended" in carrot_server
+                          and "renderRecommendations" in carrot_server
+                          and "renderAutoTuner" in carrot_server,
+                          "Carrot Web must expose the local Auto-Tuner state panel with read, apply, ignore, and clear actions")
   failures += not require("Carrot Web fishop hardware read-only panel",
                           'id="fishop-panel"' in carrot_server
                           and "refreshFishopHardware" in carrot_server
