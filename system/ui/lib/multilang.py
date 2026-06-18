@@ -19,7 +19,6 @@ UNIFONT_LANGUAGES = [
   "th",
   "zh-CHT",
   "zh-CHS",
-  "ko",
   "ja",
 ]
 
@@ -35,7 +34,6 @@ PLURAL_SELECTORS = {
   'th': lambda n: 0,
   'zh-CHT': lambda n: 0,
   'zh-CHS': lambda n: 0,
-  'ko': lambda n: 0,
   'ja': lambda n: 0,
 }
 
