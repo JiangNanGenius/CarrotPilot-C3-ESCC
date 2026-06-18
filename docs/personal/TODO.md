@@ -334,7 +334,7 @@ flowchart TD
 - [x] 默认 stock model。
 - [x] 自定义模型下载、校验、切换只允许 offroad 执行。
 - [x] active bundle 无效时回退 stock 或上一个有效 bundle。
-- [ ] 旧 Carrot model selector 只参考签名校验、hash/size、原子替换、失败回滚和状态记录。
+- [x] 旧 Carrot model selector 只参考签名校验、hash/size、原子替换、失败回滚和状态记录；alpha 保持 Sunny 原生模型管理器，不整包迁移旧 selector，下载改为临时文件/临时分片通过 hash 后再替换，失败只清理临时文件并保留原 active bundle。
 - [x] alpha 设备证据脚本支持记录 active bundle、runner、modeld 状态、`modelV2`、`drivingModelData`、`cameraOdometry`。
 - [x] 模型列表下载保留为用户主动维护功能，不归类为云连接服务。
 
