@@ -22,6 +22,13 @@
 - 还没有 `stable` tag
 - 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空
 
+安装入口：
+
+- C3 上手动输入优先用短链接：`https://jiangnangenius.github.io/cp/i`
+- 如果短链接暂时还没生效，用固定 latest 链接：`https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/latest/installer_c3_escc`
+- SSH 安装或切换通道：`curl -fsSL https://jiangnangenius.github.io/cp/s | sh`
+- 编号 test 只是历史追溯；平时不要手动输入 test25/test26 这类链接。
+
 自动检查：
 
 - GitHub Actions 的 `Personal Smoke` 会在个人分支推送和手动触发时运行。

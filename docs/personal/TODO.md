@@ -173,6 +173,8 @@
 - [x] 更新当前受控上车测试 tag 到 `carrotpilot-c3-escc-20260618-test23`，安装后写入 C3 首启说明文件。
 - [x] 准备当前受控上车测试 tag `carrotpilot-c3-escc-20260618-test24`，补充本地化审计覆盖的可见/诊断路径。
 - [x] 准备当前受控上车测试 tag `carrotpilot-c3-escc-20260618-test25`，加入 ACC/CAN 断电重启确认记录和 stable gate 检查。
+- [x] 增加固定 `latest` 安装入口和短链接入口，日常安装不再需要手动输入编号 test 链接。
+- [x] 安装脚本支持 `--channel test|dev|static|stable` 和 `--ref`，方便以后切换分支或通道。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。

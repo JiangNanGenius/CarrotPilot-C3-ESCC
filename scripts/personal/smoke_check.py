@@ -443,13 +443,18 @@ def check_install_script() -> None:
   expect_contains("scripts/personal/install_c3_escc.sh", "write_first_boot_note", "installer first-boot note writer")
   expect_contains("scripts/personal/install_c3_escc.sh", "c3_commissioning.py --archive", "installer first-boot commissioning command")
   expect_contains("scripts/personal/install_c3_escc.sh", "PowerCycleBootOk", "installer power-cycle confirmation reset")
+  expect_contains("scripts/personal/install_c3_escc.sh", "install-c3-escc-test", "installer test channel")
+  expect_contains("scripts/personal/install_c3_escc.sh", "--list-channels", "installer channel listing")
   run([sys.executable, "scripts/personal/record_power_cycle_boot.py", "--self-test"], "power-cycle boot recorder self-test")
   run([sys.executable, "scripts/personal/build_binary_installer.py", "--self-test"], "C3 binary installer builder self-test")
   run(["sh", "-n", "scripts/personal/install_c3_escc.sh"], "C3 installer shell syntax")
+  run(["scripts/personal/install_c3_escc.sh", "--list-channels"], "C3 installer channel list")
   run([
     "scripts/personal/install_c3_escc.sh",
     "--dry-run",
     "--force",
+    "--channel",
+    "test",
     "--install-dir",
     "/data/openpilot-smoke",
     "--tmp-dir",

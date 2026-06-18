@@ -4,9 +4,14 @@ set -eu
 PROJECT_NAME="CarrotPilot-C3-ESCC"
 DEFAULT_REPO_URL="https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
 DEFAULT_REF="carrotpilot-c3-escc-20260618-test25"
+TEST_CHANNEL_REF="install-c3-escc-test"
+DEV_CHANNEL_REF="personal/c3-escc-atune"
+STATIC_CHANNEL_REF="carrotpilot-c3-escc-20260618-static28"
+STABLE_CHANNEL_REF="install-c3-escc-stable"
 
 REPO_URL="${CARROTPILOT_REPO_URL:-$DEFAULT_REPO_URL}"
 REF="${CARROTPILOT_REF:-$DEFAULT_REF}"
+CHANNEL="${CARROTPILOT_CHANNEL:-}"
 INSTALL_DIR="${CARROTPILOT_INSTALL_DIR:-/data/openpilot}"
 TMP_DIR="${CARROTPILOT_TMP_DIR:-/data/tmppilot-carrotpilot-c3-escc}"
 BACKUP_ROOT="${CARROTPILOT_BACKUP_ROOT:-/data/carrotpilot-backups}"
@@ -29,6 +34,7 @@ Usage:
 
 Options:
   --ref REF              Install a tag or branch. Default: $DEFAULT_REF
+  --channel CHANNEL      Install channel: test, stable, dev, or static. Last --ref/--channel wins
   --repo URL             Git repository URL. Default: $DEFAULT_REPO_URL
   --install-dir PATH     Target directory. Default: /data/openpilot
   --tmp-dir PATH         Temporary clone directory. Default: /data/tmppilot-carrotpilot-c3-escc
@@ -41,10 +47,11 @@ Options:
   --run-commissioning    Run c3_commissioning.py --archive after install
   --dry-run              Print actions without changing files
   --force                Allow non-aarch64 or non-/data install targets
+  --list-channels        Show channel refs and exit
   -h, --help             Show this help
 
 Environment overrides:
-  CARROTPILOT_REPO_URL, CARROTPILOT_REF, CARROTPILOT_INSTALL_DIR,
+  CARROTPILOT_REPO_URL, CARROTPILOT_REF, CARROTPILOT_CHANNEL, CARROTPILOT_INSTALL_DIR,
   CARROTPILOT_TMP_DIR, CARROTPILOT_BACKUP_ROOT, CARROTPILOT_PARAMS_DIR,
   CARROTPILOT_FIRST_BOOT_NOTE
 EOF
@@ -57,6 +64,44 @@ log() {
 die() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 2
+}
+
+list_channels() {
+  cat <<EOF
+Available channels:
+  test    -> $TEST_CHANNEL_REF
+  stable  -> $STABLE_CHANNEL_REF
+  dev     -> $DEV_CHANNEL_REF
+  static  -> $STATIC_CHANNEL_REF
+
+Notes:
+  test is the current controlled-test install branch.
+  stable is intentionally unavailable until the first real-car stable tag exists.
+  dev follows the integration branch and is not a daily install target.
+  static points at the last static-check tag and is not road-tested.
+EOF
+}
+
+resolve_channel_ref() {
+  case "$1" in
+    test)
+      REF="$TEST_CHANNEL_REF"
+      ;;
+    stable)
+      REF="$STABLE_CHANNEL_REF"
+      ;;
+    dev|atune)
+      REF="$DEV_CHANNEL_REF"
+      ;;
+    static)
+      REF="$STATIC_CHANNEL_REF"
+      ;;
+    "")
+      ;;
+    *)
+      die "unknown channel: $1 (use test, stable, dev, or static)"
+      ;;
+  esac
 }
 
 run() {
@@ -94,6 +139,12 @@ parse_args() {
       --ref)
         [ "$#" -ge 2 ] || die "--ref requires a value"
         REF="$2"
+        CHANNEL=""
+        shift 2
+        ;;
+      --channel)
+        [ "$#" -ge 2 ] || die "--channel requires a value"
+        CHANNEL="$2"
         shift 2
         ;;
       --repo)
@@ -150,6 +201,10 @@ parse_args() {
         FORCE=1
         shift
         ;;
+      --list-channels)
+        list_channels
+        exit 0
+        ;;
       -h|--help)
         usage
         exit 0
@@ -159,6 +214,21 @@ parse_args() {
         ;;
     esac
   done
+}
+
+check_ref_available() {
+  [ "$DRY_RUN" = "0" ] || return 0
+  if git ls-remote --exit-code --heads "$REPO_URL" "$REF" >/dev/null 2>&1; then
+    return 0
+  fi
+  if git ls-remote --exit-code --tags "$REPO_URL" "$REF" >/dev/null 2>&1; then
+    return 0
+  fi
+  detail="$REF"
+  if [ -n "$CHANNEL" ]; then
+    detail="$CHANNEL -> $REF"
+  fi
+  die "install target not found: $detail"
 }
 
 write_file() {
@@ -224,6 +294,9 @@ CarrotPilot-C3-ESCC first boot note
 Installed ref:
   $REF
 
+Installed channel:
+  ${CHANNEL:-direct ref}
+
 Installed repo:
   $REPO_URL
 
@@ -270,9 +343,15 @@ run_commissioning() {
 
 main() {
   parse_args "$@"
+  if [ -n "$CHANNEL" ]; then
+    resolve_channel_ref "$CHANNEL"
+  fi
 
   log "$PROJECT_NAME installer"
   log "repo: $REPO_URL"
+  if [ -n "$CHANNEL" ]; then
+    log "channel: $CHANNEL"
+  fi
   log "ref: $REF"
   log "install dir: $INSTALL_DIR"
 
@@ -295,6 +374,7 @@ main() {
   need_cmd mv
   need_cmd rm
   need_cmd chmod
+  check_ref_available
 
   timestamp=$(date +%Y%m%d-%H%M%S)
   backup_dir="$BACKUP_ROOT/openpilot-$timestamp"
