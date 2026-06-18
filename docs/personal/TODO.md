@@ -460,11 +460,11 @@ flowchart LR
 
 ### P8.11: 本地化和说明
 
-- [ ] 清理新架构线韩文直出。
+- [x] 清理新架构线韩文直出：alpha 隐藏韩语语言选项，运行时/字体语言列表移除 `ko`，静态守门确认默认可见 UI/docs 不含韩文；保留翻译资源文件本身作为上游资源。
 - [ ] 补中文和英文说明，重点覆盖模型、限速、Offroad、Carrot 高级控制、fishop 硬件增强、自动超车、Auto-Tuner。
-- [ ] Sunnylink/comma connect 相关说明从用户 UI 移除，不再作为可配置云功能。
+- [x] Sunnylink/comma connect 相关说明从用户 UI 移除，不再作为可配置云功能。
 - [ ] 风险项说明必须写清默认值、适用场景、何时不要打开。
-- [ ] 本地化审计覆盖 settings、sidebar、onboarding、Carrot Web、诊断输出和参数说明。
+- [x] 本地化审计覆盖 settings、sidebar、onboarding、Carrot Web、诊断输出和参数说明的基础守门；风险项长说明仍在上一项继续补。
 
 ### P8.12: 安装器、文档和署名
 
@@ -502,6 +502,7 @@ flowchart LR
 - [x] Hyundai interface 检查通过。
 - [x] model manager 检查通过。
 - [x] Carrot Web JS/JSON/YAML 语法检查通过：Carrot Web 本地资产、Sunny settings-ui JSON/YAML 可解析，`settings_ui.json` 与 `settings_ui_src` 编译结果一致。
+- [x] 静态检查默认可见 UI/docs 不含韩文直出，且 `languages.json` / runtime / font build 不再暴露 `ko` 语言选项。
 
 ### P8.14: C3 停车验证
 
