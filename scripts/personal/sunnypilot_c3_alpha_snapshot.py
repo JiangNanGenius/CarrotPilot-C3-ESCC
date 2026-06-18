@@ -91,6 +91,8 @@ LOCAL_PROCESS_PATTERNS = {
 }
 
 DEFAULT_FISHOP_JSONL = Path("/data/fishop_hardware.jsonl")
+HYUNDAI_SP_ENHANCED_SCC_FLAG = 1
+HYUNDAI_SP_ESCC_SAFETY_PARAM = 1
 MESSAGING_SERVICES = (
   "modelV2",
   "drivingModelData",
@@ -392,6 +394,28 @@ def summarize_car_params() -> dict[str, Any]:
   }
 
 
+def summarize_car_params_sp() -> dict[str, Any]:
+  path = read_param_file("CarParamsSP") or read_param_file("CarParamsSPPersistent") or read_param_file("CarParamsSPCache")
+  if path is None:
+    return {"available": False}
+  try:
+    from cereal import custom, messaging
+    cp_sp = messaging.log_from_bytes(path.read_bytes(), custom.CarParamsSP)
+  except Exception as exc:
+    return {"available": True, "decodeError": str(exc)[:200]}
+
+  flags = int(safe_attr(cp_sp, "flags", 0) or 0)
+  safety_param = int(safe_attr(cp_sp, "safetyParam", 0) or 0)
+  return {
+    "available": True,
+    "sourceParam": path.name,
+    "flags": flags,
+    "safetyParam": safety_param,
+    "enhancedSccDetected": bool(flags & HYUNDAI_SP_ENHANCED_SCC_FLAG),
+    "esccSafetyParamSet": bool(safety_param & HYUNDAI_SP_ESCC_SAFETY_PARAM),
+  }
+
+
 def _payloads_from_lines(lines: Iterable[str]) -> Iterable[dict[str, Any]]:
   for line in lines:
     line = line.strip()
@@ -424,6 +448,105 @@ def fishop_snapshot(jsonl_path: Path | None) -> dict[str, Any]:
   except Exception as exc:
     result["parseError"] = str(exc)[:200]
   return result
+
+
+def gate_check(pass_condition: bool, missing_condition: bool, fail_reason: str, missing_reason: str = "") -> dict[str, Any]:
+  if missing_condition:
+    return {"status": "missing", "ok": False, "reason": missing_reason or fail_reason}
+  if pass_condition:
+    return {"status": "pass", "ok": True, "reason": ""}
+  return {"status": "fail", "ok": False, "reason": fail_reason}
+
+
+def summarize_fishop_release_gate(safe_params: dict[str, str], process: dict[str, Any], car_params: dict[str, Any],
+                                  car_params_sp: dict[str, Any], messaging: dict[str, Any],
+                                  fishop: dict[str, Any]) -> dict[str, Any]:
+  fishop_state = fishop.get("snapshot", {}) if isinstance(fishop, dict) else {}
+  lane = fishop_state.get("lane", {}) if isinstance(fishop_state, dict) else {}
+  blindspot = fishop_state.get("blindspot", {}) if isinstance(fishop_state, dict) else {}
+  overtake = fishop_state.get("overtake", {}) if isinstance(fishop_state, dict) else {}
+  preview = overtake.get("suggestionPreview", {}) if isinstance(overtake, dict) else {}
+  messaging_last = messaging.get("last", {}) if isinstance(messaging, dict) else {}
+  panda_states = messaging_last.get("pandaStates", []) if isinstance(messaging_last, dict) else []
+  cloud_param_values = {
+    "SunnylinkEnabled": safe_params.get("SunnylinkEnabled"),
+    "EnableSunnylinkUploader": safe_params.get("EnableSunnylinkUploader"),
+    "OnroadUploads": safe_params.get("OnroadUploads"),
+  }
+  cloud_params_disabled = not any(param_truthy(str(value)) for value in cloud_param_values.values() if value != "<missing>")
+  car_fingerprint = str(car_params.get("carFingerprint", "")) if isinstance(car_params, dict) else ""
+
+  checks = {
+    "cloudProcessesAbsent": gate_check(
+      process.get("available", False) and not process.get("cloudForbiddenSeen", False),
+      not process.get("available", False),
+      "disabled cloud/upload process is visible",
+      "process list unavailable",
+    ),
+    "cloudParamsDisabled": gate_check(
+      cloud_params_disabled,
+      False,
+      "Sunnylink/upload params are enabled",
+    ),
+    "seltosSccFingerprint": gate_check(
+      "KIA_SELTOS" in car_fingerprint and not bool(car_params.get("dashcamOnly", True)),
+      not car_params.get("available", False) or bool(car_params.get("decodeError")),
+      "CarParams is not a usable Seltos SCC profile",
+      "CarParams is unavailable or undecodable",
+    ),
+    "esccDetected": gate_check(
+      bool(car_params_sp.get("enhancedSccDetected")) and bool(car_params_sp.get("esccSafetyParamSet")),
+      not car_params_sp.get("available", False) or bool(car_params_sp.get("decodeError")),
+      "CarParamsSP does not prove ENHANCED_SCC and ESCC safetyParam",
+      "CarParamsSP is unavailable or undecodable",
+    ),
+    "pandaEvidencePresent": gate_check(
+      isinstance(panda_states, list) and len(panda_states) > 0,
+      not messaging.get("enabled", False),
+      "live pandaStates were not observed",
+      "messaging sampling was not requested",
+    ),
+    "fishopParsed": gate_check(
+      not fishop.get("parseError") and bool(fishop.get("inputAvailable")),
+      not bool(fishop.get("inputAvailable")),
+      "fishop JSONL parse error",
+      "fishop JSONL input is missing",
+    ),
+    "fishopSensorFresh": gate_check(
+      bool(fishop_state.get("sensorOnline")) and bool(lane.get("fresh")) and bool(blindspot.get("fresh")),
+      not bool(fishop_state),
+      "fishop lane/blindspot evidence is stale or offline",
+      "fishop snapshot is unavailable",
+    ),
+    "fishopOvertakeDisplayOnly": gate_check(
+      bool(preview.get("readOnly")) and preview.get("controlOutput") is False and preview.get("emitsLateralCommand") is False
+      and preview.get("stage") == "display_only",
+      not isinstance(preview, dict) or not preview,
+      "fishop overtake preview is not display-only/read-only",
+      "fishop overtake preview is missing",
+    ),
+  }
+  blocking = [name for name, check in checks.items() if not check["ok"]]
+  return {
+    "stage": "pre_control_evidence",
+    "readyForNextStageReview": not blocking,
+    "blockingChecks": blocking,
+    "checks": checks,
+    "cloudParams": cloud_param_values,
+    "carFingerprint": car_fingerprint,
+    "pandaStatesSeen": len(panda_states) if isinstance(panda_states, list) else 0,
+    "fishopSuggestionDecision": preview.get("decision", ""),
+    "requiredBeforeControl": (
+      "cloudProcessesAbsent",
+      "cloudParamsDisabled",
+      "seltosSccFingerprint",
+      "esccDetected",
+      "pandaEvidencePresent",
+      "fishopParsed",
+      "fishopSensorFresh",
+      "fishopOvertakeDisplayOnly",
+    ),
+  }
 
 
 def sample_messaging(seconds: int) -> dict[str, Any]:
@@ -503,6 +626,9 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
   safe_params = read_safe_params()
   process = process_snapshot()
   messaging = sample_messaging(sample_seconds)
+  car_params = summarize_car_params()
+  car_params_sp = summarize_car_params_sp()
+  fishop = fishop_snapshot(fishop_jsonl)
   cloud_params = {
     "SunnylinkEnabled": safe_params.get("SunnylinkEnabled"),
     "EnableSunnylinkUploader": safe_params.get("EnableSunnylinkUploader"),
@@ -522,7 +648,8 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
     },
     "params": safe_params,
     "binaryParamSummaries": read_binary_param_summaries(),
-    "carParams": summarize_car_params(),
+    "carParams": car_params,
+    "carParamsSP": car_params_sp,
     "model": {
       "runnerCache": safe_params.get("ModelRunnerTypeCache"),
       "activeBundle": parse_model_bundle(safe_params.get("ModelManager_ActiveBundle", "")),
@@ -535,7 +662,8 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
       "cloudForbiddenProcessesSeen": process.get("cloudForbiddenSeen", False),
     },
     "messaging": messaging,
-    "fishopHardware": fishop_snapshot(fishop_jsonl),
+    "fishopHardware": fishop,
+    "fishopReleaseGate": summarize_fishop_release_gate(safe_params, process, car_params, car_params_sp, messaging, fishop),
   }
 
 
@@ -546,6 +674,7 @@ def main() -> int:
   parser.add_argument("--output", type=Path, help="write JSON report to this path")
   parser.add_argument("--pretty", action="store_true", help="pretty-print JSON")
   parser.add_argument("--require-no-cloud-processes", action="store_true", help="fail if disabled cloud/upload processes are running")
+  parser.add_argument("--require-fishop-release-gate", action="store_true", help="fail if fishop next-stage evidence gate is not satisfied")
   args = parser.parse_args()
 
   snapshot = build_snapshot(max(args.sample_seconds, 0), args.fishop_jsonl)
@@ -559,6 +688,8 @@ def main() -> int:
 
   if args.require_no_cloud_processes and snapshot["cloudGuard"]["cloudForbiddenProcessesSeen"]:
     return 2
+  if args.require_fishop_release_gate and not snapshot["fishopReleaseGate"]["readyForNextStageReview"]:
+    return 3
   return 0
 
 
