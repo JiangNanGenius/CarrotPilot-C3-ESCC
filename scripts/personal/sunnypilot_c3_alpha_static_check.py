@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 
 
 def read(rel: str) -> str:
@@ -68,6 +70,17 @@ def main() -> int:
     failures += not require(f"{key} default off", f'{{"{key}", {{PERSISTENT | BACKUP, BOOL, "0"}}}}' in params,
                             f"{key} must exist and default to 0")
 
+  fishop_hardware = read("selfdrive/carrot/fishop_hardware.py")
+  fishop_sample = read("scripts/personal/fishop_hardware_sample.py")
+  failures += not require("fishop hardware read-only module exists", "class FishopHardwareState" in fishop_hardware
+                          and "CONTROL_OUTPUT_ENABLED = False" in fishop_hardware,
+                          "fishop hardware parser must exist and remain read-only")
+  for forbidden in ("socket", "PubMaster", "SubMaster", "CarControl", "CANParser", "sendto", ".bind(", "desire_helper", "blinker_ctrl"):
+    failures += not require(f"fishop hardware parser omits {forbidden}", forbidden not in fishop_hardware,
+                            "fishop hardware parser must not open network sockets, publish controls, or touch lane-change control")
+  failures += not require("fishop hardware sample tool exists", "FishopHardwareState" in fishop_sample and "SAMPLE_PAYLOADS" in fishop_sample,
+                          "fishop hardware sample tool must normalize captured JSON payloads")
+
   settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
   mici_settings = read("selfdrive/ui/sunnypilot/mici/layouts/settings.py")
@@ -118,6 +131,32 @@ def main() -> int:
                           "models_manager must validate active bundle before publishing state")
   failures += not require("model download request cleared", 'self.params.remove("ModelManager_DownloadIndex")' in models_manager,
                           "models_manager must clear download request after handling it")
+
+  try:
+    from openpilot.selfdrive.carrot.fishop_hardware import FishopHardwareState
+    fishop_state = FishopHardwareState()
+    fishop_state.update_from_payload({"resp": "lane", "left_lane": 2, "right_lane": 1, "lineValid": True}, 1000.0)
+    fishop_state.update_from_payload({"resp": "blindspot", "detect_side": 3, "lidar_lblind": True, "rf_drel": 4200}, 1000.0)
+    fishop_state.update_from_payload({"resp": "overtake", "request": True, "direction": "left"}, 1000.0)
+    fishop_snapshot = fishop_state.to_dict(1000.5)
+    failures += not require("fishop parser preserves lane evidence", fishop_snapshot["lane"]["leftLine"] == 2
+                            and fishop_snapshot["lane"]["rightLine"] == 1 and fishop_snapshot["lane"]["fresh"],
+                            "fishop parser must expose lane evidence without using it for control")
+    failures += not require("fishop parser preserves blindspot evidence", fishop_snapshot["blindspot"]["leftLidarBlind"]
+                            and fishop_snapshot["blindspot"]["fresh"],
+                            "fishop parser must expose blindspot evidence while fresh")
+    failures += not require("fishop parser records overtake read-only", fishop_snapshot["overtake"]["commandSeen"]
+                            and fishop_snapshot["overtake"]["readOnly"] and not fishop_snapshot["controlOutputEnabled"],
+                            "fishop overtake input must be evidence-only and never enable control output")
+    stale_snapshot = fishop_state.to_dict(1003.0)
+    failures += not require("fishop stale lane invalid", not stale_snapshot["lane"]["fresh"]
+                            and not stale_snapshot["lane"]["lineValid"],
+                            "stale fishop lane input must not stay valid")
+    failures += not require("fishop stale blindspot clears active bits", not stale_snapshot["blindspot"]["fresh"]
+                            and not stale_snapshot["blindspot"]["leftLidarBlind"],
+                            "stale fishop blindspot input must not stay active")
+  except Exception as exc:
+    failures += not require("fishop parser import/sample", False, f"fishop parser import/sample failed: {exc}")
 
   custom_capnp = read("cereal/custom.capnp")
   resolver = read("sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
