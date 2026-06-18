@@ -49,6 +49,10 @@ def main() -> int:
                           "CarrotPhoneSpeedLimitEnabled must exist and default to 1")
   failures += not require("SpeedLimitPolicy phone priority default", '{"SpeedLimitPolicy", {PERSISTENT | BACKUP, INT, "5"}}' in params,
                           "SpeedLimitPolicy must default to phone_priority")
+  failures += not require("SpeedLimitOffsetType default off", '{"SpeedLimitOffsetType", {PERSISTENT | BACKUP, INT, "0"}}' in params,
+                          "SpeedLimitOffsetType must default to off")
+  failures += not require("SpeedLimitValueOffset default zero", '{"SpeedLimitValueOffset", {PERSISTENT | BACKUP, INT, "0"}}' in params,
+                          "SpeedLimitValueOffset must default to 0")
   for key in (
     "FishopAutoOvertakeEnabled",
     "FishopLaneCurveEnabled",
@@ -98,6 +102,8 @@ def main() -> int:
   resolver = read("sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
   common = read("sunnypilot/selfdrive/controls/lib/speed_limit/common.py")
   planner = read("sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
+  failures += not require("percentage speed offset exists", "percentage = 2" in common and "self.offset_value * 0.01 * self.speed_limit" in resolver,
+                          "speed limit resolver must support percentage offsets")
   failures += not require("phone speed source schema", "phone @3;" in custom_capnp and "sourceLabel @9 :Text;" in custom_capnp,
                           "custom.capnp must expose phone source and sourceLabel")
   failures += not require("phone_priority policy exists", "phone_priority = 5" in common,
