@@ -1183,6 +1183,38 @@ def check_fishop_release_gate_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_c3_compat_audit_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [sys.executable, "scripts/personal/sunnypilot_c3_compat_audit.py", "--strict"],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    report = json.loads(proc.stdout)
+    failed = report.get("failedChecks", [])
+    if failed:
+      return False, f"C3 compatibility audit failed checks: {failed}"
+    checks = {check.get("name"): check for check in report.get("checks", [])}
+    for required in (
+      "c3_launcher_redirect",
+      "tici_device_detection_not_c4_or_c3x",
+      "c3_channels_are_tici_compatible",
+      "installer_supports_tici_tizi_binary_install",
+      "model_runner_split_present",
+      "cloud_and_upload_managers_not_registered",
+      "root_launcher_keeps_shutdown_policy",
+    ):
+      if checks.get(required, {}).get("status") != "pass":
+        return False, f"C3 compatibility audit did not pass {required}"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def visible_korean_text_report() -> str:
   korean_re = re.compile(r"[가-힣]")
   scan_roots = (
@@ -1342,6 +1374,7 @@ def main() -> int:
   carrot_server = read("selfdrive/carrot/carrot_server.py")
   fishop_sample = read("scripts/personal/fishop_hardware_sample.py")
   alpha_snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
+  c3_compat_audit = read("scripts/personal/sunnypilot_c3_compat_audit.py")
   failures += not require("Auto-Tuner learner module exists", "class CarrotLearner" in carrot_learning
                           and "def apply_recommendations" in carrot_learning,
                           "CarrotLearner core module must exist in alpha")
@@ -1601,6 +1634,17 @@ def main() -> int:
                           and '"esccSafetyParamSet"' in alpha_snapshot
                           and '"carParamsSP": car_params_sp' in alpha_snapshot,
                           "alpha snapshot must decode CarParamsSP and expose ENHANCED_SCC/ESCC safetyParam evidence")
+  failures += not require("C3/TICI compatibility audit tool exists",
+                          "CarrotPilot-C3-ESCC C3/TICI Compatibility Audit" in c3_compat_audit
+                          and "C3_TICI_BRANCHES" in c3_compat_audit
+                          and "c3_channels_are_tici_compatible" in c3_compat_audit
+                          and "installer_supports_tici_tizi_binary_install" in c3_compat_audit
+                          and "model_runner_split_present" in c3_compat_audit
+                          and "root_launcher_keeps_shutdown_policy" in c3_compat_audit,
+                          "alpha must include a repeatable audit for C3 launcher, channel, installer, modeld, cloud, and power compatibility")
+  ok, detail = check_c3_compat_audit_runtime()
+  failures += not require("C3/TICI compatibility audit runtime", ok,
+                          detail or "C3 compatibility audit failed")
   failures += not require("alpha snapshot records fishop release gate",
                           "def summarize_fishop_release_gate" in alpha_snapshot
                           and '"fishopReleaseGate": summarize_fishop_release_gate' in alpha_snapshot

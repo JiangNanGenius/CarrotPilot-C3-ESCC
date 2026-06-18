@@ -15,6 +15,7 @@ TESTED_SP_BRANCHES = ['staging-c3', 'staging-c3-new', 'staging']
 MASTER_SP_BRANCHES = ['master']
 RELEASE_BRANCHES = ['release-tizi-staging', 'release-mici-staging', 'release-tizi', 'release-mici', 'nightly']
 TESTED_BRANCHES = RELEASE_BRANCHES + ['devel-staging', 'nightly-dev'] + RELEASE_SP_BRANCHES + TESTED_SP_BRANCHES
+C3_TICI_BRANCHES = ['alpha-sunnypilot-c3', 'experimental/sunnypilot-011-c3']
 
 SP_BRANCH_MIGRATIONS = {
   ("tici", "staging-c3-new"): "staging-tici",
@@ -152,7 +153,7 @@ class BuildMetadata:
 
   @property
   def channel_type(self) -> str:
-    if self.channel.endswith("-tici"):
+    if self.channel.endswith("-tici") or self.channel in C3_TICI_BRANCHES or "-c3" in self.channel:
       return "tici"
     elif self.development_channel:
       return "development"
