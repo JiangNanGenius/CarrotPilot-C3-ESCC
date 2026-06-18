@@ -388,9 +388,12 @@ flowchart TD
 - [x] alpha Carrot Web 静态守门：不包含 `requests`、`urllib`、`websocket`、`ClientSession`、`SunnylinkApi`、`DongleId` 等云/远程连接入口。
 - [x] alpha Carrot Web 暂不暴露 terminal、tmux、shell、tools 等高权限本地操作，等完整迁移时单独设门禁。
 - [ ] 迁移主动限速控制，独立开关默认关闭。
+- [x] alpha 主动限速控制已纳入统一高风险门禁：即使 `CarrotActiveSpeedControlEnabled=1`，也只显示候选限速/SDI/model speed/减速带证据，`readyForControl=false`、`controlOutput=false`，等待 Speed Limit Assist 和 Seltos 2023 实车证据。
 - [ ] 迁移自动转弯减速，独立开关默认关闭。
+- [x] alpha 自动转弯减速已纳入统一高风险门禁：TBT 距离和转向类型只作为 `autoTurn` 候选证据，参数打开也会被 `real_car_gate_missing` 和 `control_output_disabled` 阻断。
 - [ ] 迁移红绿灯停车，独立开关默认关闭。
-- [ ] 每个高风险控制功能都要有实车门禁，不得随 Carrot 功能迁移自动改变控制目标。
+- [x] alpha 红绿灯停车已纳入统一高风险门禁：红灯/绿灯输入只作为 `trafficStop` 候选证据，参数打开也不会改变纵控目标。
+- [x] 每个高风险控制功能都要有实车门禁，不得随 Carrot 功能迁移自动改变控制目标：alpha 新增 `HIGH_RISK_FEATURE_GATES`、`/api/carrot_feature_gates`、Carrot Web `Control Gates` 面板和快照 `carrotFeatureGates`，覆盖红灯停车、自动转弯、主动限速、Auto-Tuner 自动应用、fishop 自动超车；静态检查会把相关参数置为 1 并确认所有功能仍然 `readyForControl=false`、`controlOutput=false`。
 
 ### P8.9: fishop / 码上飞扬硬件增强迁移
 
@@ -501,6 +504,7 @@ flowchart LR
 - [x] 静态检查 7713 导航 HTTP 兼容入口只记录证据、更新安全导航摘要，不发布控制；设备快照包含 `CarrotNaviEvent`、`CarrotNaviDebug`、`CarrotNaviImage`。
 - [x] 静态检查 7712 TCP 导航输入兼容入口只接收行式 JSON、记录 `rgdata` / `vrtx` 证据，不发布控制。
 - [x] 静态检查 APN/N/Navipilot 导航增强证据：SDI/plus 摄像头、减速带、model speed、红灯停车/自动转弯/主动限速预览都必须作为 read-only evidence 进入 Carrot Web、7705 广播和设备快照，且 `controlOutput=false`。
+- [x] 静态检查 Carrot 高风险统一门禁：`/api/carrot_feature_gates`、Carrot Web `Control Gates`、快照 `carrotFeatureGates` 必须存在；红灯停车、自动转弯、主动限速、Auto-Tuner 自动应用和 fishop 自动超车即使参数置 1，也必须保持 `readyForControl=false`、`controlOutput=false` 并带 `real_car_gate_missing` / `control_output_disabled`。
 - [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
 - [x] schema 文本契约检查通过：`custom.capnp` / `log.capnp` 无重复字段名/编号，Sunny SP 服务和手机限速 source/schema 字段存在；C3 设备端 capnp 编译仍留到停车验证补证据。
 - [x] params 检查通过。
