@@ -114,7 +114,7 @@
 迁移 Auto-Tuner 时必须满足：
 
 - `EnableEscc` 默认仍为 `0`。
-- `AlwaysOffline` 默认仍为 `1`。
+- `AlwaysOffline` 默认仍为 `0`，`EnableConnect` 默认仍为 `0`。
 - Seltos 2023 仍复用 Seltos 2021 配置。
 - 不默认开启 CANFD、HDA2、camera SCC 或其它非纯 CAN 路径。
 - 不改 panda safety 的诊断限制。

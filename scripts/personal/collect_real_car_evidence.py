@@ -145,7 +145,7 @@ def build_checklist(output_dir: Path, sample_seconds: int, archive_path: Optiona
   lines.append("  --evidence-dir /path/to/this-evidence-folder \\")
   lines.append("  --require-device-snapshot \\")
   lines.append("  --require-carparams-summary \\")
-  lines.append("  --require-offline-process-guard \\")
+  lines.append("  --require-default-connect-guard \\")
   lines.append("  --require-power-cycle-boot \\")
   lines.append("  --require-escc-sample")
   lines.append("```")

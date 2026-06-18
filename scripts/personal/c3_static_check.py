@@ -19,7 +19,7 @@ PARAM_ROOTS = [
 ]
 
 EXPECTED_PARKED_PARAMS = {
-  "AlwaysOffline": "1",
+  "AlwaysOffline": "0",
   "EnableConnect": "0",
   "EnableEscc": "0",
   "HyundaiCameraSCC": "0",

@@ -142,7 +142,8 @@ def manager_thread() -> None:
   params = Params()
 
   ignore: list[str] = []
-  if params.get("DongleId") in (None, UNREGISTERED_DONGLE_ID):
+  connect_enabled = params.get_int("EnableConnect") > 0 and not params.get_bool("AlwaysOffline")
+  if params.get("DongleId") in (None, UNREGISTERED_DONGLE_ID) or not connect_enabled:
     ignore += ["manage_athenad", "uploader"]
   if params.get_bool("AlwaysOffline"):
     ignore += ["manage_athenad", "uploader", "updated"]

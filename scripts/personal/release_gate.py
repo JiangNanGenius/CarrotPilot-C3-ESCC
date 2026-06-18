@@ -102,7 +102,7 @@ def validate_stable_evidence(path: Optional[str], snapshots: Sequence[str], evid
     "--require-device-snapshot",
     "--require-escc-sample",
     "--require-carparams-summary",
-    "--require-offline-process-guard",
+    "--require-default-connect-guard",
     "--require-power-cycle-boot",
   ]
   if path:

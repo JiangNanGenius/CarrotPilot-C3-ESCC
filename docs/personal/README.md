@@ -33,7 +33,7 @@
 - 用户主车优先：C3 克隆版、Kia Seltos 2023、纯 CAN。
 - Seltos 2023 初期复用 Seltos 2021，不额外调转向或纵控默认值。
 - ESCC 默认关闭，必须手动开启。
-- Always Offline 默认开启，适配 ACC/CAN 供电和无法在线注册的使用方式。
+- Always Offline 默认关闭，仅作为调试/故障排查开关；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
 - 机械小哥/fishop 其它功能分批迁移，每批可单独回滚。
 
 ## 本地检查
@@ -115,7 +115,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --road-test-log docs/personal/road_tests/你的记录.md \
   --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
   --require-device-snapshot \
-  --require-offline-process-guard \
+  --require-default-connect-guard \
   --require-power-cycle-boot \
   --require-escc-sample
 ```
@@ -132,7 +132,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
   --require-carparams-summary \
-  --require-offline-process-guard \
+  --require-default-connect-guard \
   --require-power-cycle-boot \
   --require-escc-sample
 ```

@@ -62,6 +62,13 @@ def current_test_tag(data: Dict[str, Any]) -> str:
   return tag
 
 
+def default_release_tag(data: Dict[str, Any]) -> str:
+  tag = data.get("latest_install_release")
+  if isinstance(tag, str) and tag:
+    return tag
+  return current_test_tag(data)
+
+
 def require_commit(ref: str, label: str) -> str:
   code, output = git(["rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"])
   if code != 0 or not output:
@@ -160,10 +167,14 @@ def require_no_extra_daily_target(data: Dict[str, Any]) -> None:
 
 def check_local(tag: str, data: Dict[str, Any]) -> str:
   require_no_extra_daily_target(data)
-  tag_commit = require_commit(f"refs/tags/{tag}", "current_test_tag")
+  tag_commit = require_commit(f"refs/tags/{tag}", "release tag")
   script_ref = read_script_default_ref()
-  if script_ref != tag:
-    raise ReleaseIntegrityError(f"installer script DEFAULT_REF is {script_ref}, expected {tag}")
+  expected_refs = {tag}
+  if tag == data.get("latest_install_release"):
+    expected_refs.add(DEFAULT_INSTALL_BRANCH)
+  if script_ref not in expected_refs:
+    expected = " or ".join(sorted(expected_refs))
+    raise ReleaseIntegrityError(f"installer script DEFAULT_REF is {script_ref}, expected {expected}")
   return tag_commit
 
 
@@ -220,7 +231,7 @@ def self_test() -> None:
 
 def main() -> int:
   parser = argparse.ArgumentParser(description="Verify personal C3 ESCC release/install integrity.")
-  parser.add_argument("--tag", help="release tag to check; defaults to current_test_tag")
+  parser.add_argument("--tag", help="release tag to check; defaults to latest_install_release, then current_test_tag")
   parser.add_argument("--online", action="store_true", help="also check remote install branch and GitHub release assets")
   parser.add_argument("--repo", default=DEFAULT_REPO, help="GitHub owner/repo")
   parser.add_argument("--remote", default="github", help="git remote name, or fallback to https://github.com/<repo>.git")
@@ -235,7 +246,7 @@ def main() -> int:
       return 0
 
     data = load_manifest()
-    tag = args.tag or current_test_tag(data)
+    tag = args.tag or default_release_tag(data)
     tag_commit = check_local(tag, data)
     print("Release integrity check")
     print(f"repo: {ROOT}")

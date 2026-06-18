@@ -10,8 +10,8 @@
   "latest_install_channel": "test",
   "latest_binary_url": "https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/latest/installer_c3_escc",
   "latest_script_url": "https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/latest/install_c3_escc.sh",
-  "short_binary_url": "https://jiangnangenius.github.io/cp/i",
-  "short_script_url": "https://jiangnangenius.github.io/cp/s",
+  "short_binary_url": "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i",
+  "short_script_url": "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s",
   "current_stable_tag": null,
   "previous_stable_tag": null,
   "rollback_base_ref": "origin/c3-wip",
@@ -20,7 +20,7 @@
     "Do not use daily development branches as long-term on-device install targets.",
     "A static tag only proves local static checks; it is not a road-tested stable version.",
     "A stable tag requires a completed road-test log and a recorded previous stable or rollback base.",
-    "A stable tag also requires a checked C3 device snapshot with ESCC 0x2AB evidence and offline process guard evidence.",
+    "A stable tag also requires a checked C3 device snapshot with ESCC 0x2AB evidence, default boot/connect guard evidence, and ACC/CAN power-cycle evidence.",
     "Until current_stable_tag is set, daily_install_target must stay null."
   ]
 }

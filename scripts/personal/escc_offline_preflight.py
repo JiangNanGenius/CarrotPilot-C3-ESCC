@@ -136,7 +136,7 @@ def check_git_context(report: Report) -> None:
 def check_params_and_settings(report: Report) -> None:
   params = parse_params_keys()
   for name, typ, default in [
-    ("AlwaysOffline", "BOOL", "1"),
+    ("AlwaysOffline", "BOOL", "0"),
     ("EnableConnect", "INT", "0"),
     ("EnableEscc", "INT", "0"),
     ("HyundaiCameraSCC", "INT", "0"),
@@ -154,7 +154,8 @@ def check_params_and_settings(report: Report) -> None:
 
   settings = settings_by_name()
   for name, default in [
-    ("AlwaysOffline", 1),
+    ("AlwaysOffline", 0),
+    ("EnableConnect", 0),
     ("EnableEscc", 0),
     ("HyundaiCameraSCC", 0),
     ("CanfdHDA2", 0),
@@ -232,11 +233,13 @@ def check_escc_wiring(report: Report) -> None:
 
 def check_offline_wiring(report: Report) -> None:
   report.require_contains("manager checks AlwaysOffline", "system/manager/manager.py", 'params.get_bool("AlwaysOffline")')
+  report.require_contains("manager checks EnableConnect", "system/manager/manager.py", 'params.get_int("EnableConnect")')
   report.require_contains("manager keeps unregistered dongle id", "system/manager/manager.py", "UNREGISTERED_DONGLE_ID")
   report.require_contains("manager disables updates offline", "system/manager/manager.py", 'params.put_bool("DisableUpdates", True)')
   report.require_contains("manager disables connect offline", "system/manager/manager.py", 'params.put_int("EnableConnect", 0)')
   report.require_contains("manager ignores online processes offline", "system/manager/manager.py", 'ignore += ["manage_athenad", "uploader", "updated"]')
   report.require_contains("registration returns unregistered id offline", "system/athena/registration.py", "return UNREGISTERED_DONGLE_ID")
+  report.require_contains("registration skips when connect disabled", "system/athena/registration.py", 'params.get_int("EnableConnect") <= 0')
   report.require_regex("updated process gated by AlwaysOffline", "system/manager/process_config.py", r"enable_updated\(.*?not params\.get_bool\(\"AlwaysOffline\"\)")
   report.require_regex("connect process gated by AlwaysOffline", "system/manager/process_config.py", r"enable_connect\(.*?not params\.get_bool\(\"AlwaysOffline\"\)")
   report.require_contains("park cancel shutdown guarded by AlwaysOffline", "selfdrive/car/car_specific.py", 'not self.params.get_bool("AlwaysOffline")')
@@ -244,7 +247,7 @@ def check_offline_wiring(report: Report) -> None:
 
 def manual_items() -> List[str]:
   return [
-    "On the C3 clone, confirm boot reaches UI with AlwaysOffline=1 after ACC/CAN power loss.",
+    "On the C3 clone, confirm boot reaches UI with AlwaysOffline=0 and EnableConnect=0 after ACC/CAN power loss.",
     "With EnableEscc=0, confirm Seltos 2023 behaves like the known-good Seltos 2021 path.",
     "With EnableEscc=1, confirm CAN bus 0 sees stable 0x2AB before enabling longitudinal control.",
     "Record /data/params for DongleId, AlwaysOffline, DisableUpdates, EnableConnect, EnableEscc, HyundaiCameraSCC, CanfdHDA2, and EnableRadarTracks.",

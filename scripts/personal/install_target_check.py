@@ -13,7 +13,7 @@ MANIFEST = ROOT / "docs/personal/INSTALL_TARGETS.json"
 TAG_RE = re.compile(r"^carrotpilot-c3-escc-(\d{8})-(static|test|stable)(\d*)$")
 STABLE_EVIDENCE_LINES = [
   "Seltos real-car test: PASS",
-  "AlwaysOffline ACC power-cycle test: PASS",
+  "C3 default boot/connect test: PASS",
   "ESCC 0x2AB observed: PASS",
   "Low-speed road test: PASS",
   "Rollback target recorded: PASS",

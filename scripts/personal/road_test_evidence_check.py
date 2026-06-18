@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 REQUIRED_PASS_LINES = [
   "Seltos real-car test: PASS",
-  "AlwaysOffline ACC power-cycle test: PASS",
+  "C3 default boot/connect test: PASS",
   "ESCC 0x2AB observed: PASS",
   "Low-speed road test: PASS",
   "Rollback target recorded: PASS",
@@ -248,6 +248,14 @@ def require_offline_process_guard(values: Dict[str, str], label: str) -> None:
     require_bool(values, key, False, label)
 
 
+def require_default_connect_guard(values: Dict[str, str], label: str) -> None:
+  require_bool(values, "AlwaysOffline", False, label)
+  require_bool(values, "EnableConnect", False, label)
+  require_bool(values, "process_snapshot_available", True, label)
+  for key in ["connect_process_seen", "uploader_process_seen"]:
+    require_bool(values, key, False, label)
+
+
 def require_power_cycle_boot(values: Dict[str, str], label: str) -> None:
   require_bool(values, "PowerCycleBootOk", True, label)
   snapshot_commit = values.get("commit", "").strip()
@@ -319,8 +327,6 @@ def validate_snapshot_text(name: str, text: str) -> Dict[str, str]:
 
   if values.get("branch") == "unknown" or values.get("commit") == "unknown":
     raise EvidenceError(f"{name}: snapshot must include a real branch and commit")
-  require_bool(values, "AlwaysOffline", True, name)
-  require_bool(values, "EnableConnect", False, name)
   require_bool(values, "process_snapshot_available", True, name)
   require_bool(values, "CanfdHDA2", False, name)
   require_bool(values, "HyundaiCameraSCC", False, name)
@@ -337,7 +343,8 @@ def validate_snapshots(
   require_amap_navi_sample: bool,
   require_model_selector_status_flag: bool,
   require_offline_guard: bool,
-  require_carparams: bool,
+  require_default_connect_guard_flag: bool = False,
+  require_carparams: bool = False,
   require_power_cycle_boot_flag: bool = False,
 ) -> List[Dict[str, str]]:
   if require_device_snapshot and not snapshot_paths:
@@ -443,6 +450,21 @@ def validate_snapshots(
         "and no updated/connect/uploader process visible"
       )
 
+  if require_default_connect_guard_flag:
+    found = False
+    for values in snapshots:
+      try:
+        require_default_connect_guard(values, "default boot/connect guard")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError(
+        "default boot evidence requires AlwaysOffline=0, EnableConnect=0, process snapshot available, "
+        "and no connect/uploader process visible"
+      )
+
   if require_power_cycle_boot_flag:
     found = False
     for values in snapshots:
@@ -524,7 +546,7 @@ def self_test() -> None:
 - 设备快照文件：snapshot.md
 - 回滚目标：origin/c3-wip
 Seltos real-car test: PASS
-AlwaysOffline ACC power-cycle test: PASS
+C3 default boot/connect test: PASS
 ESCC 0x2AB observed: PASS
 Low-speed road test: PASS
 Rollback target recorded: PASS
@@ -538,7 +560,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | --- | --- |
 | `branch` | personal/c3-escc-atune |
 | `commit` | abcdef123456 |
-| `AlwaysOffline` | 1 |
+| `AlwaysOffline` | 0 |
 | `EnableConnect` | 0 |
 | `EnableEscc` | 1 |
 | `CanfdHDA2` | 0 |
@@ -594,13 +616,15 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
     "udp_7705_seen": True,
     "udp_7705_required_keys_ok": True,
   }
+  offline_snapshot = good_snapshot.replace("| `AlwaysOffline` | 0 |", "| `AlwaysOffline` | 1 |")
   validate_log(good_log)
   validate_snapshot_text("self-test snapshot", good_snapshot)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_escc_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_cplink_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_amap_navi_sample=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_model_selector_status_flag=True)
-  validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_offline_guard=True)
+  validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_default_connect_guard_flag=True)
+  validate_snapshots_from_text([("self-test offline snapshot", offline_snapshot)], require_offline_guard=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_carparams=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_power_cycle_boot_flag=True)
   validate_navipilot_live_checks_from_objects([good_navipilot], require_navipilot_live_check=True)
@@ -625,7 +649,8 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
       require_cplink_sample=True,
       require_amap_navi_sample=True,
       require_model_selector_status_flag=True,
-      require_offline_guard=True,
+      require_offline_guard=False,
+      require_default_connect_guard_flag=True,
       require_carparams=True,
       require_power_cycle_boot_flag=True,
     )
@@ -663,6 +688,7 @@ def validate_snapshots_from_text(
   require_amap_navi_sample: bool = False,
   require_model_selector_status_flag: bool = False,
   require_offline_guard: bool = False,
+  require_default_connect_guard_flag: bool = False,
   require_carparams: bool = False,
   require_power_cycle_boot_flag: bool = False,
 ) -> List[Dict[str, str]]:
@@ -739,6 +765,17 @@ def validate_snapshots_from_text(
         continue
     if not found:
       raise EvidenceError("self-test failed: offline process guard was not detected")
+  if require_default_connect_guard_flag:
+    found = False
+    for values in snapshots:
+      try:
+        require_default_connect_guard(values, "self-test snapshot")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError("self-test failed: default boot/connect guard was not detected")
   if require_power_cycle_boot_flag:
     found = False
     for values in snapshots:
@@ -789,6 +826,7 @@ def main() -> int:
   parser.add_argument("--require-amap-navi-sample", action="store_true", help="require a sampled read-only AmapNavi status bridge update")
   parser.add_argument("--require-model-selector-status", action="store_true", help="require read-only model selector status in the device snapshot")
   parser.add_argument("--require-offline-process-guard", action="store_true", help="require AlwaysOffline with no updated/connect/uploader process visible")
+  parser.add_argument("--require-default-connect-guard", action="store_true", help="require AlwaysOffline=0, EnableConnect=0, and no connect/uploader process visible")
   parser.add_argument("--require-power-cycle-boot", action="store_true", help="require a matching post-ACC/CAN-power-cycle boot confirmation in the device snapshot")
   parser.add_argument("--require-navipilot-live-check", action="store_true", help="require C3-side 7000/7705 Navipilot endpoint check to pass")
   parser.add_argument("--require-carparams-summary", action="store_true", help="require a decoded Seltos CarParams summary")
@@ -816,6 +854,7 @@ def main() -> int:
       args.require_amap_navi_sample,
       args.require_model_selector_status,
       args.require_offline_process_guard,
+      args.require_default_connect_guard,
       args.require_carparams_summary,
       args.require_power_cycle_boot,
     )
@@ -840,6 +879,8 @@ def main() -> int:
       print("Model selector status: required and present")
     if args.require_offline_process_guard:
       print("Offline process guard: required and present")
+    if args.require_default_connect_guard:
+      print("Default boot/connect guard: required and present")
     if args.require_power_cycle_boot:
       print("ACC/CAN power-cycle boot: required and present")
     if args.require_carparams_summary:

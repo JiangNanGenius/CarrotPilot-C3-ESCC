@@ -1,5 +1,21 @@
 # 当前代码改动记录
 
+## 2026-06-18: AlwaysOffline / EnableConnect 默认策略修正
+
+改动内容：
+
+- `AlwaysOffline` 默认改为 `0`，只保留为调试/故障排查开关。
+- `EnableConnect` 默认保持 `0`，并在关闭时跳过在线注册、阻止远程连接/上传相关进程启动。
+- 设置页新增/明确“在线连接”开关说明，克隆 C3 默认不连接官方注册/远程连接服务。
+- `stable` 证据要求改为 `--require-default-connect-guard`：默认快照需满足 `AlwaysOffline=0`、`EnableConnect=0`，且不启动远程连接/上传。
+- `--require-offline-process-guard` 保留为手动开启 `AlwaysOffline=1` 后的离线调试检查，不再作为默认 stable 必需项。
+
+刻意没有改：
+
+- 没有默认开启在线连接。
+- 没有删除 AlwaysOffline 功能。
+- 没有把后台更新作为默认连接守卫的强制失败项；只有 AlwaysOffline 调试模式才要求更新、远程连接、上传都不启动。
+
 ## 2026-06-18: Navipilot 驾驶报告源码契约守卫
 
 改动文件：
@@ -74,14 +90,14 @@
 - 设备快照新增 `Process Summary`，机器可读地记录关键进程是否出现。
 - 新增 `process_snapshot_available`、`updated_process_seen`、`connect_process_seen`、`uploader_process_seen` 和 `offline_forbidden_processes_seen` 字段。
 - `road_test_evidence_check.py` 新增 `--require-offline-process-guard`，要求 `AlwaysOffline=1`、`EnableConnect=0`、可读取进程列表，且更新/远程连接/上传进程都不可见。
-- `evidence_readiness_report.py` 把 `Always Offline process guard` 设为 stable 必需阶段。
-- `release_gate.py --kind stable` 自动要求 `--require-offline-process-guard`。
+- 后续已修正：`evidence_readiness_report.py` 的 stable 必需阶段改为默认连接守卫，`Always Offline process guard` 只保留为调试检查。
+- 后续已修正：`release_gate.py --kind stable` 自动要求 `--require-default-connect-guard`。
 - 证据包和文档更新 stable 校验命令，避免 C3 克隆版 ACC/CAN 断电使用场景漏掉离线模式证据。
 
 刻意没有改：
 
 - 没有改 manager 启动逻辑。
-- 没有改 AlwaysOffline 默认值。
+- 后续已修正：AlwaysOffline 默认改为 `0`。
 - 没有用进程名判断替代实车 ACC/CAN 断电重启验证；断电重启仍需人工实际确认。
 
 当前静态测试 tag：
@@ -426,8 +442,8 @@
 
 改动内容：
 
-- 新增 `AlwaysOffline` 参数，个人 C3 克隆版默认开启。
-- 设置菜单加入“离线使用模式”。
+- 新增 `AlwaysOffline` 参数；后续已修正为默认关闭。
+- 设置菜单加入离线调试相关开关。
 - 开启后跳过在线注册，使用本地 `UnregisteredDevice`。
 - 开启后关闭后台更新和远程连接相关流程。
 - 开启后驻车按 Cancel 不再触发主动关机。
@@ -714,7 +730,7 @@
 
 - 将根 README 开头改为 `CarrotPilot-C3-ESCC` 项目说明。
 - 明确当前目标硬件和车型：C3 中国克隆版、Kia Seltos 2023、纯 CAN。
-- 明确当前功能状态：ESCC 默认关闭、Always Offline 默认开启、Auto-Tuner 默认关闭、CP搭子核心协议静态兼容但 APP 未实测。
+- 明确当前功能状态：ESCC 默认关闭、Always Offline 后续修正为默认关闭、EnableConnect 默认关闭、Auto-Tuner 默认关闭、CP搭子核心协议静态兼容但 APP 未实测。
 - 标出当前可参考 `static` tag：`carrotpilot-c3-escc-20260617-static2`，并说明它不是稳定版。
 - 在首页保留 ajouatom、fishop / 飞扬（码上飞扬，名称待确认）、机械小哥 / JixieXiaoGe、dhvms 的来源署名。
 - 标明上游 README 中的 `openpilot.comma.ai` 是官方 openpilot 安装入口，不是本个人分支安装目标。
@@ -908,7 +924,7 @@
 - 检查上车测试记录中必填字段和必填 `PASS` 结论行。
 - 支持读取一个或多个 C3 设备快照 markdown。
 - `stable` 证据要求至少一个快照满足：
-  - `AlwaysOffline=1`
+  - `AlwaysOffline=0`
   - `EnableConnect=0`
   - `CanfdHDA2=0`
   - `HyundaiCameraSCC=0`
@@ -999,7 +1015,7 @@
 - 检查当前安装是否匹配 `INSTALL_TARGETS.json` 的 `current_static_tag`。
 - 运行安装目标、Seltos 车型复用、ESCC / Always Offline、CP搭子静态预检。
 - 读取安全参数并提示是否符合停车上车前建议：
-  - `AlwaysOffline=1`
+  - `AlwaysOffline=0`
   - `EnableConnect=0`
   - `EnableEscc=0`
   - `HyundaiCameraSCC=0`

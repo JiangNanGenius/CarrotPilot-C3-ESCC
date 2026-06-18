@@ -306,7 +306,7 @@ def write_outputs(result: Dict[str, object], output: Optional[str], json_output:
 
 
 class _SelfTestHandler(BaseHTTPRequestHandler):
-  values = {"ExperimentalMode": 0, "AlwaysOffline": 1, "EnableEscc": 0, "CarrotLearningActive": 0}
+  values = {"ExperimentalMode": 0, "AlwaysOffline": 0, "EnableConnect": 0, "EnableEscc": 0, "CarrotLearningActive": 0}
 
   def log_message(self, _fmt: str, *_args: object) -> None:
     return

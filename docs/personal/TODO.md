@@ -79,13 +79,14 @@
 
 ## P2.5: C3 克隆版离线模式
 
-- [x] 新增 `AlwaysOffline` 参数，个人 C3 克隆版默认开启。
-- [x] 设置菜单加入“离线使用模式”。
-- [x] 开启后跳过在线注册。
+- [x] 新增 `AlwaysOffline` 参数，默认关闭，仅作为调试/故障排查开关。
+- [x] 新增/保留 `EnableConnect` 参数，默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
+- [x] 设置菜单加入“离线调试模式”和“在线连接”。
+- [x] `EnableConnect=0` 时跳过在线注册。
 - [x] 开启后禁用后台更新。
 - [x] 开启后禁用远程连接和上传相关流程。
 - [x] 开启后驻车按 Cancel 不主动关机。
-- [x] 设备快照和 stable evidence gate 增加离线进程守卫，要求看不到 `updated`、`athena` / 远程连接和 `uploader`。
+- [x] 设备快照和 stable evidence gate 增加默认连接守卫，要求 `AlwaysOffline=0`、`EnableConnect=0` 且看不到远程连接 / 上传进程；离线进程守卫保留为手动调试项。
 - [x] 增加 ACC/CAN 断电重启记录脚本和 stable gate 检查，要求 `PowerCycleBootOk=1` 且记录 commit 匹配设备快照 commit。
 - [ ] 上车确认 ACC/CAN 供电断电重启后能直接进入系统。
 
@@ -186,7 +187,7 @@
 - [x] 在 `INSTALL_TARGETS.json` 中预留 `previous_stable_tag` 和 `rollback_base_ref`。
 - [x] 只把稳定 tag 作为设备日常安装目标；当前没有稳定 tag，所以 `daily_install_target` 必须为空。
 - [ ] 第一次实车验证通过后，创建首个 `stable` tag，并更新 `INSTALL_TARGETS.json`。
-- [ ] 首个 `stable` 前，必须保存 C3 设备快照并通过 `road_test_evidence_check.py --require-carparams-summary --require-offline-process-guard --require-power-cycle-boot --require-escc-sample`。
+- [ ] 首个 `stable` 前，必须保存 C3 设备快照并通过 `road_test_evidence_check.py --require-carparams-summary --require-default-connect-guard --require-power-cycle-boot --require-escc-sample`。
 
 ## P7: 中文翻译和参数说明优化
 

@@ -6,7 +6,7 @@
 - 车辆：Kia Seltos 2023，纯 CAN，不是 CANFD。
 - 车型配置：新建 `Kia Seltos 2023`，初期复用 `Kia Seltos 2021`。
 - ESCC：有硬件才开启，默认关闭。
-- 离线模式：`AlwaysOffline` 默认开启。
+- 离线调试：`AlwaysOffline` 默认关闭，仅保留手动调试开关；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
 
 ## GitHub 仓库
 
@@ -56,7 +56,7 @@ GitHub Release 只负责记录“这次可安装的版本、检查状态和注�
 优先输入这个短链接：
 
 ```text
-https://jiangnangenius.github.io/cp/i
+https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i
 ```
 
 如果 GitHub Pages 短链接暂时还没生效，用这个固定 `latest` 链接：
@@ -76,20 +76,20 @@ install-c3-escc-test
 SSH 维护或救援时仍可使用脚本安装器：
 
 ```bash
-curl -fsSL https://jiangnangenius.github.io/cp/s | sh
+curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh
 ```
 
 通道切换：
 
 ```bash
-curl -fsSL https://jiangnangenius.github.io/cp/s | sh -s -- --channel test
-curl -fsSL https://jiangnangenius.github.io/cp/s | sh -s -- --channel dev
-curl -fsSL https://jiangnangenius.github.io/cp/s | sh -s -- --channel static
+curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --channel test
+curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --channel dev
+curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --channel static
 ```
 
 `stable` 通道会在首个实车 stable 发布后启用；现在还没有 stable，不要选它。
 
-脚本默认安装当前受控测试入口，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffline=1`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。安装时还会把 `PowerCycleBootOk` 清零，避免旧的断电重启确认被误用。
+脚本默认安装当前受控测试入口，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffline=0`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。安装时还会把 `PowerCycleBootOk` 清零，避免旧的断电重启确认被误用。
 
 安装完成后，脚本还会写入：
 
@@ -112,7 +112,7 @@ python3 scripts/personal/collect_real_car_evidence.py --archive
 如果要先看脚本会做什么：
 
 ```bash
-curl -fsSL https://jiangnangenius.github.io/cp/s | sh -s -- --dry-run
+curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --dry-run
 ```
 
 二进制安装器研究记录见 [C3 二进制安装器研究](BINARY_INSTALLER_RESEARCH.md)。如果以后已经有 `stable` tag，安装分支会改为指向 stable；在此之前，它只能作为受控测试安装入口。
@@ -217,7 +217,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
   --require-carparams-summary \
-  --require-offline-process-guard \
+  --require-default-connect-guard \
   --require-power-cycle-boot \
   --require-escc-sample
 ```
@@ -229,7 +229,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
   --require-carparams-summary \
-  --require-offline-process-guard \
+  --require-default-connect-guard \
   --require-power-cycle-boot \
   --require-cplink-sample \
   --require-navipilot-live-check
@@ -239,7 +239,7 @@ python3 scripts/personal/road_test_evidence_check.py \
 
 Seltos 2023 初期建议：
 
-- `AlwaysOffline=1`
+- `AlwaysOffline=0`
 - `EnableEscc=0`
 - `HyundaiCameraSCC=0`
 - `CanfdHDA2=0`
@@ -332,7 +332,7 @@ python3 scripts/personal/release_gate.py \
   --run-checks
 ```
 
-升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，并把 C3 生成的设备快照文件保存到电脑本地。`stable` gate 会要求设备快照里有 `AlwaysOffline=1`、`CanfdHDA2=0`、`EnableConnect=0`、`offline_forbidden_processes_seen=False`、`PowerCycleBootOk=1`，且 `PowerCycleBootCommit` 必须匹配快照 commit；同时至少有一次 `EnableEscc=1`、`enabled=True`、`ok=True` 且 `escc_0x2ab_bus0 > 0` 的采样。
+升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，并把 C3 生成的设备快照文件保存到电脑本地。`stable` gate 会要求设备快照里有 `AlwaysOffline=0`、`EnableConnect=0`、`CanfdHDA2=0`、`PowerCycleBootOk=1`，且 `PowerCycleBootCommit` 必须匹配快照 commit；同时至少有一次 `EnableEscc=1`、`enabled=True`、`ok=True` 且 `escc_0x2ab_bus0 > 0` 的采样。
 
 ```bash
 python3 scripts/personal/release_gate.py \

@@ -3,7 +3,7 @@ set -eu
 
 PROJECT_NAME="CarrotPilot-C3-ESCC"
 DEFAULT_REPO_URL="https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
-DEFAULT_REF="carrotpilot-c3-escc-20260618-test25"
+DEFAULT_REF="install-c3-escc-test"
 TEST_CHANNEL_REF="install-c3-escc-test"
 DEV_CHANNEL_REF="personal/c3-escc-atune"
 STATIC_CHANNEL_REF="carrotpilot-c3-escc-20260618-static28"
@@ -268,7 +268,7 @@ EOF
 apply_safe_params() {
   [ "$APPLY_PARAMS" = "1" ] || return 0
   log "Applying safe first-boot params"
-  write_param "AlwaysOffline" "1"
+  write_param "AlwaysOffline" "0"
   write_param "EnableConnect" "0"
   write_param "EnableEscc" "0"
   write_param "CanfdHDA2" "0"
@@ -301,7 +301,7 @@ Installed repo:
   $REPO_URL
 
 Safe first-boot params written by the installer:
-  AlwaysOffline=1
+  AlwaysOffline=0
   EnableConnect=0
   EnableEscc=0
   CanfdHDA2=0

@@ -8,7 +8,7 @@
 - 主车：Kia Seltos 2023，初期复用 Seltos 2021 配置
 - 硬件：C3 中国克隆版，不是 C3X
 - ESCC：已接入最小支持，默认关闭，必须手动开启 `EnableEscc`
-- 离线模式：`AlwaysOffline` 默认开启，用于 ACC/CAN 供电、无法在线注册的设备
+- 离线调试：`AlwaysOffline` 默认关闭，只保留手动调试开关；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务
 - Auto-Tuner：已接入学习和手动确认闭环，默认关闭，不自动应用
 - CP搭子 / Navipilot：核心 CarrotMan / CPlink 协议静态兼容，已增加 C3 侧 APP 端点 live check，手机 APP 实测未完成
 - 模型选择器：已跟踪参考线并增加源码审计，默认主线未启用模型下载或 modeld 切换
@@ -24,9 +24,9 @@
 
 安装入口：
 
-- C3 上手动输入优先用短链接：`https://jiangnangenius.github.io/cp/i`
+- C3 上手动输入优先用原仓库 Pages 入口：`https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i`
 - 如果短链接暂时还没生效，用固定 latest 链接：`https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/latest/installer_c3_escc`
-- SSH 安装或切换通道：`curl -fsSL https://jiangnangenius.github.io/cp/s | sh`
+- SSH 安装或切换通道：`curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh`
 - 编号 test 只是历史追溯；平时不要手动输入 test25/test26 这类链接。
 
 自动检查：

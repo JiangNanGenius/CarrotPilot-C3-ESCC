@@ -31,7 +31,7 @@ class CheckFailure(Exception):
 
 class FakeParams:
   DEFAULTS = {
-    "AlwaysOffline": True,
+    "AlwaysOffline": False,
     "EnableEscc": 0,
     "EnableConnect": 0,
     "CarrotLearningActive": 0,
@@ -190,7 +190,8 @@ def settings_by_name() -> Dict[str, Dict[str, Any]]:
 def check_settings_defaults() -> None:
   by_name = settings_by_name()
   expected = {
-    "AlwaysOffline": 1,
+    "AlwaysOffline": 0,
+    "EnableConnect": 0,
     "EnableEscc": 0,
     "CarrotLearningActive": 0,
     "CarrotLearningAutoApply": 0,
@@ -209,7 +210,7 @@ def check_settings_defaults() -> None:
 def check_params_defaults() -> None:
   params_keys = "common/params_keys.h"
   patterns = {
-    "AlwaysOffline default on": r'\{"AlwaysOffline", \{PERSISTENT, BOOL, "1"\}\}',
+    "AlwaysOffline default off": r'\{"AlwaysOffline", \{PERSISTENT, BOOL, "0"\}\}',
     "EnableEscc default off": r'\{"EnableEscc", \{PERSISTENT, INT, "0"\}\}',
     "EnableConnect default off": r'\{"EnableConnect", \{PERSISTENT, INT, "0"\}\}',
     "CarrotLearningActive default off": r'\{"CarrotLearningActive", \{PERSISTENT, INT, "0"\}\}',
@@ -249,7 +250,9 @@ def check_offline_static() -> None:
   expect_contains("system/manager/manager.py", "UNREGISTERED_DONGLE_ID", "offline dongle fallback")
   expect_contains("system/athena/registration.py", 'UNREGISTERED_DONGLE_ID = "UnregisteredDevice"', "unregistered dongle id")
   expect_contains("system/manager/manager.py", "DisableUpdates", "offline disables updates")
+  expect_contains("system/manager/manager.py", "connect_enabled", "connect process gate")
   expect_contains("system/athena/registration.py", "AlwaysOffline", "registration AlwaysOffline")
+  expect_contains("system/athena/registration.py", "EnableConnect", "registration EnableConnect")
   expect_contains("system/manager/process_config.py", "enable_connect", "connect process gate")
   expect_contains("system/manager/process_config.py", "AlwaysOffline", "process config AlwaysOffline")
   expect_contains("selfdrive/car/car_specific.py", "AlwaysOffline", "car_specific shutdown guard")

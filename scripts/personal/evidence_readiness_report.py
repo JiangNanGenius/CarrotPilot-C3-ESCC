@@ -153,6 +153,21 @@ def check_offline_process_guard(snapshot_paths: Sequence[str]) -> str:
   return "AlwaysOffline active with no updated/connect/uploader process visible"
 
 
+def check_default_connect_guard(snapshot_paths: Sequence[str]) -> str:
+  rtc.validate_snapshots(
+    snapshot_paths,
+    require_device_snapshot=True,
+    require_escc_sample=False,
+    require_cplink_sample=False,
+    require_amap_navi_sample=False,
+    require_model_selector_status_flag=False,
+    require_offline_guard=False,
+    require_default_connect_guard_flag=True,
+    require_carparams=False,
+  )
+  return "default boot uses AlwaysOffline=0, EnableConnect=0, and no connect/uploader process"
+
+
 def check_power_cycle_boot(snapshot_paths: Sequence[str]) -> str:
   rtc.validate_snapshots(
     snapshot_paths,
@@ -193,7 +208,8 @@ def check_stable_ready(road_test_log: Optional[str], snapshot_paths: Sequence[st
     require_cplink_sample=False,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=False,
-    require_offline_guard=True,
+    require_offline_guard=False,
+    require_default_connect_guard_flag=True,
     require_carparams=True,
     require_power_cycle_boot_flag=True,
   )
@@ -222,11 +238,12 @@ def build_results(
     stage_result("evidence inputs", True, lambda: (_raise(input_error) if input_error else check_inputs(selected_log, snapshot_paths))),
     stage_result("device snapshot", True, lambda: check_device_snapshot(snapshot_paths)),
     stage_result("CarParams summary", True, lambda: check_carparams(snapshot_paths)),
-    stage_result("Always Offline process guard", True, lambda: check_offline_process_guard(snapshot_paths)),
+    stage_result("default boot/connect guard", True, lambda: check_default_connect_guard(snapshot_paths)),
     stage_result("ACC/CAN power-cycle boot", True, lambda: check_power_cycle_boot(snapshot_paths)),
     stage_result("ESCC 0x2AB sample", True, lambda: check_escc_sample(snapshot_paths)),
     stage_result("completed road-test log", True, lambda: check_road_log(selected_log)),
     stage_result("stable gate readiness", True, lambda: check_stable_ready(selected_log, snapshot_paths)),
+    stage_result("Always Offline debug guard", False, lambda: check_offline_process_guard(snapshot_paths)),
     stage_result("CP搭子/Navipilot sample", False, lambda: check_cplink_sample(snapshot_paths)),
     stage_result("AmapNavi status bridge sample", False, lambda: check_amap_navi_sample(snapshot_paths)),
     stage_result("Model selector status", False, lambda: check_model_selector_status(snapshot_paths)),
@@ -271,7 +288,7 @@ def self_test() -> None:
 - 设备快照文件：device-snapshot.md
 - 回滚目标：origin/c3-wip
 Seltos real-car test: PASS
-AlwaysOffline ACC power-cycle test: PASS
+C3 default boot/connect test: PASS
 ESCC 0x2AB observed: PASS
 Low-speed road test: PASS
 Rollback target recorded: PASS
@@ -285,7 +302,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | --- | --- |
 | `branch` | personal/c3-escc-atune |
 | `commit` | abcdef123456 |
-| `AlwaysOffline` | 1 |
+| `AlwaysOffline` | 0 |
 | `EnableConnect` | 0 |
 | `EnableEscc` | 1 |
 | `CanfdHDA2` | 0 |
