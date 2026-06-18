@@ -266,8 +266,8 @@ flowchart TD
 - [x] 确认 Mr.One `openpilot/res` 是 `0.10.1` 旧 C3/TICI 兼容补丁样本。
 - [x] 确认 Mr.One `openpilot/release-new` 是 IQ.Pilot `0.10.4` 体系，不作为 SunnyPilot 主基座。
 - [x] 写入 `SUNNYPILOT_C3_LATEST_ARCHITECTURE_PLAN.md`。
-- [ ] 更新 `SUNNYPILOT_C3_LATEST_ARCHITECTURE_PLAN.md`，把本节完整开发计划同步进去。
-- [ ] 在 `AGENTS.md` 写清新架构线更新策略，后续用户说“继续更新新架构”时按本 P8 执行。
+- [x] 更新 `SUNNYPILOT_C3_LATEST_ARCHITECTURE_PLAN.md`，把本节完整开发计划同步进去。
+- [x] 在 `AGENTS.md` 写清新架构线更新策略，后续用户说“继续更新新架构”时按本 P8 执行。
 
 ### P8.1: 基座、远端和分支
 
@@ -275,9 +275,9 @@ flowchart TD
 - [x] 新增远端 `mrone-openpilot`，指向 `https://jihulab.com/mr-one/openpilot.git`。
 - [ ] 只抓必要分支：SunnyPilot `staging/master/dev/release-tizi/staging-tici`；Mr.One `devc3/res/release-new/staging/dev`。
 - [x] 从官方 SunnyPilot `staging` 0.11.2 建立独立工作树或分支 `experimental/sunnypilot-011-c3`。
-- [ ] 建立短安装分支 `alpha-sunnypilot-c3`，用于安装器不能输入带 `/` 分支名的场景。
-- [ ] 新增 Pages 入口 `/x` 指向 `alpha-sunnypilot-c3`。
-- [ ] 明确确认 `/i`、`latest`、稳定 release、`install-c3-escc-test` 不改指向。
+- [x] 建立短安装分支 `alpha-sunnypilot-c3`，用于安装器不能输入带 `/` 分支名的场景。
+- [x] 新增 Pages 入口 `/x` 指向 `alpha-sunnypilot-c3`。
+- [x] 明确确认 `/i`、`latest`、稳定 release、`install-c3-escc-test` 不改指向。
 - [x] 记录新架构基座提交、COMMA_VERSION、SunnyPilot 模型管理器版本和 Mr.One 参考提交。
 
 ### P8.2: C3/TICI 兼容补丁
@@ -427,8 +427,8 @@ flowchart LR
 
 ### P8.12: 安装器、文档和署名
 
-- [ ] 更新安装说明，新增 `https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x`。
-- [ ] `/x` 安装器支持选择或切换 `alpha-sunnypilot-c3`。
+- [x] 更新安装说明，新增 `https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x`。
+- [x] `/x` 安装器支持选择或切换 `alpha-sunnypilot-c3`。
 - [ ] 回滚说明保留 `/i`、当前 test tag 和 SSH 备用路径。
 - [ ] README 明确 alpha 新架构线不能当 stable/latest。
 - [ ] README 增加主要功能说明：ESCC、Seltos 2023、模型管理器、限速来源、Carrot Web、Auto-Tuner、Offroad。
