@@ -185,7 +185,12 @@ def check_online(tag: str, tag_commit: str, repo: str, remote: str, install_bran
       f"{install_branch} points to {branch_commit}, expected release tag commit {tag_commit}"
     )
 
-  tag_ref = ls_remote_commit(remote, repo, f"refs/tags/{tag}^{{}}")
+  try:
+    tag_ref = ls_remote_commit(remote, repo, f"refs/tags/{tag}^{{}}")
+  except ReleaseIntegrityError as exc:
+    if "remote ref is missing" not in str(exc):
+      raise
+    tag_ref = ls_remote_commit(remote, repo, f"refs/tags/{tag}")
   if tag_ref != tag_commit:
     raise ReleaseIntegrityError(f"remote tag {tag} resolves to {tag_ref}, expected {tag_commit}")
 
