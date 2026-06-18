@@ -37,6 +37,8 @@ def require(name: str, condition: bool, detail: str) -> bool:
 
 
 AUTO_TUNER_DEFAULTS = {
+  "CarrotActiveSpeedControlEnabled": 0,
+  "CarrotAutoTurnControlEnabled": 0,
   "CarrotLearningActive": 0,
   "CarrotLearningAutoApply": 0,
   "CarrotLearningApply": 0,
@@ -46,9 +48,23 @@ AUTO_TUNER_DEFAULTS = {
   "CarrotPhoneSpeedLimit": 0,
   "CarrotPhoneSpeedLimitEnabled": 1,
   "CarrotPhoneSpeedLimitUpdatedAt": 0,
+  "CarrotMapOverlayEnabled": 0,
+  "CarrotTrafficStopEnabled": 0,
   "CarrotTunerApplyLat": 1,
   "CarrotTunerApplyLong": 1,
   "CarrotTunerFactoryReset": 0,
+  "ExperimentalMode": 0,
+  "ExperimentalModeConfirmed": 0,
+  "FishopAutoOvertakeEnabled": 0,
+  "IsMetric": 1,
+  "IsOnroad": 0,
+  "OffroadMode": 0,
+  "OpenpilotEnabledToggle": 1,
+  "SpeedLimitMode": 1,
+  "SpeedLimitOffsetType": 0,
+  "SpeedLimitPolicy": 5,
+  "SpeedLimitValueOffset": 0,
+  "SshEnabled": 0,
   "CruiseMaxVals0": 160,
   "CruiseMaxVals1": 200,
   "CruiseMaxVals2": 160,
@@ -82,7 +98,7 @@ class FakeParams:
       self.reset()
     self.store = self.shared_store
 
-  def get(self, key):
+  def get(self, key, *args, **_kwargs):
     return self.store.get(key)
 
   def get_int(self, key):
@@ -222,6 +238,64 @@ def check_phone_speed_limit_runtime() -> tuple[bool, str]:
       sys.modules["openpilot.common.params"] = previous_params
 
 
+def check_params_api_runtime() -> tuple[bool, str]:
+  FakeParams.reset()
+  params_mod = types.ModuleType("openpilot.common.params")
+  params_mod.Params = FakeParams
+  previous_params = sys.modules.get("openpilot.common.params")
+  sys.modules["openpilot.common.params"] = params_mod
+  try:
+    server = import_file("alpha_carrot_server_params_static_check", "selfdrive/carrot/carrot_server.py")
+    state = server.params_bulk_state(["ExperimentalMode", "OffroadMode", "AlwaysOffroad", "DeviceType"])
+    if not state.get("hasParams"):
+      return False, "params bulk state did not report fake Params"
+    values = state.get("values", {})
+    writable = state.get("writable", {})
+    if values.get("ExperimentalMode") is not False or writable.get("ExperimentalMode") is not True:
+      return False, "ExperimentalMode was not exposed as a writable bool"
+    if values.get("OffroadMode") is not False or writable.get("OffroadMode") is not False:
+      return False, "OffroadMode must be read-only through local API"
+    if values.get("AlwaysOffroad") != 0 or writable.get("AlwaysOffroad") is not False:
+      return False, "legacy unknown AlwaysOffroad must only read as an inert default"
+    if values.get("DeviceType") != "unknown" or writable.get("DeviceType") is not False:
+      return False, "DeviceType must be a read-only virtual value"
+
+    result = server.set_param_from_api("ExperimentalMode", 1)
+    if not result.get("changed") or FakeParams.shared_store.get("ExperimentalMode") != b"1":
+      return False, "param_set did not write ExperimentalMode"
+    unchanged = server.set_param_from_api("ExperimentalMode", True)
+    if unchanged.get("changed"):
+      return False, "same-value param_set should report unchanged"
+    server.set_param_from_api("SpeedLimitMode", 3)
+    if FakeParams.shared_store.get("SpeedLimitMode") != b"2":
+      return False, "SpeedLimitMode must clamp local API writes to warning, not assist"
+
+    for blocked_name in ("OffroadMode", "CarrotTrafficStopEnabled", "FishopAutoOvertakeEnabled"):
+      try:
+        server.set_param_from_api(blocked_name, 1)
+        return False, f"{blocked_name} should be read-only through local API"
+      except ValueError:
+        pass
+
+    FakeParams.shared_store["IsOnroad"] = b"1"
+    try:
+      server.set_param_from_api("ExperimentalMode", 0)
+      return False, "onroad param change was not blocked"
+    except RuntimeError:
+      pass
+    unchanged_onroad = server.set_param_from_api("ExperimentalMode", True)
+    if unchanged_onroad.get("changed"):
+      return False, "same-value onroad write probe should remain unchanged"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+  finally:
+    if previous_params is None:
+      sys.modules.pop("openpilot.common.params", None)
+    else:
+      sys.modules["openpilot.common.params"] = previous_params
+
+
 def main() -> int:
   failures = 0
 
@@ -339,14 +413,27 @@ def main() -> int:
   failures += not require("Carrot Web local server exists", "LOCAL_WEB_PORT = 7000" in carrot_server
                           and "def make_app" in carrot_server and "web.run_app" in carrot_server,
                           "carrot_server must provide the local port-7000 aiohttp service")
-  for route in ("/api/health", "/api/carrot_learning", "/api/fishop_hardware", "/api/phone_speed_limit"):
+  for route in ("/api/health", "/api/params_bulk", "/api/param_set", "/api/carrot_learning", "/api/fishop_hardware", "/api/phone_speed_limit"):
     failures += not require(f"Carrot Web route exists: {route}", route in carrot_server,
                             f"carrot_server missing {route}")
+  failures += not require("Carrot Web params API whitelist", "PARAM_API_DEFS" in carrot_server
+                          and '"ExperimentalMode": {"type": "bool", "default": False, "writable": True}' in carrot_server
+                          and '"OffroadMode": {"type": "bool", "default": False, "writable": False}' in carrot_server
+                          and '"FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": False}' in carrot_server,
+                          "Carrot Web params API must expose only an explicit whitelist and keep high-risk params read-only")
+  failures += not require("Carrot Web params API blocks onroad changes", 'params.get_bool("IsOnroad") and changed' in carrot_server
+                          and "Cannot change params while onroad" in carrot_server,
+                          "param_set must reject changed values while onroad")
+  failures += not require("Carrot Web params API clamps active speed mode", '"SpeedLimitMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 2}' in carrot_server,
+                          "local param_set must not enable SpeedLimitMode assist through the phone API")
+  ok, detail = check_params_api_runtime()
+  failures += not require("Carrot Web params API runtime", ok, detail or "params API runtime check failed")
   failures += not require("Carrot Web phone speed API writes resolver params",
                           "def set_phone_speed_limit" in carrot_server
                           and "CarrotPhoneSpeedLimitUpdatedAt" in carrot_server
                           and "CarrotPhoneSpeedLimitSource" in carrot_server
-                          and "KPH_TO_MS" in carrot_server,
+                          and "KPH_TO_MS" in carrot_server
+                          and "params.put(key, float(value))" in carrot_server,
                           "Carrot Web must expose a local phone speed API that writes resolver params in m/s")
   failures += not require("Carrot Web phone speed API reports freshness",
                           "PHONE_SPEED_LIMIT_MAX_AGE_S = 10.0" in carrot_server

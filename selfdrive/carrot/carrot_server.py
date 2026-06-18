@@ -46,6 +46,35 @@ PHONE_SPEED_LIMIT_KPH_FIELDS = (
   "nSdiPlusSpeedLimit",
 )
 
+PARAM_API_MAX_NAMES = 80
+PARAM_API_MAX_VALUE_TEXT = 80
+
+PARAM_API_DEFS: dict[str, dict[str, Any]] = {
+  "ExperimentalMode": {"type": "bool", "default": False, "writable": True},
+  "ExperimentalModeConfirmed": {"type": "bool", "default": False, "writable": True},
+  "IsMetric": {"type": "bool", "default": True, "writable": True},
+  "CarrotLearningActive": {"type": "bool", "default": False, "writable": True},
+  "CarrotPhoneSpeedLimitEnabled": {"type": "bool", "default": True, "writable": True},
+  "CarrotMapOverlayEnabled": {"type": "bool", "default": False, "writable": True},
+  "SpeedLimitPolicy": {"type": "int", "default": 5, "writable": True, "min": 0, "max": 5},
+  "SpeedLimitOffsetType": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 2},
+  "SpeedLimitValueOffset": {"type": "int", "default": 0, "writable": True, "min": -30, "max": 30},
+  # Local API intentionally cannot enable active speed-control assist; that remains a UI/road-test gate.
+  "SpeedLimitMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 2},
+  "OffroadMode": {"type": "bool", "default": False, "writable": False},
+  "IsOnroad": {"type": "bool", "default": False, "writable": False},
+  "OpenpilotEnabledToggle": {"type": "bool", "default": True, "writable": False},
+  "SshEnabled": {"type": "bool", "default": False, "writable": False},
+  "CarrotActiveSpeedControlEnabled": {"type": "bool", "default": False, "writable": False},
+  "CarrotAutoTurnControlEnabled": {"type": "bool", "default": False, "writable": False},
+  "CarrotTrafficStopEnabled": {"type": "bool", "default": False, "writable": False},
+  "FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": False},
+}
+
+VIRTUAL_PARAM_DEFAULTS = {
+  "DeviceType": "unknown",
+}
+
 ACTION_PARAMS = {
   "apply": "CarrotLearningApply",
   "ignore": "CarrotLearningIgnore",
@@ -107,6 +136,16 @@ def _decode_param_text(raw: Any) -> str:
   return str(raw)
 
 
+def _as_bool(value: Any) -> bool:
+  if isinstance(value, bool):
+    return value
+  if isinstance(value, (int, float)):
+    return value != 0
+  if isinstance(value, bytes):
+    value = value.decode("utf-8", errors="ignore")
+  return str(value).strip().lower() in ("1", "true", "on", "yes", "y")
+
+
 def _safe_source_text(value: Any) -> str:
   text = str(value or "phone").strip()
   if not text:
@@ -116,7 +155,7 @@ def _safe_source_text(value: Any) -> str:
 
 
 def _put_float(params: Any, key: str, value: float) -> None:
-  params.put(key, f"{value:.6f}".encode("utf-8"))
+  params.put(key, float(value))
 
 
 def _clamp_param(key: str, value: Any) -> int:
@@ -130,6 +169,132 @@ def _params_state() -> tuple[Any | None, str]:
     return Params(), ""
   except Exception as exc:
     return None, str(exc)[:240]
+
+
+def _params_get(params: Any, key: str, default: Any = None) -> Any:
+  try:
+    return params.get(key, return_default=True)
+  except TypeError:
+    value = params.get(key)
+    return default if value is None else value
+  except Exception:
+    return default
+
+
+def _param_meta(name: str) -> dict[str, Any] | None:
+  return PARAM_API_DEFS.get(name)
+
+
+def _normalize_param_value(value: Any, meta: dict[str, Any]) -> Any:
+  value_type = meta.get("type")
+  if value_type == "bool":
+    return _as_bool(value)
+  if value_type == "int":
+    normalized = int(round(_as_float(value, float(meta.get("default", 0)))))
+    if "min" in meta:
+      normalized = max(int(meta["min"]), normalized)
+    if "max" in meta:
+      normalized = min(int(meta["max"]), normalized)
+    return normalized
+  if value_type == "float":
+    normalized_float = _as_float(value, float(meta.get("default", 0.0)))
+    if "min" in meta:
+      normalized_float = max(float(meta["min"]), normalized_float)
+    if "max" in meta:
+      normalized_float = min(float(meta["max"]), normalized_float)
+    return normalized_float
+  text = _decode_param_text(value).strip()
+  return text[:PARAM_API_MAX_VALUE_TEXT]
+
+
+def _json_safe_value(value: Any) -> Any:
+  if isinstance(value, bytes):
+    return value.decode("utf-8", errors="replace")
+  if isinstance(value, (str, int, float, bool)) or value is None:
+    return value
+  if isinstance(value, (dict, list)):
+    return value
+  return str(value)
+
+
+def _write_param_value(params: Any, name: str, value: Any, meta: dict[str, Any]) -> None:
+  if meta.get("type") == "bool":
+    params.put_bool(name, bool(value))
+  else:
+    params.put(name, value)
+
+
+def _requested_param_names(raw_names: str) -> list[str]:
+  names: list[str] = []
+  for raw in raw_names.split(","):
+    name = raw.strip()
+    if name and name not in names:
+      names.append(name)
+    if len(names) >= PARAM_API_MAX_NAMES:
+      break
+  return names
+
+
+def params_bulk_state(names: Iterable[str]) -> dict[str, Any]:
+  values: dict[str, Any] = {}
+  writable: dict[str, bool] = {}
+  params, error = _params_state()
+
+  for name in names:
+    if name in VIRTUAL_PARAM_DEFAULTS:
+      values[name] = VIRTUAL_PARAM_DEFAULTS[name]
+      writable[name] = False
+      continue
+
+    meta = _param_meta(name)
+    if meta is None:
+      values[name] = 0
+      writable[name] = False
+      continue
+
+    value = meta.get("default")
+    if params is not None:
+      value = _params_get(params, name, meta.get("default"))
+    values[name] = _json_safe_value(_normalize_param_value(value, meta))
+    writable[name] = bool(meta.get("writable", False))
+
+  return {
+    "hasParams": params is not None,
+    "values": values,
+    "writable": writable,
+    "error": error if params is None else "",
+  }
+
+
+def set_param_from_api(name: str, value: Any) -> dict[str, Any]:
+  if not name:
+    raise ValueError("missing name")
+  meta = _param_meta(name)
+  if meta is None:
+    raise ValueError(f"param is not exposed through local API: {name}")
+  if not meta.get("writable", False):
+    raise ValueError(f"param is read-only through local API: {name}")
+
+  params, error = _params_state()
+  if params is None:
+    raise RuntimeError(f"Params unavailable: {error}")
+
+  normalized = _normalize_param_value(value, meta)
+  current = _normalize_param_value(_params_get(params, name, meta.get("default")), meta)
+  changed = normalized != current
+
+  if params.get_bool("IsOnroad") and changed:
+    raise RuntimeError("Cannot change params while onroad")
+
+  if changed:
+    _write_param_value(params, name, normalized, meta)
+
+  return {
+    "name": name,
+    "value": _json_safe_value(normalized),
+    "changed": changed,
+    "hasParams": True,
+  }
 
 
 def _read_payload(params: Any) -> dict[str, Any] | None:
@@ -437,6 +602,8 @@ async def api_health(_request: web.Request) -> web.Response:
     "controlOutput": False,
     "endpoints": [
       "/api/health",
+      "/api/params_bulk",
+      "/api/param_set",
       "/api/carrot_learning",
       "/api/fishop_hardware",
       "/api/phone_speed_limit",
@@ -446,6 +613,34 @@ async def api_health(_request: web.Request) -> web.Response:
 
 async def api_carrot_learning(_request: web.Request) -> web.Response:
   return _json_response({"ok": True, **get_learning_state()})
+
+
+async def api_params_bulk(request: web.Request) -> web.Response:
+  names = _requested_param_names(request.query.get("names", ""))
+  if not names:
+    return _json_response({"ok": False, "error": "missing names"}, status=400)
+  state = params_bulk_state(names)
+  return _json_response({"ok": state["hasParams"], **state}, status=200 if state["hasParams"] else 400)
+
+
+async def api_param_set(request: web.Request) -> web.Response:
+  try:
+    body = await request.json()
+  except Exception:
+    return _json_response({"ok": False, "error": "invalid json"}, status=400)
+
+  name = str(body.get("name", "")).strip()
+  try:
+    result = set_param_from_api(name, body.get("value"))
+    return _json_response({"ok": True, **result})
+  except Exception as exc:
+    params, error = _params_state()
+    return _json_response({
+      "ok": False,
+      "name": name,
+      "hasParams": params is not None,
+      "error": str(exc) if params is not None else f"Params unavailable: {error}",
+    }, status=400)
 
 
 async def api_carrot_learning_action(request: web.Request) -> web.Response:
@@ -510,6 +705,7 @@ async def index(_request: web.Request) -> web.Response:
       <h2>APIs</h2>
       <ul>
         <li><a href="/api/health"><code>/api/health</code></a></li>
+        <li><a href="/api/params_bulk?names=ExperimentalMode"><code>/api/params_bulk</code></a></li>
         <li><a href="/api/carrot_learning"><code>/api/carrot_learning</code></a></li>
         <li><a href="/api/fishop_hardware"><code>/api/fishop_hardware</code></a></li>
         <li><a href="/api/phone_speed_limit"><code>/api/phone_speed_limit</code></a></li>
@@ -526,6 +722,8 @@ def make_app() -> web.Application:
   app = web.Application()
   app.router.add_get("/", index)
   app.router.add_get("/api/health", api_health)
+  app.router.add_get("/api/params_bulk", api_params_bulk)
+  app.router.add_post("/api/param_set", api_param_set)
   app.router.add_get("/api/carrot_learning", api_carrot_learning)
   app.router.add_post("/api/carrot_learning", api_carrot_learning_action)
   app.router.add_get("/api/fishop_hardware", api_fishop_hardware)
