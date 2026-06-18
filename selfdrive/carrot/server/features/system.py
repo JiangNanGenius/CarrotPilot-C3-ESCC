@@ -319,8 +319,8 @@ async def api_set_default(request: web.Request) -> web.Response:
     status = 200 if ok else 500
     return web.json_response({
       "ok": ok,
-      "message": "설정 초기화 성공" if ok else "설정 초기화 실패",
-      "error": None if ok else "설정 초기화 실패",
+      "message": "Settings reset complete" if ok else "Settings reset failed",
+      "error": None if ok else "Settings reset failed",
       "values": applied_values,
       **restored,
     }, status=status)

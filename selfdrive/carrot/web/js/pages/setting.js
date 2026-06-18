@@ -293,9 +293,8 @@ function isCarrotLearningGroup(group) {
   return list.some((item) => item?.name === "CarrotLearningActive");
 }
 
-function carrotLearningText(zh, en, ko = en) {
+function carrotLearningText(zh, en) {
   if (LANG === "zh") return zh;
-  if (LANG === "ko") return ko;
   return en;
 }
 
@@ -331,10 +330,10 @@ function renderCarrotLearningPanel(state, options = {}) {
   const recommendations = Array.isArray(state?.recommendations) ? state.recommendations : [];
   const createdAt = formatCarrotLearningTime(state?.created_at);
   const statusText = state?.ok === false
-    ? (state.error || carrotLearningText("读取建议失败", "Failed to load recommendations", "추천값을 읽지 못했습니다"))
+    ? (state.error || carrotLearningText("读取建议失败", "Failed to load recommendations"))
     : pending
-      ? carrotLearningText("有待确认建议", "Pending recommendations", "대기 중인 추천값")
-      : carrotLearningText("暂无待处理建议", "No pending recommendations", "대기 중인 추천값 없음");
+      ? carrotLearningText("有待确认建议", "Pending recommendations")
+      : carrotLearningText("暂无待处理建议", "No pending recommendations");
 
   const recRows = recommendations.slice(0, 8).map((rec) => {
     const delta = Number(rec.delta || 0);
@@ -351,19 +350,19 @@ function renderCarrotLearningPanel(state, options = {}) {
   panel.innerHTML = `
     <div class="settingTop carrot-learning-panel__top">
       <div class="setting-copy">
-        <div class="title">${escapeHtml(carrotLearningText("Auto-Tuner 建议", "Auto-Tuner Recommendations", "오토튜너 추천"))}</div>
+        <div class="title">${escapeHtml(carrotLearningText("Auto-Tuner 建议", "Auto-Tuner Recommendations"))}</div>
         <div class="name">${escapeHtml(statusText)}</div>
         ${createdAt ? `<div class="muted mt-sm">${escapeHtml(createdAt)}</div>` : ""}
       </div>
       <div class="ctrl carrot-learning-panel__actions">
-        <button type="button" class="smallBtn btn--filled" data-learning-action="apply" ${pending ? "" : "disabled"}>${escapeHtml(carrotLearningText("应用", "Apply", "적용"))}</button>
-        <button type="button" class="smallBtn" data-learning-action="ignore" ${pending ? "" : "disabled"}>${escapeHtml(carrotLearningText("忽略", "Ignore", "무시"))}</button>
-        <button type="button" class="smallBtn btn--danger" data-learning-action="clear">${escapeHtml(carrotLearningText("清空", "Clear", "초기화"))}</button>
+        <button type="button" class="smallBtn btn--filled" data-learning-action="apply" ${pending ? "" : "disabled"}>${escapeHtml(carrotLearningText("应用", "Apply"))}</button>
+        <button type="button" class="smallBtn" data-learning-action="ignore" ${pending ? "" : "disabled"}>${escapeHtml(carrotLearningText("忽略", "Ignore"))}</button>
+        <button type="button" class="smallBtn btn--danger" data-learning-action="clear">${escapeHtml(carrotLearningText("清空", "Clear"))}</button>
       </div>
     </div>
     <div class="descr carrot-learning-panel__body">
-      ${recRows || escapeHtml(carrotLearningText("停车后如果有新建议，会显示在这里。", "New recommendations will appear here after parking.", "주차 후 새 추천값이 여기에 표시됩니다."))}
-      ${extraCount ? `<div class="carrot-learning-rec carrot-learning-rec--more">${escapeHtml(carrotLearningText(`还有 ${extraCount} 项`, `${extraCount} more`, `${extraCount}개 더 있음`))}</div>` : ""}
+      ${recRows || escapeHtml(carrotLearningText("停车后如果有新建议，会显示在这里。", "New recommendations will appear here after parking."))}
+      ${extraCount ? `<div class="carrot-learning-rec carrot-learning-rec--more">${escapeHtml(carrotLearningText(`还有 ${extraCount} 项`, `${extraCount} more`))}</div>` : ""}
     </div>
   `;
 
@@ -381,20 +380,19 @@ async function runCarrotLearningAction(action) {
     const ok = await appConfirm(carrotLearningText(
       "确定应用当前 Auto-Tuner 建议吗？请只在停车安全状态下使用。",
       "Apply current Auto-Tuner recommendations? Use only while parked.",
-      "현재 오토튜너 추천값을 적용할까요? 주차 상태에서만 사용하세요.",
     ), {
-      title: carrotLearningText("应用建议", "Apply Recommendations", "추천값 적용"),
-      confirmLabel: carrotLearningText("应用", "Apply", "적용"),
+      title: carrotLearningText("应用建议", "Apply Recommendations"),
+      confirmLabel: carrotLearningText("应用", "Apply"),
     });
     if (!ok) return;
   }
 
   const result = await postJson("/api/carrot_learning", { action });
   const message = action === "apply"
-    ? carrotLearningText(`已应用 ${result.applied_count || 0} 项`, `${result.applied_count || 0} recommendations applied`, `${result.applied_count || 0}개 적용됨`)
+    ? carrotLearningText(`已应用 ${result.applied_count || 0} 项`, `${result.applied_count || 0} recommendations applied`)
     : action === "ignore"
-      ? carrotLearningText("已忽略当前建议", "Recommendations ignored", "추천값 무시됨")
-      : carrotLearningText("学习数据已清空", "Learning data cleared", "학습 데이터 초기화됨");
+      ? carrotLearningText("已忽略当前建议", "Recommendations ignored")
+      : carrotLearningText("学习数据已清空", "Learning data cleared");
   showAppToast(message, { tone: action === "apply" ? "success" : "info" });
   settingValueCache.clear();
   settingGroupValueCache.clear();
@@ -832,7 +830,6 @@ function getSettingGroupLabel(group) {
   const meta = getSettingGroupMeta(group);
   if (!meta) return group;
   if (LANG === "zh") return meta.cgroup || meta.egroup || meta.group;
-  if (LANG === "ko") return meta.group || meta.egroup || group;
   return meta.egroup || meta.group || group;
 }
 
@@ -883,7 +880,8 @@ function getLandscapeDefaultSettingGroup() {
   const match = groups.find((entry) => {
     const raw = String(entry.group || "").trim().toLowerCase();
     const label = String(getSettingGroupLabel(entry.group) || "").trim().toLowerCase();
-    return raw === "시작" || raw === "start" || label === "시작" || label === "start";
+    const legacyStart = "\uc2dc\uc791";
+    return raw === legacyStart || raw === "start" || label === legacyStart || label === "start";
   });
 
   return match?.group || CURRENT_GROUP || groups[0]?.group || null;
@@ -942,7 +940,7 @@ function formatSettingProfileDate(value) {
   const date = new Date(raw);
   if (Number.isNaN(date.getTime())) return raw;
   try {
-    return date.toLocaleString(LANG === "ko" ? "ko-KR" : undefined, {
+    return date.toLocaleString(undefined, {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",

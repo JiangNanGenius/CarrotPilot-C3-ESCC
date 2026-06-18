@@ -592,6 +592,7 @@ def main() -> int:
     ("Feature boundary guard", lambda: run([sys.executable, "scripts/personal/feature_boundary_check.py", "--no-manual"], "Feature boundary guard")),
     ("Feature status report", lambda: run([sys.executable, "scripts/personal/feature_status_report.py", "--strict"], "Feature status report")),
     ("Chinese settings audit", lambda: run([sys.executable, "scripts/personal/settings_cn_audit.py"], "Chinese settings audit")),
+    ("Localization audit", lambda: run([sys.executable, "scripts/personal/localization_audit.py"], "Localization audit")),
     ("Install target manifest", lambda: run([sys.executable, "scripts/personal/install_target_check.py"], "Install target manifest")),
     ("C3 installer script", check_install_script),
     ("Params migration self-test", lambda: run([sys.executable, "scripts/personal/params_migration.py", "self-test"], "Params migration self-test")),

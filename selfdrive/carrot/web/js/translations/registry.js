@@ -3,14 +3,14 @@
 (function initCarrotTranslations(global) {
   const api = global.CarrotTranslations || {};
   const packs = api.packs || {};
-  const order = api.order || ["en", "ko", "zh"];
+  const order = api.order || ["en", "zh"];
   const strings = api.strings || {};
   const actionLabels = api.actionLabels || {};
   const errorMessages = api.errorMessages || {};
   const driveModes = api.driveModes || {};
 
   function rebuild() {
-    const fallback = packs.en || packs.ko || {};
+    const fallback = packs.en || {};
     order.forEach((lang) => {
       const pack = packs[lang] || {};
       strings[lang] = Object.assign({}, fallback.strings || {}, pack.strings || {});
@@ -33,7 +33,7 @@
     rebuild();
   };
   api.getPack = function getPack(lang) {
-    return packs[lang] || packs.en || packs.ko || {};
+    return packs[lang] || packs.en || {};
   };
 
   global.CarrotTranslations = api;

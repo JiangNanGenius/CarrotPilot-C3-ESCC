@@ -1,24 +1,28 @@
 "use strict";
 
-// Translation registry — loaded by translations/registry.js + ko/en/zh.js
-const TRANSLATION_REGISTRY = window.CarrotTranslations || { packs: {}, order: ["en", "ko", "zh"] };
+// Translation registry — loaded by translations/registry.js + en/zh.js
+const TRANSLATION_REGISTRY = window.CarrotTranslations || { packs: {}, order: ["en", "zh"] };
 const UI_STRINGS = TRANSLATION_REGISTRY.strings || {};
 const ACTION_LABELS = TRANSLATION_REGISTRY.actionLabels || {};
 const ERROR_MESSAGES = TRANSLATION_REGISTRY.errorMessages || {};
 const DRIVE_MODES = TRANSLATION_REGISTRY.driveModes || {};
-const CARROT_WEB_LANGUAGE_CODES = Object.freeze(["en", "ko", "zh"]);
+const CARROT_WEB_LANGUAGE_CODES = Object.freeze(["en", "zh"]);
 window.CARROT_WEB_LANGUAGE_CODES = CARROT_WEB_LANGUAGE_CODES;
 
 // Device language options — loaded from the server bootstrap (languages.json).
 // Falls back to a minimal set if the server data is unavailable.
+const SUPPORTED_DEVICE_LANGUAGE_CODES = new Set(["main_en", "main_zh-CHS", "main_zh-CHT"]);
+const FALLBACK_DEVICE_LANGUAGES = [
+  { code: "main_en", name: "English" },
+  { code: "main_zh-CHS", name: "简体中文" },
+  { code: "main_zh-CHT", name: "繁體中文" },
+];
+const bootDeviceLanguages = (
+  Array.isArray(window.__CARROT_BOOTSTRAP__?.deviceLanguages) &&
+  window.__CARROT_BOOTSTRAP__.deviceLanguages.length > 0
+) ? window.__CARROT_BOOTSTRAP__.deviceLanguages : FALLBACK_DEVICE_LANGUAGES;
 window.CarrotDeviceLanguageOptions = Object.freeze(
-  (Array.isArray(window.__CARROT_BOOTSTRAP__?.deviceLanguages) &&
-    window.__CARROT_BOOTSTRAP__.deviceLanguages.length > 0)
-    ? window.__CARROT_BOOTSTRAP__.deviceLanguages
-    : [
-        { code: "main_en", name: "English" },
-        { code: "main_ko", name: "한국어" },
-      ]
+  bootDeviceLanguages.filter((item) => SUPPORTED_DEVICE_LANGUAGE_CODES.has(item?.code))
 );
 
 let LANG = "en";
@@ -26,10 +30,10 @@ let LANG = "en";
 
 function normalizeLangCode(raw) {
   const value = String(raw || "").trim().toLowerCase();
+  if (value === "ko" || value === "main_ko" || value.startsWith("ko-") || value.startsWith("ko_")) return "en";
   const packs = window.CarrotTranslations?.packs || {};
   if (packs[value]) return value;
   const deviceAliases = {
-    main_ko: "ko",
     main_en: "en",
     "main_zh-chs": "zh",
     "main_zh-cht": "zh",
@@ -37,7 +41,6 @@ function normalizeLangCode(raw) {
   if (deviceAliases[value]) return deviceAliases[value];
   const withoutMainPrefix = value.replace(/^main[_-]/, "");
   if (packs[withoutMainPrefix]) return withoutMainPrefix;
-  if (value.startsWith("ko")) return "ko";
   if (value.startsWith("zh")) return "zh";
   if (value.startsWith("en")) return "en";
   return "";
@@ -171,7 +174,7 @@ function formatUIText(text, vars = {}) {
 }
 
 function getUIText(key, fallback = "", vars = null) {
-  const value = UI_STRINGS[LANG]?.[key] ?? UI_STRINGS.en?.[key] ?? UI_STRINGS.ko?.[key] ?? fallback;
+  const value = UI_STRINGS[LANG]?.[key] ?? UI_STRINGS.en?.[key] ?? fallback;
   return vars ? formatUIText(value, vars) : value;
 }
 

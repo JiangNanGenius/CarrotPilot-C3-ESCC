@@ -104,6 +104,7 @@
 - [x] 增加 Navipilot APP 参数读写接口静态守卫，确认 7000 端口 `/api/params_bulk` 和 `/api/param_set` 兼容 APP 的 `CarrotParamClient`。
 - [x] 增加 CP搭子 / Navipilot 设备端采样字段和可选证据校验门槛。
 - [x] 增加 Navipilot APP 端点 live check，可在 C3 上验证 7000 参数接口、7705 状态广播和可选 7706 测试导航输入。
+- [x] 增加 Navipilot APP 驾驶评分/报告源码契约守卫，跟踪 `DrivingDataCollector`、`DrivingScoreEngine`、`DrivingReportScreen` 和本地报告存储。
 - [x] 建立 `tracking/model-selector`，跟踪 `ajouatom/openpilot:happymaj11r/carrot-wip-model_selector` 作为模型选择器参考线。
 - [x] 增加模型选择器源码审计脚本，确认参考线安全条件存在且当前默认 C3 主线未半截启用模型切换。
 - [x] 增加模型选择器设备端只读状态采集，记录 `DrivingModelName`、`PendingModelName` 和 `/data/model_selector_status` engine，不启用下载/安装/modeld 切换。
@@ -189,4 +190,7 @@
 - [x] 不改参数含义和默认值，只改显示文字。
 - [x] 第二批清理外部 HUD、显示路径、导航减速和低风险显示项的措辞。
 - [x] 第三批清理巡航、ATC、按键模拟、低速转向、关机时间、路径显示和跟车时间说明。
+- [x] 清理设置表、Web 默认文案、导航 HUD、地图浮层、诊断输出里的韩文残留。
+- [x] 将 Web 语言入口收敛为英文/中文；旧韩语缓存自动落到英文。
+- [x] 增加本地化审计脚本，防止上游合并后重新出现韩文 UI 文案。
 - [x] 每批翻译单独提交，方便回滚。

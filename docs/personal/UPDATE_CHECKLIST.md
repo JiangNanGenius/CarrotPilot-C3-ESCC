@@ -161,6 +161,7 @@
 - [ ] 单独运行 `python3 scripts/personal/feature_boundary_check.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/feature_status_report.py --strict` 并确认没有失败项。
 - [ ] 运行 `python3 scripts/personal/settings_cn_audit.py` 并确认高风险中文说明没有缺失。
+- [ ] 运行 `python3 scripts/personal/localization_audit.py` 并确认 README、设置、Web UI、个人文档和脚本没有直接韩文 UI 文案。
 - [ ] 运行 `python3 scripts/personal/install_target_check.py` 并确认安装目标、稳定 tag 和回滚基线一致。
 - [ ] 运行 `python3 scripts/personal/seltos_profile_check.py` 并确认车型配置没有被更新合并改成 CANFD/HDA2 或其它车型特判。
 - [ ] 运行 `python3 scripts/personal/navipilot_live_check.py --self-test` 并确认 C3 侧 APP 端点检查器正常。
@@ -175,6 +176,7 @@
 - [ ] 检查新增 Params key 是否在 UI 和默认配置中一致。
 - [ ] 检查 manager process 是否引用了存在的文件。
 - [ ] 检查中文设置说明是否仍和参数含义一致，不能改默认值或参数范围。
+- [ ] 检查 Web 语言选择仍只暴露英文/中文，旧 `ko` 缓存会回落到英文。
 - [ ] 推送后确认 GitHub Actions `Personal Smoke` 通过。
 - [ ] 同步 `upstream/c3-wip` 或 `tracking/*` 后，运行 `python3 scripts/personal/upstream_update_plan.py --write-baselines` 更新 `docs/personal/UPSTREAM_BASELINES.json`，再手动触发一次 GitHub Actions `Upstream Watch`。
 - [ ] 如环境允许，跑 Hyundai/opendbc 相关测试。

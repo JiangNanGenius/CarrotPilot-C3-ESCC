@@ -4,7 +4,6 @@ const DEBUG_UI = false;
 
 const LANG_STORAGE_KEY = "carrot_web_lang";
 const LANG_EMOJI = {
-  ko: "🇰🇷",
   en: "🇺🇸",
   zh: "🇨🇳",
 };

@@ -17,7 +17,7 @@ def get_local_ip() -> str:
       s.connect(("8.8.8.8", 80))
       return s.getsockname()[0]
   except Exception:
-    # fallback: hostname 방식(가끔 127.0.1.1 나올 수 있음)
+    # Fallback: hostname lookup can sometimes return 127.0.1.1.
     try:
       return socket.gethostbyname(socket.gethostname())
     except Exception:
@@ -26,7 +26,7 @@ def get_local_ip() -> str:
 
 def register_my_ip_sync(params: "Params") -> tuple[bool, str]:
   """
-  기존 carrot_man.py의 register_my_ip()를 그대로 옮긴 버전 (동기)
+  Synchronous port of carrot_man.py register_my_ip().
   """
   try:
     token = "12345678"
@@ -73,15 +73,15 @@ def register_my_ip_sync(params: "Params") -> tuple[bool, str]:
 
 async def heartbeat_loop(app: web.Application):
   """
-  aiohttp startup에서 create_task로 돌릴 백그라운드 루프.
-  - 이벤트 루프 블로킹 방지 위해 to_thread 사용
+  Background loop started by aiohttp create_task.
+  Uses to_thread to avoid blocking the event loop.
   """
   if not HAS_PARAMS:
     app["hb_last"] = {"ok": False, "msg": "Params not available"}
     return
 
   params = Params()
-  interval_s = 30.0  # 기존: frame%(20*30) = 30초
+  interval_s = 30.0  # Former cadence: frame % (20 * 30) = 30 seconds.
   while True:
     try:
       ok, msg = await asyncio.to_thread(register_my_ip_sync, params)

@@ -30,8 +30,8 @@ def group_index(settings: Dict[str, Any]) -> Tuple[Dict[str, list], Dict[str, Di
 
   params = settings.get("params", [])
   for p in params:
-    g = p.get("group", "기타")
-    if g == "기타":
+    g = p.get("group", "Other")
+    if g == "Other":
         if "egroup" not in p: p["egroup"] = "Other"
         if "cgroup" not in p: p["cgroup"] = "其他"
 

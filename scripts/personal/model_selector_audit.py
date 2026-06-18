@@ -93,11 +93,11 @@ def check_source_contract(ref: str) -> List[Check]:
   checks.append(Check("source files", not required_files_missing, "missing: " + ", ".join(required_files_missing) if required_files_missing else "all expected files present"))
 
   ok, missing = all_contains(texts["carrot/model_selector/README.md"], [
-    "두 엔진 완전 분리",
+    "\ub450 \uc5d4\uc9c4 \uc644\uc804 \ubd84\ub9ac",
     "modeld_runner",
     "DrivingModelName",
     "PendingModelName",
-    "기본 모델 복원",
+    "\uae30\ubcf8 \ubaa8\ub378 \ubcf5\uc6d0",
   ])
   checks.append(Check("source design notes", ok, "missing: " + ", ".join(missing) if missing else "documents split engine, params, reset flow"))
 

@@ -239,10 +239,10 @@
     const value = finiteNumber(seconds);
     if (value === null || value <= 0) return "";
     const minutes = Math.max(1, Math.round(value / 60));
-    if (minutes < 60) return `${minutes}분`;
+    if (minutes < 60) return `${minutes}分钟`;
     const hours = Math.floor(minutes / 60);
     const rest = minutes % 60;
-    return rest ? `${hours}시간 ${rest}분` : `${hours}시간`;
+    return rest ? `${hours}小时 ${rest}分钟` : `${hours}小时`;
   }
 
   function updateNavInfo() {
@@ -262,14 +262,14 @@
     const sdiLimit = finiteNumber(navState.sdi?.limit);
     const meta = [];
     if (goalDist) meta.push(goalTime ? `${goalDist} · ${goalTime}` : goalDist);
-    if (turnDist) meta.push(`회전 ${turnDist}`);
-    if (sdiDist) meta.push(sdiLimit && sdiLimit > 0 ? `${sdiLimit} 제한 ${sdiDist}` : `단속 ${sdiDist}`);
+    if (turnDist) meta.push(`转向 ${turnDist}`);
+    if (sdiDist) meta.push(sdiLimit && sdiLimit > 0 ? `${sdiLimit} 限速 ${sdiDist}` : `测速 ${sdiDist}`);
 
     if (!road && meta.length === 0) {
       navInfo.hidden = true;
       return;
     }
-    navRoad.textContent = road || "경로 안내";
+    navRoad.textContent = road || "路线导航";
     navMeta.textContent = meta.slice(0, 2).join(" / ");
     navMeta.hidden = navMeta.textContent.length === 0;
     navInfo.hidden = false;

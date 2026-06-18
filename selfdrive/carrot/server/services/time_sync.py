@@ -53,7 +53,7 @@ def sync_system_time_from_browser(epoch_ms: int, timezone_name: str, debug: bool
 
   log(f"request tz={timezone_name} target_epoch={target_epoch} server_epoch={server_epoch} diff_sec={diff_sec}")
 
-  # 1) timezone 링크 설정
+  # 1) Configure timezone link.
   if timezone_name:
     if not os.path.exists(zoneinfo_path):
       result["ok"] = False
@@ -87,7 +87,7 @@ def sync_system_time_from_browser(epoch_ms: int, timezone_name: str, debug: bool
         log(result["message"])
         return result
 
-  # 2) timezone이 없었는지 확인
+  # 2) Check whether timezone was missing.
   no_timezone = False
   try:
     if os.path.getsize(localtime_path) == 0:
@@ -95,14 +95,14 @@ def sync_system_time_from_browser(epoch_ms: int, timezone_name: str, debug: bool
   except (FileNotFoundError, OSError):
     no_timezone = True
 
-  # 3) diff가 작고 timezone도 있으면 스킵
+  # 3) Skip when the time diff is small and timezone exists.
   if abs(diff_sec) <= TIME_SYNC_THRESHOLD_SEC and not no_timezone:
     log(f"skip date set: within threshold ({diff_sec}s) and timezone exists")
     result["message"] = "skip: time diff within threshold"
     return result
 
-  # 4) 시간 세팅 시도
-  # epoch는 UTC 기준이므로 UTC로 해석해서 넣는 것이 안전
+  # 4) Try to set time.
+  # Epoch is UTC-based, so interpret it as UTC before passing to date.
   new_time_utc = datetime.datetime.utcfromtimestamp(target_epoch)
   formatted_time = new_time_utc.strftime("%Y-%m-%d %H:%M:%S")
 

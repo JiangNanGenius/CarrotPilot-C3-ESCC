@@ -1078,7 +1078,7 @@ pre {
 
    Pattern:
      <span class="chip">3 segments</span>
-     <span class="chip chip--accent">선택됨</span>
+     <span class="chip chip--accent">Selected</span>
 
    Replaces: ad-hoc .dashcam-chip (page-local) and similar.
 */

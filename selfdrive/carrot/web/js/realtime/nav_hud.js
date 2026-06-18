@@ -53,14 +53,14 @@
     8: "finish",
   };
   const TURN_LABELS = {
-    1: "좌회전",
-    2: "우회전",
-    3: "좌 차로변경",
-    4: "우 차로변경",
-    5: "좌회전",
-    6: "통행료",
-    7: "유턴",
-    8: "목적지",
+    1: "左转",
+    2: "右转",
+    3: "向左变道",
+    4: "向右变道",
+    5: "左转",
+    6: "收费站",
+    7: "掉头",
+    8: "目的地",
   };
 
   // trafficState enum (carrot_serv): 0=none, 1=stopped(red), 2=go(green).
@@ -119,10 +119,10 @@
     const s = finiteNumber(seconds);
     if (s === null || s <= 0) return "";
     const mins = Math.round(s / 60);
-    if (mins < 60) return `${mins}분`;
+    if (mins < 60) return `${mins}分钟`;
     const h = Math.floor(mins / 60);
     const rest = mins % 60;
-    return rest ? `${h}시간 ${rest}분` : `${h}시간`;
+    return rest ? `${h}小时 ${rest}分钟` : `${h}小时`;
   }
 
   // Computes "HH:MM" arrival time from now + remaining seconds.
@@ -142,7 +142,7 @@
     const parts = [];
     if (goalDist) parts.push(goalDist);
     if (goalTime) parts.push(goalTime);
-    if (etaClock) parts.push(`도착 ${etaClock}`);
+    if (etaClock) parts.push(`到达 ${etaClock}`);
     return parts.join(" · ");
   }
 
@@ -373,7 +373,7 @@
 
       // Shared attachments — computed once, slotted per mode below.
       const atcBadge = (atcType === "prepare" || atcType === "go")
-        ? (atcType === "prepare" ? "차로변경 준비" : "차로변경 중")
+        ? (atcType === "prepare" ? "准备变道" : "变道中")
         : "";
       const limitText = roadLimit > 0 ? String(roadLimit) : "";
 
@@ -383,13 +383,13 @@
 
       let side = null;
       if (sdiDist > 0 && sdiDist <= sdiThreshold && sdiType > 0) {
-        const countdown = (sdiCountdown > 0 && sdiCountdown <= COUNTDOWN_SHOW_SEC) ? `${sdiCountdown}초` : "";
+        const countdown = (sdiCountdown > 0 && sdiCountdown <= COUNTDOWN_SHOW_SEC) ? `${sdiCountdown}秒` : "";
         side = {
           kind: "camera",
           sign: sdiLimit > 0 ? String(sdiLimit) : "!",
           dist: formatDistance(sdiDist),
           countdown,
-          label: sdiDescr || (sdiLimit > 0 ? `${sdiLimit} 제한 단속` : "단속 구간"),
+          label: sdiDescr || (sdiLimit > 0 ? `${sdiLimit} 限速测速` : "测速路段"),
         };
       } else if (limitText) {
         side = {
@@ -397,14 +397,14 @@
           sign: limitText,
           dist: "",
           countdown: "",
-          label: "제한속도",
+          label: "限速",
         };
       }
 
       // Main card: turn guidance has priority, but speed/camera no longer
       // replaces the whole card. That keeps the top-center layout stable.
       if (turnInfo > 0 && turnDist > 0 && turnDist <= turnThreshold) {
-        const countdown = (turnCountdown > 0 && turnCountdown <= COUNTDOWN_SHOW_SEC) ? `${turnCountdown}초` : "";
+        const countdown = (turnCountdown > 0 && turnCountdown <= COUNTDOWN_SHOW_SEC) ? `${turnCountdown}秒` : "";
         return {
           mode: "turn",
           icon: turnInfo === 6 ? "TG" : "",
@@ -412,7 +412,7 @@
           dist: formatDistance(turnDist),
           advice: "",
           countdown,
-          road: tbtRoad || TURN_LABELS[turnInfo] || "안내",
+          road: tbtRoad || TURN_LABELS[turnInfo] || "导航",
           limit: "",
           meta,
           atc: atcBadge,
@@ -426,11 +426,11 @@
       let hint = "";
       let hintTone = "";
       if (trafficState === TRAFFIC_RED) {
-        hint = "신호 대기";
+        hint = "红灯等待";
         hintTone = "red";
       } else if (trafficState === TRAFFIC_GREEN) {
         // Suppress green by default to reduce noise; uncomment to enable.
-        // hint = "출발"; hintTone = "green";
+        // hint = "起步"; hintTone = "green";
       }
 
       return {
@@ -440,7 +440,7 @@
         dist: "",
         advice: "",
         countdown: "",
-        road: roadName || tbtRoad || "주행 중",
+        road: roadName || tbtRoad || "行驶中",
         limit: "",
         meta,
         atc: atcBadge,
@@ -494,7 +494,7 @@
         // Distinguish prepare vs go via raw atcType — we already mapped to label
         // text, but the CSS hook reads data-atc. Approximate: any non-empty
         // means active; CSS treats "prepare"|"go" identically (green outline).
-        this.root.dataset.atc = payload.atc.includes("중") ? "go" : "prepare";
+        this.root.dataset.atc = payload.atc === "变道中" ? "go" : "prepare";
       } else {
         delete this.root.dataset.atc;
       }

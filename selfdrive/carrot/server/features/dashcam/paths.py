@@ -88,9 +88,9 @@ def relative_time(epoch_seconds: int) -> str:
     return "-"
   delta = max(0, int(time.time()) - int(epoch_seconds))
   if delta < 60:
-    return "방금 전"
+    return "just now"
   if delta < 3600:
-    return f"{delta // 60}분 전"
+    return f"{delta // 60} min ago"
   if delta < 86400:
-    return f"{delta // 3600}시간 전"
-  return f"{delta // 86400}일 전"
+    return f"{delta // 3600} hr ago"
+  return f"{delta // 86400} days ago"

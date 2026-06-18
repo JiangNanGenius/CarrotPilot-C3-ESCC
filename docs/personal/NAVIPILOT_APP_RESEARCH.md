@@ -96,10 +96,28 @@ APP 侧 `DrivingDataCollector` 每秒更新一次，主要输入包括：
 - 限速、TBT 距离、道路类型、道路名。
 - 前车距离目前在 APP 中仍是 TODO。
 
+驾驶记录保存在 Android APP 本地，不是 C3 端本地报告数据库：
+
+- `SharedPreferences` 名称：`driving_sessions`。
+- 会话 key：`sessions`。
+- 最多保留 50 条。
+- 临时会话 key：`current_session_temp`。
+
 APP 启动驾驶评分采集的直接条件：
 
 - 网络状态显示已连接。
 - `CarrotManFields.isOnroad` 为 true。
+
+启动后，APP 的 `startOnroadMonitoring()` 每秒更新一次：
+
+- 车速优先用 7705 状态里的 `v_ego_kph`，没有时才用手机 GPS 速度。
+- 加速度由当前速度和上一秒速度差计算。
+- 急加速阈值：`acceleration > 3.0 m/s²`。
+- 急刹车阈值：`acceleration < -4.0 m/s²`。
+- `nooActive` 来自 7705 状态里的 `active`。
+- `cruiseActive` 由 `v_cruise_kph > 0` 判断。
+- 限速、TBT、道路类型和道路名来自 CP搭子/导航字段。
+- `leadDistance` 当前仍写死为 `0f`，前车距离没有真正进入评分。
 
 当前 APP 的 `CarrotManFields.isOnroad`、`active`、`vEgoKph`、`vCruiseKph` 等主要来自 C3 端 UDP 7705 状态广播，而不是 `/ws/raw_multiplex` 中的 `carrotMan`。`CarrotWsClient.kt` 目前订阅了 `carrotMan` 和 `gpsLocationExternal`，但 `decodeCarrotMan()` 仍返回 `null`，`gpsLocationExternal` 也未进入 `updateVehicleData()` 分支。
 
@@ -125,6 +143,15 @@ APP 侧 `DrivingScoreEngine` 的总分权重：
 
 所以 C3 端最需要保证的是实时数据和导航字段能被 APP 稳定读取，不是复制评分公式。
 
+APP 报告页 `DrivingReportScreen` 显示四个 Tab：
+
+- 概览。
+- 分析。
+- 成就。
+- 历史。
+
+分享图由 `DrivingReportShareImage.shareAsImage()` 生成。C3 主线当前不新增本地驾驶报告 Web 页面；如果以后要做 C3 端报告，那是另一个独立功能，不应和 APP 侧报告混为一谈。
+
 ## 已修复的兼容问题
 
 Navipilot 的 `carrotcode/App发往Comma3数据字段清单.md` 标出车机端一个字段 bug：
@@ -146,6 +173,7 @@ python3 scripts/personal/cplink_preflight.py
 - C3 端 `/ws/raw_multiplex` 和 `/ws/camera/road`。
 - C3 端 `/api/params_bulk` 和 `/api/param_set`。
 - Navipilot APP 当前源码对 7705、raw multiplex、camera WebSocket、`CarrotParamClient` 和驾驶评分启动条件的字段需求。
+- Navipilot APP 当前源码中的 `DrivingDataCollector`、`DrivingScoreEngine`、`DrivingSession`、`DrivingReportScreen` 和分享图入口。
 
 ## 更新维护
 

@@ -57,12 +57,12 @@ function formatRelativeEpoch(epochSeconds) {
 function localizeRelativeLabel(label) {
   const text = String(label || "").trim();
   if (!text) return "";
-  if (/^(방금\s*전|just\s*now)$/i.test(text)) return getUIText("just_now", "just now");
-  const minuteMatch = text.match(/^(\d+)\s*(?:분\s*전|min(?:ute)?s?\s*ago)$/i);
+  if (/^(\ubc29\uae08\s*\uc804|just\s*now)$/i.test(text)) return getUIText("just_now", "just now");
+  const minuteMatch = text.match(/^(\d+)\s*(?:\ubd84\s*\uc804|min(?:ute)?s?\s*ago)$/i);
   if (minuteMatch) return getUIText("minutes_ago", "{count} min ago", { count: minuteMatch[1] });
-  const hourMatch = text.match(/^(\d+)\s*(?:시간\s*전|hr?s?\s*ago|hour?s?\s*ago)$/i);
+  const hourMatch = text.match(/^(\d+)\s*(?:\uc2dc\uac04\s*\uc804|hr?s?\s*ago|hour?s?\s*ago)$/i);
   if (hourMatch) return getUIText("hours_ago", "{count} hr ago", { count: hourMatch[1] });
-  const dayMatch = text.match(/^(\d+)\s*(?:일\s*전|day?s?\s*ago)$/i);
+  const dayMatch = text.match(/^(\d+)\s*(?:\uc77c\s*\uc804|day?s?\s*ago)$/i);
   if (dayMatch) return getUIText("days_ago", "{count} days ago", { count: dayMatch[1] });
   return text;
 }

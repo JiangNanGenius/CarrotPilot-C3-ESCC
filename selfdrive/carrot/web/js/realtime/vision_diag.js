@@ -299,38 +299,38 @@
     ];
   }
 
-  function koreanHealthSummary() {
+  function localizedHealthSummary() {
     const stats = entries.filter((e) => e.type === "stat");
     const latest = stats.length ? stats[stats.length - 1] : null;
     const codec = entries.filter((e) => e.type === "codec").slice(-1)[0] || {};
     const path = entries.filter((e) => e.type === "path").slice(-1)[0] || {};
-    let verdict = "아직 판단할 통계가 충분하지 않습니다.";
+    let verdict = "还没有足够统计数据可判断。";
     if (latest) {
       const connected = /connected|completed/i.test(String(latest.conn || "")) || /connected|completed/i.test(String(latest.ice || ""));
       const recv = Number(latest.recv || 0);
       const frm = Number(latest.frm || 0);
       const loss = Number(latest.loss || 0);
       if (recv > 0 && frm > 0) {
-        verdict = "영상 수신과 디코드가 정상 진행 중입니다.";
+        verdict = "视频接收和解码正常。";
       } else if (recv > 0 && frm <= 0) {
-        verdict = "영상 RTP는 수신되지만 브라우저 디코드/렌더가 진행되지 않습니다.";
+        verdict = "已收到视频 RTP，但浏览器没有继续解码/渲染。";
       } else if (connected && recv <= 0) {
-        verdict = "WebRTC 연결은 되었지만 영상 RTP/첫 프레임이 아직 들어오지 않았습니다.";
+        verdict = "WebRTC 已连接，但还没有收到视频 RTP 或第一帧。";
       } else if (loss >= 5) {
-        verdict = "패킷 손실이 높아 네트워크 경로 문제가 의심됩니다.";
+        verdict = "丢包较高，可能是网络路径问题。";
       }
     }
     return [
-      "# ===== 네트워크 건강 요약 =====",
-      "# 판정: " + verdict,
-      "# 상태: " + (latest ? `${latest.ph}/${latest.cs}` : "?"),
-      "# ICE/연결: " + (latest ? `${latest.conn}/${latest.ice}` : "?"),
-      "# 경로: " + ((path.proto || "?") + " " + (path.local || "?") + " -> " + (path.remote || "?")),
-      "# 해상도/FPS: " + (latest ? `${latest.dw || "?"}x${latest.dh || "?"} / ${latest.fps || "?"}fps` : "?"),
-      "# 프레임: 수신 " + (latest?.recv ?? "?") + " / 디코드 " + (latest?.frm ?? "?") + " / 키프레임 " + (latest?.key ?? "?"),
-      "# 네트워크: RTT " + (latest?.rtt ?? "?") + "ms / 지터 " + (latest?.jit ?? "?") + "ms / 손실 " + (latest?.loss ?? "?") + "% / 비트레이트 " + (latest?.br ?? "?") + "Mbps",
-      "# 코덱: " + (codec.mime || "?") + " / " + (codec.profile || "?"),
-      "# 프리즈: " + (latest?.frz ?? "?") + "회 / " + (latest?.frzMs ?? "?") + "ms",
+      "# ===== 网络健康摘要 =====",
+      "# 判断: " + verdict,
+      "# 状态: " + (latest ? `${latest.ph}/${latest.cs}` : "?"),
+      "# ICE/连接: " + (latest ? `${latest.conn}/${latest.ice}` : "?"),
+      "# 路径: " + ((path.proto || "?") + " " + (path.local || "?") + " -> " + (path.remote || "?")),
+      "# 分辨率/FPS: " + (latest ? `${latest.dw || "?"}x${latest.dh || "?"} / ${latest.fps || "?"}fps` : "?"),
+      "# 帧: 接收 " + (latest?.recv ?? "?") + " / 解码 " + (latest?.frm ?? "?") + " / 关键帧 " + (latest?.key ?? "?"),
+      "# 网络: RTT " + (latest?.rtt ?? "?") + "ms / 抖动 " + (latest?.jit ?? "?") + "ms / 丢包 " + (latest?.loss ?? "?") + "% / 比特率 " + (latest?.br ?? "?") + "Mbps",
+      "# 编码: " + (codec.mime || "?") + " / " + (codec.profile || "?"),
+      "# 卡顿: " + (latest?.frz ?? "?") + "次 / " + (latest?.frzMs ?? "?") + "ms",
       "# ============================",
       "",
     ];
@@ -413,7 +413,7 @@
       "",
     ];
     const body = entries.map(fmtLine);
-    return head.concat(summary(), koreanHealthSummary(), body).join("\n");
+    return head.concat(summary(), localizedHealthSummary(), body).join("\n");
   }
 
   async function collectBrowserRawSnapshot() {

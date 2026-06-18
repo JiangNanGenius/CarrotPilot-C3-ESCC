@@ -29,7 +29,7 @@ try:
 except Exception:
   pass
 
-# ParamKeyType는 fork/버전에 따라 위치가 다를 수 있어서 방어적으로 처리
+# ParamKeyType can live in different places across forks/versions, so handle it defensively.
 if HAS_PARAMS:
   try:
     from openpilot.common.params import ParamKeyType as _ParamKeyType
@@ -215,7 +215,7 @@ def put_typed(params: "Params", key: str, value: Any) -> None:
         obj = json.loads(value) if isinstance(value, str) else value
         params.put(key, obj)
 
-      # BYTES 등은 일단 스킵
+      # Skip unsupported binary-like types here.
       raise RuntimeError(f"Unsupported ParamKeyType for {key}: {t}")
 
   except Exception:
@@ -259,7 +259,7 @@ def get_all_param_values_for_backup() -> Dict[str, str]:
     if t in (ParamKeyType.BYTES, ParamKeyType.JSON):
       continue
 
-    # default 없는 키 제외
+    # Exclude keys without a default value.
     try:
       dv = params.get_default_value(key)
     except Exception:
@@ -362,7 +362,7 @@ def restore_param_values_from_backup(values: Dict[str, Any]) -> Dict[str, Any]:
         params.put(key, str(value))
 
       else:
-        # JSON/BYTES는 백업에서 제외했지만, 혹시 들어오면 skip
+        # JSON/BYTES are excluded from backups; skip defensively if present.
         continue
 
       ok_cnt += 1

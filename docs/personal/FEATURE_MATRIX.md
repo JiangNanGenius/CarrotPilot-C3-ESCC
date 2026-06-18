@@ -29,8 +29,8 @@
 | AmapNavi / 自动超车来源审计 | `fishop/openpilot:cp` / `jixiexiaoge/navipilot:CPdazi` | P1 | 已新增源码审计，确认完整 AmapNavi、外设控制、自动超车和 DEC 仍隔离 |
 | 自动超车 | 机械小哥 / fishop | P2 | 后置验证；APP 可发 `LANECHANGE`，`OVERTAKE` 不进默认主线 |
 | LED / cluster HUD | 机械小哥 | P2 | 实验功能 |
-| 驾驶报告 | `jixiexiaoge/navipilot:CPdazi` | P2 | APP 端功能；C3 端保持 WebSocket/CarrotMan 数据兼容，待 APP 实测 |
-| 中文翻译和参数说明优化 | 本项目维护 | P2 | 不改默认值，只改菜单显示文字 |
+| 驾驶报告 | `jixiexiaoge/navipilot:CPdazi` | P2 | APP 端功能；C3 端保持 7705/WebSocket/CarrotMan 数据兼容，并用 preflight 守住 APP 评分/报告源码契约；待 APP 实测 |
+| 中文/英文本地化和参数说明优化 | 本项目维护 | P2 | 已清理直接韩文 UI 文案，Web 入口只保留英文/中文；不改默认值，只改菜单显示文字 |
 
 ## 当前主线已有但必须守住边界
 

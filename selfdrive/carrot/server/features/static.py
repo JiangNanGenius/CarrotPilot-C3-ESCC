@@ -12,6 +12,7 @@ _LANGUAGES_JSON_PATH = os.path.join(
   os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
   "ui", "translations", "languages.json",
 )
+SUPPORTED_DEVICE_LANGUAGE_CODES = {"main_en", "main_zh-CHS", "main_zh-CHT"}
 
 
 def _load_device_languages() -> list:
@@ -20,7 +21,11 @@ def _load_device_languages() -> list:
   try:
     with open(_LANGUAGES_JSON_PATH, "r", encoding="utf-8") as f:
       mapping = json.load(f)  # e.g. {"English": "main_en", ...}
-    return [{"code": code, "name": name} for name, code in mapping.items()]
+    return [
+      {"code": code, "name": name}
+      for name, code in mapping.items()
+      if code in SUPPORTED_DEVICE_LANGUAGE_CODES
+    ]
   except Exception:
     return []
 

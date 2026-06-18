@@ -606,7 +606,7 @@
       if (!this.zoomLevelEl) return;
       const b = this.zoomBias;
       // negative bias = zoomed in (closer); positive = zoomed out (farther)
-      this.zoomLevelEl.textContent = b === 0 ? "기본" : (b < 0 ? `확대 ${-b}` : `축소 ${b}`);
+      this.zoomLevelEl.textContent = b === 0 ? "默认" : (b < 0 ? `放大 ${-b}` : `缩小 ${b}`);
     }
 
     sendZoomBias() {

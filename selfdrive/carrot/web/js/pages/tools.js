@@ -383,7 +383,7 @@ let toolsLanguageMenuOpen = false;
 
 function getAvailableWebLanguages() {
   const registry = window.CarrotTranslations || {};
-  const allowed = window.CARROT_WEB_LANGUAGE_CODES || ["ko", "en", "zh"];
+  const allowed = window.CARROT_WEB_LANGUAGE_CODES || ["en", "zh"];
   const rawOrder = Array.isArray(registry.order) ? registry.order : allowed;
   const order = [...new Set([...rawOrder, ...allowed])].filter((lang) => allowed.includes(lang));
   return order
@@ -683,7 +683,7 @@ function syncToolsMetaStatusLocale() {
   const current = String(toolsMetaStatusText || "").trim();
   if (!current) return;
 
-  const langOrder = window.CarrotTranslations?.order || ["ko", "en", "zh"];
+  const langOrder = window.CarrotTranslations?.order || ["en", "zh"];
   const readyVariants = langOrder
     .map((langKey) => UI_STRINGS[langKey]?.ready || "Ready")
     .filter(Boolean);
@@ -715,7 +715,7 @@ function rerenderPageLangUi() {
     ["terminal_offline", "terminal offline"],
   ];
 
-  const langOrder = window.CarrotTranslations?.order || ["ko", "en", "zh"];
+  const langOrder = window.CarrotTranslations?.order || ["en", "zh"];
   for (const [key, fallback] of terminalStates) {
     const variants = langOrder
       .map((langKey) => UI_STRINGS[langKey]?.[key] || fallback)
@@ -765,12 +765,12 @@ async function syncDeviceLanguageOnce() {
     const values = await bulkGet(["LanguageSetting"]);
     const currentLang = String(values["LanguageSetting"] || "").trim();
 
-    // Map browser language → web language code (ko/en/zh only)
+    // Map browser language → web language code (en/zh only)
     const browserLang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
-    const webLang = normalizeLangCode(browserLang); // returns "ko" | "en" | "zh" | ""
+    const webLang = normalizeLangCode(browserLang); // returns "en" | "zh" | ""
 
     // Map web language → device language code
-    const WEB_TO_DEVICE = { ko: "main_ko", en: "main_en", zh: "main_zh-CHS" };
+    const WEB_TO_DEVICE = { en: "main_en", zh: "main_zh-CHS" };
     if (browserLang.startsWith("zh") && (browserLang.includes("tw") || browserLang.includes("hk"))) {
       WEB_TO_DEVICE.zh = "main_zh-CHT";
     }
@@ -1121,7 +1121,7 @@ function initToolsPage() {
 
   bindOnce("btnDeviceInfo", async () => {
     let title = getUIText("carrot_info", "Carrot Info");
-    
+
     try {
       if (!toolsMetaLastValues && !toolsMetaLoadPromise) {
         await refreshToolsMetaInfo({ ttlMs: 3600000 });
@@ -1213,7 +1213,7 @@ function initToolsPage() {
       "Current: {url}\n\nEnter new GitHub repository URL.\n(This will overwrite the current connection)",
       { url: defaultUrl }
     );
-    
+
     const newUrl = await appPrompt(msg, { title, defaultValue: defaultUrl });
     if (!newUrl || newUrl.trim() === "" || newUrl.trim() === defaultUrl) return;
 
@@ -1259,10 +1259,10 @@ function initToolsPage() {
 
   bindOnce("btnGitLog", async () => {
     try {
-      // 1. 터미널 출력
+      // 1. Terminal output
       await runTool("git_log", { count: 20 });
 
-      // 2. 팝업 UI 표시를 위한 데이터 다시 로드
+      // 2. Reload data for the popup UI
       const res = await postJson("/api/tools", { action: "git_log", count: 20 });
       if (!res.ok) throw new Error(res.error || "Failed to load git log");
       const commits = res.commits || [];
@@ -1296,7 +1296,7 @@ function initToolsPage() {
 
       const resetRes = await postJson("/api/tools", { action: "git_reset", mode: "hard", target: selected });
       if (!resetRes.ok) throw new Error(resetRes.error || "Reset failed");
-      
+
       toolsLogNotice(getUIText("git_log_checkout_done", "Checkout complete"), { label: "git_log" });
       await refreshToolsMetaInfo();
       await refreshGitPullStatus({ force: true });
@@ -1311,7 +1311,7 @@ function initToolsPage() {
       "git_reset_repo_confirm",
       "Warning: This will remove origin and re-add 'ajouatom/openpilot'.\nAll local changes will be lost. Proceed?"
     );
-    
+
     if (!await appConfirm(msg, { title, danger: true })) return;
 
     try {
@@ -1630,4 +1630,3 @@ function initToolsPage() {
     btnSysCmdInfo.setAttribute("aria-expanded", nextOpen ? "true" : "false");
   });
 }
-

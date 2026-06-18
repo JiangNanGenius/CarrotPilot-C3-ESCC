@@ -132,22 +132,22 @@
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path fill="currentColor" d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4m-8-2V7H4V5h3V2h2v3h3v2H9v3zm8 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4"/>
               </svg>
-              <span id="settingFabProfileAddLabel">프로필 추가</span>
+              <span id="settingFabProfileAddLabel">Add profile</span>
             </button>
             <button id="btnSettingFabResetDefaults" class="setting-fab-action" type="button" role="menuitem">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path fill="currentColor" d="M12 5V2L7 7l5 5V9c3.31 0 6 2.69 6 6 0 1.01-.25 1.96-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 15c0-4.42-3.58-8-8-8m-6 4.74A7.93 7.93 0 0 0 4 15c0 4.42 3.58 8 8 8v-2c-3.31 0-6-2.69-6-6 0-1.01.25-1.96.7-2.8z"/>
               </svg>
-              <span id="settingFabResetDefaultsLabel">설정 초기화</span>
+              <span id="settingFabResetDefaultsLabel">Reset settings</span>
             </button>
             <button id="btnSettingFabSearch" class="setting-fab-action" type="button" role="menuitem">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.47 6.47 0 0 0 4.23-1.57l.27.28v.79L19 20.49 20.49 19zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14"/>
               </svg>
-              <span id="settingFabSearchLabel">설정 검색</span>
+              <span id="settingFabSearchLabel">Search settings</span>
             </button>
           </div>
-          <button id="btnSettingSearch" class="fab fab--round fab--icon fab--setting-search fab--setting-menu" type="button" aria-label="설정 작업" aria-expanded="false" aria-haspopup="menu" aria-controls="settingFabActions">
+          <button id="btnSettingSearch" class="fab fab--round fab--icon fab--setting-search fab--setting-menu" type="button" aria-label="Setting actions" aria-expanded="false" aria-haspopup="menu" aria-controls="settingFabActions">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path fill="currentColor" d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/>
             </svg>
@@ -163,9 +163,9 @@
       <div id="settingScreenHost" class="screen-host">
         <!-- Groups Screen -->
         <div id="settingScreenGroups" class="screen">
-          <div id="settingCarRow" class="mb-md setting-car-entry" role="button" tabindex="0" aria-label="차량 선택 열기">
+          <div id="settingCarRow" class="mb-md setting-car-entry" role="button" tabindex="0" aria-label="Open car selector">
             <div class="setting-car-entry__text">
-              <div id="settingCarEyebrow" class="setting-car-entry__eyebrow">차량 선택</div>
+              <div id="settingCarEyebrow" class="setting-car-entry__eyebrow">Car select</div>
               <div id="curCarLabelSetting" class="setting-car-entry__value">-</div>
             </div>
             <span class="setting-car-entry__chevron" aria-hidden="true"></span>
@@ -173,10 +173,10 @@
 
           <div id="settingTabBar" class="setting-tabbar" role="tablist" aria-label="Setting categories">
             <button type="button" class="setting-tab" id="settingTabDevice" data-setting-tab="device" role="tab" aria-selected="false">
-              <span id="settingTabDeviceLabel">디바이스</span>
+              <span id="settingTabDeviceLabel">Device</span>
             </button>
             <button type="button" class="setting-tab is-active" id="settingTabCarrot" data-setting-tab="carrot" role="tab" aria-selected="true">
-              <span id="settingTabCarrotLabel">당근파일럿</span>
+              <span id="settingTabCarrotLabel">CarrotPilot</span>
             </button>
           </div>
 
@@ -209,7 +209,7 @@
       <button id="settingSearchBackdrop" class="setting-search-backdrop" type="button" hidden aria-label="Close search"></button>
       <div id="settingSearchPanel" class="setting-search-panel" hidden aria-hidden="true">
         <form id="settingSearchForm" class="setting-search-form">
-          <input id="settingSearchInput" type="text" class="setting-search-form__input" placeholder="설정 검색" autocomplete="off" />
+          <input id="settingSearchInput" type="text" class="setting-search-form__input" placeholder="Search settings" autocomplete="off" />
           <button id="btnSettingSearchSubmit" class="setting-search-form__submit" type="submit" aria-label="Search settings">
             <svg viewBox="0 0 24 24" focusable="false">
               <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.47 6.47 0 0 0 4.23-1.57l.27.28v.79L19 20.49 20.49 19zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14"/>
@@ -376,10 +376,10 @@
         <div class="logs-tabbar">
           <div class="logs-tabs" role="tablist" aria-label="Logs">
             <button id="logsTabDashcam" class="logs-tab is-active" type="button" role="tab" aria-selected="true">
-              <span id="logsDashcamTitle">대시캠</span>
+              <span id="logsDashcamTitle">Dashcam</span>
             </button>
             <button id="logsTabScreen" class="logs-tab" type="button" role="tab" aria-selected="false">
-              <span id="logsScreenTitle">화면녹화</span>
+              <span id="logsScreenTitle">Screen recording</span>
             </button>
           </div>
         </div>
@@ -411,11 +411,11 @@
         <div id="carrotMapDock" class="carrot-map-dock" hidden>
           <iframe id="carrotMapFrame" class="carrot-map-frame" title="Carrot map" loading="eager" referrerpolicy="no-referrer"></iframe>
           <div class="carrot-map-zoom" data-carrot-map-zoom-bar>
-            <button type="button" class="carrot-map-zoom__btn" data-carrot-map-zoom="out" aria-label="지도 축소">
+            <button type="button" class="carrot-map-zoom__btn" data-carrot-map-zoom="out" aria-label="Zoom map out">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
             </button>
-            <div class="carrot-map-zoom-level" data-carrot-map-zoom-level hidden>기본</div>
-            <button type="button" class="carrot-map-zoom__btn" data-carrot-map-zoom="in" aria-label="지도 확대">
+            <div class="carrot-map-zoom-level" data-carrot-map-zoom-level hidden>Default</div>
+            <button type="button" class="carrot-map-zoom__btn" data-carrot-map-zoom="in" aria-label="Zoom map in">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
             </button>
           </div>
@@ -456,7 +456,7 @@
 
         <div id="visionStartOverlay" class="vision-start-overlay">
           <button id="btnStartVision" class="btn btn--filled" type="button" style="font-size:1.2rem; padding: 16px 32px; border-radius: 99px;">
-            ▶ 주행 비전 시작
+            ▶ Start Drive Vision
           </button>
           <div id="visionDisabledMessage" class="vision-start-overlay__message" hidden></div>
         </div>
@@ -543,12 +543,12 @@
 
       <div class="hudBody">
         <div class="hudSpeedColumn">
-          <div id="hudSpeedLabel" class="hudSectionLabel">현재속도</div>
+          <div id="hudSpeedLabel" class="hudSectionLabel">Speed</div>
           <div id="hudSpeed" class="hudSpeedValue">--</div>
         </div>
         <div class="hudBodyDivider" aria-hidden="true"></div>
         <div class="hudSupportColumn">
-          <div id="hudSetSpeedLabel" class="hudSectionLabel">설정속도</div>
+          <div id="hudSetSpeedLabel" class="hudSectionLabel">Set speed</div>
           <div id="hudSetSpeed" class="hudSetSpeedValue">--</div>
           <div class="hudInlineDivider" aria-hidden="true"></div>
           <div class="hudSupportLine">
@@ -580,7 +580,7 @@
           <span id="hudSignalDot" class="hudSignalDot" aria-hidden="true"></span>
         </div>
         <div class="hudMetricDivider" aria-hidden="true"></div>
-        <div id="hudDriveMode" class="hudBottomSegment">일반</div>
+        <div id="hudDriveMode" class="hudBottomSegment">Normal</div>
         <div class="hudMetricDivider" aria-hidden="true"></div>
         <div id="hudRoadLimitDisplay" class="hudBottomSegment">LIMIT --</div>
         <div class="hudMetricDivider" aria-hidden="true"></div>
@@ -631,7 +631,7 @@
     <button id="appDialogBackdrop" class="app-dialog__backdrop" type="button" aria-label="Close dialog"></button>
     <div class="app-dialog__sheet" role="dialog" aria-modal="true" aria-labelledby="appDialogTitle" aria-describedby="appDialogBody">
       <div class="app-dialog__head">
-        <div id="appDialogTitle" class="app-dialog__title">알림</div>
+        <div id="appDialogTitle" class="app-dialog__title">Notice</div>
       </div>
       <div id="appDialogBody" class="app-dialog__body">-</div>
       <div id="appDialogChoices" class="app-dialog__choices" hidden></div>
@@ -639,10 +639,10 @@
         <input id="appDialogInput" type="text" class="input-text app-dialog__input" />
       </div>
       <div class="app-dialog__actions">
-        <button id="appDialogCopy" class="smallBtn" type="button" hidden>복사</button>
-        <button id="appDialogDefault" class="smallBtn" type="button" hidden>기본값</button>
-        <button id="appDialogCancel" class="smallBtn" type="button">취소</button>
-        <button id="appDialogConfirm" class="smallBtn btn--filled" type="button">확인</button>
+        <button id="appDialogCopy" class="smallBtn" type="button" hidden>Copy</button>
+        <button id="appDialogDefault" class="smallBtn" type="button" hidden>Default</button>
+        <button id="appDialogCancel" class="smallBtn" type="button">Cancel</button>
+        <button id="appDialogConfirm" class="smallBtn btn--filled" type="button">OK</button>
       </div>
     </div>
   </div>
@@ -666,10 +666,10 @@
     <div class="app-dialog__sheet app-branch-picker__sheet app-car-picker__sheet" role="dialog" aria-modal="true" aria-labelledby="appCarPickerTitle" aria-describedby="appCarPickerMeta">
       <div class="app-branch-picker__head app-car-picker__head">
         <div class="app-branch-picker__titles">
-          <div id="appCarPickerTitle" class="app-dialog__title">차량 선택</div>
+          <div id="appCarPickerTitle" class="app-dialog__title">Car select</div>
           <div id="appCarPickerMeta" class="muted app-branch-picker__meta">-</div>
         </div>
-        <button id="appCarPickerClose" class="smallBtn" type="button">닫기</button>
+        <button id="appCarPickerClose" class="smallBtn" type="button">Close</button>
       </div>
       <div id="appCarPickerList" class="app-branch-picker__list app-car-picker__list"></div>
     </div>
@@ -679,7 +679,6 @@
   <script src="/js/vendor/qrcode-generator.js?v=1.4.4"></script>
   <script src="/js/vendor/jsQR.js?v=1.4.0"></script>
   <script src="/js/translations/registry.js?v=2605-09"></script>
-  <script src="/js/translations/ko.js?v=2605-20"></script>
   <script src="/js/translations/en.js?v=2605-20"></script>
   <script src="/js/translations/zh.js?v=2605-20"></script>
   <script src="/js/realtime/hud_card.js?v=2604-05"></script>

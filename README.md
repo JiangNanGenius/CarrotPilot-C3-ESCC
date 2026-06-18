@@ -62,11 +62,7 @@
 
 下面保留上游 CarrotPilot / openpilot 原始说明。上游文档中的 `openpilot.comma.ai` 是官方 openpilot 安装入口，不是本个人分支的安装目标。
 
-## ⚠️ 법적 안내 / Legal Notice
-
-🚫 대한민국 자동차관리법 개정안에 따라, 본 소프트웨어를 실제 차량에 장착하거나 주행에 사용하는 것은 법률에 위배될 수 있습니다.  
-이 저장소에 있는 모든 소프트웨어는 **연구, 실험, 시뮬레이션 목적**으로만 제공됩니다.  
-개발자는 본 소프트웨어의 실제 사용으로 인해 발생하는 **모든 법적 책임을 지지 않습니다.**
+## ⚠️ Legal Notice / 法律声明
 
 In accordance with the amended **Korean Motor Vehicle Management Act** (effective August 14, 2025),  
 **modifying or installing software that affects the safe operation of a vehicle** is prohibited.
@@ -74,17 +70,19 @@ In accordance with the amended **Korean Motor Vehicle Management Act** (effectiv
 This software is provided **for research and educational use only**.  
 The developer does **not take any responsibility** for real-world installation or usage.
 
-**Carrotpilot에서 사용하는 차량(현대,기아)에 따라 Harness가 다릅니다..**
-- CAN통신차량: Comma 정품 Harness, Camera에 연결
-- CANFD-일반차량: Comma정품 Harness, Camera에 연결
-- CANFD-HDA2(ADAS Module 장착)차량: 사제 Harness, ADAS Module에 연결
-- 모든차량이 지원되는것이 아니니 반드시 확인바랍니다.
-  
-**In CarrotPilot, the harness used varies depending on the vehicle(HKG):**
-* **CAN vehicles** Use the official Comma harness, connected to the camera.
-* **CAN FD (standard) vehicles** Use the official Comma harness, connected to the camera.
-* **CAN FD vehicles with HDA2 (ADAS module equipped)** Use an aftermarket harness, connected to the ADAS module.
-* Please note that not all vehicles are supported.
+中文说明：本分支仅用于研究、学习、离线测试和个人验证。任何实车安装、调试、道路使用都需要使用者自行确认当地法规、车辆状态、线束接法和安全风险；开发者不承担实车使用产生的法律或安全责任。
+
+**Harness notes for Hyundai/Kia vehicles:**
+- Classic CAN vehicles: use the official comma harness connected to the camera.
+- Standard CAN FD vehicles: use the official comma harness connected to the camera.
+- CAN FD vehicles with HDA2 / ADAS module: use the appropriate aftermarket harness connected to the ADAS module.
+- Not every vehicle is supported. Confirm the vehicle platform, harness, safety flags, and CAN/CAN FD path before use.
+
+**现代/起亚线束说明：**
+- 经典 CAN 车型：使用 comma 官方线束，接摄像头。
+- 标准 CAN FD 车型：使用 comma 官方线束，接摄像头。
+- 带 HDA2 / ADAS 模块的 CAN FD 车型：使用对应副厂线束，接 ADAS 模块。
+- 并非所有车型都支持。上车前必须确认车型平台、线束、安全标志和 CAN/CAN FD 路径。
 
 <div align="center" style="text-align: center;">
 

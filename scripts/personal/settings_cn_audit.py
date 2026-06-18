@@ -8,7 +8,7 @@ from typing import Dict, List
 
 ROOT = Path(__file__).resolve().parents[2]
 SETTINGS = ROOT / "selfdrive/carrot_settings.json"
-HANGUL_RE = re.compile(r"[가-힣]")
+HANGUL_RE = re.compile(r"[\uac00-\ud7a3]")
 
 
 REQUIRED_DESCRIPTIONS = {

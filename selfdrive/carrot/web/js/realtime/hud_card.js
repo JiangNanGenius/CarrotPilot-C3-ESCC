@@ -24,13 +24,6 @@
       sport: "Fast",
       fast: "Fast",
     },
-    ko: {
-      normal: "일반",
-      eco: "에코",
-      safe: "안전",
-      sport: "고속",
-      fast: "고속",
-    },
     zh: {
       normal: "普通",
       eco: "经济",
@@ -41,7 +34,6 @@
   };
   const HUD_LABELS = {
     en: { speed: "Speed", setSpeed: "Set Speed", temp: "TEMP", gear: "GEAR", limit: "LIMIT" },
-    ko: { speed: "현재속도", setSpeed: "설정속도", temp: "TEMP", gear: "GEAR", limit: "LIMIT" },
     zh: { speed: "当前速度", setSpeed: "设定速度", temp: "TEMP", gear: "GEAR", limit: "LIMIT" },
   };
   const HUD_AUX_ROTATE_MS = 1600;

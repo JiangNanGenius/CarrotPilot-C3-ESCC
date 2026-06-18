@@ -141,7 +141,7 @@ function normalizeWebSettingValue(key, value) {
   if (key === "web_language") {
     if (typeof normalizeLangCode === "function") return normalizeLangCode(value);
     const lang = String(value || "").trim().toLowerCase();
-    return ["en", "ko", "zh"].includes(lang) ? lang : "";
+    return ["en", "zh"].includes(lang) ? lang : "";
   }
   if (key === "kmap_enabled" ||
       key === "vision_fullscreen_default" ||

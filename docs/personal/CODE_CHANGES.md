@@ -1,5 +1,28 @@
 # 当前代码改动记录
 
+## 2026-06-18: Navipilot 驾驶报告源码契约守卫
+
+改动文件：
+
+- `scripts/personal/cplink_preflight.py`
+- `docs/personal/NAVIPILOT_APP_RESEARCH.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/TODO.md`
+
+改动内容：
+
+- `cplink_preflight.py` 新增 Navipilot APP 驾驶评分/报告源码契约检查。
+- 守卫 `DrivingDataCollector.kt` 的采集入口、APP 本地存储、每秒更新字段、评分函数调用、今日/本周/全部会话读取。
+- 守卫 `DrivingScoreEngine.kt` 的五维评分和总分权重：平稳性 30%、预判力 25%、接管依赖 20%、节能 15%、NOO 稳定度 10%。
+- 守卫 `DrivingSession.kt`、`DrivingReportScreen.kt` 和 `DrivingReportShareImage.kt`，确认报告页、历史/成就/分享入口仍在 APP 侧。
+- 文档补充：驾驶报告保存在 Android APP 的 `SharedPreferences`，不是 C3 端本地报告数据库；`leadDistance` 当前仍是 TODO/0f。
+
+刻意没有改：
+
+- 没有把 Android 驾驶报告 UI 搬进 C3 Web。
+- 没有改变 C3 端驾驶控制、CP搭子协议或自动超车边界。
+- 该守卫只证明 APP 参考源码契约未漂移，不替代手机 APP 实测。
+
 ## 2026-06-18: 模型选择器只读状态采集
 
 改动文件：
@@ -1674,3 +1697,63 @@
 - 包含模型选择器参考线跟踪和源码审计。
 - 不启用模型下载、模型安装或 `modeld` 切换。
 - 不代表 stable，不应作为日常稳定安装目标。
+
+## 2026-06-18: 中文/英文本地化清理
+
+改动文件：
+
+- `selfdrive/carrot_settings.json`
+- `selfdrive/carrot/web/index.html`
+- `selfdrive/carrot/web/js/translations/registry.js`
+- `selfdrive/carrot/web/js/translations/ko.js`
+- `selfdrive/carrot/web/js/shared/i18n.js`
+- `selfdrive/carrot/web/js/shared/constants.js`
+- `selfdrive/carrot/web/js/shared/utils.js`
+- `selfdrive/carrot/web/js/pages/setting.js`
+- `selfdrive/carrot/web/js/pages/tools.js`
+- `selfdrive/carrot/web/js/pages/tools_web_settings.js`
+- `selfdrive/carrot/web/js/pages/setting_device_config.js`
+- `selfdrive/carrot/web/js/pages/logs/shared.js`
+- `selfdrive/carrot/web/js/realtime/nav_hud.js`
+- `selfdrive/carrot/web/js/realtime/carrot_map.js`
+- `selfdrive/carrot/web/js/realtime/hud_card.js`
+- `selfdrive/carrot/web/js/realtime/vision_diag.js`
+- `selfdrive/carrot/kmap/kmap.js`
+- `selfdrive/carrot/kmap/index.html`
+- `selfdrive/carrot/carrot_serv.py`
+- `selfdrive/carrot/recovery/server.py`
+- `selfdrive/carrot/server/features/static.py`
+- `selfdrive/carrot/server/features/dashcam/paths.py`
+- `selfdrive/carrot/server/features/system.py`
+- `selfdrive/carrot/server/services/settings.py`
+- `selfdrive/carrot/server/services/web_settings.py`
+- `selfdrive/carrot/server/services/heartbeat.py`
+- `selfdrive/carrot/server/services/time_sync.py`
+- `selfdrive/carrot/server/services/params.py`
+- `scripts/personal/localization_audit.py`
+- `scripts/personal/smoke_check.py`
+- `scripts/personal/settings_cn_audit.py`
+- `scripts/personal/model_selector_audit.py`
+- `README.md`
+- `docs/personal/TODO.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/CODE_CHANGES.md`
+
+改动内容：
+
+- 将 `carrot_settings.json` 的主 `group/title/descr` 从韩文切换为英文，继续保留 `cgroup/ctitle/cdescr` 中文字段；参数名、范围、默认值不变。
+- 给 11 个原本缺失英文说明的设置补英文描述，避免英文 fallback 为空。
+- Web 语言入口收敛为英文/中文，删除韩语语言包加载；旧 `ko` 或 `main_ko` 缓存会回落到英文。
+- 清理 Web 初始 HTML、设置页、日志页、Auto-Tuner 面板、Carrot Vision 诊断、地图缩放、导航 HUD 和 KMap 浮层中的直接韩文文案。
+- 过滤服务端注入的设备语言列表，只保留 English、简体中文、繁體中文；旧 `main_ko` 配置按英文处理。
+- 清理 Carrot 服务端 SDI 描述、dashcam 相对时间、系统重置消息、恢复页和 KMap HTML 的直接韩文。
+- README 上游法律/线束说明改为中英文可读版本，同时保留免责声明含义和上游署名。
+- 新增 `localization_audit.py`，并纳入 `smoke_check.py`，防止后续上游合并重新带入直接韩文 UI 文案。
+
+验证：
+
+- `python3 scripts/personal/localization_audit.py` 通过。
+- `python3 scripts/personal/settings_cn_audit.py` 通过。
+- `python3 -m json.tool selfdrive/carrot_settings.json` 通过。
+- Python 语法检查通过。
