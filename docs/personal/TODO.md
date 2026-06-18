@@ -148,7 +148,7 @@
 - [ ] 迁移 fishop 自动超车 / APP 控制变道 / `OVERTAKE` 逻辑，必须接入现有安全变道链路，不允许绕过 turn signal、BSM、驾驶员确认、Seltos 2023 车型门禁。
 - [ ] 自动超车第一阶段只做提示和日志，第二阶段只允许建议变道，第三阶段才允许受控执行；每阶段单独实车证据。
 - [ ] 国内导航 / 高德相关输入只能作为辅助来源；在澳洲或导航精度不足时，不能作为自动超车或侧向控制的唯一依据。
-- [ ] 设备快照和证据包新增 fishop 硬件采样：车道曲线、左右盲区、传感器在线、最近更新时间、自动超车状态。
+- [x] alpha 设备快照和证据包新增 fishop 硬件采样：车道曲线、左右盲区、传感器在线、最近更新时间、自动超车状态。
 - [ ] fishop 最新参考入口已确认，后续迁移先审这些源码点，不按整包合并：
   - `selfdrive/carrot/amap_navi.py`: UDP 客户端、`lane`、`blindspot`、`cam_blind`、`overtake`、`navi`、`lidar` 数据通道。
   - `cereal/custom.capnp`: `CarrotMan.leftBlind/rightBlind` 和 `AmapNavi.leftBlind/rightBlind/lineValid/leftLine/rightLine`。
@@ -335,7 +335,7 @@ flowchart TD
 - [x] 自定义模型下载、校验、切换只允许 offroad 执行。
 - [x] active bundle 无效时回退 stock 或上一个有效 bundle。
 - [ ] 旧 Carrot model selector 只参考签名校验、hash/size、原子替换、失败回滚和状态记录。
-- [ ] 设备证据记录 active bundle、runner、modeld 状态、`modelV2`、`drivingModelData`、`cameraOdometry`。
+- [x] alpha 设备证据脚本支持记录 active bundle、runner、modeld 状态、`modelV2`、`drivingModelData`、`cameraOdometry`。
 - [x] 模型列表下载保留为用户主动维护功能，不归类为云连接服务。
 
 ### P8.7: 限速、手机数据和地图覆盖
@@ -349,6 +349,7 @@ flowchart TD
 - [ ] `CarrotMapOverlayEnabled=0` 时不加载地图 iframe、不请求外部地图 SDK、不遮挡 HUD。
 - [x] 限速 fixed offset 默认 0。
 - [x] 增加 percentage offset 支持，默认 0%。
+- [x] alpha 设备证据脚本支持记录当前限速来源、来源标签、最终限速和车机限速。
 - [ ] UI 和证据里能看出当前限速来源、偏移模式、偏移值和数据新鲜度。
 
 ### P8.8: Carrot / 机械小哥功能迁移
@@ -450,6 +451,7 @@ flowchart LR
 - [x] 静态检查 fishop 硬件增强和自动超车参数默认关闭。
 - [ ] 静态检查 fishop 自动超车不能绕过安全变道链路。
 - [x] 静态检查 fishop 只读层没有控制输出路径，自动超车输入只记录为 read-only 证据。
+- [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
 - [ ] schema 检查通过。
 - [x] params 检查通过。
 - [ ] services 检查通过。
