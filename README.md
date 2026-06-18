@@ -4,15 +4,17 @@
 
 当前状态：
 
-- 底座：`ajouatom/openpilot:c3-wip`
+- 日常稳定线底座：`ajouatom/openpilot:c3-wip`，当前整合分支 `personal/c3-escc-atune`
+- 新架构 alpha 底座：官方 SunnyPilot `staging` 0.11.2，当前实验分支 `experimental/sunnypilot-011-c3`
 - 主车：Kia Seltos 2023，初期复用 Seltos 2021 配置
 - 硬件：C3 中国克隆版，不是 C3X
-- ESCC：已接入最小支持，默认关闭，必须手动开启 `EnableEscc`
-- 强制 Offroad：`AlwaysOffroad` 默认关闭，只在驻车供电时用于保持 offroad、避免接管 harness 继电器，同时保留本地 Web/SSH/更新；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务
+- ESCC：日常稳定线是最小支持、默认关闭、手动开启 `EnableEscc`；新架构 alpha 使用 SunnyPilot 原生 0x2AB 自动识别，不做普通用户手动 ESCC 开关
+- Offroad：日常稳定线使用 `AlwaysOffroad`，新架构 alpha 使用 SunnyPilot `OffroadMode` 承载同一语义；默认都关闭，只在驻车供电更新、继电器调试或故障排查时手动开启
+- 云服务：`EnableConnect` 默认关闭；新架构 alpha 移除 Sunnylink、comma connect、上传、远程配对和云备份，只保留本地网络、SSH、Web、GitHub 更新和模型下载
 - Auto-Tuner：已接入学习和手动确认闭环，默认关闭，不自动应用
 - CP搭子 / Navipilot：核心 CarrotMan / CPlink 协议静态兼容，已增加 C3 侧 APP 端点 live check，手机 APP 实测未完成
-- 模型选择器：已跟踪参考线并增加源码审计，默认主线未启用模型下载或 modeld 切换
-- AmapNavi / 自动超车 / DEC：已跟踪 fishop 和 Navipilot APP 来源；只读 AmapNavi 状态桥默认关闭，完整 AmapNavi/自动超车/DEC 未启用
+- 模型选择器：日常稳定线只跟踪和审计；新架构 alpha 使用 SunnyPilot 原生模型管理器，默认 stock model，下载/切换只允许 offroad
+- AmapNavi / 自动超车 / DEC：已跟踪 fishop 和 Navipilot APP 来源；新架构 alpha 只接入 fishop 车道/激光雷达盲区/自动超车输入的只读证据层，不默认产生控制输出
 
 当前可参考 tag：
 
@@ -24,10 +26,27 @@
 
 安装入口：
 
-- C3 上手动输入优先用原仓库 Pages 入口：`https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i`
+- C3 日常/当前稳定线入口：`https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i`
+- 新架构 alpha 入口：`https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x`
 - 如果短链接暂时还没生效，用固定 latest 链接：`https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/latest/installer_c3_escc`
 - SSH 安装或切换通道：`curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh`
+- SSH 切新架构 alpha：`curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --channel alpha`
 - 编号 test 只是历史追溯；平时不要手动输入 test25/test26 这类链接。
+- `/x`、`alpha` 只用于停车/开发验证，不替代 `/i`、`latest`、稳定 release 或 `install-c3-escc-test`。
+
+主要功能状态：
+
+| 功能 | 当前状态 | 默认状态 |
+| --- | --- | --- |
+| Seltos 2023 | 独立车型条目，复用 Seltos 2021 SCC 纯 CAN 配置；不走 CANFD/HDA2/Non-SCC | 可选车型 |
+| ESCC | 稳定线最小支持；alpha 用 0x2AB 自动识别 `ENHANCED_SCC` | 稳定线关闭，alpha 自动识别 |
+| Offroad 更新/调试 | C3 熄火断电场景下用于驻车更新和 panda no-output 调试 | 关闭 |
+| 模型管理器 | alpha 使用 SunnyPilot 原生模型管理器、stock 默认、失败回滚 | stock model |
+| 限速来源 | alpha 优先级为手机/APN/N/Navipilot > 车机限速 > OSM/mapd，并保留固定/百分比偏移 | 偏移 0 |
+| Carrot Web | 本地 7000 Web，提供健康、参数白名单、导航输入、限速、fishop 和 Auto-Tuner API | 本地/LAN |
+| Auto-Tuner | 学习、推荐、历史和手动 apply/ignore/clear；onroad apply 由服务端硬拦截 | 学习关闭，自动应用关闭 |
+| fishop 硬件增强 | 车道曲线、左右车道数据、激光雷达盲区、侧向目标、自动超车输入先作为只读证据 | 控制输出关闭 |
+| 云连接/上传 | Sunnylink、comma connect、Onroad Uploads、云备份和远程配对不作为用户功能 | 关闭/移除 |
 
 自动检查：
 
@@ -62,6 +81,8 @@
 来源和署名：
 
 - 基于 ajouatom 维护的 CarrotPilot / CarPad 当前 C3 主源分支。
+- 新架构 alpha 基于 SunnyPilot 官方 `staging` 0.11.2，并保留 SunnyPilot / comma openpilot 原始许可证和声明。
+- C3/TICI 兼容补丁研究参考 Mr.One 的公开安装线和 C3 兼容资源；只抽取必要兼容思路，不整包导入私有注册、上传或云连接改动。
 - ESCC 及部分 Hyundai/Kia 国内硬件支持参考 fishop / 飞扬（码上飞扬，名称待确认）的实现。
 - CP搭子、Navipilot、在线调参、7000 Web 等功能参考机械小哥 / JixieXiaoGe 的实现，包括 `jixiexiaoge/openpilot` 和 `jixiexiaoge/navipilot`。
 - `dhvms/carrotpilot` 当前只作为旧 CarrotPilot 说明和历史实现参考，不作为主底座。

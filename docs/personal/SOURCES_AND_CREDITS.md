@@ -16,6 +16,23 @@ ajouatom CarrotPilot / CarPad 主源
   - README 里保留 Korean legal notice、HKG harness 说明和 `# carrotpilot` 标题。
   - `dhvms/carrotpilot` README 明确写到 CarrotPilot 地址从 `ajouatom/carrotpilot.git` 改到 `ajouatom/openpilot.git`。
 
+## 新架构 alpha 底座
+
+SunnyPilot
+
+- 来源：`sunnypilot/sunnypilot`
+- URL: `https://github.com/sunnypilot/sunnypilot`
+- 计划参考分支：`staging`
+- 用途：新架构 alpha 的 OpenPilot 0.11 系基座、模型管理器、`modeld_tinygrad`、Sunny speed limit resolver 和相关 UI/服务框架。
+- 当前状态：用于 `experimental/sunnypilot-011-c3` / `alpha-sunnypilot-c3`，不替代日常稳定线。
+
+Mr.One C3 兼容参考
+
+- 来源：Mr.One 公开安装和 C3 兼容资源。
+- URL: `https://op.mr-one.cn/res`、`https://mr-one.cn/new/devc3`
+- 用途：研究 C3/TICI 启动、installer、硬件识别、modeld 兼容补丁。
+- 当前状态：只抽取必要 C3 兼容思路；不导入私有注册、上传、额外 client、关机绕过或云连接改动。
+
 ## ESCC 和国内硬件支持
 
 fishop / 码上飞扬 / 飞扬

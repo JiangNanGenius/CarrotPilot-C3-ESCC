@@ -1,5 +1,22 @@
 # 当前代码改动记录
 
+## 2026-06-19: 新架构 alpha 安装入口和说明同步
+
+改动内容：
+
+- 脚本安装器 `--channel alpha` 从旧 `alpha-supercombo` 改为新架构短分支 `alpha-sunnypilot-c3`。
+- 移除脚本安装器里的旧 `supercombo` alpha 别名，避免新架构线和旧模型实验线混用。
+- `INSTALL_TARGETS.json` 的 alpha 入口改为 `experimental/sunnypilot-011-c3`、`alpha-sunnypilot-c3` 和 Pages `/x`。
+- 安装和回滚说明明确 `/x` 只用于新架构停车/开发验证，`/i`、`latest`、稳定 release 和 `install-c3-escc-test` 不随 alpha 移动。
+- README 补充新架构 alpha、主要功能状态、安装入口和云服务移除边界。
+- 来源和署名补充 SunnyPilot 与 Mr.One C3 兼容参考。
+
+刻意没有改：
+
+- 没有移动 `latest` tag、`install-c3-escc-test` 分支或 release asset。
+- 没有把 alpha 设为日常安装目标。
+- 没有启用旧 `alpha-supercombo` 或最新模型实验线作为当前 alpha。
+
 ## 2026-06-18: 安装器增加 latest-model alpha 通道和代理更新规则
 
 改动内容：

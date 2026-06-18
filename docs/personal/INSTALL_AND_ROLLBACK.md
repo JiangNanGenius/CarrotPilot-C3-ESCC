@@ -65,13 +65,19 @@ https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i
 https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/latest/installer_c3_escc
 ```
 
-最新模型实验线只用于停车/开发验证，不作为日常安装目标。需要从 Custom Software 流程直接装 alpha 二进制时，使用：
+新架构 SunnyPilot 0.11 C3 alpha 线只用于停车/开发验证，不作为日常安装目标。需要从 Custom Software 流程直接装 alpha 二进制时，使用：
 
 ```text
-https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/a
+https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x
 ```
 
-二进制安装器实际拉取的是安装分支：
+`/x` 实际拉取的是 alpha 短安装分支：
+
+```text
+alpha-sunnypilot-c3
+```
+
+`/i`、`latest`、稳定 release 和下面的日常测试安装分支不会因为 alpha 移动而改变。当前日常测试二进制安装器实际拉取的是：
 
 ```text
 install-c3-escc-test
@@ -94,7 +100,7 @@ curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --c
 curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --channel static
 ```
 
-`alpha` 指向短安装分支 `alpha-supercombo`，该分支镜像 `experimental/latest-model-supercombo`，只用于最新模型运行栈实验，不是日常驾驶目标。`stable` 通道会在首个实车 stable 发布后启用；现在还没有 stable，不要选它。
+`alpha` 指向短安装分支 `alpha-sunnypilot-c3`，该分支镜像 `experimental/sunnypilot-011-c3`，只用于新架构停车/开发验证，不是日常驾驶目标。`stable` 通道会在首个实车 stable 发布后启用；现在还没有 stable，不要选它。
 
 脚本默认安装当前受控测试入口，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffroad=0`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`、`AutoNaviSpeedLimitOffset=0`、`AutoNaviSpeedSafetyFactor=100`。安装时还会把 `PowerCycleBootOk` 清零，避免旧的断电重启确认被误用。
 

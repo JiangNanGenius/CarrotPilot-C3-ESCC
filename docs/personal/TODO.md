@@ -470,11 +470,11 @@ flowchart LR
 
 - [x] 更新安装说明，新增 `https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x`。
 - [x] `/x` 安装器支持选择或切换 `alpha-sunnypilot-c3`。
-- [ ] 回滚说明保留 `/i`、当前 test tag 和 SSH 备用路径。
-- [ ] README 明确 alpha 新架构线不能当 stable/latest。
-- [ ] README 增加主要功能说明：ESCC、Seltos 2023、模型管理器、限速来源、Carrot Web、Auto-Tuner、Offroad。
-- [ ] README/credits 保留署名：机械小哥、码上飞扬/fishop、ajouatom/CarrotPilot、SunnyPilot、Mr.One 参考补丁。
-- [ ] 记录哪些功能来自移植、哪些只是参考、哪些暂未完成。
+- [x] 回滚说明保留 `/i`、当前 test tag、`latest` 二进制和 SSH 备用路径，并明确 `/x` 不会移动日常线。
+- [x] README 明确 alpha 新架构线不能当 stable/latest。
+- [x] README 增加主要功能说明：ESCC、Seltos 2023、模型管理器、限速来源、Carrot Web、Auto-Tuner、Offroad。
+- [x] README/credits 保留署名：机械小哥、码上飞扬/fishop、ajouatom/CarrotPilot、SunnyPilot、Mr.One 参考补丁。
+- [x] 记录哪些功能来自移植、哪些只是参考、哪些暂未完成。
 
 ### P8.13: 静态验证
 
