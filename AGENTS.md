@@ -85,7 +85,9 @@ scripts/personal/install_c3_escc.sh --list-channels
 - `personal/c3-escc-atune`: main integration branch.
 - `install-c3-escc-test`: current controlled-test install branch.
 - `latest` tag/release: points to the current controlled-test install target.
-- `experimental/latest-model-supercombo`: alpha model-runtime experiment. Installer may expose it as `--channel alpha`, but it is not a daily driving target.
+- `experimental/latest-model-supercombo`: alpha model-runtime experiment development branch.
+- `alpha-supercombo`: short install alias for `experimental/latest-model-supercombo`, required because the binary installer template cannot use branch names with `/`.
+- Installer may expose `alpha-supercombo` as `--channel alpha`, but it is not a daily driving target.
 - Do not promote `experimental/latest-model-supercombo` to `latest`, `stable`, or default install without explicit road-test evidence.
 
 ## Latest Model / Supercombo Rule
@@ -109,6 +111,8 @@ git push -f github refs/tags/latest
 ```
 
 When `scripts/personal/install_c3_escc.sh` changes, update the release script asset and GitHub Pages `/s` short script as part of the same release task.
+
+If exposing alpha through Custom Software, build/upload a separate `installer_c3_escc_alpha` binary pointing at `alpha-supercombo`; do not repoint the default `installer_c3_escc`.
 
 ## Safety Notes
 

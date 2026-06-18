@@ -4,7 +4,8 @@
 
 改动内容：
 
-- 脚本安装器新增 `--channel alpha` / `experimental` / `supercombo`，指向 `experimental/latest-model-supercombo`。
+- 脚本安装器新增 `--channel alpha` / `experimental` / `supercombo`，指向短安装分支 `alpha-supercombo`。
+- `alpha-supercombo` 作为 `experimental/latest-model-supercombo` 的二进制安装别名，避免安装器模板不支持带 `/` 分支名的问题。
 - `alpha` 只用于官方 master 最新 `driving_supercombo` 模型运行栈实验，不作为默认安装目标。
 - `docs/personal/LATEST_MODEL_SUPERCOMBO_LINE.md` 记录第三条线开法、C3/C3X/C4 的 `tici` / `tizi` / `mici` 区分和验证门禁。
 - 根目录新增 `AGENTS.md`，记录以后按三方来源自动更新的策略、保护项、门禁和 release 规则。

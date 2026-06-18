@@ -12,7 +12,7 @@ experimental/latest-model-supercombo
 
 目标是研究并最小化移植官方 master 的最新 `driving_supercombo.onnx` / `big_driving_supercombo.onnx` 运行栈。它和 `experimental/op-011-c3` 分开维护；0.11/C3 稳态迁移先保证设备可启动和车辆安全，supercombo 线只做模型运行栈实验。
 
-安装器可以暴露这条线为 `--channel alpha`，但 `alpha` 不是默认安装目标，也不是日常驾驶目标。
+安装器可以暴露这条线为 `--channel alpha`，但 `alpha` 不是默认安装目标，也不是日常驾驶目标。由于当前二进制安装器模板只支持不带 `/` 的短分支，alpha 安装入口使用短分支 `alpha-supercombo`，并让它镜像开发分支 `experimental/latest-model-supercombo`。
 
 ## 当前事实
 
@@ -70,7 +70,16 @@ git switch -c experimental/latest-model-supercombo
 git push -u github experimental/latest-model-supercombo
 ```
 
-这条线可通过脚本安装器 `--channel alpha` 指向，但初期不要接入默认 `latest`，不要移动 `install-c3-escc-test`，不要上传为默认 release asset。
+这条线可通过脚本安装器 `--channel alpha` 指向短安装分支 `alpha-supercombo`，但初期不要接入默认 `latest`，不要移动 `install-c3-escc-test`，不要上传为默认 release asset。
+
+同步 alpha 安装别名：
+
+```bash
+git branch -f alpha-supercombo experimental/latest-model-supercombo
+git push github refs/heads/alpha-supercombo:refs/heads/alpha-supercombo
+```
+
+如需 C3 Custom Software 直接安装 alpha，需要用 `build_binary_installer.py --branch alpha-supercombo` 生成单独二进制，不要复用默认 `installer_c3_escc`。
 
 ## 第一阶段：只迁模型栈，不碰车辆控制
 

@@ -6,7 +6,7 @@ DEFAULT_REPO_URL="https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
 DEFAULT_REF="install-c3-escc-test"
 TEST_CHANNEL_REF="install-c3-escc-test"
 DEV_CHANNEL_REF="personal/c3-escc-atune"
-ALPHA_CHANNEL_REF="experimental/latest-model-supercombo"
+ALPHA_CHANNEL_REF="alpha-supercombo"
 STATIC_CHANNEL_REF="carrotpilot-c3-escc-20260618-static28"
 STABLE_CHANNEL_REF="install-c3-escc-stable"
 
