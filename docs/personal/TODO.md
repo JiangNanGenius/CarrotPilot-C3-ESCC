@@ -399,7 +399,7 @@ flowchart TD
 - [x] 研究 fishop 外接激光雷达左右侧目标数据，确认坐标系、单位、刷新率、时间戳、置信度和丢包处理；drel/xrel 为毫米，前方 drel 为正、后方为负，`dist_time` 为毫秒传感器时间戳，距离数据 1 秒超时清空。
 - [x] 研究 fishop 外接激光雷达盲区数据，确认左右盲区、侧向目标、目标速度、距离、传感器在线和故障状态；`detect_side` 位 1/2 表示左/右设备在线，`lidar_lblind/rblind` 2 秒超时清空，alpha 只读 parser 记录左右 lidar/camera online 和车身盲区证据。
 - [x] 研究 `blindspot` / `cam_blind` 数据：`lidar_lblind`、`lidar_rblind`、`lf/lb/rf/rb_drel`、`lf/lb/rf/rb_xrel`、`dist_time`、`detect_side`、`lidar_id`；alpha parser 也记录 `lf/lb/rf/rb_vrel`、`left_blind/right_blind`、`lidar_car_lblind/rblind`。
-- [ ] 研究动态盲区算法，确认 `DynamicBlindRange`、`DynamicBlindDistance`、`LidarBsdDelayTime`、前后目标时距参数是否适合 Seltos 2023。
+- [x] 研究动态盲区算法，确认 `DynamicBlindRange`、`DynamicBlindDistance`、`LidarBsdDelayTime`、前后目标时距参数是否适合 Seltos 2023；fishop 默认 `DynamicBlindRange=0`、`DynamicBlindDistance=0`、`LidarBsdDelayTime=10` 即 1.0 秒，前/后 drel 时距默认 1.0 秒、vrel 预测窗口默认 3.0 秒。alpha 已实现 `is_side_object_risky` 只读 `dynamicBlind.riskPreview`，记录 drel/xrel/vrel/vEgo 证据，不写 BSM、desire、横向目标或控制输出；Seltos 2023 是否可提示/建议仍需实车验证。
 - [x] 设计统一硬件增强消息/参数桥，先接收并记录，不进入控制。
 - [x] 新增统一状态结构候选：设备在线、最后更新时间、左右车道线类型、左右车道曲率/宽度、左右前后目标距离、左右前后目标横向距离、左右前后相对速度、左右盲区、摄像头盲区、传感器健康。
 - [x] 增加 Web/UI 只读显示：车道曲线、左右车道数据、左右盲区、传感器健康、数据新鲜度；alpha Carrot Web 首页已提供只读 fishop 硬件面板。
@@ -411,17 +411,22 @@ flowchart TD
 - [x] fishop 只读解析器超时守门：车道线、盲区、目标距离和自动超车输入过期后不会继续显示为有效或活动。
 - [x] 不新增 `FishopHardwareReadOnly` / `FishopHardwareEvidenceMode` 兼容别名；alpha 只用 `readOnly` 和 `controlOutputEnabled=false` 作为证据字段，避免混淆。
 - [ ] 自动超车只接入现有安全变道链路；不得绕过转向灯、原车/外接盲区、驾驶员确认、速度范围、道路类型和 Seltos 2023 车型门禁。
-- [ ] 研究 `overtake` / `navi` 客户端的数据方向：C3 发给外设、外设发给 C3、APP 发给 C3 要分清；任何 APP 命令默认只记录，不直接执行。
+- [x] 研究 `overtake` / `navi` 客户端的数据方向：fishop 参考里外设/APP 可把 `device=overtake/navi`、`index/cmd/arg`、`overtake` 请求发到 C3；C3 也会把 OP 状态发回该客户端端口和 UDP 7705。alpha 已在 `overtake.directionality` 标记 inbound/outbound，所有 APP/外设命令默认只记录为 `record_only`，不直接执行。
 - [ ] 自动超车决策必须先产出“建议”，再由现有 desire/lane-change helper 判断；不得直接写转向目标、横向轨迹或绕过 planner。
 - [ ] 自动超车分阶段验证：只显示/只建议/受控执行，每阶段必须有单独日志和回滚点。
 - [ ] 高德 / 国内导航精度不足或地区不适配时，自动超车和侧向控制必须降级为不可用或只提示。
 - [ ] 每次启用 fishop 硬件控制相关功能前，证据包必须证明云进程不存在、ESCC 正常、基础横控正常、传感器数据新鲜且一致。
-- [ ] P8 fishop 硬件增强图流：
+- [x] P8 fishop 硬件增强图流：
 
 ```mermaid
 flowchart LR
-  S["外设输入\nlane / blindspot / cam_blind / overtake"] --> P["协议解析\n单位、方向、时间戳、健康"]
+  S["外设和 APP\nlane / blindspot / cam_blind / overtake / navi"] --> I["外设或 APP 到 C3\n命令和传感器输入"]
+  S --> O["C3 到外设\n7705 和客户端端口状态广播"]
+  I --> P["协议解析\n单位、方向、时间戳、健康"]
+  O --> Q["状态兼容\n只读广播, 不接管外设"]
+  P --> B["动态盲区预览\nriskPreview, 不写 BSM"]
   P --> R["只读状态\n不改控制目标"]
+  B --> R
   R --> V["证据和 UI\n快照、日志、Web 显示"]
   V --> W["提示/建议\n默认关闭"]
   W --> L["现有安全变道链路\n转向灯、BSM、驾驶员确认、速度、道路、车型"]
