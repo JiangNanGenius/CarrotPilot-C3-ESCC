@@ -37,6 +37,12 @@ def main() -> int:
       proc_name not in process_config,
       "process_config.py still references a disabled cloud/upload process",
     )
+  failures += not require("models_manager only offroad", 'PythonProcess("models_manager", "sunnypilot.models.manager", only_offroad)' in process_config,
+                          "models_manager must remain an offroad-only process")
+  failures += not require("stock modeld guarded by stock runner", 'PythonProcess("modeld", "selfdrive.modeld.modeld", and_(only_onroad, is_stock_model))' in process_config,
+                          "stock modeld must only run when the active runner is stock")
+  failures += not require("tinygrad modeld guarded by tinygrad runner", 'NativeProcess("modeld_tinygrad", "sunnypilot/modeld_v2", ["./modeld"], and_(only_onroad, is_tinygrad_model))' in process_config,
+                          "modeld_tinygrad must only run onroad when the active runner is tinygrad")
 
   params = read("common/params_keys.h")
   failures += not require("Sunnylink default off", '{"SunnylinkEnabled", {PERSISTENT, BOOL, "0"}}' in params,
@@ -97,6 +103,18 @@ def main() -> int:
   interface = read("opendbc_repo/opendbc/car/hyundai/interface.py")
   failures += not require("ESCC auto-detect preserved", "if ESCC_MSG in fingerprint[0]" in interface and "ENHANCED_SCC" in interface,
                           "0x2AB ESCC auto-detection missing")
+
+  models_helpers = read("sunnypilot/models/helpers.py")
+  models_manager = read("sunnypilot/models/manager.py")
+  failures += not require("model runner defaults stock", "runner_type = custom.ModelManagerSP.Runner.stock" in models_helpers,
+                          "model runner must default to stock without a valid active bundle")
+  failures += not require("invalid active bundle resets stock", 'params.remove("ModelManager_ActiveBundle")' in models_helpers
+                          and "ModelRunnerTypeCache" in models_helpers and "Runner.stock" in models_helpers,
+                          "invalid active bundle must clear active bundle and reset runner cache to stock")
+  failures += not require("model manager validates active bundle", "validate_active_bundle(self.params, self.available_models)" in models_manager,
+                          "models_manager must validate active bundle before publishing state")
+  failures += not require("model download request cleared", 'self.params.remove("ModelManager_DownloadIndex")' in models_manager,
+                          "models_manager must clear download request after handling it")
 
   custom_capnp = read("cereal/custom.capnp")
   resolver = read("sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
