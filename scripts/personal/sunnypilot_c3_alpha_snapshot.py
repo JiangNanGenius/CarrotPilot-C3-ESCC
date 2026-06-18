@@ -37,6 +37,7 @@ SAFE_PARAM_KEYS = (
   "CarrotPhoneSpeedLimit",
   "CarrotPhoneSpeedLimitSource",
   "CarrotPhoneSpeedLimitUpdatedAt",
+  "CarrotNavigationEvent",
   "CarrotLearningActive",
   "CarrotLearningApply",
   "CarrotLearningAutoApply",
