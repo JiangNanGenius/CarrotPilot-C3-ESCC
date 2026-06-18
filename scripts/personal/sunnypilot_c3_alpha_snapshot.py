@@ -83,6 +83,7 @@ MESSAGING_SERVICES = (
   "managerState",
   "longitudinalPlanSP",
   "carStateSP",
+  "pandaStates",
 )
 
 
@@ -301,6 +302,18 @@ def sample_messaging(seconds: int) -> dict[str, Any]:
         result["last"]["carStateSP"] = {
           "speedLimit": float(safe_attr(sm["carStateSP"], "speedLimit", 0.) or 0.),
         }
+
+      if sm.updated.get("pandaStates", False):
+        states = sm["pandaStates"]
+        result["last"]["pandaStates"] = [
+          {
+            "safetyModel": enum_text(safe_attr(state, "safetyModel", "")),
+            "controlsAllowed": bool(safe_attr(state, "controlsAllowed", False)),
+            "powerSaveEnabled": bool(safe_attr(state, "powerSaveEnabled", False)),
+            "harnessStatus": enum_text(safe_attr(state, "harnessStatus", "")),
+          }
+          for state in states
+        ]
 
     result["ok"] = True
   except Exception as exc:

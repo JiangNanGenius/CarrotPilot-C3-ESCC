@@ -90,9 +90,13 @@ def main() -> int:
   failures += not require("alpha snapshot tool exists", "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot" in alpha_snapshot
                           and "MESSAGING_SERVICES" in alpha_snapshot and "fishopHardware" in alpha_snapshot,
                           "alpha snapshot must collect model, process, params, and fishop evidence")
-  for service_name in ("modelV2", "drivingModelData", "cameraOdometry", "modelManagerSP", "longitudinalPlanSP", "carStateSP"):
+  for service_name in ("modelV2", "drivingModelData", "cameraOdometry", "modelManagerSP", "longitudinalPlanSP", "carStateSP", "pandaStates"):
     failures += not require(f"alpha snapshot samples {service_name}", f'"{service_name}"' in alpha_snapshot,
                             f"alpha snapshot must sample {service_name}")
+  failures += not require("alpha snapshot records panda output state", "safetyModel" in alpha_snapshot
+                          and "controlsAllowed" in alpha_snapshot and "powerSaveEnabled" in alpha_snapshot
+                          and "harnessStatus" in alpha_snapshot,
+                          "alpha snapshot must report panda safety/output state")
   for disabled_process in ("manage_athenad", "uploader", "manage_sunnylinkd", "sunnylink_registration_manager", "statsd_sp", "backup_manager"):
     failures += not require(f"alpha snapshot checks cloud process {disabled_process}", disabled_process in alpha_snapshot,
                             f"alpha snapshot must report disabled cloud process {disabled_process}")
