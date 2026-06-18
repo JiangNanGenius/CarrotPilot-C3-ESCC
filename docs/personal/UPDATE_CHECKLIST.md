@@ -247,6 +247,7 @@
 - [ ] 运行 `python3 scripts/personal/build_binary_installer.py --output /tmp/installer_c3_escc` 生成 C3 二进制安装器，确认内嵌仓库为 `JiangNanGenius/CarrotPilot-C3-ESCC.git`、内嵌分支为 `install-c3-escc-test`。
 - [ ] 创建 GitHub release 时上传两个资产：`installer_c3_escc` 和 `install_c3_escc.sh`。
 - [ ] 发布后用 GitHub release 页面或 `gh release view` 确认两个资产都已上传，并记录二进制安装器、备用脚本的 SHA256。
+- [ ] 发布后运行 `python3 scripts/personal/release_integrity_check.py --online`，确认 manifest、安装脚本默认 ref、远端安装分支、release tag 和两个安装资产一致。
 - [ ] 推送后确认 GitHub Actions `Personal Smoke` 通过；如果失败原因仍只是 release tag 先后顺序，确认 tag 已在 GitHub 后重跑失败 job。
 - [ ] `stable` 前填写上车测试记录，并把 C3 快照文件保存到电脑本地。
 - [ ] 如使用证据包，把 `road-test-log-draft.md` 和 `device-snapshot.md` 一起保存到电脑本地。

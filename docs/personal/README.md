@@ -56,6 +56,7 @@ python3 scripts/personal/feature_status_report.py --strict
 python3 scripts/personal/settings_cn_audit.py
 python3 scripts/personal/localization_audit.py
 python3 scripts/personal/install_target_check.py
+python3 scripts/personal/release_integrity_check.py --self-test
 python3 scripts/personal/seltos_profile_check.py
 python3 scripts/personal/road_test_evidence_check.py --self-test
 python3 scripts/personal/evidence_readiness_report.py --self-test
@@ -92,6 +93,12 @@ python3 scripts/personal/c3_commissioning.py \
 `seltos_profile_check.py` 专门守住 Seltos 2023 当前策略：经典 CAN、复用 Seltos 2021 harness/specs/flags、不引入 CANFD/HDA2 特判、不复制未验证 FW fingerprint。
 
 安装目标以 [INSTALL_TARGETS.json](INSTALL_TARGETS.json) 为准：当前有 `static` 预检 tag 和 `test` 受控上车测试 tag，没有 `stable` tag，所以日常稳定安装目标必须保持为空。
+
+发布 GitHub release 后，可额外运行在线完整性检查，确认 manifest、安装脚本、远端安装分支、GitHub release 和两个安装资产一致：
+
+```bash
+python3 scripts/personal/release_integrity_check.py --online
+```
 
 打安装 tag 前先跑：
 

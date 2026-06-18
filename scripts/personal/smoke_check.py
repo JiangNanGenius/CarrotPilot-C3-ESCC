@@ -594,6 +594,7 @@ def main() -> int:
     ("Chinese settings audit", lambda: run([sys.executable, "scripts/personal/settings_cn_audit.py"], "Chinese settings audit")),
     ("Localization audit", lambda: run([sys.executable, "scripts/personal/localization_audit.py"], "Localization audit")),
     ("Install target manifest", lambda: run([sys.executable, "scripts/personal/install_target_check.py"], "Install target manifest")),
+    ("Release integrity checker self-test", lambda: run([sys.executable, "scripts/personal/release_integrity_check.py", "--self-test"], "Release integrity checker self-test")),
     ("C3 installer script", check_install_script),
     ("Params migration self-test", lambda: run([sys.executable, "scripts/personal/params_migration.py", "self-test"], "Params migration self-test")),
     ("C3 static check dry-run", check_c3_static_dry_run),

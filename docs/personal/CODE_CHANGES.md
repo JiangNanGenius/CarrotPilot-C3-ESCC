@@ -812,6 +812,30 @@
 - `python3 scripts/personal/install_target_check.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
 
+## 2026-06-18: Release integrity checker
+
+改动文件：
+
+- `scripts/personal/release_integrity_check.py`
+- `scripts/personal/smoke_check.py`
+- `docs/personal/README.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/CODE_CHANGES.md`
+
+改动内容：
+
+- 新增 release 完整性检查脚本，默认检查 `INSTALL_TARGETS.json`、当前 test tag 和安装脚本 `DEFAULT_REF` 是否一致。
+- `--online` 模式会额外检查远端 `install-c3-escc-test` 分支是否指向当前 test tag commit、GitHub release 是否存在且为 prerelease、`installer_c3_escc` 和 `install_c3_escc.sh` 两个资产是否存在且大小/类型有效。
+- 将脚本 self-test 纳入 `smoke_check.py`，避免普通 CI 依赖 GitHub API。
+- 更新发布检查单，要求 release 发布后运行 `release_integrity_check.py --online`。
+
+验证：
+
+- `python3 scripts/personal/release_integrity_check.py --self-test` 通过。
+- `python3 scripts/personal/release_integrity_check.py` 通过。
+- `python3 scripts/personal/release_integrity_check.py --online` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。
+
 ## 2026-06-17: Seltos 2023 车型复用护栏
 
 新增文件：
