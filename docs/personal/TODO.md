@@ -369,14 +369,14 @@ flowchart TD
 - [x] alpha Carrot Web 新增受限 CP搭子 / Navipilot 参数接口：`GET /api/params_bulk` 和 `POST /api/param_set`，兼容 APP 读取/同值写回 `ExperimentalMode`。
 - [x] alpha 参数接口使用显式白名单；`OffroadMode`、Carrot 高风险控制、fishop 自动超车等只读或不暴露，不新增 `AlwaysOffroad` / `EnableEscc` 等混淆别名。
 - [x] alpha 参数接口 onroad 时禁止改值；`SpeedLimitMode` 通过本地 API 最高只能到 warning，不能直接启用 assist。
-- [ ] 迁移 APN/N 输入。
-- [ ] 迁移导航事件。
-- [ ] 迁移 SDI/测速摄像头数据路径。
+- [x] 迁移 APN/N 输入：alpha 7706 UDP、`/api/navigation_event`、7712 TCP 和 7713 HTTP 兼容入口都会把白名单字段归一化为 `CarrotNavigationEvent`，只做本地证据和限速输入，不执行 APP 命令。
+- [x] 迁移导航事件：alpha `CarrotNavigationEvent` 记录 `numeric/text/booleans/hazards/modelSpeed/trafficLight/controlPreview`，并保持 `readOnly=true`、`controlOutput=false`。
+- [x] 迁移 SDI/测速摄像头数据路径：alpha 记录 `nSdiType/nSdiSpeedLimit/nSdiDist/nSdiPlus*`，新鲜 SDI 限速可作为手机限速输入，过期仍由限速 resolver 超时回退。
 - [x] alpha Carrot Web 新增只读 UDP 7706 导航输入桥，接收 Navipilot/APN 风格 JSON，写入 `CarrotNavigationEvent` 作为最近一次导航证据。
 - [x] alpha UDP 7706 / `/api/navigation_event` 只提取限速、SDI、TBT、GPS/道路文本等白名单字段；`LANECHANGE`、`OVERTAKE` 等命令只记录为 ignored evidence，不执行。
 - [x] alpha 导航输入桥会把新鲜 `nRoadLimitSpeed` / `nSdiSpeedLimit` 更新到 `CarrotPhoneSpeedLimit*`，继续由 Sunny 限速解析器做超时和来源优先级处理。
-- [ ] 迁移减速带数据路径。
-- [ ] 迁移 model speed。
+- [x] 迁移减速带数据路径：alpha 支持 `speedBumpDistance`、`nSpeedBumpDist` 等字段，作为 `navigationHazards.speedBump` 只读证据进入 Web、7705 广播和设备快照。
+- [x] 迁移 model speed：alpha 支持 `modelSpeedKph/modelSpeedLimitKph/modelSpeedMS` 等字段，作为 `navigationModelSpeed` 只读证据进入 Web、7705 广播和设备快照。
 - [ ] 迁移 Carrot Web。
 - [x] alpha 新增 Carrot Web 本地骨架：`selfdrive/carrot/carrot_server.py`，manager 注册 `carrot_server`，默认端口 7000。
 - [x] alpha Carrot Web 新增本地健康接口 `/api/health`，声明 local mode、无云服务、无控制输出。
@@ -497,6 +497,7 @@ flowchart LR
 - [x] 静态检查 UDP 7705 状态广播包含旧 CarrotMan / CP搭子发现兼容字段，并明确未迁移的 Carrot 控制态不可用；7713 导航 HTTP 只有绑定成功才广播可用。
 - [x] 静态检查 7713 导航 HTTP 兼容入口只记录证据、更新安全导航摘要，不发布控制；设备快照包含 `CarrotNaviEvent`、`CarrotNaviDebug`、`CarrotNaviImage`。
 - [x] 静态检查 7712 TCP 导航输入兼容入口只接收行式 JSON、记录 `rgdata` / `vrtx` 证据，不发布控制。
+- [x] 静态检查 APN/N/Navipilot 导航增强证据：SDI/plus 摄像头、减速带、model speed、红灯停车/自动转弯/主动限速预览都必须作为 read-only evidence 进入 Carrot Web、7705 广播和设备快照，且 `controlOutput=false`。
 - [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
 - [x] schema 文本契约检查通过：`custom.capnp` / `log.capnp` 无重复字段名/编号，Sunny SP 服务和手机限速 source/schema 字段存在；C3 设备端 capnp 编译仍留到停车验证补证据。
 - [x] params 检查通过。
