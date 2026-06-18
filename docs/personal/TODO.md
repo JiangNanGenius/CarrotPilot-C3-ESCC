@@ -348,7 +348,7 @@ flowchart TD
 - [x] 手机限速必须有超时保护；超时后退回车机或 mapd，不允许过期手机数据压住车辆限速。
 - [ ] Mapbox/Kakao/Carrot route 不作为默认限速真值，只做可选路线显示。
 - [x] 新增 `CarrotMapOverlayEnabled=0`。
-- [ ] `CarrotMapOverlayEnabled=0` 时不加载地图 iframe、不请求外部地图 SDK、不遮挡 HUD。
+- [x] `CarrotMapOverlayEnabled=0` 时不加载地图 iframe、不请求外部地图 SDK、不遮挡 HUD；alpha 静态守门覆盖 Mapbox/Kakao/iframe loader。
 - [x] 限速 fixed offset 默认 0。
 - [x] 增加 percentage offset 支持，默认 0%。
 - [x] alpha 设备证据脚本支持记录当前限速来源、来源标签、最终限速和车机限速。
@@ -467,6 +467,7 @@ flowchart LR
 - [x] 静态检查 fishop 硬件增强和自动超车参数默认关闭。
 - [ ] 静态检查 fishop 自动超车不能绕过安全变道链路。
 - [x] 静态检查 fishop 只读层没有控制输出路径，自动超车输入只记录为 read-only 证据。
+- [x] 静态检查 Carrot Web/UI 不默认加载 Mapbox/Kakao 外部地图 SDK 或 iframe 覆盖层。
 - [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
 - [ ] schema 检查通过。
 - [x] params 检查通过。
