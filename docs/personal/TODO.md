@@ -416,7 +416,7 @@ flowchart TD
 - [ ] 自动超车第二阶段才允许把 `ready_for_suggestion` 交给现有安全变道链路判断；不得直接写转向目标、横向轨迹或绕过 planner。
 - [ ] 自动超车分阶段验证：只显示/只建议/受控执行，每阶段必须有单独日志和回滚点。
 - [ ] 高德 / 国内导航精度不足或地区不适配时，自动超车和侧向控制必须降级为不可用或只提示。
-- [ ] 每次启用 fishop 硬件控制相关功能前，证据包必须证明云进程不存在、ESCC 正常、基础横控正常、传感器数据新鲜且一致。
+- [x] 每次启用 fishop 硬件控制相关功能前，证据包必须证明云进程不存在、ESCC 正常、基础横控正常、传感器数据新鲜且一致；alpha 快照脚本已新增 `carParamsSP` ESCC 证据和 `fishopReleaseGate`，检查 `cloudProcessesAbsent`、`cloudParamsDisabled`、`seltosSccFingerprint`、`esccDetected`、`pandaEvidencePresent`、`fishopParsed`、`fishopSensorFresh`、`fishopOvertakeDisplayOnly`，并提供 `--require-fishop-release-gate` 失败开关。没有 C3/实车证据时门禁会显示 missing/fail，不会误判通过。
 - [x] P8 fishop 硬件增强图流：
 
 ```mermaid
@@ -436,7 +436,7 @@ flowchart LR
 
 - [ ] P8 fishop 放行顺序：
   - 第 1 步：只接收数据，证明左右不反、超时可清零、断线不会残留盲区状态；alpha 静态和样例已覆盖，仍需 C3 停车/实车日志。
-  - 第 2 步：只在 Web/UI 显示，不发提示、不影响 planner；alpha Web 已显示 lane、blindspot、dynamicBlind 和 overtake suggestion 预览，仍需设备验证。
+  - 第 2 步：只在 Web/UI 显示，不发提示、不影响 planner；alpha Web 已显示 lane、blindspot、dynamicBlind 和 overtake suggestion 预览，快照 `fishopReleaseGate` 已能汇总放行证据，仍需设备验证。
   - 第 3 步：只发提示，不产生 desire；alpha 仅有 Web/API 预览，车机 UI 提示尚未完成。
   - 第 4 步：只产生建议 desire，现有安全变道链路可拒绝。
   - 第 5 步：受控执行实验，必须有驾驶员确认、回滚安装器和完整证据。
