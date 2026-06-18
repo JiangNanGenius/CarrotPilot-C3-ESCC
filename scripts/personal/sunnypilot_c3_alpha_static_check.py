@@ -103,6 +103,9 @@ def main() -> int:
   interface = read("opendbc_repo/opendbc/car/hyundai/interface.py")
   failures += not require("ESCC auto-detect preserved", "if ESCC_MSG in fingerprint[0]" in interface and "ENHANCED_SCC" in interface,
                           "0x2AB ESCC auto-detection missing")
+  escc_surfaces = params + settings + device_settings + mici_settings + values + car_fingerprints + hyundai_fingerprints + fingerprints_ext
+  failures += not require("no manual ESCC toggle", all(key not in escc_surfaces for key in ("EnableEscc", "EnableESCC", "ESCCEnabled")),
+                          "ESCC must be detected from the 0x2AB hardware message, not exposed as a normal user toggle")
 
   models_helpers = read("sunnypilot/models/helpers.py")
   models_manager = read("sunnypilot/models/manager.py")
