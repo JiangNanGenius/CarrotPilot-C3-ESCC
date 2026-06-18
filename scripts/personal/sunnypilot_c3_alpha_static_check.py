@@ -16,6 +16,18 @@ def read(rel: str) -> str:
   return (ROOT / rel).read_text(encoding="utf-8")
 
 
+def read_tree(rel: str, suffixes: tuple[str, ...]) -> str:
+  root = ROOT / rel
+  chunks: list[str] = []
+  for path in root.rglob("*"):
+    if not path.is_file() or path.suffix not in suffixes:
+      continue
+    if path.stat().st_size > 1_000_000:
+      continue
+    chunks.append(path.read_text(encoding="utf-8", errors="ignore"))
+  return "\n".join(chunks)
+
+
 def require(name: str, condition: bool, detail: str) -> bool:
   if condition:
     print(f"PASS {name}")
@@ -416,6 +428,13 @@ def main() -> int:
                           and "atomic_write(stats_path)" in system_statsd
                           and all(token not in system_statsd for token in ("requests.", "urllib.", "websocket", "create_connection", "UPLOAD_SESS", "common.api")),
                           "system.statsd must remain local-only and must not upload over the network")
+  overlay_sources = "\n".join((
+    read_tree("selfdrive/carrot", (".py", ".html", ".js", ".json", ".yaml")),
+    read_tree("selfdrive/ui", (".py", ".cc", ".h", ".html", ".js", ".json", ".yaml")),
+  ))
+  for token in ("mapbox.com", "api.mapbox", "mapboxgl", "MapboxGL", "dapi.kakao", "kakao.maps", "<iframe"):
+    failures += not require(f"map overlay omits external loader {token}", token not in overlay_sources,
+                            "CarrotMapOverlayEnabled defaults off, so UI/Carrot Web must not load external map SDKs or iframe overlays by default")
 
   values = read("opendbc_repo/opendbc/car/hyundai/values.py")
   car_fingerprints = read("opendbc_repo/opendbc/car/fingerprints.py")
