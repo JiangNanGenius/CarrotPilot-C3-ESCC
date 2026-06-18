@@ -49,6 +49,14 @@ def main() -> int:
                           "CarrotPhoneSpeedLimitEnabled must exist and default to 1")
   failures += not require("SpeedLimitPolicy phone priority default", '{"SpeedLimitPolicy", {PERSISTENT | BACKUP, INT, "5"}}' in params,
                           "SpeedLimitPolicy must default to phone_priority")
+  for key in (
+    "FishopAutoOvertakeEnabled",
+    "FishopLaneCurveEnabled",
+    "FishopLidarBlindspotEnabled",
+    "FishopLidarLaneDataEnabled",
+  ):
+    failures += not require(f"{key} default off", f'{{"{key}", {{PERSISTENT | BACKUP, BOOL, "0"}}}}' in params,
+                            f"{key} must exist and default to 0")
 
   settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
