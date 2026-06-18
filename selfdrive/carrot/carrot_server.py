@@ -1549,7 +1549,7 @@ async def index(_request: web.Request) -> web.Response:
     const age = (value) => Number.isFinite(Number(value)) ? `${Number(value).toFixed(2)} s` : "-";
     const num = (value, digits = 3) => Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : "-";
     const targetSummary = (targets = {}) => {
-      const keys = ["lf_drel", "lb_drel", "rf_drel", "rb_drel", "lf_xrel", "lb_xrel", "rf_xrel", "rb_xrel"];
+      const keys = ["lf_drel", "lb_drel", "rf_drel", "rb_drel", "lf_xrel", "lb_xrel", "rf_xrel", "rb_xrel", "lf_vrel", "lb_vrel", "rf_vrel", "rb_vrel"];
       const parts = keys.filter((key) => targets[key] !== null && targets[key] !== undefined)
         .map((key) => `${key}:${num(targets[key], 1)}`);
       return parts.length ? parts.join(" ") : "-";
