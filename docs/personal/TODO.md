@@ -358,6 +358,9 @@ flowchart TD
 
 - [ ] 迁移 CarrotMan。
 - [ ] 迁移 CP搭子 / Navipilot 参数接口。
+- [x] alpha Carrot Web 新增受限 CP搭子 / Navipilot 参数接口：`GET /api/params_bulk` 和 `POST /api/param_set`，兼容 APP 读取/同值写回 `ExperimentalMode`。
+- [x] alpha 参数接口使用显式白名单；`OffroadMode`、Carrot 高风险控制、fishop 自动超车等只读或不暴露，不新增 `AlwaysOffroad` / `EnableEscc` 等混淆别名。
+- [x] alpha 参数接口 onroad 时禁止改值；`SpeedLimitMode` 通过本地 API 最高只能到 warning，不能直接启用 assist。
 - [ ] 迁移 APN/N 输入。
 - [ ] 迁移导航事件。
 - [ ] 迁移 SDI/测速摄像头数据路径。
@@ -468,6 +471,7 @@ flowchart LR
 - [ ] 静态检查 fishop 自动超车不能绕过安全变道链路。
 - [x] 静态检查 fishop 只读层没有控制输出路径，自动超车输入只记录为 read-only 证据。
 - [x] 静态检查 Carrot Web/UI 不默认加载 Mapbox/Kakao 外部地图 SDK 或 iframe 覆盖层。
+- [x] 静态检查 Carrot Web 参数接口白名单、onroad 改值保护、Offroad/fishop 高风险只读和 SpeedLimitMode assist 禁止。
 - [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
 - [ ] schema 检查通过。
 - [x] params 检查通过。
