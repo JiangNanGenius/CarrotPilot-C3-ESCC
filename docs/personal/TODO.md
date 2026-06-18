@@ -364,6 +364,9 @@ flowchart TD
 - [ ] 迁移 APN/N 输入。
 - [ ] 迁移导航事件。
 - [ ] 迁移 SDI/测速摄像头数据路径。
+- [x] alpha Carrot Web 新增只读 UDP 7706 导航输入桥，接收 Navipilot/APN 风格 JSON，写入 `CarrotNavigationEvent` 作为最近一次导航证据。
+- [x] alpha UDP 7706 / `/api/navigation_event` 只提取限速、SDI、TBT、GPS/道路文本等白名单字段；`LANECHANGE`、`OVERTAKE` 等命令只记录为 ignored evidence，不执行。
+- [x] alpha 导航输入桥会把新鲜 `nRoadLimitSpeed` / `nSdiSpeedLimit` 更新到 `CarrotPhoneSpeedLimit*`，继续由 Sunny 限速解析器做超时和来源优先级处理。
 - [ ] 迁移减速带数据路径。
 - [ ] 迁移 model speed。
 - [ ] 迁移 Carrot Web。
@@ -472,6 +475,7 @@ flowchart LR
 - [x] 静态检查 fishop 只读层没有控制输出路径，自动超车输入只记录为 read-only 证据。
 - [x] 静态检查 Carrot Web/UI 不默认加载 Mapbox/Kakao 外部地图 SDK 或 iframe 覆盖层。
 - [x] 静态检查 Carrot Web 参数接口白名单、onroad 改值保护、Offroad/fishop 高风险只读和 SpeedLimitMode assist 禁止。
+- [x] 静态检查 UDP 7706 导航输入只记录证据、更新限速，不发布控制、不接入变道/planner。
 - [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
 - [ ] schema 检查通过。
 - [x] params 检查通过。
