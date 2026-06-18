@@ -138,9 +138,9 @@
 - [x] 给只读 AmapNavi 状态桥补设备端采样和可选证据检查，不把它作为 stable 必需项。
 - [ ] 单独迁移 fishop 完整 `amap_navi.py` 或 APP/导航增强，不能整包合并。
 - [ ] 跟踪 fishop/码上飞扬最新版“车道识线 / 车道曲线”功能，确认输入来源、坐标系、刷新率、可信度字段和失败状态。
-- [ ] 跟踪 fishop/码上飞扬外接激光雷达 / 侧向感知硬件，确认左右车道数据、左右盲区数据、目标距离/速度/置信度、传感器健康状态和断线行为。
-- [ ] 新增 fishop 硬件增强输入层，先只记录和显示，不进入控制：车道曲线、左右车道边界、左右盲区、侧向目标、传感器健康。
-- [ ] 新增 fishop 硬件增强参数门控，默认全部关闭：
+- [x] 跟踪 fishop/码上飞扬外接激光雷达 / 侧向感知硬件，确认左右侧数据、左右盲区数据、目标距离/速度、传感器健康状态和断线行为；alpha 只读 parser 记录 `detect_side`、`dist_time`、`lf/lb/rf/rb_drel`、`lf/lb/rf/rb_xrel`、`lf/lb/rf/rb_vrel` 和设备在线/超时状态。
+- [x] 新增 fishop 硬件增强输入层，先只记录和显示，不进入控制：车道曲线、左右车道边界、左右盲区、侧向目标、传感器健康；alpha parser/Web/API/snapshot 均保持 `controlOutputEnabled=false`。
+- [x] 新增 fishop 硬件增强参数门控，默认全部关闭：
   - `FishopLaneCurveEnabled=0`
   - `FishopLidarLaneDataEnabled=0`
   - `FishopLidarBlindspotEnabled=0`
@@ -149,7 +149,7 @@
 - [ ] 自动超车第一阶段只做提示和日志，第二阶段只允许建议变道，第三阶段才允许受控执行；每阶段单独实车证据。
 - [ ] 国内导航 / 高德相关输入只能作为辅助来源；在澳洲或导航精度不足时，不能作为自动超车或侧向控制的唯一依据。
 - [x] alpha 设备快照和证据包新增 fishop 硬件采样：车道曲线、左右盲区、传感器在线、最近更新时间、自动超车状态。
-- [ ] fishop 最新参考入口已确认，后续迁移先审这些源码点，不按整包合并：
+- [x] fishop 最新参考入口已确认，后续迁移先审这些源码点，不按整包合并：
   - `selfdrive/carrot/amap_navi.py`: UDP 客户端、`lane`、`blindspot`、`cam_blind`、`overtake`、`navi`、`lidar` 数据通道。
   - `cereal/custom.capnp`: `CarrotMan.leftBlind/rightBlind` 和 `AmapNavi.leftBlind/rightBlind/lineValid/leftLine/rightLine`。
   - `cereal/log.capnp`: `DrivingModelData.LaneLineMeta`、`laneLines`、`roadEdges`、`laneWidthLeft/right`、`distanceToRoadEdgeLeft/right`。
@@ -394,11 +394,11 @@ flowchart TD
 
 - [x] 以最新 `fishop/cp` 为参考源，不直接整包合并；先固定审计入口：`selfdrive/carrot/amap_navi.py`、`cereal/custom.capnp`、`cereal/log.capnp`、`selfdrive/apilot.json`。
 - [ ] 研究 fishop 最新版车道识线 / 车道曲线实现，确认它是视觉、APP、雷达/激光雷达还是融合输出。
-- [ ] 研究 `lane` UDP 通道，确认 `left_lane`、`right_lane`、`lineValid` 的枚举含义、实线/虚线语义、左右方向和超时清零逻辑。
+- [x] 研究 `lane` UDP 通道，确认 `left_lane`、`right_lane`、`lineValid` 的枚举含义、实线/虚线语义、左右方向和超时清零逻辑；fishop `amap_navi.py` 使用 4213 UDP，`left_lane/right_lane < 1` 清零，`>= 1` 作为实线/阻止变道证据，3 秒 socket timeout 后 lane offline，alpha 只读 parser 1 秒内保持 fresh。
 - [ ] 研究 `max_curve`、`lat_a`、模型 `orientationRate`、`LaneLineMeta` 和 road edge 数据的关系，决定哪些只做显示，哪些可作为车道质量证据。
-- [ ] 研究 fishop 外接激光雷达左右车道数据，确认坐标系、单位、刷新率、时间戳、置信度和丢包处理。
-- [ ] 研究 fishop 外接激光雷达盲区数据，确认左右盲区、侧向目标、目标速度、距离、传感器在线和故障状态。
-- [ ] 研究 `blindspot` / `cam_blind` 数据：`lidar_lblind`、`lidar_rblind`、`lf/lb/rf/rb_drel`、`lf/lb/rf/rb_xrel`、`dist_time`、`detect_side`、`lidar_id`。
+- [x] 研究 fishop 外接激光雷达左右侧目标数据，确认坐标系、单位、刷新率、时间戳、置信度和丢包处理；drel/xrel 为毫米，前方 drel 为正、后方为负，`dist_time` 为毫秒传感器时间戳，距离数据 1 秒超时清空。
+- [x] 研究 fishop 外接激光雷达盲区数据，确认左右盲区、侧向目标、目标速度、距离、传感器在线和故障状态；`detect_side` 位 1/2 表示左/右设备在线，`lidar_lblind/rblind` 2 秒超时清空，alpha 只读 parser 记录左右 lidar/camera online 和车身盲区证据。
+- [x] 研究 `blindspot` / `cam_blind` 数据：`lidar_lblind`、`lidar_rblind`、`lf/lb/rf/rb_drel`、`lf/lb/rf/rb_xrel`、`dist_time`、`detect_side`、`lidar_id`；alpha parser 也记录 `lf/lb/rf/rb_vrel`、`left_blind/right_blind`、`lidar_car_lblind/rblind`。
 - [ ] 研究动态盲区算法，确认 `DynamicBlindRange`、`DynamicBlindDistance`、`LidarBsdDelayTime`、前后目标时距参数是否适合 Seltos 2023。
 - [x] 设计统一硬件增强消息/参数桥，先接收并记录，不进入控制。
 - [x] 新增统一状态结构候选：设备在线、最后更新时间、左右车道线类型、左右车道曲率/宽度、左右前后目标距离、左右前后目标横向距离、左右前后相对速度、左右盲区、摄像头盲区、传感器健康。
