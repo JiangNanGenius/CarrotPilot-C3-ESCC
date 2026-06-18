@@ -4,6 +4,9 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import re
+import shutil
+import subprocess
 import sys
 import types
 
@@ -150,6 +153,187 @@ def import_file(module_name: str, rel: str):
   sys.modules[module_name] = module
   spec.loader.exec_module(module)
   return module
+
+
+CAPNP_FIELD_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s+@([0-9]+)\s*(?::|;)")
+CAPNP_BLOCK_RE = re.compile(
+  r"\b(?:struct|enum)\s+([A-Za-z_][A-Za-z0-9_]*)\b|"
+  r"([A-Za-z_][A-Za-z0-9_]*)\s*:(?:group|union)\b|"
+  r"\bunion\b"
+)
+
+
+def capnp_duplicate_report(rel: str) -> str:
+  scopes: list[str] = [rel]
+  seen_names: dict[str, dict[str, int]] = {}
+  seen_tags: dict[str, dict[int, tuple[str, int]]] = {}
+
+  for line_no, raw_line in enumerate(read(rel).splitlines(), start=1):
+    code = raw_line.split("#", 1)[0].strip()
+    if not code:
+      continue
+
+    leading_closes = len(code) - len(code.lstrip("}"))
+    for _ in range(leading_closes):
+      if len(scopes) > 1:
+        scopes.pop()
+
+    match = CAPNP_FIELD_RE.match(code)
+    if match:
+      name = match.group(1)
+      tag = int(match.group(2))
+      scope = ".".join(scopes)
+      names = seen_names.setdefault(scope, {})
+      tags = seen_tags.setdefault(scope, {})
+      if name in names:
+        return f"{rel}:{line_no} duplicates field/enum name {name!r}; first seen at line {names[name]}"
+      if tag in tags:
+        first_name, first_line = tags[tag]
+        return f"{rel}:{line_no} duplicates tag @{tag}; first used by {first_name!r} at line {first_line}"
+      names[name] = line_no
+      tags[tag] = (name, line_no)
+
+    opens = code.count("{")
+    for _ in range(opens):
+      block_match = CAPNP_BLOCK_RE.search(code)
+      if block_match:
+        block_name = block_match.group(1) or block_match.group(2) or "union"
+      else:
+        block_name = f"block@{line_no}"
+      scopes.append(block_name)
+
+    trailing_closes = code.count("}") - leading_closes
+    for _ in range(max(trailing_closes, 0)):
+      if len(scopes) > 1:
+        scopes.pop()
+
+  return ""
+
+
+def check_schema_contract() -> tuple[bool, str]:
+  custom_capnp = read("cereal/custom.capnp")
+  log_capnp = read("cereal/log.capnp")
+
+  for rel in ("cereal/custom.capnp", "cereal/log.capnp"):
+    duplicate = capnp_duplicate_report(rel)
+    if duplicate:
+      return False, duplicate
+
+  expected_structs = (
+    "struct ModelManagerSP @",
+    "struct LongitudinalPlanSP @",
+    "struct CarParamsSP @",
+    "struct CarControlSP @",
+    "struct BackupManagerSP @",
+    "struct CarStateSP @",
+    "struct ModelDataV2SP @",
+  )
+  for token in expected_structs:
+    if token not in custom_capnp:
+      return False, f"custom.capnp missing {token}"
+
+  for token in (
+    "phone @3;",
+    "sourceLabel @9 :Text;",
+    "speedLimitFinal @5 :Float32;",
+    "speedLimitFinalLast @6 :Float32;",
+  ):
+    if token not in custom_capnp:
+      return False, f"custom.capnp missing speed-limit schema token {token!r}"
+
+  expected_log_fields = {
+    "modelManagerSP": "Custom.ModelManagerSP",
+    "longitudinalPlanSP": "Custom.LongitudinalPlanSP",
+    "carParamsSP": "Custom.CarParamsSP",
+    "backupManagerSP": "Custom.BackupManagerSP",
+    "carStateSP": "Custom.CarStateSP",
+    "modelDataV2SP": "Custom.ModelDataV2SP",
+  }
+  for service, schema_type in expected_log_fields.items():
+    if f"{service} @" not in log_capnp or schema_type not in log_capnp:
+      return False, f"log.capnp missing event field {service}: {schema_type}"
+
+  return True, ""
+
+
+def check_services_contract() -> tuple[bool, str]:
+  try:
+    services = import_file("alpha_cereal_services_static_check", "cereal/services.py")
+  except Exception as exc:
+    return False, f"unable to import cereal/services.py directly: {exc}"
+
+  generated_header = services.build_header()
+  checked_in_header = read("cereal/services.h")
+  if generated_header.rstrip("\n") != checked_in_header.rstrip("\n"):
+    return False, "cereal/services.h is out of sync with cereal/services.py"
+
+  service_list = services.SERVICE_LIST
+  expected = {
+    "modelManagerSP": (False, 1.0, 1, services.QueueSize.BIG),
+    "longitudinalPlanSP": (True, 20.0, 10, services.QueueSize.SMALL),
+    "carParamsSP": (True, 0.02, 1, services.QueueSize.SMALL),
+    "carStateSP": (True, 100.0, 10, services.QueueSize.SMALL),
+    "modelDataV2SP": (True, 20.0, None, services.QueueSize.BIG),
+  }
+  for name, (should_log, frequency, decimation, queue_size) in expected.items():
+    service = service_list.get(name)
+    if service is None:
+      return False, f"SERVICE_LIST missing {name}"
+    if service.should_log != should_log or abs(service.frequency - frequency) > 0.0001:
+      return False, f"{name} has unexpected logging/frequency"
+    if service.decimation != decimation or service.queue_size != queue_size:
+      return False, f"{name} has unexpected decimation/queue size"
+
+  for name in ("carState", "selfdriveState", "controlsState", "pandaStates", "modelV2", "drivingModelData", "cameraOdometry"):
+    if name not in service_list:
+      return False, f"SERVICE_LIST missing base service {name}"
+
+  return True, ""
+
+
+def check_carrot_web_asset_syntax() -> tuple[bool, str]:
+  try:
+    import yaml  # type: ignore[import-untyped]
+  except Exception as exc:
+    return False, f"PyYAML unavailable, cannot parse settings_ui_src YAML: {exc}"
+
+  json_paths = [
+    ROOT / "sunnypilot/sunnylink/settings_ui.json",
+    ROOT / "sunnypilot/sunnylink/settings_ui.schema.json",
+  ]
+  json_paths.extend((ROOT / "selfdrive/carrot").rglob("*.json"))
+  for path in json_paths:
+    try:
+      json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+      return False, f"{path.relative_to(ROOT)} is not valid JSON: {exc}"
+
+  for path in (ROOT / "sunnypilot/sunnylink/settings_ui_src").rglob("*.yaml"):
+    try:
+      yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception as exc:
+      return False, f"{path.relative_to(ROOT)} is not valid YAML: {exc}"
+
+  try:
+    compiler = import_file("alpha_settings_ui_compile_static_check", "sunnypilot/sunnylink/tools/compile_settings_ui.py")
+    compiled = compiler.compile_schema(str(ROOT / "sunnypilot/sunnylink/settings_ui_src"))
+    committed = json.loads(read("sunnypilot/sunnylink/settings_ui.json"))
+  except Exception as exc:
+    return False, f"settings_ui source compile failed: {exc}"
+  if compiled != committed:
+    return False, "settings_ui.json is out of sync with settings_ui_src"
+
+  js_paths = sorted((ROOT / "selfdrive/carrot").rglob("*.js"))
+  if js_paths:
+    node = shutil.which("node")
+    if node is None:
+      return False, "Carrot Web JS assets exist but node is unavailable for syntax checks"
+    for path in js_paths:
+      result = subprocess.run([node, "--check", str(path)], cwd=ROOT, capture_output=True, text=True, check=False)
+      if result.returncode != 0:
+        return False, f"{path.relative_to(ROOT)} failed node --check: {result.stderr.strip()}"
+
+  return True, ""
 
 
 def check_carrot_learning_runtime() -> tuple[bool, str]:
@@ -514,6 +698,8 @@ def main() -> int:
                           "local system.statsd should stay available for local-only stats evidence")
   failures += not require("local carrot web retained", 'PythonProcess("carrot_server", "selfdrive.carrot.carrot_server", always_run)' in process_config,
                           "local Carrot Web server must be registered as an always-run local process")
+  ok, detail = check_services_contract()
+  failures += not require("services contract check", ok, detail or "cereal services contract check failed")
 
   params = read("common/params_keys.h")
   failures += not require("OffroadMode param exists", '{"OffroadMode", {CLEAR_ON_MANAGER_START, BOOL}}' in params,
@@ -608,6 +794,8 @@ def main() -> int:
   failures += not require("Carrot Web local server exists", "LOCAL_WEB_PORT = 7000" in carrot_server
                           and "def make_app" in carrot_server and "web.run_app" in carrot_server,
                           "carrot_server must provide the local port-7000 aiohttp service")
+  ok, detail = check_carrot_web_asset_syntax()
+  failures += not require("Carrot Web JS/JSON/YAML syntax", ok, detail or "Carrot Web/settings UI asset syntax check failed")
   for route in ("/api/health", "/api/params_bulk", "/api/param_set", "/api/status_broadcast", "/api/carrot_learning", "/api/fishop_hardware", "/api/navigation_event", "/api/phone_speed_limit"):
     failures += not require(f"Carrot Web route exists: {route}", route in carrot_server,
                             f"carrot_server missing {route}")
@@ -858,6 +1046,8 @@ def main() -> int:
   resolver = read("sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
   common = read("sunnypilot/selfdrive/controls/lib/speed_limit/common.py")
   planner = read("sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
+  ok, detail = check_schema_contract()
+  failures += not require("schema contract check", ok, detail or "capnp schema text contract check failed")
   failures += not require("percentage speed offset exists", "percentage = 2" in common and "self.offset_value * 0.01 * self.speed_limit" in resolver,
                           "speed limit resolver must support percentage offsets")
   failures += not require("phone speed source schema", "phone @3;" in custom_capnp and "sourceLabel @9 :Text;" in custom_capnp,
