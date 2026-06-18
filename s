@@ -6,7 +6,7 @@ DEFAULT_REPO_URL="https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
 DEFAULT_REF="install-c3-escc-test"
 TEST_CHANNEL_REF="install-c3-escc-test"
 DEV_CHANNEL_REF="personal/c3-escc-atune"
-ALPHA_CHANNEL_REF="alpha-supercombo"
+ALPHA_CHANNEL_REF="alpha-sunnypilot-c3"
 STATIC_CHANNEL_REF="carrotpilot-c3-escc-20260618-static28"
 STABLE_CHANNEL_REF="install-c3-escc-stable"
 
@@ -78,7 +78,7 @@ Available channels:
 
 Notes:
   test is the current controlled-test install branch.
-  alpha is the latest-model supercombo experiment line; do not use it as a daily driving target.
+  alpha is the SunnyPilot 0.11 C3 architecture experiment line; do not use it as a daily driving target.
   stable is intentionally unavailable until the first real-car stable tag exists.
   dev follows the integration branch and is not a daily install target.
   static points at the last static-check tag and is not road-tested.
@@ -90,7 +90,7 @@ resolve_channel_ref() {
     test)
       REF="$TEST_CHANNEL_REF"
       ;;
-    alpha|experimental|supercombo)
+    alpha|experimental|sunnypilot-c3)
       REF="$ALPHA_CHANNEL_REF"
       ;;
     stable)
