@@ -834,7 +834,14 @@ def check_navigation_event_runtime() -> tuple[bool, str]:
       "nRoadLimitSpeed": 0,
       "nSdiSpeedLimit": 60,
       "nSdiDist": 240,
+      "nSdiType": 7,
+      "nSdiPlusSpeedLimit": 50,
+      "nSdiPlusDist": 600,
       "nTBTDist": 500,
+      "nTBTTurnType": 12,
+      "speedBumpDistance": 80,
+      "modelSpeedKph": 45,
+      "trafficRedLightOn": True,
       "szTBTMainTextNext": "static check",
       "latitude": 1.234567,
       "longitude": 2.345678,
@@ -847,12 +854,28 @@ def check_navigation_event_runtime() -> tuple[bool, str]:
       return False, "high-risk navigation command was not recorded as ignored evidence"
     if event.get("speedLimitKph") != 60.0 or event.get("speedLimitSourceField") != "nSdiSpeedLimit":
       return False, "navigation event did not use SDI speed fallback"
+    hazards = event.get("hazards", {})
+    if hazards.get("sdi", {}).get("type") != 7 or hazards.get("sdi", {}).get("plusDistanceM") != 600.0:
+      return False, "navigation event did not preserve SDI/plus camera hazard evidence"
+    if hazards.get("speedBump", {}).get("distanceM") != 80.0 or hazards.get("speedBump", {}).get("available") is not True:
+      return False, "navigation event did not preserve speed-bump evidence"
+    if event.get("modelSpeed", {}).get("speedKph") != 45.0 or event.get("modelSpeed", {}).get("controlOutput") is not False:
+      return False, "navigation event did not preserve read-only model speed evidence"
+    preview = event.get("controlPreview", {})
+    if preview.get("trafficStop", {}).get("candidate") is not True or preview.get("trafficStop", {}).get("controlOutput") is not False:
+      return False, "navigation event did not produce read-only traffic-stop preview"
+    if preview.get("autoTurn", {}).get("candidate") is not True or preview.get("activeSpeed", {}).get("candidate") is not True:
+      return False, "navigation event did not produce auto-turn/active-speed evidence previews"
+    if preview.get("overtake", {}).get("state") != "ignored_command" or preview.get("controlOutput") is not False:
+      return False, "navigation event must keep overtake commands as ignored read-only evidence"
     raw_speed = FakeParams.shared_store.get("CarrotPhoneSpeedLimit", b"0").decode("utf-8")
     if abs(float(raw_speed) - 16.666667) > 0.001:
       return False, "navigation event did not update phone speed limit in m/s"
     raw_event = json.loads(FakeParams.shared_store.get("CarrotNavigationEvent", b"{}").decode("utf-8"))
     if raw_event.get("ignoredCommand") != "OVERTAKE":
       return False, "CarrotNavigationEvent did not persist ignored command evidence"
+    if raw_event.get("controlOutput") is not False or raw_event.get("readOnly") is not True:
+      return False, "CarrotNavigationEvent must persist read-only/no-control boundary"
     return True, ""
   except Exception as exc:
     return False, str(exc)
@@ -914,8 +937,13 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       "nRoadLimitSpeed": 0,
       "nSdiSpeedLimit": 60,
       "nSdiDist": 240,
+      "nSdiType": 7,
+      "nSdiPlusDist": 600,
       "nTBTDist": 500,
       "nTBTTurnType": 12,
+      "speedBumpDistance": 80,
+      "modelSpeedKph": 45,
+      "trafficRedLightOn": True,
       "szTBTMainTextNext": "status check",
     }, "udp-7706")
     FakeParams.shared_store["IsOnroad"] = b"1"
@@ -965,6 +993,19 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       return False, "status payload did not expose latest navigation distances"
     if payload.get("sdi_speed") != 60 or payload.get("phoneSpeedLimitKph") != 60.0:
       return False, "status payload did not expose latest SDI/phone speed"
+    if payload.get("sdi_type") != 7 or payload.get("sdi_plus_dist") != 600.0:
+      return False, "status payload did not expose SDI type/plus-distance evidence"
+    if payload.get("speedBumpAvailable") is not True or payload.get("speedBumpDist") != 80.0:
+      return False, "status payload did not expose speed-bump evidence"
+    if payload.get("modelSpeedAvailable") is not True or payload.get("modelSpeedKph") != 45.0:
+      return False, "status payload did not expose model-speed evidence"
+    preview = payload.get("carrotControlPreview", {})
+    if preview.get("trafficStop", {}).get("controlOutput") is not False or preview.get("trafficStop", {}).get("candidate") is not True:
+      return False, "status payload did not expose read-only traffic-stop preview"
+    if preview.get("autoTurn", {}).get("candidate") is not True or preview.get("activeSpeed", {}).get("candidate") is not True:
+      return False, "status payload did not expose auto-turn/active-speed previews"
+    if payload.get("navigationHazards", {}).get("controlOutput") is not False or payload.get("navigationModelSpeed", {}).get("controlOutput") is not False:
+      return False, "status payload navigation evidence must remain read-only"
     if payload.get("phoneSpeedLimitFresh") is not True or payload.get("phoneSpeedLimitEnabled") is not True:
       return False, "status payload did not expose phone speed freshness/enabled evidence"
     if payload.get("speedLimitPolicyName") != "phone_priority" or payload.get("speedLimitModeName") != "information":
@@ -1263,7 +1304,8 @@ def main() -> int:
                           and "update_messaging_status_from_sm" in carrot_server,
                           "UDP 7705 status broadcast must read carState/selfdriveState/speed-limit state through a local SubMaster cache")
   for key in ("Carrot2", "IsOnroad", "CarrotRouteActive", "ip", "port", "navi_http_port", "navi_tcp_port", "log_carrot",
-              "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "xState", "trafficState"):
+              "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "sdi_type",
+              "speedBumpDist", "modelSpeedKph", "carrotControlPreview", "navigationHazards", "xState", "trafficState"):
     failures += not require(f"7705 status key exists: {key}", f'"{key}"' in carrot_server,
                             f"UDP 7705 status broadcast must include {key}")
   failures += not require("Carrot Web status broadcast declares compatibility boundary",
@@ -1291,6 +1333,22 @@ def main() -> int:
                           and "commandIgnored" in carrot_server and "highRiskCommandSeen" in carrot_server
                           and "HIGH_RISK_NAV_COMMANDS" in carrot_server,
                           "navigation input must record commands as ignored evidence, not execute them")
+  failures += not require("Carrot Web navigation evidence covers hazards and model speed",
+                          "NAVIGATION_SPEED_BUMP_DISTANCE_FIELDS" in carrot_server
+                          and "NAVIGATION_MODEL_SPEED_KPH_FIELDS" in carrot_server
+                          and '"hazards": hazards' in carrot_server
+                          and '"modelSpeed": model_speed' in carrot_server
+                          and '"controlPreview"' in carrot_server,
+                          "navigation input must preserve SDI, speed-bump, model-speed, and control-preview evidence")
+  failures += not require("Carrot Web navigation evidence panel",
+                          'id="navigation-panel"' in carrot_server
+                          and "refreshNavigationEvidence" in carrot_server
+                          and 'fetch("/api/navigation_event", {cache: "no-store"})' in carrot_server
+                          and 'id="navigation-speed-bump"' in carrot_server
+                          and 'id="navigation-model-speed"' in carrot_server
+                          and 'id="navigation-traffic-stop"' in carrot_server
+                          and 'id="navigation-active-speed"' in carrot_server,
+                          "Carrot Web home page must expose read-only navigation, speed-bump, model-speed, and control-preview evidence")
   failures += not require("Carrot Web navigation HTTP compatibility exists",
                           '"/api/navi/{tmap_version}"' in carrot_server
                           and '"/api/navi"' in carrot_server
@@ -1444,6 +1502,13 @@ def main() -> int:
                           "alpha snapshot must summarize Auto-Tuner state")
   failures += not require("alpha snapshot records navigation event", '"CarrotNavigationEvent"' in alpha_snapshot,
                           "alpha snapshot must include the latest sanitized navigation event")
+  failures += not require("alpha snapshot summarizes navigation evidence",
+                          "def summarize_navigation_event" in alpha_snapshot
+                          and '"navigationEvidence": summarize_navigation_event()' in alpha_snapshot
+                          and '"hazards": hazards' in alpha_snapshot
+                          and '"modelSpeed": model_speed' in alpha_snapshot
+                          and '"controlPreview": control_preview' in alpha_snapshot,
+                          "alpha snapshot must summarize SDI, speed-bump, model-speed, and read-only control-preview evidence")
   failures += not require("alpha snapshot records speed-limit evidence",
                           '"speedLimitEvidence"' in alpha_snapshot
                           and "summarize_speed_limit" in alpha_snapshot

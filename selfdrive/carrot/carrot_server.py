@@ -123,6 +123,7 @@ NAVIGATION_NUMERIC_FIELDS = (
   "nSdiDist",
   "nSdiPlusType",
   "nSdiPlusSpeedLimit",
+  "nSdiPlusDist",
   "nTBTDist",
   "nTBTTurnType",
   "nTBTDistNext",
@@ -135,11 +136,25 @@ NAVIGATION_NUMERIC_FIELDS = (
   "longitude",
 )
 
+NAVIGATION_BOOLEAN_FIELDS = (
+  "trafficRedLightOn",
+  "trafficGreenLightOn",
+  "redLightOn",
+  "greenLightOn",
+  "leftLightOn",
+  "speedBump",
+  "speedBumpValid",
+  "schoolZone",
+  "childrenProtectionZone",
+)
+
 NAVIGATION_TEXT_FIELDS = (
   "szTBTMainText",
   "szTBTMainTextNext",
   "roadName",
   "currentRoadName",
+  "trafficStraight",
+  "trafficLeft",
 )
 
 NAVIGATION_COMMAND_FIELDS = (
@@ -152,6 +167,30 @@ HIGH_RISK_NAV_COMMANDS = (
   "LANE_CHANGE",
   "OVERTAKE",
   "AUTO_OVERTAKE",
+)
+
+NAVIGATION_SPEED_BUMP_DISTANCE_FIELDS = (
+  "nSpeedBumpDist",
+  "nSpeedBumpDistance",
+  "speedBumpDist",
+  "speedBumpDistance",
+  "bumpDist",
+  "bumpDistance",
+)
+
+NAVIGATION_MODEL_SPEED_KPH_FIELDS = (
+  "modelSpeedKph",
+  "modelSpeedLimitKph",
+  "modelSpeed",
+  "modelSpeedLimit",
+  "modelTargetSpeed",
+)
+
+NAVIGATION_MODEL_SPEED_MS_FIELDS = (
+  "modelSpeedMS",
+  "modelSpeedMps",
+  "modelSpeedLimitMS",
+  "modelSpeedLimitMps",
 )
 
 ACTION_PARAMS = {
@@ -264,6 +303,16 @@ def _param_int(params: Any | None, key: str, default: int = 0) -> int:
     return int(params.get_int(key))
   except Exception:
     return int(_as_float(_params_get(params, key, default), float(default)))
+
+
+def _param_bool(params: Any | None, key: str, default: bool = False) -> bool:
+  if params is None:
+    return default
+  try:
+    return bool(params.get_bool(key))
+  except Exception:
+    raw = _params_get(params, key, "1" if default else "0")
+    return _as_bool(raw)
 
 
 def _clamp_param(key: str, value: Any) -> int:
@@ -410,37 +459,218 @@ def _safe_navigation_text(value: Any) -> str:
   return text[:120]
 
 
-def _navigation_payload_event(payload: dict[str, Any], source: str) -> dict[str, Any]:
+def _navigation_payload_candidates(payload: dict[str, Any]) -> Iterable[dict[str, Any]]:
+  yield payload
+  for key in ("payload", "navigation", "nav", "data", "rgdata", "sinf", "ssinf"):
+    nested = payload.get(key)
+    if isinstance(nested, dict):
+      yield nested
+
+
+def _navigation_value(candidates: Iterable[dict[str, Any]], key: str) -> Any:
+  for candidate in candidates:
+    if key in candidate:
+      return candidate.get(key)
+  return None
+
+
+def _navigation_numeric_value(candidates: Iterable[dict[str, Any]], keys: Iterable[str], default: float = 0.0) -> tuple[float, str]:
+  for key in keys:
+    value = _navigation_value(candidates, key)
+    if value is None:
+      continue
+    return _as_float(value, default), key
+  return default, ""
+
+
+def _navigation_bool_value(candidates: Iterable[dict[str, Any]], keys: Iterable[str]) -> bool:
+  for key in keys:
+    value = _navigation_value(candidates, key)
+    if value is not None:
+      return _as_bool(value)
+  return False
+
+
+def _navigation_model_speed(candidates: list[dict[str, Any]]) -> dict[str, Any]:
+  speed_ms, source_field = _navigation_numeric_value(candidates, NAVIGATION_MODEL_SPEED_MS_FIELDS, -1.0)
+  speed_kph = speed_ms / KPH_TO_MS if speed_ms > 0.0 else 0.0
+  if speed_kph <= 0.0:
+    speed_kph, source_field = _navigation_numeric_value(candidates, NAVIGATION_MODEL_SPEED_KPH_FIELDS, -1.0)
+  valid = speed_kph > 0.0 and speed_kph <= PHONE_SPEED_LIMIT_MAX_KPH
+  return {
+    "available": valid,
+    "speedKph": round(speed_kph, 3) if valid else 0.0,
+    "sourceField": source_field if valid else "",
+    "readOnly": True,
+    "controlOutput": False,
+  }
+
+
+def _navigation_hazard_evidence(candidates: list[dict[str, Any]], numeric: dict[str, float | int]) -> dict[str, Any]:
+  speed_bump_distance, speed_bump_field = _navigation_numeric_value(candidates, NAVIGATION_SPEED_BUMP_DISTANCE_FIELDS, 0.0)
+  explicit_speed_bump = _navigation_bool_value(candidates, ("speedBump", "speedBumpValid"))
+  sdi_dist = _as_float(numeric.get("nSdiDist"), 0.0)
+  sdi_speed = _as_float(numeric.get("nSdiSpeedLimit"), 0.0)
+  sdi_type = int(_as_float(numeric.get("nSdiType"), 0.0))
+  plus_dist = _as_float(numeric.get("nSdiPlusDist"), 0.0)
+  plus_speed = _as_float(numeric.get("nSdiPlusSpeedLimit"), 0.0)
+  plus_type = int(_as_float(numeric.get("nSdiPlusType"), 0.0))
+  return {
+    "sdi": {
+      "available": sdi_dist > 0.0 or sdi_speed > 0.0 or sdi_type > 0,
+      "type": sdi_type,
+      "speedLimitKph": round(sdi_speed, 3) if sdi_speed > 0.0 else 0.0,
+      "distanceM": round(sdi_dist, 3) if sdi_dist > 0.0 else 0.0,
+      "plusType": plus_type,
+      "plusSpeedLimitKph": round(plus_speed, 3) if plus_speed > 0.0 else 0.0,
+      "plusDistanceM": round(plus_dist, 3) if plus_dist > 0.0 else 0.0,
+    },
+    "speedBump": {
+      "available": explicit_speed_bump or speed_bump_distance > 0.0,
+      "distanceM": round(speed_bump_distance, 3) if speed_bump_distance > 0.0 else 0.0,
+      "sourceField": speed_bump_field,
+    },
+    "schoolZone": {
+      "available": _navigation_bool_value(candidates, ("schoolZone", "childrenProtectionZone")),
+    },
+    "readOnly": True,
+    "controlOutput": False,
+  }
+
+
+def _traffic_light_state(candidates: list[dict[str, Any]], text: dict[str, str]) -> dict[str, Any]:
+  straight = (text.get("trafficStraight") or "").upper()
+  left = (text.get("trafficLeft") or "").upper()
+  red = (
+    _navigation_bool_value(candidates, ("trafficRedLightOn", "redLightOn"))
+    or straight == "RED_LIGHT_ON"
+  )
+  green = (
+    _navigation_bool_value(candidates, ("trafficGreenLightOn", "greenLightOn"))
+    or straight == "GREEN_LIGHT_ON"
+  )
+  left_green = _navigation_bool_value(candidates, ("leftLightOn",)) or left == "GREEN_LIGHT_ON"
+  return {
+    "red": red,
+    "green": green,
+    "leftGreen": left_green,
+    "straight": straight,
+    "left": left,
+  }
+
+
+def _navigation_control_preview(params: Any | None, event: dict[str, Any], traffic: dict[str, Any]) -> dict[str, Any]:
+  numeric = event.get("numeric", {}) if isinstance(event.get("numeric"), dict) else {}
+  hazards = event.get("hazards", {}) if isinstance(event.get("hazards"), dict) else {}
+  model_speed = event.get("modelSpeed", {}) if isinstance(event.get("modelSpeed"), dict) else {}
+  sdi = hazards.get("sdi", {}) if isinstance(hazards.get("sdi"), dict) else {}
+  speed_bump = hazards.get("speedBump", {}) if isinstance(hazards.get("speedBump"), dict) else {}
+  tbt_dist = _as_float(numeric.get("nTBTDist"), 0.0)
+  turn_type = int(_as_float(numeric.get("nTBTTurnType"), 0.0))
+  next_turn_type = int(_as_float(numeric.get("nTBTTurnTypeNext"), 0.0))
+  speed_limit_kph = _as_float(event.get("speedLimitKph"), 0.0)
+
+  traffic_stop_enabled = _param_bool(params, "CarrotTrafficStopEnabled", False)
+  auto_turn_enabled = _param_bool(params, "CarrotAutoTurnControlEnabled", False)
+  active_speed_enabled = _param_bool(params, "CarrotActiveSpeedControlEnabled", False)
+  overtake_enabled = _param_bool(params, "FishopAutoOvertakeEnabled", False)
+
+  traffic_candidate = bool(traffic.get("red")) and tbt_dist > 0.0
+  turn_candidate = tbt_dist > 0.0 and (turn_type > 0 or next_turn_type > 0)
+  active_speed_candidate = speed_limit_kph > 0.0 or _as_float(sdi.get("speedLimitKph"), 0.0) > 0.0 or bool(model_speed.get("available"))
+  speed_bump_candidate = bool(speed_bump.get("available"))
+
+  return {
+    "trafficStop": {
+      "enabledParam": traffic_stop_enabled,
+      "candidate": traffic_candidate,
+      "redLightInput": bool(traffic.get("red")),
+      "greenLightInput": bool(traffic.get("green")),
+      "distanceM": round(tbt_dist, 3) if tbt_dist > 0.0 else 0.0,
+      "state": "disabled_default" if not traffic_stop_enabled else "blocked_real_car_gate",
+      "controlOutput": False,
+    },
+    "autoTurn": {
+      "enabledParam": auto_turn_enabled,
+      "candidate": turn_candidate,
+      "turnType": turn_type,
+      "nextTurnType": next_turn_type,
+      "distanceM": round(tbt_dist, 3) if tbt_dist > 0.0 else 0.0,
+      "state": "disabled_default" if not auto_turn_enabled else "blocked_real_car_gate",
+      "controlOutput": False,
+    },
+    "activeSpeed": {
+      "enabledParam": active_speed_enabled,
+      "candidate": active_speed_candidate or speed_bump_candidate,
+      "phoneOrSdiSpeedLimitKph": round(speed_limit_kph or _as_float(sdi.get("speedLimitKph"), 0.0), 3),
+      "modelSpeedKph": model_speed.get("speedKph", 0.0),
+      "speedBumpInput": speed_bump_candidate,
+      "state": "display_only",
+      "controlOutput": False,
+    },
+    "overtake": {
+      "enabledParam": overtake_enabled,
+      "commandIgnored": bool(event.get("commandIgnored", False)),
+      "highRiskCommandSeen": bool(event.get("highRiskCommandSeen", False)),
+      "state": "ignored_command" if event.get("highRiskCommandSeen") else "no_command",
+      "controlOutput": False,
+    },
+    "readOnly": True,
+    "controlOutput": False,
+    "requiresRealCarEvidence": True,
+  }
+
+
+def _navigation_payload_event(payload: dict[str, Any], source: str, params: Any | None = None) -> dict[str, Any]:
+  candidates = list(_navigation_payload_candidates(payload))
   numeric: dict[str, float | int] = {}
+  booleans: dict[str, bool] = {}
   text: dict[str, str] = {}
   for key in NAVIGATION_NUMERIC_FIELDS:
-    if key not in payload:
+    value = _navigation_value(candidates, key)
+    if value is None:
       continue
-    value = _as_float(payload.get(key), 0.0)
+    value = _as_float(value, 0.0)
     numeric[key] = int(value) if float(value).is_integer() else round(value, 7)
+  for key in NAVIGATION_BOOLEAN_FIELDS:
+    value = _navigation_value(candidates, key)
+    if value is not None:
+      booleans[key] = _as_bool(value)
   for key in NAVIGATION_TEXT_FIELDS:
-    if key in payload:
-      text[key] = _safe_navigation_text(payload.get(key))
+    value = _navigation_value(candidates, key)
+    if value is not None:
+      text[key] = _safe_navigation_text(value)
 
-  command = _safe_navigation_text(payload.get(NAVIGATION_COMMAND_FIELDS[0], ""))
-  command_arg = _safe_navigation_text(payload.get(NAVIGATION_COMMAND_FIELDS[1], ""))
+  command = _safe_navigation_text(_navigation_value(candidates, NAVIGATION_COMMAND_FIELDS[0]) or "")
+  command_arg = _safe_navigation_text(_navigation_value(candidates, NAVIGATION_COMMAND_FIELDS[1]) or "")
   command_upper = command.upper()
   ignored_command = bool(command or command_arg)
   high_risk_command = command_upper in HIGH_RISK_NAV_COMMANDS
 
   speed_kph, speed_field = _extract_phone_speed_kph(payload)
-  return {
+  hazards = _navigation_hazard_evidence(candidates, numeric)
+  model_speed = _navigation_model_speed(candidates)
+  traffic = _traffic_light_state(candidates, text)
+  event = {
     "updatedAt": time.time(),
     "source": _safe_source_text(source),
     "numeric": numeric,
+    "booleans": booleans,
     "text": text,
+    "hazards": hazards,
+    "modelSpeed": model_speed,
+    "trafficLight": traffic,
     "speedLimitKph": round(speed_kph, 3) if speed_kph is not None else 0.0,
     "speedLimitSourceField": speed_field,
     "commandIgnored": ignored_command,
     "highRiskCommandSeen": high_risk_command,
     "ignoredCommand": command,
     "ignoredCommandArg": command_arg,
+    "readOnly": True,
+    "controlOutput": False,
   }
+  event["controlPreview"] = _navigation_control_preview(params, event, traffic)
+  return event
 
 
 def navigation_event_state() -> dict[str, Any]:
@@ -463,7 +693,7 @@ def record_navigation_event(payload: dict[str, Any], source: str = "api") -> dic
   if params is None:
     raise RuntimeError(f"Params unavailable: {error}")
 
-  event = _navigation_payload_event(payload, source)
+  event = _navigation_payload_event(payload, source, params)
   params.put("CarrotNavigationEvent", event)
   phone_result: dict[str, Any] = {"accepted": False}
   try:
@@ -497,6 +727,33 @@ def _status_payload_navigation_fields(event: dict[str, Any]) -> dict[str, Any]:
     "tbt_turn_type": int(_as_float(numeric.get("nTBTTurnType"), 0.0)),
     "tbt_next_turn_type": int(_as_float(numeric.get("nTBTTurnTypeNext"), 0.0)),
     "tbt_main_text": _safe_navigation_text(text.get("szTBTMainTextNext") or text.get("szTBTMainText") or ""),
+  }
+
+
+def _status_payload_navigation_evidence(event: dict[str, Any]) -> dict[str, Any]:
+  hazards = event.get("hazards") if isinstance(event, dict) else {}
+  model_speed = event.get("modelSpeed") if isinstance(event, dict) else {}
+  control_preview = event.get("controlPreview") if isinstance(event, dict) else {}
+  traffic = event.get("trafficLight") if isinstance(event, dict) else {}
+  hazards = hazards if isinstance(hazards, dict) else {}
+  model_speed = model_speed if isinstance(model_speed, dict) else {}
+  control_preview = control_preview if isinstance(control_preview, dict) else {}
+  traffic = traffic if isinstance(traffic, dict) else {}
+  speed_bump = hazards.get("speedBump") if isinstance(hazards.get("speedBump"), dict) else {}
+  sdi = hazards.get("sdi") if isinstance(hazards.get("sdi"), dict) else {}
+  return {
+    "hazards": hazards,
+    "modelSpeed": model_speed,
+    "controlPreview": control_preview,
+    "trafficLight": traffic,
+    "speedBumpDistanceM": _as_float(speed_bump.get("distanceM"), 0.0),
+    "speedBumpAvailable": bool(speed_bump.get("available", False)),
+    "modelSpeedKph": _as_float(model_speed.get("speedKph"), 0.0),
+    "modelSpeedAvailable": bool(model_speed.get("available", False)),
+    "sdiType": int(_as_float(sdi.get("type"), 0.0)),
+    "sdiPlusDistanceM": _as_float(sdi.get("plusDistanceM"), 0.0),
+    "controlOutput": False,
+    "readOnly": True,
   }
 
 
@@ -628,6 +885,7 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None,
   event_state = navigation_event_state()
   event = event_state.get("event", {}) if isinstance(event_state, dict) else {}
   nav_fields = _status_payload_navigation_fields(event if isinstance(event, dict) else {})
+  nav_evidence = _status_payload_navigation_evidence(event if isinstance(event, dict) else {})
   runtime_status = {**default_messaging_status(), **(runtime_status or {})}
   navi_http_status = {**default_navi_http_state(), **(navi_http_status or {})}
   navi_tcp_status = {**default_navi_tcp_state(), **(navi_tcp_status or {})}
@@ -670,6 +928,16 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None,
     "tbt_main_text": nav_fields["tbt_main_text"],
     "carrotRouteAgeSec": nav_fields["route_age_sec"],
     "carrotRouteMaxAgeSec": NAVIGATION_ROUTE_MAX_AGE_S,
+    "sdi_type": nav_evidence["sdiType"],
+    "sdi_plus_dist": nav_evidence["sdiPlusDistanceM"],
+    "speedBumpDist": nav_evidence["speedBumpDistanceM"],
+    "speedBumpAvailable": nav_evidence["speedBumpAvailable"],
+    "modelSpeedKph": nav_evidence["modelSpeedKph"],
+    "modelSpeedAvailable": nav_evidence["modelSpeedAvailable"],
+    "trafficLight": nav_evidence["trafficLight"],
+    "carrotControlPreview": nav_evidence["controlPreview"],
+    "navigationHazards": nav_evidence["hazards"],
+    "navigationModelSpeed": nav_evidence["modelSpeed"],
     "phoneSpeedLimitKph": speed_limit_state.get("speedLimitKph", 0.0),
     "phoneSpeedLimitSource": speed_limit_state.get("source", ""),
     "phoneSpeedLimitFresh": bool(speed_limit_state.get("fresh", False)),
@@ -1266,6 +1534,8 @@ async def api_health(_request: web.Request) -> web.Response:
   messaging_state = _request.app["messaging_status_state"]
   navi_http_state = _request.app["navi_http_state"]
   navi_tcp_state = _request.app["navi_tcp_state"]
+  nav_state = navigation_event_state()
+  nav_event = nav_state.get("event", {}) if isinstance(nav_state, dict) else {}
   return _json_response({
     "ok": True,
     "service": "carrot_server",
@@ -1279,6 +1549,7 @@ async def api_health(_request: web.Request) -> web.Response:
     "messagingLastUpdateAt": float(messaging_state.get("lastUpdateAt", 0.0)),
     "messagingLastError": str(messaging_state.get("lastError", "")),
     "speedLimitEvidence": speed_limit_evidence_state(messaging_state),
+    "navigationEvidence": _status_payload_navigation_evidence(nav_event if isinstance(nav_event, dict) else {}),
     "navigationUdpPort": NAVIGATION_UDP_PORT,
     "navigationUdpError": udp_error,
     "navigationUdpLastError": udp_last_error,
@@ -1513,6 +1784,19 @@ async def index(_request: web.Request) -> web.Response:
       <div class="metric"><span class="label">fishop hardware</span><span class="value">lane, lidar, blindspot, and overtake inputs are evidence-only</span></div>
       <div class="metric"><span class="label">Carrot control</span><span class="value">traffic stop, auto turn, active speed, and overtake control outputs stay disabled</span></div>
     </section>
+    <section id="navigation-panel">
+      <h2>Navigation Evidence</h2>
+      <div class="metric"><span class="label">State</span><span class="value"><span id="navigation-state" class="pill off">loading</span></span></div>
+      <div class="metric"><span class="label">Source</span><span class="value" id="navigation-source">-</span></div>
+      <div class="metric"><span class="label">SDI</span><span class="value" id="navigation-sdi">-</span></div>
+      <div class="metric"><span class="label">Speed bump</span><span class="value" id="navigation-speed-bump">-</span></div>
+      <div class="metric"><span class="label">Model speed</span><span class="value" id="navigation-model-speed">-</span></div>
+      <div class="metric"><span class="label">Traffic stop</span><span class="value" id="navigation-traffic-stop">-</span></div>
+      <div class="metric"><span class="label">Auto turn</span><span class="value" id="navigation-auto-turn">-</span></div>
+      <div class="metric"><span class="label">Active speed</span><span class="value" id="navigation-active-speed">-</span></div>
+      <div class="metric"><span class="label">Command boundary</span><span class="value" id="navigation-command-boundary">read-only</span></div>
+      <p id="navigation-error"></p>
+    </section>
     <section id="fishop-panel">
       <h2>fishop Hardware</h2>
       <div class="metric"><span class="label">State</span><span class="value"><span id="fishop-state" class="pill off">loading</span></span></div>
@@ -1618,6 +1902,12 @@ async def index(_request: web.Request) -> web.Response:
       const reasons = Array.isArray(preview.reasons) ? preview.reasons.slice(0, 2) : [];
       return reasons.length ? `blocked: ${reasons.join("; ")}` : "blocked";
     };
+    const controlStateSummary = (preview = {}) => {
+      const state = preview.state || "display_only";
+      const candidate = preview.candidate ? "candidate" : "idle";
+      const enabled = preview.enabledParam ? "param on" : "default off";
+      return `${state} / ${candidate} / ${enabled}`;
+    };
     const timeText = (value) => {
       const timestamp = Number(value);
       return Number.isFinite(timestamp) && timestamp > 0 ? new Date(timestamp * 1000).toLocaleString() : "-";
@@ -1678,6 +1968,31 @@ async def index(_request: web.Request) -> web.Response:
         list.appendChild(row);
       }
     };
+    const renderNavigationEvidence = (data = {}) => {
+      const event = data.event || {};
+      const hazards = event.hazards || {};
+      const sdi = hazards.sdi || {};
+      const speedBump = hazards.speedBump || {};
+      const modelSpeed = event.modelSpeed || {};
+      const preview = event.controlPreview || {};
+      const command = preview.overtake || {};
+      if (!data.hasParams) {
+        setPill("navigation-state", "unavailable", "warn");
+      } else if (event.updatedAt) {
+        setPill("navigation-state", "recorded", "ok");
+      } else {
+        setPill("navigation-state", "empty", "off");
+      }
+      setText("navigation-source", `${event.source || "-"} @ ${timeText(event.updatedAt)}`);
+      setText("navigation-sdi", sdi.available ? `type ${sdi.type || 0}, ${num(sdi.speedLimitKph, 0)} kph, ${num(sdi.distanceM, 0)} m` : "-");
+      setText("navigation-speed-bump", speedBump.available ? `${num(speedBump.distanceM, 0)} m via ${speedBump.sourceField || "flag"}` : "-");
+      setText("navigation-model-speed", modelSpeed.available ? `${num(modelSpeed.speedKph, 0)} kph via ${modelSpeed.sourceField || "-"}` : "-");
+      setText("navigation-traffic-stop", controlStateSummary(preview.trafficStop || {}));
+      setText("navigation-auto-turn", controlStateSummary(preview.autoTurn || {}));
+      setText("navigation-active-speed", controlStateSummary(preview.activeSpeed || {}));
+      setText("navigation-command-boundary", command.highRiskCommandSeen ? `ignored ${event.ignoredCommand || "command"}` : "read-only");
+      setText("navigation-error", data.error || "");
+    };
     const renderAutoTuner = (data = {}) => {
       if (!data.hasParams) {
         setPill("auto-tuner-state", "unavailable", "warn");
@@ -1709,6 +2024,16 @@ async def index(_request: web.Request) -> web.Response:
       } catch (err) {
         setPill("auto-tuner-state", "error", "warn");
         setText("auto-tuner-error", String(err).slice(0, 160));
+      }
+    }
+    async function refreshNavigationEvidence() {
+      try {
+        const response = await fetch("/api/navigation_event", {cache: "no-store"});
+        const data = await response.json();
+        renderNavigationEvidence(data);
+      } catch (err) {
+        setPill("navigation-state", "error", "warn");
+        setText("navigation-error", String(err).slice(0, 160));
       }
     }
     async function postAutoTunerAction(action) {
@@ -1774,6 +2099,8 @@ async def index(_request: web.Request) -> web.Response:
     }
     refreshAutoTuner();
     setInterval(refreshAutoTuner, 5000);
+    refreshNavigationEvidence();
+    setInterval(refreshNavigationEvidence, 1000);
     refreshFishopHardware();
     setInterval(refreshFishopHardware, 1000);
   </script>
