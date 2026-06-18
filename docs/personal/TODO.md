@@ -479,7 +479,7 @@ flowchart LR
 - [x] 静态检查 Non-SCC Seltos 不参与匹配。
 - [x] 静态检查 ESCC 0x2AB 自动置 flag。
 - [x] 静态检查 fishop 硬件增强和自动超车参数默认关闭。
-- [ ] 静态检查 fishop 自动超车不能绕过安全变道链路。
+- [x] 静态检查 fishop 自动超车不能绕过安全变道链路：当前 alpha 要求 `FishopAutoOvertakeEnabled` 不进入 control/car 输出面，`OVERTAKE` / `AUTO_OVERTAKE` 只作为 ignored evidence，fishop 解析器不得引用 desire、planner、CarControl、sendcan 或转向灯/盲区控制字段。
 - [x] 静态检查 fishop 只读层没有控制输出路径，自动超车输入只记录为 read-only 证据。
 - [x] 静态检查 Carrot Web/UI 不默认加载 Mapbox/Kakao 外部地图 SDK 或 iframe 覆盖层。
 - [x] 静态检查 Carrot Web 参数接口白名单、onroad 改值保护、Offroad/fishop 高风险只读和 SpeedLimitMode assist 禁止。
