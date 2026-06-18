@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import datetime as dt
+import hashlib
 import json
 import sys
 import time
@@ -31,9 +32,10 @@ MESSAGING_STATUS_SERVICES = (
 )
 MESSAGING_STATUS_INTERVAL_S = 0.2
 NAVIGATION_UDP_PORT = 7706
-# Old CarrotMan advertises a 7713 navigation HTTP service. Keep the key in 7705
-# discovery, but report 0 until that server is deliberately migrated.
-NAVI_HTTP_PORT = 0
+NAVI_HTTP_PORT = 7713
+NAVI_HTTP_MAX_BODY_SIZE = 16 * 1024 * 1024
+NAVI_EVENT_TYPES = ("complexCrossroad", "rgdata", "vrtx", "ssinf", "sinf", "route")
+NAVI_IMAGE_BASE64_MAX_CHARS = 6 * 1024 * 1024
 NAVIGATION_ROUTE_MAX_AGE_S = 30.0
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_FISHOP_JSONL = Path("/data/fishop_hardware.jsonl")
@@ -589,12 +591,14 @@ def update_messaging_status_from_sm(sm: Any) -> dict[str, Any]:
   }
 
 
-def build_status_payload(runtime_status: dict[str, Any] | None = None) -> dict[str, Any]:
+def build_status_payload(runtime_status: dict[str, Any] | None = None, navi_http_status: dict[str, Any] | None = None) -> dict[str, Any]:
   params, _error = _params_state()
   event_state = navigation_event_state()
   event = event_state.get("event", {}) if isinstance(event_state, dict) else {}
   nav_fields = _status_payload_navigation_fields(event if isinstance(event, dict) else {})
   runtime_status = {**default_messaging_status(), **(runtime_status or {})}
+  navi_http_status = {**default_navi_http_state(), **(navi_http_status or {})}
+  navi_http_available = bool(navi_http_status.get("available", False))
 
   is_onroad = bool(params.get_bool("IsOnroad")) if params is not None else bool(runtime_status.get("isOnroad", False))
   active = bool(runtime_status.get("active", False))
@@ -607,8 +611,9 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None) -> dict[s
     "ip": DEFAULT_HOST,
     "port": NAVIGATION_UDP_PORT,
     "navi_debug": 0,
-    "navi_http_port": NAVI_HTTP_PORT,
-    "naviHttpAvailable": NAVI_HTTP_PORT > 0,
+    "navi_http_port": NAVI_HTTP_PORT if navi_http_available else 0,
+    "naviHttpAvailable": navi_http_available,
+    "naviHttpLastError": str(navi_http_status.get("lastError", "")),
     "carrotManCompatible": True,
     "carrotManControlStateAvailable": False,
     "active": active,
@@ -918,6 +923,187 @@ def _payloads_from_lines(lines: Iterable[str]) -> Iterable[dict[str, Any]]:
           yield item
 
 
+def default_navi_http_state() -> dict[str, Any]:
+  return {
+    "available": False,
+    "port": NAVI_HTTP_PORT,
+    "lastError": "",
+    "lastEvent": {},
+    "lastReceivedAt": 0.0,
+    "receivedTypes": {},
+  }
+
+
+def _detect_navi_event_type(payload: Any) -> str:
+  if not isinstance(payload, dict):
+    return "unknown"
+  for key in NAVI_EVENT_TYPES:
+    if payload.get(key) is not None:
+      return key
+  return "unknown"
+
+
+def _navi_event_timestamp_ms(payload: dict[str, Any]) -> int:
+  try:
+    return int(_as_float(payload.get("timestamp_ms") or payload.get("timestamp"), 0.0))
+  except Exception:
+    return 0
+
+
+def _navi_route_count(value: Any) -> int:
+  if isinstance(value, list):
+    return len(value)
+  if isinstance(value, dict):
+    for key in ("points", "coordinates", "route", "vrtx"):
+      nested = value.get(key)
+      if isinstance(nested, list):
+        return len(nested)
+  return 0
+
+
+def _navi_http_summary(payload: dict[str, Any], event_type: str) -> dict[str, Any]:
+  summary: dict[str, Any] = {"type": event_type}
+  event_payload = payload.get(event_type) if event_type in payload else payload
+  if event_type == "rgdata" and isinstance(event_payload, dict):
+    summary.update({
+      "lat": event_payload.get("vpPosPointLat") or event_payload.get("latitude"),
+      "lon": event_payload.get("vpPosPointLon") or event_payload.get("longitude"),
+      "roadLimitSpeed": event_payload.get("nRoadLimitSpeed"),
+      "tbtDist": event_payload.get("nTBTDist"),
+      "sdiType": event_payload.get("nSdiType"),
+      "sdiSpeedLimit": event_payload.get("nSdiSpeedLimit"),
+      "sdiDist": event_payload.get("nSdiDist"),
+    })
+  elif event_type in ("vrtx", "route"):
+    summary["routePointCount"] = _navi_route_count(event_payload)
+  elif event_type in ("sinf", "ssinf") and isinstance(event_payload, dict):
+    summary.update({
+      "distance": event_payload.get("distance"),
+      "redLightOn": event_payload.get("redLightOn") or event_payload.get("straight") == "RED_LIGHT_ON",
+      "greenLightOn": event_payload.get("greenLightOn") or event_payload.get("straight") == "GREEN_LIGHT_ON",
+      "leftLightOn": event_payload.get("leftLightOn") or event_payload.get("left") == "GREEN_LIGHT_ON",
+    })
+  elif event_type == "complexCrossroad" and isinstance(event_payload, dict):
+    image_base64 = event_payload.get("imageBase64")
+    image_hash = ""
+    if isinstance(image_base64, str) and image_base64:
+      digest = hashlib.sha256()
+      for index in range(0, len(image_base64), 65536):
+        digest.update(image_base64[index:index + 65536].encode("ascii", "ignore"))
+      image_hash = digest.hexdigest()[:16]
+    summary.update({
+      "show": bool(event_payload.get("show", False)),
+      "imageUrl": str(event_payload.get("imageUrl", ""))[:200],
+      "imageMime": str(event_payload.get("imageMime", ""))[:64],
+      "imageWidth": int(_as_float(event_payload.get("imageWidth"), 0.0)),
+      "imageHeight": int(_as_float(event_payload.get("imageHeight"), 0.0)),
+      "hasImageBase64": isinstance(image_base64, str) and bool(image_base64),
+      "imageBase64Size": len(image_base64) if isinstance(image_base64, str) else 0,
+      "imageHash": image_hash,
+    })
+  else:
+    summary["keys"] = list(payload.keys())[:10]
+  return summary
+
+
+def _navigation_payload_from_navi_http(payload: dict[str, Any], event_type: str) -> dict[str, Any]:
+  if event_type == "rgdata" and isinstance(payload.get("rgdata"), dict):
+    return dict(payload["rgdata"])
+  if event_type == "sinf" and isinstance(payload.get("sinf"), dict):
+    sinf = payload["sinf"]
+    return {
+      "nTBTDist": sinf.get("distance", 0),
+      "trafficRedLightOn": bool(sinf.get("redLightOn", False)),
+      "trafficGreenLightOn": bool(sinf.get("greenLightOn", False)),
+      "source": "http-7713-sinf",
+    }
+  if event_type == "ssinf" and isinstance(payload.get("ssinf"), dict):
+    ssinf = payload["ssinf"]
+    return {
+      "nTBTDist": ssinf.get("distance", 0),
+      "trafficStraight": ssinf.get("straight", ""),
+      "trafficLeft": ssinf.get("left", ""),
+      "source": "http-7713-ssinf",
+    }
+  return dict(payload)
+
+
+def _write_navi_http_params(payload: dict[str, Any], event: dict[str, Any], image: dict[str, Any] | None) -> bool:
+  params, _error = _params_state()
+  if params is None:
+    return False
+  params.put("CarrotNaviEvent", event)
+  params.put("CarrotNaviDebug", {
+    "receivedAt": event["receivedAt"],
+    "eventTimeMs": event["eventTimeMs"],
+    "summary": event["summary"],
+    "controlOutput": False,
+  })
+  if image is not None:
+    params.put("CarrotNaviImage", image)
+  return True
+
+
+def record_navi_http_event(app: web.Application, payload: dict[str, Any], tmap_version: str = "") -> dict[str, Any]:
+  if not isinstance(payload, dict):
+    raise ValueError("navigation HTTP payload must be a JSON object")
+  event_type = _detect_navi_event_type(payload)
+  received_at = time.time()
+  summary = _navi_http_summary(payload, event_type)
+  event = {
+    "receivedAt": received_at,
+    "eventTimeMs": _navi_event_timestamp_ms(payload),
+    "type": event_type,
+    "tmapVersion": _safe_navigation_text(tmap_version),
+    "summary": summary,
+    "controlOutput": False,
+  }
+
+  image: dict[str, Any] | None = None
+  if event_type == "complexCrossroad" and isinstance(payload.get("complexCrossroad"), dict):
+    crossroad = payload["complexCrossroad"]
+    image_base64 = crossroad.get("imageBase64")
+    image_too_large = isinstance(image_base64, str) and len(image_base64) > NAVI_IMAGE_BASE64_MAX_CHARS
+    if image_too_large:
+      image_base64 = ""
+    image = {
+      "receivedAt": received_at,
+      "show": bool(crossroad.get("show", False)),
+      "imageBase64": image_base64 if isinstance(image_base64, str) else "",
+      "imageMime": str(crossroad.get("imageMime", "")),
+      "imageEncoding": str(crossroad.get("imageEncoding", "")),
+      "imageWidth": int(_as_float(crossroad.get("imageWidth"), 0.0)),
+      "imageHeight": int(_as_float(crossroad.get("imageHeight"), 0.0)),
+      "imageHash": str(summary.get("imageHash", "")),
+      "imageUrl": str(crossroad.get("imageUrl", "")),
+      "imageTooLarge": image_too_large,
+    }
+
+  params_written = _write_navi_http_params(payload, event, image)
+  nav_result: dict[str, Any] = {"recorded": False}
+  try:
+    nav_payload = _navigation_payload_from_navi_http(payload, event_type)
+    nav_result = record_navigation_event(nav_payload, f"http-7713-{event_type}")
+  except Exception as exc:
+    nav_result = {"recorded": False, "error": str(exc)}
+
+  state = app["navi_http_state"]
+  received_types = state.setdefault("receivedTypes", {})
+  received_types[event_type] = int(received_types.get(event_type, 0)) + 1
+  state["lastEvent"] = event
+  state["lastReceivedAt"] = received_at
+  state["lastError"] = ""
+  return {
+    "recorded": True,
+    "type": event_type,
+    "tmapVersion": _safe_navigation_text(tmap_version),
+    "paramsWritten": params_written,
+    "navigation": nav_result,
+    "summary": summary,
+    "controlOutput": False,
+  }
+
+
 def fishop_state() -> dict[str, Any]:
   result: dict[str, Any] = {
     "inputPath": str(DEFAULT_FISHOP_JSONL),
@@ -949,6 +1135,7 @@ async def api_health(_request: web.Request) -> web.Response:
   status_last_sent_at = float(status_state.get("lastSentAt", 0.0))
   status_last_error = str(status_state.get("lastError", ""))
   messaging_state = _request.app["messaging_status_state"]
+  navi_http_state = _request.app["navi_http_state"]
   return _json_response({
     "ok": True,
     "service": "carrot_server",
@@ -966,6 +1153,10 @@ async def api_health(_request: web.Request) -> web.Response:
     "navigationUdpLastError": udp_last_error,
     "navigationUdpLastDatagramAt": udp_last_datagram_at,
     "navigationUdpLastRecordedAt": udp_last_recorded_at,
+    "naviHttpPort": NAVI_HTTP_PORT,
+    "naviHttpAvailable": bool(navi_http_state.get("available", False)),
+    "naviHttpLastError": str(navi_http_state.get("lastError", "")),
+    "naviHttpLastReceivedAt": float(navi_http_state.get("lastReceivedAt", 0.0)),
     "timestamp": dt.datetime.now(dt.timezone.utc).astimezone().isoformat(timespec="seconds"),
     "cloudServices": False,
     "controlOutput": False,
@@ -977,6 +1168,7 @@ async def api_health(_request: web.Request) -> web.Response:
       "/api/carrot_learning",
       "/api/fishop_hardware",
       "/api/navigation_event",
+      "/api/navi",
       "/api/phone_speed_limit",
     ],
   })
@@ -1017,6 +1209,7 @@ async def api_param_set(request: web.Request) -> web.Response:
 async def api_status_broadcast(_request: web.Request) -> web.Response:
   status_state = _request.app["status_broadcast_state"]
   messaging_state = _request.app["messaging_status_state"]
+  navi_http_state = _request.app["navi_http_state"]
   return _json_response({
     "ok": True,
     "port": STATUS_BROADCAST_PORT,
@@ -1024,7 +1217,8 @@ async def api_status_broadcast(_request: web.Request) -> web.Response:
     "lastSentAt": float(status_state.get("lastSentAt", 0.0)),
     "lastError": str(status_state.get("lastError", "")),
     "messagingStatus": messaging_state,
-    "payload": status_state.get("lastPayload") or build_status_payload(messaging_state),
+    "naviHttpStatus": navi_http_state,
+    "payload": status_state.get("lastPayload") or build_status_payload(messaging_state, navi_http_state),
   })
 
 
@@ -1063,6 +1257,37 @@ async def api_navigation_event_action(request: web.Request) -> web.Response:
   except Exception as exc:
     state = navigation_event_state()
     return _json_response({"ok": False, "error": str(exc), **state}, status=400)
+
+
+async def api_navi_http_health(request: web.Request) -> web.Response:
+  state = request.app["navi_http_state"]
+  return _json_response({
+    "ok": True,
+    "service": "carrot_navi_http",
+    "port": NAVI_HTTP_PORT,
+    "available": bool(state.get("available", False)),
+    "lastError": str(state.get("lastError", "")),
+    "lastEvent": state.get("lastEvent", {}),
+    "receivedTypes": state.get("receivedTypes", {}),
+    "controlOutput": False,
+  })
+
+
+async def api_navi_http_post(request: web.Request) -> web.Response:
+  try:
+    body = await request.json()
+  except Exception:
+    try:
+      text = (await request.text()).strip()
+      body = json.loads(text) if text else {}
+    except Exception as exc:
+      return _json_response({"ok": False, "error": f"invalid json: {exc}", "controlOutput": False}, status=400)
+  try:
+    result = record_navi_http_event(request.app, body, request.match_info.get("tmap_version", ""))
+    return _json_response({"ok": True, **result})
+  except Exception as exc:
+    request.app["navi_http_state"]["lastError"] = str(exc)[:200]
+    return _json_response({"ok": False, "error": str(exc), "controlOutput": False}, status=400)
 
 
 async def api_phone_speed_limit(_request: web.Request) -> web.Response:
@@ -1205,10 +1430,11 @@ async def status_broadcast_loop(app: web.Application) -> None:
     return
   status_state = app["status_broadcast_state"]
   messaging_state = app["messaging_status_state"]
+  navi_http_state = app["navi_http_state"]
 
   while True:
     try:
-      payload = build_status_payload(dict(messaging_state))
+      payload = build_status_payload(dict(messaging_state), dict(navi_http_state))
       data = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
       for target in STATUS_BROADCAST_TARGETS:
         transport.sendto(data, (target, STATUS_BROADCAST_PORT))
@@ -1248,15 +1474,51 @@ async def stop_status_broadcast(app: web.Application) -> None:
     transport.close()
 
 
+def add_navi_http_routes(app: web.Application) -> None:
+  app.router.add_get("/health", api_navi_http_health)
+  app.router.add_get("/api/navi/health", api_navi_http_health)
+  app.router.add_post("/api/navi", api_navi_http_post)
+  app.router.add_post("/api/navi/{tmap_version}", api_navi_http_post)
+
+
+async def start_navi_http(app: web.Application) -> None:
+  navi_app = web.Application(client_max_size=NAVI_HTTP_MAX_BODY_SIZE)
+  navi_app["navi_http_state"] = app["navi_http_state"]
+  add_navi_http_routes(navi_app)
+  runner = web.AppRunner(navi_app, access_log=None)
+  try:
+    await runner.setup()
+    site = web.TCPSite(runner, DEFAULT_HOST, NAVI_HTTP_PORT)
+    await site.start()
+    app["background_tasks"]["navi_http_runner"] = runner
+    app["navi_http_state"]["available"] = True
+    app["navi_http_state"]["lastError"] = ""
+  except Exception as exc:
+    app["navi_http_state"]["available"] = False
+    app["navi_http_state"]["lastError"] = str(exc)[:200]
+    await runner.cleanup()
+
+
+async def stop_navi_http(app: web.Application) -> None:
+  runner = app["background_tasks"].get("navi_http_runner")
+  if runner is not None:
+    await runner.cleanup()
+    app["background_tasks"]["navi_http_runner"] = None
+  app["navi_http_state"]["available"] = False
+
+
 def make_app() -> web.Application:
-  app = web.Application()
+  app = web.Application(client_max_size=NAVI_HTTP_MAX_BODY_SIZE)
   app["status_broadcast_state"] = {"lastPayload": {}, "lastSentAt": 0.0, "lastError": ""}
   app["messaging_status_state"] = default_messaging_status()
-  app["background_tasks"] = {"messaging_status": None}
+  app["navi_http_state"] = default_navi_http_state()
+  app["background_tasks"] = {"messaging_status": None, "navi_http_runner": None}
   app.on_startup.append(start_messaging_status)
+  app.on_startup.append(start_navi_http)
   app.on_startup.append(start_status_broadcast)
   app.on_startup.append(start_navigation_udp)
   app.on_cleanup.append(stop_status_broadcast)
+  app.on_cleanup.append(stop_navi_http)
   app.on_cleanup.append(stop_messaging_status)
   app.on_cleanup.append(stop_navigation_udp)
   app.router.add_get("/", index)
@@ -1269,6 +1531,7 @@ def make_app() -> web.Application:
   app.router.add_get("/api/fishop_hardware", api_fishop_hardware)
   app.router.add_get("/api/navigation_event", api_navigation_event)
   app.router.add_post("/api/navigation_event", api_navigation_event_action)
+  add_navi_http_routes(app)
   app.router.add_get("/api/phone_speed_limit", api_phone_speed_limit)
   app.router.add_post("/api/phone_speed_limit", api_phone_speed_limit_action)
   return app

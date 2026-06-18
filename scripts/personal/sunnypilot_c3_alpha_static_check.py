@@ -45,6 +45,9 @@ AUTO_TUNER_DEFAULTS = {
   "CarrotLearningIgnore": 0,
   "CarrotLearningClear": 0,
   "CarrotLearningPopupReady": 0,
+  "CarrotNaviDebug": "{}",
+  "CarrotNaviEvent": "{}",
+  "CarrotNaviImage": "{}",
   "CarrotPhoneSpeedLimit": 0,
   "CarrotPhoneSpeedLimitEnabled": 1,
   "CarrotPhoneSpeedLimitUpdatedAt": 0,
@@ -415,6 +418,10 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       "canValid": True,
       "speedLimitKph": 60.0,
       "speedLimitSource": "phone",
+    }, {
+      "available": True,
+      "port": server.NAVI_HTTP_PORT,
+      "lastError": "",
     })
     for key in ("Carrot2", "IsOnroad", "CarrotRouteActive", "ip", "port", "navi_http_port", "log_carrot",
                 "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "xState", "trafficState"):
@@ -422,8 +429,8 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
         return False, f"status payload missing {key}"
     if payload.get("CarrotRouteActive") is not True or payload.get("port") != server.NAVIGATION_UDP_PORT:
       return False, "status payload did not expose CarrotMan-compatible discovery fields"
-    if payload.get("navi_http_port") != 0 or payload.get("naviHttpAvailable") is not False:
-      return False, "status payload must not claim the old navigation HTTP server before migration"
+    if payload.get("navi_http_port") != server.NAVI_HTTP_PORT or payload.get("naviHttpAvailable") is not True:
+      return False, "status payload did not expose the active navigation HTTP compatibility server"
     if payload.get("carrotManCompatible") is not True or payload.get("carrotManControlStateAvailable") is not False:
       return False, "status payload did not declare the read-only CarrotMan compatibility boundary"
     if payload.get("log_carrot") != "status ok":
@@ -442,6 +449,19 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       return False, "xState and trafficState must stay inert until Carrot control migration"
     if payload.get("controlOutput") is not False:
       return False, "status payload must explicitly remain read-only"
+
+    navi_result = server.record_navi_http_event(
+      {"navi_http_state": server.default_navi_http_state()},
+      {"sinf": {"distance": 123, "redLightOn": True, "redLightRemainTime": 8}},
+      "",
+    )
+    if not navi_result.get("recorded") or navi_result.get("type") != "sinf":
+      return False, "navigation HTTP compatibility handler did not record sinf"
+    if navi_result.get("controlOutput") is not False:
+      return False, "navigation HTTP compatibility handler must remain read-only"
+    raw_navi = json.loads(FakeParams.shared_store.get("CarrotNaviEvent", b"{}").decode("utf-8"))
+    if raw_navi.get("type") != "sinf" or raw_navi.get("controlOutput") is not False:
+      return False, "navigation HTTP compatibility handler did not persist a read-only event"
     return True, ""
   except Exception as exc:
     return False, str(exc)
@@ -538,6 +558,9 @@ def main() -> int:
                           "CarrotPhoneSpeedLimitEnabled must exist and default to 1")
   failures += not require("Carrot navigation event param exists", '{"CarrotNavigationEvent", {CLEAR_ON_MANAGER_START, JSON}}' in params,
                           "CarrotNavigationEvent must record the latest local navigation input and clear on manager start")
+  for key in ("CarrotNaviDebug", "CarrotNaviEvent", "CarrotNaviImage"):
+    failures += not require(f"Carrot navi HTTP param exists: {key}", f'{{"{key}", {{CLEAR_ON_MANAGER_START, JSON}}}}' in params,
+                            f"{key} must record local navigation HTTP evidence and clear on manager start")
   failures += not require("SpeedLimitPolicy phone priority default", '{"SpeedLimitPolicy", {PERSISTENT | BACKUP, INT, "5"}}' in params,
                           "SpeedLimitPolicy must default to phone_priority")
   failures += not require("SpeedLimitOffsetType default off", '{"SpeedLimitOffsetType", {PERSISTENT | BACKUP, INT, "0"}}' in params,
@@ -607,8 +630,10 @@ def main() -> int:
                           "carrotManCompatible" in carrot_server
                           and "carrotManControlStateAvailable" in carrot_server
                           and "naviHttpAvailable" in carrot_server
-                          and "NAVI_HTTP_PORT = 0" in carrot_server,
-                          "UDP 7705 status must be compatible with CP app discovery without claiming unmigrated Carrot control/HTTP services")
+                          and "NAVI_HTTP_PORT = 7713" in carrot_server
+                          and "start_navi_http" in carrot_server
+                          and "web.TCPSite(runner, DEFAULT_HOST, NAVI_HTTP_PORT)" in carrot_server,
+                          "UDP 7705 status must be compatible with CP app discovery and expose the bound 7713 HTTP service only when available")
   failures += not require("Carrot Web status broadcast local-only", "255.255.255.255" in carrot_server
                           and "127.0.0.1" in carrot_server and "allow_broadcast=True" in carrot_server
                           and "controlOutput" in carrot_server,
@@ -623,6 +648,19 @@ def main() -> int:
                           and "commandIgnored" in carrot_server and "highRiskCommandSeen" in carrot_server
                           and "HIGH_RISK_NAV_COMMANDS" in carrot_server,
                           "navigation input must record commands as ignored evidence, not execute them")
+  failures += not require("Carrot Web navigation HTTP compatibility exists",
+                          '"/api/navi/{tmap_version}"' in carrot_server
+                          and '"/api/navi"' in carrot_server
+                          and "record_navi_http_event" in carrot_server
+                          and "CarrotNaviEvent" in carrot_server
+                          and "CarrotNaviDebug" in carrot_server
+                          and "CarrotNaviImage" in carrot_server,
+                          "Carrot Web must provide the old CarrotMan /api/navi HTTP compatibility entry points")
+  failures += not require("Carrot Web navigation HTTP remains evidence-only",
+                          "controlOutput\": False" in carrot_server
+                          and "record_navigation_event(nav_payload" in carrot_server
+                          and "NAVI_IMAGE_BASE64_MAX_CHARS" in carrot_server,
+                          "navigation HTTP input must persist evidence and sanitized navigation state without control output")
   for forbidden in ("PubMaster", "CarControl", "sendcan", "desire_helper", "LateralPlan"):
     failures += not require(f"Carrot Web navigation omits control output {forbidden}", forbidden not in carrot_server,
                             "navigation UDP/API input must not publish controls or touch lane-change/planner outputs")
@@ -666,6 +704,9 @@ def main() -> int:
                           "alpha snapshot must summarize Auto-Tuner state")
   failures += not require("alpha snapshot records navigation event", '"CarrotNavigationEvent"' in alpha_snapshot,
                           "alpha snapshot must include the latest sanitized navigation event")
+  for key in ("CarrotNaviDebug", "CarrotNaviEvent", "CarrotNaviImage"):
+    failures += not require(f"alpha snapshot records navigation HTTP evidence: {key}", f'"{key}"' in alpha_snapshot,
+                            f"alpha snapshot must include {key} for 7713 navigation HTTP evidence")
   failures += not require("alpha snapshot records carrot_server process", '"carrot_server"' in alpha_snapshot,
                           "alpha snapshot must report local Carrot Web process state")
   for service_name in ("modelV2", "drivingModelData", "cameraOdometry", "modelManagerSP", "longitudinalPlanSP", "carStateSP", "pandaStates"):
