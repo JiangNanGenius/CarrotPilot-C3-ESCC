@@ -169,6 +169,7 @@
 - [x] 更新当前静态预检 tag 到 `carrotpilot-c3-escc-20260618-static28`。
 - [x] 更新当前受控上车测试 tag 到 `carrotpilot-c3-escc-20260618-test21`，并发布 C3 二进制安装器和 SSH 备用安装脚本。
 - [x] 更新当前受控上车测试 tag 到 `carrotpilot-c3-escc-20260618-test22`，包含本地化说明和发布检查单改进。
+- [x] 更新当前受控上车测试 tag 到 `carrotpilot-c3-escc-20260618-test23`，安装后写入 C3 首启说明文件。
 - [x] 写安装说明。
 - [x] 写回滚说明。
 - [x] 写上车测试记录模板。

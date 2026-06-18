@@ -836,6 +836,34 @@
 - `python3 scripts/personal/release_integrity_check.py --online` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
 
+## 2026-06-18: Installer first-boot note
+
+改动文件：
+
+- `scripts/personal/install_c3_escc.sh`
+- `scripts/personal/smoke_check.py`
+- `README.md`
+- `docs/personal/BINARY_INSTALLER_RESEARCH.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/TODO.md`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/CODE_CHANGES.md`
+
+改动内容：
+
+- 安装脚本默认写入 `/data/media/0/carrotpilot-c3-escc-first-boot.txt`。
+- 将当前受控上车测试目标更新为 `carrotpilot-c3-escc-20260618-test23`，让新安装包直接包含首启说明文件。
+- 首启说明记录安装 ref、仓库、安全默认参数、首装向导命令、旧版本参数迁移命令和 ESCC 0x2AB 证据采集命令。
+- 新增 `--first-boot-note PATH` 和 `--no-first-boot-note`，便于调试或关闭提示文件。
+- `smoke_check.py` 增加安装脚本首启说明守卫，防止以后删掉上车提示。
+
+验证：
+
+- `sh -n scripts/personal/install_c3_escc.sh` 通过。
+- `scripts/personal/install_c3_escc.sh --dry-run --force ...` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。
+
 ## 2026-06-17: Seltos 2023 车型复用护栏
 
 新增文件：

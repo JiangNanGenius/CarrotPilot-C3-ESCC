@@ -437,6 +437,9 @@ def check_js_syntax() -> str:
 
 
 def check_install_script() -> None:
+  expect_contains("scripts/personal/install_c3_escc.sh", "CARROTPILOT_FIRST_BOOT_NOTE", "installer first-boot note env")
+  expect_contains("scripts/personal/install_c3_escc.sh", "write_first_boot_note", "installer first-boot note writer")
+  expect_contains("scripts/personal/install_c3_escc.sh", "c3_commissioning.py --archive", "installer first-boot commissioning command")
   run([sys.executable, "scripts/personal/build_binary_installer.py", "--self-test"], "C3 binary installer builder self-test")
   run(["sh", "-n", "scripts/personal/install_c3_escc.sh"], "C3 installer shell syntax")
   run([
