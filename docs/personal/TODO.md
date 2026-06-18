@@ -393,9 +393,9 @@ flowchart TD
 ### P8.9: fishop / 码上飞扬硬件增强迁移
 
 - [x] 以最新 `fishop/cp` 为参考源，不直接整包合并；先固定审计入口：`selfdrive/carrot/amap_navi.py`、`cereal/custom.capnp`、`cereal/log.capnp`、`selfdrive/apilot.json`。
-- [ ] 研究 fishop 最新版车道识线 / 车道曲线实现，确认它是视觉、APP、雷达/激光雷达还是融合输出。
+- [x] 研究 fishop 最新版车道识线 / 车道曲线实现，确认它是视觉、APP、雷达/激光雷达还是融合输出；fishop `left_lane/right_lane/lineValid` 来自外设或 APP 的 UDP 4213 `resp=lane` 输入，3 秒 socket timeout 后清零；`max_curve/lat_a` 位于状态 JSON 广播，不在 `AmapNavi` capnp 内，优先使用共享数据，缺失 `max_curve` 时 fishop 从模型 `orientationRate.z` 估最大曲线点。alpha 已在只读 `laneQuality` 中区分线型输入、曲率广播和模型质量证据。
 - [x] 研究 `lane` UDP 通道，确认 `left_lane`、`right_lane`、`lineValid` 的枚举含义、实线/虚线语义、左右方向和超时清零逻辑；fishop `amap_navi.py` 使用 4213 UDP，`left_lane/right_lane < 1` 清零，`>= 1` 作为实线/阻止变道证据，3 秒 socket timeout 后 lane offline，alpha 只读 parser 1 秒内保持 fresh。
-- [ ] 研究 `max_curve`、`lat_a`、模型 `orientationRate`、`LaneLineMeta` 和 road edge 数据的关系，决定哪些只做显示，哪些可作为车道质量证据。
+- [x] 研究 `max_curve`、`lat_a`、模型 `orientationRate`、`LaneLineMeta` 和 road edge 数据的关系，决定哪些只做显示，哪些可作为车道质量证据；`laneLineProbs`、`roadEdgeStds`、`laneWidthLeft/Right`、`distanceToRoadEdgeLeft/Right` 是模型/Meta 质量证据，适合 Web/API/快照显示；`max_curve/lat_a` 只作为曲率证据显示，不作为自动横控或自动变道输入。alpha Web 已显示 `laneQuality`，静态检查要求它保持 `readOnly`、`controlOutput=false`。
 - [x] 研究 fishop 外接激光雷达左右侧目标数据，确认坐标系、单位、刷新率、时间戳、置信度和丢包处理；drel/xrel 为毫米，前方 drel 为正、后方为负，`dist_time` 为毫秒传感器时间戳，距离数据 1 秒超时清空。
 - [x] 研究 fishop 外接激光雷达盲区数据，确认左右盲区、侧向目标、目标速度、距离、传感器在线和故障状态；`detect_side` 位 1/2 表示左/右设备在线，`lidar_lblind/rblind` 2 秒超时清空，alpha 只读 parser 记录左右 lidar/camera online 和车身盲区证据。
 - [x] 研究 `blindspot` / `cam_blind` 数据：`lidar_lblind`、`lidar_rblind`、`lf/lb/rf/rb_drel`、`lf/lb/rf/rb_xrel`、`dist_time`、`detect_side`、`lidar_id`；alpha parser 也记录 `lf/lb/rf/rb_vrel`、`left_blind/right_blind`、`lidar_car_lblind/rblind`。
