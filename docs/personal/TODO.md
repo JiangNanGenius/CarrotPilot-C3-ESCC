@@ -309,7 +309,9 @@ flowchart TD
 - [x] 移除 Sunnylink 设置页、侧边栏状态、配对按钮、赞助/远程访问 UI、云备份 UI。
 - [x] 移除设备设置里的 `Onroad Uploads` 开关；alpha 已同步清理 settings-ui 源 YAML 和编译后的 `settings_ui.json`。
 - [x] 旧参数 `SunnylinkEnabled`、`EnableSunnylinkUploader`、`OnroadUploads` 即使存在，也不能启动云服务。
-- [ ] 保留本地 Wi-Fi、SSH、Carrot Web、本地更新、GitHub 更新、模型清单和模型下载。
+- [x] 保留本地 Wi-Fi、SSH、Carrot Web、本地更新、GitHub 更新、模型清单和模型下载：alpha C3 审计覆盖 Wi-Fi 设置/扫描 UI、`SshEnabled` + `GithubSshKeys` 本地参数、Carrot Web、`updated`、`models_manager`、`mapd_manager` 和模型下载 UI。
+- [x] SSH 不再只能依赖 GitHub 用户名拉取；alpha 设置页支持直接粘贴本地 SSH 公钥，仍写入系统 `GithubSshKeys` 参数，公开安装器不默认写入个人或第三方 SSH key。
+- [x] C3 审计默认只做本地代码边界检查；参考分支 diff 改为显式 `--include-reference-diffs` 才运行，避免 Mr.One/Sunny 远端或大型 git 比对卡住日常检查。
 
 ### P8.4: C3 电源和 Always Offroad
 
