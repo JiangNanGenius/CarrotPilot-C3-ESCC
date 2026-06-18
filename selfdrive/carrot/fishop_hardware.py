@@ -38,7 +38,12 @@ DYNAMIC_BLIND_TARGETS = {
 LEFT_SIDE_BIT = 0x1
 RIGHT_SIDE_BIT = 0x2
 
-LANE_KEYS = ("left_lane", "right_lane", "lineValid", "max_curve", "lat_a")
+LANE_QUALITY_KEYS = (
+  "prob", "l_lane_prob", "l_line_prob", "r_line_prob", "r_lane_prob",
+  "l_edge_prob", "r_edge_prob", "l_lane_width", "r_lane_width",
+  "l_edge_dist", "r_edge_dist", "lane_width", "atc_state", "blinker",
+)
+LANE_KEYS = ("left_lane", "right_lane", "lineValid", "max_curve", "lat_a", *LANE_QUALITY_KEYS)
 BLINDSPOT_KEYS = (
   "lidar_lblind", "lidar_rblind", "left_blind", "right_blind",
   "l_blindspot", "r_blindspot", "detect_side", "lidar_id",
@@ -156,6 +161,13 @@ class LaneEvidence:
   line_valid: bool = False
   max_curve: float | None = None
   lat_a: float | None = None
+  model_prob_available: bool = False
+  lane_probs: dict[str, float | None] = field(default_factory=dict)
+  edge_probs: dict[str, float | None] = field(default_factory=dict)
+  lane_widths_m: dict[str, float | None] = field(default_factory=dict)
+  road_edge_distances_m: dict[str, float | None] = field(default_factory=dict)
+  atc_state: int | None = None
+  blinker: int | None = None
 
   def update(self, payload: dict[str, Any], now_s: float) -> None:
     if "left_lane" in payload:
@@ -170,7 +182,63 @@ class LaneEvidence:
       self.max_curve = _as_float(payload.get("max_curve"))
     if "lat_a" in payload:
       self.lat_a = _as_float(payload.get("lat_a"))
+    if "prob" in payload:
+      self.model_prob_available = _as_bool(payload.get("prob"))
+    for payload_key, output_key in (
+      ("l_lane_prob", "leftOuter"),
+      ("l_line_prob", "leftInner"),
+      ("r_line_prob", "rightInner"),
+      ("r_lane_prob", "rightOuter"),
+    ):
+      if payload_key in payload:
+        self.lane_probs[output_key] = _as_float(payload.get(payload_key))
+    for payload_key, output_key in (("l_edge_prob", "left"), ("r_edge_prob", "right")):
+      if payload_key in payload:
+        self.edge_probs[output_key] = _as_float(payload.get(payload_key))
+    for payload_key, output_key in (
+      ("l_lane_width", "left"),
+      ("r_lane_width", "right"),
+      ("lane_width", "center"),
+    ):
+      if payload_key in payload:
+        self.lane_widths_m[output_key] = _as_float(payload.get(payload_key))
+    for payload_key, output_key in (("l_edge_dist", "left"), ("r_edge_dist", "right")):
+      if payload_key in payload:
+        self.road_edge_distances_m[output_key] = _as_float(payload.get(payload_key))
+    if "atc_state" in payload:
+      self.atc_state = _as_int(payload.get("atc_state"), 0)
+    if "blinker" in payload:
+      self.blinker = _as_int(payload.get("blinker"), 0)
     self.last_update_s = now_s
+
+  def quality(self, fresh: bool) -> dict[str, Any]:
+    curve_available = fresh and (self.max_curve is not None or self.lat_a is not None)
+    model_available = fresh and (
+      self.model_prob_available
+      or bool(self.lane_probs)
+      or bool(self.edge_probs)
+      or bool(self.lane_widths_m)
+      or bool(self.road_edge_distances_m)
+    )
+    return {
+      "readOnly": True,
+      "controlOutput": False,
+      "lineSource": "fishop UDP 4213 lane payload",
+      "lineEvidenceAvailable": fresh and self.line_valid,
+      "curveAvailable": curve_available,
+      "curveSource": "fishop status JSON; reference uses shared lat_a/max_curve or modelV2.orientationRate.z fallback",
+      "maxCurve": _round_float(self.max_curve),
+      "latA": _round_float(self.lat_a),
+      "modelEvidenceAvailable": model_available,
+      "modelSource": "fishop status JSON from modelV2 laneLineProbs, roadEdgeStds, and LaneLineMeta widths/distances",
+      "laneProbabilities": dict(sorted(self.lane_probs.items())),
+      "roadEdgeProbabilities": dict(sorted(self.edge_probs.items())),
+      "laneWidthsM": dict(sorted(self.lane_widths_m.items())),
+      "roadEdgeDistancesM": dict(sorted(self.road_edge_distances_m.items())),
+      "atcState": self.atc_state if fresh else None,
+      "blinker": self.blinker if fresh else None,
+      "notUsedFor": ("steering target", "path output", "automatic lane-change"),
+    }
 
   def to_dict(self, now_s: float) -> dict[str, Any]:
     fresh = _fresh(self.last_update_s, now_s, LANE_MAX_AGE_S)
@@ -186,6 +254,7 @@ class LaneEvidence:
       "lineTypeRule": "fishop reference treats lane line values >= 1 as solid-line lane-change blockers",
       "maxCurve": self.max_curve,
       "latA": self.lat_a,
+      "laneQuality": self.quality(fresh),
     }
 
 

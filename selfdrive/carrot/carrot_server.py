@@ -1508,6 +1508,7 @@ async def index(_request: web.Request) -> web.Response:
           <div class="metric"><span class="label">Valid</span><span class="value" id="fishop-lane-valid">-</span></div>
           <div class="metric"><span class="label">Left / right</span><span class="value" id="fishop-lane-lines">-</span></div>
           <div class="metric"><span class="label">Curve</span><span class="value" id="fishop-lane-curve">-</span></div>
+          <div class="metric"><span class="label">Quality</span><span class="value" id="fishop-lane-quality">-</span></div>
           <div class="metric"><span class="label">Age</span><span class="value" id="fishop-lane-age">-</span></div>
         </div>
         <div class="panel">
@@ -1567,6 +1568,17 @@ async def index(_request: web.Request) -> web.Response:
       }
       return Object.keys(preview).length ? `clear @ ${num(dynamicBlind.vEgoMps, 1)} m/s` : "-";
     };
+    const laneQualitySummary = (laneQuality = {}) => {
+      const probs = laneQuality.laneProbabilities || {};
+      const widths = laneQuality.laneWidthsM || {};
+      const inner = [probs.leftInner, probs.rightInner].filter((value) => Number.isFinite(Number(value)));
+      const width = Number.isFinite(Number(widths.center)) ? widths.center : (Number.isFinite(Number(widths.left)) ? widths.left : widths.right);
+      const parts = [];
+      if (inner.length) parts.push(`line ${inner.map((value) => num(value, 1)).join("/")}`);
+      if (Number.isFinite(Number(width))) parts.push(`width ${num(width, 1)} m`);
+      if (laneQuality.curveAvailable) parts.push("curve");
+      return parts.length ? parts.join(" ") : "-";
+    };
     async function refreshFishopHardware() {
       try {
         const response = await fetch("/api/fishop_hardware", {cache: "no-store"});
@@ -1586,6 +1598,7 @@ async def index(_request: web.Request) -> web.Response:
         setText("fishop-lane-valid", yesNo(lane.lineValid));
         setText("fishop-lane-lines", `${lane.leftLine || 0} / ${lane.rightLine || 0}`);
         setText("fishop-lane-curve", `curve ${num(lane.maxCurve)} / latA ${num(lane.latA)}`);
+        setText("fishop-lane-quality", laneQualitySummary(lane.laneQuality || {}));
         setText("fishop-lane-age", age(lane.ageSec));
         setText("fishop-lidar-blind", `L ${yesNo(blindspot.leftLidarBlind)} / R ${yesNo(blindspot.rightLidarBlind)}`);
         setText("fishop-camera-blind", `L ${yesNo(blindspot.leftCameraBlind)} / R ${yesNo(blindspot.rightCameraBlind)}`);
