@@ -14,7 +14,7 @@
 - [ ] 记录当前车款识别结果：Seltos 2023 独立车型，初期复用 Seltos 2021 配置。
 - [ ] 确认车辆仍按纯 CAN 路径运行，不是 CANFD。
 - [ ] 记录 ESCC 相关参数当前值。
-- [ ] 记录 `AlwaysOffline`、`DisableUpdates`、`EnableConnect` 当前值。
+- [ ] 记录 `AlwaysOffroad`、`SoftwareMenu`、`EnableConnect` 当前值。
 - [ ] 如果当前设备版本能正常跑，先运行 `python3 scripts/personal/params_migration.py export --output /data/media/0/carrotpilot-working-params.json` 导出安全设置白名单。
 - [ ] 如果使用 atune 分支，记录 `CarrotLearningActive`、`CarrotLearningAutoApply` 和当前推荐值快照。
 - [ ] 如果使用 CP搭子，记录手机 APP 版本、导航源、同 WiFi 状态和 7705/7706 连接结果。
@@ -62,7 +62,7 @@
 
 ## 3. ESCC 回归检查
 
-- [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`。
+- [ ] 运行 `python3 scripts/personal/escc_offroad_preflight.py`。
 - [ ] `EnableEscc` 仍存在。
 - [ ] ESCC 默认关闭，必须显式开启。
 - [ ] ESCC 只在预期 Hyundai/Kia 路径启用。
@@ -74,14 +74,14 @@
 
 ## 3.5. 启动 / 连接默认值回归检查
 
-- [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`。
-- [ ] `AlwaysOffline` 仍存在，但默认关闭，仅作为调试/故障排查开关。
+- [ ] 运行 `python3 scripts/personal/escc_offroad_preflight.py`。
+- [ ] `AlwaysOffroad` 仍存在，但默认关闭，仅作为驻车供电更新、继电器调试或故障排查开关。
 - [ ] `EnableConnect` 仍存在且默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
-- [ ] 设置菜单仍显示“离线调试模式”和“在线连接”。
+- [ ] 设置菜单仍显示“强制 Offroad 模式”和“在线连接”。
 - [ ] `EnableConnect=0` 时跳过在线注册，不启动远程连接和上传流程。
-- [ ] 如手动开启 `AlwaysOffline=1`，再额外确认不启动后台更新、远程连接和上传流程。
-- [ ] 默认快照里 `connect_process_seen=False`、`uploader_process_seen=False`。
-- [ ] 驻车按 Cancel 不触发主动关机。
+- [ ] 如手动开启 `AlwaysOffroad=1`，再额外确认 `IsOnroad=False`、pandad 进入 `NO_OUTPUT`，本地 Web/SSH/更新仍可用。
+- [ ] 默认快照里 `connect_process_seen=False`、`uploader_process_seen=False`，但不要把本地更新服务当作失败项。
+- [ ] 驻车按 Cancel 行为保持底座原逻辑，不被 `AlwaysOffroad` 额外改写。
 - [ ] manager process 没有引用当前代码树不存在的模块。
 
 ## 3.6. Auto-Tuner / atune 回归检查
@@ -97,7 +97,7 @@
 - [ ] 手动应用推荐时，`IsOnroad=True` 会拒绝写入。
 - [ ] `CarrotLearningApply`、`CarrotLearningIgnore`、`CarrotLearningClear` 都是一触发即复位的一次性动作。
 - [ ] Auto-Tuner 改动没有夹带 Web、cluster HUD、地图、Tesla、CANFD/HDA2 等无关功能。
-- [ ] Seltos 2023、ESCC、Always Offline 的默认行为没有变化。
+- [ ] Seltos 2023、ESCC、AlwaysOffroad 的默认行为没有变化。
 
 ## 3.7. CP搭子 / Navipilot 回归检查
 
@@ -156,7 +156,7 @@
 - [ ] 运行 `python3 scripts/personal/update_audit.py` 并确认当前分支仍包含 `origin/c3-wip` 和 `personal/c3-escc`。
 - [ ] 运行 `python3 scripts/personal/upstream_update_plan.py --strict` 并确认已审查来源与本地 tracking/baseline 状态一致。
 - [ ] 运行 `python3 scripts/personal/smoke_check.py` 并确认全部通过。
-- [ ] 单独运行 `python3 scripts/personal/escc_offline_preflight.py` 并确认没有失败项。
+- [ ] 单独运行 `python3 scripts/personal/escc_offroad_preflight.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/cplink_preflight.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/feature_boundary_check.py` 并确认没有失败项。
 - [ ] 单独运行 `python3 scripts/personal/feature_status_report.py --strict` 并确认没有失败项。
@@ -186,11 +186,11 @@
 
 - [ ] 先跑 `python3 scripts/personal/release_gate.py --tag carrotpilot-c3-escc-YYYYMMDD-static1 --kind static --run-checks`。
 - [ ] 先打 `static` 或 `test` tag，不直接装开发分支。
-- [ ] 运行 `python3 scripts/personal/escc_offline_preflight.py`，逐条处理脚本输出的 Manual checks。
+- [ ] 运行 `python3 scripts/personal/escc_offroad_preflight.py`，逐条处理脚本输出的 Manual checks。
 - [ ] 安装前记录当前可用版本。
 - [ ] 安装前保存设备证据包或设备快照文件。
 - [ ] 如有旧版本设置导出文件，安装后先运行 `python3 scripts/personal/params_migration.py import --input /data/media/0/carrotpilot-working-params.json` dry-run。
-- [ ] dry-run 输出里重点核对 `EnableEscc`、`HyundaiCameraSCC`、`EnableRadarTracks`、`AlwaysOffline`、Seltos/转向/纵控/导航调参项，再决定是否加 `--apply`。
+- [ ] dry-run 输出里重点核对 `EnableEscc`、`HyundaiCameraSCC`、`EnableRadarTracks`、`AlwaysOffroad`、Seltos/转向/纵控/导航调参项，再决定是否加 `--apply`。
 - [ ] 更推荐安装后先运行 `python3 scripts/personal/c3_commissioning.py --migration-input /data/media/0/carrotpilot-working-params.json --archive`，把 dry-run、静态检查、证据包和 readiness 报告放到一个目录。
 - [ ] 查看 `/data/media/0/carrotpilot-c3-escc-first-boot.txt`，确认安装 ref、安全默认参数和首装向导命令与本次 release 一致。
 - [ ] 准备回滚 URL 或回滚分支。
@@ -198,7 +198,7 @@
 - [ ] 确认无 manager crash、无循环重启、无缺失模块。
 - [ ] 确认车辆识别正确。
 - [ ] 确认 ESCC 参数默认状态符合预期。
-- [ ] 确认默认 `AlwaysOffline=0`、`EnableConnect=0` 时不会因注册失败卡住。
+- [ ] 确认默认 `AlwaysOffroad=0`、`EnableConnect=0` 时不会因官方注册失败卡住。
 - [ ] 如测试 CP搭子，先在停车状态运行 `python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --navipilot-check --navipilot-param-write-probe --archive`。
 - [ ] 如测试 CP搭子，确认 Android APP 能发现 C3 并发送导航数据。
 - [ ] 如测试 Navipilot 驾驶报告，确认 APP 端先收到 7705 的 `IsOnroad=True` 和车速字段，再在 onroad 后开始采集，并在停车后生成评分。
@@ -239,7 +239,7 @@
 - [ ] 更新 changelog。
 - [ ] 标注来源：CarrotPilot、机械小哥、fishop/码上飞扬。
 - [ ] 标注是否经过 Seltos 实车验证。
-- [ ] 标注是否经过 Always Offline 启动验证。
+- [ ] 标注是否经过 AlwaysOffroad 驻车供电、offroad、本地更新和 pandad no-output 验证。
 - [ ] 推送 `personal/c3-escc` 或 `personal/c3-escc-atune` 到 `github`。
 - [ ] 发布前再次确认没有个人 token、私钥或设备隐私参数进入仓库。
 - [ ] 如发布 `test` tag，先确认 `docs/personal/INSTALL_TARGETS.json` 的 `current_test_tag` 已更新到目标 tag，且 `daily_install_target` 仍为空。

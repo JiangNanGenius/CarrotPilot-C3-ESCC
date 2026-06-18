@@ -118,7 +118,7 @@ def run_static_checks(pending_tag: Optional[str]) -> None:
   env = {"CARROTPILOT_PENDING_RELEASE_TAG": pending_tag} if pending_tag else None
   run([sys.executable, "scripts/personal/update_audit.py"])
   run([sys.executable, "scripts/personal/smoke_check.py"], extra_env=env)
-  run([sys.executable, "scripts/personal/escc_offline_preflight.py", "--no-manual"])
+  run([sys.executable, "scripts/personal/escc_offroad_preflight.py", "--no-manual"])
   run([sys.executable, "scripts/personal/cplink_preflight.py", "--no-manual"])
   run(["git", "diff", "--check"])
 
@@ -173,7 +173,7 @@ def main() -> int:
     validate_tag(args.tag, args.kind)
     require_clean_worktree()
     require_ref_contains("origin/c3-wip", "HEAD", "latest C3 base")
-    require_ref_contains("personal/c3-escc", "HEAD", "ESCC / Always Offline protection line")
+    require_ref_contains("personal/c3-escc", "HEAD", "ESCC / AlwaysOffroad protection line")
     require_no_grep(TOKEN_RE, "GitHub token-like secret")
     require_no_grep(OLD_NAME_RE, "old repo/project name")
 

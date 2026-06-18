@@ -77,16 +77,16 @@
 - [ ] 上车确认 ESCC 0x2AB、lead、AEB/FCW 和 SCC 状态真实正常。
 - [ ] 用 `device_snapshot.py --sample-seconds 20` 保存 ESCC 0x2AB 静态采样结果。
 
-## P2.5: C3 克隆版离线模式
+## P2.5: C3 克隆版 Connect / Offroad 模式
 
-- [x] 新增 `AlwaysOffline` 参数，默认关闭，仅作为调试/故障排查开关。
+- [x] 新增 `AlwaysOffroad` 参数，默认关闭，仅作为驻车供电更新/故障排查开关。
 - [x] 新增/保留 `EnableConnect` 参数，默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
-- [x] 设置菜单加入“离线调试模式”和“在线连接”。
+- [x] 设置菜单加入“强制 Offroad 模式”和“在线连接”。
 - [x] `EnableConnect=0` 时跳过在线注册。
-- [x] 开启后禁用后台更新。
-- [x] 开启后禁用远程连接和上传相关流程。
-- [x] 开启后驻车按 Cancel 不主动关机。
-- [x] 设备快照和 stable evidence gate 增加默认连接守卫，要求 `AlwaysOffline=0`、`EnableConnect=0` 且看不到远程连接 / 上传进程；离线进程守卫保留为手动调试项。
+- [x] `AlwaysOffroad=1` 时强制保持 offroad，不进入驾驶控制路径。
+- [x] `AlwaysOffroad=1` 时 pandad 强制 panda `NO_OUTPUT`，避免接管 harness 继电器。
+- [x] `AlwaysOffroad=1` 时本地 Web/SSH/更新仍保持可用。
+- [x] 设备快照和 stable evidence gate 增加默认连接守卫，要求 `AlwaysOffroad=0`、`EnableConnect=0` 且看不到远程连接 / 上传进程；AlwaysOffroad 更新/调试守卫保留为手动调试项。
 - [x] 增加 ACC/CAN 断电重启记录脚本和 stable gate 检查，要求 `PowerCycleBootOk=1` 且记录 commit 匹配设备快照 commit。
 - [ ] 上车确认 ACC/CAN 供电断电重启后能直接进入系统。
 
@@ -153,7 +153,7 @@
 ## P6: 发布和安装
 
 - [x] 增加个人版本地 smoke 检查脚本。
-- [x] 增加 ESCC / Always Offline 上车前静态 preflight 脚本。
+- [x] 增加 ESCC / AlwaysOffroad 上车前静态 preflight 脚本。
 - [x] 增加 CP搭子 / Navipilot 核心协议静态 preflight 脚本。
 - [x] 增加功能边界守卫脚本，确认未验证高风险入口不在默认主线，已有 Web/cluster/ShareData 入口保持开关控制。
 - [x] 增加功能状态报告脚本，防止 TODO 和实际代码能力脱节。
@@ -191,11 +191,11 @@
 
 ## P7: 中文翻译和参数说明优化
 
-低优先级，等 ESCC 和离线模式先稳定。
+低优先级，等 ESCC 和 Connect / AlwaysOffroad 语义先稳定。
 
 - [x] 梳理 `selfdrive/carrot_settings.json` 中明显机翻、韩文残留和含糊描述。
 - [x] 第一批优先改启动、现代/起亚、雷达、纵控、转向相关高风险参数说明。
-- [x] 第一批给 ESCC、CANFD/HDA2、Camera SCC、雷达轨迹、角雷达、离线模式、车门/安全带屏蔽补“适用车型/默认建议/风险提示”。
+- [x] 第一批给 ESCC、CANFD/HDA2、Camera SCC、雷达轨迹、角雷达、Connect / AlwaysOffroad、车门/安全带屏蔽补“适用车型/默认建议/风险提示”。
 - [x] 增加中文设置说明审计脚本，防止高风险中文说明退化。
 - [x] 不改参数含义和默认值，只改显示文字。
 - [x] 第二批清理外部 HUD、显示路径、导航减速和低风险显示项的措辞。

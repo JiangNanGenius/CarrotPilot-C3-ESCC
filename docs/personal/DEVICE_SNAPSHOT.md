@@ -1,6 +1,6 @@
 # 设备端快照采集
 
-这个快照用于上车前后把 C3 设备上的关键状态记录下来，方便判断 ESCC、离线模式、车型路径、CP搭子协议和只读 AmapNavi 状态桥是否正常。
+这个快照用于上车前后把 C3 设备上的关键状态记录下来，方便判断 ESCC、Connect / AlwaysOffroad、车型路径、CP搭子协议和只读 AmapNavi 状态桥是否正常。
 
 快照也会记录模型选择器的只读状态，包括 `DrivingModelName`、`PendingModelName` 和 `/data/model_selector_status` 中的 engine。默认主线未启用模型选择器时，状态会显示为 `default_upstream_assumed`，这表示继续使用内置 upstream modeld。
 
@@ -132,15 +132,15 @@ python3 scripts/personal/road_test_evidence_check.py \
 - `CarParamsDecoded`：是否成功解码当前设备上的 `CarParams`。
 - `carFingerprint`：确认当前车型路径，应为 Seltos 相关车型。
 - `carName`、`networkLocation`、`safetyConfigs`、`spFlags`：确认 Hyundai/Kia safety、接线位置和 ESCC safety 参数摘要。
-- `AlwaysOffline`：默认应为 `0`，仅在调试/故障排查时手动开启。
+- `AlwaysOffroad`：默认应为 `0`，仅在驻车供电更新、继电器调试或故障排查时手动开启。
 - `EnableConnect`：默认应为 `0`，避免克隆 C3 连接官方注册/远程连接服务。
 - `EnableEscc`：第一次上车前应为 `0`。
 - `HyundaiCameraSCC`、`CanfdHDA2`：Seltos 2023 纯 CAN 初期应为 `0`。
 - `EnableRadarTracks`：初期建议为 `0`。
-- `DisableUpdates`：按当前调试模式和更新需求确认。
 - `process_snapshot_available`：是否成功读取进程列表。
 - `connect_process_seen` / `uploader_process_seen`：默认 `EnableConnect=0` 时应为 `False`。
-- `offline_forbidden_processes_seen` / `updated_process_seen`：只在手动开启 `AlwaysOffline=1` 做离线调试时作为额外检查。
+- `updated_process_seen` / `carrot_server_process_seen`：手动开启 `AlwaysOffroad=1` 做驻车供电更新/调试时应为 `True`，确认本地更新和 Web 仍可用。
+- `connect_forbidden_processes_seen`：默认 `EnableConnect=0` 时应为 `False`，确认官方远程连接/上传没有启动。
 - `PowerCycleBootOk`：真实 ACC/CAN 断电重启成功后，由 `record_power_cycle_boot.py` 手动记录为 `1`。
 - `PowerCycleBootCommit`：记录断电重启成功时的当前 commit；stable gate 会要求它匹配快照 commit，避免旧记录混用。
 - `PowerCycleBootTag` / `PowerCycleBootRecordedAt`：记录当时 tag 和时间，便于以后回查。
@@ -168,7 +168,7 @@ python3 scripts/personal/road_test_evidence_check.py \
 - `CarParamsDecoded=ok`
 - `carFingerprint` 包含 `SELTOS`
 - `safetyConfigs` 有有效摘要
-- `AlwaysOffline=0`
+- `AlwaysOffroad=0`
 - `EnableConnect=0`
 - `process_snapshot_available=True`
 - `connect_process_seen=False`

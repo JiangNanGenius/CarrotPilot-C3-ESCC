@@ -3,7 +3,23 @@
 #include "common/swaglog.h"
 
 void PandaSafety::configureSafetyMode() {
+  bool always_offroad = params_.getBool("AlwaysOffroad");
   bool is_onroad = params_.getBool("IsOnroad");
+
+  if (always_offroad) {
+    if (!always_offroad_applied_) {
+      LOGW("AlwaysOffroad active: setting panda safety to NO_OUTPUT");
+      for (int i = 0; i < pandas_.size(); ++i) {
+        pandas_[i]->set_safety_model(cereal::CarParams::SafetyModel::NO_OUTPUT);
+      }
+      always_offroad_applied_ = true;
+    }
+    initialized_ = false;
+    safety_configured_ = false;
+    log_once_ = false;
+    return;
+  }
+  always_offroad_applied_ = false;
 
   if (is_onroad && !safety_configured_) {
     updateMultiplexingMode();

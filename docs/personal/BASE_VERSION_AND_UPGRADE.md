@@ -55,7 +55,7 @@ openpilot 0.10.x
 
 ### ESCC 优先
 
-马上飞扬/鱼店 ESCC 支持是必移植项。ESCC、Always Offline、Seltos 2023 纯 CAN、C3 二进制安装器这些主目标完成并实车稳定前，不做大版本 rebase。
+马上飞扬/鱼店 ESCC 支持是必移植项。ESCC、AlwaysOffroad、Seltos 2023 纯 CAN、C3 二进制安装器这些主目标完成并实车稳定前，不做大版本 rebase。
 
 ### 机械小哥功能采用移植策略
 
@@ -73,7 +73,7 @@ C4/新架构线可以保留研究价值，但不要影响 C3/Seltos/ESCC 主线�
 
 - 主线继续基于 `ajouatom/openpilot:c3-wip`。
 - 上游更新先通过 `scripts/personal/upstream_update_plan.py` 比较。
-- 只 cherry-pick 明确需要的 C3、ESCC、Seltos、Always Offline、CP搭子功能。
+- 只 cherry-pick 明确需要的 C3、ESCC、Seltos、AlwaysOffroad、CP搭子功能。
 - 不把 daily install target 指向开发分支。
 
 中期策略：
@@ -86,7 +86,7 @@ C4/新架构线可以保留研究价值，但不要影响 C3/Seltos/ESCC 主线�
 
 - 另开迁移研究分支，例如 `research/openpilot-0.10-c3-escc`。
 - 先比对 opendbc、panda safety、manager/registration、installer、modeld、CarrotPilot UI/Web 参数体系。
-- 不在主线直接 rebase 到 0.10.x/1.0，除非 C3 克隆版启动、ESCC 0x2AB、Always Offline、Seltos 2023 全部重新验证通过。
+- 不在主线直接 rebase 到 0.10.x/1.0，除非 C3 克隆版启动、ESCC 0x2AB、AlwaysOffroad、Seltos 2023 全部重新验证通过。
 
 ## 复查命令
 

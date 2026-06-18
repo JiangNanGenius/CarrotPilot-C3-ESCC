@@ -224,7 +224,7 @@ def audit_source(source: Source, report: Audit, baselines: Dict[str, str], max_c
 def print_next_steps(report: Audit) -> None:
   print("\n## Required personal checks after merge or rebase")
   print("- python3 scripts/personal/smoke_check.py")
-  print("- python3 scripts/personal/escc_offline_preflight.py --no-manual")
+  print("- python3 scripts/personal/escc_offroad_preflight.py --no-manual")
   print("- python3 scripts/personal/cplink_preflight.py --no-manual")
   print("- manual car checks from docs/personal/UPDATE_CHECKLIST.md before any road use")
 

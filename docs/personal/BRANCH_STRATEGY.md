@@ -4,7 +4,7 @@
 
 主线服务 C3 克隆版和 Seltos 2023。C4 只做旁支，不让它拖慢主线。
 
-ESCC 和 Always Offline 是主线必保留功能。机械小哥和 fishop 的其它功能尽量全整合，但要分阶段、可回滚。
+ESCC 和 AlwaysOffroad 是主线必保留功能。机械小哥和 fishop 的其它功能尽量全整合，但要分阶段、可回滚。
 
 ## 远端
 
@@ -31,7 +31,7 @@ git remote add dhvms https://github.com/dhvms/carrotpilot.git
 
 `personal/c3-escc`
 
-主用分支。基于 `upstream/c3-wip`，集成 ESCC 和 Always Offline，并新建 Seltos 2023 纯 CAN 车型条目。Seltos 2023 初期复用 Seltos 2021 配置。
+主用分支。基于 `upstream/c3-wip`，集成 ESCC 和 AlwaysOffroad，并新建 Seltos 2023 纯 CAN 车型条目。Seltos 2023 初期复用 Seltos 2021 配置。
 
 `personal/c3-escc-atune`
 

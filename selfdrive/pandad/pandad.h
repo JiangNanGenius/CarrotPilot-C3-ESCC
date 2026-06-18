@@ -21,6 +21,7 @@ private:
   bool initialized_ = false;
   bool log_once_ = false;
   bool safety_configured_ = false;
+  bool always_offroad_applied_ = false;
   bool prev_obd_multiplexing_ = false;
   std::vector<Panda *> pandas_;
   Params params_;

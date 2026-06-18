@@ -11,7 +11,7 @@
 | ESCC 参数开关 | `fishop/openpilot:cp` | P0 | 默认关闭 |
 | Hyundai Camera SCC 相关兼容 | `fishop/openpilot:cp` | P0 | 按 Seltos 纯 CAN 接线验证 |
 | Radar tracks / ESCC lead 解析 | `fishop/openpilot:cp` | P0 | 优先迁移 |
-| Always Offline 离线调试模式 | 用户硬件约束 / fishop 思路 | P0 | 默认关闭，仅用于调试/故障排查 |
+| AlwaysOffroad 强制 Offroad 模式 | 用户硬件约束 / fishop 思路 | P0 | 默认关闭，仅用于驻车供电更新/继电器调试/故障排查 |
 | Enable Connect 在线连接 | 当前维护 | P0 | 默认关闭，避免克隆 C3 连接官方注册/远程连接服务 |
 
 ## 计划进入扩展分支
@@ -38,8 +38,8 @@
 | 功能 | 当前状态 | 守卫 |
 | --- | --- | --- |
 | 7000 Web 本地控制台 | `carrot_server.py` 默认 7000 端口，已有 dashcam、screenrecord、tools、Auto-Tuner 面板 | `scripts/personal/feature_boundary_check.py` 确认入口和关键文件仍存在 |
-| 默认连接守卫 | 设备快照记录远程连接和 `uploader` 是否出现；stable gate 要求 `AlwaysOffline=0`、`EnableConnect=0` 且不启动远程连接/上传 | `road_test_evidence_check.py --require-default-connect-guard` 和 `evidence_readiness_report.py` |
-| Always Offline 调试守卫 | 手动开启 `AlwaysOffline=1` 时，检查更新、远程连接和上传进程都不启动 | `road_test_evidence_check.py --require-offline-process-guard` |
+| 默认连接守卫 | 设备快照记录远程连接和 `uploader` 是否出现；stable gate 要求 `AlwaysOffroad=0`、`EnableConnect=0` 且不启动远程连接/上传 | `road_test_evidence_check.py --require-default-connect-guard` 和 `evidence_readiness_report.py` |
+| AlwaysOffroad 更新/调试守卫 | 手动开启 `AlwaysOffroad=1` 时，检查 `IsOnroad=False`、本地 Web/更新服务可见，并由 pandad 保持 no-output 安全路径 | `road_test_evidence_check.py --require-offroad-update-guard` |
 | ACC/CAN 断电重启确认 | `record_power_cycle_boot.py` 在真实断电重启成功后写入当前 commit/tag，设备快照记录 `PowerCycleBoot*` 字段 | `road_test_evidence_check.py --require-power-cycle-boot` 要求确认记录匹配快照 commit；`release_gate.py --kind stable` 默认要求 |
 | AmapNavi 只读状态桥 | `app_navi_status.py` 默认关闭，只镜像 `carState` 车道线和原车盲区到 `amapNavi`；设备快照可选采样 `amapNavi_updates` | `scripts/personal/amap_navi_status_check.py` 和 `feature_boundary_check.py` 确认不接收命令、不接外设、不进变道逻辑；`road_test_evidence_check.py --require-amap-navi-sample` 可验证停车采样 |
 | cluster HUD / USB 小屏代码 | 当前代码树已有，manager 只在 `ClusterHud` 为 1 或 2 时启动 | `feature_boundary_check.py` 确认 `carrot_cluster` 仍由 `enable_cluster_hud` 控制 |

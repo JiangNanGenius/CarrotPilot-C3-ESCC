@@ -33,7 +33,7 @@
 - 用户主车优先：C3 克隆版、Kia Seltos 2023、纯 CAN。
 - Seltos 2023 初期复用 Seltos 2021，不额外调转向或纵控默认值。
 - ESCC 默认关闭，必须手动开启。
-- Always Offline 默认关闭，仅作为调试/故障排查开关；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
+- AlwaysOffroad 默认关闭，仅作为驻车供电更新、继电器调试或故障排查开关；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
 - 机械小哥/fishop 其它功能分批迁移，每批可单独回滚。
 
 ## 本地检查
@@ -46,10 +46,10 @@ python3 scripts/personal/upstream_update_plan.py
 python3 scripts/personal/smoke_check.py
 ```
 
-上车前也可以单独跑更详细的 ESCC / 离线模式预检：
+上车前也可以单独跑更详细的 ESCC / AlwaysOffroad 预检：
 
 ```bash
-python3 scripts/personal/escc_offline_preflight.py
+python3 scripts/personal/escc_offroad_preflight.py
 python3 scripts/personal/cplink_preflight.py
 python3 scripts/personal/feature_boundary_check.py
 python3 scripts/personal/feature_status_report.py --strict
@@ -71,7 +71,7 @@ python3 scripts/personal/c3_commissioning.py --output-dir /tmp/carrotpilot-c3-es
 `update_audit.py --fetch` 用于更新前检查三方来源是否有新提交、是否碰到高风险目录，以及本地 tracking 分支是否需要重新审查。
 `upstream_update_plan.py --fetch` 用于把这些更新转成可执行计划：哪些 tracking 分支可以快进、哪些来源触碰高风险目录、后续该跑哪些门禁。它默认只读，只有显式加 `--apply-tracking` 或 `--write-baselines` 才会改本地 tracking 分支或基准文件。
 
-其它检查覆盖 Seltos 2023、ESCC、Always Offline、Auto-Tuner 默认安全状态、上游更新计划工具、功能边界守卫、功能状态报告、证据就绪度报告、模型选择器参考线审计、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
+其它检查覆盖 Seltos 2023、ESCC、AlwaysOffroad、Auto-Tuner 默认安全状态、上游更新计划工具、功能边界守卫、功能状态报告、证据就绪度报告、模型选择器参考线审计、中文设置说明、设置 JSON、关键 Python/JS 语法、Auto-Tuner mock 回归、capnp/DBC/Params 关键依赖、CP搭子核心协议链路，以及仍需实车确认的项目。
 
 如果要从当前可工作的 fishop / 飞扬版本迁移设置，使用：
 
@@ -164,7 +164,7 @@ python3 scripts/personal/collect_real_car_evidence.py --archive
 
 - `.github/workflows/personal-smoke.yml`
 - 触发：推送到 `personal/c3-escc`、`personal/c3-escc-atune`，PR 到这些分支，或手动触发。
-- 内容：运行 `smoke_check.py`、ESCC / Always Offline preflight、CP搭子 preflight 和功能边界守卫。
+- 内容：运行 `smoke_check.py`、ESCC / AlwaysOffroad preflight、CP搭子 preflight 和功能边界守卫。
 - `smoke_check.py` 里也会运行功能状态报告，确认 7000 Web、实验模式开关、Auto-Tuner、CP搭子核心、cluster HUD gate、ShareData gate 和高风险隔离状态没有漂移。
 
 公开仓库还有一个上游监控工作流：

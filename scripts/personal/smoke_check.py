@@ -12,6 +12,10 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[2]
+FORBIDDEN_LEGACY_PARAMS = (
+  "Always" + "Offline",
+  "device_go" + "_off_road",
+)
 WHITESPACE_CANDIDATES = [
   "README.md",
   ".github/workflows/personal-smoke.yml",
@@ -31,9 +35,10 @@ class CheckFailure(Exception):
 
 class FakeParams:
   DEFAULTS = {
-    "AlwaysOffline": False,
+    "AlwaysOffroad": False,
     "EnableEscc": 0,
     "EnableConnect": 0,
+    "SoftwareMenu": 1,
     "CarrotLearningActive": 0,
     "CarrotLearningAutoApply": False,
     "CarrotTunerApplyLat": 1,
@@ -170,6 +175,12 @@ def expect_contains(path: str, needle: str, label: str) -> None:
     raise CheckFailure("%s missing in %s" % (label, path))
 
 
+def expect_not_contains(path: str, needle: str, label: str) -> None:
+  text = read_text(path)
+  if needle in text:
+    raise CheckFailure("%s unexpectedly found in %s" % (label, path))
+
+
 def expect_regex(path: str, pattern: str, label: str) -> None:
   text = read_text(path)
   if not re.search(pattern, text, re.S):
@@ -190,8 +201,9 @@ def settings_by_name() -> Dict[str, Dict[str, Any]]:
 def check_settings_defaults() -> None:
   by_name = settings_by_name()
   expected = {
-    "AlwaysOffline": 0,
+    "AlwaysOffroad": 0,
     "EnableConnect": 0,
+    "SoftwareMenu": 1,
     "EnableEscc": 0,
     "CarrotLearningActive": 0,
     "CarrotLearningAutoApply": 0,
@@ -210,9 +222,10 @@ def check_settings_defaults() -> None:
 def check_params_defaults() -> None:
   params_keys = "common/params_keys.h"
   patterns = {
-    "AlwaysOffline default off": r'\{"AlwaysOffline", \{PERSISTENT, BOOL, "0"\}\}',
+    "AlwaysOffroad default off": r'\{"AlwaysOffroad", \{PERSISTENT, BOOL, "0"\}\}',
     "EnableEscc default off": r'\{"EnableEscc", \{PERSISTENT, INT, "0"\}\}',
     "EnableConnect default off": r'\{"EnableConnect", \{PERSISTENT, INT, "0"\}\}',
+    "SoftwareMenu default on": r'\{"SoftwareMenu", \{PERSISTENT, INT, "1"\}\}',
     "CarrotLearningActive default off": r'\{"CarrotLearningActive", \{PERSISTENT, INT, "0"\}\}',
     "CarrotLearningAutoApply default off": r'\{"CarrotLearningAutoApply", \{PERSISTENT, BOOL, "0"\}\}',
     "CarrotLearningApply action": r'\{"CarrotLearningApply", \{PERSISTENT, BOOL, "0"\}\}',
@@ -245,17 +258,34 @@ def check_escc_static() -> None:
   expect_contains("opendbc_repo/opendbc/safety/safety/safety_hyundai_common.h", "HYUNDAI_PARAM_ESCC = 1024", "panda ESCC safety param")
 
 
-def check_offline_static() -> None:
-  expect_contains("system/manager/manager.py", "AlwaysOffline", "manager AlwaysOffline")
-  expect_contains("system/manager/manager.py", "UNREGISTERED_DONGLE_ID", "offline dongle fallback")
+def check_offroad_static() -> None:
+  for path in [
+    "common/params_keys.h",
+    "selfdrive/carrot_settings.json",
+    "system/hardware/hardwared.py",
+    "selfdrive/pandad/panda_safety.cc",
+    "selfdrive/pandad/pandad.h",
+    "system/manager/manager.py",
+    "system/manager/process_config.py",
+    "system/athena/registration.py",
+    "selfdrive/car/car_specific.py",
+  ]:
+    for legacy_name in FORBIDDEN_LEGACY_PARAMS:
+      expect_not_contains(path, legacy_name, "forbidden legacy param")
+
+  expect_contains("system/hardware/hardwared.py", 'params.get_bool("AlwaysOffroad")', "hardwared AlwaysOffroad")
+  expect_contains("system/hardware/hardwared.py", "should_start = not always_offroad", "hardwared offroad gate")
+  expect_contains("selfdrive/pandad/panda_safety.cc", 'params_.getBool("AlwaysOffroad")', "pandad AlwaysOffroad")
+  expect_contains("selfdrive/pandad/panda_safety.cc", "SafetyModel::NO_OUTPUT", "pandad no-output safety")
+  expect_contains("system/manager/manager.py", "UNREGISTERED_DONGLE_ID", "unregistered dongle fallback")
   expect_contains("system/athena/registration.py", 'UNREGISTERED_DONGLE_ID = "UnregisteredDevice"', "unregistered dongle id")
-  expect_contains("system/manager/manager.py", "DisableUpdates", "offline disables updates")
   expect_contains("system/manager/manager.py", "connect_enabled", "connect process gate")
-  expect_contains("system/athena/registration.py", "AlwaysOffline", "registration AlwaysOffline")
   expect_contains("system/athena/registration.py", "EnableConnect", "registration EnableConnect")
   expect_contains("system/manager/process_config.py", "enable_connect", "connect process gate")
-  expect_contains("system/manager/process_config.py", "AlwaysOffline", "process config AlwaysOffline")
-  expect_contains("selfdrive/car/car_specific.py", "AlwaysOffline", "car_specific shutdown guard")
+  expect_contains("system/manager/process_config.py", "return not started and params.get_bool(\"SoftwareMenu\")", "updated stays available offroad")
+  expect_contains("system/manager/process_config.py", "return params.get_int(\"EnableConnect\") > 0", "connect process uses EnableConnect")
+  expect_not_contains("system/manager/manager.py", "DisableUpdates", "manager does not disable updates for offroad")
+  expect_not_contains("selfdrive/car/car_specific.py", "AlwaysOffroad", "car_specific not tied to AlwaysOffroad")
 
 
 def install_fake_openpilot_params() -> None:
@@ -384,7 +414,7 @@ def check_py_compile() -> None:
 
   files = [
     "scripts/personal/smoke_check.py",
-    "scripts/personal/escc_offline_preflight.py",
+    "scripts/personal/escc_offroad_preflight.py",
     "scripts/personal/cplink_preflight.py",
     "scripts/personal/feature_boundary_check.py",
     "scripts/personal/feature_status_report.py",
@@ -491,7 +521,7 @@ def check_c3_static_dry_run() -> None:
     "CarParamsDecoded",
     "EnableAmapNaviStatus",
     "process_snapshot_available",
-    "offline_forbidden_processes_seen",
+    "connect_forbidden_processes_seen",
     "updated_process_seen",
     "connect_process_seen",
     "uploader_process_seen",
@@ -604,8 +634,8 @@ def main() -> int:
     ("AmapNavi status compatibility", lambda: run([sys.executable, "scripts/personal/amap_navi_status_check.py"], "AmapNavi status compatibility")),
     ("Seltos 2023 static checks", check_seltos_static),
     ("ESCC static checks", check_escc_static),
-    ("Always Offline static checks", check_offline_static),
-    ("ESCC / Always Offline preflight", lambda: run([sys.executable, "scripts/personal/escc_offline_preflight.py", "--no-manual"], "ESCC / Always Offline preflight")),
+    ("AlwaysOffroad static checks", check_offroad_static),
+    ("ESCC / AlwaysOffroad preflight", lambda: run([sys.executable, "scripts/personal/escc_offroad_preflight.py", "--no-manual"], "ESCC / AlwaysOffroad preflight")),
     ("CPlink / Navipilot preflight", lambda: run([sys.executable, "scripts/personal/cplink_preflight.py", "--no-manual"], "CPlink / Navipilot preflight")),
     ("Feature boundary guard", lambda: run([sys.executable, "scripts/personal/feature_boundary_check.py", "--no-manual"], "Feature boundary guard")),
     ("Feature status report", lambda: run([sys.executable, "scripts/personal/feature_status_report.py", "--strict"], "Feature status report")),

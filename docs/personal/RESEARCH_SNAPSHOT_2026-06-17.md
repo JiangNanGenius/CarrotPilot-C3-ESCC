@@ -10,7 +10,7 @@
 - 项目目标：新建 Seltos 2023 独立车型条目，初期复用 Seltos 2021 配置。
 - 车辆总线：纯 CAN，不是 CANFD。
 - 必迁：fishop / 飞扬线里的 ESCC 硬件支持。
-- 必备：Always Offline 模式，适配 ACC/CAN 供电、熄火断电、无法在线注册的 C3 克隆版。
+- 必备：AlwaysOffroad 模式，适配 ACC/CAN 供电、熄火断电、无法在线注册的 C3 克隆版。
 - 目标：尽量整合机械小哥和 fishop 的全部实用功能。
 - C4：可旁支维护，但不影响 C3 主线。
 - 低优先级：清理 Korean/机翻式中文菜单和抽象参数说明。

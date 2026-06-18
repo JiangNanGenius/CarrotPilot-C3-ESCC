@@ -46,8 +46,8 @@ jobs:
       - name: Run personal smoke check
         run: python3 scripts/personal/smoke_check.py
 
-      - name: Run ESCC and offline preflight
-        run: python3 scripts/personal/escc_offline_preflight.py --no-manual
+      - name: Run ESCC and AlwaysOffroad preflight
+        run: python3 scripts/personal/escc_offroad_preflight.py --no-manual
 
       - name: Run CPlink preflight
         run: python3 scripts/personal/cplink_preflight.py --no-manual

@@ -8,6 +8,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[2]
+FORBIDDEN_LEGACY_PARAMS = (
+  "Always" + "Offline",
+  "device_go" + "_off_road",
+)
 
 
 class Report:
@@ -34,6 +38,10 @@ class Report:
   def require_contains(self, label: str, path: str, needle: str) -> None:
     text = read_text(path)
     self.require(label, needle in text, f"missing {needle!r} in {path}")
+
+  def require_not_contains(self, label: str, path: str, needle: str) -> None:
+    text = read_text(path)
+    self.require(label, needle not in text, f"unexpected {needle!r} in {path}")
 
   def require_regex(self, label: str, path: str, pattern: str) -> None:
     text = read_text(path)
@@ -136,8 +144,9 @@ def check_git_context(report: Report) -> None:
 def check_params_and_settings(report: Report) -> None:
   params = parse_params_keys()
   for name, typ, default in [
-    ("AlwaysOffline", "BOOL", "0"),
+    ("AlwaysOffroad", "BOOL", "0"),
     ("EnableConnect", "INT", "0"),
+    ("SoftwareMenu", "INT", "1"),
     ("EnableEscc", "INT", "0"),
     ("HyundaiCameraSCC", "INT", "0"),
     ("CanfdHDA2", "INT", "0"),
@@ -154,8 +163,9 @@ def check_params_and_settings(report: Report) -> None:
 
   settings = settings_by_name()
   for name, default in [
-    ("AlwaysOffline", 0),
+    ("AlwaysOffroad", 0),
     ("EnableConnect", 0),
+    ("SoftwareMenu", 1),
     ("EnableEscc", 0),
     ("HyundaiCameraSCC", 0),
     ("CanfdHDA2", 0),
@@ -231,32 +241,46 @@ def check_escc_wiring(report: Report) -> None:
   report.require_contains("panda safety parses ESCC param", "opendbc_repo/opendbc/safety/safety/safety_hyundai_common.h", "hyundai_escc = GET_FLAG(param, HYUNDAI_PARAM_ESCC)")
 
 
-def check_offline_wiring(report: Report) -> None:
-  report.require_contains("manager checks AlwaysOffline", "system/manager/manager.py", 'params.get_bool("AlwaysOffline")')
+def check_offroad_wiring(report: Report) -> None:
+  for path in [
+    "common/params_keys.h",
+    "selfdrive/carrot_settings.json",
+    "system/hardware/hardwared.py",
+    "selfdrive/pandad/panda_safety.cc",
+    "selfdrive/pandad/pandad.h",
+    "system/manager/manager.py",
+    "system/manager/process_config.py",
+    "system/athena/registration.py",
+    "selfdrive/car/car_specific.py",
+  ]:
+    for legacy_name in FORBIDDEN_LEGACY_PARAMS:
+      report.require_not_contains("forbidden legacy param absent: " + path, path, legacy_name)
+
+  report.require_contains("hardwared reads AlwaysOffroad", "system/hardware/hardwared.py", 'params.get_bool("AlwaysOffroad")')
+  report.require_contains("hardwared keeps device offroad", "system/hardware/hardwared.py", "should_start = not always_offroad")
+  report.require_contains("pandad reads AlwaysOffroad", "selfdrive/pandad/panda_safety.cc", 'params_.getBool("AlwaysOffroad")')
+  report.require_contains("pandad forces no-output safety", "selfdrive/pandad/panda_safety.cc", "SafetyModel::NO_OUTPUT")
   report.require_contains("manager checks EnableConnect", "system/manager/manager.py", 'params.get_int("EnableConnect")')
   report.require_contains("manager keeps unregistered dongle id", "system/manager/manager.py", "UNREGISTERED_DONGLE_ID")
-  report.require_contains("manager disables updates offline", "system/manager/manager.py", 'params.put_bool("DisableUpdates", True)')
-  report.require_contains("manager disables connect offline", "system/manager/manager.py", 'params.put_int("EnableConnect", 0)')
-  report.require_contains("manager ignores online processes offline", "system/manager/manager.py", 'ignore += ["manage_athenad", "uploader", "updated"]')
-  report.require_contains("registration returns unregistered id offline", "system/athena/registration.py", "return UNREGISTERED_DONGLE_ID")
+  report.require_contains("registration returns unregistered id when Connect is disabled", "system/athena/registration.py", "return UNREGISTERED_DONGLE_ID")
   report.require_contains("registration skips when connect disabled", "system/athena/registration.py", 'params.get_int("EnableConnect") <= 0')
-  report.require_regex("updated process gated by AlwaysOffline", "system/manager/process_config.py", r"enable_updated\(.*?not params\.get_bool\(\"AlwaysOffline\"\)")
-  report.require_regex("connect process gated by AlwaysOffline", "system/manager/process_config.py", r"enable_connect\(.*?not params\.get_bool\(\"AlwaysOffline\"\)")
-  report.require_contains("park cancel shutdown guarded by AlwaysOffline", "selfdrive/car/car_specific.py", 'not self.params.get_bool("AlwaysOffline")')
+  report.require_contains("local updater remains available offroad", "system/manager/process_config.py", 'return not started and params.get_bool("SoftwareMenu")')
+  report.require_contains("remote connect process uses EnableConnect only", "system/manager/process_config.py", 'return params.get_int("EnableConnect") > 0')
 
 
 def manual_items() -> List[str]:
   return [
-    "On the C3 clone, confirm boot reaches UI with AlwaysOffline=0 and EnableConnect=0 after ACC/CAN power loss.",
+    "On the C3 clone, confirm boot reaches UI with AlwaysOffroad=0 and EnableConnect=0 after ACC/CAN power loss.",
     "With EnableEscc=0, confirm Seltos 2023 behaves like the known-good Seltos 2021 path.",
     "With EnableEscc=1, confirm CAN bus 0 sees stable 0x2AB before enabling longitudinal control.",
-    "Record /data/params for DongleId, AlwaysOffline, DisableUpdates, EnableConnect, EnableEscc, HyundaiCameraSCC, CanfdHDA2, and EnableRadarTracks.",
+    "Record /data/params for DongleId, AlwaysOffroad, SoftwareMenu, EnableConnect, EnableEscc, HyundaiCameraSCC, CanfdHDA2, and EnableRadarTracks.",
+    "With AlwaysOffroad=1 while powered, confirm the UI stays offroad and local Web/update access still works.",
     "Confirm no SCC/AEB/FCW fault appears after ESCC is enabled.",
   ]
 
 
 def print_report(report: Report, show_manual: bool) -> None:
-  print("ESCC / Always Offline preflight")
+  print("ESCC / AlwaysOffroad preflight")
   print("repo:", ROOT)
   for label in report.passed:
     print("[PASS]", label)
@@ -285,7 +309,7 @@ def main() -> int:
   check_capnp_and_dbc(report)
   check_seltos_profile(report)
   check_escc_wiring(report)
-  check_offline_wiring(report)
+  check_offroad_wiring(report)
 
   print_report(report, show_manual=not args.no_manual)
   return 1 if report.failed else 0

@@ -30,12 +30,12 @@ labels: update
 - [ ] Radar lead 解析正常。
 - [ ] Seltos 配置未被破坏。
 
-## Always Offline 检查
+## Connect / AlwaysOffroad 检查
 
-- [ ] `AlwaysOffline` 存在且个人 C3 克隆版默认开启。
-- [ ] 在线注册被跳过。
-- [ ] 更新和远程连接流程不在离线模式下启动。
-- [ ] 驻车按 Cancel 不主动关机。
+- [ ] `AlwaysOffroad` 存在且默认关闭。
+- [ ] `EnableConnect` 存在且默认关闭，在线注册被跳过。
+- [ ] `EnableConnect=0` 时远程连接和上传流程不启动。
+- [ ] `AlwaysOffroad=1` 时设备保持 offroad，本地 Web/SSH/更新仍可用，pandad 保持 no-output。
 
 ## 验证
 

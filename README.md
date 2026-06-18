@@ -8,7 +8,7 @@
 - 主车：Kia Seltos 2023，初期复用 Seltos 2021 配置
 - 硬件：C3 中国克隆版，不是 C3X
 - ESCC：已接入最小支持，默认关闭，必须手动开启 `EnableEscc`
-- 离线调试：`AlwaysOffline` 默认关闭，只保留手动调试开关；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务
+- 强制 Offroad：`AlwaysOffroad` 默认关闭，只在驻车供电时用于保持 offroad、避免接管 harness 继电器，同时保留本地 Web/SSH/更新；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务
 - Auto-Tuner：已接入学习和手动确认闭环，默认关闭，不自动应用
 - CP搭子 / Navipilot：核心 CarrotMan / CPlink 协议静态兼容，已增加 C3 侧 APP 端点 live check，手机 APP 实测未完成
 - 模型选择器：已跟踪参考线并增加源码审计，默认主线未启用模型下载或 modeld 切换
@@ -32,7 +32,7 @@
 自动检查：
 
 - GitHub Actions 的 `Personal Smoke` 会在个人分支推送和手动触发时运行。
-- 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、Always Offline 进程守卫、CP搭子核心协议、Auto-Tuner 默认安全状态、上游更新计划工具、模型选择器、只读 AmapNavi 状态桥及其可选实机采样证据、AmapNavi/自动超车来源审计、功能边界守卫、证据就绪度报告和中文设置说明。
+- 它覆盖 Seltos 2023 纯 CAN 复用策略、ESCC、AlwaysOffroad offroad/本地更新守卫、CP搭子核心协议、Auto-Tuner 默认安全状态、上游更新计划工具、模型选择器、只读 AmapNavi 状态桥及其可选实机采样证据、AmapNavi/自动超车来源审计、功能边界守卫、证据就绪度报告和中文设置说明。
 - `Upstream Watch` 每周和手动触发时比较 ajouatom、jixiexiaoge/openpilot、jixiexiaoge/navipilot、fishop 的最新分支和 [UPSTREAM_BASELINES.json](docs/personal/UPSTREAM_BASELINES.json)；变红通常表示有新上游提交需要审查。
 - 本地更新前可先运行 `python3 scripts/personal/upstream_update_plan.py --fetch`，它会给出 tracking 分支快进计划、高风险目录和后续门禁命令，默认不修改代码。
 - Actions 通过不代表实车验证通过。

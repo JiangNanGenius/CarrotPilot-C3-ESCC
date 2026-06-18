@@ -69,7 +69,7 @@ python3 scripts/personal/navipilot_live_check.py --param-write-probe
 
 它用于停车状态确认：
 
-- 7000 端口 `/api/params_bulk` 能读取 `ExperimentalMode`、`AlwaysOffline`、`EnableEscc` 等参数。
+- 7000 端口 `/api/params_bulk` 能读取 `ExperimentalMode`、`AlwaysOffroad`、`EnableEscc` 等参数。
 - 7000 端口 `/api/param_set` 能把 `ExperimentalMode` 同值写回，证明 APP 参数写入口可用但不改变实际语义。
 - UDP 7705 能收到状态广播，并包含 APP 驾驶评分需要的关键字段。
 - 加 `--send-test-nav` 后，可向 UDP 7706 发送不含 `LANECHANGE` / `OVERTAKE` 的测试导航包。

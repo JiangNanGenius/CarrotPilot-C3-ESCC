@@ -47,7 +47,7 @@ python3 scripts/personal/params_migration.py import \
 - `HyundaiCameraSCC`
 - `EnableRadarTracks`
 - `CanfdHDA2`
-- `AlwaysOffline`
+- `AlwaysOffroad`
 - 巡航、跟车、转向、导航减速和 Auto-Tuner 相关参数
 
 Seltos 2023 是纯 CAN，`CanfdHDA2` 应保持 `0`。如果 dry-run 准备把它改成 `1`，不要 apply。

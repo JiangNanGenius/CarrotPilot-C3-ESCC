@@ -19,7 +19,7 @@ PARAM_ROOTS = [
 ]
 
 EXPECTED_PARKED_PARAMS = {
-  "AlwaysOffline": "0",
+  "AlwaysOffroad": "0",
   "EnableConnect": "0",
   "EnableEscc": "0",
   "HyundaiCameraSCC": "0",
@@ -203,7 +203,7 @@ def main() -> int:
       check_target_tag(target_tag, args.allow_branch),
       run_preflight("install target check", [sys.executable, "scripts/personal/install_target_check.py"], args.skip_preflight),
       run_preflight("Seltos profile check", [sys.executable, "scripts/personal/seltos_profile_check.py"], args.skip_preflight),
-      run_preflight("ESCC/offline preflight", [sys.executable, "scripts/personal/escc_offline_preflight.py", "--no-manual"], args.skip_preflight),
+      run_preflight("ESCC/AlwaysOffroad preflight", [sys.executable, "scripts/personal/escc_offroad_preflight.py", "--no-manual"], args.skip_preflight),
       run_preflight("CPlink preflight", [sys.executable, "scripts/personal/cplink_preflight.py", "--no-manual"], args.skip_preflight),
     ]
     results.extend(check_params())

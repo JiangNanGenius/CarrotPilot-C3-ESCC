@@ -63,7 +63,7 @@ def check_device_snapshot(snapshot_paths: Sequence[str]) -> str:
     require_cplink_sample=False,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=False,
-    require_offline_guard=False,
+    require_offroad_update_guard_flag=False,
     require_carparams=False,
   )
   return f"validated snapshots: {len(snapshots)}"
@@ -77,7 +77,7 @@ def check_carparams(snapshot_paths: Sequence[str]) -> str:
     require_cplink_sample=False,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=False,
-    require_offline_guard=False,
+    require_offroad_update_guard_flag=False,
     require_carparams=True,
   )
   return "decoded Seltos CarParams summary present"
@@ -91,7 +91,7 @@ def check_escc_sample(snapshot_paths: Sequence[str]) -> str:
     require_cplink_sample=False,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=False,
-    require_offline_guard=False,
+    require_offroad_update_guard_flag=False,
     require_carparams=False,
   )
   return "EnableEscc=1 sample with escc_0x2ab_bus0 > 0 present"
@@ -105,7 +105,7 @@ def check_cplink_sample(snapshot_paths: Sequence[str]) -> str:
     require_cplink_sample=True,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=False,
-    require_offline_guard=False,
+    require_offroad_update_guard_flag=False,
     require_carparams=False,
   )
   return "CP搭子/Navipilot sampled navigation data present"
@@ -119,7 +119,7 @@ def check_amap_navi_sample(snapshot_paths: Sequence[str]) -> str:
     require_cplink_sample=False,
     require_amap_navi_sample=True,
     require_model_selector_status_flag=False,
-    require_offline_guard=False,
+    require_offroad_update_guard_flag=False,
     require_carparams=False,
   )
   return "read-only AmapNavi status bridge sample present"
@@ -133,13 +133,13 @@ def check_model_selector_status(snapshot_paths: Sequence[str]) -> str:
     require_cplink_sample=False,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=True,
-    require_offline_guard=False,
+    require_offroad_update_guard_flag=False,
     require_carparams=False,
   )
   return "read-only model selector status captured with no pending model install"
 
 
-def check_offline_process_guard(snapshot_paths: Sequence[str]) -> str:
+def check_offroad_update_guard(snapshot_paths: Sequence[str]) -> str:
   rtc.validate_snapshots(
     snapshot_paths,
     require_device_snapshot=True,
@@ -147,10 +147,10 @@ def check_offline_process_guard(snapshot_paths: Sequence[str]) -> str:
     require_cplink_sample=False,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=False,
-    require_offline_guard=True,
+    require_offroad_update_guard_flag=True,
     require_carparams=False,
   )
-  return "AlwaysOffline active with no updated/connect/uploader process visible"
+  return "AlwaysOffroad keeps the device offroad while local Web/update services stay visible"
 
 
 def check_default_connect_guard(snapshot_paths: Sequence[str]) -> str:
@@ -161,11 +161,11 @@ def check_default_connect_guard(snapshot_paths: Sequence[str]) -> str:
     require_cplink_sample=False,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=False,
-    require_offline_guard=False,
+    require_offroad_update_guard_flag=False,
     require_default_connect_guard_flag=True,
     require_carparams=False,
   )
-  return "default boot uses AlwaysOffline=0, EnableConnect=0, and no connect/uploader process"
+  return "default boot uses AlwaysOffroad=0, EnableConnect=0, and no connect/uploader process"
 
 
 def check_power_cycle_boot(snapshot_paths: Sequence[str]) -> str:
@@ -176,7 +176,7 @@ def check_power_cycle_boot(snapshot_paths: Sequence[str]) -> str:
     require_cplink_sample=False,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=False,
-    require_offline_guard=False,
+    require_offroad_update_guard_flag=False,
     require_carparams=False,
     require_power_cycle_boot_flag=True,
   )
@@ -208,7 +208,7 @@ def check_stable_ready(road_test_log: Optional[str], snapshot_paths: Sequence[st
     require_cplink_sample=False,
     require_amap_navi_sample=False,
     require_model_selector_status_flag=False,
-    require_offline_guard=False,
+    require_offroad_update_guard_flag=False,
     require_default_connect_guard_flag=True,
     require_carparams=True,
     require_power_cycle_boot_flag=True,
@@ -243,7 +243,7 @@ def build_results(
     stage_result("ESCC 0x2AB sample", True, lambda: check_escc_sample(snapshot_paths)),
     stage_result("completed road-test log", True, lambda: check_road_log(selected_log)),
     stage_result("stable gate readiness", True, lambda: check_stable_ready(selected_log, snapshot_paths)),
-    stage_result("Always Offline debug guard", False, lambda: check_offline_process_guard(snapshot_paths)),
+    stage_result("AlwaysOffroad update/debug guard", False, lambda: check_offroad_update_guard(snapshot_paths)),
     stage_result("CP搭子/Navipilot sample", False, lambda: check_cplink_sample(snapshot_paths)),
     stage_result("AmapNavi status bridge sample", False, lambda: check_amap_navi_sample(snapshot_paths)),
     stage_result("Model selector status", False, lambda: check_model_selector_status(snapshot_paths)),
@@ -302,8 +302,9 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | --- | --- |
 | `branch` | personal/c3-escc-atune |
 | `commit` | abcdef123456 |
-| `AlwaysOffline` | 0 |
+| `AlwaysOffroad` | 0 |
 | `EnableConnect` | 0 |
+| `SoftwareMenu` | 1 |
 | `EnableEscc` | 1 |
 | `CanfdHDA2` | 0 |
 | `HyundaiCameraSCC` | 0 |
@@ -315,9 +316,11 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `PowerCycleBootCommit` | abcdef123456 |
 | `PowerCycleBootTag` | carrotpilot-c3-escc-20260618-test1 |
 | `PowerCycleBootRecordedAt` | 2026-06-18T10:00:00+00:00 |
+| `IsOnroad` | False |
 | `process_snapshot_available` | True |
-| `offline_forbidden_processes_seen` | False |
-| `updated_process_seen` | False |
+| `connect_forbidden_processes_seen` | False |
+| `carrot_server_process_seen` | True |
+| `updated_process_seen` | True |
 | `connect_process_seen` | False |
 | `uploader_process_seen` | False |
 | `enabled` | True |

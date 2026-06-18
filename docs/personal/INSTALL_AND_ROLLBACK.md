@@ -6,7 +6,7 @@
 - 车辆：Kia Seltos 2023，纯 CAN，不是 CANFD。
 - 车型配置：新建 `Kia Seltos 2023`，初期复用 `Kia Seltos 2021`。
 - ESCC：有硬件才开启，默认关闭。
-- 离线调试：`AlwaysOffline` 默认关闭，仅保留手动调试开关；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
+- 强制 Offroad：`AlwaysOffroad` 默认关闭，仅在驻车供电更新、继电器调试或故障排查时手动开启；`EnableConnect` 默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
 
 ## GitHub 仓库
 
@@ -38,10 +38,10 @@
 
 ```bash
 python3 scripts/personal/smoke_check.py
-python3 scripts/personal/escc_offline_preflight.py
+python3 scripts/personal/escc_offroad_preflight.py
 ```
 
-`escc_offline_preflight.py` 只能证明代码里的 capnp、DBC、Params key、设置默认值和 ESCC/离线路径引用完整；它不能替代实车确认 0x2AB、ACC 断电重启、SCC/AEB 状态。
+`escc_offroad_preflight.py` 只能证明代码里的 capnp、DBC、Params key、设置默认值和 ESCC / AlwaysOffroad 路径引用完整；它不能替代实车确认 0x2AB、ACC 断电重启、SCC/AEB 状态。
 
 ## Release 和安装器
 
@@ -89,7 +89,7 @@ curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --c
 
 `stable` 通道会在首个实车 stable 发布后启用；现在还没有 stable，不要选它。
 
-脚本默认安装当前受控测试入口，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffline=0`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。安装时还会把 `PowerCycleBootOk` 清零，避免旧的断电重启确认被误用。
+脚本默认安装当前受控测试入口，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffroad=0`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。安装时还会把 `PowerCycleBootOk` 清零，避免旧的断电重启确认被误用。
 
 安装完成后，脚本还会写入：
 
@@ -123,10 +123,10 @@ curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --d
 
 - 当前安装 URL 或分支。
 - 当前能正常使用的车型选择。
-- `/data/params` 中和车辆、ESCC、离线模式相关的参数。
+- `/data/params` 中和车辆、ESCC、EnableConnect / AlwaysOffroad 相关的参数。
 - 上一个稳定 tag 或可回滚安装地址。
 
-如果当前设备上正在跑 fishop / 飞扬版本且状态正常，优先按 [从旧版本迁移安全参数](CONFIG_MIGRATION.md) 导出一份设置白名单。这样安装本项目版本后，可以先 dry-run 对比，再只导入 ESCC、Camera SCC、雷达、离线模式和调参相关设置。
+如果当前设备上正在跑 fishop / 飞扬版本且状态正常，优先按 [从旧版本迁移安全参数](CONFIG_MIGRATION.md) 导出一份设置白名单。这样安装本项目版本后，可以先 dry-run 对比，再只导入 ESCC、Camera SCC、雷达、EnableConnect / AlwaysOffroad 和调参相关设置。
 
 安装本项目版本后，可以先跑一次首装向导。它默认不会写参数，只会把迁移 dry-run、静态检查、设备快照、证据包和 readiness 报告放进同一个目录：
 
@@ -239,7 +239,7 @@ python3 scripts/personal/road_test_evidence_check.py \
 
 Seltos 2023 初期建议：
 
-- `AlwaysOffline=0`
+- `AlwaysOffroad=0`
 - `EnableEscc=0`
 - `HyundaiCameraSCC=0`
 - `CanfdHDA2=0`
@@ -256,9 +256,9 @@ Seltos 2023 初期建议：
 第一级检查只看设备状态，不开车：
 
 - 能进入系统，不反复重启。
-- 不因为在线注册卡住。
-- 不启动后台更新和远程连接。
-- 设置菜单能看到“离线使用模式”和“启用 ESCC 硬件”。
+- 不因为官方在线注册卡住。
+- 不启动官方远程连接和上传流程；本地 Web/SSH/更新仍可用。
+- 设置菜单能看到“强制 Offroad 模式”“在线连接”和“启用 ESCC 硬件”。
 - 车型可以手动选择 `Kia Seltos 2023`。
 
 ## 静态上车检查
@@ -298,7 +298,7 @@ python3 scripts/personal/device_snapshot.py --sample-seconds 20 --output /data/m
 - 设备能正常启动。
 - 车型选择仍可用。
 - `EnableEscc` 已关闭或不存在。
-- `AlwaysOffline` 状态符合当前设备供电方式。
+- `AlwaysOffroad` 状态符合当前设备供电方式；如果开启过，确认本地 Web/SSH/更新仍可用。
 
 ## 发布 tag 建议
 
@@ -332,7 +332,7 @@ python3 scripts/personal/release_gate.py \
   --run-checks
 ```
 
-升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，并把 C3 生成的设备快照文件保存到电脑本地。`stable` gate 会要求设备快照里有 `AlwaysOffline=0`、`EnableConnect=0`、`CanfdHDA2=0`、`PowerCycleBootOk=1`，且 `PowerCycleBootCommit` 必须匹配快照 commit；同时至少有一次 `EnableEscc=1`、`enabled=True`、`ok=True` 且 `escc_0x2ab_bus0 > 0` 的采样。
+升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，并把 C3 生成的设备快照文件保存到电脑本地。`stable` gate 会要求设备快照里有 `AlwaysOffroad=0`、`EnableConnect=0`、`CanfdHDA2=0`、`PowerCycleBootOk=1`，且 `PowerCycleBootCommit` 必须匹配快照 commit；同时至少有一次 `EnableEscc=1`、`enabled=True`、`ok=True` 且 `escc_0x2ab_bus0 > 0` 的采样。
 
 ```bash
 python3 scripts/personal/release_gate.py \

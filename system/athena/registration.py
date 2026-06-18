@@ -37,10 +37,6 @@ def register(show_spinner=False) -> str | None:
   """
   params = Params()
 
-  if params.get_bool("AlwaysOffline"):
-    params.put("DongleId", UNREGISTERED_DONGLE_ID)
-    cloudlog.warning("AlwaysOffline enabled: using local unregistered dongle id")
-    return UNREGISTERED_DONGLE_ID
   if params.get_int("EnableConnect") <= 0:
     params.put("DongleId", UNREGISTERED_DONGLE_ID)
     cloudlog.warning("EnableConnect disabled: skipping online registration")

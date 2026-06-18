@@ -18,7 +18,7 @@
 - 它会改 `modeld` 启动入口。
 - 它涉及远程 `models.json`、签名验证、ONNX 下载、SHA256/size 校验、tinygrad 编译、warp pkl、重启和 `/data/models` 原子替换。
 - 它需要真实 C3 存储空间、编译耗时、模型资产和回滚验证。
-- 当前用户主需求里 ESCC、AlwaysOffline、Seltos 2023、CP搭子基础链路优先级更高。
+- 当前用户主需求里 ESCC、AlwaysOffroad、Seltos 2023、CP搭子基础链路优先级更高。
 
 当前已做的是来源跟踪和安全审计，不是功能启用。
 

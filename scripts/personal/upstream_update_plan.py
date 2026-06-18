@@ -197,7 +197,7 @@ def print_plan(plans: Sequence[SourcePlan]) -> None:
   if fast_forward:
     print("- python3 scripts/personal/upstream_update_plan.py --fetch --apply-tracking")
     print("- python3 scripts/personal/smoke_check.py")
-    print("- python3 scripts/personal/escc_offline_preflight.py --no-manual")
+    print("- python3 scripts/personal/escc_offroad_preflight.py --no-manual")
     print("- python3 scripts/personal/cplink_preflight.py --no-manual")
     print("- python3 scripts/personal/upstream_update_plan.py --write-baselines")
   else:

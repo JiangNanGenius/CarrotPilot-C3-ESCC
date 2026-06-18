@@ -36,7 +36,7 @@ Rollback target recorded: PENDING
 - [ ] 或运行 `python3 scripts/personal/collect_real_car_evidence.py --archive` 生成完整证据包。
 - [ ] 把快照文件保存到电脑本地，准备给 `road_test_evidence_check.py` 或 `release_gate.py --device-snapshot` 使用。
 - [ ] 准备回滚安装地址或回滚 tag。
-- [ ] 确认 `AlwaysOffline=0`。
+- [ ] 确认 `AlwaysOffroad=0`。
 - [ ] 确认 `EnableConnect=0`。
 - [ ] 确认 `EnableEscc=0`。
 
@@ -45,7 +45,7 @@ Rollback target recorded: PENDING
 - [ ] 设备能进入系统。
 - [ ] 不因注册或联网流程卡住。
 - [ ] 无 manager crash 或循环重启。
-- [ ] 设置页能看到“离线调试模式”“在线连接”和“启用 ESCC 硬件”。
+- [ ] 设置页能看到“强制 Offroad 模式”“在线连接”和“启用 ESCC 硬件”。
 - [ ] 可手动选择 `Kia Seltos 2023`。
 
 ## 2. 车辆和 CAN 路径
@@ -61,10 +61,10 @@ Rollback target recorded: PENDING
 - [ ] ACC/CAN 重新供电后能正常进入系统。
 - [ ] 重新供电并确认系统正常进入后，运行 `python3 scripts/personal/record_power_cycle_boot.py`。
 - [ ] 运行记录脚本后重新采集设备快照或证据包，确保快照里有 `PowerCycleBootOk=1` 且 `PowerCycleBootCommit` 匹配当前 commit。
-- [ ] 默认保持 `AlwaysOffline=0`、`EnableConnect=0`。
-- [ ] 不启动远程连接和上传流程。
-- [ ] 如需单独验证离线调试模式，再手动开启 `AlwaysOffline=1` 并额外运行 `--require-offline-process-guard`。
-- [ ] 驻车按 Cancel 不主动关机。
+- [ ] 默认保持 `AlwaysOffroad=0`、`EnableConnect=0`。
+- [ ] 默认不启动官方远程连接和上传流程，本地 Web/SSH/更新仍可用。
+- [ ] 如需单独验证强制 Offroad 模式，再手动开启 `AlwaysOffroad=1`，确认 `IsOnroad=False`、本地 Web/更新可用，并额外运行 `--require-offroad-update-guard`。
+- [ ] 驻车按 Cancel 行为符合底座原逻辑，未被 `AlwaysOffroad` 额外改写。
 
 ## 4. ESCC 静态确认
 

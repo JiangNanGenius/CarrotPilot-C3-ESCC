@@ -218,6 +218,7 @@ def hardware_thread(end_event, hw_queue) -> None:
   thermal_config = HARDWARE.get_thermal_config()
 
   fan_controller = None
+  always_offroad = False
 
   restart_triggered_ts = 0.
 
@@ -342,8 +343,12 @@ def hardware_thread(end_event, hw_queue) -> None:
         if not Path("/data/media").is_mount():
           set_offroad_alert_if_changed("Offroad_StorageMissing", True)
 
-    # Handle offroad/onroad transition
-    should_start = all(onroad_conditions.values())
+    # Handle offroad/onroad transition. AlwaysOffroad is a local update/debug
+    # mode: keep the device offroad even while the car is powered, so pandad
+    # never switches into the driving safety mode that drives the harness relay.
+    if count % 6 == 0:
+      always_offroad = params.get_bool("AlwaysOffroad")
+    should_start = not always_offroad and all(onroad_conditions.values())
     if started_ts is None:
       should_start = should_start and all(startup_conditions.values())
 

@@ -16,9 +16,12 @@ from typing import Dict, List, Optional, Sequence, Tuple
 ROOT = Path(__file__).resolve().parents[2]
 
 SAFE_PARAM_KEYS = [
-  "AlwaysOffline",
+  "AlwaysOffroad",
   "DisableUpdates",
   "EnableConnect",
+  "HotspotOnBoot",
+  "SoftwareMenu",
+  "SshEnabled",
   "EnableEscc",
   "HyundaiCameraSCC",
   "CanfdHDA2",
@@ -68,8 +71,7 @@ PROCESS_PATTERNS = {
   "uploader_process_seen": r"(^|[ /])uploader($|[ \t])",
 }
 
-OFFLINE_FORBIDDEN_PROCESS_KEYS = [
-  "updated_process_seen",
+CONNECT_FORBIDDEN_PROCESS_KEYS = [
   "connect_process_seen",
   "uploader_process_seen",
 ]
@@ -263,7 +265,7 @@ def process_diagnostics(lines: Sequence[str]) -> Dict[str, object]:
   values: Dict[str, object] = {"process_snapshot_available": available}
   for key, pattern in PROCESS_PATTERNS.items():
     values[key] = available and bool(re.search(pattern, text))
-  values["offline_forbidden_processes_seen"] = any(bool(values[key]) for key in OFFLINE_FORBIDDEN_PROCESS_KEYS)
+  values["connect_forbidden_processes_seen"] = any(bool(values[key]) for key in CONNECT_FORBIDDEN_PROCESS_KEYS)
   return values
 
 

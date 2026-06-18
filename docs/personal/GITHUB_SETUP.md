@@ -8,7 +8,7 @@
 - 本地远端名：`github`
 - 默认分支：`personal/c3-escc-atune`
 - 已推送分支：
-  - `personal/c3-escc`：Seltos 2023 + ESCC + Always Offline 主用保护线。
+  - `personal/c3-escc`：Seltos 2023 + ESCC + AlwaysOffroad 主用保护线。
   - `personal/c3-escc-atune`：在主用保护线上继续集成 Auto-Tuner。
 - GitHub CLI 已登录 `JiangNanGenius`，凭据保存在本机 GitHub CLI/keyring，不写入仓库。
 - 仓库先从 `ajouatom/openpilot` 种入上游历史，再转为独立公开仓库；GitHub 页面不再显示 fork 关系，但远端仍保留上游分支历史，方便后续只推个人改动。

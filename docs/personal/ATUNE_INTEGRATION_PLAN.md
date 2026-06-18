@@ -84,7 +84,7 @@
 这部分暂时放到第三批，原因：
 
 - 它会把手动驾驶习惯转换为默认参数，误判成本比普通推荐更高。
-- 用户当前优先级是 ESCC、Seltos 2023、离线模式和可更新维护。
+- 用户当前优先级是 ESCC、Seltos 2023、Connect / AlwaysOffroad 语义和可更新维护。
 - 需要实车数据确认以后再打开。
 
 第三批原则：
@@ -114,7 +114,7 @@
 迁移 Auto-Tuner 时必须满足：
 
 - `EnableEscc` 默认仍为 `0`。
-- `AlwaysOffline` 默认仍为 `0`，`EnableConnect` 默认仍为 `0`。
+- `AlwaysOffroad` 默认仍为 `0`，`EnableConnect` 默认仍为 `0`。
 - Seltos 2023 仍复用 Seltos 2021 配置。
 - 不默认开启 CANFD、HDA2、camera SCC 或其它非纯 CAN 路径。
 - 不改 panda safety 的诊断限制。
@@ -142,7 +142,7 @@
 上车前检查：
 
 - [ ] 先在停车状态启动，确认无 manager crash。
-- [ ] 先保持 Auto-Tuner 关闭，确认 ESCC 和离线模式无回归。
+- [ ] 先保持 Auto-Tuner 关闭，确认 ESCC、EnableConnect 默认关闭和 AlwaysOffroad 无回归。
 - [ ] 再只开启学习，不开启自动应用。
 - [ ] 第一次路测只观察推荐值，不应用。
 - [ ] 手动应用前保存 `/data/params` 快照。
@@ -161,4 +161,4 @@
 4. `Add Auto-Tuner settings entries`
 5. `Add recommendation review UI`
 
-如果任何一步出问题，可以回滚单个提交，不影响当前已经完成的 ESCC / Seltos / Always Offline 主线。
+如果任何一步出问题，可以回滚单个提交，不影响当前已经完成的 ESCC / Seltos / AlwaysOffroad 主线。

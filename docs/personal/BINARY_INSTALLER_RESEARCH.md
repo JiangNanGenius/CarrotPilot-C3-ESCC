@@ -103,7 +103,7 @@ carrotpilot-c3-escc-20260618-test23
 
 ## 后续真正自编译路线
 
-如果以后需要把 `AlwaysOffline=0`、`EnableConnect=0`、`EnableEscc=0`、车型预设或更多安全参数直接写进二进制安装流程，需要恢复并维护 installer 源码，而不是只做占位替换。
+如果以后需要把 `AlwaysOffroad=0`、`EnableConnect=0`、`EnableEscc=0`、车型预设或更多安全参数直接写进二进制安装流程，需要恢复并维护 installer 源码，而不是只做占位替换。
 
 可选路线：
 

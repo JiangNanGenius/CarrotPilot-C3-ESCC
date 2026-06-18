@@ -1,20 +1,22 @@
 # 当前代码改动记录
 
-## 2026-06-18: AlwaysOffline / EnableConnect 默认策略修正
+## 2026-06-18: AlwaysOffroad / EnableConnect 语义修正
 
 改动内容：
 
-- `AlwaysOffline` 默认改为 `0`，只保留为调试/故障排查开关。
+- `AlwaysOffroad` 默认保持 `0`，只保留为驻车供电更新、继电器调试或故障排查开关。
 - `EnableConnect` 默认保持 `0`，并在关闭时跳过在线注册、阻止远程连接/上传相关进程启动。
 - 设置页新增/明确“在线连接”开关说明，克隆 C3 默认不连接官方注册/远程连接服务。
-- `stable` 证据要求改为 `--require-default-connect-guard`：默认快照需满足 `AlwaysOffline=0`、`EnableConnect=0`，且不启动远程连接/上传。
-- `--require-offline-process-guard` 保留为手动开启 `AlwaysOffline=1` 后的离线调试检查，不再作为默认 stable 必需项。
+- `stable` 证据要求改为 `--require-default-connect-guard`：默认快照需满足 `AlwaysOffroad=0`、`EnableConnect=0`，且不启动远程连接/上传。
+- `--require-offroad-update-guard` 保留为手动开启 `AlwaysOffroad=1` 后的驻车更新/调试检查，要求 `IsOnroad=False` 且本地 Web/更新服务可见，不再作为默认 stable 必需项。
+- `hardwared` 使用 `AlwaysOffroad` 强制保持 offroad；`pandad` 在该模式下把 panda 安全模式压到 `NO_OUTPUT`。
 
 刻意没有改：
 
 - 没有默认开启在线连接。
-- 没有删除 AlwaysOffline 功能。
-- 没有把后台更新作为默认连接守卫的强制失败项；只有 AlwaysOffline 调试模式才要求更新、远程连接、上传都不启动。
+- 没有删除 AlwaysOffroad 功能。
+- 没有把后台更新作为默认连接守卫的强制失败项；AlwaysOffroad 调试模式反而要求本地更新/Web 仍可见。
+- 没有把 `AlwaysOffroad` 当成官方 Connect 开关；官方注册/远程连接只由 `EnableConnect` 控制。
 
 ## 2026-06-18: Navipilot 驾驶报告源码契约守卫
 
@@ -66,7 +68,7 @@
 - 没有把模型选择器作为 stable 必需项。
 - 没有改变默认模型；这只是后续实验分支和上车排查用的证据口子。
 
-## 2026-06-18: Always Offline 进程证据守卫
+## 2026-06-18: AlwaysOffroad 更新/调试证据守卫
 
 改动文件：
 
@@ -88,16 +90,16 @@
 改动内容：
 
 - 设备快照新增 `Process Summary`，机器可读地记录关键进程是否出现。
-- 新增 `process_snapshot_available`、`updated_process_seen`、`connect_process_seen`、`uploader_process_seen` 和 `offline_forbidden_processes_seen` 字段。
-- `road_test_evidence_check.py` 新增 `--require-offline-process-guard`，要求 `AlwaysOffline=1`、`EnableConnect=0`、可读取进程列表，且更新/远程连接/上传进程都不可见。
-- 后续已修正：`evidence_readiness_report.py` 的 stable 必需阶段改为默认连接守卫，`Always Offline process guard` 只保留为调试检查。
+- 新增 `process_snapshot_available`、`updated_process_seen`、`connect_process_seen`、`uploader_process_seen` 和 `connect_forbidden_processes_seen` 字段。
+- `road_test_evidence_check.py` 新增 `--require-offroad-update-guard`，要求 `AlwaysOffroad=1`、`IsOnroad=False`、可读取进程列表，且本地 Web/更新服务可见。
+- 后续已修正：`evidence_readiness_report.py` 的 stable 必需阶段改为默认连接守卫，`AlwaysOffroad update/debug guard` 只保留为调试检查。
 - 后续已修正：`release_gate.py --kind stable` 自动要求 `--require-default-connect-guard`。
-- 证据包和文档更新 stable 校验命令，避免 C3 克隆版 ACC/CAN 断电使用场景漏掉离线模式证据。
+- 证据包和文档更新 stable 校验命令，避免 C3 克隆版 ACC/CAN 断电使用场景漏掉 Connect / AlwaysOffroad 证据。
 
 刻意没有改：
 
 - 没有改 manager 启动逻辑。
-- 后续已修正：AlwaysOffline 默认改为 `0`。
+- 后续已修正：AlwaysOffroad 默认改为 `0`。
 - 没有用进程名判断替代实车 ACC/CAN 断电重启验证；断电重启仍需人工实际确认。
 
 当前静态测试 tag：
@@ -110,7 +112,7 @@
 
 含义：
 
-- 包含 Always Offline 进程证据守卫，静态检查通过，不代表实车断电重启或稳定版本。
+- 包含 AlwaysOffroad 更新/调试证据守卫，静态检查通过，不代表实车断电重启或稳定版本。
 
 ## 2026-06-18: AmapNavi 只读状态桥实机采样证据
 
@@ -329,7 +331,7 @@
 - 没有启用 APP 外接转向灯控制。
 - 没有启用 `OVERTAKE`。
 - 没有引入 DEC / longcontrol 大改。
-- 没有改变 Seltos 2023、ESCC、Always Offline 或 Auto-Tuner 默认行为。
+- 没有改变 Seltos 2023、ESCC、AlwaysOffroad 或 Auto-Tuner 默认行为。
 
 待后续：
 
@@ -429,7 +431,7 @@
 - 确认 ESCC lead 距离、相对速度和 AEB 状态显示正常。
 - 确认不会触发 SCC/AEB 相关故障。
 
-## 2026-06-17: Always Offline 模式
+## 2026-06-17: AlwaysOffroad 模式
 
 改动文件：
 
@@ -442,11 +444,10 @@
 
 改动内容：
 
-- 新增 `AlwaysOffline` 参数；后续已修正为默认关闭。
-- 设置菜单加入离线调试相关开关。
-- 开启后跳过在线注册，使用本地 `UnregisteredDevice`。
-- 开启后关闭后台更新和远程连接相关流程。
-- 开启后驻车按 Cancel 不再触发主动关机。
+- 新增 `AlwaysOffroad` 参数；后续已修正为默认关闭。
+- 设置菜单加入强制 Offroad相关开关。
+- 后续已修正：官方在线注册/远程连接由 `EnableConnect` 控制，不由 `AlwaysOffroad` 控制。
+- 后续已修正：`AlwaysOffroad=1` 时保持 offroad 和 panda no-output，本地 Web/SSH/更新仍应可用。
 - 新增 `EnableConnect` 参数，默认关闭，避免未定义参数被写入。
 
 用途：
@@ -457,7 +458,7 @@
 
 - 开机不再卡注册。
 - 断电重启后能直接进入系统。
-- 离线模式开启时不启动更新和远程连接。
+- `AlwaysOffroad=1` 时保持 offroad，本地 Web/更新可用，且不进入驾驶控制/继电器输出路径。
 
 ## 2026-06-17: Auto-Tuner 第一批实验接入
 
@@ -493,7 +494,7 @@
 - 没有加入 Web 控制台、地图、cluster HUD、USB 小屏、视觉诊断、Tesla 或 CANFD/HDA2 无关功能。
 - 没有默认开启学习。
 - 没有默认自动应用推荐。
-- 没有改变 Seltos 2023、ESCC、Always Offline 的默认行为。
+- 没有改变 Seltos 2023、ESCC、AlwaysOffroad 的默认行为。
 
 验证：
 
@@ -569,18 +570,18 @@
 新增文件：
 
 - `scripts/personal/smoke_check.py`
-- `scripts/personal/escc_offline_preflight.py`
+- `scripts/personal/escc_offroad_preflight.py`
 
 用途：
 
 - 更新、合并或上车前一键检查个人版关键保护项。
-- 覆盖 Seltos 2023 独立车型、ESCC、Always Offline、Auto-Tuner 默认安全状态、设置 JSON、Python/JS 语法和 Auto-Tuner mock 回归。
-- 单独 preflight 检查 ESCC / Always Offline 的 capnp、DBC、Params key、设置默认值、Seltos 2023 非 CANFD/HDA2 路径、ESCC 0x2AB 解析链路和离线注册/更新/连接禁用链路。
+- 覆盖 Seltos 2023 独立车型、ESCC、AlwaysOffroad、Auto-Tuner 默认安全状态、设置 JSON、Python/JS 语法和 Auto-Tuner mock 回归。
+- 单独 preflight 检查 ESCC / AlwaysOffroad 的 capnp、DBC、Params key、设置默认值、Seltos 2023 非 CANFD/HDA2 路径、ESCC 0x2AB 解析链路、EnableConnect 注册守卫和 AlwaysOffroad 本地更新/继电器安全链路。
 - preflight 明确保留实车待验证项，不把静态检查当成路测结论。
 
 验证：
 
-- `python3 scripts/personal/escc_offline_preflight.py` 通过。
+- `python3 scripts/personal/escc_offroad_preflight.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
 
 ## 2026-06-17: GitHub 公开仓库建立
@@ -622,11 +623,11 @@
 - 将 `upstream/c3-wip` 更新到最新 `origin/c3-wip`。
 - 将 `personal/c3-escc` 变基到最新 C3 底座。
 - 将 `personal/c3-escc-atune` 继续变基到新的 `personal/c3-escc`。
-- 保留 ESCC、Always Offline、Seltos 2023 和 Auto-Tuner 改动。
+- 保留 ESCC、AlwaysOffroad、Seltos 2023 和 Auto-Tuner 改动。
 
 验证：
 
-- `python3 scripts/personal/escc_offline_preflight.py` 通过。
+- `python3 scripts/personal/escc_offroad_preflight.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
 
 ## 2026-06-17: CP搭子 / fishop 功能边界
@@ -710,7 +711,7 @@
 
 - 只修改 `selfdrive/carrot_settings.json` 的中文显示字段 `cgroup` / `ctitle` / `cdescr`，不修改参数名、范围、默认值或控制逻辑。
 - 第一批补充启动、现代/起亚、雷达、纵控、转向和外部 HUD 中容易误解的说明。
-- 给 ESCC、CANFD/HDA2、Camera SCC、雷达轨迹、角雷达、Always Offline、车门/安全带屏蔽等高风险项补充适用车型、默认建议和风险提示。
+- 给 ESCC、CANFD/HDA2、Camera SCC、雷达轨迹、角雷达、AlwaysOffroad、车门/安全带屏蔽等高风险项补充适用车型、默认建议和风险提示。
 - 补齐中文字段中的空说明，并将部分英文残留改为中文。
 - 将中文设置审计接入 `scripts/personal/smoke_check.py`。
 
@@ -730,7 +731,7 @@
 
 - 将根 README 开头改为 `CarrotPilot-C3-ESCC` 项目说明。
 - 明确当前目标硬件和车型：C3 中国克隆版、Kia Seltos 2023、纯 CAN。
-- 明确当前功能状态：ESCC 默认关闭、Always Offline 后续修正为默认关闭、EnableConnect 默认关闭、Auto-Tuner 默认关闭、CP搭子核心协议静态兼容但 APP 未实测。
+- 明确当前功能状态：ESCC 默认关闭、AlwaysOffroad 后续修正为默认关闭、EnableConnect 默认关闭、Auto-Tuner 默认关闭、CP搭子核心协议静态兼容但 APP 未实测。
 - 标出当前可参考 `static` tag：`carrotpilot-c3-escc-20260617-static2`，并说明它不是稳定版。
 - 在首页保留 ajouatom、fishop / 飞扬（码上飞扬，名称待确认）、机械小哥 / JixieXiaoGe、dhvms 的来源署名。
 - 标明上游 README 中的 `openpilot.comma.ai` 是官方 openpilot 安装入口，不是本个人分支安装目标。
@@ -752,7 +753,7 @@
 - 触发范围限制在 `personal/c3-escc`、`personal/c3-escc-atune`、对应 PR 和手动触发。
 - 使用 `actions/checkout@v6`、`actions/setup-python@v6`、`actions/setup-node@v6` 和 Node.js 24，避免 Node 20 退役警告。
 - 工作流会补齐个人脚本需要的 `personal/c3-escc`、`origin/c3-wip`、`jixie/master` / `tracking/jixie-master` 参考 ref。
-- 运行 `scripts/personal/smoke_check.py`、`scripts/personal/escc_offline_preflight.py --no-manual` 和 `scripts/personal/cplink_preflight.py --no-manual`。
+- 运行 `scripts/personal/smoke_check.py`、`scripts/personal/escc_offroad_preflight.py --no-manual` 和 `scripts/personal/cplink_preflight.py --no-manual`。
 - README 和更新检查单增加 Actions 说明。
 
 验证：
@@ -924,7 +925,7 @@
 - 检查上车测试记录中必填字段和必填 `PASS` 结论行。
 - 支持读取一个或多个 C3 设备快照 markdown。
 - `stable` 证据要求至少一个快照满足：
-  - `AlwaysOffline=0`
+  - `AlwaysOffroad=0`
   - `EnableConnect=0`
   - `CanfdHDA2=0`
   - `HyundaiCameraSCC=0`
@@ -1013,9 +1014,9 @@
 
 - 增加 C3 设备端静态检查向导，默认只读，不修改参数。
 - 检查当前安装是否匹配 `INSTALL_TARGETS.json` 的 `current_static_tag`。
-- 运行安装目标、Seltos 车型复用、ESCC / Always Offline、CP搭子静态预检。
+- 运行安装目标、Seltos 车型复用、ESCC / AlwaysOffroad、CP搭子静态预检。
 - 读取安全参数并提示是否符合停车上车前建议：
-  - `AlwaysOffline=0`
+  - `AlwaysOffroad=0`
   - `EnableConnect=0`
   - `EnableEscc=0`
   - `HyundaiCameraSCC=0`

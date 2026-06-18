@@ -97,7 +97,7 @@ python3 scripts/personal/app_navi_overtake_audit.py
 
 - Seltos 2023 独立车型。
 - ESCC 最小补丁。
-- Always Offline。
+- AlwaysOffroad。
 - Auto-Tuner 第一批核心学习器。
 - Auto-Tuner 第二批 Web 推荐面板和手动确认。
 - CP搭子核心协议静态预检。

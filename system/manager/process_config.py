@@ -58,7 +58,7 @@ def only_offroad(started: bool, params: Params, CP: car.CarParams) -> bool:
   return not started
 
 def enable_updated(started: bool, params: Params, CP: car.CarParams) -> bool:
-  return not started and params.get_bool("SoftwareMenu") and not params.get_bool("AlwaysOffline")
+  return not started and params.get_bool("SoftwareMenu")
 
 def check_fleet(started, params, CP: car.CarParams) -> bool:
   return FLASK_AVAILABLE
@@ -73,7 +73,7 @@ def enable_dm(started, params, CP: car.CarParams) -> bool:
   return (started or params.get_bool("IsDriverViewEnabled")) and params.get_int("DisableDM") == 0
 
 def enable_connect(started, params, CP: car.CarParams) -> bool:
-  return params.get_int("EnableConnect") > 0 and not params.get_bool("AlwaysOffline")
+  return params.get_int("EnableConnect") > 0
 
 def enable_xiaoge_data(started, params, CP: car.CarParams) -> bool:
   return params.get_bool("ShareData")

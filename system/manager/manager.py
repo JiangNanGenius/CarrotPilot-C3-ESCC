@@ -77,19 +77,13 @@ def manager_init() -> None:
   params.put_bool("IsReleaseBranch", build_metadata.release_channel)
   params.put("HardwareSerial", serial)
 
-  # set dongle id
-  if params.get_bool("AlwaysOffline"):
-    dongle_id = params.get("DongleId", encoding="utf8") or UNREGISTERED_DONGLE_ID
-    params.put("DongleId", dongle_id)
-    params.put_bool("DisableUpdates", True)
-    params.put_int("EnableConnect", 0)
-    cloudlog.warning("AlwaysOffline enabled: skipping online registration")
+  # set dongle id. EnableConnect controls official/remote Connect registration;
+  # AlwaysOffroad is only a local offroad/harness-relay debug mode.
+  reg_res = register(show_spinner=True)
+  if reg_res:
+    dongle_id = reg_res
   else:
-    reg_res = register(show_spinner=True)
-    if reg_res:
-      dongle_id = reg_res
-    else:
-      raise Exception(f"Registration failed for device {serial}")
+    raise Exception(f"Registration failed for device {serial}")
   os.environ['DONGLE_ID'] = dongle_id  # Needed for swaglog
   os.environ['GIT_ORIGIN'] = build_metadata.openpilot.git_normalized_origin # Needed for swaglog
   os.environ['GIT_BRANCH'] = build_metadata.channel # Needed for swaglog
@@ -142,11 +136,9 @@ def manager_thread() -> None:
   params = Params()
 
   ignore: list[str] = []
-  connect_enabled = params.get_int("EnableConnect") > 0 and not params.get_bool("AlwaysOffline")
+  connect_enabled = params.get_int("EnableConnect") > 0
   if params.get("DongleId") in (None, UNREGISTERED_DONGLE_ID) or not connect_enabled:
     ignore += ["manage_athenad", "uploader"]
-  if params.get_bool("AlwaysOffline"):
-    ignore += ["manage_athenad", "uploader", "updated"]
   if os.getenv("NOBOARD") is not None:
     ignore.append("pandad")
   ignore += [x for x in os.getenv("BLOCK", "").split(",") if len(x) > 0]
