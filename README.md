@@ -34,6 +34,7 @@
 
 - [安装和回滚说明](docs/personal/INSTALL_AND_ROLLBACK.md)
 - [C3 二进制安装器研究](docs/personal/BINARY_INSTALLER_RESEARCH.md)
+- [底座版本和升级路线](docs/personal/BASE_VERSION_AND_UPGRADE.md)
 - [从旧版本迁移安全参数](docs/personal/CONFIG_MIGRATION.md)
 - [安装目标清单](docs/personal/INSTALL_TARGETS.json)
 - [设备端快照采集](docs/personal/DEVICE_SNAPSHOT.md)

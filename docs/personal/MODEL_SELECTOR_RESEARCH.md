@@ -44,6 +44,72 @@
 - 失败后恢复 backup。
 - reset 恢复默认模型并清除参数。
 
+## 新模型是怎么进旧底座的
+
+模型列表来自 `happymaj11r/openpilot-models` 的 `models.json`。2026-06-18 检查时，该 manifest 有 52 个模型，更新时间为 `2026-05-23T05:47:30+09:00`。
+
+如果车机 UI 实际只看到四五个模型，先按“UI 展示、selector 版本过滤、远端清单获取失败或缓存”排查，不要理解成底座只内置了四五个可用模型。参考分支的 `/api/models/list` 是从远端 manifest 拉取列表，按 selector 版本过滤后交给前端排序展示。
+
+按文件结构分三类：
+
+- 25 个旧两文件模型：`driving_vision.onnx` + `driving_policy.onnx`。
+- 16 个新三文件模型：`driving_vision.onnx` + `driving_on_policy.onnx` + `driving_off_policy.onnx`。
+- 11 个三文件兼容模型：`driving_vision.onnx` + `driving_policy.onnx` + `driving_off_policy.onnx`。
+
+用户提到的 CoolPeople 对应 manifest 里的：
+
+```text
+The-Cool-peoples-v3 / TCPv3
+```
+
+它仍是旧两文件结构：
+
+```text
+driving_vision.onnx
+driving_policy.onnx
+```
+
+真正更像 1.0 时代/新架构模型的是：
+
+```text
+OPv10
+OPv11
+OPv12
+op11 / op11v2 / op11v3
+Op model16*
+```
+
+这些模型使用 `driving_on_policy.onnx` / `driving_off_policy.onnx` 这类文件，或者依赖 `carrot_modeld` 的更新 parser。
+
+它不是把“1.0 模型”硬塞给旧 upstream modeld 跑。参考分支做的是：
+
+- manager 把 `modeld` 进程入口改成 `carrot.model_selector.modeld_runner`。
+- `modeld_runner` 先检查 `/data/models` 是否是有效自定义模型目录。
+- 没有有效自定义模型时，继续运行 upstream `selfdrive.modeld.modeld`。
+- 有有效自定义模型时，运行 `carrot_modeld`。
+
+下载来的 ONNX 文件会先进入 `/data/models_tmp`，然后在 C3 上执行：
+
+```text
+selfdrive/modeld/get_model_metadata.py
+tinygrad_repo/examples/openpilot/compile3.py
+selfdrive/modeld/compile_warp.py
+```
+
+最终安装到 `/data/models` 的不是 ONNX，而是：
+
+```text
+*_tinygrad.pkl
+*_metadata.pkl
+warp_*_tinygrad.pkl
+```
+
+`carrot_modeld` 会读取这些 pkl/metadata。它支持旧两模型结构，也支持带 `off_policy` 的三模型结构；并且它的 parser 能处理新模型里的 `action` 输出。如果没有 `action`，再回退到 legacy plan-based 解析。
+
+所以“0.9.9-era 底座能用 1.0 时代模型”的关键不是底座本身升级到了 1.0，而是模型选择器移植了一套兼容新模型输出的自定义 modeld/Parser/编译/回滚流程。
+
+风险也在这里：模型能不能安全使用，不只看文件能不能下载和编译，还要看输出 schema、`ModelConstants`、metadata shape、`modelV2` 消息填充、横纵控取值方式是否匹配。这个链路一旦错，可能影响控制输出。因此它暂不进入默认 C3 / Seltos / ESCC 主线。
+
 ## 本项目新增守卫
 
 新增脚本：
