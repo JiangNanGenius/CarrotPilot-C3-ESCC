@@ -45,8 +45,14 @@ def main() -> int:
                           "stock modeld must only run when the active runner is stock")
   failures += not require("tinygrad modeld guarded by tinygrad runner", 'NativeProcess("modeld_tinygrad", "sunnypilot/modeld_v2", ["./modeld"], and_(only_onroad, is_tinygrad_model))' in process_config,
                           "modeld_tinygrad must only run onroad when the active runner is tinygrad")
+  failures += not require("local statsd retained", 'PythonProcess("statsd", "system.statsd", always_run)' in process_config,
+                          "local system.statsd should stay available for local-only stats evidence")
 
   params = read("common/params_keys.h")
+  failures += not require("OffroadMode param exists", '{"OffroadMode", {CLEAR_ON_MANAGER_START, BOOL}}' in params,
+                          "OffroadMode must be the only Always Offroad param")
+  failures += not require("no AlwaysOffline alias", "AlwaysOffline" not in params and "AlwaysOffroad" not in params,
+                          "do not add confusing AlwaysOffline/AlwaysOffroad aliases in alpha")
   failures += not require("Sunnylink default off", '{"SunnylinkEnabled", {PERSISTENT, BOOL, "0"}}' in params,
                           "SunnylinkEnabled must default to 0")
   failures += not require("OnroadUploads default off", '{"OnroadUploads", {PERSISTENT | BACKUP, BOOL, "0"}}' in params,
@@ -96,6 +102,10 @@ def main() -> int:
   mici_settings = read("selfdrive/ui/sunnypilot/mici/layouts/settings.py")
   main_onboarding = read("selfdrive/ui/layouts/onboarding.py")
   mici_onboarding = read("selfdrive/ui/mici/layouts/onboarding.py")
+  hardwared = read("system/hardware/hardwared.py")
+  panda_safety = read("selfdrive/pandad/panda_safety.cc")
+  pandad = read("selfdrive/pandad/pandad.cc")
+  system_statsd = read("system/statsd.py")
   failures += not require("Sunnylink panel removed", "SunnylinkLayout" not in settings and "SUNNYLINK" not in settings,
                           "Sunnylink panel is still wired into settings")
   failures += not require("MICI Sunnylink panel removed", "SunnylinkLayoutMici" not in mici_settings and "sunnylink_btn" not in mici_settings,
@@ -106,6 +116,19 @@ def main() -> int:
                           "Main onboarding still imports Sunnylink onboarding")
   failures += not require("MICI onboarding skips Sunnylink", "SunnylinkConsentPage" not in mici_onboarding,
                           "MICI onboarding still imports Sunnylink consent")
+  failures += not require("OffroadMode blocks onroad", 'offroad_mode = params.get_bool("OffroadMode")' in hardwared
+                          and 'startup_conditions["not_always_offroad"] = not offroad_mode' in hardwared
+                          and 'onroad_conditions["not_always_offroad"] = not offroad_mode' in hardwared,
+                          "hardwared must use OffroadMode to keep the device offroad")
+  failures += not require("OffroadMode forces panda no-output", 'params_.getBool("OffroadMode")' in panda_safety
+                          and "always_offroad = panda_safety.getOffroadMode()" in pandad
+                          and "&& !always_offroad" in pandad
+                          and "SafetyModel::NO_OUTPUT" in pandad,
+                          "pandad must drive panda to NO_OUTPUT while OffroadMode keeps ignition_local false")
+  failures += not require("system statsd local-only", "sock.bind(STATS_SOCKET)" in system_statsd
+                          and "atomic_write(stats_path)" in system_statsd
+                          and all(token not in system_statsd for token in ("requests.", "urllib.", "websocket", "create_connection", "UPLOAD_SESS", "common.api")),
+                          "system.statsd must remain local-only and must not upload over the network")
 
   values = read("opendbc_repo/opendbc/car/hyundai/values.py")
   car_fingerprints = read("opendbc_repo/opendbc/car/fingerprints.py")
