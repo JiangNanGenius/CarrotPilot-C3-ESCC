@@ -1775,3 +1775,36 @@
 - 脚本安装器默认 ref 同步改为 test21。
 - 安装说明里的 release asset URL、二进制安装器说明和 dry-run 命令同步改为 test21。
 - `current_static_tag` 仍保持 `carrotpilot-c3-escc-20260618-static28`；当前仍没有 stable tag，`daily_install_target` 继续为空。
+
+## 2026-06-18: test22 本地化说明和发布清单
+
+改动文件：
+
+- `selfdrive/carrot_settings.json`
+- `scripts/personal/settings_cn_audit.py`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/TODO.md`
+- `docs/personal/FEATURE_MATRIX.md`
+- `docs/personal/README.md`
+- `docs/personal/INSTALL_TARGETS.json`
+- `scripts/personal/install_c3_escc.sh`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/BINARY_INSTALLER_RESEARCH.md`
+- `README.md`
+- `docs/personal/CODE_CHANGES.md`
+
+改动内容：
+
+- 将当前受控上车测试目标更新为 `carrotpilot-c3-escc-20260618-test22`。
+- 改善一批容易误解的设置说明，覆盖转向摩擦补偿、巡航触发距离、节能巡航、目标停车距离、起步加速代价、巡航按键步进、LDWS-only、雷达轨迹、软件菜单、弯道减速下限、驾驶模式、红绿灯处理和外部 HUD 主题。
+- 扩展 `settings_cn_audit.py`，把这批说明加入自动守卫，防止以后上游合并退回抽象机翻。
+- 更新 `UPDATE_CHECKLIST.md`，补齐 test release 的二进制安装器发布步骤、tag 先后顺序和 GitHub Actions 复跑注意事项。
+- 更新安装说明、脚本默认 ref 和二进制安装器研究记录到 test22。
+
+验证：
+
+- `jq empty selfdrive/carrot_settings.json` 通过。
+- `python3 scripts/personal/settings_cn_audit.py` 通过。
+- `python3 scripts/personal/localization_audit.py` 通过。
+- `python3 scripts/personal/install_target_check.py` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。

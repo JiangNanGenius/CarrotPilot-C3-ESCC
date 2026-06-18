@@ -54,6 +54,7 @@ python3 scripts/personal/cplink_preflight.py
 python3 scripts/personal/feature_boundary_check.py
 python3 scripts/personal/feature_status_report.py --strict
 python3 scripts/personal/settings_cn_audit.py
+python3 scripts/personal/localization_audit.py
 python3 scripts/personal/install_target_check.py
 python3 scripts/personal/seltos_profile_check.py
 python3 scripts/personal/road_test_evidence_check.py --self-test

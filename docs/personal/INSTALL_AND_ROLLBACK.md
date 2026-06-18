@@ -23,7 +23,7 @@
 
 当前受控上车测试 tag：
 
-- `carrotpilot-c3-escc-20260618-test21`
+- `carrotpilot-c3-escc-20260618-test22`
 - 用于停车静态检查、证据采集和低速短程验证。
 - 不作为日常稳定安装目标。
 
@@ -53,7 +53,7 @@ GitHub Release 只负责记录“这次可安装的版本、检查状态和注�
 当前主安装入口是 C3 二进制安装器。它的形态和 `gitop.vip/cp` 同类，适合在 C3 初装/Custom Software 流程里使用：
 
 ```bash
-https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test21/installer_c3_escc
+https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test22/installer_c3_escc
 ```
 
 二进制安装器实际拉取的是安装分支：
@@ -62,20 +62,20 @@ https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpi
 install-c3-escc-test
 ```
 
-该分支会指向当前受控测试 tag `carrotpilot-c3-escc-20260618-test21` 对应提交。二进制安装器使用分支而不是 tag，是因为旧 Qt installer 内部会执行 `git reset --hard origin/<branch>`。
+该分支会指向当前受控测试 tag `carrotpilot-c3-escc-20260618-test22` 对应提交。二进制安装器使用分支而不是 tag，是因为旧 Qt installer 内部会执行 `git reset --hard origin/<branch>`。
 
 SSH 维护或救援时仍可使用脚本安装器：
 
 ```bash
-curl -fsSL https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test21/install_c3_escc.sh | sh
+curl -fsSL https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test22/install_c3_escc.sh | sh
 ```
 
-脚本默认安装 `carrotpilot-c3-escc-20260618-test21`，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffline=1`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。
+脚本默认安装 `carrotpilot-c3-escc-20260618-test22`，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffline=1`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。
 
 如果要先看脚本会做什么：
 
 ```bash
-curl -fsSL https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test21/install_c3_escc.sh | sh -s -- --dry-run
+curl -fsSL https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test22/install_c3_escc.sh | sh -s -- --dry-run
 ```
 
 二进制安装器研究记录见 [C3 二进制安装器研究](BINARY_INSTALLER_RESEARCH.md)。如果以后已经有 `stable` tag，安装分支会改为指向 stable；在此之前，它只能作为受控测试安装入口。
