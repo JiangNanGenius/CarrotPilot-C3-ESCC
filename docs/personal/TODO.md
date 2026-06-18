@@ -340,15 +340,15 @@ flowchart TD
 
 ### P8.7: 限速、手机数据和地图覆盖
 
-- [ ] 扩展 Sunny speed limit schema，新增 `phone` 来源和来源说明标签。
-- [ ] 接入 APN/N、Navipilot、Carrot 手机实时限速数据。
-- [ ] 限速优先级实现为：新鲜手机数据 > 车机/仪表 `carStateSP.speedLimit` > Sunny OSM/mapd > 无来源。
-- [ ] 手机限速必须有超时保护；超时后退回车机或 mapd，不允许过期手机数据压住车辆限速。
+- [x] 扩展 Sunny speed limit schema，新增 `phone` 来源和来源说明标签。
+- [x] 接入 APN/N、Navipilot、Carrot 手机实时限速数据。
+- [x] 限速优先级实现为：新鲜手机数据 > 车机/仪表 `carStateSP.speedLimit` > Sunny OSM/mapd > 无来源。
+- [x] 手机限速必须有超时保护；超时后退回车机或 mapd，不允许过期手机数据压住车辆限速。
 - [ ] Mapbox/Kakao/Carrot route 不作为默认限速真值，只做可选路线显示。
-- [ ] 新增 `CarrotMapOverlayEnabled=0`。
+- [x] 新增 `CarrotMapOverlayEnabled=0`。
 - [ ] `CarrotMapOverlayEnabled=0` 时不加载地图 iframe、不请求外部地图 SDK、不遮挡 HUD。
-- [ ] 限速 fixed offset 默认 0。
-- [ ] 增加 percentage offset 支持，默认 0%。
+- [x] 限速 fixed offset 默认 0。
+- [x] 增加 percentage offset 支持，默认 0%。
 - [ ] UI 和证据里能看出当前限速来源、偏移模式、偏移值和数据新鲜度。
 
 ### P8.8: Carrot / 机械小哥功能迁移
