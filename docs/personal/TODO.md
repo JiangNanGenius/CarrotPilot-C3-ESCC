@@ -342,6 +342,8 @@ flowchart TD
 
 - [x] 扩展 Sunny speed limit schema，新增 `phone` 来源和来源说明标签。
 - [x] 接入 APN/N、Navipilot、Carrot 手机实时限速数据。
+- [x] alpha Carrot Web 新增本地手机/导航限速入口 `/api/phone_speed_limit`，兼容 `speedLimit`、`nRoadLimitSpeed`、`nSdiSpeedLimit` 等字段，只写 `CarrotPhoneSpeedLimit*`，不接收变道/超车控制命令。
+- [x] alpha 手机限速入口把 km/h 转成 Sunny 内部 m/s，并在 0 值道路限速时允许回退到有效 SDI 限速字段。
 - [x] 限速优先级实现为：新鲜手机数据 > 车机/仪表 `carStateSP.speedLimit` > Sunny OSM/mapd > 无来源。
 - [x] 手机限速必须有超时保护；超时后退回车机或 mapd，不允许过期手机数据压住车辆限速。
 - [ ] Mapbox/Kakao/Carrot route 不作为默认限速真值，只做可选路线显示。
@@ -366,6 +368,7 @@ flowchart TD
 - [x] alpha Carrot Web 新增本地健康接口 `/api/health`，声明 local mode、无云服务、无控制输出。
 - [x] alpha Carrot Web 新增 Auto-Tuner 接口 `/api/carrot_learning`，支持读取推荐、offroad 手动应用、忽略和清空。
 - [x] alpha Carrot Web 新增 fishop 只读接口 `/api/fishop_hardware`，读取 `/data/fishop_hardware.jsonl` 并归一化为证据快照。
+- [x] alpha Carrot Web 新增手机/导航限速接口 `/api/phone_speed_limit`，仅作为本地 APN/N/Navipilot/Carrot 限速输入桥，不暴露控制动作。
 - [x] alpha Carrot Web 静态守门：不包含 `requests`、`urllib`、`websocket`、`ClientSession`、`SunnylinkApi`、`DongleId` 等云/远程连接入口。
 - [x] alpha Carrot Web 暂不暴露 terminal、tmux、shell、tools 等高权限本地操作，等完整迁移时单独设门禁。
 - [ ] 迁移主动限速控制，独立开关默认关闭。

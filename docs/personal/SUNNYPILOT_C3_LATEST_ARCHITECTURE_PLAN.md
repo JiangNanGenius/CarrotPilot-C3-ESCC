@@ -95,6 +95,7 @@ User-Agent: AGNOSSetup-12.4
 - ESCC：使用 SunnyPilot 原生 `0x2AB` 自动识别 `ENHANCED_SCC`，不做普通用户手动开关。
 - 模型：采用 SunnyPilot 原生模型管理器、`ModelManager_ActiveBundle`、`ModelRunnerTypeCache` 和 `modeld_tinygrad`。
 - 限速：新增手机/APN/N/Navipilot 来源，优先级为新鲜手机数据 > 车机限速 > OSM/mapd > 无来源，并加入超时回退。
+- 手机限速入口：通过本地 Carrot Web `/api/phone_speed_limit` 写入 `CarrotPhoneSpeedLimit*` 参数；该入口只接收限速数据，不接收或执行变道、超车、外设控制命令。
 - 地图：Mapbox/Kakao/Carrot route 只作为可选显示，新增 `CarrotMapOverlayEnabled=0`，默认不加载地图覆盖。
 - Carrot：迁移 CarrotMan、CP搭子/Navipilot、APN/N、导航事件、SDI/测速/减速带、model speed、Carrot Web。
 - fishop 硬件增强：迁移车道识线/车道曲线、左右车道数据、外接激光雷达盲区、侧向目标、传感器健康状态和自动超车参考逻辑；默认只读、默认关闭。
