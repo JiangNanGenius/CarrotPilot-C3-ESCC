@@ -996,6 +996,55 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       sys.modules["openpilot.common.params"] = previous_params
 
 
+def check_fishop_release_gate_runtime() -> tuple[bool, str]:
+  try:
+    snapshot = import_file("alpha_snapshot_release_gate_static_check", "scripts/personal/sunnypilot_c3_alpha_snapshot.py")
+    safe_params = {
+      "SunnylinkEnabled": "0",
+      "EnableSunnylinkUploader": "0",
+      "OnroadUploads": "0",
+    }
+    process = {"available": True, "cloudForbiddenSeen": False}
+    car_params = {"available": True, "carFingerprint": "KIA_SELTOS_2023", "dashcamOnly": False}
+    car_params_sp = {"available": True, "enhancedSccDetected": True, "esccSafetyParamSet": True}
+    messaging = {"enabled": True, "last": {"pandaStates": [{"controlsAllowed": True, "safetyModel": "hyundai"}]}}
+    fishop = {
+      "inputAvailable": True,
+      "parseError": "",
+      "snapshot": {
+        "sensorOnline": True,
+        "lane": {"fresh": True},
+        "blindspot": {"fresh": True},
+        "overtake": {"suggestionPreview": {
+          "readOnly": True,
+          "controlOutput": False,
+          "emitsLateralCommand": False,
+          "stage": "display_only",
+          "decision": "ready_for_suggestion",
+        }},
+      },
+    }
+    gate = snapshot.summarize_fishop_release_gate(safe_params, process, car_params, car_params_sp, messaging, fishop)
+    if gate.get("readyForNextStageReview") is not True or gate.get("blockingChecks") != []:
+      return False, "complete synthetic evidence did not pass the fishop release gate"
+    if gate.get("checks", {}).get("esccDetected", {}).get("status") != "pass":
+      return False, "ESCC evidence check did not pass with enhanced SCC and ESCC safetyParam"
+
+    process["cloudForbiddenSeen"] = True
+    blocked = snapshot.summarize_fishop_release_gate(safe_params, process, car_params, car_params_sp, messaging, fishop)
+    if blocked.get("readyForNextStageReview") is not False or "cloudProcessesAbsent" not in blocked.get("blockingChecks", []):
+      return False, "cloud process evidence did not block the fishop release gate"
+
+    process["cloudForbiddenSeen"] = False
+    car_params_sp["enhancedSccDetected"] = False
+    blocked = snapshot.summarize_fishop_release_gate(safe_params, process, car_params, car_params_sp, messaging, fishop)
+    if blocked.get("readyForNextStageReview") is not False or "esccDetected" not in blocked.get("blockingChecks", []):
+      return False, "missing ESCC evidence did not block the fishop release gate"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def main() -> int:
   failures = 0
 
@@ -1296,6 +1345,22 @@ def main() -> int:
   failures += not require("alpha snapshot tool exists", "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot" in alpha_snapshot
                           and "MESSAGING_SERVICES" in alpha_snapshot and "fishopHardware" in alpha_snapshot,
                           "alpha snapshot must collect model, process, params, and fishop evidence")
+  failures += not require("alpha snapshot records CarParamsSP ESCC evidence",
+                          "def summarize_car_params_sp" in alpha_snapshot
+                          and '"enhancedSccDetected"' in alpha_snapshot
+                          and '"esccSafetyParamSet"' in alpha_snapshot
+                          and '"carParamsSP": car_params_sp' in alpha_snapshot,
+                          "alpha snapshot must decode CarParamsSP and expose ENHANCED_SCC/ESCC safetyParam evidence")
+  failures += not require("alpha snapshot records fishop release gate",
+                          "def summarize_fishop_release_gate" in alpha_snapshot
+                          and '"fishopReleaseGate": summarize_fishop_release_gate' in alpha_snapshot
+                          and '"readyForNextStageReview"' in alpha_snapshot
+                          and '"requiredBeforeControl"' in alpha_snapshot
+                          and "--require-fishop-release-gate" in alpha_snapshot,
+                          "alpha snapshot must summarize the fishop pre-control evidence gate")
+  ok, detail = check_fishop_release_gate_runtime()
+  failures += not require("alpha snapshot fishop release gate runtime", ok,
+                          detail or "fishop release gate runtime check failed")
   failures += not require("alpha snapshot records Auto-Tuner summary", '"CarrotLearningActive"' in alpha_snapshot
                           and '"autoTuner"' in alpha_snapshot and "summarize_auto_tuner" in alpha_snapshot
                           and '"recommendationsPreview"' in alpha_snapshot and '"appliedRecommendationCount"' in alpha_snapshot,
