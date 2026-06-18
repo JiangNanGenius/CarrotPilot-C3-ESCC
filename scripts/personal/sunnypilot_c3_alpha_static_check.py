@@ -181,6 +181,8 @@ def main() -> int:
                           "modeld_tinygrad must only run onroad when the active runner is tinygrad")
   failures += not require("local statsd retained", 'PythonProcess("statsd", "system.statsd", always_run)' in process_config,
                           "local system.statsd should stay available for local-only stats evidence")
+  failures += not require("local carrot web retained", 'PythonProcess("carrot_server", "selfdrive.carrot.carrot_server", always_run)' in process_config,
+                          "local Carrot Web server must be registered as an always-run local process")
 
   params = read("common/params_keys.h")
   failures += not require("OffroadMode param exists", '{"OffroadMode", {CLEAR_ON_MANAGER_START, BOOL}}' in params,
@@ -254,6 +256,7 @@ def main() -> int:
 
   fishop_hardware = read("selfdrive/carrot/fishop_hardware.py")
   carrot_learning = read("selfdrive/carrot/carrot_learning.py")
+  carrot_server = read("selfdrive/carrot/carrot_server.py")
   fishop_sample = read("scripts/personal/fishop_hardware_sample.py")
   alpha_snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
   failures += not require("Auto-Tuner learner module exists", "class CarrotLearner" in carrot_learning
@@ -266,6 +269,21 @@ def main() -> int:
                           "CarrotLearner must not apply recommendations while onroad")
   ok, detail = check_carrot_learning_runtime()
   failures += not require("Auto-Tuner runtime guard", ok, detail or "runtime guard check failed")
+  failures += not require("Carrot Web local server exists", "LOCAL_WEB_PORT = 7000" in carrot_server
+                          and "def make_app" in carrot_server and "web.run_app" in carrot_server,
+                          "carrot_server must provide the local port-7000 aiohttp service")
+  for route in ("/api/health", "/api/carrot_learning", "/api/fishop_hardware"):
+    failures += not require(f"Carrot Web route exists: {route}", route in carrot_server,
+                            f"carrot_server missing {route}")
+  failures += not require("Carrot Web blocks onroad Auto-Tuner apply", 'params.get_bool("IsOnroad")' in carrot_server
+                          and "Cannot apply Auto-Tuner recommendations while onroad" in carrot_server,
+                          "Carrot Web must refuse Auto-Tuner apply while onroad")
+  for forbidden in ("requests.", "urllib.", "websocket", "ClientSession", "common.api", "SunnylinkApi", "DongleId"):
+    failures += not require(f"Carrot Web omits cloud client token {forbidden}", forbidden not in carrot_server,
+                            "local Carrot Web must not include outbound cloud/client code")
+  for forbidden in ("subprocess", "tmux", "terminal", "shell=True", "os.system"):
+    failures += not require(f"Carrot Web alpha omits high-risk tool {forbidden}", forbidden not in carrot_server,
+                            "alpha Carrot Web should not expose terminal/tools before explicit migration gates")
   failures += not require("fishop hardware read-only module exists", "class FishopHardwareState" in fishop_hardware
                           and "CONTROL_OUTPUT_ENABLED = False" in fishop_hardware,
                           "fishop hardware parser must exist and remain read-only")
@@ -280,6 +298,8 @@ def main() -> int:
   failures += not require("alpha snapshot records Auto-Tuner summary", '"CarrotLearningActive"' in alpha_snapshot
                           and '"autoTuner"' in alpha_snapshot and "summarize_auto_tuner" in alpha_snapshot,
                           "alpha snapshot must summarize Auto-Tuner state")
+  failures += not require("alpha snapshot records carrot_server process", '"carrot_server"' in alpha_snapshot,
+                          "alpha snapshot must report local Carrot Web process state")
   for service_name in ("modelV2", "drivingModelData", "cameraOdometry", "modelManagerSP", "longitudinalPlanSP", "carStateSP", "pandaStates"):
     failures += not require(f"alpha snapshot samples {service_name}", f'"{service_name}"' in alpha_snapshot,
                             f"alpha snapshot must sample {service_name}")

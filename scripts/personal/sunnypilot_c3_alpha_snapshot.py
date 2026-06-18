@@ -78,6 +78,7 @@ LOCAL_PROCESS_PATTERNS = {
   "manager": r"(^|[ /])manager(\.py)?($|[ \t])",
   "updated": r"(^|[ /])updated(\.py)?($|[ \t])",
   "models_manager": r"(^|[ /])models_manager(\.py)?($|[ \t])",
+  "carrot_server": r"(^|[ /])carrot_server(\.py)?($|[ \t])",
   "modeld": r"(^|[ /])modeld($|[ \t])",
   "modeld_tinygrad": r"(^|[ /])modeld_tinygrad($|[ \t])",
   "mapd": r"(^|[ /])mapd($|[ \t])",
