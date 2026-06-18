@@ -18,6 +18,22 @@ FISHOP_PROTOCOL = {
   "navigationListenPort": 7706,
   "navigationRemotePort": 7705,
 }
+DYNAMIC_BLIND_REFERENCE_DEFAULTS = {
+  "DynamicBlindRange": 0,
+  "DynamicBlindDistance": 0,
+  "LidarBsdDelayTimeSec": 1.0,
+  "LidarFrontVDistTimeSec": 1.0,
+  "LidarFrontVRelDistTimeSec": 3.0,
+  "LidarBehindVDistTimeSec": 1.0,
+  "LidarBehindVRelDistTimeSec": 3.0,
+  "LaneLineDelayTimeSec": 1.0,
+}
+DYNAMIC_BLIND_TARGETS = {
+  "lf": ("left", "front", "LidarFrontVRelDistTimeSec", "LidarFrontVDistTimeSec"),
+  "lb": ("left", "rear", "LidarBehindVRelDistTimeSec", "LidarBehindVDistTimeSec"),
+  "rf": ("right", "front", "LidarFrontVRelDistTimeSec", "LidarFrontVDistTimeSec"),
+  "rb": ("right", "rear", "LidarBehindVRelDistTimeSec", "LidarBehindVDistTimeSec"),
+}
 
 LEFT_SIDE_BIT = 0x1
 RIGHT_SIDE_BIT = 0x2
@@ -30,6 +46,7 @@ BLINDSPOT_KEYS = (
   "lf_drel", "lb_drel", "rf_drel", "rb_drel",
   "lf_xrel", "lb_xrel", "rf_xrel", "rb_xrel",
   "lf_vrel", "lb_vrel", "rf_vrel", "rb_vrel", "dist_time", "device",
+  "v_ego_mps", "vEgo", "v_ego", "vego",
 )
 TARGET_KEYS = (
   "lf_drel", "lb_drel", "rf_drel", "rb_drel",
@@ -85,6 +102,10 @@ def _as_float(value: Any) -> float | None:
   return val if isfinite(val) else None
 
 
+def _round_float(value: float | None, digits: int = 3) -> float | None:
+  return None if value is None else round(value, digits)
+
+
 def _line_type(value: Any) -> int:
   # fishop treats values below 1 as no useful lane-line evidence.
   return max(0, _as_int(value, 0))
@@ -95,6 +116,36 @@ def _limited_text(value: Any, limit: int = 80) -> str:
     return ""
   text = str(value).replace("\x00", "").strip()
   return text[:limit]
+
+
+def _side_object_risk(drel_mm: float | None, vrel_mps: float | None, v_ego_mps: float | None,
+                      time_horizon_s: float, min_drel_scale: float) -> dict[str, Any] | None:
+  if drel_mm is None or vrel_mps is None or v_ego_mps is None:
+    return None
+
+  drel_m = abs(drel_mm) / 1000.0
+  v_other_mps = v_ego_mps + vrel_mps
+  if drel_mm > 0:
+    closing_speed_mps = max(v_ego_mps - v_other_mps, 0.0)
+  else:
+    closing_speed_mps = max(v_other_mps - v_ego_mps, 0.0)
+
+  if min_drel_scale >= 0:
+    danger_distance_m = max(v_ego_mps * min_drel_scale, 0.0)
+  else:
+    danger_distance_m = abs(min_drel_scale)
+  future_distance_m = drel_m - closing_speed_mps * time_horizon_s
+  return {
+    "risk": future_distance_m < danger_distance_m or drel_m < danger_distance_m,
+    "drelM": _round_float(drel_m),
+    "vrelMps": _round_float(vrel_mps),
+    "vEgoMps": _round_float(v_ego_mps),
+    "closingSpeedMps": _round_float(closing_speed_mps),
+    "dangerDistanceM": _round_float(danger_distance_m),
+    "futureDistanceM": _round_float(future_distance_m),
+    "timeHorizonSec": _round_float(time_horizon_s),
+    "minDistanceScale": _round_float(min_drel_scale),
+  }
 
 
 @dataclass
@@ -151,6 +202,7 @@ class BlindspotEvidence:
   camera_detect_side: int = 0
   lidar_id: int | None = None
   dist_time_ms: int | None = None
+  v_ego_mps: float | None = None
   targets: dict[str, float | None] = field(default_factory=dict)
 
   def update(self, payload: dict[str, Any], now_s: float) -> None:
@@ -168,6 +220,10 @@ class BlindspotEvidence:
       self.lidar_id = _as_int(payload.get("lidar_id"), 0)
     if "dist_time" in payload:
       self.dist_time_ms = _as_int(payload.get("dist_time"), 0)
+    for speed_key in ("v_ego_mps", "vEgo", "v_ego", "vego"):
+      if speed_key in payload:
+        self.v_ego_mps = _as_float(payload.get(speed_key))
+        break
 
     if "lidar_lblind" in payload:
       self.left_lidar_blind = _as_bool(payload.get("lidar_lblind"))
@@ -190,8 +246,39 @@ class BlindspotEvidence:
     if payload:
       self.last_update_s = now_s
 
+  def dynamic_blind(self, targets_fresh: bool) -> dict[str, Any]:
+    preview: dict[str, dict[str, Any]] = {}
+    if targets_fresh:
+      for prefix, (side, position, horizon_key, distance_key) in DYNAMIC_BLIND_TARGETS.items():
+        risk = _side_object_risk(
+          self.targets.get(f"{prefix}_drel"),
+          self.targets.get(f"{prefix}_vrel"),
+          self.v_ego_mps,
+          DYNAMIC_BLIND_REFERENCE_DEFAULTS[horizon_key],
+          DYNAMIC_BLIND_REFERENCE_DEFAULTS[distance_key],
+        )
+        if risk is not None:
+          risk["side"] = side
+          risk["position"] = position
+          preview[prefix] = risk
+
+    active = sorted(key for key, value in preview.items() if value.get("risk"))
+    return {
+      "readOnly": True,
+      "controlOutput": False,
+      "available": bool(preview),
+      "targetsFresh": targets_fresh,
+      "vEgoMps": _round_float(self.v_ego_mps),
+      "activeRiskPreview": active,
+      "riskPreview": preview,
+      "reference": "fishop is_side_object_risky preview from amap_navi.py; alpha records evidence only",
+      "referenceDefaults": dict(DYNAMIC_BLIND_REFERENCE_DEFAULTS),
+      "notUsedFor": ("lane-change decision", "steering target", "path output"),
+    }
+
   def to_dict(self, now_s: float) -> dict[str, Any]:
     fresh = _fresh(self.last_update_s, now_s, BLINDSPOT_MAX_AGE_S)
+    targets_fresh = _fresh(self.last_update_s, now_s, LIDAR_DISTANCE_MAX_AGE_S)
     return {
       "fresh": fresh,
       "ageSec": _age(self.last_update_s, now_s),
@@ -211,8 +298,9 @@ class BlindspotEvidence:
       "rightLidarCarBlind": self.right_lidar_car_blind if fresh else False,
       "leftCameraBlind": self.left_camera_blind if fresh else False,
       "rightCameraBlind": self.right_camera_blind if fresh else False,
-      "targetsFresh": _fresh(self.last_update_s, now_s, LIDAR_DISTANCE_MAX_AGE_S),
+      "targetsFresh": targets_fresh,
       "targets": dict(sorted(self.targets.items())),
+      "dynamicBlind": self.dynamic_blind(targets_fresh),
       "targetUnits": {
         "drel": "millimeter longitudinal distance; front positive, rear negative in fishop reference",
         "xrel": "millimeter lateral distance",
@@ -263,6 +351,14 @@ class OvertakeEvidence:
       "remoteCmd": self.remote_cmd if fresh else "",
       "remoteArg": self.remote_arg if fresh else "",
       "readOnly": True,
+      "directionality": {
+        "inbound": "external fishop APP/hardware command evidence reaches C3 as device=overtake/navi JSON or index/cmd/arg fields",
+        "outbound": "fishop reference sends OP status back to overtake/navi clients on the client port and UDP 7705",
+        "alphaAction": "record_only",
+        "suggestionStage": "display_only",
+        "usesExistingLaneChangeChain": False,
+        "controlOutput": False,
+      },
     }
 
 
