@@ -205,6 +205,7 @@ class CarrotServ:
     self.autoNaviSpeedSafetyFactor = float(self.params.get_int("AutoNaviSpeedSafetyFactor")) * 0.01
     self.autoNaviSpeedDecelRate = float(self.params.get_int("AutoNaviSpeedDecelRate")) * 0.01
     self.autoNaviCountDownMode = self.params.get_int("AutoNaviCountDownMode")
+    self.autoNaviSpeedLimitOffset = self.params.get_int("AutoNaviSpeedLimitOffset")
     self.turnSpeedControlMode= self.params.get_int("TurnSpeedControlMode")
     self.mapTurnSpeedFactor= self.params.get_float("MapTurnSpeedFactor") * 0.01
 
@@ -231,6 +232,12 @@ class CarrotServ:
       self.lang = "zh"
     else:
       self.lang = "en"
+
+  def _camera_speed_limit(self, speed_limit_kph):
+    if speed_limit_kph <= 0:
+      return 0.0
+    offset_kph = float(self.autoNaviSpeedLimitOffset)
+    return max(0.0, speed_limit_kph * self.autoNaviSpeedSafetyFactor + offset_kph)
 
 
   def _update_cmd(self):
@@ -554,7 +561,7 @@ class CarrotServ:
     # 3: endOSEPS: section control end
     # 0: no decel, 1: speed camera, 2: +speed bump, 3: +mobile camera
     if self.nSdiType in [0,1,2,3,4,7,8, 75, 76] and self.nSdiSpeedLimit > 0 and self.autoNaviSpeedCtrlMode > 0:
-      self.xSpdLimit = self.nSdiSpeedLimit * self.autoNaviSpeedSafetyFactor
+      self.xSpdLimit = self._camera_speed_limit(self.nSdiSpeedLimit)
       self.xSpdDist = self.nSdiDist
       self.xSpdType = self.nSdiType
       if self.nSdiBlockType in [2,3]:
@@ -776,8 +783,7 @@ class CarrotServ:
         xSpdType = 100
 
       if xSpdType >= 0:
-        offset = 5 if self.is_metric else 5 * CV.MPH_TO_KPH
-        self.xSpdLimit = self.nRoadLimitSpeed + offset
+        self.xSpdLimit = self._camera_speed_limit(self.nRoadLimitSpeed)
 
         self.xSpdDist = distance
         self.xSpdType =xSpdType
@@ -860,7 +866,7 @@ class CarrotServ:
     elif CS is not None and CS.speedLimit > 0 and CS.speedLimitDistance > 0:
       sdi_speed = min(sdi_speed,
                       self.calculate_current_speed(CS.speedLimitDistance,
-                                                   CS.speedLimit * self.autoNaviSpeedSafetyFactor,
+                                                   self._camera_speed_limit(CS.speedLimit),
                                                    self.autoNaviSpeedCtrlEnd,
                                                    self.autoNaviSpeedDecelRate))
       #self.active_carrot = 6

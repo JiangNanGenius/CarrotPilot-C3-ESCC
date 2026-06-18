@@ -15,6 +15,7 @@
 - [ ] 确认车辆仍按纯 CAN 路径运行，不是 CANFD。
 - [ ] 记录 ESCC 相关参数当前值。
 - [ ] 记录 `AlwaysOffroad`、`SoftwareMenu`、`EnableConnect` 当前值。
+- [ ] 记录 `AutoNaviSpeedLimitOffset` 和 `AutoNaviSpeedSafetyFactor` 当前值。
 - [ ] 如果当前设备版本能正常跑，先运行 `python3 scripts/personal/params_migration.py export --output /data/media/0/carrotpilot-working-params.json` 导出安全设置白名单。
 - [ ] 如果使用 atune 分支，记录 `CarrotLearningActive`、`CarrotLearningAutoApply` 和当前推荐值快照。
 - [ ] 如果使用 CP搭子，记录手机 APP 版本、导航源、同 WiFi 状态和 7705/7706 连接结果。
@@ -108,6 +109,7 @@
 - [ ] 7000 WebSocket `/ws/raw_multiplex` 和 `/ws/camera/road` 仍存在，满足 Navipilot APP 车辆数据和摄像头预览。
 - [ ] 设备端可运行 `python3 scripts/personal/navipilot_live_check.py --param-write-probe`，验证 7000 参数读写和 7705 状态广播。
 - [ ] `nRoadLimitSpeed`、TBT、SDI、GPS 字段仍被解析。
+- [ ] 测速摄像头限速目标仍按 `AutoNaviSpeedSafetyFactor / 100 + AutoNaviSpeedLimitOffset` 计算，默认保持 `100` 和 `0`。
 - [ ] `szTBTMainTextNext` 仍从 APP 的 `szTBTMainTextNext` 键读取，不退回误读 `szTBTMainText`。
 - [ ] `LANECHANGE` 命令仍只走现有安全变道逻辑。
 - [ ] `OVERTAKE`、外接转向灯、AmapNavi、哨兵模式没有被无保护夹带进主线。
@@ -190,7 +192,7 @@
 - [ ] 安装前记录当前可用版本。
 - [ ] 安装前保存设备证据包或设备快照文件。
 - [ ] 如有旧版本设置导出文件，安装后先运行 `python3 scripts/personal/params_migration.py import --input /data/media/0/carrotpilot-working-params.json` dry-run。
-- [ ] dry-run 输出里重点核对 `EnableEscc`、`HyundaiCameraSCC`、`EnableRadarTracks`、`AlwaysOffroad`、Seltos/转向/纵控/导航调参项，再决定是否加 `--apply`。
+- [ ] dry-run 输出里重点核对 `EnableEscc`、`HyundaiCameraSCC`、`EnableRadarTracks`、`AlwaysOffroad`、`AutoNaviSpeedLimitOffset`、`AutoNaviSpeedSafetyFactor`、Seltos/转向/纵控/导航调参项，再决定是否加 `--apply`。
 - [ ] 更推荐安装后先运行 `python3 scripts/personal/c3_commissioning.py --migration-input /data/media/0/carrotpilot-working-params.json --archive`，把 dry-run、静态检查、证据包和 readiness 报告放到一个目录。
 - [ ] 查看 `/data/media/0/carrotpilot-c3-escc-first-boot.txt`，确认安装 ref、安全默认参数和首装向导命令与本次 release 一致。
 - [ ] 准备回滚 URL 或回滚分支。
@@ -199,6 +201,7 @@
 - [ ] 确认车辆识别正确。
 - [ ] 确认 ESCC 参数默认状态符合预期。
 - [ ] 确认默认 `AlwaysOffroad=0`、`EnableConnect=0` 时不会因官方注册失败卡住。
+- [ ] 确认默认 `AutoNaviSpeedLimitOffset=0`、`AutoNaviSpeedSafetyFactor=100`，旧版本的 105% 没有被迁移误带回来。
 - [ ] 如测试 CP搭子，先在停车状态运行 `python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --navipilot-check --navipilot-param-write-probe --archive`。
 - [ ] 如测试 CP搭子，确认 Android APP 能发现 C3 并发送导航数据。
 - [ ] 如测试 Navipilot 驾驶报告，确认 APP 端先收到 7705 的 `IsOnroad=True` 和车速字段，再在 onroad 后开始采集，并在停车后生成评分。

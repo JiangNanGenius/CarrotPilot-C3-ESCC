@@ -2355,6 +2355,22 @@
     },
     {
       "group": "SPEED",
+      "name": "AutoNaviSpeedLimitOffset",
+      "title": "SpeedCamLimitOffset(0km/h)",
+      "descr": "Fixed offset added to navigation speed-camera and car-reported camera speed limits after applying the percentage ratio. 0 means no fixed offset.",
+      "egroup": "SPEED",
+      "etitle": "SpeedCamLimitOffset(0km/h)",
+      "edescr": "Fixed offset added to navigation speed-camera and car-reported camera speed limits after applying the percentage ratio. 0 means no fixed offset.",
+      "min": -20,
+      "max": 30,
+      "default": 0,
+      "unit": 1,
+      "cgroup": "速度控制",
+      "ctitle": "测速限速固定偏移 (0km/h)",
+      "cdescr": "导航测速摄像头、区间测速、流动测速和原车摄像头限速目标速度的固定偏移量。最终目标约为“限速 × 比例 + 固定偏移”；0 表示不额外增加。"
+    },
+    {
+      "group": "SPEED",
       "name": "AutoNaviSpeedBumpTime",
       "title": "SpeedBumpEndingPoint(1s)",
       "descr": "Seconds after passing a speed bump before speed-bump deceleration ends. Too low may resume too early.",
@@ -2468,18 +2484,18 @@
     {
       "group": "SPEED",
       "name": "AutoNaviSpeedSafetyFactor",
-      "title": "NaviSpeedLimitRatio(105)%",
-      "descr": "Reduce speed to the road speed limit*set value at the speed camera",
+      "title": "SpeedCamLimitRatio(100)%",
+      "descr": "Percentage ratio for navigation speed-camera and car-reported camera speed limits. 100 means no percentage offset, 105 means +5%, and 95 means -5%.",
       "egroup": "SPEED",
-      "etitle": "NaviSpeedLimitRatio(105)%",
-      "edescr": "Reduce speed to the road speed limit*set value at the speed camera",
+      "etitle": "SpeedCamLimitRatio(100)%",
+      "edescr": "Percentage ratio for navigation speed-camera and car-reported camera speed limits. 100 means no percentage offset, 105 means +5%, and 95 means -5%.",
       "min": 80,
       "max": 120,
-      "default": 105,
+      "default": 100,
       "unit": 1,
       "cgroup": "速度控制",
-      "ctitle": "导航限速比例 (105)%",
-      "cdescr": "限速摄像头目标速度比例。例如 105 表示按道路限速的 105% 控制。"
+      "ctitle": "测速限速百分比 (100%)",
+      "cdescr": "导航测速摄像头、区间测速、流动测速和原车摄像头限速目标速度的百分比比例。100 表示不加百分比偏移，105 表示 +5%，95 表示 -5%；之后还会叠加“测速限速固定偏移”。"
     },
     {
       "group": "DISPLAY",

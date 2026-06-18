@@ -356,6 +356,21 @@ python3 scripts/personal/params_migration.py import --input /data/media/0/carrot
 - 自动超车
 - 模型切换
 
+## 测速摄像头限速偏移
+
+测速摄像头和导航限速目标速度现在由两个设置共同决定：
+
+```text
+目标速度 = 限速 × AutoNaviSpeedSafetyFactor / 100 + AutoNaviSpeedLimitOffset
+```
+
+- `AutoNaviSpeedLimitOffset`：固定偏移，默认 `0`。设为 `5` 就是在目标速度上加 5km/h。
+- `AutoNaviSpeedSafetyFactor`：百分比比例，默认 `100`。`100` 表示不加百分比偏移，`105` 表示 +5%，`95` 表示 -5%。
+
+默认组合是 `AutoNaviSpeedLimitOffset=0`、`AutoNaviSpeedSafetyFactor=100`，也就是识别到测速摄像头时按限速本身控制，不再默认额外加速。
+
+源码核对结论：Navipilot APP 目前把高德/腾讯广播里的 `CAMERA_SPEED`、`CAMERA_SPEED_LIMIT`、`LIMITED_SPEED` 原样写入 `nSdiSpeedLimit` / `nRoadLimitSpeed`；APP 里的 `限速 + 5` 只用于手机 UI/语音超速提醒。实际控制目标速度是在 C3 端 `carrot_serv.py` 里计算的。
+
 ## 遇到问题先关什么
 
 如果出现异常，按这个顺序降级：

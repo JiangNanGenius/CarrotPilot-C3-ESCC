@@ -1,5 +1,23 @@
 # 当前代码改动记录
 
+## 2026-06-18: 测速摄像头限速偏移改为可调
+
+改动内容：
+
+- 新增 `AutoNaviSpeedLimitOffset`，默认 `0`，用于测速摄像头/导航限速目标速度的固定 km/h 偏移。
+- `AutoNaviSpeedSafetyFactor` 默认从 `105` 改为 `100`，保留为百分比比例：100 不加偏移，105 为 +5%，95 为 -5%。
+- `carrot_serv.py` 统一测速摄像头目标速度计算：`限速 × 比例 + 固定偏移`。
+- 删除 Waze/外部测速摄像头路径里的硬编码 `+5`。
+- 原生 C3 设置页和 Web 设置表都暴露固定偏移和百分比比例。
+- 安装器首启安全参数写入 `AutoNaviSpeedLimitOffset=0`、`AutoNaviSpeedSafetyFactor=100`，避免旧版本已持久化的 105% 继续生效。
+- `smoke_check.py` 增加守卫，防止默认值或硬编码 `+5` 回退。
+- 源码核对：fishop `cp` / `escc-cpv9`、ajouatom `carrot-wip` / `c3-wip`、jixiexiaoge `atune` 都有 `AutoNaviSpeedSafetyFactor=105` 或 Waze/外部测速路径 `offset = 5`；Navipilot APP 侧未发现把下发给 C3 的测速限速主动 `+5`。
+
+刻意没有改：
+
+- 没有改变 ESCC、Seltos 2023、Connect、AlwaysOffroad 或 panda safety 逻辑。
+- 没有把道路限速巡航偏移 `AutoRoadSpeedLimitOffset` 当成测速摄像头偏移。
+
 ## 2026-06-18: 原生设置页补齐 AlwaysOffroad 入口
 
 改动内容：

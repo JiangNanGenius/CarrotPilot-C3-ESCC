@@ -89,7 +89,7 @@ curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh -s -- --c
 
 `stable` 通道会在首个实车 stable 发布后启用；现在还没有 stable，不要选它。
 
-脚本默认安装当前受控测试入口，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffroad=0`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。安装时还会把 `PowerCycleBootOk` 清零，避免旧的断电重启确认被误用。
+脚本默认安装当前受控测试入口，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffroad=0`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`、`AutoNaviSpeedLimitOffset=0`、`AutoNaviSpeedSafetyFactor=100`。安装时还会把 `PowerCycleBootOk` 清零，避免旧的断电重启确认被误用。
 
 安装完成后，脚本还会写入：
 
@@ -244,6 +244,8 @@ Seltos 2023 初期建议：
 - `HyundaiCameraSCC=0`
 - `CanfdHDA2=0`
 - `EnableRadarTracks=0`
+- `AutoNaviSpeedLimitOffset=0`
+- `AutoNaviSpeedSafetyFactor=100`
 
 第一次上车静态验证通过后，再手动开启：
 

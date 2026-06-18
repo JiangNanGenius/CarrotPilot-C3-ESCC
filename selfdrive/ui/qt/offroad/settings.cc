@@ -864,7 +864,8 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlEnd", tr("SpeedCamDecelEnd(6s)"), tr("Sets the deceleration completion point. A larger value completes deceleration farther away from the camera."), 3, 20, 1));
   speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlMode", tr("NaviSpeedControlMode(2)"), tr("0:No slowdown, 1: speed camera, 2: + accident prevention bump, 3: + mobile camera"), 0, 3, 1));
   speedToggles->addItem(new CValueControl("AutoNaviSpeedDecelRate", tr("SpeedCamDecelRatex0.01m/s^2(80)"), tr("Lower number, slows down from a greater distance"), 10, 200, 10));
-  speedToggles->addItem(new CValueControl("AutoNaviSpeedSafetyFactor", tr("SpeedCamSafetyFactor(105%)"), "", 80, 120, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedLimitOffset", tr("SpeedCamLimitOffset(0km/h)"), tr("Fixed offset added to speed-camera targets after the percentage ratio."), -20, 30, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedSafetyFactor", tr("SpeedCamLimitRatio(100%)"), tr("100: no percentage offset, 105: +5%, 95: -5%."), 80, 120, 1));
   speedToggles->addItem(new CValueControl("AutoNaviSpeedBumpTime", tr("SpeedBumpTimeDistance(1s)"), "", 1, 50, 1));
   speedToggles->addItem(new CValueControl("AutoNaviSpeedBumpSpeed", tr("SpeedBumpSpeed(35Km/h)"), "", 10, 100, 5));
   speedToggles->addItem(new CValueControl("AutoNaviCountDownMode", tr("NaviCountDown mode(2)"), tr("0: off, 1:tbt+camera, 2:tbt+camera+bump"), 0, 2, 1));

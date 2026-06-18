@@ -229,10 +229,11 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"AutoNaviSpeedCtrlEnd", {PERSISTENT, INT, "7"}},
     {"AutoNaviSpeedCtrlMode", {PERSISTENT, INT, "2"}},
     {"AutoRoadSpeedLimitOffset", {PERSISTENT, INT, "-1"}},
+    {"AutoNaviSpeedLimitOffset", {PERSISTENT, INT, "0"}},
     {"AutoNaviSpeedBumpTime", {PERSISTENT, INT, "1"}},
     {"AutoNaviSpeedBumpSpeed", {PERSISTENT, INT, "35"}},
     {"AutoNaviSpeedDecelRate", {PERSISTENT, INT, "120"}},
-    {"AutoNaviSpeedSafetyFactor", {PERSISTENT, INT, "105"}},
+    {"AutoNaviSpeedSafetyFactor", {PERSISTENT, INT, "100"}},
     {"AutoNaviCountDownMode", {PERSISTENT, INT, "2"}},
     {"TurnSpeedControlMode", {PERSISTENT, INT, "1"}},
 

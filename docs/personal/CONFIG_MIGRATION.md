@@ -48,9 +48,13 @@ python3 scripts/personal/params_migration.py import \
 - `EnableRadarTracks`
 - `CanfdHDA2`
 - `AlwaysOffroad`
+- `AutoNaviSpeedLimitOffset`
+- `AutoNaviSpeedSafetyFactor`
 - 巡航、跟车、转向、导航减速和 Auto-Tuner 相关参数
 
 Seltos 2023 是纯 CAN，`CanfdHDA2` 应保持 `0`。如果 dry-run 准备把它改成 `1`，不要 apply。
+
+旧 fishop / 飞扬版本可能保存了 `AutoNaviSpeedSafetyFactor=105`，也可能保留了测速摄像头默认加速的习惯。除非你明确想让测速摄像头目标速度高于限速，否则安装本项目后保持 `AutoNaviSpeedLimitOffset=0`、`AutoNaviSpeedSafetyFactor=100`。
 
 也可以用首装向导把 dry-run、静态检查和证据包一次跑完：
 

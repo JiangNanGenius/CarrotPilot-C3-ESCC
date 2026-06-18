@@ -724,8 +724,20 @@
         <translation>数值越小，越远开始减速</translation>
     </message>
     <message>
-        <source>SpeedCamSafetyFactor(105%)</source>
-        <translation>测速安全系数(105%)</translation>
+        <source>SpeedCamLimitOffset(0km/h)</source>
+        <translation>测速限速固定偏移(0km/h)</translation>
+    </message>
+    <message>
+        <source>Fixed offset added to speed-camera targets after the percentage ratio.</source>
+        <translation>在测速限速按百分比计算后，再额外增加的固定偏移。</translation>
+    </message>
+    <message>
+        <source>SpeedCamLimitRatio(100%)</source>
+        <translation>测速限速百分比(100%)</translation>
+    </message>
+    <message>
+        <source>100: no percentage offset, 105: +5%, 95: -5%.</source>
+        <translation>100: 不加百分比偏移，105: +5%，95: -5%。</translation>
     </message>
     <message>
         <source>SpeedBumpTimeDistance(1s)</source>

@@ -211,6 +211,8 @@ def check_settings_defaults() -> None:
     "CarrotLearningIgnore": 0,
     "CarrotLearningClear": 0,
     "EnableAmapNaviStatus": 0,
+    "AutoNaviSpeedLimitOffset": 0,
+    "AutoNaviSpeedSafetyFactor": 100,
   }
   for name, default in expected.items():
     if name not in by_name:
@@ -233,6 +235,8 @@ def check_params_defaults() -> None:
     "CarrotTunerApplyLat default on": r'\{"CarrotTunerApplyLat", \{PERSISTENT, INT, "1"\}\}',
     "CarrotTunerApplyLong default on": r'\{"CarrotTunerApplyLong", \{PERSISTENT, INT, "1"\}\}',
     "EnableAmapNaviStatus default off": r'\{"EnableAmapNaviStatus", \{PERSISTENT, INT, "0"\}\}',
+    "AutoNaviSpeedLimitOffset default zero": r'\{"AutoNaviSpeedLimitOffset", \{PERSISTENT, INT, "0"\}\}',
+    "AutoNaviSpeedSafetyFactor default neutral": r'\{"AutoNaviSpeedSafetyFactor", \{PERSISTENT, INT, "100"\}\}',
     "PowerCycleBootOk default off": r'\{"PowerCycleBootOk", \{PERSISTENT, BOOL, "0"\}\}',
   }
   for label, pattern in patterns.items():
@@ -289,6 +293,17 @@ def check_offroad_static() -> None:
   expect_regex("selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("EnableConnect".*?, 0, 1, 1\)', "native EnableConnect setting is binary")
   expect_not_contains("system/manager/manager.py", "DisableUpdates", "manager does not disable updates for offroad")
   expect_not_contains("selfdrive/car/car_specific.py", "AlwaysOffroad", "car_specific not tied to AlwaysOffroad")
+
+
+def check_speed_camera_offsets() -> None:
+  expect_contains("selfdrive/carrot/carrot_serv.py", 'params.get_int("AutoNaviSpeedLimitOffset")', "speed camera fixed offset param")
+  expect_contains("selfdrive/carrot/carrot_serv.py", "def _camera_speed_limit", "speed camera target helper")
+  expect_contains("selfdrive/carrot/carrot_serv.py", "speed_limit_kph * self.autoNaviSpeedSafetyFactor + offset_kph", "speed camera percent plus fixed offset")
+  expect_not_contains("selfdrive/carrot/carrot_serv.py", "offset = 5 if self.is_metric", "no hardcoded speed-camera +5 offset")
+  expect_not_contains("selfdrive/carrot/carrot_serv.py", "offset_kph *= CV.MPH_TO_KPH", "speed camera fixed offset stays km/h")
+  expect_regex("selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("AutoNaviSpeedLimitOffset".*?, -20, 30, 1\)', "native speed camera fixed offset setting")
+  expect_regex("selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("AutoNaviSpeedSafetyFactor".*?, 80, 120, 1\)', "native speed camera percent setting")
+  expect_not_contains("selfdrive/ui/translations/main_zh-CHS.ts", "SpeedCamSafetyFactor(105%)", "no stale speed-camera translation")
 
 
 def install_fake_openpilot_params() -> None:
@@ -479,6 +494,8 @@ def check_install_script() -> None:
   expect_contains("scripts/personal/install_c3_escc.sh", "write_first_boot_note", "installer first-boot note writer")
   expect_contains("scripts/personal/install_c3_escc.sh", "c3_commissioning.py --archive", "installer first-boot commissioning command")
   expect_contains("scripts/personal/install_c3_escc.sh", "PowerCycleBootOk", "installer power-cycle confirmation reset")
+  expect_contains("scripts/personal/install_c3_escc.sh", 'write_param "AutoNaviSpeedLimitOffset" "0"', "installer neutral speed-camera fixed offset")
+  expect_contains("scripts/personal/install_c3_escc.sh", 'write_param "AutoNaviSpeedSafetyFactor" "100"', "installer neutral speed-camera percentage")
   expect_contains("scripts/personal/install_c3_escc.sh", "install-c3-escc-test", "installer test channel")
   expect_contains("scripts/personal/install_c3_escc.sh", "--list-channels", "installer channel listing")
   run([sys.executable, "scripts/personal/record_power_cycle_boot.py", "--self-test"], "power-cycle boot recorder self-test")
@@ -638,6 +655,7 @@ def main() -> int:
     ("Seltos 2023 static checks", check_seltos_static),
     ("ESCC static checks", check_escc_static),
     ("AlwaysOffroad static checks", check_offroad_static),
+    ("Speed camera offset static checks", check_speed_camera_offsets),
     ("ESCC / AlwaysOffroad preflight", lambda: run([sys.executable, "scripts/personal/escc_offroad_preflight.py", "--no-manual"], "ESCC / AlwaysOffroad preflight")),
     ("CPlink / Navipilot preflight", lambda: run([sys.executable, "scripts/personal/cplink_preflight.py", "--no-manual"], "CPlink / Navipilot preflight")),
     ("Feature boundary guard", lambda: run([sys.executable, "scripts/personal/feature_boundary_check.py", "--no-manual"], "Feature boundary guard")),
