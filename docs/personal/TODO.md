@@ -461,10 +461,12 @@ flowchart LR
 ### P8.11: 本地化和说明
 
 - [x] 清理新架构线韩文直出：alpha 隐藏韩语语言选项，运行时/字体语言列表移除 `ko`，静态守门确认默认可见 UI/docs 不含韩文；保留翻译资源文件本身作为上游资源。
-- [ ] 补中文和英文说明，重点覆盖模型、限速、Offroad、Carrot 高级控制、fishop 硬件增强、自动超车、Auto-Tuner。
+- [x] 补英文说明，覆盖 settings-ui 的模型、限速、Offroad、Carrot 高级控制、fishop 硬件增强、自动超车、Auto-Tuner 默认值和风险边界。
+- [x] 补车机 UI 中英文说明，覆盖模型管理器、限速模式/偏移/来源、Offroad/no-output 行为；简体和繁体翻译均已补齐。
+- [x] 补 Carrot Web 首页安全边界说明，明确云服务关闭、限速优先级和超时、限速偏移默认 0、Auto-Tuner 手动应用、fishop 只读证据、红灯/转弯/主动限速/自动超车控制输出关闭。
 - [x] Sunnylink/comma connect 相关说明从用户 UI 移除，不再作为可配置云功能。
-- [ ] 风险项说明必须写清默认值、适用场景、何时不要打开。
-- [x] 本地化审计覆盖 settings、sidebar、onboarding、Carrot Web、诊断输出和参数说明的基础守门；风险项长说明仍在上一项继续补。
+- [x] 风险项说明必须写清默认值、适用场景、何时不要打开：已覆盖模型、限速 Assist/offset、Offroad、Carrot 高级控制、fishop 自动超车输入和 Auto-Tuner。
+- [x] 本地化审计覆盖 settings、sidebar、onboarding、Carrot Web、诊断输出和参数说明的基础守门；alpha 静态检查已新增高风险说明和简体/繁体关键翻译守门。
 
 ### P8.12: 安装器、文档和署名
 
@@ -503,6 +505,8 @@ flowchart LR
 - [x] model manager 检查通过。
 - [x] Carrot Web JS/JSON/YAML 语法检查通过：Carrot Web 本地资产、Sunny settings-ui JSON/YAML 可解析，`settings_ui.json` 与 `settings_ui_src` 编译结果一致。
 - [x] 静态检查默认可见 UI/docs 不含韩文直出，且 `languages.json` / runtime / font build 不再暴露 `ko` 语言选项。
+- [x] 静态检查高风险设置说明存在：Phone First 超时、限速偏移 0、Offroad panda no-output、stock model、Auto-Tuner、Carrot 主动限速/红灯停车、fishop 自动超车只读证据等关键词必须保留。
+- [x] 静态检查简体和繁体中文关键安全说明存在，避免模型、限速、Offroad 等说明在上游合并后退化为空翻译。
 
 ### P8.14: C3 停车验证
 

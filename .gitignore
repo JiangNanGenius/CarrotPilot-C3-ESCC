@@ -21,6 +21,7 @@ a.out
 *.d
 *.pyc
 *.pyo
+__pycache__/
 .*.swp
 .*.swo
 .*.un~
