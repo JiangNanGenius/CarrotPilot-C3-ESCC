@@ -51,7 +51,7 @@ class ModelsLayout(Widget):
   def _initialize_items(self):
     self.current_model_item = ListItemSP(
       title=tr("Current Model"),
-      description="",
+      description=tr("Stock is the default. Select or download custom model bundles only while offroad; failed bundles fall back to stock or the last valid model."),
       action_item=NoElideButtonAction(tr("SELECT")),
       callback=self._handle_current_model_clicked
     )
@@ -62,13 +62,14 @@ class ModelsLayout(Widget):
     self.off_policy_label = progress_item(tr("Off-Policy Model"))
     self.on_policy_label = progress_item(tr("On-Policy Model"))
 
-    self.refresh_item = button_item(tr("Refresh Model List"), tr("REFRESH"), "",
+    self.refresh_item = button_item(tr("Refresh Model List"), tr("REFRESH"),
+                                    tr("Fetches the remote model list for manual offroad updates. This is not a cloud pairing service."),
                                     lambda: (ui_state.params.put("ModelManager_LastSyncTime", 0),
                                              gui_app.push_widget(alert_dialog(tr("Fetching Latest Models")))))
 
     self.clear_cache_item = ListItemSP(
       title=tr("Clear Model Cache"),
-      description="",
+      description=tr("Deletes downloaded model cache files except the active model. Use only while parked if storage needs to be reclaimed."),
       action_item=NoElideButtonAction(tr("CLEAR")),
       callback=self._clear_cache
     )
@@ -256,10 +257,10 @@ class ModelsLayout(Widget):
 
     if not ui_state.is_offroad():
       self.current_model_item.action_item.set_enabled(False)
-      self.current_model_item.set_description(tr("Only available when vehicle is off, or always offroad mode is on"))
+      self.current_model_item.set_description(tr("Only available while offroad. Do not change model bundles during a drive."))
     else:
       self.current_model_item.action_item.set_enabled(True)
-      self.current_model_item.set_description("")
+      self.current_model_item.set_description(tr("Stock is the default. Download, validate, and switch custom model bundles only while parked."))
 
   def _render(self, rect):
     self._scroller.render(rect)

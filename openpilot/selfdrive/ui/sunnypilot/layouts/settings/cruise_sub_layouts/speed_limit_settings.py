@@ -23,16 +23,16 @@ SPEED_LIMIT_MODE_BUTTONS = [tr("Off"), tr("Info"), tr("Warning"), tr("Assist")]
 SPEED_LIMIT_OFFSET_TYPE_BUTTONS = [tr("None"), tr("Fixed"), tr("%")]
 
 SPEED_LIMIT_MODE_DESCRIPTIONS = [
-  tr("Off: Disables the Speed Limit functions."),
-  tr("Information: Displays the current road's speed limit."),
-  tr("Warning: Provides a warning when exceeding the current road's speed limit."),
-  tr("Assist: Adjusts the vehicle's cruise speed based on the current road's speed limit when operating the +/- buttons."),
+  tr("Off: Disables speed limit display, warnings, and assist."),
+  tr("Information: Displays the resolved speed limit only. This is the default and does not change cruise targets."),
+  tr("Warning: Displays the limit and warns when current speed exceeds it."),
+  tr("Assist: May adjust cruise targets on supported cars. Use only after phone, car, and map sources have been verified."),
 ]
 
 SPEED_LIMIT_OFFSET_DESCRIPTIONS = [
-  tr("None: No Offset"),
-  tr("Fixed: Adds a fixed offset [Speed Limit + Offset]"),
-  tr("Percent: Adds a percent offset [Speed Limit + (Offset % Speed Limit)]"),
+  tr("None: No offset. This is the default and safest setting."),
+  tr("Fixed: Adds a fixed km/h or mph offset to the detected limit."),
+  tr("Percent: Adds a percentage of the detected limit. Keep at 0 until the source is reliable."),
 ]
 
 

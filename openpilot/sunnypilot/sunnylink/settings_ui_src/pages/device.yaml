@@ -14,11 +14,14 @@ sections:
   - key: OffroadMode
     widget: toggle
     title: Force Offroad Mode
+    description: Default is Off. When enabled, the device stays offroad and panda is held in no-output mode for parked
+      updates or harness/relay debugging on ACC/CAN powered C3 devices. Do not enable it before driving; local Wi-Fi, SSH,
+      Web, GitHub updates, and model downloads remain available.
   - key: DeviceBootMode
     widget: option
     title: Wake Up Behavior
-    description: 'Controls state of the device after boot/sleep. Default: Device will boot/wake-up normally and will be ready
-      to engage. Offroad: Device will be in Always Offroad mode after boot/wake-up.'
+    description: 'Controls state of the device after boot/sleep. Default: Device boots normally and may become ready to
+      engage. Offroad: Device boots into offroad/no-output mode for parked maintenance only.'
     options:
     - value: 0
       label: Standard

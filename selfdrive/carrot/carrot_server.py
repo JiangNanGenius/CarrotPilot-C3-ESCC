@@ -1504,6 +1504,15 @@ async def index(_request: web.Request) -> web.Response:
   <main>
     <h1>CarrotPilot C3 Local Web</h1>
     <p>Local-only alpha service for maintenance evidence, Auto-Tuner recommendations, and fishop hardware snapshots.</p>
+    <section id="safety-boundaries">
+      <h2>Safety Boundaries</h2>
+      <div class="metric"><span class="label">Cloud services</span><span class="value">disabled; no Sunnylink, connect, upload, pairing, or backup</span></div>
+      <div class="metric"><span class="label">Speed limits</span><span class="value">phone first, then car, then map; stale phone data times out</span></div>
+      <div class="metric"><span class="label">Speed offset</span><span class="value">default 0; fixed or percentage only when deliberately set</span></div>
+      <div class="metric"><span class="label">Auto-Tuner</span><span class="value">learning off by default; apply is manual and blocked onroad</span></div>
+      <div class="metric"><span class="label">fishop hardware</span><span class="value">lane, lidar, blindspot, and overtake inputs are evidence-only</span></div>
+      <div class="metric"><span class="label">Carrot control</span><span class="value">traffic stop, auto turn, active speed, and overtake control outputs stay disabled</span></div>
+    </section>
     <section id="fishop-panel">
       <h2>fishop Hardware</h2>
       <div class="metric"><span class="label">State</span><span class="value"><span id="fishop-state" class="pill off">loading</span></span></div>

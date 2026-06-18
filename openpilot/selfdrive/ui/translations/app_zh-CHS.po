@@ -871,3 +871,90 @@ msgstr "✓ 已订阅"
 msgid "🔥 Firehose Mode 🔥"
 msgstr "🔥 Firehose 模式 🔥"
 
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/device.py
+msgid "Controls the state of the device after boot/sleep. Use Offroad only for parked updates or harness debugging."
+msgstr "控制设备启动/唤醒后的状态。Offroad 只用于停车更新或线束调试。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/device.py
+msgid "Offroad: Device will boot into parked maintenance mode and keep panda in no-output mode."
+msgstr "Offroad：设备会进入停车维护模式，并让 panda 保持无输出模式。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/device.py
+msgid "Exit Always Offroad mode and allow normal startup on the next drive?"
+msgstr "退出 Always Offroad，并允许下次驾驶正常启动？"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/device.py
+msgid "Enter Always Offroad mode for parked maintenance? The device will stay offroad and panda will remain no-output until you turn this off."
+msgstr "进入停车维护用 Always Offroad 模式？关闭前设备会保持 offroad，panda 会保持无输出。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/models.py
+msgid "Stock is the default. Select or download custom model bundles only while offroad; failed bundles fall back to stock or the last valid model."
+msgstr "默认使用原厂模型。只能在 offroad 状态选择或下载自定义模型包；失败时会回退到原厂模型或上一个有效模型。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/models.py
+msgid "Fetches the remote model list for manual offroad updates. This is not a cloud pairing service."
+msgstr "拉取远程模型列表，用于手动 offroad 更新；这不是云配对服务。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/models.py
+msgid "Deletes downloaded model cache files except the active model. Use only while parked if storage needs to be reclaimed."
+msgstr "删除已下载的模型缓存，但保留当前启用模型。只在停车且需要清理空间时使用。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/models.py
+msgid "Only available while offroad. Do not change model bundles during a drive."
+msgstr "仅 offroad 时可用。行驶中不要切换模型包。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/models.py
+msgid "Stock is the default. Download, validate, and switch custom model bundles only while parked."
+msgstr "默认使用原厂模型。下载、校验和切换自定义模型包只能在停车时进行。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py
+msgid "Off: Disables speed limit display, warnings, and assist."
+msgstr "关闭：禁用限速显示、警告和辅助。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py
+msgid "Information: Displays the resolved speed limit only. This is the default and does not change cruise targets."
+msgstr "信息：只显示解析出的限速。这是默认值，不会改变巡航目标。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py
+msgid "Warning: Displays the limit and warns when current speed exceeds it."
+msgstr "警告：显示限速，并在当前速度超过限速时提醒。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py
+msgid "Assist: May adjust cruise targets on supported cars. Use only after phone, car, and map sources have been verified."
+msgstr "辅助：在支持的车辆上可能调整巡航目标。只有在手机、车机和地图限速来源都验证后再使用。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py
+msgid "None: No offset. This is the default and safest setting."
+msgstr "无：不加偏移。这是默认且最安全的设置。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py
+msgid "Fixed: Adds a fixed km/h or mph offset to the detected limit."
+msgstr "固定：在检测到的限速上增加固定 km/h 或 mph 偏移。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py
+msgid "Percent: Adds a percentage of the detected limit. Keep at 0 until the source is reliable."
+msgstr "百分比：按检测限速增加一定比例。限速来源可靠前保持 0。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py
+msgid "Car Only: Use speed limit data only from the vehicle or cluster when available."
+msgstr "仅车机：只使用车辆或仪表提供的限速数据。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py
+msgid "Map Only: Use speed limit data only from OpenStreetMap/mapd."
+msgstr "仅地图：只使用 OpenStreetMap/mapd 限速数据。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py
+msgid "Car First: Use vehicle speed limit first; fall back to OpenStreetMap/mapd."
+msgstr "车机优先：优先使用车辆限速，再回退到 OpenStreetMap/mapd。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py
+msgid "Map First: Use OpenStreetMap/mapd first; fall back to vehicle speed limit."
+msgstr "地图优先：优先使用 OpenStreetMap/mapd，再回退到车辆限速。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py
+msgid "Combined: Use combined vehicle and OpenStreetMap/mapd data."
+msgstr "组合：结合车辆和 OpenStreetMap/mapd 限速数据。"
+
+#: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py
+msgid "Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle, then OpenStreetMap/mapd."
+msgstr "手机优先：优先使用新鲜的 APN/N、Navipilot 或 Carrot 手机限速数据。过期手机数据会超时，然后回退到车辆限速，再回退到 OpenStreetMap/mapd。"

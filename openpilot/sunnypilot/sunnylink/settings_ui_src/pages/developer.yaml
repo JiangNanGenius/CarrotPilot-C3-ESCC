@@ -135,3 +135,38 @@ sections:
       key: DisableUpdates
       equals: true
     - $ref: '#/macros/advanced_only'
+- id: personal_feature_boundaries
+  title: Personal Feature Boundaries
+  description: Local-only CarrotPilot-C3-ESCC features and safety defaults. These entries document behavior; high-risk control
+    paths remain disabled until separate real-car evidence exists.
+  items:
+  - key: CarrotMapOverlayEnabled
+    widget: info
+    title: Carrot Map Overlay
+    description: Default is Off. When Off, the Carrot Web page does not load external Mapbox/Kakao SDKs or iframe overlays.
+      Leave Off unless a parked route-display test proves it does not cover the driving HUD.
+  - key: CarrotLearningActive
+    widget: info
+    title: Auto-Tuner Learning
+    description: Default is Off. Learning can generate recommendations, but applying them is manual and blocked while onroad.
+      Auto-apply remains Off by default and must not be used until recommendations are reviewed after a drive.
+  - key: CarrotActiveSpeedControlEnabled
+    widget: info
+    title: Carrot Active Speed Control
+    description: Default is Off and read-only in the local Web API. Do not enable active speed changes until phone speed,
+      vehicle speed, and map fallback behavior are validated separately.
+  - key: CarrotAutoTurnControlEnabled
+    widget: info
+    title: Auto Turn Slowdown
+    description: Default is Off and read-only. This can change longitudinal targets for turns; it needs a dedicated real-car
+      gate before it can influence control.
+  - key: CarrotTrafficStopEnabled
+    widget: info
+    title: Traffic Light Stop
+    description: Default is Off and read-only. Red-light or traffic-stop behavior must not change control targets until camera,
+      navigation, and driver-confirmation gates are proven.
+  - key: FishopAutoOvertakeEnabled
+    widget: info
+    title: fishop Auto Overtake Input
+    description: Default is Off. fishop lane, lidar blindspot, and overtake messages are currently evidence-only. They may
+      show readiness or block reasons, but they do not publish desire, planner, steering, or CAN commands.

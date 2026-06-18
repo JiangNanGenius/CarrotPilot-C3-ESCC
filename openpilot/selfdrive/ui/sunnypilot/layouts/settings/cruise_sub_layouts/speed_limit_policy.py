@@ -18,12 +18,12 @@ from openpilot.system.ui.sunnypilot.widgets import get_highlighted_description
 SPEED_LIMIT_POLICY_BUTTONS = [tr("Car Only"), tr("Map Only"), tr("Car First"), tr("Map First"), tr("Combined"), tr("Phone First")]
 
 SPEED_LIMIT_POLICY_DESCRIPTIONS = [
-  tr("Car Only: Use Speed Limit data only from Car"),
-  tr("Map Only: Use Speed Limit data only from OpenStreetMaps"),
-  tr("Car First: Use Speed Limit data from Car if available, else use from OpenStreetMaps"),
-  tr("Map First: Use Speed Limit data from OpenStreetMaps if available, else use from Car"),
-  tr("Combined: Use combined Speed Limit data from Car & OpenStreetMaps"),
-  tr("Phone First: Use fresh APN/N, Navipilot, or Carrot phone speed limit first. If it is missing or stale, use Car speed limit, then OpenStreetMaps.")
+  tr("Car Only: Use speed limit data only from the vehicle or cluster when available."),
+  tr("Map Only: Use speed limit data only from OpenStreetMap/mapd."),
+  tr("Car First: Use vehicle speed limit first; fall back to OpenStreetMap/mapd."),
+  tr("Map First: Use OpenStreetMap/mapd first; fall back to vehicle speed limit."),
+  tr("Combined: Use combined vehicle and OpenStreetMap/mapd data."),
+  tr("Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle, then OpenStreetMap/mapd.")
 ]
 
 
