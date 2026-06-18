@@ -36,6 +36,7 @@ jobs:
 
       - name: Fetch personal comparison refs
         run: |
+          git fetch --tags --force origin || true
           git fetch --no-tags origin personal/c3-escc:refs/heads/personal/c3-escc || true
           git fetch --no-tags https://github.com/ajouatom/openpilot.git c3-wip:refs/remotes/origin/c3-wip happymaj11r/carrot-wip-model_selector:refs/remotes/origin/happymaj11r/carrot-wip-model_selector happymaj11r/carrot-wip-model_selector:refs/heads/tracking/model-selector || true
           git fetch --no-tags https://github.com/jixiexiaoge/openpilot.git master:refs/remotes/jixie/master master:refs/heads/tracking/jixie-master || true

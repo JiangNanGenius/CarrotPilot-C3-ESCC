@@ -791,6 +791,27 @@
 - `python3 scripts/personal/install_target_check.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
 
+## 2026-06-18: CI tag refresh for release manifests
+
+改动文件：
+
+- `.github/workflows/personal-smoke.yml`
+- `scripts/personal/install_target_check.py`
+- `docs/personal/UPDATE_CHECKLIST.md`
+- `docs/personal/CODE_CHANGES.md`
+
+改动内容：
+
+- `Personal Smoke` 在运行个人 smoke 前显式刷新 GitHub release tags，减少发布 commit 先触发、release tag 后到达导致的无意义红灯。
+- `install_target_check.py` 在本地 tag 缺失时自动从 `origin` 补 fetch 一次 tags，再严格解析 `current_static_tag`、`current_test_tag`、`current_stable_tag`。
+- 保留 `CARROTPILOT_PENDING_RELEASE_TAG` 给本地 release gate 使用；stable tag 仍必须真实存在，并且 stable 证据门槛不放松。
+- 更新发布检查单，说明 CI 会主动刷新 tags，极端竞态下再复跑失败 job。
+
+验证：
+
+- `python3 scripts/personal/install_target_check.py` 通过。
+- `python3 scripts/personal/smoke_check.py` 通过。
+
 ## 2026-06-17: Seltos 2023 车型复用护栏
 
 新增文件：

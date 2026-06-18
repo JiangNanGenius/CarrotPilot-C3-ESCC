@@ -18,6 +18,7 @@ STABLE_EVIDENCE_LINES = [
   "Low-speed road test: PASS",
   "Rollback target recorded: PASS",
 ]
+_TAGS_FETCHED = False
 
 
 class InstallTargetError(Exception):
@@ -82,15 +83,28 @@ def pending_release_tags() -> set[str]:
   return tags
 
 
+def fetch_tags_once() -> None:
+  global _TAGS_FETCHED
+  if _TAGS_FETCHED:
+    return
+  _TAGS_FETCHED = True
+  remote = os.environ.get("CARROTPILOT_TAG_REMOTE", "origin")
+  git(["fetch", "--tags", "--force", "--quiet", remote])
+
+
 def require_tag_exists(tag: Optional[str], key: str) -> Optional[str]:
   if tag is None:
     return None
   try:
     return require_commit_ref(f"refs/tags/{tag}", key)
-  except InstallTargetError:
+  except InstallTargetError as original:
     if key in {"current_static_tag", "current_test_tag"} and tag in pending_release_tags():
       return require_commit_ref("HEAD", key)
-    raise
+    fetch_tags_once()
+    try:
+      return require_commit_ref(f"refs/tags/{tag}", key)
+    except InstallTargetError as fetched:
+      raise fetched from original
 
 
 def require_ancestor(base: str, tip: str, label: str) -> None:

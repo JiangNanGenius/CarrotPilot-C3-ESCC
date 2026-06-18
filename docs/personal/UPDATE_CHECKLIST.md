@@ -242,12 +242,12 @@
 - [ ] 推送 `personal/c3-escc` 或 `personal/c3-escc-atune` 到 `github`。
 - [ ] 发布前再次确认没有个人 token、私钥或设备隐私参数进入仓库。
 - [ ] 如发布 `test` tag，先确认 `docs/personal/INSTALL_TARGETS.json` 的 `current_test_tag` 已更新到目标 tag，且 `daily_install_target` 仍为空。
-- [ ] 推送目标 tag 后，再重新运行 `python3 scripts/personal/install_target_check.py`，避免 GitHub Actions 因 tag 尚未存在而误红。
+- [ ] 推送目标 tag 后，再重新运行 `python3 scripts/personal/install_target_check.py`；GitHub Actions 会在 smoke 前刷新 tags，但极端竞态下仍可复跑失败 job。
 - [ ] 将 `install-c3-escc-test` 安装分支快进到本次 `test` 提交，并确认远端分支指向同一 commit。
 - [ ] 运行 `python3 scripts/personal/build_binary_installer.py --output /tmp/installer_c3_escc` 生成 C3 二进制安装器，确认内嵌仓库为 `JiangNanGenius/CarrotPilot-C3-ESCC.git`、内嵌分支为 `install-c3-escc-test`。
 - [ ] 创建 GitHub release 时上传两个资产：`installer_c3_escc` 和 `install_c3_escc.sh`。
 - [ ] 发布后用 GitHub release 页面或 `gh release view` 确认两个资产都已上传，并记录二进制安装器、备用脚本的 SHA256。
-- [ ] 推送后确认 GitHub Actions `Personal Smoke` 通过；如果失败原因只是 release tag 先后顺序，推 tag 后重跑失败 job。
+- [ ] 推送后确认 GitHub Actions `Personal Smoke` 通过；如果失败原因仍只是 release tag 先后顺序，确认 tag 已在 GitHub 后重跑失败 job。
 - [ ] `stable` 前填写上车测试记录，并把 C3 快照文件保存到电脑本地。
 - [ ] 如使用证据包，把 `road-test-log-draft.md` 和 `device-snapshot.md` 一起保存到电脑本地。
 - [ ] 先运行 `python3 scripts/personal/evidence_readiness_report.py --evidence-dir <证据包目录>`，确认 stable 必需阶段都通过。
