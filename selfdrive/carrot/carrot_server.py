@@ -31,6 +31,10 @@ MESSAGING_STATUS_SERVICES = (
 )
 MESSAGING_STATUS_INTERVAL_S = 0.2
 NAVIGATION_UDP_PORT = 7706
+# Old CarrotMan advertises a 7713 navigation HTTP service. Keep the key in 7705
+# discovery, but report 0 until that server is deliberately migrated.
+NAVI_HTTP_PORT = 0
+NAVIGATION_ROUTE_MAX_AGE_S = 30.0
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_FISHOP_JSONL = Path("/data/fishop_hardware.jsonl")
 MAX_FISHOP_LINES = 240
@@ -444,7 +448,16 @@ def _status_payload_navigation_fields(event: dict[str, Any]) -> dict[str, Any]:
   text = event.get("text") if isinstance(event, dict) else {}
   numeric = numeric if isinstance(numeric, dict) else {}
   text = text if isinstance(text, dict) else {}
+  updated_at = _as_float(event.get("updatedAt"), 0.0) if isinstance(event, dict) else 0.0
+  route_age_sec = max(0.0, time.time() - updated_at) if updated_at > 0.0 else 0.0
+  route_has_guidance = bool(
+    _as_float(numeric.get("nTBTDist"), 0.0) > 0.0
+    or _as_float(numeric.get("nSdiDist"), 0.0) > 0.0
+    or _safe_navigation_text(text.get("szTBTMainTextNext") or text.get("szTBTMainText") or "")
+  )
   return {
+    "route_active": route_has_guidance and updated_at > 0.0 and route_age_sec <= NAVIGATION_ROUTE_MAX_AGE_S,
+    "route_age_sec": round(route_age_sec, 3),
     "tbt_dist": int(_as_float(numeric.get("nTBTDist"), 0.0)),
     "sdi_dist": int(_as_float(numeric.get("nSdiDist"), 0.0)),
     "sdi_speed": int(_as_float(numeric.get("nSdiSpeedLimit"), 0.0)),
@@ -468,6 +481,7 @@ def default_messaging_status() -> dict[str, Any]:
     "vEgoKph": 0.0,
     "vCruiseKph": 0.0,
     "carCruiseSpeedKph": 0.0,
+    "logCarrot": "",
     "active": False,
     "enabled": False,
     "isOnroad": False,
@@ -534,6 +548,7 @@ def update_messaging_status_from_sm(sm: Any) -> dict[str, Any]:
 
   v_ego_ms = _positive_float(_safe_attr(car_state, "vEgoCluster", 0.0), _safe_attr(car_state, "vEgo", 0.0))
   cruise_state = _safe_attr(car_state, "cruiseState")
+  log_carrot = _decode_param_text(_safe_attr(car_state, "logCarrot", ""))
   v_cruise_kph = _positive_float(
     _safe_attr(car_state, "vCruiseCluster", 0.0),
     _safe_attr(car_state, "vCruise", 0.0),
@@ -563,6 +578,7 @@ def update_messaging_status_from_sm(sm: Any) -> dict[str, Any]:
     "vEgoKph": round(_ms_to_kph(v_ego_ms), 3) if v_ego_ms > 0.0 else 0.0,
     "vCruiseKph": round(v_cruise_kph, 3) if v_cruise_kph > 0.0 else 0.0,
     "carCruiseSpeedKph": round(car_cruise_speed_kph, 3) if car_cruise_speed_kph > 0.0 else 0.0,
+    "logCarrot": log_carrot[:240],
     "active": active,
     "enabled": enabled,
     "isOnroad": active or enabled,
@@ -587,7 +603,16 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None) -> dict[s
   return {
     "Carrot2": "CarrotPilot-C3-ESCC-alpha",
     "IsOnroad": is_onroad,
+    "CarrotRouteActive": bool(is_onroad and nav_fields["route_active"]),
+    "ip": DEFAULT_HOST,
+    "port": NAVIGATION_UDP_PORT,
+    "navi_debug": 0,
+    "navi_http_port": NAVI_HTTP_PORT,
+    "naviHttpAvailable": NAVI_HTTP_PORT > 0,
+    "carrotManCompatible": True,
+    "carrotManControlStateAvailable": False,
     "active": active,
+    "log_carrot": str(runtime_status.get("logCarrot", "")),
     "v_ego_kph": round(_as_float(runtime_status.get("vEgoKph")), 1),
     "v_cruise_kph": round(_as_float(runtime_status.get("vCruiseKph")), 1),
     "carcruiseSpeed": round(_as_float(runtime_status.get("carCruiseSpeedKph")), 1),
@@ -600,6 +625,8 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None) -> dict[s
     "tbt_turn_type": nav_fields["tbt_turn_type"],
     "tbt_next_turn_type": nav_fields["tbt_next_turn_type"],
     "tbt_main_text": nav_fields["tbt_main_text"],
+    "carrotRouteAgeSec": nav_fields["route_age_sec"],
+    "carrotRouteMaxAgeSec": NAVIGATION_ROUTE_MAX_AGE_S,
     "phoneSpeedLimitKph": speed_limit_state.get("speedLimitKph", 0.0),
     "phoneSpeedLimitSource": speed_limit_state.get("source", ""),
     "phoneSpeedLimitFresh": bool(speed_limit_state.get("fresh", False)),
