@@ -834,6 +834,23 @@ FW_VERSIONS = {
       b'\xf1\x00SP2 MFC  AT USA LHD 1.00 1.05 99210-Q5000 201012',
     ],
   },
+  CAR.KIA_SELTOS_2023: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00SP2_ SCC FHCUP      1.01 1.05 99110-Q5100         ',
+    ],
+    (Ecu.abs, 0x7d1, None): [
+      b'\xf1\x00SP ESC \x07 101\x19\t\x05 58910-Q5450',
+      b'\xf1\x00SP ESC \t 101\x19\t\x05 58910-Q5450',
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00SP2 MDPS C 1.00 1.04 56300Q5200          ',
+      b'\xf1\x00SP2 MDPS C 1.01 1.05 56300Q5200          ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00SP2 MFC  AT USA LHD 1.00 1.04 99210-Q5000 191114',
+      b'\xf1\x00SP2 MFC  AT USA LHD 1.00 1.05 99210-Q5000 201012',
+    ],
+  },
   CAR.KIA_OPTIMA_G4: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JF__ SCC F-CUP      1.00 1.00 96400-D4100         ',

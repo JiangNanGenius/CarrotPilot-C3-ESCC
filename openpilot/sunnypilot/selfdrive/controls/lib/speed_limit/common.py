@@ -14,6 +14,7 @@ class Policy(IntEnumBase):
   car_state_priority = 2
   map_data_priority = 3
   combined = 4
+  phone_priority = 5
 
 
 class OffsetType(IntEnumBase):

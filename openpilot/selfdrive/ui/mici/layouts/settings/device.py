@@ -8,7 +8,6 @@ from openpilot.common.time_helpers import system_time_valid
 from openpilot.system.ui.widgets.scroller import NavRawScrollPanel, NavScroller
 from openpilot.selfdrive.ui.mici.widgets.button import BigButton, BigCircleButton
 from openpilot.selfdrive.ui.mici.widgets.dialog import BigDialog, BigConfirmationDialog
-from openpilot.selfdrive.ui.mici.widgets.pairing_dialog import PairingDialog
 from openpilot.selfdrive.ui.mici.onroad.cabin_camera_dialog import CabinCameraDialog
 from openpilot.selfdrive.ui.mici.layouts.onboarding import TrainingGuide, TermsPage
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos
@@ -17,7 +16,6 @@ from openpilot.system.ui.widgets import Widget
 from openpilot.selfdrive.ui.ui_state import device, ui_state
 from openpilot.system.ui.widgets.label import UnifiedLabel
 from openpilot.system.ui.widgets.html_render import HtmlRenderer
-from openpilot.system.athena.registration import UNREGISTERED_DONGLE_ID
 
 
 class ReviewTermsPage(TermsPage, NavScroller):
@@ -120,42 +118,6 @@ class DeviceInfoLayoutMici(Widget):
     self._serial_number_text_label.render()
 
 
-class PairBigButton(BigButton):
-  def __init__(self):
-    super().__init__("pair", "connect.comma.ai", gui_app.texture("icons_mici/settings/comma_icon.png", 33, 60))
-
-  def _get_label_font_size(self):
-    return 64
-
-  def _update_state(self):
-    super()._update_state()
-
-    if ui_state.prime_state.is_paired():
-      self.set_text("paired")
-      if ui_state.prime_state.is_prime():
-        self.set_value("subscribed")
-      else:
-        self.set_value("upgrade to prime")
-    else:
-      self.set_text("pair")
-      self.set_value("connect.comma.ai")
-
-  def _handle_mouse_release(self, mouse_pos: MousePos):
-    super()._handle_mouse_release(mouse_pos)
-
-    # TODO: show ad dialog when clicked if not prime
-    if ui_state.prime_state.is_paired():
-      return
-    dlg: BigDialog | PairingDialog
-    if not system_time_valid():
-      dlg = BigDialog("", tr("Please connect to Wi-Fi to complete initial pairing."))
-    elif UNREGISTERED_DONGLE_ID == (ui_state.params.get("DongleId") or UNREGISTERED_DONGLE_ID):
-      dlg = BigDialog("", tr("Device must be registered with the comma.ai backend to pair."))
-    else:
-      dlg = PairingDialog()
-    gui_app.push_widget(dlg)
-
-
 class DeviceLayoutMici(NavScroller):
   def __init__(self):
     super().__init__()
@@ -202,7 +164,6 @@ class DeviceLayoutMici(NavScroller):
 
     self._scroller.add_widgets([
       DeviceInfoLayoutMici(),
-      PairBigButton(),
       review_training_guide_btn,
       cabin_cam_btn,
       terms_btn,

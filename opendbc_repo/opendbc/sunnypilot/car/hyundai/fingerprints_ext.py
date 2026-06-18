@@ -81,24 +81,6 @@ FW_VERSIONS_EXT = {
     #   b'\xf1\x87CXLQAM0906975JB0\x89\x88\xa6\x8aVfug\xba\x87\x94yffuxgfo\xff\x8b\xff\xff\xff\x91\x82\xf1\x816V2C1051\x00\x00\xf1\x006V2B0_C2\x00\x006V2C1051\x00\x00CBD0N20NS8q\xc1&\xd2',  # noqa: E501
     # ],
   },
-  CAR.KIA_SELTOS_2023_NON_SCC: {
-    (Ecu.abs, 0x7d1, None): [
-      b'\xf1\x00SP ESC \t 101"\t\x01 58910-Q5510',
-      b'\xf1\x00SP ESC \r 100"\x04\x01 58910-Q5510',
-    ],
-    (Ecu.eps, 0x7d4, None): [
-      b'\xf1\x00SP2 MDPS C 1.00 1.04 56310Q5240  4SPSC104',
-      b'\xf1\x00SP2 MDPS C 1.00 1.01 56300Q5920          ',
-    ],
-    (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00SP2 MFC  AT USA LHD 1.00 1.03 99210-Q5500 230208',
-      b'\xf1\x00SP2 MFC  AT AUS RHD 1.00 1.02 99210-Q5500 220624',
-    ],
-    (Ecu.transmission, 0x7e1, None): [
-      b'\xf1\x006V2B0_C2\x00\x006V2D5051\x00\x00CSP2N20NL0\x00\x00\x00\x00',
-      b'\xf1\x006V2B0_C2\x00\x006V2D4051\x00\x00CSP2N20KL1\x00\x00\x00\x00',
-    ],
-  },
   CAR.HYUNDAI_ELANTRA_2022_NON_SCC: {
     (Ecu.eps, 0x7d4, None): [
       # b'\xf1\x8756310AA030\x00\xf1\x00CN7 MDPS C 1.00 1.06 56310AA030\x00 4CNDC106',

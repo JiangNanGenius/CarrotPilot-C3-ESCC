@@ -268,6 +268,7 @@ struct LongitudinalPlanSP @0xf35cc4560bbf6ec2 {
       speedLimitFinalLast @6 :Float32;
       speedLimitValid @7 :Bool;
       speedLimitLastValid @8 :Bool;
+      sourceLabel @9 :Text;
     }
 
     struct Assist {
@@ -282,6 +283,7 @@ struct LongitudinalPlanSP @0xf35cc4560bbf6ec2 {
       none @0;
       car @1;
       map @2;
+      phone @3;
     }
 
     enum AssistState {

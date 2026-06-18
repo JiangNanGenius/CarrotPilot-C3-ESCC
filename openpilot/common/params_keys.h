@@ -174,7 +174,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"OnroadScreenOffBrightnessMigrated", {PERSISTENT | BACKUP, STRING, "0.0"}},
     {"OnroadScreenOffTimer", {PERSISTENT | BACKUP, INT, "15"}},
     {"OnroadScreenOffTimerMigrated", {PERSISTENT | BACKUP, STRING, "0.0"}},
-    {"OnroadUploads", {PERSISTENT | BACKUP, BOOL, "1"}},
+    {"OnroadUploads", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"QuickBootToggle", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"QuietMode", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"RainbowMode", {PERSISTENT | BACKUP, BOOL, "0"}},
@@ -212,7 +212,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"SunnylinkCache_Users", {PERSISTENT, STRING}},
     {"SunnylinkDongleId", {PERSISTENT, STRING}},
     {"SunnylinkdPid", {PERSISTENT, INT}},
-    {"SunnylinkEnabled", {PERSISTENT, BOOL, "1"}},
+    {"SunnylinkEnabled", {PERSISTENT, BOOL, "0"}},
     {"SunnylinkTempFault", {CLEAR_ON_MANAGER_START | CLEAR_ON_OFFROAD_TRANSITION, BOOL, "0"}},
 
     // Backup Manager params
@@ -262,10 +262,22 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"RoadNameToggle", {PERSISTENT | BACKUP, BOOL, "0"}},
 
     // Speed Limit
+    {"CarrotPhoneSpeedLimit", {CLEAR_ON_MANAGER_START, FLOAT, "0.0"}},
+    {"CarrotPhoneSpeedLimitEnabled", {PERSISTENT | BACKUP, BOOL, "1"}},
+    {"CarrotPhoneSpeedLimitSource", {CLEAR_ON_MANAGER_START, STRING}},
+    {"CarrotPhoneSpeedLimitUpdatedAt", {CLEAR_ON_MANAGER_START, FLOAT, "0.0"}},
     {"SpeedLimitMode", {PERSISTENT | BACKUP, INT, "1"}},
     {"SpeedLimitOffsetType", {PERSISTENT | BACKUP, INT, "0"}},
-    {"SpeedLimitPolicy", {PERSISTENT | BACKUP, INT, "3"}},
+    {"SpeedLimitPolicy", {PERSISTENT | BACKUP, INT, "5"}},
     {"SpeedLimitValueOffset", {PERSISTENT | BACKUP, INT, "0"}},
+
+    // Carrot personal features
+    {"CarrotActiveSpeedControlEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
+    {"CarrotAutoTurnControlEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
+    {"CarrotLearningActive", {PERSISTENT | BACKUP, BOOL, "0"}},
+    {"CarrotLearningAutoApply", {PERSISTENT | BACKUP, BOOL, "0"}},
+    {"CarrotMapOverlayEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
+    {"CarrotTrafficStopEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
 
     // Smart Cruise Control
     {"MapTargetVelocities", {CLEAR_ON_ONROAD_TRANSITION, STRING}},

@@ -10,7 +10,6 @@ from openpilot.cereal import messaging, log, custom
 from opendbc.car.structs import car
 from openpilot.common.params import Params
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.display import OnroadBrightness
-from openpilot.sunnypilot.sunnylink.sunnylink_state import SunnylinkState
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.sunnypilot.widgets.screen_saver import ScreenSaverSP
 
@@ -26,6 +25,25 @@ class OnroadTimerStatus(Enum):
   RESUME = 2
 
 
+class DisabledSunnylinkState:
+  def start(self):
+    pass
+
+  def stop(self):
+    pass
+
+  def set_settings_open(self, open_: bool):
+    pass
+
+  @staticmethod
+  def is_sponsor() -> bool:
+    return False
+
+  @staticmethod
+  def is_paired() -> bool:
+    return False
+
+
 class UIStateSP:
   def __init__(self):
     self.params = Params()
@@ -33,11 +51,11 @@ class UIStateSP:
     self.has_icbm: bool = False
     self.is_sp_release: bool = self.params.get_bool("IsReleaseSpBranch")
     self.sm_services_ext = [
-      "modelManagerSP", "selfdriveStateSP", "longitudinalPlanSP", "backupManagerSP",
+      "modelManagerSP", "selfdriveStateSP", "longitudinalPlanSP",
       "gpsLocation", "lateralTorqueParameters", "carStateSP", "liveMapDataSP", "carParamsSP", "lateralDelay"
     ]
 
-    self.sunnylink_state = SunnylinkState()
+    self.sunnylink_state = DisabledSunnylinkState()
 
     self.screensaver = ScreenSaverSP(params=self.params)
     self.screensaver_enabled: bool = False
@@ -64,10 +82,7 @@ class UIStateSP:
     self._sp_initialized: bool = False
 
   def update(self) -> None:
-    if self.sunnylink_enabled:
-      self.sunnylink_state.start()
-    else:
-      self.sunnylink_state.stop()
+    self.sunnylink_state.stop()
 
   def onroad_brightness_handle_alerts(self, _ui_state, alert):
     if _ui_state.sm.recv_frame["carState"] < _ui_state.started_frame:
@@ -163,7 +178,13 @@ class UIStateSP:
     self.rocket_fuel = self.params.get_bool("RocketFuel")
     self.speed_limit_mode = self.params.get("SpeedLimitMode", return_default=True)
     self.standstill_timer = self.params.get_bool("StandstillTimer")
-    self.sunnylink_enabled = self.params.get_bool("SunnylinkEnabled")
+    if self.params.get_bool("SunnylinkEnabled"):
+      self.params.put_bool("SunnylinkEnabled", False)
+    if self.params.get_bool("EnableSunnylinkUploader"):
+      self.params.put_bool("EnableSunnylinkUploader", False)
+    if self.params.get_bool("OnroadUploads"):
+      self.params.put_bool("OnroadUploads", False)
+    self.sunnylink_enabled = False
     self.torque_bar = self.params.get_bool("TorqueBar")
     self.enforce_torque_control = self.params.get_bool("EnforceTorqueControl")
     self.custom_torque_params = self.params.get_bool("CustomTorqueParams")
