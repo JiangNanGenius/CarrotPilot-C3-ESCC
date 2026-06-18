@@ -283,13 +283,18 @@ flowchart TD
 ### P8.2: C3/TICI 兼容补丁
 
 - [ ] 对比 Mr.One `devc3` 与官方 SunnyPilot `release-tizi/staging`，列出 C3/TICI 必需补丁。
+- [x] 已记录 Mr.One `devc3` 当前远端头 `5c0feefabdef5ec2186a33b1495891c38dcf5c36` 和 SunnyPilot `staging` / `release-tizi` 本地参考 refs；alpha 新增 `scripts/personal/sunnypilot_c3_compat_audit.py`，能在 Mr.One 本地 refs 可用时自动列出 watched C3/TICI 路径差异。
+- [ ] 重新拉取 Mr.One `devc3` 树对象并完成逐文件差异归类；本轮 `ls-remote` 成功但 `fetch` 卡住，审计脚本会把 `mroneDevc3` 标为 missing，不误判完成。
 - [ ] 对比 Mr.One `res` 与官方旧 TICI 线，列出旧 C3/TICI 可借鉴补丁。
-- [ ] 抽取硬件识别补丁，确认克隆 C3 设备字符串为 `tici` 时不会被误判为 C4/C3X。
-- [ ] 抽取启动和 UI setup 必需补丁，保证 C3 停车状态能进入 UI。
-- [ ] 抽取 installer 必需补丁，保证二进制安装器能拉 `alpha-sunnypilot-c3`。
-- [ ] 抽取 modeld/modeld_v2 兼容补丁，保证 stock modeld 在 C3 上可启动。
-- [ ] 明确拒绝 Mr.One 私有注册、额外 client、上传、云连接、禁用关机、大面积 safety/opendbc 改动。
-- [ ] 不照抄 Mr.One 永不关机逻辑；电源策略必须适配用户 ACC/CAN 熄火断电场景。
+- [x] 已记录 Mr.One `res` 当前远端头 `01e22f5921d9dfd49235f5867f54d9ec0bdccbaf`；审计脚本会在 `mroneRes` 本地 ref 存在时生成和当前 alpha 的 watched path 差异。
+- [ ] 重新拉取 Mr.One `res` 树对象并完成旧 TICI 线逐文件差异归类；本轮 `fetch` 卡住，仍需后续补证据。
+- [x] 抽取硬件识别补丁，确认克隆 C3 设备字符串为 `tici` 时不会被误判为 C4/C3X：alpha 审计确认 `/TICI` 设备仍走 `HardwareTici`，`tici/tizi` 只映射到 `TICI/TIZI`，相关路径不含 C4/C3X 分支。
+- [x] alpha 修复 C3 分支通道识别：`alpha-sunnypilot-c3`、`experimental/sunnypilot-011-c3` 和 `*-c3*` 分支在 `system/version.py` 中归类为 `channel_type=tici`，避免 `hardwared` 把用户 C3 当作不支持的 `tici` + feature branch 组合拦在 offroad。
+- [x] 抽取启动和 UI setup 必需补丁：`launch_openpilot.sh` 在 `comma tici` 设备上转入 `sunnypilot/system/hardware/c3/launch_chffrplus.sh`，C3 launcher 保留 AGNOS / safe staging / manager 启动路径；静态审计覆盖 C3 launcher、C3 env 和 C3 AGNOS manifest 存在。
+- [x] 抽取 installer 必需补丁，保证二进制安装器能拉 `alpha-sunnypilot-c3`：installer 保留 TICI/TIZI 设备识别、TICI 安装 UI 和 `migrated_branch = BRANCH_STR`，不会把 alpha 分支强制迁移到 release/master。
+- [x] 抽取 modeld/modeld_v2 兼容补丁，保证 stock modeld 在 C3 上可启动：manager 注册 stock `modeld` 与 `modeld_tinygrad` 双 runner，审计脚本确认 active bundle / runner cache / hash 校验路径存在；C3 设备端 stock modeld 启动仍需 P8.14 停车验证补证据。
+- [x] 明确拒绝 Mr.One 私有注册、额外 client、上传、云连接、禁用关机、大面积 safety/opendbc 改动：alpha C3 审计和完整静态检查确认云/上传/backup/statsd_sp 进程未注册，runtime watched paths 不含 Mr.One 私有 token。
+- [x] 不照抄 Mr.One 永不关机逻辑；电源策略必须适配用户 ACC/CAN 熄火断电场景：`hardwared` 仍保留 `power_monitor.should_shutdown(...)` 和 `DoShutdown`，未加入 `DisableShutdown` / `NeverShutdown` 类绕过；Always Offroad 仅使用 `OffroadMode` + panda no-output。
 
 ### P8.3: 云服务移除和本地网络保留
 
@@ -486,6 +491,7 @@ flowchart LR
 ### P8.13: 静态验证
 
 - [x] 静态检查云进程不在 manager 注册表。
+- [x] 静态检查 C3/TICI 兼容审计：`scripts/personal/sunnypilot_c3_compat_audit.py --strict` 必须通过，覆盖 C3 launcher、C3/TICI 设备识别、C3 分支 channel_type、installer、stock/tinygrad modeld、云/上传拒绝和正常电源关机策略。
 - [x] 静态检查 Sunnylink、Onroad Uploads 不出现在 onboarding、settings、sidebar。
 - [x] 静态检查旧云参数不能启动云进程。
 - [x] 静态检查 Seltos 2023 等价 2021 SCC。
