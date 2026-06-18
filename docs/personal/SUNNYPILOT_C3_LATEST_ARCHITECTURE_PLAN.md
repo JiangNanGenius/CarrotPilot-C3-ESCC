@@ -98,6 +98,7 @@ User-Agent: AGNOSSetup-12.4
 - 地图：Mapbox/Kakao/Carrot route 只作为可选显示，新增 `CarrotMapOverlayEnabled=0`，默认不加载地图覆盖。
 - Carrot：迁移 CarrotMan、CP搭子/Navipilot、APN/N、导航事件、SDI/测速/减速带、model speed、Carrot Web。
 - fishop 硬件增强：迁移车道识线/车道曲线、左右车道数据、外接激光雷达盲区、侧向目标、传感器健康状态和自动超车参考逻辑；默认只读、默认关闭。
+- fishop 最新参考入口：以 `fishop/cp` 的 `selfdrive/carrot/amap_navi.py`、`cereal/custom.capnp`、`cereal/log.capnp`、`selfdrive/apilot.json` 为第一批审计入口；只拆数据协议和安全门，不整包合并。
 - 高风险控制：红灯停车、自动转弯减速、主动限速控制、Auto-Tuner 自动应用独立开关，默认不改变控制目标。
 - 自动超车：只能接入现有安全变道链路，必须经过转向灯、原车/外接盲区、驾驶员确认、速度范围、道路类型和 Seltos 2023 车型门禁；高德/国内导航不适配时自动降级。
 - Auto-Tuner：迁移学习、推荐值、历史记录、手动应用；`CarrotLearningActive=0`，`CarrotLearningAutoApply=0`。
@@ -309,6 +310,34 @@ tmux capture-pane -p
 - CarrotMan、CP搭子/Navipilot、APN/N、导航事件、SDI/测速、减速带、model speed、Carrot Web。
 - fishop/码上飞扬硬件增强输入：车道曲线、左右车道数据、激光雷达盲区、侧向目标、传感器健康，第一阶段只读记录和显示。
 - fishop/码上飞扬自动超车：先只提示/只建议，后续才允许受控执行，且不得绕过安全变道链路。
+- fishop/码上飞扬硬件图流：
+
+```mermaid
+flowchart TD
+  A["外设/APP 输入\nlane、blindspot、cam_blind、overtake、navi"] --> B["协议审计\n字段、单位、方向、时间戳、超时、健康"]
+  B --> C["只读状态桥\n车道线、曲率、左右目标、盲区、在线状态"]
+  C --> D["证据层\n快照、Web 只读显示、日志、最近更新时间"]
+  D --> E{"停车和只读路测通过？"}
+  E -- "否" --> C
+  E -- "是" --> F["提示/建议层\n不直接改控制目标"]
+  F --> G{"建议层证据通过？"}
+  G -- "否" --> F
+  G -- "是" --> H["现有安全变道链路\n转向灯、BSM、驾驶员确认、速度、道路、车型"]
+  H --> I{"全部门禁通过？"}
+  I -- "否" --> F
+  I -- "是" --> J["受控执行实验\n默认关闭、单独 tag、可回滚"]
+```
+
+- fishop/码上飞扬硬件输入必须先分清方向：
+  - C3 发给外设的数据，例如巡航速度、车速、原车盲区、雷达摘要、车道/路沿概率。
+  - 外设发给 C3 的数据，例如 `lane`、`blindspot`、`cam_blind`、左右目标距离、左右目标横向距离、盲区位。
+  - APP 或外设发起的 `overtake`/变道命令，默认只能记录，不能直接执行。
+- 自动超车分五步放行：
+  - 只接收和记录。
+  - 只显示。
+  - 只提示。
+  - 只建议，现有安全变道链路可拒绝。
+  - 受控执行实验，必须保留驾驶员确认和回滚安装器。
 - 红灯停车、自动转弯减速、主动限速控制独立开关，默认关闭。
 - Auto-Tuner 学习、推荐、历史、手动应用，自动应用默认关闭。
 - 用户参数迁移脚本。

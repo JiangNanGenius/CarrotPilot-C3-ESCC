@@ -149,6 +149,37 @@
 - [ ] 自动超车第一阶段只做提示和日志，第二阶段只允许建议变道，第三阶段才允许受控执行；每阶段单独实车证据。
 - [ ] 国内导航 / 高德相关输入只能作为辅助来源；在澳洲或导航精度不足时，不能作为自动超车或侧向控制的唯一依据。
 - [ ] 设备快照和证据包新增 fishop 硬件采样：车道曲线、左右盲区、传感器在线、最近更新时间、自动超车状态。
+- [ ] fishop 最新参考入口已确认，后续迁移先审这些源码点，不按整包合并：
+  - `selfdrive/carrot/amap_navi.py`: UDP 客户端、`lane`、`blindspot`、`cam_blind`、`overtake`、`navi`、`lidar` 数据通道。
+  - `cereal/custom.capnp`: `CarrotMan.leftBlind/rightBlind` 和 `AmapNavi.leftBlind/rightBlind/lineValid/leftLine/rightLine`。
+  - `cereal/log.capnp`: `DrivingModelData.LaneLineMeta`、`laneLines`、`roadEdges`、`laneWidthLeft/right`、`distanceToRoadEdgeLeft/right`。
+  - `selfdrive/apilot.json`: `UseLaneLineSpeed`、`UseLaneLineCurveSpeed`、`LaneChangeNeedTorque` 等车道模式参数说明。
+- [ ] fishop 硬件增强迁移图流：
+
+```mermaid
+flowchart TD
+  A["fishop/码上飞扬外设\nlane camera / lidar / overtake client"] --> B["协议审计\n字段、单位、坐标系、刷新率、超时"]
+  B --> C["只读输入桥\n车道线、车道曲线、左右目标、盲区、健康状态"]
+  C --> D["证据记录\n设备快照、Web 只读显示、日志、时间戳"]
+  D --> E{"停车和只读路测通过？"}
+  E -- "否" --> C
+  E -- "是" --> F["提示层\n盲区提示、车道线提示、自动超车建议"]
+  F --> G{"建议层证据通过？"}
+  G -- "否" --> F
+  G -- "是" --> H["受控执行候选\n只接现有安全变道链路"]
+  H --> I{"全部安全门通过？"}
+  I -- "否" --> F
+  I -- "是" --> J["Seltos 2023 实验开关\n默认关闭，可回滚"]
+```
+
+- [ ] 图流门禁必须逐项落地：
+  - 输入门：字段存在、单位明确、时间戳新鲜、左右方向不反、断线能清零。
+  - 车辆门：仅 Seltos 2023 SCC 纯 CAN 实验启用，不进入 Non-SCC/CANFD/HDA2 路径。
+  - 地图门：高德/国内导航只做辅助，澳洲或精度不足时自动降级。
+  - 盲区门：原车 BSM 和外接盲区任一报警都阻止自动变道。
+  - 驾驶员门：不绕过转向灯、手握/确认、油门/刹车/转向人工介入。
+  - 模型门：车道线、路沿、曲率和传感器数据互相矛盾时只提示不控制。
+  - 发布门：每阶段都有单独 tag、证据包和回滚安装器。
 - [x] 决定哪些进入主分支，哪些放到实验分支：
   - ESCC 继续保留在主分支，默认关闭。
   - CP搭子 / Navipilot 核心协议保留在主分支，`LANECHANGE` 只走现有安全变道链路。
@@ -337,16 +368,43 @@
 
 ### P8.9: fishop / 码上飞扬硬件增强迁移
 
+- [ ] 以最新 `fishop/cp` 为参考源，不直接整包合并；先固定审计入口：`selfdrive/carrot/amap_navi.py`、`cereal/custom.capnp`、`cereal/log.capnp`、`selfdrive/apilot.json`。
 - [ ] 研究 fishop 最新版车道识线 / 车道曲线实现，确认它是视觉、APP、雷达/激光雷达还是融合输出。
+- [ ] 研究 `lane` UDP 通道，确认 `left_lane`、`right_lane`、`lineValid` 的枚举含义、实线/虚线语义、左右方向和超时清零逻辑。
+- [ ] 研究 `max_curve`、`lat_a`、模型 `orientationRate`、`LaneLineMeta` 和 road edge 数据的关系，决定哪些只做显示，哪些可作为车道质量证据。
 - [ ] 研究 fishop 外接激光雷达左右车道数据，确认坐标系、单位、刷新率、时间戳、置信度和丢包处理。
 - [ ] 研究 fishop 外接激光雷达盲区数据，确认左右盲区、侧向目标、目标速度、距离、传感器在线和故障状态。
+- [ ] 研究 `blindspot` / `cam_blind` 数据：`lidar_lblind`、`lidar_rblind`、`lf/lb/rf/rb_drel`、`lf/lb/rf/rb_xrel`、`dist_time`、`detect_side`、`lidar_id`。
+- [ ] 研究动态盲区算法，确认 `DynamicBlindRange`、`DynamicBlindDistance`、`LidarBsdDelayTime`、前后目标时距参数是否适合 Seltos 2023。
 - [ ] 设计统一硬件增强消息/参数桥，先接收并记录，不进入控制。
+- [ ] 新增统一状态结构候选：设备在线、最后更新时间、左右车道线类型、左右车道曲率/宽度、左右前后目标距离、左右前后目标横向距离、左右前后相对速度、左右盲区、摄像头盲区、传感器健康。
 - [ ] 增加 Web/UI 只读显示：车道曲线、左右车道数据、左右盲区、传感器健康、数据新鲜度。
 - [ ] 新增默认关闭参数：`FishopLaneCurveEnabled=0`、`FishopLidarLaneDataEnabled=0`、`FishopLidarBlindspotEnabled=0`、`FishopAutoOvertakeEnabled=0`。
+- [ ] 新增只读采样参数候选：`FishopHardwareReadOnly=1`、`FishopHardwareEvidenceMode=1`；若最终实现已有等价参数，不新增别名。
 - [ ] 自动超车只接入现有安全变道链路；不得绕过转向灯、原车/外接盲区、驾驶员确认、速度范围、道路类型和 Seltos 2023 车型门禁。
+- [ ] 研究 `overtake` / `navi` 客户端的数据方向：C3 发给外设、外设发给 C3、APP 发给 C3 要分清；任何 APP 命令默认只记录，不直接执行。
+- [ ] 自动超车决策必须先产出“建议”，再由现有 desire/lane-change helper 判断；不得直接写转向目标、横向轨迹或绕过 planner。
 - [ ] 自动超车分阶段验证：只显示/只建议/受控执行，每阶段必须有单独日志和回滚点。
 - [ ] 高德 / 国内导航精度不足或地区不适配时，自动超车和侧向控制必须降级为不可用或只提示。
 - [ ] 每次启用 fishop 硬件控制相关功能前，证据包必须证明云进程不存在、ESCC 正常、基础横控正常、传感器数据新鲜且一致。
+- [ ] P8 fishop 硬件增强图流：
+
+```mermaid
+flowchart LR
+  S["外设输入\nlane / blindspot / cam_blind / overtake"] --> P["协议解析\n单位、方向、时间戳、健康"]
+  P --> R["只读状态\n不改控制目标"]
+  R --> V["证据和 UI\n快照、日志、Web 显示"]
+  V --> W["提示/建议\n默认关闭"]
+  W --> L["现有安全变道链路\n转向灯、BSM、驾驶员确认、速度、道路、车型"]
+  L --> X["受控执行实验\n单独开关、单独 tag、可回滚"]
+```
+
+- [ ] P8 fishop 放行顺序：
+  - 第 1 步：只接收数据，证明左右不反、超时可清零、断线不会残留盲区状态。
+  - 第 2 步：只在 Web/UI 显示，不发提示、不影响 planner。
+  - 第 3 步：只发提示，不产生 desire。
+  - 第 4 步：只产生建议 desire，现有安全变道链路可拒绝。
+  - 第 5 步：受控执行实验，必须有驾驶员确认、回滚安装器和完整证据。
 
 ### P8.10: Auto-Tuner 迁移
 

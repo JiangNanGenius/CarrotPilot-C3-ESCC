@@ -125,6 +125,8 @@ When the user asks to continue the new SunnyPilot architecture work, follow `doc
 - Migrate Carrot, CP搭子/Navipilot, fishop hardware-enhanced sensing, Auto-Tuner, and high-risk controls behind independent safe defaults. Red-light stop, auto-turn decel, active speed control, fishop auto-overtake, and Auto-Tuner auto-apply must be off by default.
 - For fishop hardware features, first preserve read-only data paths for lane curves, left/right lane data, external lidar blindspots, side targets, sensor health, and freshness timestamps. Only after parked and road evidence may these inputs feed warnings, suggested lane changes, or controlled auto-overtake.
 - fishop auto-overtake must use the existing safe lane-change chain. It must not bypass turn signals, stock/external blindspot checks, driver confirmation, speed gates, road-type gates, sensor freshness gates, or the Seltos 2023 vehicle gate.
+- For fishop hardware updates, start by re-auditing `fishop/cp:selfdrive/carrot/amap_navi.py`, `fishop/cp:cereal/custom.capnp`, `fishop/cp:cereal/log.capnp`, and `fishop/cp:selfdrive/apilot.json`. Treat `lane`, `blindspot`, `cam_blind`, `overtake`, `navi`, and `lidar` as protocol inputs to prove, not as trusted control commands.
+- Keep the fishop hardware flow in this order: protocol audit, read-only state bridge, evidence/UI display, warning or suggestion, existing lane-change safety chain, then controlled experiment. Do not skip stages even if the hardware is installed.
 
 ## Release Rules
 
