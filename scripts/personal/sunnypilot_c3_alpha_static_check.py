@@ -898,6 +898,78 @@ def check_navigation_event_runtime() -> tuple[bool, str]:
       sys.modules["openpilot.common.params"] = previous_params
 
 
+def check_carrot_feature_gates_runtime() -> tuple[bool, str]:
+  FakeParams.reset()
+  params_mod = types.ModuleType("openpilot.common.params")
+  params_mod.Params = FakeParams
+  previous_params = sys.modules.get("openpilot.common.params")
+  sys.modules["openpilot.common.params"] = params_mod
+  try:
+    server = import_file("alpha_carrot_server_feature_gates_static_check", "selfdrive/carrot/carrot_server.py")
+    for key in (
+      "CarrotTrafficStopEnabled",
+      "CarrotAutoTurnControlEnabled",
+      "CarrotActiveSpeedControlEnabled",
+      "CarrotLearningAutoApply",
+      "FishopAutoOvertakeEnabled",
+    ):
+      FakeParams.shared_store[key] = b"1"
+
+    payload = {
+      "carrotCmd": "OVERTAKE",
+      "nRoadLimitSpeed": 70,
+      "nSdiSpeedLimit": 60,
+      "nSdiDist": 200,
+      "nTBTDist": 320,
+      "nTBTTurnType": 12,
+      "modelSpeedKph": 45,
+      "trafficRedLightOn": True,
+    }
+    server.record_navigation_event(payload, "feature-gate-static-check")
+    recommendation = {
+      "source": "feature-gate-static-check",
+      "created_at": 1234,
+      "recommendations": {
+        "CruiseMaxVals4": {
+          "category": "long",
+          "current": 110,
+          "recommended": 120,
+          "reason": "gate check",
+        },
+      },
+    }
+    FakeParams.shared_store["CarrotLearningRecommend"] = json.dumps(recommendation).encode("utf-8")
+
+    gate = server.carrot_feature_gate_state()
+    if gate.get("controlOutput") is not False or gate.get("controlOutputAllowed") is not False:
+      return False, "feature gate reported control output as available"
+    if gate.get("allBlocked") is not True:
+      return False, "feature gate did not block every high-risk feature"
+    features = gate.get("features", {})
+    for key in ("trafficStop", "autoTurn", "activeSpeed", "autoTunerAutoApply", "fishopAutoOvertake"):
+      feature = features.get(key, {})
+      if feature.get("enabledParam") is not True:
+        return False, f"{key} did not reflect enabled test param"
+      if feature.get("readyForControl") is not False or feature.get("controlOutput") is not False or feature.get("readOnly") is not True:
+        return False, f"{key} is not held at read-only/no-control"
+      reasons = feature.get("blockingReasons", [])
+      if "real_car_gate_missing" not in reasons or "control_output_disabled" not in reasons:
+        return False, f"{key} missing real-car/control-output blocking reasons"
+    for key in ("trafficStop", "autoTurn", "activeSpeed", "autoTunerAutoApply"):
+      if features.get(key, {}).get("candidate") is not True:
+        return False, f"{key} did not preserve candidate evidence"
+    if "fishopAutoOvertake" not in gate.get("enabledFeatures", []):
+      return False, "fishop auto overtake was not represented in enabled feature summary"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+  finally:
+    if previous_params is None:
+      sys.modules.pop("openpilot.common.params", None)
+    else:
+      sys.modules["openpilot.common.params"] = previous_params
+
+
 def check_status_broadcast_runtime() -> tuple[bool, str]:
   FakeParams.reset()
   params_mod = types.ModuleType("openpilot.common.params")
@@ -1287,7 +1359,7 @@ def main() -> int:
                           "carrot_server must provide the local port-7000 aiohttp service")
   ok, detail = check_carrot_web_asset_syntax()
   failures += not require("Carrot Web JS/JSON/YAML syntax", ok, detail or "Carrot Web/settings UI asset syntax check failed")
-  for route in ("/api/health", "/api/params_bulk", "/api/param_set", "/api/status_broadcast", "/api/carrot_learning", "/api/fishop_hardware", "/api/navigation_event", "/api/phone_speed_limit"):
+  for route in ("/api/health", "/api/params_bulk", "/api/param_set", "/api/status_broadcast", "/api/carrot_learning", "/api/carrot_feature_gates", "/api/fishop_hardware", "/api/navigation_event", "/api/phone_speed_limit"):
     failures += not require(f"Carrot Web route exists: {route}", route in carrot_server,
                             f"carrot_server missing {route}")
   failures += not require("Carrot Web params API whitelist", "PARAM_API_DEFS" in carrot_server
@@ -1393,6 +1465,18 @@ def main() -> int:
                             "navigation UDP/API input must not publish controls or touch lane-change/planner outputs")
   ok, detail = check_navigation_event_runtime()
   failures += not require("Carrot Web navigation runtime", ok, detail or "navigation runtime check failed")
+  failures += not require("Carrot Web feature gate API",
+                          "HIGH_RISK_FEATURE_GATES" in carrot_server
+                          and "def carrot_feature_gate_state" in carrot_server
+                          and "def api_carrot_feature_gates" in carrot_server
+                          and '"readyForControl": False' in carrot_server
+                          and '"controlOutputAllowed": False' in carrot_server
+                          and '"real_car_gate_missing"' in carrot_server
+                          and 'app.router.add_get("/api/carrot_feature_gates", api_carrot_feature_gates)' in carrot_server,
+                          "Carrot high-risk controls must be exposed through a read-only real-car gate API")
+  ok, detail = check_carrot_feature_gates_runtime()
+  failures += not require("Carrot Web feature gate runtime", ok,
+                          detail or "Carrot feature gate runtime check failed")
   failures += not require("Carrot Web phone speed API writes resolver params",
                           "def set_phone_speed_limit" in carrot_server
                           and "CarrotPhoneSpeedLimitUpdatedAt" in carrot_server
@@ -1442,6 +1526,17 @@ def main() -> int:
                           and "renderRecommendations" in carrot_server
                           and "renderAutoTuner" in carrot_server,
                           "Carrot Web must expose the local Auto-Tuner state panel with read, apply, ignore, and clear actions")
+  failures += not require("Carrot Web control gate panel",
+                          'id="control-gates-panel"' in carrot_server
+                          and "refreshFeatureGates" in carrot_server
+                          and 'fetch("/api/carrot_feature_gates", {cache: "no-store"})' in carrot_server
+                          and "gateSummary" in carrot_server
+                          and 'id="control-gate-traffic-stop"' in carrot_server
+                          and 'id="control-gate-auto-turn"' in carrot_server
+                          and 'id="control-gate-active-speed"' in carrot_server
+                          and 'id="control-gate-auto-tuner"' in carrot_server
+                          and 'id="control-gate-fishop-overtake"' in carrot_server,
+                          "Carrot Web home page must show read-only high-risk control gate status")
   failures += not require("Carrot Web fishop hardware read-only panel",
                           'id="fishop-panel"' in carrot_server
                           and "refreshFishopHardware" in carrot_server
@@ -1524,7 +1619,8 @@ def main() -> int:
                           "alpha snapshot must include the latest sanitized navigation event")
   failures += not require("alpha snapshot summarizes navigation evidence",
                           "def summarize_navigation_event" in alpha_snapshot
-                          and '"navigationEvidence": summarize_navigation_event()' in alpha_snapshot
+                          and "navigation = summarize_navigation_event()" in alpha_snapshot
+                          and '"navigationEvidence": navigation' in alpha_snapshot
                           and '"hazards": hazards' in alpha_snapshot
                           and '"modelSpeed": model_speed' in alpha_snapshot
                           and '"controlPreview": control_preview' in alpha_snapshot,
@@ -1537,6 +1633,14 @@ def main() -> int:
                           and '"resolver"' in alpha_snapshot
                           and '"speedLimitOffset"' in alpha_snapshot,
                           "alpha snapshot must summarize speed-limit source, phone freshness, resolver, and offset evidence")
+  failures += not require("alpha snapshot records Carrot feature gates",
+                          "HIGH_RISK_FEATURE_GATES" in alpha_snapshot
+                          and "def summarize_carrot_feature_gates" in alpha_snapshot
+                          and '"carrotFeatureGates": carrot_feature_gates' in alpha_snapshot
+                          and '"readyForControl": False' in alpha_snapshot
+                          and '"controlOutputAllowed": False' in alpha_snapshot
+                          and "real_car_gate_missing" in alpha_snapshot,
+                          "alpha snapshot must summarize high-risk Carrot/fishop control gates as blocked until real-car evidence")
   for key in ("CarrotNaviDebug", "CarrotNaviEvent", "CarrotNaviImage"):
     failures += not require(f"alpha snapshot records navigation HTTP evidence: {key}", f'"{key}"' in alpha_snapshot,
                             f"alpha snapshot must include {key} for 7713 navigation HTTP evidence")

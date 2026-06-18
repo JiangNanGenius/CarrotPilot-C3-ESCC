@@ -112,6 +112,65 @@ PARAM_API_DEFS: dict[str, dict[str, Any]] = {
   "FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": False},
 }
 
+HIGH_RISK_FEATURE_GATES: tuple[dict[str, Any], ...] = (
+  {
+    "key": "trafficStop",
+    "label": "Traffic Light Stop",
+    "param": "CarrotTrafficStopEnabled",
+    "requiredEvidence": (
+      "parked_navigation_replay",
+      "red_light_input_consistency",
+      "Seltos 2023 ESCC road test",
+      "driver confirmation gate",
+    ),
+  },
+  {
+    "key": "autoTurn",
+    "label": "Auto Turn Slowdown",
+    "param": "CarrotAutoTurnControlEnabled",
+    "requiredEvidence": (
+      "fresh turn-by-turn input",
+      "curve and turn-type consistency",
+      "Seltos 2023 ESCC road test",
+      "planner handoff review",
+    ),
+  },
+  {
+    "key": "activeSpeed",
+    "label": "Carrot Active Speed Control",
+    "param": "CarrotActiveSpeedControlEnabled",
+    "requiredEvidence": (
+      "phone/car/map speed source comparison",
+      "Speed Limit Assist road test",
+      "braking comfort review",
+      "Seltos 2023 ESCC road test",
+    ),
+  },
+  {
+    "key": "autoTunerAutoApply",
+    "label": "Auto-Tuner Auto Apply",
+    "param": "CarrotLearningAutoApply",
+    "requiredEvidence": (
+      "offroad-only apply proof",
+      "manual recommendation review history",
+      "parameter rollback point",
+      "Seltos 2023 stability review",
+    ),
+  },
+  {
+    "key": "fishopAutoOvertake",
+    "label": "fishop Auto Overtake",
+    "param": "FishopAutoOvertakeEnabled",
+    "requiredEvidence": (
+      "fresh lane input",
+      "fresh lidar and camera blindspot input",
+      "existing safe lane-change chain review",
+      "driver confirmation gate",
+      "Seltos 2023 ESCC road test",
+    ),
+  },
+)
+
 VIRTUAL_PARAM_DEFAULTS = {
   "DeviceType": "unknown",
 }
@@ -659,7 +718,7 @@ def _navigation_control_preview(params: Any | None, event: dict[str, Any], traff
       "phoneOrSdiSpeedLimitKph": round(speed_limit_kph or _as_float(sdi.get("speedLimitKph"), 0.0), 3),
       "modelSpeedKph": model_speed.get("speedKph", 0.0),
       "speedBumpInput": speed_bump_candidate,
-      "state": "display_only",
+      "state": "disabled_default" if not active_speed_enabled else "blocked_real_car_gate",
       "controlOutput": False,
     },
     "overtake": {
@@ -672,6 +731,140 @@ def _navigation_control_preview(params: Any | None, event: dict[str, Any], traff
     "readOnly": True,
     "controlOutput": False,
     "requiresRealCarEvidence": True,
+  }
+
+
+def _feature_gate_blocking_reasons(enabled_param: bool, candidate: bool) -> list[str]:
+  if not enabled_param:
+    return ["param_disabled", "control_output_disabled"]
+  reasons = ["real_car_gate_missing", "control_output_disabled"]
+  if not candidate:
+    reasons.insert(0, "candidate_evidence_missing")
+  return reasons
+
+
+def _feature_gate_state(enabled_param: bool, candidate: bool) -> str:
+  if not enabled_param:
+    return "disabled_default"
+  if not candidate:
+    return "blocked_waiting_evidence"
+  return "blocked_real_car_gate"
+
+
+def _navigation_preview_feature(nav_event: dict[str, Any], key: str) -> tuple[bool, dict[str, Any]]:
+  preview = nav_event.get("controlPreview", {}) if isinstance(nav_event.get("controlPreview"), dict) else {}
+  feature = preview.get(key, {}) if isinstance(preview.get(key), dict) else {}
+  return bool(feature.get("candidate", False)), feature
+
+
+def _feature_gate_evidence(feature_key: str, nav_event: dict[str, Any], learning: dict[str, Any],
+                           fishop: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
+  if feature_key == "trafficStop":
+    candidate, preview = _navigation_preview_feature(nav_event, "trafficStop")
+    traffic = nav_event.get("trafficLight", {}) if isinstance(nav_event.get("trafficLight"), dict) else {}
+    return candidate, {
+      "source": nav_event.get("source", ""),
+      "updatedAt": nav_event.get("updatedAt", 0.0),
+      "redLightInput": bool(traffic.get("red", False)),
+      "greenLightInput": bool(traffic.get("green", False)),
+      "preview": preview,
+    }
+
+  if feature_key == "autoTurn":
+    candidate, preview = _navigation_preview_feature(nav_event, "autoTurn")
+    return candidate, {
+      "source": nav_event.get("source", ""),
+      "updatedAt": nav_event.get("updatedAt", 0.0),
+      "preview": preview,
+    }
+
+  if feature_key == "activeSpeed":
+    candidate, preview = _navigation_preview_feature(nav_event, "activeSpeed")
+    return candidate, {
+      "source": nav_event.get("source", ""),
+      "updatedAt": nav_event.get("updatedAt", 0.0),
+      "speedLimitKph": nav_event.get("speedLimitKph", 0.0),
+      "preview": preview,
+    }
+
+  if feature_key == "autoTunerAutoApply":
+    summary = learning.get("recommendationSummary", {}) if isinstance(learning.get("recommendationSummary"), dict) else {}
+    pending_count = int(_as_float(summary.get("pending"), 0.0))
+    candidate = bool(learning.get("pending", False) or pending_count > 0)
+    return candidate, {
+      "active": bool(learning.get("active", False)),
+      "pending": bool(learning.get("pending", False)),
+      "pendingRecommendationCount": pending_count,
+      "autoApplyStateReported": bool(learning.get("autoApply", False)),
+      "source": learning.get("source", ""),
+      "createdAt": learning.get("createdAt", 0.0),
+    }
+
+  if feature_key == "fishopAutoOvertake":
+    snapshot = fishop.get("snapshot", {}) if isinstance(fishop.get("snapshot"), dict) else {}
+    overtake = snapshot.get("overtake", {}) if isinstance(snapshot.get("overtake"), dict) else {}
+    preview = overtake.get("suggestionPreview", {}) if isinstance(overtake.get("suggestionPreview"), dict) else {}
+    candidate = bool(overtake.get("requested", False) or overtake.get("commandSeen", False) or preview.get("readyForSuggestion", False))
+    return candidate, {
+      "inputAvailable": bool(fishop.get("inputAvailable", False)),
+      "sensorOnline": bool(snapshot.get("sensorOnline", False)),
+      "direction": overtake.get("direction", ""),
+      "commandSeen": bool(overtake.get("commandSeen", False)),
+      "requested": bool(overtake.get("requested", False)),
+      "suggestionPreview": preview,
+    }
+
+  return False, {}
+
+
+def carrot_feature_gate_state() -> dict[str, Any]:
+  params, error = _params_state()
+  nav_state = navigation_event_state()
+  nav_event = nav_state.get("event", {}) if isinstance(nav_state, dict) and isinstance(nav_state.get("event"), dict) else {}
+  learning = get_learning_state()
+  fishop = fishop_state()
+  features: dict[str, Any] = {}
+
+  for spec in HIGH_RISK_FEATURE_GATES:
+    key = str(spec["key"])
+    param = str(spec["param"])
+    enabled_param = _param_bool(params, param, False)
+    candidate, evidence = _feature_gate_evidence(key, nav_event, learning, fishop)
+    features[key] = {
+      "label": str(spec["label"]),
+      "param": param,
+      "enabledParam": enabled_param,
+      "candidate": candidate,
+      "state": _feature_gate_state(enabled_param, candidate),
+      "readyForControl": False,
+      "readOnly": True,
+      "controlOutput": False,
+      "blockingReasons": _feature_gate_blocking_reasons(enabled_param, candidate),
+      "requiredEvidence": list(spec["requiredEvidence"]),
+      "evidence": evidence,
+    }
+
+  enabled_features = [key for key, feature in features.items() if feature["enabledParam"]]
+  candidate_features = [key for key, feature in features.items() if feature["candidate"]]
+  return {
+    "hasParams": params is not None,
+    "error": error,
+    "stage": "pre_control_evidence",
+    "readOnly": True,
+    "controlOutput": False,
+    "controlOutputAllowed": False,
+    "allBlocked": all(not feature["readyForControl"] for feature in features.values()),
+    "enabledFeatures": enabled_features,
+    "candidateFeatures": candidate_features,
+    "features": features,
+    "requiredBeforeControl": (
+      "cloud processes absent",
+      "Seltos 2023 SCC and ESCC evidence captured",
+      "stock model baseline road test",
+      "feature-specific parked replay",
+      "feature-specific road test",
+      "rollback installer available",
+    ),
   }
 
 
@@ -1590,6 +1783,7 @@ async def api_health(_request: web.Request) -> web.Response:
   navi_tcp_state = _request.app["navi_tcp_state"]
   nav_state = navigation_event_state()
   nav_event = nav_state.get("event", {}) if isinstance(nav_state, dict) else {}
+  feature_gates = carrot_feature_gate_state()
   return _json_response({
     "ok": True,
     "service": "carrot_server",
@@ -1604,6 +1798,7 @@ async def api_health(_request: web.Request) -> web.Response:
     "messagingLastError": str(messaging_state.get("lastError", "")),
     "speedLimitEvidence": speed_limit_evidence_state(messaging_state),
     "navigationEvidence": _status_payload_navigation_evidence(nav_event if isinstance(nav_event, dict) else {}),
+    "carrotFeatureGates": feature_gates,
     "navigationUdpPort": NAVIGATION_UDP_PORT,
     "navigationUdpError": udp_error,
     "navigationUdpLastError": udp_last_error,
@@ -1627,6 +1822,7 @@ async def api_health(_request: web.Request) -> web.Response:
       "/api/param_set",
       "/api/status_broadcast",
       "/api/carrot_learning",
+      "/api/carrot_feature_gates",
       "/api/fishop_hardware",
       "/api/navigation_event",
       "/api/navi",
@@ -1634,6 +1830,10 @@ async def api_health(_request: web.Request) -> web.Response:
       "/api/phone_speed_limit",
     ],
   })
+
+
+async def api_carrot_feature_gates(_request: web.Request) -> web.Response:
+  return _json_response({"ok": True, **carrot_feature_gate_state()})
 
 
 async def api_carrot_learning(_request: web.Request) -> web.Response:
@@ -1845,6 +2045,19 @@ async def index(_request: web.Request) -> web.Response:
       <div class="metric"><span class="label">fishop hardware</span><span class="value">lane, lidar, blindspot, and overtake inputs are evidence-only</span></div>
       <div class="metric"><span class="label">Carrot control</span><span class="value">traffic stop, auto turn, active speed, and overtake control outputs stay disabled</span></div>
     </section>
+    <section id="control-gates-panel">
+      <h2>Control Gates</h2>
+      <div class="metric"><span class="label">State</span><span class="value"><span id="control-gates-state" class="pill off">loading</span></span></div>
+      <div class="metric"><span class="label">Enabled params</span><span class="value" id="control-gates-enabled">-</span></div>
+      <div class="metric"><span class="label">Candidate inputs</span><span class="value" id="control-gates-candidates">-</span></div>
+      <div class="metric"><span class="label">Traffic stop</span><span class="value" id="control-gate-traffic-stop">-</span></div>
+      <div class="metric"><span class="label">Auto turn</span><span class="value" id="control-gate-auto-turn">-</span></div>
+      <div class="metric"><span class="label">Active speed</span><span class="value" id="control-gate-active-speed">-</span></div>
+      <div class="metric"><span class="label">Auto-Tuner auto apply</span><span class="value" id="control-gate-auto-tuner">-</span></div>
+      <div class="metric"><span class="label">fishop auto overtake</span><span class="value" id="control-gate-fishop-overtake">-</span></div>
+      <div class="metric"><span class="label">Boundary</span><span class="value" id="control-gates-boundary">read-only</span></div>
+      <p id="control-gates-error"></p>
+    </section>
     <section id="navigation-panel">
       <h2>Navigation Evidence</h2>
       <div class="metric"><span class="label">State</span><span class="value"><span id="navigation-state" class="pill off">loading</span></span></div>
@@ -1915,6 +2128,7 @@ async def index(_request: web.Request) -> web.Response:
         <li><a href="/api/params_bulk?names=ExperimentalMode"><code>/api/params_bulk</code></a></li>
         <li><a href="/api/status_broadcast"><code>/api/status_broadcast</code></a></li>
         <li><a href="/api/carrot_learning"><code>/api/carrot_learning</code></a></li>
+        <li><a href="/api/carrot_feature_gates"><code>/api/carrot_feature_gates</code></a></li>
         <li><a href="/api/fishop_hardware"><code>/api/fishop_hardware</code></a></li>
         <li><a href="/api/navigation_event"><code>/api/navigation_event</code></a></li>
         <li><a href="/api/phone_speed_limit"><code>/api/phone_speed_limit</code></a></li>
@@ -1968,6 +2182,14 @@ async def index(_request: web.Request) -> web.Response:
       const candidate = preview.candidate ? "candidate" : "idle";
       const enabled = preview.enabledParam ? "param on" : "default off";
       return `${state} / ${candidate} / ${enabled}`;
+    };
+    const gateSummary = (feature = {}) => {
+      const state = feature.state || "blocked";
+      const candidate = feature.candidate ? "candidate" : "idle";
+      const enabled = feature.enabledParam ? "param on" : "default off";
+      const reasons = Array.isArray(feature.blockingReasons) ? feature.blockingReasons.slice(0, 2) : [];
+      const suffix = reasons.length ? ` / ${reasons.join(", ")}` : "";
+      return `${state} / ${candidate} / ${enabled}${suffix}`;
     };
     const timeText = (value) => {
       const timestamp = Number(value);
@@ -2054,6 +2276,27 @@ async def index(_request: web.Request) -> web.Response:
       setText("navigation-command-boundary", command.highRiskCommandSeen ? `ignored ${event.ignoredCommand || "command"}` : "read-only");
       setText("navigation-error", data.error || "");
     };
+    const renderFeatureGates = (data = {}) => {
+      const features = data.features || {};
+      if (!data.hasParams) {
+        setPill("control-gates-state", "unavailable", "warn");
+      } else if (data.controlOutputAllowed) {
+        setPill("control-gates-state", "control allowed", "warn");
+      } else {
+        setPill("control-gates-state", "blocked", "off");
+      }
+      const enabled = Array.isArray(data.enabledFeatures) ? data.enabledFeatures : [];
+      const candidates = Array.isArray(data.candidateFeatures) ? data.candidateFeatures : [];
+      setText("control-gates-enabled", enabled.length ? enabled.join(", ") : "none");
+      setText("control-gates-candidates", candidates.length ? candidates.join(", ") : "none");
+      setText("control-gate-traffic-stop", gateSummary(features.trafficStop || {}));
+      setText("control-gate-auto-turn", gateSummary(features.autoTurn || {}));
+      setText("control-gate-active-speed", gateSummary(features.activeSpeed || {}));
+      setText("control-gate-auto-tuner", gateSummary(features.autoTunerAutoApply || {}));
+      setText("control-gate-fishop-overtake", gateSummary(features.fishopAutoOvertake || {}));
+      setText("control-gates-boundary", data.controlOutput ? "control output present" : "read-only, no control output");
+      setText("control-gates-error", data.error || "");
+    };
     const renderAutoTuner = (data = {}) => {
       if (!data.hasParams) {
         setPill("auto-tuner-state", "unavailable", "warn");
@@ -2095,6 +2338,16 @@ async def index(_request: web.Request) -> web.Response:
       } catch (err) {
         setPill("navigation-state", "error", "warn");
         setText("navigation-error", String(err).slice(0, 160));
+      }
+    }
+    async function refreshFeatureGates() {
+      try {
+        const response = await fetch("/api/carrot_feature_gates", {cache: "no-store"});
+        const data = await response.json();
+        renderFeatureGates(data);
+      } catch (err) {
+        setPill("control-gates-state", "error", "warn");
+        setText("control-gates-error", String(err).slice(0, 160));
       }
     }
     async function postAutoTunerAction(action) {
@@ -2162,6 +2415,8 @@ async def index(_request: web.Request) -> web.Response:
     setInterval(refreshAutoTuner, 5000);
     refreshNavigationEvidence();
     setInterval(refreshNavigationEvidence, 1000);
+    refreshFeatureGates();
+    setInterval(refreshFeatureGates, 2000);
     refreshFishopHardware();
     setInterval(refreshFishopHardware, 1000);
   </script>
@@ -2416,6 +2671,7 @@ def make_app() -> web.Application:
   app.router.add_get("/api/status_broadcast", api_status_broadcast)
   app.router.add_get("/api/carrot_learning", api_carrot_learning)
   app.router.add_post("/api/carrot_learning", api_carrot_learning_action)
+  app.router.add_get("/api/carrot_feature_gates", api_carrot_feature_gates)
   app.router.add_get("/api/fishop_hardware", api_fishop_hardware)
   app.router.add_get("/api/navigation_event", api_navigation_event)
   app.router.add_post("/api/navigation_event", api_navigation_event_action)

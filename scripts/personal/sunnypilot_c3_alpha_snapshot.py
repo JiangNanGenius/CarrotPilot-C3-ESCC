@@ -41,6 +41,9 @@ SAFE_PARAM_KEYS = (
   "CarrotNaviEvent",
   "CarrotNaviImage",
   "CarrotNavigationEvent",
+  "CarrotActiveSpeedControlEnabled",
+  "CarrotAutoTurnControlEnabled",
+  "CarrotTrafficStopEnabled",
   "CarrotLearningActive",
   "CarrotLearningApply",
   "CarrotLearningAutoApply",
@@ -68,6 +71,40 @@ BINARY_PARAM_KEYS = (
   "CarParams",
   "CarParamsCache",
   "CarParamsSP",
+)
+
+HIGH_RISK_FEATURE_GATES = (
+  ("trafficStop", "Traffic Light Stop", "CarrotTrafficStopEnabled", (
+    "parked_navigation_replay",
+    "red_light_input_consistency",
+    "Seltos 2023 ESCC road test",
+    "driver confirmation gate",
+  )),
+  ("autoTurn", "Auto Turn Slowdown", "CarrotAutoTurnControlEnabled", (
+    "fresh turn-by-turn input",
+    "curve and turn-type consistency",
+    "Seltos 2023 ESCC road test",
+    "planner handoff review",
+  )),
+  ("activeSpeed", "Carrot Active Speed Control", "CarrotActiveSpeedControlEnabled", (
+    "phone/car/map speed source comparison",
+    "Speed Limit Assist road test",
+    "braking comfort review",
+    "Seltos 2023 ESCC road test",
+  )),
+  ("autoTunerAutoApply", "Auto-Tuner Auto Apply", "CarrotLearningAutoApply", (
+    "offroad-only apply proof",
+    "manual recommendation review history",
+    "parameter rollback point",
+    "Seltos 2023 stability review",
+  )),
+  ("fishopAutoOvertake", "fishop Auto Overtake", "FishopAutoOvertakeEnabled", (
+    "fresh lane input",
+    "fresh lidar and camera blindspot input",
+    "existing safe lane-change chain review",
+    "driver confirmation gate",
+    "Seltos 2023 ESCC road test",
+  )),
 )
 
 CLOUD_PROCESS_PATTERNS = {
@@ -373,6 +410,114 @@ def summarize_auto_tuner(safe_params: dict[str, str]) -> dict[str, Any]:
   }
 
 
+def feature_gate_blocking_reasons(enabled_param: bool, candidate: bool) -> list[str]:
+  if not enabled_param:
+    return ["param_disabled", "control_output_disabled"]
+  reasons = ["real_car_gate_missing", "control_output_disabled"]
+  if not candidate:
+    reasons.insert(0, "candidate_evidence_missing")
+  return reasons
+
+
+def feature_gate_state(enabled_param: bool, candidate: bool) -> str:
+  if not enabled_param:
+    return "disabled_default"
+  if not candidate:
+    return "blocked_waiting_evidence"
+  return "blocked_real_car_gate"
+
+
+def summarize_carrot_feature_gates(safe_params: dict[str, str], navigation: dict[str, Any],
+                                   auto_tuner: dict[str, Any], fishop: dict[str, Any]) -> dict[str, Any]:
+  control_preview = navigation.get("controlPreview", {}) if isinstance(navigation.get("controlPreview"), dict) else {}
+  fishop_state = fishop.get("snapshot", {}) if isinstance(fishop.get("snapshot"), dict) else {}
+  overtake = fishop_state.get("overtake", {}) if isinstance(fishop_state.get("overtake"), dict) else {}
+  overtake_preview = overtake.get("suggestionPreview", {}) if isinstance(overtake.get("suggestionPreview"), dict) else {}
+  traffic = navigation.get("trafficLight", {}) if isinstance(navigation.get("trafficLight"), dict) else {}
+
+  candidates = {
+    "trafficStop": bool(control_preview.get("trafficStop", {}).get("candidate", False)),
+    "autoTurn": bool(control_preview.get("autoTurn", {}).get("candidate", False)),
+    "activeSpeed": bool(control_preview.get("activeSpeed", {}).get("candidate", False)),
+    "autoTunerAutoApply": bool(auto_tuner.get("pending", False) or int(auto_tuner.get("pendingRecommendationCount", 0) or 0) > 0),
+    "fishopAutoOvertake": bool(overtake.get("requested", False) or overtake.get("commandSeen", False)
+                                or overtake_preview.get("readyForSuggestion", False)),
+  }
+  evidence = {
+    "trafficStop": {
+      "source": navigation.get("source", ""),
+      "updatedAt": navigation.get("updatedAt", 0.0),
+      "redLightInput": bool(traffic.get("red", False)),
+      "greenLightInput": bool(traffic.get("green", False)),
+      "preview": control_preview.get("trafficStop", {}),
+    },
+    "autoTurn": {
+      "source": navigation.get("source", ""),
+      "updatedAt": navigation.get("updatedAt", 0.0),
+      "preview": control_preview.get("autoTurn", {}),
+    },
+    "activeSpeed": {
+      "source": navigation.get("source", ""),
+      "updatedAt": navigation.get("updatedAt", 0.0),
+      "speedLimitKph": navigation.get("speedLimitKph", 0.0),
+      "preview": control_preview.get("activeSpeed", {}),
+    },
+    "autoTunerAutoApply": {
+      "active": bool(auto_tuner.get("active", False)),
+      "pending": bool(auto_tuner.get("pending", False)),
+      "pendingRecommendationCount": int(auto_tuner.get("pendingRecommendationCount", 0) or 0),
+      "autoApplyStateReported": bool(auto_tuner.get("autoApply", False)),
+      "source": auto_tuner.get("source", ""),
+      "createdAt": auto_tuner.get("createdAt", 0.0),
+    },
+    "fishopAutoOvertake": {
+      "inputAvailable": bool(fishop.get("inputAvailable", False)),
+      "sensorOnline": bool(fishop_state.get("sensorOnline", False)),
+      "direction": overtake.get("direction", ""),
+      "commandSeen": bool(overtake.get("commandSeen", False)),
+      "requested": bool(overtake.get("requested", False)),
+      "suggestionPreview": overtake_preview,
+    },
+  }
+
+  features: dict[str, Any] = {}
+  for key, label, param, required_evidence in HIGH_RISK_FEATURE_GATES:
+    enabled_param = param_truthy(safe_params.get(param))
+    candidate = candidates.get(key, False)
+    features[key] = {
+      "label": label,
+      "param": param,
+      "enabledParam": enabled_param,
+      "candidate": candidate,
+      "state": feature_gate_state(enabled_param, candidate),
+      "readyForControl": False,
+      "readOnly": True,
+      "controlOutput": False,
+      "blockingReasons": feature_gate_blocking_reasons(enabled_param, candidate),
+      "requiredEvidence": list(required_evidence),
+      "evidence": evidence.get(key, {}),
+    }
+
+  return {
+    "stage": "pre_control_evidence",
+    "readOnly": True,
+    "controlOutput": False,
+    "controlOutputAllowed": False,
+    "allBlocked": all(not feature["readyForControl"] for feature in features.values()),
+    "enabledFeatures": [key for key, feature in features.items() if feature["enabledParam"]],
+    "candidateFeatures": [key for key, feature in features.items() if feature["candidate"]],
+    "features": features,
+    "requiredBeforeControl": (
+      "cloud processes absent",
+      "Seltos 2023 SCC and ESCC evidence captured",
+      "stock model baseline road test",
+      "feature-specific parked replay",
+      "feature-specific road test",
+      "rollback installer available",
+    ),
+  }
+
+
 def process_snapshot() -> dict[str, Any]:
   code, output = run(["ps", "-A"])
   if code != 0:
@@ -666,6 +811,9 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
   car_params = summarize_car_params()
   car_params_sp = summarize_car_params_sp()
   fishop = fishop_snapshot(fishop_jsonl)
+  navigation = summarize_navigation_event()
+  auto_tuner = summarize_auto_tuner(safe_params)
+  carrot_feature_gates = summarize_carrot_feature_gates(safe_params, navigation, auto_tuner, fishop)
   cloud_params = {
     "SunnylinkEnabled": safe_params.get("SunnylinkEnabled"),
     "EnableSunnylinkUploader": safe_params.get("EnableSunnylinkUploader"),
@@ -692,8 +840,9 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
       "activeBundle": parse_model_bundle(safe_params.get("ModelManager_ActiveBundle", "")),
     },
     "speedLimitEvidence": summarize_speed_limit(safe_params, messaging),
-    "navigationEvidence": summarize_navigation_event(),
-    "autoTuner": summarize_auto_tuner(safe_params),
+    "navigationEvidence": navigation,
+    "carrotFeatureGates": carrot_feature_gates,
+    "autoTuner": auto_tuner,
     "process": process,
     "cloudGuard": {
       "cloudParams": cloud_params,
