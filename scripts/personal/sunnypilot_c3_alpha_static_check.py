@@ -552,6 +552,85 @@ def check_phone_speed_limit_runtime() -> tuple[bool, str]:
       sys.modules["openpilot.common.params"] = previous_params
 
 
+def check_route_speed_truth_contract() -> tuple[bool, str]:
+  custom_capnp = read("cereal/custom.capnp")
+  resolver = read("sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
+  common = read("sunnypilot/selfdrive/controls/lib/speed_limit/common.py")
+  planner = read("sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
+  carrot_server = read("selfdrive/carrot/carrot_server.py")
+
+  try:
+    speed_limit_start = custom_capnp.index("struct SpeedLimit {")
+    source_start = custom_capnp.index("enum Source {", speed_limit_start)
+    source_end = custom_capnp.index("\n    }", source_start)
+    source_enum = custom_capnp[source_start:source_end]
+  except ValueError:
+    return False, "unable to locate LongitudinalPlanSP.SpeedLimit.Source enum"
+
+  required_sources = ("none @0;", "car @1;", "map @2;", "phone @3;")
+  if not all(source in source_enum for source in required_sources):
+    return False, "SpeedLimit.Source must remain limited to none/car/map/phone"
+  for token in ("route", "vrtx", "mapbox", "kakao", "carrot", "navigation"):
+    if token in source_enum.lower():
+      return False, f"SpeedLimit.Source must not include route/map overlay source token {token}"
+
+  control_surfaces = {
+    "speed_limit_resolver.py": resolver,
+    "speed_limit/common.py": common,
+    "longitudinal_planner.py": planner,
+  }
+  banned_control_tokens = (
+    "route",
+    "Route",
+    "vrtx",
+    "Mapbox",
+    "mapbox",
+    "Kakao",
+    "kakao",
+    "CarrotRoute",
+    "CarrotNavi",
+    "CarrotNavigationEvent",
+  )
+  for name, text in control_surfaces.items():
+    for token in banned_control_tokens:
+      if token in text:
+        return False, f"{name} contains route/map overlay token {token}"
+
+  if "Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car, SpeedLimitSource.map]" not in resolver:
+    return False, "phone_priority must stay ordered phone > car > map"
+  if "self._get_from_phone_data()" not in resolver or "self._get_from_car_state(sm)" not in resolver or "self._get_from_map_data(sm)" not in resolver:
+    return False, "resolver must collect only phone, car, and map speed-limit sources"
+
+  try:
+    kph_start = carrot_server.index("PHONE_SPEED_LIMIT_KPH_FIELDS = (")
+    kph_end = carrot_server.index(")", kph_start)
+    kph_fields = carrot_server[kph_start:kph_end]
+    ms_start = carrot_server.index("PHONE_SPEED_LIMIT_MS_FIELDS = (")
+    ms_end = carrot_server.index(")", ms_start)
+    ms_fields = carrot_server[ms_start:ms_end]
+  except ValueError:
+    return False, "unable to locate phone speed-limit field allowlists"
+
+  for token in ("route", "vrtx", "points", "coordinates", "vpPosPointLat", "vpPosPointLon", "latitude", "longitude"):
+    if f'"{token}"' in kph_fields or f'"{token}"' in ms_fields:
+      return False, f"phone speed-limit allowlist must not accept route/position field {token}"
+  for token in ("nRoadLimitSpeed", "nSdiSpeedLimit", "nSdiPlusSpeedLimit", "speedLimitKph"):
+    if f'"{token}"' not in kph_fields:
+      return False, f"phone speed-limit allowlist missing expected speed field {token}"
+
+  if 'NAVI_EVENT_TYPES = ("complexCrossroad", "rgdata", "vrtx", "ssinf", "sinf", "route")' not in carrot_server:
+    return False, "Carrot route/vrtx input must remain a navigation event type, not a resolver source"
+  if 'elif event_type in ("vrtx", "route"):' not in carrot_server or 'summary["routePointCount"] = _navi_route_count(event_payload)' not in carrot_server:
+    return False, "route/vrtx compatibility input must be summarized as routePointCount evidence"
+  if '"controlOutput": False' not in carrot_server:
+    return False, "Carrot route/navigation compatibility events must remain read-only"
+  for token in ("Mapbox", "mapbox", "Kakao", "kakao"):
+    if token in carrot_server:
+      return False, f"Carrot Web/server must not load {token} as a speed-limit truth source"
+
+  return True, ""
+
+
 def check_carrot_learning_api_runtime() -> tuple[bool, str]:
   FakeParams.reset()
   params_mod = types.ModuleType("openpilot.common.params")
@@ -671,6 +750,21 @@ def check_navigation_event_runtime() -> tuple[bool, str]:
   sys.modules["openpilot.common.params"] = params_mod
   try:
     server = import_file("alpha_carrot_server_navigation_static_check", "selfdrive/carrot/carrot_server.py")
+    route_only = {
+      "route": [{"latitude": 1.2345, "longitude": 2.3456}],
+      "vrtx": [{"latitude": 1.2346, "longitude": 2.3457}],
+      "vpPosPointLat": 1.2345,
+      "vpPosPointLon": 2.3456,
+    }
+    route_result = server.record_navigation_event(route_only, "route-only")
+    route_event = route_result.get("event", {})
+    if route_event.get("speedLimitKph") != 0.0 or route_event.get("speedLimitSourceField") != "":
+      return False, "route-only navigation input must not become a speed-limit source"
+    if route_result.get("phoneSpeed", {}).get("accepted") is not False:
+      return False, "route-only navigation input must not update CarrotPhoneSpeedLimit"
+    if FakeParams.shared_store.get("CarrotPhoneSpeedLimit", b"0").decode("utf-8") != "0":
+      return False, "route-only navigation input changed stored phone speed limit"
+
     payload = {
       "carrotIndex": 7,
       "carrotCmd": "OVERTAKE",
@@ -1275,6 +1369,9 @@ def main() -> int:
                           "resolver must reject stale phone speed data")
   failures += not require("phone source priority", "Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car, SpeedLimitSource.map]" in resolver,
                           "phone_priority must resolve phone, car, then map")
+  ok, detail = check_route_speed_truth_contract()
+  failures += not require("route/map overlay not speed truth", ok,
+                          detail or "Mapbox/Kakao/Carrot route must stay display/evidence-only, not a speed-limit truth source")
   failures += not require("source label published", "resolver.sourceLabel = self.resolver.source_label" in planner,
                           "longitudinal planner must publish resolver sourceLabel")
 
