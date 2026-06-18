@@ -31,6 +31,49 @@ def read_tree(rel: str, suffixes: tuple[str, ...]) -> str:
   return "\n".join(chunks)
 
 
+def find_token_in_tree(rel: str, tokens: tuple[str, ...], suffixes: tuple[str, ...]) -> tuple[str, str] | None:
+  root = ROOT / rel
+  rg = shutil.which("rg")
+  if rg is not None:
+    glob_args: list[str] = []
+    for suffix in suffixes:
+      glob_args.extend(["--glob", f"*{suffix}"])
+    for token in tokens:
+      result = subprocess.run(
+        [
+          rg,
+          "--fixed-strings",
+          "--line-number",
+          "--glob", "!**/tests/**",
+          "--glob", "!**/test/**",
+          *glob_args,
+          token,
+          str(root),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+      )
+      if result.returncode == 0:
+        first = result.stdout.splitlines()[0].split(":", 1)[0]
+        return token, str(Path(first).resolve().relative_to(ROOT))
+
+  skip_dirs = {"__pycache__", ".git", "tests", "test"}
+  for path in root.rglob("*"):
+    if not path.is_file() or path.suffix not in suffixes:
+      continue
+    if any(part in skip_dirs for part in path.relative_to(root).parts):
+      continue
+    if path.stat().st_size > 1_000_000:
+      continue
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    for token in tokens:
+      if token in text:
+        return token, str(path.relative_to(ROOT))
+  return None
+
+
 def require(name: str, condition: bool, detail: str) -> bool:
   if condition:
     print(f"PASS {name}")
@@ -339,17 +382,16 @@ def check_carrot_web_asset_syntax() -> tuple[bool, str]:
 def check_fishop_overtake_safety_contract() -> tuple[bool, str]:
   fishop_hardware = read("selfdrive/carrot/fishop_hardware.py")
   carrot_server = read("selfdrive/carrot/carrot_server.py")
-  control_surface = "\n".join(
-    read_tree(root, (".py", ".cc", ".cpp", ".h", ".hpp"))
-    for root in ("selfdrive/controls", "selfdrive/car", "opendbc_repo/opendbc/car")
-  )
 
   # Stage 0/1 contract: fishop overtaking is evidence only. It must not enter
   # controls until a later staged suggestion path explicitly uses the existing
   # lane-change helper with turn-signal, blindspot, driver, speed, and vehicle gates.
-  for token in ("FishopAutoOvertakeEnabled", "AUTO_OVERTAKE", "OVERTAKE", "overtake_request", "overtake"):
-    if token in control_surface:
-      return False, f"{token!r} appears in controls/car output surfaces before the staged safety chain exists"
+  blocked_control_tokens = ("FishopAutoOvertakeEnabled", "AUTO_OVERTAKE", "OVERTAKE", "overtake_request", "overtake")
+  for root in ("selfdrive/controls", "selfdrive/car", "opendbc_repo/opendbc/car"):
+    found = find_token_in_tree(root, blocked_control_tokens, (".py", ".cc", ".cpp", ".h", ".hpp"))
+    if found is not None:
+      token, path = found
+      return False, f"{token!r} appears in {path} before the staged safety chain exists"
 
   parser_forbidden = (
     "log.Desire",
@@ -714,6 +756,15 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       return False, "status payload did not expose latest navigation distances"
     if payload.get("sdi_speed") != 60 or payload.get("phoneSpeedLimitKph") != 60.0:
       return False, "status payload did not expose latest SDI/phone speed"
+    if payload.get("phoneSpeedLimitFresh") is not True or payload.get("phoneSpeedLimitEnabled") is not True:
+      return False, "status payload did not expose phone speed freshness/enabled evidence"
+    if payload.get("speedLimitPolicyName") != "phone_priority" or payload.get("speedLimitModeName") != "information":
+      return False, "status payload did not expose speed-limit policy/mode evidence"
+    if payload.get("speedLimitOffsetTypeName") != "off" or payload.get("speedLimitOffsetValue") != 0 or payload.get("speedLimitOffsetUnit") != "":
+      return False, "status payload did not expose zero-offset evidence"
+    evidence = payload.get("speedLimitEvidence", {})
+    if evidence.get("resolvedSource") != "phone" or evidence.get("phone", {}).get("fresh") is not True:
+      return False, "status payload did not expose nested speed-limit evidence"
     if payload.get("xState") != 0 or payload.get("trafficState") != 0:
       return False, "xState and trafficState must stay inert until Carrot control migration"
     if payload.get("controlOutput") is not False:
@@ -967,6 +1018,15 @@ def main() -> int:
                           "PHONE_SPEED_LIMIT_MAX_AGE_S = 10.0" in carrot_server
                           and '"fresh": fresh' in carrot_server,
                           "Carrot Web phone speed state must report the same freshness window as the resolver")
+  failures += not require("Carrot Web speed-limit evidence exposes offset and freshness",
+                          "def speed_limit_evidence_state" in carrot_server
+                          and "SPEED_LIMIT_OFFSET_TYPE_NAMES" in carrot_server
+                          and '"speedLimitEvidence": speed_limit_evidence' in carrot_server
+                          and '"phoneSpeedLimitAgeSec"' in carrot_server
+                          and '"speedLimitOffsetTypeName"' in carrot_server
+                          and '"speedLimitOffsetValue"' in carrot_server
+                          and '"speedLimitOffsetUnit"' in carrot_server,
+                          "Carrot Web status/health must expose source, phone freshness, offset type/value/unit, and nested speed-limit evidence")
   ok, detail = check_phone_speed_limit_runtime()
   failures += not require("Carrot Web phone speed runtime", ok, detail or "phone speed runtime check failed")
   failures += not require("Carrot Web blocks onroad Auto-Tuner apply", 'params.get_bool("IsOnroad")' in carrot_server
@@ -996,6 +1056,14 @@ def main() -> int:
                           "alpha snapshot must summarize Auto-Tuner state")
   failures += not require("alpha snapshot records navigation event", '"CarrotNavigationEvent"' in alpha_snapshot,
                           "alpha snapshot must include the latest sanitized navigation event")
+  failures += not require("alpha snapshot records speed-limit evidence",
+                          '"speedLimitEvidence"' in alpha_snapshot
+                          and "summarize_speed_limit" in alpha_snapshot
+                          and '"offsetTypeName"' in alpha_snapshot
+                          and '"phone"' in alpha_snapshot
+                          and '"resolver"' in alpha_snapshot
+                          and '"speedLimitOffset"' in alpha_snapshot,
+                          "alpha snapshot must summarize speed-limit source, phone freshness, resolver, and offset evidence")
   for key in ("CarrotNaviDebug", "CarrotNaviEvent", "CarrotNaviImage"):
     failures += not require(f"alpha snapshot records navigation HTTP evidence: {key}", f'"{key}"' in alpha_snapshot,
                             f"alpha snapshot must include {key} for 7713 navigation HTTP evidence")
@@ -1050,12 +1118,13 @@ def main() -> int:
                           and "atomic_write(stats_path)" in system_statsd
                           and all(token not in system_statsd for token in ("requests.", "urllib.", "websocket", "create_connection", "UPLOAD_SESS", "common.api")),
                           "system.statsd must remain local-only and must not upload over the network")
-  overlay_sources = "\n".join((
-    read_tree("selfdrive/carrot", (".py", ".html", ".js", ".json", ".yaml")),
-    read_tree("selfdrive/ui", (".py", ".cc", ".h", ".html", ".js", ".json", ".yaml")),
-  ))
   for token in ("mapbox.com", "api.mapbox", "mapboxgl", "MapboxGL", "dapi.kakao", "kakao.maps", "<iframe"):
-    failures += not require(f"map overlay omits external loader {token}", token not in overlay_sources,
+    found = None
+    for root in ("selfdrive/carrot", "selfdrive/ui"):
+      found = find_token_in_tree(root, (token,), (".py", ".cc", ".h", ".html", ".js", ".json", ".yaml"))
+      if found is not None:
+        break
+    failures += not require(f"map overlay omits external loader {token}", found is None,
                             "CarrotMapOverlayEnabled defaults off, so UI/Carrot Web must not load external map SDKs or iframe overlays by default")
 
   values = read("opendbc_repo/opendbc/car/hyundai/values.py")
