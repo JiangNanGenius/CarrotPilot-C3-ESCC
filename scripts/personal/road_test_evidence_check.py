@@ -248,6 +248,23 @@ def require_offline_process_guard(values: Dict[str, str], label: str) -> None:
     require_bool(values, key, False, label)
 
 
+def require_power_cycle_boot(values: Dict[str, str], label: str) -> None:
+  require_bool(values, "PowerCycleBootOk", True, label)
+  snapshot_commit = values.get("commit", "").strip()
+  recorded_commit = values.get("PowerCycleBootCommit", "").strip()
+  recorded_at = values.get("PowerCycleBootRecordedAt", "").strip()
+  if not is_filled(snapshot_commit) or snapshot_commit == "unknown":
+    raise EvidenceError(f"{label}: snapshot commit is missing")
+  if not is_filled(recorded_commit) or recorded_commit == "unknown":
+    raise EvidenceError(f"{label}: PowerCycleBootCommit is missing")
+  if snapshot_commit[:12] != recorded_commit[:12]:
+    raise EvidenceError(
+      f"{label}: PowerCycleBootCommit {recorded_commit!r} does not match snapshot commit {snapshot_commit!r}"
+    )
+  if not is_filled(recorded_at):
+    raise EvidenceError(f"{label}: PowerCycleBootRecordedAt is missing")
+
+
 def require_model_selector_status(values: Dict[str, str], label: str) -> None:
   required = [
     "DrivingModelName",
@@ -321,6 +338,7 @@ def validate_snapshots(
   require_model_selector_status_flag: bool,
   require_offline_guard: bool,
   require_carparams: bool,
+  require_power_cycle_boot_flag: bool = False,
 ) -> List[Dict[str, str]]:
   if require_device_snapshot and not snapshot_paths:
     raise EvidenceError("stable evidence requires at least one --device-snapshot copied from the C3")
@@ -424,6 +442,21 @@ def validate_snapshots(
         "offline evidence requires AlwaysOffline=1, EnableConnect=0, process snapshot available, "
         "and no updated/connect/uploader process visible"
       )
+
+  if require_power_cycle_boot_flag:
+    found = False
+    for values in snapshots:
+      try:
+        require_power_cycle_boot(values, "ACC/CAN power-cycle boot")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError(
+        "power-cycle evidence requires PowerCycleBootOk=1 recorded after reboot, "
+        "PowerCycleBootCommit matching the snapshot commit, and PowerCycleBootRecordedAt present"
+      )
   return snapshots
 
 
@@ -514,6 +547,10 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `DrivingModelName` | <missing> |
 | `PendingModelName` | <missing> |
 | `CarParams` | 200 bytes, sha256:abc |
+| `PowerCycleBootOk` | 1 |
+| `PowerCycleBootCommit` | abcdef123456 |
+| `PowerCycleBootTag` | carrotpilot-c3-escc-20260617-test1 |
+| `PowerCycleBootRecordedAt` | 2026-06-17T10:00:00+00:00 |
 | `process_snapshot_available` | True |
 | `offline_forbidden_processes_seen` | False |
 | `updated_process_seen` | False |
@@ -565,6 +602,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_model_selector_status_flag=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_offline_guard=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_carparams=True)
+  validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_power_cycle_boot_flag=True)
   validate_navipilot_live_checks_from_objects([good_navipilot], require_navipilot_live_check=True)
 
   with tempfile.TemporaryDirectory() as tmp:
@@ -589,6 +627,7 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
       require_model_selector_status_flag=True,
       require_offline_guard=True,
       require_carparams=True,
+      require_power_cycle_boot_flag=True,
     )
     validate_navipilot_live_checks(bundle_navipilot, require_navipilot_live_check=True)
 
@@ -598,6 +637,16 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
     pass
   else:
     raise EvidenceError("self-test failed: missing PASS line was accepted")
+
+  try:
+    validate_snapshots_from_text(
+      [("self-test snapshot", good_snapshot.replace("PowerCycleBootCommit` | abcdef123456", "PowerCycleBootCommit` | stalecommit"))],
+      require_power_cycle_boot_flag=True,
+    )
+  except EvidenceError:
+    pass
+  else:
+    raise EvidenceError("self-test failed: stale power-cycle commit was accepted")
 
   try:
     validate_navipilot_live_checks_from_objects([{**good_navipilot, "overall_ok": False}], require_navipilot_live_check=True)
@@ -615,6 +664,7 @@ def validate_snapshots_from_text(
   require_model_selector_status_flag: bool = False,
   require_offline_guard: bool = False,
   require_carparams: bool = False,
+  require_power_cycle_boot_flag: bool = False,
 ) -> List[Dict[str, str]]:
   snapshots = [validate_snapshot_text(name, text) for name, text in items]
   if require_escc_sample:
@@ -689,6 +739,17 @@ def validate_snapshots_from_text(
         continue
     if not found:
       raise EvidenceError("self-test failed: offline process guard was not detected")
+  if require_power_cycle_boot_flag:
+    found = False
+    for values in snapshots:
+      try:
+        require_power_cycle_boot(values, "self-test snapshot")
+        found = True
+        break
+      except EvidenceError:
+        continue
+    if not found:
+      raise EvidenceError("self-test failed: power-cycle boot evidence was not detected")
   return snapshots
 
 
@@ -728,6 +789,7 @@ def main() -> int:
   parser.add_argument("--require-amap-navi-sample", action="store_true", help="require a sampled read-only AmapNavi status bridge update")
   parser.add_argument("--require-model-selector-status", action="store_true", help="require read-only model selector status in the device snapshot")
   parser.add_argument("--require-offline-process-guard", action="store_true", help="require AlwaysOffline with no updated/connect/uploader process visible")
+  parser.add_argument("--require-power-cycle-boot", action="store_true", help="require a matching post-ACC/CAN-power-cycle boot confirmation in the device snapshot")
   parser.add_argument("--require-navipilot-live-check", action="store_true", help="require C3-side 7000/7705 Navipilot endpoint check to pass")
   parser.add_argument("--require-carparams-summary", action="store_true", help="require a decoded Seltos CarParams summary")
   parser.add_argument("--self-test", action="store_true", help="run built-in parser checks")
@@ -755,6 +817,7 @@ def main() -> int:
       args.require_model_selector_status,
       args.require_offline_process_guard,
       args.require_carparams_summary,
+      args.require_power_cycle_boot,
     )
     navipilot_reports = validate_navipilot_live_checks(navipilot_paths, args.require_navipilot_live_check)
 
@@ -777,6 +840,8 @@ def main() -> int:
       print("Model selector status: required and present")
     if args.require_offline_process_guard:
       print("Offline process guard: required and present")
+    if args.require_power_cycle_boot:
+      print("ACC/CAN power-cycle boot: required and present")
     if args.require_carparams_summary:
       print("CarParams summary: required and present")
     if args.require_navipilot_live_check:

@@ -39,6 +39,10 @@ SAFE_PARAM_KEYS = [
   "CompletedTrainingVersion",
   "DisengageOnAccelerator",
   "AutoGasCancelSpeed",
+  "PowerCycleBootOk",
+  "PowerCycleBootCommit",
+  "PowerCycleBootTag",
+  "PowerCycleBootRecordedAt",
 ]
 
 BINARY_PARAM_KEYS = [
@@ -509,6 +513,7 @@ def build_report(sample_seconds: int) -> str:
   lines.append("- ESCC 0x2AB visible in CAN tool: yes/no")
   lines.append("- SCC/AEB/FCW warning on dash: yes/no")
   lines.append("- ACC/CAN power-cycle boot result:")
+  lines.append("- After a successful ACC/CAN power-cycle boot, run `python3 scripts/personal/record_power_cycle_boot.py` and collect a new snapshot.")
   lines.append("- CPlink/Navipilot app connection result:")
   lines.append("")
   return "\n".join(lines) + "\n"

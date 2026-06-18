@@ -172,6 +172,7 @@ def markdown_report(results: Sequence[CheckResult], target_tag: str, snapshot_pa
   lines.append("")
   lines.append("- If any check failed, do not drive with this build yet.")
   lines.append("- Keep `EnableEscc=0` until parked static checks pass.")
+  lines.append("- After a successful ACC/CAN power-cycle boot, run `record_power_cycle_boot.py` and collect a new snapshot.")
   lines.append("- After enabling ESCC while parked, rerun with `--sample-seconds 20` to capture 0x2AB evidence.")
   lines.append("- Use the generated device snapshot together with `ROAD_TEST_LOG_TEMPLATE.md` before any stable tag.")
   lines.append("")

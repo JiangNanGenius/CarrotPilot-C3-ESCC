@@ -17,7 +17,7 @@
 当前可参考 tag：
 
 - 静态检查：`carrotpilot-c3-escc-20260618-static28`
-- 受控上车测试：`carrotpilot-c3-escc-20260618-test24`
+- 受控上车测试：`carrotpilot-c3-escc-20260618-test25`
 - `static` / `test` 都不代表实车验证完成或稳定版
 - 还没有 `stable` tag
 - 机器可检查的安装目标见 [INSTALL_TARGETS.json](docs/personal/INSTALL_TARGETS.json)，当前日常稳定安装目标为空

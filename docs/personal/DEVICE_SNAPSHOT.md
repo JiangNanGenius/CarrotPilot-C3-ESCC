@@ -88,6 +88,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
   --require-offline-process-guard \
+  --require-power-cycle-boot \
   --require-escc-sample
 ```
 
@@ -139,6 +140,9 @@ python3 scripts/personal/road_test_evidence_check.py \
 - `process_snapshot_available`：是否成功读取进程列表。
 - `offline_forbidden_processes_seen`：离线模式下不应看到更新、远程连接或上传进程。
 - `updated_process_seen` / `connect_process_seen` / `uploader_process_seen`：离线模式下应为 `False`。
+- `PowerCycleBootOk`：真实 ACC/CAN 断电重启成功后，由 `record_power_cycle_boot.py` 手动记录为 `1`。
+- `PowerCycleBootCommit`：记录断电重启成功时的当前 commit；stable gate 会要求它匹配快照 commit，避免旧记录混用。
+- `PowerCycleBootTag` / `PowerCycleBootRecordedAt`：记录当时 tag 和时间，便于以后回查。
 - `escc_0x2ab_bus0`：开启 ESCC 后用于确认 0x2AB 是否真的出现在 bus 0。
 - `carrotMan_updates` / `navInstructionCarrot_updates`：用于确认 CP搭子 / Navipilot 数据是否进入系统。
 - `EnableAmapNaviStatus`：只读 AmapNavi 状态桥开关，默认应为 `0`。
@@ -170,6 +174,8 @@ python3 scripts/personal/road_test_evidence_check.py \
 - `updated_process_seen=False`
 - `connect_process_seen=False`
 - `uploader_process_seen=False`
+- `PowerCycleBootOk=1`
+- `PowerCycleBootCommit` 匹配快照里的 `commit`
 - `CanfdHDA2=0`
 - `HyundaiCameraSCC=0`
 - `EnableEscc=1`

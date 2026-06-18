@@ -23,7 +23,7 @@
 
 当前受控上车测试 tag：
 
-- `carrotpilot-c3-escc-20260618-test24`
+- `carrotpilot-c3-escc-20260618-test25`
 - 用于停车静态检查、证据采集和低速短程验证。
 - 不作为日常稳定安装目标。
 
@@ -53,7 +53,7 @@ GitHub Release 只负责记录“这次可安装的版本、检查状态和注�
 当前主安装入口是 C3 二进制安装器。它的形态和 `gitop.vip/cp` 同类，适合在 C3 初装/Custom Software 流程里使用：
 
 ```bash
-https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test24/installer_c3_escc
+https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test25/installer_c3_escc
 ```
 
 二进制安装器实际拉取的是安装分支：
@@ -62,15 +62,15 @@ https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpi
 install-c3-escc-test
 ```
 
-该分支会指向当前受控测试 tag `carrotpilot-c3-escc-20260618-test24` 对应提交。二进制安装器使用分支而不是 tag，是因为旧 Qt installer 内部会执行 `git reset --hard origin/<branch>`。
+该分支会指向当前受控测试 tag `carrotpilot-c3-escc-20260618-test25` 对应提交。二进制安装器使用分支而不是 tag，是因为旧 Qt installer 内部会执行 `git reset --hard origin/<branch>`。
 
 SSH 维护或救援时仍可使用脚本安装器：
 
 ```bash
-curl -fsSL https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test24/install_c3_escc.sh | sh
+curl -fsSL https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test25/install_c3_escc.sh | sh
 ```
 
-脚本默认安装 `carrotpilot-c3-escc-20260618-test24`，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffline=1`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。
+脚本默认安装 `carrotpilot-c3-escc-20260618-test25`，备份旧 `/data/openpilot` 到 `/data/carrotpilot-backups/`，更新 `/data/continue.sh`，并写入首次启动安全参数：`AlwaysOffline=1`、`EnableConnect=0`、`EnableEscc=0`、`CanfdHDA2=0`、`HyundaiCameraSCC=0`、`EnableRadarTracks=0`。安装时还会把 `PowerCycleBootOk` 清零，避免旧的断电重启确认被误用。
 
 安装完成后，脚本还会写入：
 
@@ -80,10 +80,20 @@ curl -fsSL https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/downlo
 
 这份首启说明会记录安装 ref、安全默认参数、首装向导命令、旧版本参数迁移命令和 ESCC 0x2AB 证据采集命令。它只是提示文件，不改变车辆控制逻辑；如需关闭可给脚本加 `--no-first-boot-note`。
 
+完成第一次真实熄火断电、ACC/CAN 重新供电并确认系统能正常进入后，在 C3 上运行：
+
+```bash
+cd /data/openpilot
+python3 scripts/personal/record_power_cycle_boot.py
+python3 scripts/personal/collect_real_car_evidence.py --archive
+```
+
+记录脚本会写入当前 commit/tag 和时间；`stable` gate 会要求这条记录和设备快照 commit 匹配。
+
 如果要先看脚本会做什么：
 
 ```bash
-curl -fsSL https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test24/install_c3_escc.sh | sh -s -- --dry-run
+curl -fsSL https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/releases/download/carrotpilot-c3-escc-20260618-test25/install_c3_escc.sh | sh -s -- --dry-run
 ```
 
 二进制安装器研究记录见 [C3 二进制安装器研究](BINARY_INSTALLER_RESEARCH.md)。如果以后已经有 `stable` tag，安装分支会改为指向 stable；在此之前，它只能作为受控测试安装入口。
@@ -189,6 +199,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-device-snapshot \
   --require-carparams-summary \
   --require-offline-process-guard \
+  --require-power-cycle-boot \
   --require-escc-sample
 ```
 
@@ -199,6 +210,8 @@ python3 scripts/personal/road_test_evidence_check.py \
   --evidence-dir /path/to/carrotpilot-c3-escc-evidence-YYYYMMDD-HHMMSS \
   --require-device-snapshot \
   --require-carparams-summary \
+  --require-offline-process-guard \
+  --require-power-cycle-boot \
   --require-cplink-sample \
   --require-navipilot-live-check
 ```
@@ -300,7 +313,7 @@ python3 scripts/personal/release_gate.py \
   --run-checks
 ```
 
-升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，并把 C3 生成的设备快照文件保存到电脑本地。`stable` gate 会要求设备快照里有 `AlwaysOffline=1`、`CanfdHDA2=0`、`EnableConnect=0`、`offline_forbidden_processes_seen=False`，并且至少有一次 `EnableEscc=1`、`enabled=True`、`ok=True` 且 `escc_0x2ab_bus0 > 0` 的采样。
+升级到 `stable` 前，先复制并填写 [上车测试记录模板](ROAD_TEST_LOG_TEMPLATE.md)，并把 C3 生成的设备快照文件保存到电脑本地。`stable` gate 会要求设备快照里有 `AlwaysOffline=1`、`CanfdHDA2=0`、`EnableConnect=0`、`offline_forbidden_processes_seen=False`、`PowerCycleBootOk=1`，且 `PowerCycleBootCommit` 必须匹配快照 commit；同时至少有一次 `EnableEscc=1`、`enabled=True`、`ok=True` 且 `escc_0x2ab_bus0 > 0` 的采样。
 
 ```bash
 python3 scripts/personal/release_gate.py \

@@ -116,6 +116,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --device-snapshot /path/to/carrotpilot-c3-escc-snapshot.md \
   --require-device-snapshot \
   --require-offline-process-guard \
+  --require-power-cycle-boot \
   --require-escc-sample
 ```
 
@@ -132,6 +133,7 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-device-snapshot \
   --require-carparams-summary \
   --require-offline-process-guard \
+  --require-power-cycle-boot \
   --require-escc-sample
 ```
 

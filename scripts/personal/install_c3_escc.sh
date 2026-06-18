@@ -3,7 +3,7 @@ set -eu
 
 PROJECT_NAME="CarrotPilot-C3-ESCC"
 DEFAULT_REPO_URL="https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
-DEFAULT_REF="carrotpilot-c3-escc-20260618-test24"
+DEFAULT_REF="carrotpilot-c3-escc-20260618-test25"
 
 REPO_URL="${CARROTPILOT_REPO_URL:-$DEFAULT_REPO_URL}"
 REF="${CARROTPILOT_REF:-$DEFAULT_REF}"
@@ -204,6 +204,10 @@ apply_safe_params() {
   write_param "CanfdHDA2" "0"
   write_param "HyundaiCameraSCC" "0"
   write_param "EnableRadarTracks" "0"
+  write_param "PowerCycleBootOk" "0"
+  write_param "PowerCycleBootCommit" ""
+  write_param "PowerCycleBootTag" ""
+  write_param "PowerCycleBootRecordedAt" ""
 }
 
 write_first_boot_note() {
@@ -230,10 +234,16 @@ Safe first-boot params written by the installer:
   CanfdHDA2=0
   HyundaiCameraSCC=0
   EnableRadarTracks=0
+  PowerCycleBootOk=0
 
 Next parked checks on the C3:
   cd /data/openpilot
   python3 scripts/personal/c3_commissioning.py --archive
+
+After the first successful ACC/CAN power-cycle boot:
+  cd /data/openpilot
+  python3 scripts/personal/record_power_cycle_boot.py
+  python3 scripts/personal/collect_real_car_evidence.py --archive
 
 If you exported settings from a working fishop / feiyang build:
   cd /data/openpilot

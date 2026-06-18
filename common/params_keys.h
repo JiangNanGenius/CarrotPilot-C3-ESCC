@@ -103,6 +103,10 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"PandaSomResetTriggered", {CLEAR_ON_MANAGER_START | CLEAR_ON_OFFROAD_TRANSITION, BOOL}},
     {"PandaSignatures", {CLEAR_ON_MANAGER_START, BYTES}},
     {"PrimeType", {PERSISTENT, INT}},
+    {"PowerCycleBootCommit", {PERSISTENT, STRING, ""}},
+    {"PowerCycleBootOk", {PERSISTENT, BOOL, "0"}},
+    {"PowerCycleBootRecordedAt", {PERSISTENT, STRING, ""}},
+    {"PowerCycleBootTag", {PERSISTENT, STRING, ""}},
     {"RecordAudio", {PERSISTENT, BOOL}},
     {"RecordFront", {PERSISTENT, BOOL}},
     {"RecordFrontLock", {PERSISTENT, BOOL}},  // for the internal fleet

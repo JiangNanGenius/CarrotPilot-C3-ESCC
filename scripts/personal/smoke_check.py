@@ -219,6 +219,7 @@ def check_params_defaults() -> None:
     "CarrotTunerApplyLat default on": r'\{"CarrotTunerApplyLat", \{PERSISTENT, INT, "1"\}\}',
     "CarrotTunerApplyLong default on": r'\{"CarrotTunerApplyLong", \{PERSISTENT, INT, "1"\}\}',
     "EnableAmapNaviStatus default off": r'\{"EnableAmapNaviStatus", \{PERSISTENT, INT, "0"\}\}',
+    "PowerCycleBootOk default off": r'\{"PowerCycleBootOk", \{PERSISTENT, BOOL, "0"\}\}',
   }
   for label, pattern in patterns.items():
     expect_regex(params_keys, pattern, label)
@@ -398,6 +399,7 @@ def check_py_compile() -> None:
     "scripts/personal/road_test_evidence_check.py",
     "scripts/personal/evidence_readiness_report.py",
     "scripts/personal/navipilot_live_check.py",
+    "scripts/personal/record_power_cycle_boot.py",
     "scripts/personal/model_selector_audit.py",
     "scripts/personal/app_navi_overtake_audit.py",
     "scripts/personal/amap_navi_status_check.py",
@@ -440,6 +442,8 @@ def check_install_script() -> None:
   expect_contains("scripts/personal/install_c3_escc.sh", "CARROTPILOT_FIRST_BOOT_NOTE", "installer first-boot note env")
   expect_contains("scripts/personal/install_c3_escc.sh", "write_first_boot_note", "installer first-boot note writer")
   expect_contains("scripts/personal/install_c3_escc.sh", "c3_commissioning.py --archive", "installer first-boot commissioning command")
+  expect_contains("scripts/personal/install_c3_escc.sh", "PowerCycleBootOk", "installer power-cycle confirmation reset")
+  run([sys.executable, "scripts/personal/record_power_cycle_boot.py", "--self-test"], "power-cycle boot recorder self-test")
   run([sys.executable, "scripts/personal/build_binary_installer.py", "--self-test"], "C3 binary installer builder self-test")
   run(["sh", "-n", "scripts/personal/install_c3_escc.sh"], "C3 installer shell syntax")
   run([
@@ -495,6 +499,9 @@ def check_c3_static_dry_run() -> None:
     "model_selector_engine",
     "model_selector_pending_active",
     "model_selector_describe",
+    "PowerCycleBootOk",
+    "PowerCycleBootCommit",
+    "PowerCycleBootRecordedAt",
   ]:
     if key not in snapshot_text:
       raise CheckFailure("C3 static dry-run snapshot missing " + key)

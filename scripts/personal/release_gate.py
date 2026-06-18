@@ -103,6 +103,7 @@ def validate_stable_evidence(path: Optional[str], snapshots: Sequence[str], evid
     "--require-escc-sample",
     "--require-carparams-summary",
     "--require-offline-process-guard",
+    "--require-power-cycle-boot",
   ]
   if path:
     cmd.extend(["--road-test-log", path])

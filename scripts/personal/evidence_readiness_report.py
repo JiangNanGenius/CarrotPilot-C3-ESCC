@@ -153,6 +153,21 @@ def check_offline_process_guard(snapshot_paths: Sequence[str]) -> str:
   return "AlwaysOffline active with no updated/connect/uploader process visible"
 
 
+def check_power_cycle_boot(snapshot_paths: Sequence[str]) -> str:
+  rtc.validate_snapshots(
+    snapshot_paths,
+    require_device_snapshot=True,
+    require_escc_sample=False,
+    require_cplink_sample=False,
+    require_amap_navi_sample=False,
+    require_model_selector_status_flag=False,
+    require_offline_guard=False,
+    require_carparams=False,
+    require_power_cycle_boot_flag=True,
+  )
+  return "ACC/CAN power-cycle boot confirmation matches the snapshot commit"
+
+
 def check_navipilot_live(navipilot_paths: Sequence[str]) -> str:
   reports = rtc.validate_navipilot_live_checks(navipilot_paths, require_navipilot_live_check=True)
   return f"C3-side Navipilot endpoint check present: {len(reports)} report(s)"
@@ -180,6 +195,7 @@ def check_stable_ready(road_test_log: Optional[str], snapshot_paths: Sequence[st
     require_model_selector_status_flag=False,
     require_offline_guard=True,
     require_carparams=True,
+    require_power_cycle_boot_flag=True,
   )
   return "stable evidence gate requirements are satisfied"
 
@@ -207,6 +223,7 @@ def build_results(
     stage_result("device snapshot", True, lambda: check_device_snapshot(snapshot_paths)),
     stage_result("CarParams summary", True, lambda: check_carparams(snapshot_paths)),
     stage_result("Always Offline process guard", True, lambda: check_offline_process_guard(snapshot_paths)),
+    stage_result("ACC/CAN power-cycle boot", True, lambda: check_power_cycle_boot(snapshot_paths)),
     stage_result("ESCC 0x2AB sample", True, lambda: check_escc_sample(snapshot_paths)),
     stage_result("completed road-test log", True, lambda: check_road_log(selected_log)),
     stage_result("stable gate readiness", True, lambda: check_stable_ready(selected_log, snapshot_paths)),
@@ -277,6 +294,10 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
 | `DrivingModelName` | <missing> |
 | `PendingModelName` | <missing> |
 | `CarParams` | 200 bytes, sha256:abc |
+| `PowerCycleBootOk` | 1 |
+| `PowerCycleBootCommit` | abcdef123456 |
+| `PowerCycleBootTag` | carrotpilot-c3-escc-20260618-test1 |
+| `PowerCycleBootRecordedAt` | 2026-06-18T10:00:00+00:00 |
 | `process_snapshot_available` | True |
 | `offline_forbidden_processes_seen` | False |
 | `updated_process_seen` | False |
