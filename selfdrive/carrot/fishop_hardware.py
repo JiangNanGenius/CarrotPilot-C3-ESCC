@@ -59,6 +59,16 @@ TARGET_KEYS = (
   "lf_vrel", "lb_vrel", "rf_vrel", "rb_vrel",
 )
 OVERTAKE_KEYS = ("overtake", "overtake_request", "request", "direction", "reason", "index", "cmd", "arg")
+OVERTAKE_DIRECTIONS = {
+  "l": "left",
+  "left": "left",
+  "左": "left",
+  "左侧": "left",
+  "r": "right",
+  "right": "right",
+  "右": "right",
+  "右侧": "right",
+}
 
 
 def _now() -> float:
@@ -121,6 +131,19 @@ def _limited_text(value: Any, limit: int = 80) -> str:
     return ""
   text = str(value).replace("\x00", "").strip()
   return text[:limit]
+
+
+def _overtake_direction(*values: Any) -> str:
+  for value in values:
+    text = _limited_text(value).lower()
+    if not text:
+      continue
+    if text in OVERTAKE_DIRECTIONS:
+      return OVERTAKE_DIRECTIONS[text]
+    for token, direction in OVERTAKE_DIRECTIONS.items():
+      if token in text:
+        return direction
+  return ""
 
 
 def _side_object_risk(drel_mm: float | None, vrel_mps: float | None, v_ego_mps: float | None,
@@ -407,13 +430,15 @@ class OvertakeEvidence:
 
   def to_dict(self, now_s: float) -> dict[str, Any]:
     fresh = _fresh(self.last_update_s, now_s, OVERTAKE_MAX_AGE_S)
+    direction = _overtake_direction(self.direction, self.remote_arg)
     return {
       "fresh": fresh,
       "ageSec": _age(self.last_update_s, now_s),
       "lastUpdateMonotonicSec": self.last_update_s if self.last_update_s > 0. else None,
       "commandSeen": self.command_seen and fresh,
       "requested": self.requested and fresh,
-      "direction": self.direction if fresh else "",
+      "direction": direction if fresh else "",
+      "rawDirection": self.direction if fresh else "",
       "reason": self.reason if fresh else "",
       "sourceDevice": self.source_device if fresh else "",
       "cmdIndex": self.cmd_index if fresh else None,
@@ -429,6 +454,63 @@ class OvertakeEvidence:
         "controlOutput": False,
       },
     }
+
+
+def _overtake_suggestion_preview(lane: dict[str, Any], blindspot: dict[str, Any], overtake: dict[str, Any]) -> dict[str, Any]:
+  direction = overtake.get("direction", "")
+  reasons: list[str] = []
+
+  if not overtake.get("fresh"):
+    reasons.append("overtake command is stale")
+  if not overtake.get("requested"):
+    reasons.append("no active overtake request")
+  if direction not in ("left", "right"):
+    reasons.append("direction is missing or unsupported")
+  if not lane.get("fresh"):
+    reasons.append("lane evidence is stale")
+  if not blindspot.get("fresh"):
+    reasons.append("blindspot evidence is stale")
+
+  if direction == "left":
+    if lane.get("leftLaneBlind"):
+      reasons.append("left lane line blocks the suggestion")
+    if blindspot.get("leftLidarBlind") or blindspot.get("leftLidarCarBlind") or blindspot.get("leftCameraBlind"):
+      reasons.append("left blindspot evidence blocks the suggestion")
+  elif direction == "right":
+    if lane.get("rightLaneBlind"):
+      reasons.append("right lane line blocks the suggestion")
+    if blindspot.get("rightLidarBlind") or blindspot.get("rightLidarCarBlind") or blindspot.get("rightCameraBlind"):
+      reasons.append("right blindspot evidence blocks the suggestion")
+
+  active_dynamic = blindspot.get("dynamicBlind", {}).get("activeRiskPreview", [])
+  if direction == "left" and any(str(item).startswith("l") for item in active_dynamic):
+    reasons.append("left dynamic blind preview blocks the suggestion")
+  if direction == "right" and any(str(item).startswith("r") for item in active_dynamic):
+    reasons.append("right dynamic blind preview blocks the suggestion")
+
+  ready = not reasons
+  return {
+    "readOnly": True,
+    "controlOutput": False,
+    "stage": "display_only",
+    "decision": "ready_for_suggestion" if ready else "blocked",
+    "readyForSuggestion": ready,
+    "direction": direction,
+    "reasons": reasons,
+    "evidence": {
+      "overtakeFresh": bool(overtake.get("fresh")),
+      "requestActive": bool(overtake.get("requested")),
+      "laneFresh": bool(lane.get("fresh")),
+      "blindspotFresh": bool(blindspot.get("fresh")),
+      "targetLaneLineClear": direction == "left" and not lane.get("leftLaneBlind") or direction == "right" and not lane.get("rightLaneBlind"),
+      "blindspotClear": direction == "left" and not (blindspot.get("leftLidarBlind") or blindspot.get("leftLidarCarBlind") or blindspot.get("leftCameraBlind"))
+                         or direction == "right" and not (blindspot.get("rightLidarBlind") or blindspot.get("rightLidarCarBlind") or blindspot.get("rightCameraBlind")),
+      "dynamicBlindClear": (direction == "left" and not any(str(item).startswith("l") for item in active_dynamic))
+                           or (direction == "right" and not any(str(item).startswith("r") for item in active_dynamic)),
+    },
+    "nextRequiredGate": "existing safety chain must still approve before any lateral command",
+    "emitsLateralCommand": False,
+  }
 
 
 @dataclass
@@ -455,6 +537,7 @@ class FishopHardwareState:
     lane = self.lane.to_dict(now_s)
     blindspot = self.blindspot.to_dict(now_s)
     overtake = self.overtake.to_dict(now_s)
+    overtake["suggestionPreview"] = _overtake_suggestion_preview(lane, blindspot, overtake)
     last_updates = [
       value for value in (
         self.lane.last_update_s,

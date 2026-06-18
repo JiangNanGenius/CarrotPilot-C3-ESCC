@@ -1524,6 +1524,7 @@ async def index(_request: web.Request) -> web.Response:
           <div class="metric"><span class="label">Command</span><span class="value" id="fishop-overtake-command">-</span></div>
           <div class="metric"><span class="label">Request</span><span class="value" id="fishop-overtake-request">-</span></div>
           <div class="metric"><span class="label">Direction</span><span class="value" id="fishop-overtake-direction">-</span></div>
+          <div class="metric"><span class="label">Suggestion</span><span class="value" id="fishop-overtake-suggestion">-</span></div>
           <div class="metric"><span class="label">Data path</span><span class="value" id="fishop-overtake-path">record only</span></div>
           <div class="metric"><span class="label">Boundary</span><span class="value" id="fishop-overtake-boundary">read-only</span></div>
         </div>
@@ -1579,6 +1580,12 @@ async def index(_request: web.Request) -> web.Response:
       if (laneQuality.curveAvailable) parts.push("curve");
       return parts.length ? parts.join(" ") : "-";
     };
+    const suggestionSummary = (preview = {}) => {
+      if (!preview.readOnly) return "-";
+      if (preview.readyForSuggestion) return `ready ${preview.direction || ""}`.trim();
+      const reasons = Array.isArray(preview.reasons) ? preview.reasons.slice(0, 2) : [];
+      return reasons.length ? `blocked: ${reasons.join("; ")}` : "blocked";
+    };
     async function refreshFishopHardware() {
       try {
         const response = await fetch("/api/fishop_hardware", {cache: "no-store"});
@@ -1608,6 +1615,7 @@ async def index(_request: web.Request) -> web.Response:
         setText("fishop-overtake-command", yesNo(overtake.commandSeen));
         setText("fishop-overtake-request", yesNo(overtake.requested));
         setText("fishop-overtake-direction", overtake.direction || "-");
+        setText("fishop-overtake-suggestion", suggestionSummary(overtake.suggestionPreview || {}));
         setText("fishop-overtake-path", (overtake.directionality || {}).alphaAction || "record_only");
         setText("fishop-overtake-boundary", snapshot.controlOutputEnabled ? "control enabled" : "read-only");
         setText("fishop-error", data.parseError || "");
