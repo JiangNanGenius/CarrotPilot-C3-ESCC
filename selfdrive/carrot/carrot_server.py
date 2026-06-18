@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import datetime as dt
 import json
 import sys
@@ -18,6 +19,7 @@ from openpilot.selfdrive.carrot.fishop_hardware import normalize_fishop_payloads
 
 
 LOCAL_WEB_PORT = 7000
+NAVIGATION_UDP_PORT = 7706
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_FISHOP_JSONL = Path("/data/fishop_hardware.jsonl")
 MAX_FISHOP_LINES = 240
@@ -74,6 +76,45 @@ PARAM_API_DEFS: dict[str, dict[str, Any]] = {
 VIRTUAL_PARAM_DEFAULTS = {
   "DeviceType": "unknown",
 }
+
+NAVIGATION_NUMERIC_FIELDS = (
+  "carrotIndex",
+  "nRoadLimitSpeed",
+  "nSdiType",
+  "nSdiSpeedLimit",
+  "nSdiDist",
+  "nSdiPlusType",
+  "nSdiPlusSpeedLimit",
+  "nTBTDist",
+  "nTBTTurnType",
+  "nTBTDistNext",
+  "nTBTTurnTypeNext",
+  "nGoPosDist",
+  "nGoPosTime",
+  "vpPosPointLat",
+  "vpPosPointLon",
+  "latitude",
+  "longitude",
+)
+
+NAVIGATION_TEXT_FIELDS = (
+  "szTBTMainText",
+  "szTBTMainTextNext",
+  "roadName",
+  "currentRoadName",
+)
+
+NAVIGATION_COMMAND_FIELDS = (
+  "carrotCmd",
+  "carrotArg",
+)
+
+HIGH_RISK_NAV_COMMANDS = (
+  "LANECHANGE",
+  "LANE_CHANGE",
+  "OVERTAKE",
+  "AUTO_OVERTAKE",
+)
 
 ACTION_PARAMS = {
   "apply": "CarrotLearningApply",
@@ -295,6 +336,76 @@ def set_param_from_api(name: str, value: Any) -> dict[str, Any]:
     "changed": changed,
     "hasParams": True,
   }
+
+
+def _safe_navigation_text(value: Any) -> str:
+  text = _decode_param_text(value).replace("\x00", "").strip()
+  return text[:120]
+
+
+def _navigation_payload_event(payload: dict[str, Any], source: str) -> dict[str, Any]:
+  numeric: dict[str, float | int] = {}
+  text: dict[str, str] = {}
+  for key in NAVIGATION_NUMERIC_FIELDS:
+    if key not in payload:
+      continue
+    value = _as_float(payload.get(key), 0.0)
+    numeric[key] = int(value) if float(value).is_integer() else round(value, 7)
+  for key in NAVIGATION_TEXT_FIELDS:
+    if key in payload:
+      text[key] = _safe_navigation_text(payload.get(key))
+
+  command = _safe_navigation_text(payload.get(NAVIGATION_COMMAND_FIELDS[0], ""))
+  command_arg = _safe_navigation_text(payload.get(NAVIGATION_COMMAND_FIELDS[1], ""))
+  command_upper = command.upper()
+  ignored_command = bool(command or command_arg)
+  high_risk_command = command_upper in HIGH_RISK_NAV_COMMANDS
+
+  speed_kph, speed_field = _extract_phone_speed_kph(payload)
+  return {
+    "updatedAt": time.time(),
+    "source": _safe_source_text(source),
+    "numeric": numeric,
+    "text": text,
+    "speedLimitKph": round(speed_kph, 3) if speed_kph is not None else 0.0,
+    "speedLimitSourceField": speed_field,
+    "commandIgnored": ignored_command,
+    "highRiskCommandSeen": high_risk_command,
+    "ignoredCommand": command,
+    "ignoredCommandArg": command_arg,
+  }
+
+
+def navigation_event_state() -> dict[str, Any]:
+  params, error = _params_state()
+  if params is None:
+    return {"hasParams": False, "event": {}, "error": error}
+  raw = _params_get(params, "CarrotNavigationEvent", {})
+  if isinstance(raw, dict):
+    event = raw
+  else:
+    decoded = _decode_json(raw)
+    event = decoded if isinstance(decoded, dict) else {}
+  return {"hasParams": True, "event": event}
+
+
+def record_navigation_event(payload: dict[str, Any], source: str = "api") -> dict[str, Any]:
+  if not isinstance(payload, dict):
+    raise ValueError("invalid navigation payload")
+  params, error = _params_state()
+  if params is None:
+    raise RuntimeError(f"Params unavailable: {error}")
+
+  event = _navigation_payload_event(payload, source)
+  params.put("CarrotNavigationEvent", event)
+  phone_result: dict[str, Any] = {"accepted": False}
+  try:
+    phone_payload = dict(payload)
+    phone_payload["source"] = source
+    phone_result = set_phone_speed_limit(phone_payload)
+  except Exception as exc:
+    phone_result = {"accepted": False, "error": str(exc)}
+  return {"recorded": True, "event": event, "phoneSpeed": phone_result}
 
 
 def _read_payload(params: Any) -> dict[str, Any] | None:
@@ -592,11 +703,21 @@ def fishop_state() -> dict[str, Any]:
 
 
 async def api_health(_request: web.Request) -> web.Response:
+  udp_error = str(_request.app.get("navigation_udp_error", ""))
+  udp_protocol = _request.app.get("navigation_udp_protocol")
+  udp_last_error = str(getattr(udp_protocol, "last_error", ""))
+  udp_last_datagram_at = float(getattr(udp_protocol, "last_datagram_at", 0.0))
+  udp_last_recorded_at = float(getattr(udp_protocol, "last_recorded_at", 0.0))
   return _json_response({
     "ok": True,
     "service": "carrot_server",
     "mode": "local",
     "port": LOCAL_WEB_PORT,
+    "navigationUdpPort": NAVIGATION_UDP_PORT,
+    "navigationUdpError": udp_error,
+    "navigationUdpLastError": udp_last_error,
+    "navigationUdpLastDatagramAt": udp_last_datagram_at,
+    "navigationUdpLastRecordedAt": udp_last_recorded_at,
     "timestamp": dt.datetime.now(dt.timezone.utc).astimezone().isoformat(timespec="seconds"),
     "cloudServices": False,
     "controlOutput": False,
@@ -606,6 +727,7 @@ async def api_health(_request: web.Request) -> web.Response:
       "/api/param_set",
       "/api/carrot_learning",
       "/api/fishop_hardware",
+      "/api/navigation_event",
       "/api/phone_speed_limit",
     ],
   })
@@ -662,6 +784,24 @@ async def api_fishop_hardware(_request: web.Request) -> web.Response:
   return _json_response({"ok": True, **fishop_state()})
 
 
+async def api_navigation_event(_request: web.Request) -> web.Response:
+  state = navigation_event_state()
+  return _json_response({"ok": state["hasParams"], **state}, status=200 if state["hasParams"] else 400)
+
+
+async def api_navigation_event_action(request: web.Request) -> web.Response:
+  try:
+    body = await request.json()
+  except Exception:
+    body = {}
+  try:
+    result = record_navigation_event(body, "api")
+    return _json_response({"ok": True, **result})
+  except Exception as exc:
+    state = navigation_event_state()
+    return _json_response({"ok": False, "error": str(exc), **state}, status=400)
+
+
 async def api_phone_speed_limit(_request: web.Request) -> web.Response:
   return _json_response({"ok": True, **phone_speed_state()})
 
@@ -708,6 +848,7 @@ async def index(_request: web.Request) -> web.Response:
         <li><a href="/api/params_bulk?names=ExperimentalMode"><code>/api/params_bulk</code></a></li>
         <li><a href="/api/carrot_learning"><code>/api/carrot_learning</code></a></li>
         <li><a href="/api/fishop_hardware"><code>/api/fishop_hardware</code></a></li>
+        <li><a href="/api/navigation_event"><code>/api/navigation_event</code></a></li>
         <li><a href="/api/phone_speed_limit"><code>/api/phone_speed_limit</code></a></li>
       </ul>
     </section>
@@ -718,8 +859,50 @@ async def index(_request: web.Request) -> web.Response:
   return web.Response(text=html, content_type="text/html", headers={"Cache-Control": "no-store"})
 
 
+class NavigationUdpProtocol(asyncio.DatagramProtocol):
+  def __init__(self) -> None:
+    self.last_error = ""
+    self.last_datagram_at = 0.0
+    self.last_recorded_at = 0.0
+
+  def datagram_received(self, data: bytes, _addr: tuple[str, int]) -> None:
+    self.last_datagram_at = time.time()
+    try:
+      payload = json.loads(data.decode("utf-8", errors="replace"))
+      if not isinstance(payload, dict):
+        raise ValueError("navigation UDP payload must be a JSON object")
+      record_navigation_event(payload, "udp-7706")
+      self.last_recorded_at = time.time()
+      self.last_error = ""
+    except Exception as exc:
+      self.last_error = str(exc)[:200]
+
+
+async def start_navigation_udp(app: web.Application) -> None:
+  loop = asyncio.get_running_loop()
+  protocol = NavigationUdpProtocol()
+  try:
+    transport, _ = await loop.create_datagram_endpoint(
+      lambda: protocol,
+      local_addr=(DEFAULT_HOST, NAVIGATION_UDP_PORT),
+    )
+    app["navigation_udp_transport"] = transport
+    app["navigation_udp_protocol"] = protocol
+    app["navigation_udp_error"] = ""
+  except Exception as exc:
+    app["navigation_udp_error"] = str(exc)[:200]
+
+
+async def stop_navigation_udp(app: web.Application) -> None:
+  transport = app.get("navigation_udp_transport")
+  if transport is not None:
+    transport.close()
+
+
 def make_app() -> web.Application:
   app = web.Application()
+  app.on_startup.append(start_navigation_udp)
+  app.on_cleanup.append(stop_navigation_udp)
   app.router.add_get("/", index)
   app.router.add_get("/api/health", api_health)
   app.router.add_get("/api/params_bulk", api_params_bulk)
@@ -727,6 +910,8 @@ def make_app() -> web.Application:
   app.router.add_get("/api/carrot_learning", api_carrot_learning)
   app.router.add_post("/api/carrot_learning", api_carrot_learning_action)
   app.router.add_get("/api/fishop_hardware", api_fishop_hardware)
+  app.router.add_get("/api/navigation_event", api_navigation_event)
+  app.router.add_post("/api/navigation_event", api_navigation_event_action)
   app.router.add_get("/api/phone_speed_limit", api_phone_speed_limit)
   app.router.add_post("/api/phone_speed_limit", api_phone_speed_limit_action)
   return app

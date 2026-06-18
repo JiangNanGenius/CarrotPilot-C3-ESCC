@@ -49,6 +49,7 @@ AUTO_TUNER_DEFAULTS = {
   "CarrotPhoneSpeedLimitEnabled": 1,
   "CarrotPhoneSpeedLimitUpdatedAt": 0,
   "CarrotMapOverlayEnabled": 0,
+  "CarrotNavigationEvent": "{}",
   "CarrotTrafficStopEnabled": 0,
   "CarrotTunerApplyLat": 1,
   "CarrotTunerApplyLong": 1,
@@ -118,7 +119,12 @@ class FakeParams:
       return False
 
   def put(self, key, value):
-    self.store[key] = value if isinstance(value, bytes) else str(value).encode("utf-8")
+    if isinstance(value, bytes):
+      self.store[key] = value
+    elif isinstance(value, (dict, list)):
+      self.store[key] = json.dumps(value, separators=(",", ":")).encode("utf-8")
+    else:
+      self.store[key] = str(value).encode("utf-8")
 
   def put_int(self, key, value):
     self.put(key, str(int(value)))
@@ -296,6 +302,50 @@ def check_params_api_runtime() -> tuple[bool, str]:
       sys.modules["openpilot.common.params"] = previous_params
 
 
+def check_navigation_event_runtime() -> tuple[bool, str]:
+  FakeParams.reset()
+  params_mod = types.ModuleType("openpilot.common.params")
+  params_mod.Params = FakeParams
+  previous_params = sys.modules.get("openpilot.common.params")
+  sys.modules["openpilot.common.params"] = params_mod
+  try:
+    server = import_file("alpha_carrot_server_navigation_static_check", "selfdrive/carrot/carrot_server.py")
+    payload = {
+      "carrotIndex": 7,
+      "carrotCmd": "OVERTAKE",
+      "carrotArg": "left",
+      "nRoadLimitSpeed": 0,
+      "nSdiSpeedLimit": 60,
+      "nSdiDist": 240,
+      "nTBTDist": 500,
+      "szTBTMainTextNext": "static check",
+      "latitude": 1.234567,
+      "longitude": 2.345678,
+    }
+    result = server.record_navigation_event(payload, "udp-7706")
+    event = result.get("event", {})
+    if not result.get("recorded") or not isinstance(event, dict):
+      return False, "navigation event was not recorded"
+    if not event.get("commandIgnored") or not event.get("highRiskCommandSeen"):
+      return False, "high-risk navigation command was not recorded as ignored evidence"
+    if event.get("speedLimitKph") != 60.0 or event.get("speedLimitSourceField") != "nSdiSpeedLimit":
+      return False, "navigation event did not use SDI speed fallback"
+    raw_speed = FakeParams.shared_store.get("CarrotPhoneSpeedLimit", b"0").decode("utf-8")
+    if abs(float(raw_speed) - 16.666667) > 0.001:
+      return False, "navigation event did not update phone speed limit in m/s"
+    raw_event = json.loads(FakeParams.shared_store.get("CarrotNavigationEvent", b"{}").decode("utf-8"))
+    if raw_event.get("ignoredCommand") != "OVERTAKE":
+      return False, "CarrotNavigationEvent did not persist ignored command evidence"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+  finally:
+    if previous_params is None:
+      sys.modules.pop("openpilot.common.params", None)
+    else:
+      sys.modules["openpilot.common.params"] = previous_params
+
+
 def main() -> int:
   failures = 0
 
@@ -380,6 +430,8 @@ def main() -> int:
                             f"{key} must be registered before Carrot control migration")
   failures += not require("Carrot phone limit enabled", '{"CarrotPhoneSpeedLimitEnabled", {PERSISTENT | BACKUP, BOOL, "1"}}' in params,
                           "CarrotPhoneSpeedLimitEnabled must exist and default to 1")
+  failures += not require("Carrot navigation event param exists", '{"CarrotNavigationEvent", {CLEAR_ON_MANAGER_START, JSON}}' in params,
+                          "CarrotNavigationEvent must record the latest local navigation input and clear on manager start")
   failures += not require("SpeedLimitPolicy phone priority default", '{"SpeedLimitPolicy", {PERSISTENT | BACKUP, INT, "5"}}' in params,
                           "SpeedLimitPolicy must default to phone_priority")
   failures += not require("SpeedLimitOffsetType default off", '{"SpeedLimitOffsetType", {PERSISTENT | BACKUP, INT, "0"}}' in params,
@@ -413,7 +465,7 @@ def main() -> int:
   failures += not require("Carrot Web local server exists", "LOCAL_WEB_PORT = 7000" in carrot_server
                           and "def make_app" in carrot_server and "web.run_app" in carrot_server,
                           "carrot_server must provide the local port-7000 aiohttp service")
-  for route in ("/api/health", "/api/params_bulk", "/api/param_set", "/api/carrot_learning", "/api/fishop_hardware", "/api/phone_speed_limit"):
+  for route in ("/api/health", "/api/params_bulk", "/api/param_set", "/api/carrot_learning", "/api/fishop_hardware", "/api/navigation_event", "/api/phone_speed_limit"):
     failures += not require(f"Carrot Web route exists: {route}", route in carrot_server,
                             f"carrot_server missing {route}")
   failures += not require("Carrot Web params API whitelist", "PARAM_API_DEFS" in carrot_server
@@ -428,6 +480,19 @@ def main() -> int:
                           "local param_set must not enable SpeedLimitMode assist through the phone API")
   ok, detail = check_params_api_runtime()
   failures += not require("Carrot Web params API runtime", ok, detail or "params API runtime check failed")
+  failures += not require("Carrot Web navigation UDP input", "NAVIGATION_UDP_PORT = 7706" in carrot_server
+                          and "class NavigationUdpProtocol" in carrot_server
+                          and "record_navigation_event(payload, \"udp-7706\")" in carrot_server,
+                          "Carrot Web must listen for local Navipilot/APN UDP 7706 navigation JSON")
+  failures += not require("Carrot Web navigation input remains evidence-only", "CarrotNavigationEvent" in carrot_server
+                          and "commandIgnored" in carrot_server and "highRiskCommandSeen" in carrot_server
+                          and "HIGH_RISK_NAV_COMMANDS" in carrot_server,
+                          "navigation input must record commands as ignored evidence, not execute them")
+  for forbidden in ("PubMaster", "CarControl", "sendcan", "desire_helper", "LateralPlan"):
+    failures += not require(f"Carrot Web navigation omits control output {forbidden}", forbidden not in carrot_server,
+                            "navigation UDP/API input must not publish controls or touch lane-change/planner outputs")
+  ok, detail = check_navigation_event_runtime()
+  failures += not require("Carrot Web navigation runtime", ok, detail or "navigation runtime check failed")
   failures += not require("Carrot Web phone speed API writes resolver params",
                           "def set_phone_speed_limit" in carrot_server
                           and "CarrotPhoneSpeedLimitUpdatedAt" in carrot_server
@@ -464,6 +529,8 @@ def main() -> int:
   failures += not require("alpha snapshot records Auto-Tuner summary", '"CarrotLearningActive"' in alpha_snapshot
                           and '"autoTuner"' in alpha_snapshot and "summarize_auto_tuner" in alpha_snapshot,
                           "alpha snapshot must summarize Auto-Tuner state")
+  failures += not require("alpha snapshot records navigation event", '"CarrotNavigationEvent"' in alpha_snapshot,
+                          "alpha snapshot must include the latest sanitized navigation event")
   failures += not require("alpha snapshot records carrot_server process", '"carrot_server"' in alpha_snapshot,
                           "alpha snapshot must report local Carrot Web process state")
   for service_name in ("modelV2", "drivingModelData", "cameraOdometry", "modelManagerSP", "longitudinalPlanSP", "carStateSP", "pandaStates"):

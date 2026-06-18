@@ -282,6 +282,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"CarrotLearningPopupSource", {PERSISTENT, STRING, ""}},
     {"CarrotLearningRecommend", {PERSISTENT, BYTES, ""}},
     {"CarrotMapOverlayEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
+    {"CarrotNavigationEvent", {CLEAR_ON_MANAGER_START, JSON}},
     {"CarrotTrafficStopEnabled", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"CarrotTunerApplyLat", {PERSISTENT | BACKUP, INT, "1"}},
     {"CarrotTunerApplyLong", {PERSISTENT | BACKUP, INT, "1"}},
