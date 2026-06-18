@@ -15,7 +15,10 @@ from openpilot.selfdrive.carrot.fishop_hardware import FishopHardwareState  # no
 
 
 SAMPLE_PAYLOADS: list[dict[str, Any]] = [
-  {"resp": "lane", "left_lane": 2, "right_lane": 1, "lineValid": True, "max_curve": 0.018, "lat_a": 0.21},
+  {"resp": "lane", "left_lane": 2, "right_lane": 1, "lineValid": True, "max_curve": 0.018, "lat_a": 0.21,
+   "prob": True, "l_lane_prob": 0.7, "l_line_prob": 0.9, "r_line_prob": 0.8, "r_lane_prob": 0.6,
+   "l_edge_prob": 0.5, "r_edge_prob": 0.4, "l_lane_width": 3.2, "r_lane_width": 3.3,
+   "l_edge_dist": 1.8, "r_edge_dist": 2.1, "lane_width": 3.25, "atc_state": 0, "blinker": 0},
   {"device": "lidar", "resp": "blindspot", "detect_side": 3, "lidar_id": 0, "dist_time": 123456,
    "lidar_lblind": True, "lidar_car_lblind": True, "rf_drel": 4200, "rb_drel": -1800,
    "rf_xrel": 850, "rf_vrel": -1.2, "v_ego_mps": 15.0},

@@ -438,6 +438,7 @@ def check_fishop_overtake_safety_contract() -> tuple[bool, str]:
     '"readOnly": True',
     '"overtake": overtake',
     "OVERTAKE_MAX_AGE_S = 1.0",
+    '"laneQuality": self.quality(fresh)',
     '"dynamicBlind": self.dynamic_blind(targets_fresh)',
     '"directionality": {',
     '"alphaAction": "record_only"',
@@ -1239,10 +1240,12 @@ def main() -> int:
                           and "refreshFishopHardware" in carrot_server
                           and 'fetch("/api/fishop_hardware", {cache: "no-store"})' in carrot_server
                           and 'id="fishop-lane-curve"' in carrot_server
+                          and 'id="fishop-lane-quality"' in carrot_server
                           and 'id="fishop-lidar-blind"' in carrot_server
                           and 'id="fishop-targets"' in carrot_server
                           and 'id="fishop-dynamic-risk"' in carrot_server
                           and 'id="fishop-overtake-path"' in carrot_server
+                          and "laneQualitySummary" in carrot_server
                           and "dynamicRiskSummary" in carrot_server
                           and "snapshot.controlOutputEnabled ? \"control enabled\" : \"read-only\"" in carrot_server
                           and 'method:' not in carrot_server[carrot_server.index('async function refreshFishopHardware'):carrot_server.index('setInterval(refreshFishopHardware')],
@@ -1262,6 +1265,10 @@ def main() -> int:
                           and "rightLaneBlind" in fishop_hardware
                           and "lf_vrel" in fishop_hardware
                           and "distTimeMs" in fishop_hardware
+                          and "LANE_QUALITY_KEYS" in fishop_hardware
+                          and "laneProbabilities" in fishop_hardware
+                          and "roadEdgeDistancesM" in fishop_hardware
+                          and "modelV2.orientationRate.z fallback" in fishop_hardware
                           and "leftLidarOnline" in fishop_hardware
                           and "rightCameraOnline" in fishop_hardware
                           and "lidar_car_lblind" in fishop_hardware
@@ -1400,7 +1407,11 @@ def main() -> int:
   try:
     from openpilot.selfdrive.carrot.fishop_hardware import FishopHardwareState
     fishop_state = FishopHardwareState()
-    fishop_state.update_from_payload({"resp": "lane", "left_lane": 2, "right_lane": 1, "lineValid": True}, 1000.0)
+    fishop_state.update_from_payload({"resp": "lane", "left_lane": 2, "right_lane": 1, "lineValid": True,
+                                      "max_curve": 0.018, "lat_a": 0.21, "prob": True,
+                                      "l_line_prob": 0.9, "r_line_prob": 0.8,
+                                      "l_lane_width": 3.2, "r_lane_width": 3.3, "lane_width": 3.25,
+                                      "l_edge_dist": 1.8, "r_edge_dist": 2.1, "atc_state": 0, "blinker": 0}, 1000.0)
     fishop_state.update_from_payload({"device": "lidar", "resp": "blindspot", "detect_side": 3, "lidar_id": 0,
                                       "dist_time": 123456, "lidar_lblind": True, "lidar_car_lblind": True,
                                       "rf_drel": 4200, "rb_drel": -1800, "rf_xrel": 850, "rf_vrel": -1.2,
@@ -1413,6 +1424,17 @@ def main() -> int:
                             and fishop_snapshot["lane"]["rightLine"] == 1 and fishop_snapshot["lane"]["fresh"]
                             and fishop_snapshot["lane"]["leftLaneBlind"] and fishop_snapshot["lane"]["rightLaneBlind"],
                             "fishop parser must expose lane evidence without using it for control")
+    lane_quality = fishop_snapshot["lane"]["laneQuality"]
+    failures += not require("fishop parser preserves lane quality evidence", lane_quality["readOnly"]
+                            and lane_quality["controlOutput"] is False
+                            and lane_quality["curveAvailable"]
+                            and lane_quality["modelEvidenceAvailable"]
+                            and lane_quality["laneProbabilities"]["leftInner"] == 0.9
+                            and lane_quality["laneWidthsM"]["center"] == 3.25
+                            and lane_quality["roadEdgeDistancesM"]["left"] == 1.8
+                            and lane_quality["atcState"] == 0
+                            and lane_quality["blinker"] == 0,
+                            "fishop parser must expose lane curve/model quality evidence as read-only")
     failures += not require("fishop parser preserves blindspot evidence", fishop_snapshot["blindspot"]["leftLidarBlind"]
                             and fishop_snapshot["blindspot"]["leftLidarCarBlind"]
                             and fishop_snapshot["blindspot"]["leftLidarOnline"]
@@ -1452,7 +1474,9 @@ def main() -> int:
                             "fishop parser must expose sensorOnline and last-update evidence")
     stale_snapshot = fishop_state.to_dict(1003.0)
     failures += not require("fishop stale lane invalid", not stale_snapshot["lane"]["fresh"]
-                            and not stale_snapshot["lane"]["lineValid"],
+                            and not stale_snapshot["lane"]["lineValid"]
+                            and not stale_snapshot["lane"]["laneQuality"]["lineEvidenceAvailable"]
+                            and stale_snapshot["lane"]["laneQuality"]["atcState"] is None,
                             "stale fishop lane input must not stay valid")
     failures += not require("fishop stale blindspot clears active bits", not stale_snapshot["blindspot"]["fresh"]
                             and not stale_snapshot["blindspot"]["leftLidarBlind"]
