@@ -368,7 +368,7 @@ flowchart TD
 
 ### P8.9: fishop / 码上飞扬硬件增强迁移
 
-- [ ] 以最新 `fishop/cp` 为参考源，不直接整包合并；先固定审计入口：`selfdrive/carrot/amap_navi.py`、`cereal/custom.capnp`、`cereal/log.capnp`、`selfdrive/apilot.json`。
+- [x] 以最新 `fishop/cp` 为参考源，不直接整包合并；先固定审计入口：`selfdrive/carrot/amap_navi.py`、`cereal/custom.capnp`、`cereal/log.capnp`、`selfdrive/apilot.json`。
 - [ ] 研究 fishop 最新版车道识线 / 车道曲线实现，确认它是视觉、APP、雷达/激光雷达还是融合输出。
 - [ ] 研究 `lane` UDP 通道，确认 `left_lane`、`right_lane`、`lineValid` 的枚举含义、实线/虚线语义、左右方向和超时清零逻辑。
 - [ ] 研究 `max_curve`、`lat_a`、模型 `orientationRate`、`LaneLineMeta` 和 road edge 数据的关系，决定哪些只做显示，哪些可作为车道质量证据。
@@ -380,6 +380,10 @@ flowchart TD
 - [ ] 新增统一状态结构候选：设备在线、最后更新时间、左右车道线类型、左右车道曲率/宽度、左右前后目标距离、左右前后目标横向距离、左右前后相对速度、左右盲区、摄像头盲区、传感器健康。
 - [ ] 增加 Web/UI 只读显示：车道曲线、左右车道数据、左右盲区、传感器健康、数据新鲜度。
 - [x] 新增默认关闭参数：`FishopLaneCurveEnabled=0`、`FishopLidarLaneDataEnabled=0`、`FishopLidarBlindspotEnabled=0`、`FishopAutoOvertakeEnabled=0`。
+- [x] alpha 新增 fishop 硬件只读解析器：`selfdrive/carrot/fishop_hardware.py`，把 `lane`、`blindspot`、`cam_blind`、`overtake` JSON 归一化为 read-only 证据快照。
+- [x] alpha 新增 fishop 采样工具：`scripts/personal/fishop_hardware_sample.py`，可从 JSON Lines 或内置样例生成车道、盲区、目标距离和自动超车输入状态。
+- [x] fishop 只读解析器静态守门：不使用 socket、`PubMaster`、`SubMaster`、`CarControl`、`CANParser`、`desire_helper` 或外接转向灯控制字段。
+- [x] fishop 只读解析器超时守门：车道线、盲区、目标距离和自动超车输入过期后不会继续显示为有效或活动。
 - [ ] 新增只读采样参数候选：`FishopHardwareReadOnly=1`、`FishopHardwareEvidenceMode=1`；若最终实现已有等价参数，不新增别名。
 - [ ] 自动超车只接入现有安全变道链路；不得绕过转向灯、原车/外接盲区、驾驶员确认、速度范围、道路类型和 Seltos 2023 车型门禁。
 - [ ] 研究 `overtake` / `navi` 客户端的数据方向：C3 发给外设、外设发给 C3、APP 发给 C3 要分清；任何 APP 命令默认只记录，不直接执行。
@@ -445,11 +449,12 @@ flowchart LR
 - [x] 静态检查 ESCC 0x2AB 自动置 flag。
 - [x] 静态检查 fishop 硬件增强和自动超车参数默认关闭。
 - [ ] 静态检查 fishop 自动超车不能绕过安全变道链路。
+- [x] 静态检查 fishop 只读层没有控制输出路径，自动超车输入只记录为 read-only 证据。
 - [ ] schema 检查通过。
-- [ ] params 检查通过。
+- [x] params 检查通过。
 - [ ] services 检查通过。
-- [ ] Hyundai interface 检查通过。
-- [ ] model manager 检查通过。
+- [x] Hyundai interface 检查通过。
+- [x] model manager 检查通过。
 - [ ] Carrot Web JS/JSON 语法检查通过。
 
 ### P8.14: C3 停车验证
