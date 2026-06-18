@@ -362,6 +362,12 @@ flowchart TD
 - [ ] 迁移减速带数据路径。
 - [ ] 迁移 model speed。
 - [ ] 迁移 Carrot Web。
+- [x] alpha 新增 Carrot Web 本地骨架：`selfdrive/carrot/carrot_server.py`，manager 注册 `carrot_server`，默认端口 7000。
+- [x] alpha Carrot Web 新增本地健康接口 `/api/health`，声明 local mode、无云服务、无控制输出。
+- [x] alpha Carrot Web 新增 Auto-Tuner 接口 `/api/carrot_learning`，支持读取推荐、offroad 手动应用、忽略和清空。
+- [x] alpha Carrot Web 新增 fishop 只读接口 `/api/fishop_hardware`，读取 `/data/fishop_hardware.jsonl` 并归一化为证据快照。
+- [x] alpha Carrot Web 静态守门：不包含 `requests`、`urllib`、`websocket`、`ClientSession`、`SunnylinkApi`、`DongleId` 等云/远程连接入口。
+- [x] alpha Carrot Web 暂不暴露 terminal、tmux、shell、tools 等高权限本地操作，等完整迁移时单独设门禁。
 - [ ] 迁移主动限速控制，独立开关默认关闭。
 - [ ] 迁移自动转弯减速，独立开关默认关闭。
 - [ ] 迁移红绿灯停车，独立开关默认关闭。
@@ -380,6 +386,7 @@ flowchart TD
 - [x] 设计统一硬件增强消息/参数桥，先接收并记录，不进入控制。
 - [x] 新增统一状态结构候选：设备在线、最后更新时间、左右车道线类型、左右车道曲率/宽度、左右前后目标距离、左右前后目标横向距离、左右前后相对速度、左右盲区、摄像头盲区、传感器健康。
 - [ ] 增加 Web/UI 只读显示：车道曲线、左右车道数据、左右盲区、传感器健康、数据新鲜度。
+- [x] alpha Web API 已提供 fishop 只读 JSON 状态；完整 Web 页面/车机 UI 显示仍未完成。
 - [x] 新增默认关闭参数：`FishopLaneCurveEnabled=0`、`FishopLidarLaneDataEnabled=0`、`FishopLidarBlindspotEnabled=0`、`FishopAutoOvertakeEnabled=0`。
 - [x] alpha 新增 fishop 硬件只读解析器：`selfdrive/carrot/fishop_hardware.py`，把 `lane`、`blindspot`、`cam_blind`、`overtake` JSON 归一化为 read-only 证据快照。
 - [x] alpha 新增 fishop 采样工具：`scripts/personal/fishop_hardware_sample.py`，可从 JSON Lines 或内置样例生成车道、盲区、目标距离和自动超车输入状态。
@@ -425,6 +432,7 @@ flowchart LR
 - [x] alpha 补齐 Auto-Tuner 目标参数键：`CruiseMaxVals*`、`TFollowGap*`、`PathOffset`、`SteerActuatorDelay`、`JLeadFactor3` 等。
 - [x] alpha 静态守门覆盖：默认关闭不写学习数据、onroad 禁止应用、offroad 手动应用才改写参数。
 - [x] alpha 设备证据脚本新增 `autoTuner` 摘要：是否开启、是否自动应用、是否有待处理建议、推荐项数量和历史数量。
+- [x] alpha Carrot Web 已提供 Auto-Tuner 推荐读取和手动动作 API；完整 Web 面板仍未完成。
 - [ ] Web/UI 明确区分“推荐值”和“已应用值”。
 
 ### P8.11: 本地化和说明
