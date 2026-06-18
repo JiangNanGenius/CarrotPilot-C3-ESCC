@@ -410,9 +410,10 @@ flowchart TD
 - [x] fishop 只读解析器静态守门：不使用 socket、`PubMaster`、`SubMaster`、`CarControl`、`CANParser`、`desire_helper` 或外接转向灯控制字段。
 - [x] fishop 只读解析器超时守门：车道线、盲区、目标距离和自动超车输入过期后不会继续显示为有效或活动。
 - [x] 不新增 `FishopHardwareReadOnly` / `FishopHardwareEvidenceMode` 兼容别名；alpha 只用 `readOnly` 和 `controlOutputEnabled=false` 作为证据字段，避免混淆。
+- [x] 自动超车第一阶段只显示/只记录建议预览：alpha `overtake.suggestionPreview` 只用请求新鲜度、方向、车道线、盲区、动态盲区证据输出 `blocked` 或 `ready_for_suggestion`，并保持 `readOnly=true`、`controlOutput=false`、`emitsLateralCommand=false`；Web 只显示结果和原因，不提供执行入口。
 - [ ] 自动超车只接入现有安全变道链路；不得绕过转向灯、原车/外接盲区、驾驶员确认、速度范围、道路类型和 Seltos 2023 车型门禁。
 - [x] 研究 `overtake` / `navi` 客户端的数据方向：fishop 参考里外设/APP 可把 `device=overtake/navi`、`index/cmd/arg`、`overtake` 请求发到 C3；C3 也会把 OP 状态发回该客户端端口和 UDP 7705。alpha 已在 `overtake.directionality` 标记 inbound/outbound，所有 APP/外设命令默认只记录为 `record_only`，不直接执行。
-- [ ] 自动超车决策必须先产出“建议”，再由现有 desire/lane-change helper 判断；不得直接写转向目标、横向轨迹或绕过 planner。
+- [ ] 自动超车第二阶段才允许把 `ready_for_suggestion` 交给现有安全变道链路判断；不得直接写转向目标、横向轨迹或绕过 planner。
 - [ ] 自动超车分阶段验证：只显示/只建议/受控执行，每阶段必须有单独日志和回滚点。
 - [ ] 高德 / 国内导航精度不足或地区不适配时，自动超车和侧向控制必须降级为不可用或只提示。
 - [ ] 每次启用 fishop 硬件控制相关功能前，证据包必须证明云进程不存在、ESCC 正常、基础横控正常、传感器数据新鲜且一致。
@@ -434,9 +435,9 @@ flowchart LR
 ```
 
 - [ ] P8 fishop 放行顺序：
-  - 第 1 步：只接收数据，证明左右不反、超时可清零、断线不会残留盲区状态。
-  - 第 2 步：只在 Web/UI 显示，不发提示、不影响 planner。
-  - 第 3 步：只发提示，不产生 desire。
+  - 第 1 步：只接收数据，证明左右不反、超时可清零、断线不会残留盲区状态；alpha 静态和样例已覆盖，仍需 C3 停车/实车日志。
+  - 第 2 步：只在 Web/UI 显示，不发提示、不影响 planner；alpha Web 已显示 lane、blindspot、dynamicBlind 和 overtake suggestion 预览，仍需设备验证。
+  - 第 3 步：只发提示，不产生 desire；alpha 仅有 Web/API 预览，车机 UI 提示尚未完成。
   - 第 4 步：只产生建议 desire，现有安全变道链路可拒绝。
   - 第 5 步：受控执行实验，必须有驾驶员确认、回滚安装器和完整证据。
 
