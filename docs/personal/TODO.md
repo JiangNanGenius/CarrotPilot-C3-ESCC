@@ -352,7 +352,7 @@ flowchart TD
 - [x] 限速 fixed offset 默认 0。
 - [x] 增加 percentage offset 支持，默认 0%。
 - [x] alpha 设备证据脚本支持记录当前限速来源、来源标签、最终限速和车机限速。
-- [ ] UI 和证据里能看出当前限速来源、偏移模式、偏移值和数据新鲜度。
+- [x] UI 和证据里能看出当前限速来源、偏移模式、偏移值和数据新鲜度：alpha Carrot Web `/api/health`、7705 状态广播和设备快照都输出 `speedLimitEvidence`，包含 policy/mode、phone freshness、resolver source/sourceLabel、offset type/value/unit。
 
 ### P8.8: Carrot / 机械小哥功能迁移
 
