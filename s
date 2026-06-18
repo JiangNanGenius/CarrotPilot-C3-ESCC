@@ -274,6 +274,8 @@ apply_safe_params() {
   write_param "CanfdHDA2" "0"
   write_param "HyundaiCameraSCC" "0"
   write_param "EnableRadarTracks" "0"
+  write_param "AutoNaviSpeedLimitOffset" "0"
+  write_param "AutoNaviSpeedSafetyFactor" "100"
   write_param "PowerCycleBootOk" "0"
   write_param "PowerCycleBootCommit" ""
   write_param "PowerCycleBootTag" ""
@@ -307,6 +309,8 @@ Safe first-boot params written by the installer:
   CanfdHDA2=0
   HyundaiCameraSCC=0
   EnableRadarTracks=0
+  AutoNaviSpeedLimitOffset=0
+  AutoNaviSpeedSafetyFactor=100
   PowerCycleBootOk=0
 
 Next parked checks on the C3:
