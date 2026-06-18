@@ -66,7 +66,7 @@ class GitBranchStatusProvider:
         self.refresh_interval_s = max(5.0, float(refresh_interval_s))
         self.command_timeout_s = max(0.5, float(command_timeout_s))
         initial_branch = read_head_branch(self.repo_path) if self.repo_path is not None else None
-        initial_detail = "확인 중" if self.repo_path is not None else "저장소 없음"
+        initial_detail = "checking" if self.repo_path is not None else "repo not found"
         self._status = GitBranchStatus(initial_branch or "git", "unknown", initial_detail)
         self._next_refresh = 0.0
         self._lock = threading.Lock()
@@ -89,27 +89,27 @@ class GitBranchStatusProvider:
 
     def _read_status(self) -> GitBranchStatus:
         if self.repo_path is None:
-            return GitBranchStatus("git", "unknown", "저장소 없음")
+            return GitBranchStatus("git", "unknown", "repo not found")
 
         branch = self._current_branch()
         if branch is None:
-            return GitBranchStatus(read_head_branch(self.repo_path) or "HEAD", "unknown", "브렌치 아님")
+            return GitBranchStatus(read_head_branch(self.repo_path) or "HEAD", "unknown", "detached HEAD")
 
         remote_name, remote_branch = self._tracking_branch(branch)
         if remote_name is None or remote_branch is None:
-            return GitBranchStatus(branch, "missing", "원격 설정 없음")
+            return GitBranchStatus(branch, "missing", "no upstream")
 
         remote_exists = self._remote_branch_exists(remote_name, remote_branch)
         if remote_exists is False:
-            return GitBranchStatus(branch, "missing", "원격에서 삭제됨")
+            return GitBranchStatus(branch, "missing", "remote branch gone")
         if remote_exists is None:
-            return GitBranchStatus(branch, "unknown", "원격 확인 실패")
+            return GitBranchStatus(branch, "unknown", "remote check failed")
 
         behind_count = self._behind_count(remote_name, remote_branch)
         if behind_count is None:
-            return GitBranchStatus(branch, "unknown", "pull 확인 실패")
+            return GitBranchStatus(branch, "unknown", "pull check failed")
         if behind_count > 0:
-            return GitBranchStatus(branch, "pull", f"git pull 가능 +{behind_count}")
+            return GitBranchStatus(branch, "pull", f"pull available +{behind_count}")
         return GitBranchStatus(branch, "ok")
 
     def _current_branch(self) -> str | None:
