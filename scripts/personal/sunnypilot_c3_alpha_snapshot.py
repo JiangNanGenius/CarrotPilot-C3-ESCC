@@ -292,6 +292,27 @@ def summarize_auto_tuner(safe_params: dict[str, str]) -> dict[str, Any]:
   recommendations = payload.get("recommendations", {}) if isinstance(payload, dict) else {}
   if not isinstance(recommendations, dict):
     recommendations = {}
+  preview: list[dict[str, Any]] = []
+  for key in sorted(str(key) for key in recommendations.keys())[:20]:
+    info = recommendations.get(key, {})
+    if not isinstance(info, dict):
+      continue
+    captured_current = param_int(str(info.get("current", 0)), 0)
+    recommended = param_int(str(info.get("recommended", captured_current)), captured_current)
+    current_path = read_param_file(key)
+    current_raw = sanitize_bytes(current_path.read_bytes()) if current_path else str(captured_current)
+    current_value = param_int(current_raw, captured_current)
+    preview.append({
+      "key": key,
+      "category": str(info.get("category", "")),
+      "capturedCurrentValue": captured_current,
+      "currentValue": current_value,
+      "recommendedValue": recommended,
+      "appliedValue": current_value,
+      "liveDelta": recommended - current_value,
+      "applied": current_value == recommended,
+      "state": "applied" if current_value == recommended else ("changed" if current_value != captured_current else "pending"),
+    })
 
   return {
     "active": param_truthy(safe_params.get("CarrotLearningActive")),
@@ -302,6 +323,10 @@ def summarize_auto_tuner(safe_params: dict[str, str]) -> dict[str, Any]:
     "pending": bool(recommendations),
     "recommendationCount": len(recommendations),
     "recommendationKeys": sorted(str(key) for key in recommendations.keys())[:20],
+    "recommendationsPreview": preview,
+    "appliedRecommendationCount": sum(1 for rec in preview if rec.get("applied")),
+    "pendingRecommendationCount": sum(1 for rec in preview if rec.get("state") == "pending"),
+    "changedRecommendationCount": sum(1 for rec in preview if rec.get("state") == "changed"),
     "source": str(payload.get("source", "")) if isinstance(payload, dict) else "",
     "createdAt": payload.get("created_at", 0) if isinstance(payload, dict) else 0,
     "historyCount": len(history) if isinstance(history, list) else 0,

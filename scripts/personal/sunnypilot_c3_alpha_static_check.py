@@ -552,6 +552,59 @@ def check_phone_speed_limit_runtime() -> tuple[bool, str]:
       sys.modules["openpilot.common.params"] = previous_params
 
 
+def check_carrot_learning_api_runtime() -> tuple[bool, str]:
+  FakeParams.reset()
+  params_mod = types.ModuleType("openpilot.common.params")
+  params_mod.Params = FakeParams
+  previous_params = sys.modules.get("openpilot.common.params")
+  sys.modules["openpilot.common.params"] = params_mod
+  try:
+    server = import_file("alpha_carrot_server_learning_static_check", "selfdrive/carrot/carrot_server.py")
+    payload = {
+      "version": 1,
+      "source": "static-check",
+      "created_at": 1234.0,
+      "recommendations": {
+        "CruiseMaxVals4": {
+          "category": "long",
+          "current": 110,
+          "recommended": 120,
+          "reason": "static check",
+          "evidence": {"sample": True},
+        },
+      },
+    }
+    FakeParams.shared_store["CruiseMaxVals4"] = b"110"
+    FakeParams.shared_store["CarrotLearningRecommend"] = json.dumps(payload).encode("utf-8")
+    state = server.get_learning_state()
+    recs = state.get("recommendations", [])
+    if state.get("recommendationSummary", {}).get("pending") != 1 or len(recs) != 1:
+      return False, "Carrot learning API did not report one pending recommendation"
+    rec = recs[0]
+    if rec.get("capturedCurrentValue") != 110 or rec.get("currentValue") != 110 or rec.get("recommendedValue") != 120:
+      return False, "Carrot learning API did not expose captured/current/recommended values"
+    if rec.get("applied") is not False or rec.get("state") != "pending" or rec.get("liveDelta") != 10:
+      return False, "Carrot learning API did not distinguish a pending recommendation"
+
+    FakeParams.shared_store["CruiseMaxVals4"] = b"120"
+    applied_state = server.get_learning_state()
+    applied_rec = applied_state.get("recommendations", [])[0]
+    if applied_rec.get("currentValue") != 120 or applied_rec.get("appliedValue") != 120:
+      return False, "Carrot learning API did not expose the applied/current value"
+    if applied_rec.get("applied") is not True or applied_rec.get("state") != "applied" or applied_rec.get("liveDelta") != 0:
+      return False, "Carrot learning API did not mark the recommendation as applied"
+    if applied_state.get("recommendationSummary", {}).get("applied") != 1:
+      return False, "Carrot learning API did not summarize applied recommendations"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+  finally:
+    if previous_params is None:
+      sys.modules.pop("openpilot.common.params", None)
+    else:
+      sys.modules["openpilot.common.params"] = previous_params
+
+
 def check_params_api_runtime() -> tuple[bool, str]:
   FakeParams.reset()
   params_mod = types.ModuleType("openpilot.common.params")
@@ -921,6 +974,8 @@ def main() -> int:
                           "CarrotLearner must not apply recommendations while onroad")
   ok, detail = check_carrot_learning_runtime()
   failures += not require("Auto-Tuner runtime guard", ok, detail or "runtime guard check failed")
+  ok, detail = check_carrot_learning_api_runtime()
+  failures += not require("Auto-Tuner Web recommendation/applied value runtime", ok, detail or "Auto-Tuner Web value separation runtime check failed")
   failures += not require("Carrot Web local server exists", "LOCAL_WEB_PORT = 7000" in carrot_server
                           and "def make_app" in carrot_server and "web.run_app" in carrot_server,
                           "carrot_server must provide the local port-7000 aiohttp service")
@@ -1032,6 +1087,14 @@ def main() -> int:
   failures += not require("Carrot Web blocks onroad Auto-Tuner apply", 'params.get_bool("IsOnroad")' in carrot_server
                           and "Cannot apply Auto-Tuner recommendations while onroad" in carrot_server,
                           "Carrot Web must refuse Auto-Tuner apply while onroad")
+  failures += not require("Carrot Web distinguishes Auto-Tuner recommendation and applied values",
+                          '"capturedCurrentValue"' in carrot_server
+                          and '"currentValue"' in carrot_server
+                          and '"recommendedValue"' in carrot_server
+                          and '"appliedValue"' in carrot_server
+                          and '"liveDelta"' in carrot_server
+                          and '"recommendationSummary"' in carrot_server,
+                          "Carrot Web must clearly distinguish captured/current, recommended, and applied Auto-Tuner values")
   for forbidden in ("requests.", "urllib.", "websocket", "ClientSession", "common.api", "SunnylinkApi", "DongleId"):
     failures += not require(f"Carrot Web omits cloud client token {forbidden}", forbidden not in carrot_server,
                             "local Carrot Web must not include outbound cloud/client code")
@@ -1052,7 +1115,8 @@ def main() -> int:
                           and "MESSAGING_SERVICES" in alpha_snapshot and "fishopHardware" in alpha_snapshot,
                           "alpha snapshot must collect model, process, params, and fishop evidence")
   failures += not require("alpha snapshot records Auto-Tuner summary", '"CarrotLearningActive"' in alpha_snapshot
-                          and '"autoTuner"' in alpha_snapshot and "summarize_auto_tuner" in alpha_snapshot,
+                          and '"autoTuner"' in alpha_snapshot and "summarize_auto_tuner" in alpha_snapshot
+                          and '"recommendationsPreview"' in alpha_snapshot and '"appliedRecommendationCount"' in alpha_snapshot,
                           "alpha snapshot must summarize Auto-Tuner state")
   failures += not require("alpha snapshot records navigation event", '"CarrotNavigationEvent"' in alpha_snapshot,
                           "alpha snapshot must include the latest sanitized navigation event")
