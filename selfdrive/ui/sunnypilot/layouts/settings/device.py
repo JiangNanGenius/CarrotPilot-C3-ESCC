@@ -137,8 +137,8 @@ class DeviceLayoutSP(DeviceLayout):
   @staticmethod
   def wake_mode_description() -> str:
     def_str = tr("Default: Device will boot/wake-up normally & will be ready to engage.")
-    offrd_str = tr("Offroad: Device will be in Always Offroad mode after boot/wake-up.")
-    header = tr("Controls state of the device after boot/sleep.")
+    offrd_str = tr("Offroad: Device will boot into parked maintenance mode and keep panda in no-output mode.")
+    header = tr("Controls the state of the device after boot/sleep. Use Offroad only for parked updates or harness debugging.")
 
     return f"{header}\n\n{def_str}\n{offrd_str}"
 
@@ -169,8 +169,8 @@ class DeviceLayoutSP(DeviceLayout):
       return
 
     _offroad_mode_state = ui_state.params.get_bool("OffroadMode")
-    _offroad_mode_str = tr("Are you sure you want to exit Always Offroad mode?") if _offroad_mode_state else \
-                        tr("Are you sure you want to enter Always Offroad mode?")
+    _offroad_mode_str = tr("Exit Always Offroad mode and allow normal startup on the next drive?") if _offroad_mode_state else \
+                        tr("Enter Always Offroad mode for parked maintenance? The device will stay offroad and panda will remain no-output until you turn this off.")
 
     def _set_always_offroad(result: int):
       if result == DialogResult.CONFIRM and not ui_state.engaged:

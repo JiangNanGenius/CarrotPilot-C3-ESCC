@@ -129,7 +129,9 @@ sections:
         equals: true
 - id: speed_limits
   title: Speed Limits
-  description: Speed limit detection and offset behavior
+  description: |-
+    Speed limit display, source priority, and offset behavior. Defaults are display-only: Speed Limit mode is Information,
+    source policy is Phone First, and offset is 0.
   items: []
   sub_panels:
   - id: speed_limit_settings
@@ -139,6 +141,8 @@ sections:
     - key: SpeedLimitMode
       widget: multiple_button
       title: Speed Limit Assist Mode
+      description: Information only displays the resolved speed limit. Warning adds alerts. Assist can change the cruise
+        target on supported cars; leave Assist off until phone, car, and map sources have been verified in the real vehicle.
       options:
       - value: 0
         label: 'Off'
@@ -175,6 +179,8 @@ sections:
     - key: SpeedLimitPolicy
       widget: multiple_button
       title: Speed Limit Source
+      description: Phone First uses fresh APN/N/Navipilot/Carrot phone data first; stale phone data times out, then the
+        resolver falls back to the vehicle speed limit and then OpenStreetMap/mapd.
       options:
       - value: 0
         label: Car State Only
@@ -186,9 +192,13 @@ sections:
         label: Map Data Priority
       - value: 4
         label: Combined
+      - value: 5
+        label: Phone First
     - key: SpeedLimitOffsetType
       widget: multiple_button
       title: Speed Limit Offset Type
+      description: Default is Off, which means no added speed. Fixed adds km/h or mph. Percentage adds a percentage of
+        the detected limit. Keep this at 0 until the source is known to be reliable.
       options:
       - value: 0
         label: 'Off'
@@ -199,6 +209,7 @@ sections:
     - key: SpeedLimitValueOffset
       widget: option
       title: Speed Limit Offset Value
+      description: Offset value applied only when offset type is Fixed or Percentage. Default is 0.
       min: -30
       max: 30
       step: 1

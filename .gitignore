@@ -22,6 +22,7 @@ bin/
 *.pem
 *.pyc
 *.pyo
+__pycache__/
 .*.swp
 .*.swo
 .*.un~

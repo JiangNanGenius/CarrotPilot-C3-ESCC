@@ -772,7 +772,7 @@
         {
           "id": "speed_limits",
           "title": "Speed Limits",
-          "description": "Speed limit detection and offset behavior",
+          "description": "Speed limit display, source priority, and offset behavior. Defaults are display-only: Speed Limit mode is Information,\nsource policy is Phone First, and offset is 0.",
           "items": [],
           "sub_panels": [
             {
@@ -784,6 +784,7 @@
                   "key": "SpeedLimitMode",
                   "widget": "multiple_button",
                   "title": "Speed Limit Assist Mode",
+                  "description": "Information only displays the resolved speed limit. Warning adds alerts. Assist can change the cruise target on supported cars; leave Assist off until phone, car, and map sources have been verified in the real vehicle.",
                   "options": [
                     {
                       "value": 0,
@@ -850,6 +851,7 @@
                   "key": "SpeedLimitPolicy",
                   "widget": "multiple_button",
                   "title": "Speed Limit Source",
+                  "description": "Phone First uses fresh APN/N/Navipilot/Carrot phone data first; stale phone data times out, then the resolver falls back to the vehicle speed limit and then OpenStreetMap/mapd.",
                   "options": [
                     {
                       "value": 0,
@@ -870,6 +872,10 @@
                     {
                       "value": 4,
                       "label": "Combined"
+                    },
+                    {
+                      "value": 5,
+                      "label": "Phone First"
                     }
                   ]
                 },
@@ -877,6 +883,7 @@
                   "key": "SpeedLimitOffsetType",
                   "widget": "multiple_button",
                   "title": "Speed Limit Offset Type",
+                  "description": "Default is Off, which means no added speed. Fixed adds km/h or mph. Percentage adds a percentage of the detected limit. Keep this at 0 until the source is known to be reliable.",
                   "options": [
                     {
                       "value": 0,
@@ -896,6 +903,7 @@
                   "key": "SpeedLimitValueOffset",
                   "widget": "option",
                   "title": "Speed Limit Offset Value",
+                  "description": "Offset value applied only when offset type is Fixed or Percentage. Default is 0.",
                   "min": -30,
                   "max": 30,
                   "step": 1,
@@ -1554,13 +1562,14 @@
             {
               "key": "OffroadMode",
               "widget": "toggle",
-              "title": "Force Offroad Mode"
+              "title": "Force Offroad Mode",
+              "description": "Default is Off. When enabled, the device stays offroad and panda is held in no-output mode for parked updates or harness/relay debugging on ACC/CAN powered C3 devices. Do not enable it before driving; local Wi-Fi, SSH, Web, GitHub updates, and model downloads remain available."
             },
             {
               "key": "DeviceBootMode",
               "widget": "option",
               "title": "Wake Up Behavior",
-              "description": "Controls state of the device after boot/sleep. Default: Device will boot/wake-up normally and will be ready to engage. Offroad: Device will be in Always Offroad mode after boot/wake-up.",
+              "description": "Controls state of the device after boot/sleep. Default: Device boots normally and may become ready to engage. Offroad: Device boots into offroad/no-output mode for parked maintenance only.",
               "options": [
                 {
                   "value": 0,
@@ -1920,6 +1929,49 @@
               ]
             }
           ]
+        },
+        {
+          "id": "personal_feature_boundaries",
+          "title": "Personal Feature Boundaries",
+          "description": "Local-only CarrotPilot-C3-ESCC features and safety defaults. These entries document behavior; high-risk control paths remain disabled until separate real-car evidence exists.",
+          "items": [
+            {
+              "key": "CarrotMapOverlayEnabled",
+              "widget": "info",
+              "title": "Carrot Map Overlay",
+              "description": "Default is Off. When Off, the Carrot Web page does not load external Mapbox/Kakao SDKs or iframe overlays. Leave Off unless a parked route-display test proves it does not cover the driving HUD."
+            },
+            {
+              "key": "CarrotLearningActive",
+              "widget": "info",
+              "title": "Auto-Tuner Learning",
+              "description": "Default is Off. Learning can generate recommendations, but applying them is manual and blocked while onroad. Auto-apply remains Off by default and must not be used until recommendations are reviewed after a drive."
+            },
+            {
+              "key": "CarrotActiveSpeedControlEnabled",
+              "widget": "info",
+              "title": "Carrot Active Speed Control",
+              "description": "Default is Off and read-only in the local Web API. Do not enable active speed changes until phone speed, vehicle speed, and map fallback behavior are validated separately."
+            },
+            {
+              "key": "CarrotAutoTurnControlEnabled",
+              "widget": "info",
+              "title": "Auto Turn Slowdown",
+              "description": "Default is Off and read-only. This can change longitudinal targets for turns; it needs a dedicated real-car gate before it can influence control."
+            },
+            {
+              "key": "CarrotTrafficStopEnabled",
+              "widget": "info",
+              "title": "Traffic Light Stop",
+              "description": "Default is Off and read-only. Red-light or traffic-stop behavior must not change control targets until camera, navigation, and driver-confirmation gates are proven."
+            },
+            {
+              "key": "FishopAutoOvertakeEnabled",
+              "widget": "info",
+              "title": "fishop Auto Overtake Input",
+              "description": "Default is Off. fishop lane, lidar blindspot, and overtake messages are currently evidence-only. They may show readiness or block reasons, but they do not publish desire, planner, steering, or CAN commands."
+            }
+          ]
         }
       ]
     },
@@ -1929,12 +1981,12 @@
       "icon": "models",
       "order": 10,
       "remote_configurable": false,
-      "description": "Driving model behavior and camera calibration",
+      "description": "Driving model behavior, model manager status, and camera calibration. The stock model is the default. Custom model download, validation, and switching must be done while offroad, and failures should fall back to stock or the last valid bundle.",
       "sections": [
         {
           "id": "model_behavior",
           "title": "Model Behavior",
-          "description": "Lane desire and lead-vehicle awareness tuning",
+          "description": "Lane desire and lead-vehicle awareness tuning. These settings affect planning behavior; leave defaults until the vehicle has been tested on familiar roads.",
           "items": [
             {
               "key": "LaneTurnDesire",
@@ -1971,7 +2023,7 @@
               "key": "LagdToggle",
               "widget": "toggle",
               "title": "Live Learning Steer Delay",
-              "description": "Allow device to learn and adapt car's steering response time"
+              "description": "Allows the device to learn and adapt steering response time. Keep default behavior unless you have evidence that fixed delay is better for this vehicle."
             },
             {
               "key": "LagdToggleDelay",
@@ -2002,7 +2054,7 @@
         {
           "id": "lateral_control",
           "title": "Lateral Control",
-          "description": "Neural network lateral control for supported models",
+          "description": "Neural network lateral control for supported models. This is separate from the driving model manager and should stay off unless the car/platform is known to support it.",
           "items": [
             {
               "key": "NeuralNetworkLateralControl",
@@ -2040,7 +2092,7 @@
         {
           "id": "camera",
           "title": "Camera",
-          "description": "Camera position and calibration",
+          "description": "Camera position and calibration. Camera offset changes shift the model path; keep at default unless mounting evidence shows the camera is physically offset.",
           "items": [
             {
               "key": "CameraOffset",

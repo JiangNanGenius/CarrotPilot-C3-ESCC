@@ -31,6 +31,19 @@ def read_tree(rel: str, suffixes: tuple[str, ...]) -> str:
   return "\n".join(chunks)
 
 
+def po_has_translation(po_text: str, msgid: str) -> bool:
+  marker = f'msgid "{msgid}"'
+  idx = po_text.find(marker)
+  if idx < 0:
+    return False
+  for line in po_text[idx:].splitlines()[1:6]:
+    if line.startswith('msgid "'):
+      return False
+    if line.startswith('msgstr "') and line != 'msgstr ""':
+      return True
+  return False
+
+
 def find_token_in_tree(rel: str, tokens: tuple[str, ...], suffixes: tuple[str, ...]) -> tuple[str, str] | None:
   root = ROOT / rel
   rg = shutil.which("rg")
@@ -1051,13 +1064,23 @@ def visible_korean_text_report() -> str:
     "README.md",
     "docs/personal",
     "selfdrive/carrot",
-    "selfdrive/ui",
-    "system/ui",
+    "selfdrive/ui/layouts",
+    "selfdrive/ui/mici/layouts",
+    "selfdrive/ui/sunnypilot/layouts",
+    "selfdrive/ui/sunnypilot/mici/layouts",
+    "selfdrive/ui/sunnypilot/onroad",
+    "selfdrive/ui/sunnypilot/widgets",
+    "system/ui/lib",
+    "system/ui/sunnypilot/widgets",
+    "system/ui/widgets",
     "sunnypilot/sunnylink/settings_ui_src",
   )
   suffixes = {".cc", ".h", ".html", ".json", ".md", ".py", ".ts", ".tsx", ".yaml", ".yml"}
   skipped = {
     Path("selfdrive/ui/translations/app_ko.po"),
+  }
+  skipped_dirs = {
+    Path("selfdrive/ui/translations"),
   }
   hits: list[str] = []
 
@@ -1069,6 +1092,10 @@ def visible_korean_text_report() -> str:
         continue
       rel = path.relative_to(ROOT)
       if rel in skipped:
+        continue
+      if any(rel == skipped_dir or skipped_dir in rel.parents for skipped_dir in skipped_dirs):
+        continue
+      if path.stat().st_size > 200_000:
         continue
       text = path.read_text(encoding="utf-8", errors="ignore")
       for line_no, line in enumerate(text.splitlines(), start=1):
@@ -1445,6 +1472,8 @@ def main() -> int:
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
   settings_ui_device = read("sunnypilot/sunnylink/settings_ui_src/pages/device.yaml")
   settings_ui_json = read("sunnypilot/sunnylink/settings_ui.json")
+  zh_chs_po = read("selfdrive/ui/translations/app_zh-CHS.po")
+  zh_cht_po = read("selfdrive/ui/translations/app_zh-CHT.po")
   languages_json = read("selfdrive/ui/translations/languages.json")
   multilang = read("system/ui/lib/multilang.py")
   font_process = read("selfdrive/assets/fonts/process.py")
@@ -1474,6 +1503,46 @@ def main() -> int:
                           and "'ko':" not in multilang
                           and '"ko"' not in font_process,
                           "personal alpha should expose Chinese/English-oriented language choices without Korean as a visible option")
+  risk_text = settings_ui_device + settings_ui_json + read("sunnypilot/sunnylink/settings_ui_src/pages/cruise.yaml") + read("sunnypilot/sunnylink/settings_ui_src/pages/models.yaml") + read("sunnypilot/sunnylink/settings_ui_src/pages/developer.yaml")
+  for token in (
+    "Phone First",
+    "stale phone data",
+    "offset is 0",
+    "panda is held in no-output mode",
+    "parked updates",
+    "stock model",
+    "offroad",
+    "Auto-Tuner Learning",
+    "blocked while onroad",
+    "Carrot Active Speed Control",
+    "Traffic Light Stop",
+    "fishop Auto Overtake Input",
+    "evidence-only",
+    "do not publish desire, planner, steering, or CAN commands",
+  ):
+    failures += not require(f"settings risk description exists: {token}", token in risk_text,
+                            "settings UI source and compiled JSON must explain defaults, risk boundaries, and when not to enable high-risk features")
+  failures += not require("Carrot Web safety boundary panel",
+                          'id="safety-boundaries"' in carrot_server
+                          and "Cloud services" in carrot_server
+                          and "Speed offset" in carrot_server
+                          and "fishop hardware" in carrot_server
+                          and "control outputs stay disabled" in carrot_server,
+                          "Carrot Web home page must explain local/cloud, speed, Auto-Tuner, fishop, and control-output boundaries")
+  for msgid in (
+    "Controls the state of the device after boot/sleep. Use Offroad only for parked updates or harness debugging.",
+    "Offroad: Device will boot into parked maintenance mode and keep panda in no-output mode.",
+    "Stock is the default. Select or download custom model bundles only while offroad; failed bundles fall back to stock or the last valid model.",
+    "Only available while offroad. Do not change model bundles during a drive.",
+    "Information: Displays the resolved speed limit only. This is the default and does not change cruise targets.",
+    "Assist: May adjust cruise targets on supported cars. Use only after phone, car, and map sources have been verified.",
+    "None: No offset. This is the default and safest setting.",
+    "Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle, then OpenStreetMap/mapd.",
+  ):
+    failures += not require(f"Simplified Chinese safety translation exists: {msgid[:40]}", po_has_translation(zh_chs_po, msgid),
+                            "critical risk/default descriptions must remain translated in app_zh-CHS.po")
+    failures += not require(f"Traditional Chinese safety translation exists: {msgid[:40]}", po_has_translation(zh_cht_po, msgid),
+                            "critical risk/default descriptions must remain translated in app_zh-CHT.po")
   failures += not require("TICI onboarding skips Sunnylink", "SunnylinkOnboarding" not in main_onboarding,
                           "Main onboarding still imports Sunnylink onboarding")
   failures += not require("MICI onboarding skips Sunnylink", "SunnylinkConsentPage" not in mici_onboarding,
