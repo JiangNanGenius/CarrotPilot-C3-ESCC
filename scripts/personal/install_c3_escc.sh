@@ -3,7 +3,7 @@ set -eu
 
 PROJECT_NAME="CarrotPilot-C3-ESCC"
 DEFAULT_REPO_URL="https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
-DEFAULT_REF="carrotpilot-c3-escc-20260618-test19"
+DEFAULT_REF="carrotpilot-c3-escc-20260618-test20"
 
 REPO_URL="${CARROTPILOT_REPO_URL:-$DEFAULT_REPO_URL}"
 REF="${CARROTPILOT_REF:-$DEFAULT_REF}"

@@ -79,7 +79,7 @@ install-c3-escc-test
 这个分支只作为安装入口指针。每次发布新的受控测试版或稳定版前，先通过 release gate，再把该分支移动到对应提交。Release tag 负责记录不可变版本，例如：
 
 ```text
-carrotpilot-c3-escc-20260618-test19
+carrotpilot-c3-escc-20260618-test20
 ```
 
 ## 二进制安装器和脚本安装器的区别
