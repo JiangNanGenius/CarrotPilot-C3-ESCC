@@ -11,6 +11,13 @@ LANE_MAX_AGE_S = 1.0
 BLINDSPOT_MAX_AGE_S = 2.0
 LIDAR_DISTANCE_MAX_AGE_S = 1.0
 OVERTAKE_MAX_AGE_S = 1.0
+FISHOP_PROTOCOL = {
+  "opListenPort": 4211,
+  "laneRemotePort": 4212,
+  "laneListenPort": 4213,
+  "navigationListenPort": 7706,
+  "navigationRemotePort": 7705,
+}
 
 LEFT_SIDE_BIT = 0x1
 RIGHT_SIDE_BIT = 0x2
@@ -19,10 +26,17 @@ LANE_KEYS = ("left_lane", "right_lane", "lineValid", "max_curve", "lat_a")
 BLINDSPOT_KEYS = (
   "lidar_lblind", "lidar_rblind", "left_blind", "right_blind",
   "l_blindspot", "r_blindspot", "detect_side", "lidar_id",
+  "lidar_car_lblind", "lidar_car_rblind", "lidar_l", "lidar_r", "camera_l", "camera_r",
   "lf_drel", "lb_drel", "rf_drel", "rb_drel",
   "lf_xrel", "lb_xrel", "rf_xrel", "rb_xrel",
+  "lf_vrel", "lb_vrel", "rf_vrel", "rb_vrel", "dist_time", "device",
 )
-OVERTAKE_KEYS = ("overtake", "overtake_request", "request", "direction", "reason")
+TARGET_KEYS = (
+  "lf_drel", "lb_drel", "rf_drel", "rb_drel",
+  "lf_xrel", "lb_xrel", "rf_xrel", "rb_xrel",
+  "lf_vrel", "lb_vrel", "rf_vrel", "rb_vrel",
+)
+OVERTAKE_KEYS = ("overtake", "overtake_request", "request", "direction", "reason", "index", "cmd", "arg")
 
 
 def _now() -> float:
@@ -116,6 +130,9 @@ class LaneEvidence:
       "lineValid": self.line_valid and fresh,
       "leftLine": self.left_line,
       "rightLine": self.right_line,
+      "leftLaneBlind": self.left_line >= 1 and fresh,
+      "rightLaneBlind": self.right_line >= 1 and fresh,
+      "lineTypeRule": "fishop reference treats lane line values >= 1 as solid-line lane-change blockers",
       "maxCurve": self.max_curve,
       "latA": self.lat_a,
     }
@@ -126,29 +143,47 @@ class BlindspotEvidence:
   last_update_s: float = 0.
   left_lidar_blind: bool = False
   right_lidar_blind: bool = False
+  left_lidar_car_blind: bool = False
+  right_lidar_car_blind: bool = False
   left_camera_blind: bool = False
   right_camera_blind: bool = False
-  detect_side: int = 0
+  lidar_detect_side: int = 0
+  camera_detect_side: int = 0
   lidar_id: int | None = None
+  dist_time_ms: int | None = None
   targets: dict[str, float | None] = field(default_factory=dict)
 
   def update(self, payload: dict[str, Any], now_s: float) -> None:
-    detect_side = _as_int(payload.get("detect_side"), self.detect_side)
-    self.detect_side = detect_side
+    source = _limited_text(payload.get("resp", payload.get("type", payload.get("device")))).lower()
+    device = _limited_text(payload.get("device")).lower()
+    detect_side = _as_int(payload.get("detect_side"), 0)
+    lidar_payload = source == "blindspot" or device == "lidar" or any(key in payload for key in ("lidar_lblind", "lidar_rblind", "lidar_id", "dist_time"))
+    camera_payload = source == "cam_blind" or device == "camera" or any(key in payload for key in ("left_blind", "right_blind", "l_blindspot", "r_blindspot"))
+    if detect_side:
+      if lidar_payload:
+        self.lidar_detect_side = detect_side
+      if camera_payload:
+        self.camera_detect_side = detect_side
     if "lidar_id" in payload:
       self.lidar_id = _as_int(payload.get("lidar_id"), 0)
+    if "dist_time" in payload:
+      self.dist_time_ms = _as_int(payload.get("dist_time"), 0)
 
     if "lidar_lblind" in payload:
       self.left_lidar_blind = _as_bool(payload.get("lidar_lblind"))
     if "lidar_rblind" in payload:
       self.right_lidar_blind = _as_bool(payload.get("lidar_rblind"))
+    if "lidar_car_lblind" in payload:
+      self.left_lidar_car_blind = _as_bool(payload.get("lidar_car_lblind"))
+    if "lidar_car_rblind" in payload:
+      self.right_lidar_car_blind = _as_bool(payload.get("lidar_car_rblind"))
 
     if "left_blind" in payload or "l_blindspot" in payload:
       self.left_camera_blind = _as_bool(payload.get("left_blind", payload.get("l_blindspot")))
     if "right_blind" in payload or "r_blindspot" in payload:
       self.right_camera_blind = _as_bool(payload.get("right_blind", payload.get("r_blindspot")))
 
-    for key in ("lf_drel", "lb_drel", "rf_drel", "rb_drel", "lf_xrel", "lb_xrel", "rf_xrel", "rb_xrel"):
+    for key in TARGET_KEYS:
       if key in payload:
         self.targets[key] = _as_float(payload.get(key))
 
@@ -161,14 +196,29 @@ class BlindspotEvidence:
       "fresh": fresh,
       "ageSec": _age(self.last_update_s, now_s),
       "lastUpdateMonotonicSec": self.last_update_s if self.last_update_s > 0. else None,
-      "detectSide": self.detect_side,
+      "detectSide": self.lidar_detect_side | self.camera_detect_side,
+      "lidarDetectSide": self.lidar_detect_side,
+      "cameraDetectSide": self.camera_detect_side,
       "lidarId": self.lidar_id,
+      "distTimeMs": self.dist_time_ms,
+      "leftLidarOnline": bool((self.lidar_detect_side & LEFT_SIDE_BIT) and fresh),
+      "rightLidarOnline": bool((self.lidar_detect_side & RIGHT_SIDE_BIT) and fresh),
+      "leftCameraOnline": bool((self.camera_detect_side & LEFT_SIDE_BIT) and fresh),
+      "rightCameraOnline": bool((self.camera_detect_side & RIGHT_SIDE_BIT) and fresh),
       "leftLidarBlind": self.left_lidar_blind if fresh else False,
       "rightLidarBlind": self.right_lidar_blind if fresh else False,
+      "leftLidarCarBlind": self.left_lidar_car_blind if fresh else False,
+      "rightLidarCarBlind": self.right_lidar_car_blind if fresh else False,
       "leftCameraBlind": self.left_camera_blind if fresh else False,
       "rightCameraBlind": self.right_camera_blind if fresh else False,
       "targetsFresh": _fresh(self.last_update_s, now_s, LIDAR_DISTANCE_MAX_AGE_S),
       "targets": dict(sorted(self.targets.items())),
+      "targetUnits": {
+        "drel": "millimeter longitudinal distance; front positive, rear negative in fishop reference",
+        "xrel": "millimeter lateral distance",
+        "vrel": "meter_per_second relative speed",
+        "distTimeMs": "sensor timestamp in milliseconds",
+      },
     }
 
 
@@ -179,12 +229,23 @@ class OvertakeEvidence:
   requested: bool = False
   direction: str = ""
   reason: str = ""
+  source_device: str = ""
+  cmd_index: int | None = None
+  remote_cmd: str = ""
+  remote_arg: str = ""
 
   def update(self, payload: dict[str, Any], now_s: float) -> None:
     self.command_seen = True
     self.requested = _as_bool(payload.get("overtake", payload.get("overtake_request", payload.get("request"))))
     self.direction = _limited_text(payload.get("direction"))
     self.reason = _limited_text(payload.get("reason"))
+    self.source_device = _limited_text(payload.get("device", payload.get("resp", payload.get("type"))))
+    if "index" in payload:
+      self.cmd_index = _as_int(payload.get("index"), 0)
+    if "cmd" in payload:
+      self.remote_cmd = _limited_text(payload.get("cmd"))
+    if "arg" in payload:
+      self.remote_arg = _limited_text(payload.get("arg"))
     self.last_update_s = now_s
 
   def to_dict(self, now_s: float) -> dict[str, Any]:
@@ -197,6 +258,10 @@ class OvertakeEvidence:
       "requested": self.requested and fresh,
       "direction": self.direction if fresh else "",
       "reason": self.reason if fresh else "",
+      "sourceDevice": self.source_device if fresh else "",
+      "cmdIndex": self.cmd_index if fresh else None,
+      "remoteCmd": self.remote_cmd if fresh else "",
+      "remoteArg": self.remote_arg if fresh else "",
       "readOnly": True,
     }
 
@@ -209,15 +274,15 @@ class FishopHardwareState:
 
   def update_from_payload(self, payload: dict[str, Any], now_s: float | None = None) -> None:
     now_s = _now() if now_s is None else now_s
-    source = _limited_text(payload.get("resp", payload.get("type", payload.get("device_type")))).lower()
+    source = _limited_text(payload.get("resp", payload.get("type", payload.get("device_type", payload.get("device"))))).lower()
 
     if source == "lane" or any(key in payload for key in LANE_KEYS):
       self.lane.update(payload, now_s)
 
-    if source in ("blindspot", "cam_blind") or any(key in payload for key in BLINDSPOT_KEYS):
+    if source in ("blindspot", "cam_blind", "lidar", "camera") or any(key in payload for key in BLINDSPOT_KEYS):
       self.blindspot.update(payload, now_s)
 
-    if source == "overtake" or any(key in payload for key in OVERTAKE_KEYS):
+    if source in ("overtake", "navi") or any(key in payload for key in OVERTAKE_KEYS):
       self.overtake.update(payload, now_s)
 
   def to_dict(self, now_s: float | None = None) -> dict[str, Any]:
@@ -235,6 +300,8 @@ class FishopHardwareState:
     return {
       "readOnly": True,
       "controlOutputEnabled": CONTROL_OUTPUT_ENABLED,
+      "protocol": dict(FISHOP_PROTOCOL),
+      "source": "fishop/openpilot:selfdrive/carrot/amap_navi.py",
       "sensorOnline": bool(lane["fresh"] or blindspot["fresh"] or overtake["fresh"]),
       "lastUpdateMonotonicSec": max(last_updates) if last_updates else None,
       "lane": lane,

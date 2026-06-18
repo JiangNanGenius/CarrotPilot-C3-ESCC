@@ -1247,8 +1247,20 @@ def main() -> int:
     failures += not require(f"Carrot Web alpha omits high-risk tool {forbidden}", forbidden not in carrot_server,
                             "alpha Carrot Web should not expose terminal/tools before explicit migration gates")
   failures += not require("fishop hardware read-only module exists", "class FishopHardwareState" in fishop_hardware
-                          and "CONTROL_OUTPUT_ENABLED = False" in fishop_hardware,
+                          and "CONTROL_OUTPUT_ENABLED = False" in fishop_hardware
+                          and "FISHOP_PROTOCOL" in fishop_hardware,
                           "fishop hardware parser must exist and remain read-only")
+  failures += not require("fishop hardware parser covers latest protocol fields",
+                          "leftLaneBlind" in fishop_hardware
+                          and "rightLaneBlind" in fishop_hardware
+                          and "lf_vrel" in fishop_hardware
+                          and "distTimeMs" in fishop_hardware
+                          and "leftLidarOnline" in fishop_hardware
+                          and "rightCameraOnline" in fishop_hardware
+                          and "lidar_car_lblind" in fishop_hardware
+                          and "remoteCmd" in fishop_hardware
+                          and "fishop/openpilot:selfdrive/carrot/amap_navi.py" in fishop_hardware,
+                          "fishop hardware parser must preserve lane, lidar, camera, target, and command evidence fields from amap_navi.py")
   for forbidden in ("socket", "PubMaster", "SubMaster", "CarControl", "CANParser", "sendto", ".bind(", "desire_helper", "blinker_ctrl"):
     failures += not require(f"fishop hardware parser omits {forbidden}", forbidden not in fishop_hardware,
                             "fishop hardware parser must not open network sockets, publish controls, or touch lane-change control")
@@ -1378,22 +1390,38 @@ def main() -> int:
     from openpilot.selfdrive.carrot.fishop_hardware import FishopHardwareState
     fishop_state = FishopHardwareState()
     fishop_state.update_from_payload({"resp": "lane", "left_lane": 2, "right_lane": 1, "lineValid": True}, 1000.0)
-    fishop_state.update_from_payload({"resp": "blindspot", "detect_side": 3, "lidar_lblind": True, "rf_drel": 4200}, 1000.0)
-    fishop_state.update_from_payload({"resp": "overtake", "request": True, "direction": "left"}, 1000.0)
+    fishop_state.update_from_payload({"device": "lidar", "resp": "blindspot", "detect_side": 3, "lidar_id": 0,
+                                      "dist_time": 123456, "lidar_lblind": True, "lidar_car_lblind": True,
+                                      "rf_drel": 4200, "rb_drel": -1800, "rf_xrel": 850, "rf_vrel": -1.2}, 1000.0)
+    fishop_state.update_from_payload({"device": "camera", "resp": "cam_blind", "detect_side": 2, "right_blind": True}, 1000.0)
+    fishop_state.update_from_payload({"device": "overtake", "index": 7, "cmd": "OVERTAKE", "arg": "left",
+                                      "request": True, "direction": "left"}, 1000.0)
     fishop_snapshot = fishop_state.to_dict(1000.5)
     failures += not require("fishop parser preserves lane evidence", fishop_snapshot["lane"]["leftLine"] == 2
-                            and fishop_snapshot["lane"]["rightLine"] == 1 and fishop_snapshot["lane"]["fresh"],
+                            and fishop_snapshot["lane"]["rightLine"] == 1 and fishop_snapshot["lane"]["fresh"]
+                            and fishop_snapshot["lane"]["leftLaneBlind"] and fishop_snapshot["lane"]["rightLaneBlind"],
                             "fishop parser must expose lane evidence without using it for control")
     failures += not require("fishop parser preserves blindspot evidence", fishop_snapshot["blindspot"]["leftLidarBlind"]
+                            and fishop_snapshot["blindspot"]["leftLidarCarBlind"]
+                            and fishop_snapshot["blindspot"]["leftLidarOnline"]
+                            and fishop_snapshot["blindspot"]["rightLidarOnline"]
+                            and fishop_snapshot["blindspot"]["rightCameraOnline"]
+                            and fishop_snapshot["blindspot"]["rightCameraBlind"]
+                            and fishop_snapshot["blindspot"]["distTimeMs"] == 123456
+                            and fishop_snapshot["blindspot"]["targets"]["rf_vrel"] == -1.2
                             and fishop_snapshot["blindspot"]["fresh"],
                             "fishop parser must expose blindspot evidence while fresh")
     failures += not require("fishop parser records overtake read-only", fishop_snapshot["overtake"]["commandSeen"]
-                            and fishop_snapshot["overtake"]["readOnly"] and not fishop_snapshot["controlOutputEnabled"],
+                            and fishop_snapshot["overtake"]["readOnly"]
+                            and fishop_snapshot["overtake"]["cmdIndex"] == 7
+                            and fishop_snapshot["overtake"]["remoteCmd"] == "OVERTAKE"
+                            and not fishop_snapshot["controlOutputEnabled"],
                             "fishop overtake input must be evidence-only and never enable control output")
     failures += not require("fishop parser omits overtake action output", all(key not in fishop_snapshot["overtake"] for key in ("desire", "laneChange", "execute", "control"))
                             and fishop_snapshot["overtake"]["requested"] and fishop_snapshot["overtake"]["direction"] == "left",
                             "fishop overtake evidence must not expose desire/lane-change/control action fields")
     failures += not require("fishop parser reports sensor freshness", fishop_snapshot["sensorOnline"]
+                            and fishop_snapshot["protocol"]["laneListenPort"] == 4213
                             and fishop_snapshot["lastUpdateMonotonicSec"] == 1000.0
                             and fishop_snapshot["lane"]["lastUpdateMonotonicSec"] == 1000.0,
                             "fishop parser must expose sensorOnline and last-update evidence")
@@ -1402,7 +1430,9 @@ def main() -> int:
                             and not stale_snapshot["lane"]["lineValid"],
                             "stale fishop lane input must not stay valid")
     failures += not require("fishop stale blindspot clears active bits", not stale_snapshot["blindspot"]["fresh"]
-                            and not stale_snapshot["blindspot"]["leftLidarBlind"],
+                            and not stale_snapshot["blindspot"]["leftLidarBlind"]
+                            and not stale_snapshot["blindspot"]["rightCameraBlind"]
+                            and not stale_snapshot["blindspot"]["targetsFresh"],
                             "stale fishop blindspot input must not stay active")
   except Exception as exc:
     failures += not require("fishop parser import/sample", False, f"fishop parser import/sample failed: {exc}")
