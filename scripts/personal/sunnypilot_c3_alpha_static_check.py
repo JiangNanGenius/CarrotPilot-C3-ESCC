@@ -158,6 +158,10 @@ def main() -> int:
     failures += not require("fishop parser records overtake read-only", fishop_snapshot["overtake"]["commandSeen"]
                             and fishop_snapshot["overtake"]["readOnly"] and not fishop_snapshot["controlOutputEnabled"],
                             "fishop overtake input must be evidence-only and never enable control output")
+    failures += not require("fishop parser reports sensor freshness", fishop_snapshot["sensorOnline"]
+                            and fishop_snapshot["lastUpdateMonotonicSec"] == 1000.0
+                            and fishop_snapshot["lane"]["lastUpdateMonotonicSec"] == 1000.0,
+                            "fishop parser must expose sensorOnline and last-update evidence")
     stale_snapshot = fishop_state.to_dict(1003.0)
     failures += not require("fishop stale lane invalid", not stale_snapshot["lane"]["fresh"]
                             and not stale_snapshot["lane"]["lineValid"],

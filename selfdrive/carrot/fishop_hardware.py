@@ -112,6 +112,7 @@ class LaneEvidence:
     return {
       "fresh": fresh,
       "ageSec": _age(self.last_update_s, now_s),
+      "lastUpdateMonotonicSec": self.last_update_s if self.last_update_s > 0. else None,
       "lineValid": self.line_valid and fresh,
       "leftLine": self.left_line,
       "rightLine": self.right_line,
@@ -159,6 +160,7 @@ class BlindspotEvidence:
     return {
       "fresh": fresh,
       "ageSec": _age(self.last_update_s, now_s),
+      "lastUpdateMonotonicSec": self.last_update_s if self.last_update_s > 0. else None,
       "detectSide": self.detect_side,
       "lidarId": self.lidar_id,
       "leftLidarBlind": self.left_lidar_blind if fresh else False,
@@ -190,6 +192,7 @@ class OvertakeEvidence:
     return {
       "fresh": fresh,
       "ageSec": _age(self.last_update_s, now_s),
+      "lastUpdateMonotonicSec": self.last_update_s if self.last_update_s > 0. else None,
       "commandSeen": self.command_seen and fresh,
       "requested": self.requested and fresh,
       "direction": self.direction if fresh else "",
@@ -219,12 +222,24 @@ class FishopHardwareState:
 
   def to_dict(self, now_s: float | None = None) -> dict[str, Any]:
     now_s = _now() if now_s is None else now_s
+    lane = self.lane.to_dict(now_s)
+    blindspot = self.blindspot.to_dict(now_s)
+    overtake = self.overtake.to_dict(now_s)
+    last_updates = [
+      value for value in (
+        self.lane.last_update_s,
+        self.blindspot.last_update_s,
+        self.overtake.last_update_s,
+      ) if value > 0.
+    ]
     return {
       "readOnly": True,
       "controlOutputEnabled": CONTROL_OUTPUT_ENABLED,
-      "lane": self.lane.to_dict(now_s),
-      "blindspot": self.blindspot.to_dict(now_s),
-      "overtake": self.overtake.to_dict(now_s),
+      "sensorOnline": bool(lane["fresh"] or blindspot["fresh"] or overtake["fresh"]),
+      "lastUpdateMonotonicSec": max(last_updates) if last_updates else None,
+      "lane": lane,
+      "blindspot": blindspot,
+      "overtake": overtake,
     }
 
 
