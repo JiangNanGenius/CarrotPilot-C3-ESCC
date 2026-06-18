@@ -32,6 +32,8 @@ MESSAGING_STATUS_SERVICES = (
 )
 MESSAGING_STATUS_INTERVAL_S = 0.2
 NAVIGATION_UDP_PORT = 7706
+NAVI_TCP_PORT = 7712
+NAVI_TCP_MAX_LINE_BYTES = 1024 * 1024
 NAVI_HTTP_PORT = 7713
 NAVI_HTTP_MAX_BODY_SIZE = 16 * 1024 * 1024
 NAVI_EVENT_TYPES = ("complexCrossroad", "rgdata", "vrtx", "ssinf", "sinf", "route")
@@ -591,14 +593,18 @@ def update_messaging_status_from_sm(sm: Any) -> dict[str, Any]:
   }
 
 
-def build_status_payload(runtime_status: dict[str, Any] | None = None, navi_http_status: dict[str, Any] | None = None) -> dict[str, Any]:
+def build_status_payload(runtime_status: dict[str, Any] | None = None,
+                         navi_http_status: dict[str, Any] | None = None,
+                         navi_tcp_status: dict[str, Any] | None = None) -> dict[str, Any]:
   params, _error = _params_state()
   event_state = navigation_event_state()
   event = event_state.get("event", {}) if isinstance(event_state, dict) else {}
   nav_fields = _status_payload_navigation_fields(event if isinstance(event, dict) else {})
   runtime_status = {**default_messaging_status(), **(runtime_status or {})}
   navi_http_status = {**default_navi_http_state(), **(navi_http_status or {})}
+  navi_tcp_status = {**default_navi_tcp_state(), **(navi_tcp_status or {})}
   navi_http_available = bool(navi_http_status.get("available", False))
+  navi_tcp_available = bool(navi_tcp_status.get("available", False))
 
   is_onroad = bool(params.get_bool("IsOnroad")) if params is not None else bool(runtime_status.get("isOnroad", False))
   active = bool(runtime_status.get("active", False))
@@ -614,6 +620,9 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None, navi_http
     "navi_http_port": NAVI_HTTP_PORT if navi_http_available else 0,
     "naviHttpAvailable": navi_http_available,
     "naviHttpLastError": str(navi_http_status.get("lastError", "")),
+    "navi_tcp_port": NAVI_TCP_PORT if navi_tcp_available else 0,
+    "naviTcpAvailable": navi_tcp_available,
+    "naviTcpLastError": str(navi_tcp_status.get("lastError", "")),
     "carrotManCompatible": True,
     "carrotManControlStateAvailable": False,
     "active": active,
@@ -934,6 +943,19 @@ def default_navi_http_state() -> dict[str, Any]:
   }
 
 
+def default_navi_tcp_state() -> dict[str, Any]:
+  return {
+    "available": False,
+    "port": NAVI_TCP_PORT,
+    "lastError": "",
+    "lastEvent": {},
+    "lastReceivedAt": 0.0,
+    "receivedTypes": {},
+    "activeConnections": 0,
+    "lastPeer": "",
+  }
+
+
 def _detect_navi_event_type(payload: Any) -> str:
   if not isinstance(payload, dict):
     return "unknown"
@@ -1044,9 +1066,11 @@ def _write_navi_http_params(payload: dict[str, Any], event: dict[str, Any], imag
   return True
 
 
-def record_navi_http_event(app: web.Application, payload: dict[str, Any], tmap_version: str = "") -> dict[str, Any]:
+def _record_navi_compat_event(app: web.Application, payload: dict[str, Any], *,
+                              tmap_version: str = "", state_key: str = "navi_http_state",
+                              source_prefix: str = "http-7713") -> dict[str, Any]:
   if not isinstance(payload, dict):
-    raise ValueError("navigation HTTP payload must be a JSON object")
+    raise ValueError("navigation compatibility payload must be a JSON object")
   event_type = _detect_navi_event_type(payload)
   received_at = time.time()
   summary = _navi_http_summary(payload, event_type)
@@ -1054,6 +1078,7 @@ def record_navi_http_event(app: web.Application, payload: dict[str, Any], tmap_v
     "receivedAt": received_at,
     "eventTimeMs": _navi_event_timestamp_ms(payload),
     "type": event_type,
+    "source": source_prefix,
     "tmapVersion": _safe_navigation_text(tmap_version),
     "summary": summary,
     "controlOutput": False,
@@ -1083,11 +1108,11 @@ def record_navi_http_event(app: web.Application, payload: dict[str, Any], tmap_v
   nav_result: dict[str, Any] = {"recorded": False}
   try:
     nav_payload = _navigation_payload_from_navi_http(payload, event_type)
-    nav_result = record_navigation_event(nav_payload, f"http-7713-{event_type}")
+    nav_result = record_navigation_event(nav_payload, f"{source_prefix}-{event_type}")
   except Exception as exc:
     nav_result = {"recorded": False, "error": str(exc)}
 
-  state = app["navi_http_state"]
+  state = app[state_key]
   received_types = state.setdefault("receivedTypes", {})
   received_types[event_type] = int(received_types.get(event_type, 0)) + 1
   state["lastEvent"] = event
@@ -1102,6 +1127,14 @@ def record_navi_http_event(app: web.Application, payload: dict[str, Any], tmap_v
     "summary": summary,
     "controlOutput": False,
   }
+
+
+def record_navi_http_event(app: web.Application, payload: dict[str, Any], tmap_version: str = "") -> dict[str, Any]:
+  return _record_navi_compat_event(app, payload, tmap_version=tmap_version, state_key="navi_http_state", source_prefix="http-7713")
+
+
+def record_navi_tcp_event(app: web.Application, payload: dict[str, Any]) -> dict[str, Any]:
+  return _record_navi_compat_event(app, payload, state_key="navi_tcp_state", source_prefix="tcp-7712")
 
 
 def fishop_state() -> dict[str, Any]:
@@ -1136,6 +1169,7 @@ async def api_health(_request: web.Request) -> web.Response:
   status_last_error = str(status_state.get("lastError", ""))
   messaging_state = _request.app["messaging_status_state"]
   navi_http_state = _request.app["navi_http_state"]
+  navi_tcp_state = _request.app["navi_tcp_state"]
   return _json_response({
     "ok": True,
     "service": "carrot_server",
@@ -1157,6 +1191,11 @@ async def api_health(_request: web.Request) -> web.Response:
     "naviHttpAvailable": bool(navi_http_state.get("available", False)),
     "naviHttpLastError": str(navi_http_state.get("lastError", "")),
     "naviHttpLastReceivedAt": float(navi_http_state.get("lastReceivedAt", 0.0)),
+    "naviTcpPort": NAVI_TCP_PORT,
+    "naviTcpAvailable": bool(navi_tcp_state.get("available", False)),
+    "naviTcpLastError": str(navi_tcp_state.get("lastError", "")),
+    "naviTcpLastReceivedAt": float(navi_tcp_state.get("lastReceivedAt", 0.0)),
+    "naviTcpActiveConnections": int(navi_tcp_state.get("activeConnections", 0)),
     "timestamp": dt.datetime.now(dt.timezone.utc).astimezone().isoformat(timespec="seconds"),
     "cloudServices": False,
     "controlOutput": False,
@@ -1169,6 +1208,7 @@ async def api_health(_request: web.Request) -> web.Response:
       "/api/fishop_hardware",
       "/api/navigation_event",
       "/api/navi",
+      "/api/navi/tcp_health",
       "/api/phone_speed_limit",
     ],
   })
@@ -1210,6 +1250,7 @@ async def api_status_broadcast(_request: web.Request) -> web.Response:
   status_state = _request.app["status_broadcast_state"]
   messaging_state = _request.app["messaging_status_state"]
   navi_http_state = _request.app["navi_http_state"]
+  navi_tcp_state = _request.app["navi_tcp_state"]
   return _json_response({
     "ok": True,
     "port": STATUS_BROADCAST_PORT,
@@ -1218,7 +1259,8 @@ async def api_status_broadcast(_request: web.Request) -> web.Response:
     "lastError": str(status_state.get("lastError", "")),
     "messagingStatus": messaging_state,
     "naviHttpStatus": navi_http_state,
-    "payload": status_state.get("lastPayload") or build_status_payload(messaging_state, navi_http_state),
+    "naviTcpStatus": navi_tcp_state,
+    "payload": status_state.get("lastPayload") or build_status_payload(messaging_state, navi_http_state, navi_tcp_state),
   })
 
 
@@ -1268,6 +1310,22 @@ async def api_navi_http_health(request: web.Request) -> web.Response:
     "available": bool(state.get("available", False)),
     "lastError": str(state.get("lastError", "")),
     "lastEvent": state.get("lastEvent", {}),
+    "receivedTypes": state.get("receivedTypes", {}),
+    "controlOutput": False,
+  })
+
+
+async def api_navi_tcp_health(request: web.Request) -> web.Response:
+  state = request.app["navi_tcp_state"]
+  return _json_response({
+    "ok": True,
+    "service": "carrot_navi_tcp",
+    "port": NAVI_TCP_PORT,
+    "available": bool(state.get("available", False)),
+    "lastError": str(state.get("lastError", "")),
+    "lastEvent": state.get("lastEvent", {}),
+    "lastPeer": str(state.get("lastPeer", "")),
+    "activeConnections": int(state.get("activeConnections", 0)),
     "receivedTypes": state.get("receivedTypes", {}),
     "controlOutput": False,
   })
@@ -1431,10 +1489,11 @@ async def status_broadcast_loop(app: web.Application) -> None:
   status_state = app["status_broadcast_state"]
   messaging_state = app["messaging_status_state"]
   navi_http_state = app["navi_http_state"]
+  navi_tcp_state = app["navi_tcp_state"]
 
   while True:
     try:
-      payload = build_status_payload(dict(messaging_state), dict(navi_http_state))
+      payload = build_status_payload(dict(messaging_state), dict(navi_http_state), dict(navi_tcp_state))
       data = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
       for target in STATUS_BROADCAST_TARGETS:
         transport.sendto(data, (target, STATUS_BROADCAST_PORT))
@@ -1474,9 +1533,68 @@ async def stop_status_broadcast(app: web.Application) -> None:
     transport.close()
 
 
+async def handle_navi_tcp_client(reader: asyncio.StreamReader, writer: asyncio.StreamWriter, app: web.Application) -> None:
+  state = app["navi_tcp_state"]
+  peer = writer.get_extra_info("peername")
+  peer_text = f"{peer[0]}:{peer[1]}" if isinstance(peer, tuple) and len(peer) >= 2 else str(peer or "")
+  state["activeConnections"] = int(state.get("activeConnections", 0)) + 1
+  state["lastPeer"] = peer_text
+  try:
+    while True:
+      line = await reader.readline()
+      if not line:
+        break
+      if len(line) > NAVI_TCP_MAX_LINE_BYTES:
+        state["lastError"] = "navigation TCP line too large"
+        continue
+      text = line.decode("utf-8", errors="replace").strip()
+      if not text:
+        continue
+      try:
+        payload = json.loads(text)
+        if not isinstance(payload, dict):
+          raise ValueError("navigation TCP payload must be a JSON object")
+        record_navi_tcp_event(app, payload)
+        state["lastError"] = ""
+      except Exception as exc:
+        state["lastError"] = str(exc)[:200]
+  finally:
+    state["activeConnections"] = max(0, int(state.get("activeConnections", 0)) - 1)
+    try:
+      writer.close()
+      await writer.wait_closed()
+    except Exception:
+      pass
+
+
+async def start_navi_tcp(app: web.Application) -> None:
+  try:
+    server = await asyncio.start_server(
+      lambda reader, writer: handle_navi_tcp_client(reader, writer, app),
+      DEFAULT_HOST,
+      NAVI_TCP_PORT,
+    )
+    app["background_tasks"]["navi_tcp_server"] = server
+    app["navi_tcp_state"]["available"] = True
+    app["navi_tcp_state"]["lastError"] = ""
+  except Exception as exc:
+    app["navi_tcp_state"]["available"] = False
+    app["navi_tcp_state"]["lastError"] = str(exc)[:200]
+
+
+async def stop_navi_tcp(app: web.Application) -> None:
+  server = app["background_tasks"].get("navi_tcp_server")
+  if server is not None:
+    server.close()
+    await server.wait_closed()
+    app["background_tasks"]["navi_tcp_server"] = None
+  app["navi_tcp_state"]["available"] = False
+
+
 def add_navi_http_routes(app: web.Application) -> None:
   app.router.add_get("/health", api_navi_http_health)
   app.router.add_get("/api/navi/health", api_navi_http_health)
+  app.router.add_get("/api/navi/tcp_health", api_navi_tcp_health)
   app.router.add_post("/api/navi", api_navi_http_post)
   app.router.add_post("/api/navi/{tmap_version}", api_navi_http_post)
 
@@ -1484,6 +1602,7 @@ def add_navi_http_routes(app: web.Application) -> None:
 async def start_navi_http(app: web.Application) -> None:
   navi_app = web.Application(client_max_size=NAVI_HTTP_MAX_BODY_SIZE)
   navi_app["navi_http_state"] = app["navi_http_state"]
+  navi_app["navi_tcp_state"] = app["navi_tcp_state"]
   add_navi_http_routes(navi_app)
   runner = web.AppRunner(navi_app, access_log=None)
   try:
@@ -1512,13 +1631,16 @@ def make_app() -> web.Application:
   app["status_broadcast_state"] = {"lastPayload": {}, "lastSentAt": 0.0, "lastError": ""}
   app["messaging_status_state"] = default_messaging_status()
   app["navi_http_state"] = default_navi_http_state()
-  app["background_tasks"] = {"messaging_status": None, "navi_http_runner": None}
+  app["navi_tcp_state"] = default_navi_tcp_state()
+  app["background_tasks"] = {"messaging_status": None, "navi_http_runner": None, "navi_tcp_server": None}
   app.on_startup.append(start_messaging_status)
+  app.on_startup.append(start_navi_tcp)
   app.on_startup.append(start_navi_http)
   app.on_startup.append(start_status_broadcast)
   app.on_startup.append(start_navigation_udp)
   app.on_cleanup.append(stop_status_broadcast)
   app.on_cleanup.append(stop_navi_http)
+  app.on_cleanup.append(stop_navi_tcp)
   app.on_cleanup.append(stop_messaging_status)
   app.on_cleanup.append(stop_navigation_udp)
   app.router.add_get("/", index)
