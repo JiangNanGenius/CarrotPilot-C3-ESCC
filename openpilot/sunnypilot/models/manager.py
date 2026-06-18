@@ -47,6 +47,58 @@ class ModelManagerSP:
         artifact.downloadProgress.progress = source_artifact.downloadProgress.progress
         artifact.downloadProgress.eta = source_artifact.downloadProgress.eta
 
+  @staticmethod
+  def _download_temp_path(full_path: str) -> str:
+    return f"{full_path}.download-{os.getpid()}-{time.monotonic_ns()}"
+
+  @staticmethod
+  def _chunk_artifact_paths(base_path: str) -> list[str]:
+    from openpilot.common.file_chunker import get_chunk_name, get_manifest_path
+    manifest_path = get_manifest_path(base_path)
+    if not os.path.isfile(manifest_path):
+      return []
+
+    try:
+      with open(manifest_path) as f:
+        num_chunks = int(f.read().strip())
+    except Exception:
+      return [manifest_path]
+    return [manifest_path] + [get_chunk_name(base_path, i, num_chunks) for i in range(num_chunks)]
+
+  @staticmethod
+  def _remove_chunk_artifacts(base_path: str, keep: set[str] | None = None) -> None:
+    directory = os.path.dirname(base_path) or "."
+    prefix = f"{os.path.basename(base_path)}.chunk"
+    keep = {os.path.abspath(path) for path in (keep or set())}
+    if not os.path.isdir(directory):
+      return
+    for filename in os.listdir(directory):
+      path = os.path.join(directory, filename)
+      if filename.startswith(prefix) and os.path.abspath(path) not in keep and os.path.isfile(path):
+        os.remove(path)
+
+  def _cleanup_download_artifact(self, base_path: str) -> None:
+    if os.path.isfile(base_path):
+      os.remove(base_path)
+    self._remove_chunk_artifacts(base_path)
+
+  def _install_downloaded_artifact(self, temp_path: str, full_path: str) -> None:
+    from openpilot.common.file_chunker import get_chunk_name, get_manifest_path
+    temp_chunk_paths = self._chunk_artifact_paths(temp_path)
+    if not temp_chunk_paths:
+      os.replace(temp_path, full_path)
+      self._remove_chunk_artifacts(full_path)
+      return
+
+    final_manifest = get_manifest_path(full_path)
+    final_chunks = [get_chunk_name(full_path, i, len(temp_chunk_paths) - 1) for i in range(len(temp_chunk_paths) - 1)]
+    for temp_chunk_path, final_chunk_path in zip(temp_chunk_paths[1:], final_chunks):
+      os.replace(temp_chunk_path, final_chunk_path)
+    os.replace(temp_chunk_paths[0], final_manifest)
+    if os.path.isfile(full_path):
+      os.remove(full_path)
+    self._remove_chunk_artifacts(full_path, keep={final_manifest, *final_chunks})
+
   def _calculate_eta(self, filename: str, progress: float) -> int:
     """Calculate ETA based on elapsed time and current progress"""
     if filename not in self._download_start_times or progress <= 0:
@@ -138,6 +190,7 @@ class ModelManagerSP:
     expected_hash = artifact.downloadUri.sha256
     filename = artifact.fileName
     full_path = os.path.join(destination_path, filename)
+    temp_path = self._download_temp_path(full_path)
 
     try:
       is_cached = False
@@ -164,17 +217,18 @@ class ModelManagerSP:
         return
 
       if len(artifact.chunks) > 0:
-        await self._download_chunked(url, full_path, artifact)
+        await self._download_chunked(url, temp_path, artifact)
         from openpilot.common.file_chunker import get_chunk_name
         for i, chunk in enumerate(artifact.chunks):
-          chunk_path = get_chunk_name(full_path, i, len(artifact.chunks))
+          chunk_path = get_chunk_name(temp_path, i, len(artifact.chunks))
           if not await verify_file(chunk_path, chunk.sha256):
             raise ValueError(f"Hash validation failed for chunk {i+1} of {filename}")
       else:
-        await self._download_file(url, full_path, artifact)
-        if not await verify_file(full_path, expected_hash):
+        await self._download_file(url, temp_path, artifact)
+        if not await verify_file(temp_path, expected_hash):
           raise ValueError(f"Hash validation failed for {filename}")
 
+      self._install_downloaded_artifact(temp_path, full_path)
       artifact.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.downloaded
       artifact.downloadProgress.progress = 100
       artifact.downloadProgress.eta = 0
@@ -183,9 +237,6 @@ class ModelManagerSP:
 
     except Exception as e:
       cloudlog.error(f"Error downloading {filename}: {str(e)}")
-      for f in [full_path] + [p for p in (os.path.join(destination_path, f) for f in os.listdir(destination_path)) if filename in p]:
-        if os.path.isfile(f):  # noqa: ASYNC240
-          os.remove(f)
       artifact.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.failed
       artifact.downloadProgress.eta = 0
       self._sync_artifact_progress(artifact)
@@ -194,6 +245,8 @@ class ModelManagerSP:
       self._report_status()
       self._download_start_times.pop(artifact.fileName, None)
       raise
+    finally:
+      self._cleanup_download_artifact(temp_path)
 
   async def _process_model(self, model, destination_path: str) -> None:
     """Processes a single model download including verification"""
