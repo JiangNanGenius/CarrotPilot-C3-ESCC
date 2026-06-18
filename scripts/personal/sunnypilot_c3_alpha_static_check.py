@@ -72,6 +72,7 @@ def main() -> int:
 
   fishop_hardware = read("selfdrive/carrot/fishop_hardware.py")
   fishop_sample = read("scripts/personal/fishop_hardware_sample.py")
+  alpha_snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
   failures += not require("fishop hardware read-only module exists", "class FishopHardwareState" in fishop_hardware
                           and "CONTROL_OUTPUT_ENABLED = False" in fishop_hardware,
                           "fishop hardware parser must exist and remain read-only")
@@ -80,6 +81,15 @@ def main() -> int:
                             "fishop hardware parser must not open network sockets, publish controls, or touch lane-change control")
   failures += not require("fishop hardware sample tool exists", "FishopHardwareState" in fishop_sample and "SAMPLE_PAYLOADS" in fishop_sample,
                           "fishop hardware sample tool must normalize captured JSON payloads")
+  failures += not require("alpha snapshot tool exists", "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot" in alpha_snapshot
+                          and "MESSAGING_SERVICES" in alpha_snapshot and "fishopHardware" in alpha_snapshot,
+                          "alpha snapshot must collect model, process, params, and fishop evidence")
+  for service_name in ("modelV2", "drivingModelData", "cameraOdometry", "modelManagerSP", "longitudinalPlanSP", "carStateSP"):
+    failures += not require(f"alpha snapshot samples {service_name}", f'"{service_name}"' in alpha_snapshot,
+                            f"alpha snapshot must sample {service_name}")
+  for disabled_process in ("manage_athenad", "uploader", "manage_sunnylinkd", "sunnylink_registration_manager", "statsd_sp", "backup_manager"):
+    failures += not require(f"alpha snapshot checks cloud process {disabled_process}", disabled_process in alpha_snapshot,
+                            f"alpha snapshot must report disabled cloud process {disabled_process}")
 
   settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
