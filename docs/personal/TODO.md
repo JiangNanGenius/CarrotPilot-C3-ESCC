@@ -346,7 +346,7 @@ flowchart TD
 - [x] alpha 手机限速入口把 km/h 转成 Sunny 内部 m/s，并在 0 值道路限速时允许回退到有效 SDI 限速字段。
 - [x] 限速优先级实现为：新鲜手机数据 > 车机/仪表 `carStateSP.speedLimit` > Sunny OSM/mapd > 无来源。
 - [x] 手机限速必须有超时保护；超时后退回车机或 mapd，不允许过期手机数据压住车辆限速。
-- [ ] Mapbox/Kakao/Carrot route 不作为默认限速真值，只做可选路线显示。
+- [x] Mapbox/Kakao/Carrot route 不作为默认限速真值，只做可选路线显示；alpha 静态和运行门禁确认 resolver 只接受 phone/car/map，`route/vrtx` 只记录路线点证据，不能更新 `CarrotPhoneSpeedLimit*`。
 - [x] 新增 `CarrotMapOverlayEnabled=0`。
 - [x] `CarrotMapOverlayEnabled=0` 时不加载地图 iframe、不请求外部地图 SDK、不遮挡 HUD；alpha 静态守门覆盖 Mapbox/Kakao/iframe loader。
 - [x] 限速 fixed offset 默认 0。
