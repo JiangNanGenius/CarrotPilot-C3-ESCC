@@ -1,5 +1,19 @@
 # 当前代码改动记录
 
+## 2026-06-18: 原生设置页补齐 AlwaysOffroad 入口
+
+改动内容：
+
+- 原生 C3 设置页 `Start` 分组新增 `AlwaysOffroad`，范围固定为 `0/1`。
+- 原生 C3 设置页的 `EnableConnect` 范围收紧为 `0/1`，与设置表和后台逻辑一致。
+- `smoke_check.py` 和 `escc_offroad_preflight.py` 增加守卫，防止原生设置页缺失 `AlwaysOffroad` 或把 `EnableConnect` 变成非二值状态。
+
+刻意没有改：
+
+- 没有改变 `AlwaysOffroad` 默认值，仍为 `0`。
+- 没有把 `AlwaysOffroad` 当成官方 Connect 开关。
+- 没有改变驾驶控制或 ESCC 逻辑。
+
 ## 2026-06-18: AlwaysOffroad / EnableConnect 语义修正
 
 改动内容：

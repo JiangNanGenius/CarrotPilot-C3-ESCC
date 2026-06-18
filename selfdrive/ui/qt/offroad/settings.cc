@@ -836,7 +836,8 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   startToggles->addItem(new CValueControl("SoundVolumeAdjust", tr("Sound Volume(100%)"), "", 5, 200, 5));
   startToggles->addItem(new CValueControl("SoundVolumeAdjustEngage", tr("Sound Volume, Engage(10%)"), "", 5, 200, 5));
   startToggles->addItem(new CValueControl("MaxTimeOffroadMin", tr("Power off time (min)"), "", 1, 600, 10));
-  startToggles->addItem(new CValueControl("EnableConnect", tr("EnableConnect"), tr("Your device may be banned by Comma"), 0, 2, 1));
+  startToggles->addItem(new CValueControl("AlwaysOffroad", tr("Always Offroad"), tr("Parked update/debug mode. Keeps openpilot offroad and keeps local Wi-Fi, SSH, Web UI, and updates available."), 0, 1, 1));
+  startToggles->addItem(new CValueControl("EnableConnect", tr("Enable Connect"), tr("Official comma/openpilot online registration and remote connection. Clone C3 hardware should normally keep this off."), 0, 1, 1));
   startToggles->addItem(new CValueControl("MapboxStyle", tr("Mapbox Style(0)"), "", 0, 2, 1));
   startToggles->addItem(new CValueControl("RecordRoadCam", tr("Record Road camera(0)"), tr("1:RoadCam, 2:RoadCam+WideRoadCam"), 0, 2, 1));
   startToggles->addItem(new CValueControl("HDPuse", tr("Use HDP(CCNC)(0)"), tr("1:While Using APN, 2:Always"), 0, 2, 1));

@@ -248,6 +248,7 @@ def check_offroad_wiring(report: Report) -> None:
     "system/hardware/hardwared.py",
     "selfdrive/pandad/panda_safety.cc",
     "selfdrive/pandad/pandad.h",
+    "selfdrive/ui/qt/offroad/settings.cc",
     "system/manager/manager.py",
     "system/manager/process_config.py",
     "system/athena/registration.py",
@@ -266,6 +267,8 @@ def check_offroad_wiring(report: Report) -> None:
   report.require_contains("registration skips when connect disabled", "system/athena/registration.py", 'params.get_int("EnableConnect") <= 0')
   report.require_contains("local updater remains available offroad", "system/manager/process_config.py", 'return not started and params.get_bool("SoftwareMenu")')
   report.require_contains("remote connect process uses EnableConnect only", "system/manager/process_config.py", 'return params.get_int("EnableConnect") > 0')
+  report.require_regex("native setting exposes AlwaysOffroad", "selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("AlwaysOffroad".*?, 0, 1, 1\)')
+  report.require_regex("native setting keeps EnableConnect binary", "selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("EnableConnect".*?, 0, 1, 1\)')
 
 
 def manual_items() -> List[str]:

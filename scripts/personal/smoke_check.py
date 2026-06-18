@@ -265,6 +265,7 @@ def check_offroad_static() -> None:
     "system/hardware/hardwared.py",
     "selfdrive/pandad/panda_safety.cc",
     "selfdrive/pandad/pandad.h",
+    "selfdrive/ui/qt/offroad/settings.cc",
     "system/manager/manager.py",
     "system/manager/process_config.py",
     "system/athena/registration.py",
@@ -284,6 +285,8 @@ def check_offroad_static() -> None:
   expect_contains("system/manager/process_config.py", "enable_connect", "connect process gate")
   expect_contains("system/manager/process_config.py", "return not started and params.get_bool(\"SoftwareMenu\")", "updated stays available offroad")
   expect_contains("system/manager/process_config.py", "return params.get_int(\"EnableConnect\") > 0", "connect process uses EnableConnect")
+  expect_regex("selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("AlwaysOffroad".*?, 0, 1, 1\)', "native AlwaysOffroad setting")
+  expect_regex("selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("EnableConnect".*?, 0, 1, 1\)', "native EnableConnect setting is binary")
   expect_not_contains("system/manager/manager.py", "DisableUpdates", "manager does not disable updates for offroad")
   expect_not_contains("selfdrive/car/car_specific.py", "AlwaysOffroad", "car_specific not tied to AlwaysOffroad")
 
