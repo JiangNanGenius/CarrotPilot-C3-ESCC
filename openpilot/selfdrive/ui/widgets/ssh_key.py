@@ -22,6 +22,54 @@ from openpilot.system.ui.widgets.list_view import (
 )
 
 VALUE_FONT_SIZE = 48
+SSH_PUBLIC_KEY_PREFIXES = (
+  "ssh-ed25519 ",
+  "ssh-rsa ",
+  "ecdsa-sha2-nistp256 ",
+  "ecdsa-sha2-nistp384 ",
+  "ecdsa-sha2-nistp521 ",
+)
+MANUAL_SSH_KEY_LABEL = tr_noop("Manual key")
+
+
+def _param_to_text(value) -> str:
+  if isinstance(value, bytes):
+    return value.decode("utf-8", errors="ignore")
+  return value or ""
+
+
+def normalize_ssh_public_keys(keys: str) -> str:
+  normalized: list[str] = []
+  for raw_line in keys.replace("\r", "\n").splitlines():
+    line = " ".join(raw_line.strip().split())
+    if not line:
+      continue
+    if not line.startswith(SSH_PUBLIC_KEY_PREFIXES):
+      raise ValueError(tr("Paste a valid SSH public key, for example one starting with ssh-ed25519."))
+    if len(line.split()) < 2:
+      raise ValueError(tr("Paste a valid SSH public key, for example one starting with ssh-ed25519."))
+    normalized.append(line)
+
+  if not normalized:
+    raise ValueError(tr("No SSH public key found"))
+  return "\n".join(normalized)
+
+
+def is_ssh_public_key_text(text: str) -> bool:
+  try:
+    normalize_ssh_public_keys(text)
+  except ValueError:
+    return False
+  return True
+
+
+def ssh_key_display_name(params: Params) -> str:
+  username = _param_to_text(params.get("GithubUsername"))
+  if username:
+    return username
+  if params.get("GithubSshKeys"):
+    return tr(MANUAL_SSH_KEY_LABEL)
+  return ""
 
 
 class SshKeyFetcher:
@@ -50,6 +98,16 @@ class SshKeyFetcher:
   def clear(self):
     self._params.remove("GithubUsername")
     self._params.remove("GithubSshKeys")
+
+  def set_manual_keys(self, keys: str) -> str | None:
+    try:
+      normalized = normalize_ssh_public_keys(keys)
+    except ValueError as exc:
+      return str(exc)
+
+    self._params.remove("GithubUsername")
+    self._params.put("GithubSshKeys", normalized, block=True)
+    return None
 
   def _fetch_thread(self, username: str):
     try:
@@ -81,7 +139,7 @@ class SshKeyAction(ItemAction):
   def __init__(self):
     super().__init__(self.MAX_WIDTH, True)
 
-    self._keyboard = Keyboard(min_text_size=1)
+    self._keyboard = Keyboard(max_text_size=4096, min_text_size=1)
     self._params = Params()
     self._fetcher = SshKeyFetcher(self._params)
     self._text_font = gui_app.font(FontWeight.NORMAL)
@@ -95,7 +153,7 @@ class SshKeyAction(ItemAction):
     self._button.set_touch_valid_callback(touch_callback)
 
   def _refresh_state(self):
-    self._username = self._params.get("GithubUsername")
+    self._username = ssh_key_display_name(self._params)
     self._state = SshKeyActionState.REMOVE if self._params.get("GithubSshKeys") else SshKeyActionState.ADD
 
   def _update_state(self):
@@ -126,7 +184,10 @@ class SshKeyAction(ItemAction):
   def _handle_button_click(self):
     if self._state == SshKeyActionState.ADD:
       self._keyboard.reset()
-      self._keyboard.set_title(tr("Enter your GitHub username"))
+      self._keyboard.set_title(
+        tr("Enter your GitHub username or SSH public key"),
+        tr("Paste a local public key to avoid GitHub lookup."),
+      )
       self._keyboard.set_callback(self._on_username_submit)
       gui_app.push_widget(self._keyboard)
     elif self._state == SshKeyActionState.REMOVE:
@@ -137,17 +198,28 @@ class SshKeyAction(ItemAction):
     if result != DialogResult.CONFIRM:
       return
 
-    username = self._keyboard.text.strip()
-    if not username:
+    entry = self._keyboard.text.strip()
+    if not entry:
+      return
+
+    if is_ssh_public_key_text(entry):
+      error = self._fetcher.set_manual_keys(entry)
+      if error is None:
+        self._state = SshKeyActionState.REMOVE
+        self._username = ssh_key_display_name(self._params)
+      else:
+        self._state = SshKeyActionState.ADD
+        self._username = ""
+        gui_app.push_widget(alert_dialog(error))
       return
 
     self._state = SshKeyActionState.LOADING
-    self._fetcher.fetch(username, self._on_fetch_response)
+    self._fetcher.fetch(entry, self._on_fetch_response)
 
   def _on_fetch_response(self, error: str | None):
     if error is None:
       self._state = SshKeyActionState.REMOVE
-      self._username = self._params.get("GithubUsername")
+      self._username = ssh_key_display_name(self._params)
     else:
       self._state = SshKeyActionState.ADD
       self._username = ""

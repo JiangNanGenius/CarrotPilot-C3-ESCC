@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import types
 
 
@@ -1241,25 +1242,48 @@ def visible_korean_text_report() -> str:
   }
   hits: list[str] = []
 
-  for root_rel in scan_roots:
-    root = ROOT / root_rel
-    paths = [root] if root.is_file() else sorted(root.rglob("*"))
-    for path in paths:
-      if not path.is_file() or path.suffix not in suffixes:
-        continue
-      rel = path.relative_to(ROOT)
-      if rel in skipped:
-        continue
-      if any(rel == skipped_dir or skipped_dir in rel.parents for skipped_dir in skipped_dirs):
-        continue
-      if path.stat().st_size > 200_000:
-        continue
-      text = path.read_text(encoding="utf-8", errors="ignore")
-      for line_no, line in enumerate(text.splitlines(), start=1):
-        if korean_re.search(line):
-          hits.append(f"{rel}:{line_no}: {line.strip()[:120]}")
-          if len(hits) >= 8:
-            return "; ".join(hits)
+  deadline = time.monotonic() + 20
+
+  paths: list[Path] = []
+  try:
+    result = subprocess.run(
+      ["git", "ls-files", "--", *scan_roots],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=10,
+    )
+    if result.returncode == 0:
+      paths = [ROOT / line for line in result.stdout.splitlines() if line.strip()]
+  except subprocess.TimeoutExpired:
+    return "visible Korean git file listing timed out after 10s"
+
+  if not paths:
+    for root_rel in scan_roots:
+      if time.monotonic() > deadline:
+        return "visible Korean scan timed out after 20s"
+      root = ROOT / root_rel
+      paths.extend([root] if root.is_file() else sorted(root.rglob("*")))
+
+  for path in paths:
+    if time.monotonic() > deadline:
+      return "visible Korean scan timed out after 20s"
+    if not path.is_file() or path.suffix not in suffixes:
+      continue
+    rel = path.relative_to(ROOT)
+    if rel in skipped:
+      continue
+    if any(rel == skipped_dir or skipped_dir in rel.parents for skipped_dir in skipped_dirs):
+      continue
+    if path.stat().st_size > 200_000:
+      continue
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    for line_no, line in enumerate(text.splitlines(), start=1):
+      if korean_re.search(line):
+        hits.append(f"{rel}:{line_no}: {line.strip()[:120]}")
+        if len(hits) >= 8:
+          return "; ".join(hits)
   return ""
 
 
@@ -1639,9 +1663,13 @@ def main() -> int:
                           and "C3_TICI_BRANCHES" in c3_compat_audit
                           and "c3_channels_are_tici_compatible" in c3_compat_audit
                           and "installer_supports_tici_tizi_binary_install" in c3_compat_audit
+                          and "public_installer_does_not_install_default_ssh_key" in c3_compat_audit
+                          and "local_wifi_settings_retained" in c3_compat_audit
+                          and "local_ssh_keys_retained_without_cloud_dependency" in c3_compat_audit
+                          and "local_update_and_model_ui_retained" in c3_compat_audit
                           and "model_runner_split_present" in c3_compat_audit
                           and "root_launcher_keeps_shutdown_policy" in c3_compat_audit,
-                          "alpha must include a repeatable audit for C3 launcher, channel, installer, modeld, cloud, and power compatibility")
+                          "alpha must include a repeatable audit for C3 launcher, channel, installer, local network, modeld, cloud, and power compatibility")
   ok, detail = check_c3_compat_audit_runtime()
   failures += not require("C3/TICI compatibility audit runtime", ok,
                           detail or "C3 compatibility audit failed")

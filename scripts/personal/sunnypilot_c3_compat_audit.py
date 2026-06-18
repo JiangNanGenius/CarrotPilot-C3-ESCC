@@ -21,7 +21,16 @@ WATCHED_PATHS = (
   "system/hardware/tici/hardware.h",
   "system/hardware/hardwared.py",
   "system/manager/process_config.py",
+  "system/ui/lib/wifi_manager.py",
   "selfdrive/ui/installer/installer.cc",
+  "selfdrive/ui/widgets/ssh_key.py",
+  "selfdrive/ui/layouts/settings/developer.py",
+  "selfdrive/ui/mici/layouts/settings/developer.py",
+  "selfdrive/ui/sunnypilot/layouts/settings/settings.py",
+  "selfdrive/ui/sunnypilot/layouts/settings/network.py",
+  "selfdrive/ui/layouts/settings/software.py",
+  "selfdrive/ui/sunnypilot/layouts/settings/software.py",
+  "selfdrive/ui/sunnypilot/layouts/settings/models.py",
   "selfdrive/modeld",
   "sunnypilot/modeld_v2",
   "sunnypilot/models/manager.py",
@@ -54,8 +63,13 @@ FORBIDDEN_PRIVATE_TOKENS = (
 
 
 def run_git(args: list[str]) -> tuple[int, str]:
-  proc = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=False)
-  return proc.returncode, (proc.stdout + proc.stderr).strip()
+  try:
+    proc = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=False, timeout=15)
+    return proc.returncode, (proc.stdout + proc.stderr).strip()
+  except subprocess.TimeoutExpired as exc:
+    cmd = " ".join(["git", *args])
+    output = ((exc.stdout or "") + (exc.stderr or "")).strip()
+    return 124, f"{cmd} timed out after 15s\n{output}".strip()
 
 
 def read(rel: str) -> str:
@@ -101,11 +115,11 @@ def diff_summary(ref: str) -> dict[str, Any]:
   }
 
 
-def reference_state() -> dict[str, Any]:
+def reference_state(include_diffs: bool = False) -> dict[str, Any]:
   refs: dict[str, Any] = {}
   for name, ref in REFERENCE_REFS.items():
     ref_state = local_ref(ref)
-    if ref_state["available"]:
+    if include_diffs and ref_state["available"]:
       ref_state["diffToHead"] = diff_summary(ref)
     refs[name] = ref_state
   return refs
@@ -120,17 +134,34 @@ def private_tokens_absent(*texts: str) -> bool:
   return all(token.lower() not in combined for token in FORBIDDEN_PRIVATE_TOKENS)
 
 
+def token_inside_internal_block(text: str, token: str) -> bool:
+  start = text.find("#ifdef INTERNAL")
+  token_index = text.find(token)
+  end = text.find("#endif", start)
+  return start >= 0 and end >= 0 and start < token_index < end
+
+
 def local_checks() -> list[dict[str, Any]]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
   c3_env = read("sunnypilot/system/hardware/c3/launch_env.sh")
   root_launch = read("launch_chffrplus.sh")
+  params_keys = read("common/params_keys.h")
   version = read("system/version.py")
   hardware_init = read("system/hardware/__init__.py")
   tici_hw = read("system/hardware/tici/hardware.h")
   hardwared = read("system/hardware/hardwared.py")
   process_config = read("system/manager/process_config.py")
+  wifi_manager = read("system/ui/lib/wifi_manager.py")
   installer = read("selfdrive/ui/installer/installer.cc")
+  ssh_widget = read("selfdrive/ui/widgets/ssh_key.py")
+  developer_layout = read("selfdrive/ui/layouts/settings/developer.py")
+  mici_developer_layout = read("selfdrive/ui/mici/layouts/settings/developer.py")
+  sp_settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+  sp_network = read("selfdrive/ui/sunnypilot/layouts/settings/network.py")
+  base_software = read("selfdrive/ui/layouts/settings/software.py")
+  sp_software = read("selfdrive/ui/sunnypilot/layouts/settings/software.py")
+  sp_models = read("selfdrive/ui/sunnypilot/layouts/settings/models.py")
   manager = read("sunnypilot/models/manager.py")
   model_helpers = read("sunnypilot/models/helpers.py")
 
@@ -196,6 +227,36 @@ def local_checks() -> list[dict[str, Any]]:
       "Binary installer must handle TICI/TIZI display/setup and keep the requested alpha branch unless migrated intentionally",
     ),
     status(
+      "public_installer_does_not_install_default_ssh_key",
+      token_inside_internal_block(installer, "GithubSshKeys")
+      and token_inside_internal_block(installer, "SshEnabled")
+      and token_inside_internal_block(installer, "git remote set-url origin --push"),
+      "Default SSH trust and push remotes must stay inside the INTERNAL installer block only",
+    ),
+    status(
+      "local_wifi_settings_retained",
+      "class WifiManager" in wifi_manager
+      and "NetworkManager" in wifi_manager
+      and "WifiManager" in sp_settings
+      and "PanelType.NETWORK" in sp_settings
+      and "NetworkUISP" in sp_settings
+      and "self._wifi_manager._request_scan()" in sp_network,
+      "Local Wi-Fi settings and scan/connect UI must remain available without cloud services",
+    ),
+    status(
+      "local_ssh_keys_retained_without_cloud_dependency",
+      '"GithubSshKeys", {PERSISTENT | BACKUP, STRING}' in params_keys
+      and '"SshEnabled", {PERSISTENT | BACKUP, BOOL}' in params_keys
+      and "normalize_ssh_public_keys" in ssh_widget
+      and "set_manual_keys" in ssh_widget
+      and "Paste a local public key to avoid GitHub lookup." in ssh_widget
+      and "https://github.com/{username}.keys" in ssh_widget
+      and "ssh_key_item" in developer_layout
+      and "is_ssh_public_key_text" in mici_developer_layout
+      and "manage_athenad" not in process_config,
+      "SSH must keep local SshEnabled/GithubSshKeys params and allow manual public-key setup without athenad/cloud",
+    ),
+    status(
       "model_runner_split_present",
       "def is_stock_model" in process_config
       and "def is_tinygrad_model" in process_config
@@ -231,16 +292,27 @@ def local_checks() -> list[dict[str, Any]]:
       'PythonProcess("updated", "system.updated.updated", only_offroad, enabled=not PC)' in process_config
       and 'PythonProcess("models_manager", "sunnypilot.models.manager", only_offroad)' in process_config
       and 'PythonProcess("carrot_server", "selfdrive.carrot.carrot_server", always_run)' in process_config
+      and 'PythonProcess("mapd_manager", "sunnypilot.mapd.mapd_manager", always_run)' in process_config
       and 'NativeProcess("mapd", Paths.mapd_root()' in process_config,
-      "Local updater, models manager, Carrot Web, and mapd local services must remain available",
+      "Local updater, models manager, Carrot Web, mapd manager, and mapd local services must remain available",
+    ),
+    status(
+      "local_update_and_model_ui_retained",
+      "pkill -SIGUSR1 -f system.updated.updated" in base_software + sp_software
+      and "pkill -SIGHUP -f system.updated.updated" in base_software + sp_software
+      and "ModelManager_LastSyncTime" in sp_models
+      and "ModelManager_DownloadIndex" in sp_models
+      and "not a cloud pairing service" in sp_models,
+      "Software update controls and offroad model list/download controls must remain available as active local maintenance",
     ),
   ]
 
 
-def build_report() -> dict[str, Any]:
+def build_report(include_reference_diffs: bool = False) -> dict[str, Any]:
   code, head = run_git(["rev-parse", "--short=12", "HEAD"])
   code_branch, branch = run_git(["branch", "--show-current"])
   checks = local_checks()
+  refs = reference_state(include_reference_diffs)
   return {
     "metadata": {
       "title": "CarrotPilot-C3-ESCC C3/TICI Compatibility Audit",
@@ -248,11 +320,11 @@ def build_report() -> dict[str, Any]:
       "branch": branch if code_branch == 0 else "",
       "commit": head if code == 0 else "",
     },
-    "references": reference_state(),
+    "references": refs,
     "checks": checks,
     "failedChecks": [check["name"] for check in checks if not check["ok"]],
     "missingReferenceRefs": [
-      name for name, ref_state in reference_state().items()
+      name for name, ref_state in refs.items()
       if not ref_state.get("available", False) and name.startswith("mrone")
     ],
     "policy": {
@@ -267,10 +339,11 @@ def main() -> int:
   parser = argparse.ArgumentParser(description="Audit C3/TICI compatibility boundaries for the SunnyPilot alpha line.")
   parser.add_argument("--pretty", action="store_true", help="pretty-print JSON")
   parser.add_argument("--strict", action="store_true", help="fail if any local compatibility check fails")
+  parser.add_argument("--include-reference-diffs", action="store_true", help="include git diff summaries against local reference refs")
   parser.add_argument("--require-mrone-refs", action="store_true", help="also fail when Mr.One local refs are missing")
   args = parser.parse_args()
 
-  report = build_report()
+  report = build_report(include_reference_diffs=args.include_reference_diffs)
   print(json.dumps(report, ensure_ascii=False, indent=2 if args.pretty else None, sort_keys=True))
   if args.strict and report["failedChecks"]:
     return 2
