@@ -705,7 +705,7 @@ def _read_payload(params: Any) -> dict[str, Any] | None:
   return payload if isinstance(payload, dict) else None
 
 
-def _normalize_recommendations(payload: dict[str, Any] | None) -> list[dict[str, Any]]:
+def _normalize_recommendations(payload: dict[str, Any] | None, params: Any | None = None) -> list[dict[str, Any]]:
   if not payload:
     return []
   raw_recs = payload.get("recommendations", {})
@@ -717,16 +717,28 @@ def _normalize_recommendations(payload: dict[str, Any] | None) -> list[dict[str,
     if key not in PARAM_LIMITS or not isinstance(info, dict):
       continue
     try:
-      current = int(info.get("current", 0))
-      recommended = _clamp_param(key, info.get("recommended", current))
+      captured_current = int(info.get("current", 0))
+      recommended = _clamp_param(key, info.get("recommended", captured_current))
+      current_value = params.get_int(key) if params is not None else captured_current
     except Exception:
       continue
+    applied = current_value == recommended
+    changed_since_recommendation = current_value != captured_current
+    state = "applied" if applied else ("changed" if changed_since_recommendation else "pending")
     normalized.append({
       "key": key,
       "category": str(info.get("category", "long")),
-      "current": current,
+      "current": captured_current,
+      "capturedCurrentValue": captured_current,
+      "currentValue": current_value,
       "recommended": recommended,
-      "delta": recommended - current,
+      "recommendedValue": recommended,
+      "appliedValue": current_value,
+      "delta": recommended - captured_current,
+      "liveDelta": recommended - current_value,
+      "applied": applied,
+      "changedSinceRecommendation": changed_since_recommendation,
+      "state": state,
       "reason": str(info.get("reason", "")),
       "evidence": info.get("evidence", {}),
     })
@@ -767,12 +779,21 @@ def get_learning_state() -> dict[str, Any]:
       "applyLong": False,
       "source": "",
       "createdAt": 0,
+      "recommendationSummary": {"total": 0, "pending": 0, "applied": 0, "changed": 0, "lat": 0, "long": 0},
       "recommendations": [],
       "error": error,
     }
 
   payload = _read_payload(params)
-  recs = _normalize_recommendations(payload)
+  recs = _normalize_recommendations(payload, params)
+  recommendation_summary = {
+    "total": len(recs),
+    "pending": sum(1 for rec in recs if rec.get("state") == "pending"),
+    "applied": sum(1 for rec in recs if rec.get("applied")),
+    "changed": sum(1 for rec in recs if rec.get("state") == "changed"),
+    "lat": sum(1 for rec in recs if rec.get("category") == "lat"),
+    "long": sum(1 for rec in recs if rec.get("category") == "long"),
+  }
   return {
     "hasParams": True,
     "active": params.get_bool("CarrotLearningActive"),
@@ -783,6 +804,7 @@ def get_learning_state() -> dict[str, Any]:
     "applyLong": params.get_int("CarrotTunerApplyLong") != 0,
     "source": str(payload.get("source", "")) if isinstance(payload, dict) else "",
     "createdAt": payload.get("created_at", 0) if isinstance(payload, dict) else 0,
+    "recommendationSummary": recommendation_summary,
     "recommendations": recs,
   }
 
@@ -795,7 +817,7 @@ def apply_learning_recommendations() -> dict[str, Any]:
     raise RuntimeError("Cannot apply Auto-Tuner recommendations while onroad")
 
   payload = _read_payload(params)
-  recs = _normalize_recommendations(payload)
+  recs = _normalize_recommendations(payload, params)
   if not payload or not recs:
     _clear_pending(params)
     return {"applied": {}, "appliedCount": 0}
