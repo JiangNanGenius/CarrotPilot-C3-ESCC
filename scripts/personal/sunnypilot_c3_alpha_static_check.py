@@ -31,6 +31,9 @@ AUTO_TUNER_DEFAULTS = {
   "CarrotLearningIgnore": 0,
   "CarrotLearningClear": 0,
   "CarrotLearningPopupReady": 0,
+  "CarrotPhoneSpeedLimit": 0,
+  "CarrotPhoneSpeedLimitEnabled": 1,
+  "CarrotPhoneSpeedLimitUpdatedAt": 0,
   "CarrotTunerApplyLat": 1,
   "CarrotTunerApplyLong": 1,
   "CarrotTunerFactoryReset": 0,
@@ -56,8 +59,16 @@ AUTO_TUNER_DEFAULTS = {
 
 
 class FakeParams:
+  shared_store: dict[str, bytes] = {}
+
+  @classmethod
+  def reset(cls) -> None:
+    cls.shared_store = {key: str(value).encode("utf-8") for key, value in AUTO_TUNER_DEFAULTS.items()}
+
   def __init__(self):
-    self.store = {key: str(value).encode("utf-8") for key, value in AUTO_TUNER_DEFAULTS.items()}
+    if not self.shared_store:
+      self.reset()
+    self.store = self.shared_store
 
   def get(self, key):
     return self.store.get(key)
@@ -87,6 +98,9 @@ class FakeParams:
   def put_bool(self, key, value):
     self.put(key, "1" if value else "0")
 
+  def put_float(self, key, value):
+    self.put(key, f"{float(value):.6f}")
+
   def remove(self, key):
     self.store.pop(key, None)
 
@@ -102,6 +116,7 @@ def import_file(module_name: str, rel: str):
 
 
 def check_carrot_learning_runtime() -> tuple[bool, str]:
+  FakeParams.reset()
   params_mod = types.ModuleType("openpilot.common.params")
   params_mod.Params = FakeParams
   previous_params = sys.modules.get("openpilot.common.params")
@@ -145,6 +160,46 @@ def check_carrot_learning_runtime() -> tuple[bool, str]:
       return False, "offroad manual apply did not apply recommendation"
     if learner.params.get("CarrotLearningRecommend"):
       return False, "manual apply did not clear pending recommendation"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+  finally:
+    if previous_params is None:
+      sys.modules.pop("openpilot.common.params", None)
+    else:
+      sys.modules["openpilot.common.params"] = previous_params
+
+
+def check_phone_speed_limit_runtime() -> tuple[bool, str]:
+  FakeParams.reset()
+  params_mod = types.ModuleType("openpilot.common.params")
+  params_mod.Params = FakeParams
+  previous_params = sys.modules.get("openpilot.common.params")
+  sys.modules["openpilot.common.params"] = params_mod
+  try:
+    server = import_file("alpha_carrot_server_static_check", "selfdrive/carrot/carrot_server.py")
+    result = server.set_phone_speed_limit({"speedLimit": 50, "source": "navipilot"})
+    if not result.get("accepted"):
+      return False, "phone speed endpoint did not accept a normal speed limit"
+    raw_speed = FakeParams.shared_store.get("CarrotPhoneSpeedLimit", b"0").decode("utf-8")
+    if abs(float(raw_speed) - 13.888889) > 0.001:
+      return False, f"phone speed endpoint wrote {raw_speed}, expected m/s for 50 kph"
+    raw_source = FakeParams.shared_store.get("CarrotPhoneSpeedLimitSource", b"").decode("utf-8")
+    if raw_source != "navipilot":
+      return False, "phone speed endpoint did not preserve the local source label"
+    state = server.phone_speed_state()
+    if not state.get("fresh") or state.get("speedLimitKph") != 50.0:
+      return False, "phone speed state did not report fresh 50 kph data"
+
+    server.set_phone_speed_limit({"nRoadLimitSpeed": 0, "nSdiSpeedLimit": 40, "source": "apn"})
+    state = server.phone_speed_state()
+    if not state.get("fresh") or state.get("speedLimitKph") != 40.0 or state.get("source") != "apn":
+      return False, "phone speed endpoint did not skip zero road limit and use SDI fallback"
+
+    server.set_phone_speed_limit({"action": "clear"})
+    state = server.phone_speed_state()
+    if state.get("fresh") or state.get("speedLimitMS") != 0.0:
+      return False, "phone speed clear action did not invalidate the phone source"
     return True, ""
   except Exception as exc:
     return False, str(exc)
@@ -272,9 +327,21 @@ def main() -> int:
   failures += not require("Carrot Web local server exists", "LOCAL_WEB_PORT = 7000" in carrot_server
                           and "def make_app" in carrot_server and "web.run_app" in carrot_server,
                           "carrot_server must provide the local port-7000 aiohttp service")
-  for route in ("/api/health", "/api/carrot_learning", "/api/fishop_hardware"):
+  for route in ("/api/health", "/api/carrot_learning", "/api/fishop_hardware", "/api/phone_speed_limit"):
     failures += not require(f"Carrot Web route exists: {route}", route in carrot_server,
                             f"carrot_server missing {route}")
+  failures += not require("Carrot Web phone speed API writes resolver params",
+                          "def set_phone_speed_limit" in carrot_server
+                          and "CarrotPhoneSpeedLimitUpdatedAt" in carrot_server
+                          and "CarrotPhoneSpeedLimitSource" in carrot_server
+                          and "KPH_TO_MS" in carrot_server,
+                          "Carrot Web must expose a local phone speed API that writes resolver params in m/s")
+  failures += not require("Carrot Web phone speed API reports freshness",
+                          "PHONE_SPEED_LIMIT_MAX_AGE_S = 10.0" in carrot_server
+                          and '"fresh": fresh' in carrot_server,
+                          "Carrot Web phone speed state must report the same freshness window as the resolver")
+  ok, detail = check_phone_speed_limit_runtime()
+  failures += not require("Carrot Web phone speed runtime", ok, detail or "phone speed runtime check failed")
   failures += not require("Carrot Web blocks onroad Auto-Tuner apply", 'params.get_bool("IsOnroad")' in carrot_server
                           and "Cannot apply Auto-Tuner recommendations while onroad" in carrot_server,
                           "Carrot Web must refuse Auto-Tuner apply while onroad")

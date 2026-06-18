@@ -21,6 +21,30 @@ LOCAL_WEB_PORT = 7000
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_FISHOP_JSONL = Path("/data/fishop_hardware.jsonl")
 MAX_FISHOP_LINES = 240
+KPH_TO_MS = 1000.0 / 3600.0
+MPH_TO_KPH = 1.609344
+PHONE_SPEED_LIMIT_MAX_KPH = 180.0
+PHONE_SPEED_LIMIT_MAX_AGE_S = 10.0
+PHONE_SPEED_LIMIT_SOURCE_MAX_CHARS = 48
+
+PHONE_SPEED_LIMIT_MS_FIELDS = (
+  "speedLimitMS",
+  "speed_limit_ms",
+  "speedLimitMps",
+  "speed_limit_mps",
+)
+
+PHONE_SPEED_LIMIT_KPH_FIELDS = (
+  "speedLimitKph",
+  "speed_limit_kph",
+  "speedLimit",
+  "speed_limit",
+  "limit",
+  "speed",
+  "nRoadLimitSpeed",
+  "nSdiSpeedLimit",
+  "nSdiPlusSpeedLimit",
+)
 
 ACTION_PARAMS = {
   "apply": "CarrotLearningApply",
@@ -62,6 +86,37 @@ def _decode_json(raw: Any) -> Any:
     return json.loads(text)
   except Exception:
     return None
+
+
+def _as_float(value: Any, default: float = 0.0) -> float:
+  if value is None:
+    return default
+  if isinstance(value, bytes):
+    value = value.decode("utf-8", errors="ignore")
+  try:
+    return float(value)
+  except (TypeError, ValueError):
+    return default
+
+
+def _decode_param_text(raw: Any) -> str:
+  if raw is None:
+    return ""
+  if isinstance(raw, bytes):
+    return raw.decode("utf-8", errors="ignore")
+  return str(raw)
+
+
+def _safe_source_text(value: Any) -> str:
+  text = str(value or "phone").strip()
+  if not text:
+    text = "phone"
+  safe = "".join(ch for ch in text if ch.isalnum() or ch in (" ", "-", "_", ".", "/", ":")).strip()
+  return (safe or "phone")[:PHONE_SPEED_LIMIT_SOURCE_MAX_CHARS]
+
+
+def _put_float(params: Any, key: str, value: float) -> None:
+  params.put(key, f"{value:.6f}".encode("utf-8"))
 
 
 def _clamp_param(key: str, value: Any) -> int:
@@ -227,6 +282,115 @@ def handle_learning_action(action: str) -> dict[str, Any]:
   raise ValueError(f"unknown Auto-Tuner action: {action}")
 
 
+def _candidate_phone_payloads(body: dict[str, Any]) -> Iterable[dict[str, Any]]:
+  yield body
+  for key in ("payload", "navigation", "nav", "data"):
+    nested = body.get(key)
+    if isinstance(nested, dict):
+      yield nested
+
+
+def _extract_phone_speed_kph(body: dict[str, Any]) -> tuple[float | None, str]:
+  for payload in _candidate_phone_payloads(body):
+    for key in PHONE_SPEED_LIMIT_MS_FIELDS:
+      if key in payload:
+        speed_ms = _as_float(payload.get(key), -1.0)
+        if speed_ms <= 0.0:
+          continue
+        return speed_ms / KPH_TO_MS, key
+
+    unit = str(payload.get("unit", "kph")).strip().lower()
+    for key in PHONE_SPEED_LIMIT_KPH_FIELDS:
+      if key not in payload:
+        continue
+      speed = _as_float(payload.get(key), -1.0)
+      if speed <= 0.0:
+        continue
+      if unit in ("m/s", "ms", "mps", "meter_per_second", "meters_per_second"):
+        return speed / KPH_TO_MS, key
+      if unit in ("mph", "mi/h"):
+        return speed * MPH_TO_KPH, key
+      return speed, key
+
+  return None, ""
+
+
+def phone_speed_state() -> dict[str, Any]:
+  params, error = _params_state()
+  if params is None:
+    return {
+      "hasParams": False,
+      "enabled": False,
+      "fresh": False,
+      "speedLimitMS": 0.0,
+      "speedLimitKph": 0.0,
+      "source": "",
+      "updatedAt": 0.0,
+      "ageSec": 0.0,
+      "maxAgeSec": PHONE_SPEED_LIMIT_MAX_AGE_S,
+      "error": error,
+    }
+
+  now = time.time()
+  speed_ms = _as_float(params.get("CarrotPhoneSpeedLimit"))
+  updated_at = _as_float(params.get("CarrotPhoneSpeedLimitUpdatedAt"))
+  age_sec = now - updated_at if updated_at > 0 else 0.0
+  enabled = params.get_bool("CarrotPhoneSpeedLimitEnabled")
+  source = _decode_param_text(params.get("CarrotPhoneSpeedLimitSource"))
+  fresh = enabled and speed_ms > 0.0 and updated_at > 0.0 and 0.0 <= age_sec <= PHONE_SPEED_LIMIT_MAX_AGE_S
+
+  return {
+    "hasParams": True,
+    "enabled": enabled,
+    "fresh": fresh,
+    "speedLimitMS": round(speed_ms, 6),
+    "speedLimitKph": round(speed_ms / KPH_TO_MS, 3) if speed_ms > 0.0 else 0.0,
+    "source": source or "phone",
+    "updatedAt": updated_at,
+    "ageSec": round(age_sec, 3),
+    "maxAgeSec": PHONE_SPEED_LIMIT_MAX_AGE_S,
+  }
+
+
+def clear_phone_speed_limit() -> dict[str, Any]:
+  params, error = _params_state()
+  if params is None:
+    raise RuntimeError(f"Params unavailable: {error}")
+  _put_float(params, "CarrotPhoneSpeedLimit", 0.0)
+  _put_float(params, "CarrotPhoneSpeedLimitUpdatedAt", 0.0)
+  params.remove("CarrotPhoneSpeedLimitSource")
+  return {"cleared": True}
+
+
+def set_phone_speed_limit(body: dict[str, Any]) -> dict[str, Any]:
+  params, error = _params_state()
+  if params is None:
+    raise RuntimeError(f"Params unavailable: {error}")
+
+  if not isinstance(body, dict):
+    raise ValueError("invalid JSON body")
+  if str(body.get("action", "")).strip().lower() == "clear":
+    return clear_phone_speed_limit()
+
+  speed_kph, source_field = _extract_phone_speed_kph(body)
+  if speed_kph is None:
+    raise ValueError("missing speed limit")
+  if speed_kph <= 0.0 or speed_kph > PHONE_SPEED_LIMIT_MAX_KPH:
+    raise ValueError(f"speed limit must be between 0 and {PHONE_SPEED_LIMIT_MAX_KPH:g} km/h")
+
+  source = _safe_source_text(body.get("source") or body.get("provider") or source_field or "phone")
+  _put_float(params, "CarrotPhoneSpeedLimit", speed_kph * KPH_TO_MS)
+  _put_float(params, "CarrotPhoneSpeedLimitUpdatedAt", time.time())
+  params.put("CarrotPhoneSpeedLimitSource", source.encode("utf-8"))
+  return {
+    "accepted": True,
+    "sourceField": source_field,
+    "speedLimitKph": round(speed_kph, 3),
+    "speedLimitMS": round(speed_kph * KPH_TO_MS, 6),
+    "source": source,
+  }
+
+
 def _payloads_from_lines(lines: Iterable[str]) -> Iterable[dict[str, Any]]:
   for line in lines:
     line = line.strip()
@@ -275,6 +439,7 @@ async def api_health(_request: web.Request) -> web.Response:
       "/api/health",
       "/api/carrot_learning",
       "/api/fishop_hardware",
+      "/api/phone_speed_limit",
     ],
   })
 
@@ -300,6 +465,22 @@ async def api_carrot_learning_action(request: web.Request) -> web.Response:
 
 async def api_fishop_hardware(_request: web.Request) -> web.Response:
   return _json_response({"ok": True, **fishop_state()})
+
+
+async def api_phone_speed_limit(_request: web.Request) -> web.Response:
+  return _json_response({"ok": True, **phone_speed_state()})
+
+
+async def api_phone_speed_limit_action(request: web.Request) -> web.Response:
+  try:
+    body = await request.json()
+  except Exception:
+    body = {}
+  try:
+    result = set_phone_speed_limit(body)
+    return _json_response({"ok": True, **result, **phone_speed_state()})
+  except Exception as exc:
+    return _json_response({"ok": False, "error": str(exc), **phone_speed_state()}, status=400)
 
 
 async def index(_request: web.Request) -> web.Response:
@@ -331,6 +512,7 @@ async def index(_request: web.Request) -> web.Response:
         <li><a href="/api/health"><code>/api/health</code></a></li>
         <li><a href="/api/carrot_learning"><code>/api/carrot_learning</code></a></li>
         <li><a href="/api/fishop_hardware"><code>/api/fishop_hardware</code></a></li>
+        <li><a href="/api/phone_speed_limit"><code>/api/phone_speed_limit</code></a></li>
       </ul>
     </section>
   </main>
@@ -347,6 +529,8 @@ def make_app() -> web.Application:
   app.router.add_get("/api/carrot_learning", api_carrot_learning)
   app.router.add_post("/api/carrot_learning", api_carrot_learning_action)
   app.router.add_get("/api/fishop_hardware", api_fishop_hardware)
+  app.router.add_get("/api/phone_speed_limit", api_phone_speed_limit)
+  app.router.add_post("/api/phone_speed_limit", api_phone_speed_limit_action)
   return app
 
 
