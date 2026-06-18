@@ -490,12 +490,12 @@ flowchart LR
 - [x] 静态检查 7713 导航 HTTP 兼容入口只记录证据、更新安全导航摘要，不发布控制；设备快照包含 `CarrotNaviEvent`、`CarrotNaviDebug`、`CarrotNaviImage`。
 - [x] 静态检查 7712 TCP 导航输入兼容入口只接收行式 JSON、记录 `rgdata` / `vrtx` 证据，不发布控制。
 - [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
-- [ ] schema 检查通过。
+- [x] schema 文本契约检查通过：`custom.capnp` / `log.capnp` 无重复字段名/编号，Sunny SP 服务和手机限速 source/schema 字段存在；C3 设备端 capnp 编译仍留到停车验证补证据。
 - [x] params 检查通过。
-- [ ] services 检查通过。
+- [x] services 检查通过：`cereal/services.py` 与生成的 `services.h` 一致，模型管理器、`longitudinalPlanSP`、`carStateSP`、`modelDataV2SP` 等服务参数受静态守门覆盖。
 - [x] Hyundai interface 检查通过。
 - [x] model manager 检查通过。
-- [ ] Carrot Web JS/JSON 语法检查通过。
+- [x] Carrot Web JS/JSON/YAML 语法检查通过：Carrot Web 本地资产、Sunny settings-ui JSON/YAML 可解析，`settings_ui.json` 与 `settings_ui_src` 编译结果一致。
 
 ### P8.14: C3 停车验证
 
