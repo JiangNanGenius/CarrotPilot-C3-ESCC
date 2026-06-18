@@ -346,6 +346,42 @@ def check_navigation_event_runtime() -> tuple[bool, str]:
       sys.modules["openpilot.common.params"] = previous_params
 
 
+def check_status_broadcast_runtime() -> tuple[bool, str]:
+  FakeParams.reset()
+  params_mod = types.ModuleType("openpilot.common.params")
+  params_mod.Params = FakeParams
+  previous_params = sys.modules.get("openpilot.common.params")
+  sys.modules["openpilot.common.params"] = params_mod
+  try:
+    server = import_file("alpha_carrot_server_status_static_check", "selfdrive/carrot/carrot_server.py")
+    server.record_navigation_event({
+      "nRoadLimitSpeed": 0,
+      "nSdiSpeedLimit": 60,
+      "nSdiDist": 240,
+      "nTBTDist": 500,
+      "nTBTTurnType": 12,
+      "szTBTMainTextNext": "status check",
+    }, "udp-7706")
+    payload = server.build_status_payload()
+    for key in ("Carrot2", "IsOnroad", "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "xState", "trafficState"):
+      if key not in payload:
+        return False, f"status payload missing {key}"
+    if payload.get("tbt_dist") != 500 or payload.get("sdi_dist") != 240:
+      return False, "status payload did not expose latest navigation distances"
+    if payload.get("sdi_speed") != 60 or payload.get("phoneSpeedLimitKph") != 60.0:
+      return False, "status payload did not expose latest SDI/phone speed"
+    if payload.get("controlOutput") is not False:
+      return False, "status payload must explicitly remain read-only"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+  finally:
+    if previous_params is None:
+      sys.modules.pop("openpilot.common.params", None)
+    else:
+      sys.modules["openpilot.common.params"] = previous_params
+
+
 def main() -> int:
   failures = 0
 
@@ -465,7 +501,7 @@ def main() -> int:
   failures += not require("Carrot Web local server exists", "LOCAL_WEB_PORT = 7000" in carrot_server
                           and "def make_app" in carrot_server and "web.run_app" in carrot_server,
                           "carrot_server must provide the local port-7000 aiohttp service")
-  for route in ("/api/health", "/api/params_bulk", "/api/param_set", "/api/carrot_learning", "/api/fishop_hardware", "/api/navigation_event", "/api/phone_speed_limit"):
+  for route in ("/api/health", "/api/params_bulk", "/api/param_set", "/api/status_broadcast", "/api/carrot_learning", "/api/fishop_hardware", "/api/navigation_event", "/api/phone_speed_limit"):
     failures += not require(f"Carrot Web route exists: {route}", route in carrot_server,
                             f"carrot_server missing {route}")
   failures += not require("Carrot Web params API whitelist", "PARAM_API_DEFS" in carrot_server
@@ -480,6 +516,20 @@ def main() -> int:
                           "local param_set must not enable SpeedLimitMode assist through the phone API")
   ok, detail = check_params_api_runtime()
   failures += not require("Carrot Web params API runtime", ok, detail or "params API runtime check failed")
+  failures += not require("Carrot Web status broadcast exists", "STATUS_BROADCAST_PORT = 7705" in carrot_server
+                          and "STATUS_BROADCAST_TARGETS" in carrot_server
+                          and "def build_status_payload" in carrot_server
+                          and "status_broadcast_loop" in carrot_server,
+                          "Carrot Web must provide a local UDP 7705 status broadcaster for Navipilot")
+  for key in ("Carrot2", "IsOnroad", "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "xState", "trafficState"):
+    failures += not require(f"7705 status key exists: {key}", f'"{key}"' in carrot_server,
+                            f"UDP 7705 status broadcast must include {key}")
+  failures += not require("Carrot Web status broadcast local-only", "255.255.255.255" in carrot_server
+                          and "127.0.0.1" in carrot_server and "allow_broadcast=True" in carrot_server
+                          and "controlOutput" in carrot_server,
+                          "UDP 7705 broadcast must stay local/LAN and explicitly read-only")
+  ok, detail = check_status_broadcast_runtime()
+  failures += not require("Carrot Web status broadcast runtime", ok, detail or "status broadcast runtime check failed")
   failures += not require("Carrot Web navigation UDP input", "NAVIGATION_UDP_PORT = 7706" in carrot_server
                           and "class NavigationUdpProtocol" in carrot_server
                           and "record_navigation_event(payload, \"udp-7706\")" in carrot_server,

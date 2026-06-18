@@ -19,6 +19,9 @@ from openpilot.selfdrive.carrot.fishop_hardware import normalize_fishop_payloads
 
 
 LOCAL_WEB_PORT = 7000
+STATUS_BROADCAST_PORT = 7705
+STATUS_BROADCAST_INTERVAL_S = 1.0
+STATUS_BROADCAST_TARGETS = ("255.255.255.255", "127.0.0.1")
 NAVIGATION_UDP_PORT = 7706
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_FISHOP_JSONL = Path("/data/fishop_hardware.jsonl")
@@ -408,6 +411,58 @@ def record_navigation_event(payload: dict[str, Any], source: str = "api") -> dic
   return {"recorded": True, "event": event, "phoneSpeed": phone_result}
 
 
+def _status_payload_navigation_fields(event: dict[str, Any]) -> dict[str, Any]:
+  numeric = event.get("numeric") if isinstance(event, dict) else {}
+  text = event.get("text") if isinstance(event, dict) else {}
+  numeric = numeric if isinstance(numeric, dict) else {}
+  text = text if isinstance(text, dict) else {}
+  return {
+    "tbt_dist": int(_as_float(numeric.get("nTBTDist"), 0.0)),
+    "sdi_dist": int(_as_float(numeric.get("nSdiDist"), 0.0)),
+    "sdi_speed": int(_as_float(numeric.get("nSdiSpeedLimit"), 0.0)),
+    "road_limit_speed": int(_as_float(numeric.get("nRoadLimitSpeed"), 0.0)),
+    "tbt_turn_type": int(_as_float(numeric.get("nTBTTurnType"), 0.0)),
+    "tbt_next_turn_type": int(_as_float(numeric.get("nTBTTurnTypeNext"), 0.0)),
+    "tbt_main_text": _safe_navigation_text(text.get("szTBTMainTextNext") or text.get("szTBTMainText") or ""),
+  }
+
+
+def build_status_payload() -> dict[str, Any]:
+  params, _error = _params_state()
+  event_state = navigation_event_state()
+  event = event_state.get("event", {}) if isinstance(event_state, dict) else {}
+  nav_fields = _status_payload_navigation_fields(event if isinstance(event, dict) else {})
+
+  is_onroad = bool(params.get_bool("IsOnroad")) if params is not None else False
+  active = bool(params.get_bool("IsEngaged")) if params is not None else False
+  speed_limit_state = phone_speed_state()
+
+  return {
+    "Carrot2": "CarrotPilot-C3-ESCC-alpha",
+    "IsOnroad": is_onroad,
+    "active": active,
+    "v_ego_kph": 0,
+    "v_cruise_kph": 0,
+    "carcruiseSpeed": 0,
+    "tbt_dist": nav_fields["tbt_dist"],
+    "sdi_dist": nav_fields["sdi_dist"],
+    "xState": 0,
+    "trafficState": 0,
+    "sdi_speed": nav_fields["sdi_speed"],
+    "road_limit_speed": nav_fields["road_limit_speed"],
+    "tbt_turn_type": nav_fields["tbt_turn_type"],
+    "tbt_next_turn_type": nav_fields["tbt_next_turn_type"],
+    "tbt_main_text": nav_fields["tbt_main_text"],
+    "phoneSpeedLimitKph": speed_limit_state.get("speedLimitKph", 0.0),
+    "phoneSpeedLimitSource": speed_limit_state.get("source", ""),
+    "phoneSpeedLimitFresh": bool(speed_limit_state.get("fresh", False)),
+    "navigationUpdatedAt": event.get("updatedAt", 0.0) if isinstance(event, dict) else 0.0,
+    "timestamp": time.time(),
+    "controlOutput": False,
+    "paramsAvailable": params is not None,
+  }
+
+
 def _read_payload(params: Any) -> dict[str, Any] | None:
   payload = _decode_json(params.get("CarrotLearningRecommend"))
   return payload if isinstance(payload, dict) else None
@@ -708,11 +763,18 @@ async def api_health(_request: web.Request) -> web.Response:
   udp_last_error = str(getattr(udp_protocol, "last_error", ""))
   udp_last_datagram_at = float(getattr(udp_protocol, "last_datagram_at", 0.0))
   udp_last_recorded_at = float(getattr(udp_protocol, "last_recorded_at", 0.0))
+  status_state = _request.app["status_broadcast_state"]
+  status_last_sent_at = float(status_state.get("lastSentAt", 0.0))
+  status_last_error = str(status_state.get("lastError", ""))
   return _json_response({
     "ok": True,
     "service": "carrot_server",
     "mode": "local",
     "port": LOCAL_WEB_PORT,
+    "statusBroadcastPort": STATUS_BROADCAST_PORT,
+    "statusBroadcastTargets": list(STATUS_BROADCAST_TARGETS),
+    "statusBroadcastLastSentAt": status_last_sent_at,
+    "statusBroadcastError": status_last_error,
     "navigationUdpPort": NAVIGATION_UDP_PORT,
     "navigationUdpError": udp_error,
     "navigationUdpLastError": udp_last_error,
@@ -725,6 +787,7 @@ async def api_health(_request: web.Request) -> web.Response:
       "/api/health",
       "/api/params_bulk",
       "/api/param_set",
+      "/api/status_broadcast",
       "/api/carrot_learning",
       "/api/fishop_hardware",
       "/api/navigation_event",
@@ -763,6 +826,18 @@ async def api_param_set(request: web.Request) -> web.Response:
       "hasParams": params is not None,
       "error": str(exc) if params is not None else f"Params unavailable: {error}",
     }, status=400)
+
+
+async def api_status_broadcast(_request: web.Request) -> web.Response:
+  status_state = _request.app["status_broadcast_state"]
+  return _json_response({
+    "ok": True,
+    "port": STATUS_BROADCAST_PORT,
+    "targets": list(STATUS_BROADCAST_TARGETS),
+    "lastSentAt": float(status_state.get("lastSentAt", 0.0)),
+    "lastError": str(status_state.get("lastError", "")),
+    "payload": status_state.get("lastPayload") or build_status_payload(),
+  })
 
 
 async def api_carrot_learning_action(request: web.Request) -> web.Response:
@@ -846,6 +921,7 @@ async def index(_request: web.Request) -> web.Response:
       <ul>
         <li><a href="/api/health"><code>/api/health</code></a></li>
         <li><a href="/api/params_bulk?names=ExperimentalMode"><code>/api/params_bulk</code></a></li>
+        <li><a href="/api/status_broadcast"><code>/api/status_broadcast</code></a></li>
         <li><a href="/api/carrot_learning"><code>/api/carrot_learning</code></a></li>
         <li><a href="/api/fishop_hardware"><code>/api/fishop_hardware</code></a></li>
         <li><a href="/api/navigation_event"><code>/api/navigation_event</code></a></li>
@@ -899,14 +975,66 @@ async def stop_navigation_udp(app: web.Application) -> None:
     transport.close()
 
 
+async def status_broadcast_loop(app: web.Application) -> None:
+  transport = app.get("status_broadcast_transport")
+  if transport is None:
+    return
+  status_state = app["status_broadcast_state"]
+
+  while True:
+    try:
+      payload = build_status_payload()
+      data = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+      for target in STATUS_BROADCAST_TARGETS:
+        transport.sendto(data, (target, STATUS_BROADCAST_PORT))
+      status_state["lastPayload"] = payload
+      status_state["lastSentAt"] = time.time()
+      status_state["lastError"] = ""
+    except Exception as exc:
+      status_state["lastError"] = str(exc)[:200]
+    await asyncio.sleep(STATUS_BROADCAST_INTERVAL_S)
+
+
+async def start_status_broadcast(app: web.Application) -> None:
+  loop = asyncio.get_running_loop()
+  try:
+    transport, _ = await loop.create_datagram_endpoint(
+      asyncio.DatagramProtocol,
+      local_addr=(DEFAULT_HOST, 0),
+      allow_broadcast=True,
+    )
+    app["status_broadcast_transport"] = transport
+    app["status_broadcast_task"] = asyncio.create_task(status_broadcast_loop(app))
+    app["status_broadcast_state"]["lastError"] = ""
+  except Exception as exc:
+    app["status_broadcast_state"]["lastError"] = str(exc)[:200]
+
+
+async def stop_status_broadcast(app: web.Application) -> None:
+  task = app.get("status_broadcast_task")
+  if task is not None:
+    task.cancel()
+    try:
+      await task
+    except asyncio.CancelledError:
+      pass
+  transport = app.get("status_broadcast_transport")
+  if transport is not None:
+    transport.close()
+
+
 def make_app() -> web.Application:
   app = web.Application()
+  app["status_broadcast_state"] = {"lastPayload": {}, "lastSentAt": 0.0, "lastError": ""}
+  app.on_startup.append(start_status_broadcast)
   app.on_startup.append(start_navigation_udp)
+  app.on_cleanup.append(stop_status_broadcast)
   app.on_cleanup.append(stop_navigation_udp)
   app.router.add_get("/", index)
   app.router.add_get("/api/health", api_health)
   app.router.add_get("/api/params_bulk", api_params_bulk)
   app.router.add_post("/api/param_set", api_param_set)
+  app.router.add_get("/api/status_broadcast", api_status_broadcast)
   app.router.add_get("/api/carrot_learning", api_carrot_learning)
   app.router.add_post("/api/carrot_learning", api_carrot_learning_action)
   app.router.add_get("/api/fishop_hardware", api_fishop_hardware)
