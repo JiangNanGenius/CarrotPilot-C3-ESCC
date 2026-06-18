@@ -94,11 +94,11 @@ class DeviceLayoutSP(DeviceLayout):
     )
     self._reg_and_training.action_item.right_button.set_button_style(ButtonStyle.NORMAL)
 
-    self._onroad_uploads_and_reset_settings = dual_button_item_sp(
-      left_text=lambda: tr("Onroad Uploads"),
-      left_callback=lambda: ui_state.params.put_bool("OnroadUploads", not ui_state.params.get_bool("OnroadUploads")),
-      right_text=lambda: tr("Reset Settings"),
-      right_callback=self._reset_settings
+    self._reset_settings_btn = button_item_sp(
+      title=lambda: tr("Reset Settings"),
+      button_text=lambda: tr("RESET"),
+      callback=self._reset_settings,
+      enabled=lambda: ui_state.is_offroad()
     )
 
     self._power_buttons = dual_button_item_sp(
@@ -113,8 +113,6 @@ class DeviceLayoutSP(DeviceLayout):
       LineSeparator(),
       text_item(lambda: tr("Serial"), self._params.get("HardwareSerial") or (lambda: tr("N/A"))),
       LineSeparator(),
-      self._pair_device_btn,
-      LineSeparator(),
       self._reset_calib_btn,
       LineSeparator(),
       button_item_sp(lambda: tr("Change Language"), lambda: tr("CHANGE"), callback=self._show_language_dialog),
@@ -125,7 +123,7 @@ class DeviceLayoutSP(DeviceLayout):
       LineSeparator(height=10),
       self._quiet_mode_and_dcam,
       self._reg_and_training,
-      self._onroad_uploads_and_reset_settings,
+      self._reset_settings_btn,
       Spacer(10),
       LineSeparator(height=10),
       self._power_buttons,
@@ -209,13 +207,7 @@ class DeviceLayoutSP(DeviceLayout):
     # Quiet Mode button
     self._quiet_mode_and_dcam.action_item.left_button.set_button_style(ButtonStyle.PRIMARY if ui_state.params.get_bool("QuietMode") else ButtonStyle.NORMAL)
 
-    # Onroad Uploads
-    self._onroad_uploads_and_reset_settings.action_item.left_button.set_button_style(
-      ButtonStyle.PRIMARY if ui_state.params.get_bool("OnroadUploads") else ButtonStyle.NORMAL
-    )
-
     # Offroad only buttons
     self._quiet_mode_and_dcam.action_item.right_button.set_enabled(ui_state.is_offroad())
     self._reg_and_training.action_item.left_button.set_enabled(ui_state.is_offroad())
     self._reg_and_training.action_item.right_button.set_enabled(ui_state.is_offroad())
-    self._onroad_uploads_and_reset_settings.action_item.right_button.set_enabled(ui_state.is_offroad())

@@ -19,11 +19,13 @@ from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.common import Polic
 SpeedLimitSource = custom.LongitudinalPlanSP.SpeedLimit.Source
 
 ALL_SOURCES = tuple(SpeedLimitSource.schema.enumerants.values())
+PHONE_SPEED_LIMIT_MAX_AGE_S = 10.0
 
 
 class SpeedLimitResolver:
   limit_solutions: dict[custom.LongitudinalPlanSP.SpeedLimit.Source, float]
   distance_solutions: dict[custom.LongitudinalPlanSP.SpeedLimit.Source, float]
+  source_labels: dict[custom.LongitudinalPlanSP.SpeedLimit.Source, str]
   v_ego: float
   speed_limit: float
   speed_limit_last: float
@@ -31,6 +33,7 @@ class SpeedLimitResolver:
   speed_limit_final_last: float
   distance: float
   source: custom.LongitudinalPlanSP.SpeedLimit.Source
+  source_label: str
   speed_limit_offset: float
 
   def __init__(self):
@@ -40,6 +43,7 @@ class SpeedLimitResolver:
     self._gps_location_service = get_gps_location_service(self.params)
     self.limit_solutions = {}  # Store for speed limit solutions from different sources
     self.distance_solutions = {}  # Store for distance to current speed limit start for different sources
+    self.source_labels = {}  # Store a human-readable source label for logging/UI evidence
 
     self.policy = self.params.get("SpeedLimitPolicy", return_default=True)
     self.policy = get_sanitize_int_param(
@@ -54,8 +58,10 @@ class SpeedLimitResolver:
       Policy.car_state_priority: [SpeedLimitSource.car, SpeedLimitSource.map],
       Policy.map_data_priority: [SpeedLimitSource.map, SpeedLimitSource.car],
       Policy.combined: [SpeedLimitSource.car, SpeedLimitSource.map],
+      Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car, SpeedLimitSource.map],
     }
     self.source = SpeedLimitSource.none
+    self.source_label = ""
     for source in ALL_SOURCES:
       self._reset_limit_sources(source)
 
@@ -109,15 +115,48 @@ class SpeedLimitResolver:
   def _reset_limit_sources(self, source: custom.LongitudinalPlanSP.SpeedLimit.Source) -> None:
     self.limit_solutions[source] = 0.
     self.distance_solutions[source] = 0.
+    self.source_labels[source] = ""
 
   def _get_from_car_state(self, sm: messaging.SubMaster) -> None:
     self._reset_limit_sources(SpeedLimitSource.car)
     self.limit_solutions[SpeedLimitSource.car] = sm['carStateSP'].speedLimit
     self.distance_solutions[SpeedLimitSource.car] = 0.
+    self.source_labels[SpeedLimitSource.car] = "car"
 
   def _get_from_map_data(self, sm: messaging.SubMaster) -> None:
     self._reset_limit_sources(SpeedLimitSource.map)
     self._process_map_data(sm)
+
+  @staticmethod
+  def _parse_float(value: str | bytes | float | int | None) -> float:
+    if value is None:
+      return 0.
+    if isinstance(value, bytes):
+      value = value.decode("utf-8", errors="ignore")
+    try:
+      return float(value)
+    except (TypeError, ValueError):
+      return 0.
+
+  def _get_from_phone_data(self) -> None:
+    self._reset_limit_sources(SpeedLimitSource.phone)
+    if not self.params.get_bool("CarrotPhoneSpeedLimitEnabled"):
+      return
+
+    speed_limit = self._parse_float(self.params.get("CarrotPhoneSpeedLimit"))
+    updated_at = self._parse_float(self.params.get("CarrotPhoneSpeedLimitUpdatedAt"))
+    data_age = time.time() - updated_at
+
+    if speed_limit <= 0. or updated_at <= 0. or data_age < 0. or data_age > PHONE_SPEED_LIMIT_MAX_AGE_S:
+      return
+
+    label = self.params.get("CarrotPhoneSpeedLimitSource")
+    if isinstance(label, bytes):
+      label = label.decode("utf-8", errors="ignore")
+
+    self.limit_solutions[SpeedLimitSource.phone] = speed_limit
+    self.distance_solutions[SpeedLimitSource.phone] = 0.
+    self.source_labels[SpeedLimitSource.phone] = label or "phone"
 
   def _process_map_data(self, sm: messaging.SubMaster) -> None:
     gps_data = sm[self._gps_location_service]
@@ -141,6 +180,7 @@ class SpeedLimitResolver:
 
     self.limit_solutions[SpeedLimitSource.map] = speed_limit
     self.distance_solutions[SpeedLimitSource.map] = 0.
+    self.source_labels[SpeedLimitSource.map] = "map"
 
     # FIXME-SP: this is not working as expected
     if 0. < next_speed_limit < self.v_ego:
@@ -169,6 +209,7 @@ class SpeedLimitResolver:
 
   def _resolve_limit_sources(self, sm: messaging.SubMaster) -> tuple[float, float, custom.LongitudinalPlanSP.SpeedLimit.Source]:
     """Get limit solutions from each data source"""
+    self._get_from_phone_data()
     self._get_from_car_state(sm)
     self._get_from_map_data(sm)
 
@@ -183,6 +224,7 @@ class SpeedLimitResolver:
     self.update_params()
 
     self.speed_limit, self.distance, self.source = self._resolve_limit_sources(sm)
+    self.source_label = self.source_labels.get(self.source, "")
     self.speed_limit_offset = self._get_speed_limit_offset()
 
     self.update_speed_limit_states()
