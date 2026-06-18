@@ -336,6 +336,85 @@ def check_carrot_web_asset_syntax() -> tuple[bool, str]:
   return True, ""
 
 
+def check_fishop_overtake_safety_contract() -> tuple[bool, str]:
+  fishop_hardware = read("selfdrive/carrot/fishop_hardware.py")
+  carrot_server = read("selfdrive/carrot/carrot_server.py")
+  control_surface = "\n".join(
+    read_tree(root, (".py", ".cc", ".cpp", ".h", ".hpp"))
+    for root in ("selfdrive/controls", "selfdrive/car", "opendbc_repo/opendbc/car")
+  )
+
+  # Stage 0/1 contract: fishop overtaking is evidence only. It must not enter
+  # controls until a later staged suggestion path explicitly uses the existing
+  # lane-change helper with turn-signal, blindspot, driver, speed, and vehicle gates.
+  for token in ("FishopAutoOvertakeEnabled", "AUTO_OVERTAKE", "OVERTAKE", "overtake_request", "overtake"):
+    if token in control_surface:
+      return False, f"{token!r} appears in controls/car output surfaces before the staged safety chain exists"
+
+  parser_forbidden = (
+    "log.Desire",
+    "LaneChangeState",
+    "LaneChangeDirection",
+    "lateralManeuverPlan",
+    "leftBlinker",
+    "rightBlinker",
+    "leftBlindspot",
+    "rightBlindspot",
+    "desiredCurvature",
+    "CarControl",
+    "PubMaster",
+    "sendcan",
+    "desire_helper",
+    "planner",
+  )
+  for token in parser_forbidden:
+    if token in fishop_hardware:
+      return False, f"fishop hardware parser references control/safety-chain token {token!r}"
+
+  server_forbidden = (
+    "log.Desire",
+    "LaneChangeState",
+    "LaneChangeDirection",
+    "lateralManeuverPlan",
+    "leftBlinker",
+    "rightBlinker",
+    "leftBlindspot",
+    "rightBlindspot",
+    "desiredCurvature",
+    "CarControl",
+    "PubMaster",
+    "sendcan",
+    "desire_helper",
+  )
+  for token in server_forbidden:
+    if token in carrot_server:
+      return False, f"Carrot Web/navigation bridge references control/safety-chain token {token!r}"
+
+  required_parser_tokens = (
+    "CONTROL_OUTPUT_ENABLED = False",
+    '"controlOutputEnabled": CONTROL_OUTPUT_ENABLED',
+    '"readOnly": True',
+    '"overtake": overtake',
+    "OVERTAKE_MAX_AGE_S = 1.0",
+  )
+  for token in required_parser_tokens:
+    if token not in fishop_hardware:
+      return False, f"fishop hardware parser missing read-only overtaking contract token {token!r}"
+
+  required_server_tokens = (
+    '"FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": False}',
+    '"OVERTAKE"',
+    '"AUTO_OVERTAKE"',
+    "commandIgnored",
+    "highRiskCommandSeen",
+  )
+  for token in required_server_tokens:
+    if token not in carrot_server:
+      return False, f"Carrot Web/navigation bridge missing high-risk command guard token {token!r}"
+
+  return True, ""
+
+
 def check_carrot_learning_runtime() -> tuple[bool, str]:
   FakeParams.reset()
   params_mod = types.ModuleType("openpilot.common.params")
@@ -905,6 +984,8 @@ def main() -> int:
   for forbidden in ("socket", "PubMaster", "SubMaster", "CarControl", "CANParser", "sendto", ".bind(", "desire_helper", "blinker_ctrl"):
     failures += not require(f"fishop hardware parser omits {forbidden}", forbidden not in fishop_hardware,
                             "fishop hardware parser must not open network sockets, publish controls, or touch lane-change control")
+  ok, detail = check_fishop_overtake_safety_contract()
+  failures += not require("fishop auto-overtake safety chain gate", ok, detail or "fishop auto-overtake safety chain gate failed")
   failures += not require("fishop hardware sample tool exists", "FishopHardwareState" in fishop_sample and "SAMPLE_PAYLOADS" in fishop_sample,
                           "fishop hardware sample tool must normalize captured JSON payloads")
   failures += not require("alpha snapshot tool exists", "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot" in alpha_snapshot
@@ -1028,6 +1109,9 @@ def main() -> int:
     failures += not require("fishop parser records overtake read-only", fishop_snapshot["overtake"]["commandSeen"]
                             and fishop_snapshot["overtake"]["readOnly"] and not fishop_snapshot["controlOutputEnabled"],
                             "fishop overtake input must be evidence-only and never enable control output")
+    failures += not require("fishop parser omits overtake action output", all(key not in fishop_snapshot["overtake"] for key in ("desire", "laneChange", "execute", "control"))
+                            and fishop_snapshot["overtake"]["requested"] and fishop_snapshot["overtake"]["direction"] == "left",
+                            "fishop overtake evidence must not expose desire/lane-change/control action fields")
     failures += not require("fishop parser reports sensor freshness", fishop_snapshot["sensorOnline"]
                             and fishop_snapshot["lastUpdateMonotonicSec"] == 1000.0
                             and fishop_snapshot["lane"]["lastUpdateMonotonicSec"] == 1000.0,
