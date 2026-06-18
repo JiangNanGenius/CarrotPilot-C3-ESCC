@@ -360,7 +360,9 @@ flowchart TD
 - [x] alpha Carrot Web 新增只读 UDP 7705 状态广播骨架，包含 Navipilot APP 驾驶评分启动需要的 `Carrot2`、`IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph`、`carcruiseSpeed`、`tbt_dist`、`sdi_dist`、`xState`、`trafficState`。
 - [x] alpha 7705 状态广播会带出最近一次导航输入里的 TBT/SDI/限速摘要，并明确 `controlOutput=false`。
 - [x] alpha 7705 状态广播接入真实 messaging 只读缓存：`carState` 车速/巡航、`selfdriveState` active/enabled、`longitudinalPlanSP` / `carStateSP` 限速摘要。
+- [x] alpha 7705 状态广播补齐旧 CarrotMan / CP搭子发现兼容字段：`CarrotRouteActive`、`ip`、`port`、`navi_http_port`、`log_carrot`；未迁移的 7713 导航 HTTP 明确 `navi_http_port=0` / `naviHttpAvailable=false`。
 - [ ] alpha 7705 状态广播接入真正 CarrotMan / Carrot 控制运行态；在控制逻辑迁移前 `xState`、`trafficState` 必须继续保持 0。
+- [ ] 迁移旧 CarrotMan 7713 导航 HTTP 服务或等价本地接口；未迁移前不能在 7705 中宣称可用。
 - [ ] 迁移 CP搭子 / Navipilot 参数接口。
 - [x] alpha Carrot Web 新增受限 CP搭子 / Navipilot 参数接口：`GET /api/params_bulk` 和 `POST /api/param_set`，兼容 APP 读取/同值写回 `ExperimentalMode`。
 - [x] alpha 参数接口使用显式白名单；`OffroadMode`、Carrot 高风险控制、fishop 自动超车等只读或不暴露，不新增 `AlwaysOffroad` / `EnableEscc` 等混淆别名。
@@ -482,6 +484,7 @@ flowchart LR
 - [x] 静态检查 UDP 7706 导航输入只记录证据、更新限速，不发布控制、不接入变道/planner。
 - [x] 静态检查 UDP 7705 状态广播必需字段、局域网目标、read-only 标记和运行时 payload。
 - [x] 静态检查 UDP 7705 状态广播从本地 messaging 只读缓存读取 `carState`、`selfdriveState`、`longitudinalPlanSP`、`carStateSP`，并确认 `xState` / `trafficState` 在 Carrot 控制迁移前保持惰性。
+- [x] 静态检查 UDP 7705 状态广播包含旧 CarrotMan / CP搭子发现兼容字段，并明确未迁移的 Carrot 控制态和 7713 导航 HTTP 不可用。
 - [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
 - [ ] schema 检查通过。
 - [x] params 检查通过。
