@@ -1757,3 +1757,21 @@
 - `python3 scripts/personal/settings_cn_audit.py` 通过。
 - `python3 -m json.tool selfdrive/carrot_settings.json` 通过。
 - Python 语法检查通过。
+
+## 2026-06-18: test21 受控测试安装目标
+
+改动文件：
+
+- `docs/personal/INSTALL_TARGETS.json`
+- `scripts/personal/install_c3_escc.sh`
+- `docs/personal/INSTALL_AND_ROLLBACK.md`
+- `docs/personal/BINARY_INSTALLER_RESEARCH.md`
+- `README.md`
+- `docs/personal/CODE_CHANGES.md`
+
+改动内容：
+
+- 将当前受控上车测试目标更新为 `carrotpilot-c3-escc-20260618-test21`。
+- 脚本安装器默认 ref 同步改为 test21。
+- 安装说明里的 release asset URL、二进制安装器说明和 dry-run 命令同步改为 test21。
+- `current_static_tag` 仍保持 `carrotpilot-c3-escc-20260618-static28`；当前仍没有 stable tag，`daily_install_target` 继续为空。
