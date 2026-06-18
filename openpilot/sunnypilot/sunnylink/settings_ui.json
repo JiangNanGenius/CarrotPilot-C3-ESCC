@@ -1671,11 +1671,6 @@
               "title": "Quiet Mode"
             },
             {
-              "key": "OnroadUploads",
-              "widget": "toggle",
-              "title": "Onroad Uploads"
-            },
-            {
               "key": "MaxTimeOffroad",
               "widget": "option",
               "title": "Max Time Offroad",
