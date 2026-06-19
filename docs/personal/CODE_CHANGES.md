@@ -145,6 +145,8 @@ Implementation notes added after the first device sync:
 - SunnyPilot ICBM, SCC-V, SCC-M, and DEC are hidden and forced inert in the personal alpha. Any future speed-control work should be implemented as Carrot/Genius Pilot granular controls, not by re-enabling those SunnyPilot black-box toggles.
 - The sidebar temperature label now prefers numeric `maxTempC` and only uses the color state as a warning hint.
 - A Simplified Chinese overlay was added for the high-use alpha pages, but this is the first pass; real-device wording feedback should continue to update the `.po` file and the setting descriptions.
+- After pushing commit `ec7e73dc`, the user's C3 was aligned to `alpha-sunnypilot-c3` and the working tree was clean. The Wi-Fi fallback reported connected SSID `zhao`, IP `192.168.100.174`, and 13 scanned networks after the UI-style activation path.
+- A quick process check found no `athenad`, `sunnylinkd`, `uploader`, `statsd_sp`, or `backup_manager` process running.
 
 Open follow-up from the same bench test:
 
