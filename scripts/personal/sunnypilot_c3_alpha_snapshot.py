@@ -133,6 +133,8 @@ CARROT_WEB_HOST = "127.0.0.1"
 CARROT_WEB_PORT = 7000
 CARROT_STATUS_BROADCAST_PATH = "/api/status_broadcast"
 CARROT_HEALTH_PATH = "/api/health"
+ALPHA_INSTALL_URL = "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x"
+STABLE_ROLLBACK_INSTALL_URL = "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i"
 HYUNDAI_SP_ENHANCED_SCC_FLAG = 1
 HYUNDAI_SP_ESCC_SAFETY_PARAM = 1
 MESSAGING_SERVICES = (
@@ -862,6 +864,149 @@ def summarize_fishop_release_gate(safe_params: dict[str, str], process: dict[str
   }
 
 
+def _stage_status(implemented: bool, evidence_ok: bool, locked: bool = False) -> str:
+  if locked:
+    return "locked"
+  if not implemented:
+    return "not_implemented"
+  return "pass" if evidence_ok else "waiting_evidence"
+
+
+def _stage_record(stage_id: int, name: str, implemented: bool, evidence_ok: bool, current_allowed: bool,
+                  required_log: str, missing: Iterable[str], rollback: dict[str, Any], locked: bool = False) -> dict[str, Any]:
+  return {
+    "stageId": stage_id,
+    "name": name,
+    "status": _stage_status(implemented, evidence_ok, locked),
+    "implemented": implemented,
+    "currentAllowed": current_allowed,
+    "evidenceOk": evidence_ok,
+    "readOnly": True,
+    "controlOutput": False,
+    "mayPublishDesire": False,
+    "maySendLateralCommand": False,
+    "requiredLog": required_log,
+    "rollback": rollback,
+    "missingBeforeNextStage": list(missing),
+  }
+
+
+def summarize_fishop_overtake_stages(fishop: dict[str, Any], release_gate: dict[str, Any]) -> dict[str, Any]:
+  fishop_state = fishop.get("snapshot", {}) if isinstance(fishop, dict) else {}
+  lane = fishop_state.get("lane", {}) if isinstance(fishop_state, dict) else {}
+  blindspot = fishop_state.get("blindspot", {}) if isinstance(fishop_state, dict) else {}
+  overtake = fishop_state.get("overtake", {}) if isinstance(fishop_state, dict) else {}
+  preview = overtake.get("suggestionPreview", {}) if isinstance(overtake, dict) else {}
+  hint = preview.get("overtakeHint", {}) if isinstance(preview.get("overtakeHint"), dict) else {}
+  navigation_gate = preview.get("navigationGate", {}) if isinstance(preview.get("navigationGate"), dict) else {}
+  release_checks = release_gate.get("checks", {}) if isinstance(release_gate, dict) else {}
+  rollback = {
+    "required": True,
+    "alphaInstaller": ALPHA_INSTALL_URL,
+    "stableRollbackInstaller": STABLE_ROLLBACK_INSTALL_URL,
+    "branch": git_value(["branch", "--show-current"]),
+    "commit": git_value(["rev-parse", "--short=12", "HEAD"]),
+    "tagRequiredBeforePromotion": True,
+  }
+
+  data_evidence = bool(fishop.get("inputAvailable")) and not bool(fishop.get("parseError")) and bool(fishop_state)
+  sensor_evidence = bool(fishop_state.get("sensorOnline")) and bool(lane.get("fresh")) and bool(blindspot.get("fresh"))
+  display_evidence = bool(release_checks.get("fishopOvertakeDisplayOnly", {}).get("ok"))
+  hint_supported = (
+    isinstance(hint, dict)
+    and hint.get("readOnly") is True
+    and hint.get("controlOutput") is False
+    and hint.get("emitsLateralCommand") is False
+    and hint.get("stage") == "hint_only"
+  )
+  suggestion_review_supported = (
+    bool(preview.get("readyForSuggestion"))
+    and navigation_gate.get("suggestionEligible") is True
+    and navigation_gate.get("controlEligible") is False
+    and preview.get("emitsLateralCommand") is False
+  )
+
+  stages = [
+    _stage_record(
+      1,
+      "data_only_capture",
+      True,
+      data_evidence,
+      True,
+      "fishop JSONL/input capture with timestamps, lane, blindspot, navigation, and overtake fields",
+      () if data_evidence else ("fishop input file or parsed payload evidence",),
+      rollback,
+    ),
+    _stage_record(
+      2,
+      "display_only_web_snapshot",
+      True,
+      sensor_evidence and display_evidence,
+      True,
+      "Carrot Web/API/snapshot display-only evidence; no planner, desire, steering, or CAN output",
+      () if sensor_evidence and display_evidence else ("fresh lane/blindspot evidence", "display-only release gate"),
+      rollback,
+    ),
+    _stage_record(
+      3,
+      "hint_only_no_desire",
+      True,
+      hint_supported,
+      True,
+      "overtakeHint log with direction, reasons, navigationGate, and explicit no-desire/no-lateral-output fields",
+      () if hint_supported else ("overtakeHint evidence with controlOutput=false and emitsLateralCommand=false",),
+      rollback,
+    ),
+    _stage_record(
+      4,
+      "suggestion_review_existing_safety_chain",
+      False,
+      suggestion_review_supported,
+      False,
+      "future suggestion review log consumed only by existing safe lane-change chain",
+      (
+        "existing safe lane-change chain integration",
+        "turn signal and driver confirmation gate",
+        "original and external blindspot agreement gate",
+        "speed, road type, and Seltos 2023 SCC/ESCC gate",
+        "parked replay plus road-test evidence",
+      ),
+      rollback,
+      locked=True,
+    ),
+    _stage_record(
+      5,
+      "controlled_execution_experiment",
+      False,
+      False,
+      False,
+      "future controlled execution evidence log with separate tag, rollback installer, and driver override review",
+      (
+        "all previous stages passed on device",
+        "separate experimental tag",
+        "rollback installer verified",
+        "driver override and disengagement review",
+        "cloud/upload processes absent in every evidence bundle",
+      ),
+      rollback,
+      locked=True,
+    ),
+  ]
+  return {
+    "readOnly": True,
+    "controlOutput": False,
+    "currentMaxStage": max(stage["stageId"] for stage in stages if stage["implemented"] and stage["currentAllowed"]),
+    "nextLockedStage": next((stage["stageId"] for stage in stages if stage["status"] == "locked"), None),
+    "rollbackRequiredForEveryStage": True,
+    "cloudEvidenceRequiredEveryStage": True,
+    "allImplementedStagesNoControlOutput": all(
+      stage["controlOutput"] is False and stage["mayPublishDesire"] is False and stage["maySendLateralCommand"] is False
+      for stage in stages
+    ),
+    "stages": stages,
+  }
+
+
 def sample_messaging(seconds: int) -> dict[str, Any]:
   result: dict[str, Any] = {
     "enabled": seconds > 0,
@@ -946,6 +1091,8 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
   navigation = summarize_navigation_event()
   auto_tuner = summarize_auto_tuner(safe_params)
   carrot_feature_gates = summarize_carrot_feature_gates(safe_params, navigation, auto_tuner, fishop)
+  fishop_release_gate = summarize_fishop_release_gate(safe_params, process, car_params, car_params_sp, messaging, fishop)
+  fishop_overtake_stages = summarize_fishop_overtake_stages(fishop, fishop_release_gate)
   cloud_params = {
     "SunnylinkEnabled": safe_params.get("SunnylinkEnabled"),
     "EnableSunnylinkUploader": safe_params.get("EnableSunnylinkUploader"),
@@ -983,7 +1130,8 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
     },
     "messaging": messaging,
     "fishopHardware": fishop,
-    "fishopReleaseGate": summarize_fishop_release_gate(safe_params, process, car_params, car_params_sp, messaging, fishop),
+    "fishopReleaseGate": fishop_release_gate,
+    "fishopOvertakeStages": fishop_overtake_stages,
   }
 
 
