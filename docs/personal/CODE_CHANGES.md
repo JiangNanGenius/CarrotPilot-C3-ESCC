@@ -1,5 +1,18 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 C3 Params And Local Web Evidence Fixes
+
+Fixed another C3 runtime compatibility issue and tightened parked evidence:
+
+- Replaced direct `Params.get_int()` / `Params.put_int()` usage in Carrot Web, Auto-Tuner, UI state, and curve-speed policy with compatibility helpers that work with the C3 `Params` extension.
+- Fixed `/api/health` returning HTTP 500 when Auto-Tuner state was included in Carrot Web health output.
+- Made `carrotControlPreview` always report `controlOutput=false`, even when no navigation event is present.
+- Updated the Navipilot live check so Carrot active speed, ATC, traffic-light stop, Auto-Tuner auto-apply, and Fishop overtake are treated as offroad-writable test switches; `OffroadMode` and `SpeedFromPCM` remain read-only through the local API.
+- Added `scripts/personal/carrot_tuning_baseline.py` to export a repeatable Carrot/Fishop/model/visual tuning baseline from the user's C3 params before future updates.
+- Added a static release gate that prevents direct `get_int()` / `put_int()` calls from returning to C3 runtime paths.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.30`.
+
 ## 2026-06-20 Carrot Cruise Ownership Clarification
 
 Tightened the alpha maintenance contract for cruise-speed ownership:

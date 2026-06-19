@@ -33,7 +33,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep a robust local Wi-Fi UI on clone C3 even when the `jeepney` DBus dependency is absent; prefer DBus when available and fall back to `nmcli`.
 - [x] Remove the fresh-install dependency on `jeepney` by patching the packed TICI updater to use the same `nmcli` fallback as the main Wi-Fi manager.
 - [x] Decide the permanent C3 rescue access policy: no GitHub/cloud registration required, no public hardcoded password in release builds, and a bench-only recovery method for the user's device.
-- [ ] Verify local LAN services after every install: Wi-Fi status, SSH, local web, updater, model manager, and no dependency crashes in `/tmp/launch_log`.
+- [x] Verify local LAN services after the C3 hotfix: SSH works, local Carrot Web/API health responds, Navipilot 7000/7705/7712/7713 checks pass, and no cloud services are exposed.
 - [ ] Run real device parking test on clone C3.
 - [ ] Pull a C3 evidence bundle with `sunnypilot_c3_device_collect.py` after `/x` install succeeds.
 
@@ -133,7 +133,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add a Carrot cruise-control section covering button behavior, curve slowdown, traffic-light logic, speed-limit behavior, and model-speed behavior.
 - [x] Add a Fishop hardware section for lane curve, lidar lane data, lidar blindspot, navigation gate, and auto-overtake, including how each input relates to the existing lane-change chain.
 - [x] Migrate mechanical/masang-feiyang lane-line curve display, lidar left/right lane data, lidar blindspot data, navigation gate, and automatic-overtake switches as display-first features.
-- [ ] Preserve the user's current working masang-feiyang tuning values as a known-good baseline before replacing any longitudinal or braking behavior.
+- [x] Preserve the user's current working masang-feiyang tuning values as a known-good baseline before replacing any longitudinal or braking behavior.
+- [x] Add `scripts/personal/carrot_tuning_baseline.py` so future updates can export the same Carrot/Fishop/model/visual baseline from C3 params.
 - [x] Compare ajouatom CarrotPilot, jixiexiaoge mechanical/Auto-Tuner, and ESCC fork settings one-by-one, then create the missing Genius Pilot controls instead of hiding behavior behind SunnyPilot defaults.
 
 ## Three-Branch Settings Relationship Plan
@@ -163,6 +164,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [ ] Sync or reinstall on the user's C3 and confirm Super Advanced opens, NNLC defaults on, Seltos 2023 appears, and new Carrot params do not show unknown-key waits.
 - [ ] Run C3 parked checks with the device currently available: UI opens, Wi-Fi/network page reports connected state, local Web/API responds, no cloud processes exist, model manager opens, stock model runner starts.
 - [x] Run local Carrot Web/API checks: write and read `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, `CarrotTrafficStopEnabled`, `FishopAutoOvertakeEnabled`, `CurveSpeedControlMode`, and `NeuralNetworkLateralControl` while offroad.
+- [x] Run C3 local Carrot Web/API checks: health, params bulk, same-value param write, status broadcast, UDP status, navigation HTTP, and navigation TCP all pass with local-only/no-control evidence.
 - [x] Run Navipilot/APN/N input replay locally and confirm phone speed, SDI, speed-bump, traffic-light, turn, and model-speed fields are parsed.
 - [x] Run Fishop sample replay locally and confirm lane curve, left/right lane, lidar blindspot, dynamic risk, navigation gate, and overtake fields render in Web/API.
 - [ ] Road testing is not required for this code/local phase; keep `/i` as rollback until later parked and real-car checks are intentionally performed.

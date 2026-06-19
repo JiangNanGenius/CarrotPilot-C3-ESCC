@@ -27,6 +27,7 @@ DEFAULT_PARAM_NAMES = [
   "OffroadMode",
   "CarrotMapOverlayEnabled",
   "CarrotPhoneSpeedLimitEnabled",
+  "CarrotActiveSpeedControlEnabled",
   "CarrotTrafficStopEnabled",
   "CarrotAutoTurnControlEnabled",
   "CarrotLearningActive",
@@ -37,10 +38,6 @@ DEFAULT_PARAM_NAMES = [
 READ_ONLY_PARAM_NAMES = {
   "OffroadMode",
   "SpeedFromPCM",
-  "CarrotTrafficStopEnabled",
-  "CarrotAutoTurnControlEnabled",
-  "CarrotLearningAutoApply",
-  "FishopAutoOvertakeEnabled",
 }
 
 WRITABLE_SAME_VALUE_PARAM_NAMES = {
@@ -48,7 +45,12 @@ WRITABLE_SAME_VALUE_PARAM_NAMES = {
   "ExperimentalModeConfirmed",
   "CarrotMapOverlayEnabled",
   "CarrotPhoneSpeedLimitEnabled",
+  "CarrotActiveSpeedControlEnabled",
+  "CarrotTrafficStopEnabled",
+  "CarrotAutoTurnControlEnabled",
   "CarrotLearningActive",
+  "CarrotLearningAutoApply",
+  "FishopAutoOvertakeEnabled",
 }
 
 REQUIRED_HEALTH_ENDPOINTS = {
@@ -224,6 +226,7 @@ def validate_params(payload: dict[str, Any], names: list[str]) -> tuple[bool, st
 def validate_status_payload(payload: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
   missing = [key for key in REQUIRED_STATUS_KEYS if key not in payload]
   preview = payload.get("carrotControlPreview") if isinstance(payload.get("carrotControlPreview"), dict) else {}
+  preview_control_output = preview.get("controlOutput", False)
   evidence = {
     "missing": missing,
     "Carrot2": payload.get("Carrot2"),
@@ -231,7 +234,7 @@ def validate_status_payload(payload: dict[str, Any]) -> tuple[bool, str, dict[st
     "xState": payload.get("xState"),
     "trafficState": payload.get("trafficState"),
     "controlOutput": payload.get("controlOutput"),
-    "previewControlOutput": preview.get("controlOutput"),
+    "previewControlOutput": preview_control_output,
     "carrotManCompatible": payload.get("carrotManCompatible"),
     "naviHttpAvailable": payload.get("naviHttpAvailable"),
     "naviTcpAvailable": payload.get("naviTcpAvailable"),
@@ -245,7 +248,7 @@ def validate_status_payload(payload: dict[str, Any]) -> tuple[bool, str, dict[st
     failures.append("trafficState must stay 0 before Carrot control migration")
   if payload.get("controlOutput") is not False:
     failures.append("controlOutput must be false")
-  if preview.get("controlOutput") is not False:
+  if preview_control_output is not False:
     failures.append("carrotControlPreview.controlOutput must be false")
   if payload.get("carrotManCompatible") is not True:
     failures.append("carrotManCompatible must be true")

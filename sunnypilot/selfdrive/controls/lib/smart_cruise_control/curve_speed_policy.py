@@ -18,12 +18,35 @@ class CurveSpeedControlMode(IntEnum):
   fusion = 3
 
 
+def _param_int(params: Params, key: str, default: int) -> int:
+  get_int = getattr(params, "get_int", None)
+  if callable(get_int):
+    try:
+      return int(get_int(key))
+    except Exception:
+      pass
+  try:
+    raw = params.get(key, return_default=True)
+  except TypeError:
+    raw = params.get(key)
+  except Exception:
+    raw = default
+  if raw is None:
+    raw = default
+  if isinstance(raw, bytes):
+    raw = raw.decode("utf-8", errors="ignore")
+  try:
+    return int(float(raw))
+  except (TypeError, ValueError):
+    return int(default)
+
+
 def _mode(params: Params | None = None) -> CurveSpeedControlMode:
   if params is None:
     params = Params()
 
   try:
-    return CurveSpeedControlMode(int(params.get_int("CurveSpeedControlMode")))
+    return CurveSpeedControlMode(_param_int(params, "CurveSpeedControlMode", CurveSpeedControlMode.sunny.value))
   except (KeyError, TypeError, ValueError):
     return CurveSpeedControlMode.sunny
 
