@@ -60,5 +60,15 @@ Balanced means Sunny model-curvature quality plus Carrot navigation/phone/lane i
 - `SpeedLimitPolicy`, `CarrotPhoneSpeedLimitEnabled`,
   `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, and
   `UseLaneLineCurveSpeed` keep their own gates; curve mode does not bypass them.
+- `SpeedLimitPolicy=Phone First` chooses source order only: fresh
+  APN/N/Navipilot/Carrot phone data, then vehicle/cluster data. OSM/mapd is
+  opt-in through the map policies and is not used as the default speed truth.
+  `SpeedLimitMode=Assist` is still required before resolved speed limits can
+  change cruise targets.
+- `CarrotAutoTurnControlEnabled` and `TurnSpeedControlMode` own ATC/turn
+  slowdown. `CarrotCruiseAtcDecel` belongs to that path only and should not be
+  treated as a generic cruise decel value.
+- `CarrotTrafficStopEnabled` is separate from both active speed and ATC because
+  red-light stop can request a much lower target near intersections.
 - Every upstream update must pass the curve-speed contract before publishing
   `/x`.

@@ -37,6 +37,10 @@ def check_sources() -> list[str]:
     "0 uses live/default delay",
     "VEgoStopping",
     "0.01 m/s",
+    "Recommendation target meanings",
+    "Stronger requested acceleration",
+    "Longer following time gap",
+    "No pending recommendation means no tuning value changes",
     "数值越高",
     "数值越低",
     "负值",
@@ -52,6 +56,10 @@ def check_sources() -> list[str]:
     "Lane/path lateral offset used by Carrot tuning. Zero is neutral; negative shifts left, positive shifts right.",
     "Additional steering actuator delay target used by Auto-Tuner. Zero uses live/default delay",
     "Stopping detection threshold in 0.01 m/s units",
+    "If no recommendation is pending, no value changes",
+    "higher Cruise Accel is stronger",
+    "Speed-limit data still needs Speed Limit Assist",
+    "Deceleration target used only by Auto Turn Control",
   )
   if not all(token in carrot_ui for token in required_ui_tokens):
     errors.append("Super Advanced Carrot UI missing clarified tuning descriptions")

@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Carrot-First Speed Policy
+
+Made the default speed-limit path match the Carrot/Genius owner decision:
+
+- `SpeedLimitPolicy=Phone First` now resolves fresh APN/N/Navipilot/Carrot phone data first, then vehicle/cluster data; Sunny OSM/mapd no longer participates in the default policy.
+- Map/GPS speed limits are still available through explicit map policies, but the resolver only reads mapd when the selected policy includes map.
+- Bumped the `GeniusSpeedLimitPolicyMigrated` version so early alpha devices stuck on `Map First` migrate once to the safer Phone First default.
+- Updated the Cruise and Speed Limit settings pages, Simplified/Traditional Chinese strings, Carrot Web risk text, settings matrix, conflict notes, and release checks to describe map/GPS as opt-in.
+- Expanded Auto-Tuner documentation and UI contracts so recommendation targets explain what higher/lower values mean instead of only saying whether a recommendation exists.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.27`.
+
 ## 2026-06-20 MICI Branding Cleanup
 
 Cleaned up the last obvious old-brand strings that could still appear on C3/MICI settings surfaces:

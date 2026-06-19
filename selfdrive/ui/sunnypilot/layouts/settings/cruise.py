@@ -89,19 +89,19 @@ class CruiseLayout(Widget):
       inline=True)
 
     self.sla_settings_button = simple_button_item_sp(
-      button_text=lambda: tr("Speed Limit"),
+      button_text=lambda: tr("Phone First Speed Limit"),
       button_width=800,
       callback=lambda: self._set_current_panel(PanelType.SLA)
     )
 
     self.phone_speed_source = toggle_item_sp(
       title=lambda: tr("Phone Speed Limit Source"),
-      description=lambda: tr("Use fresh APN/N, Navipilot, or Carrot phone speed-limit data before vehicle and map sources. Stale data times out automatically."),
+      description=lambda: tr("Enable the phone/APN/N input for the Phone First resolver. Fresh phone data wins first, stale data times out, then vehicle/cluster speed. Sunny map/GPS limits are only used by explicit map policies."),
       param="CarrotPhoneSpeedLimitEnabled")
 
     self.carrot_active_speed = toggle_item_sp(
       title=lambda: tr("Carrot Active Speed Control"),
-      description=lambda: tr("Allow Carrot speed-limit, navigation, SDI, speed-bump, traffic-light, and model-speed evidence to adjust cruise targets when the related assist mode is enabled."),
+      description=lambda: tr("Master gate for Carrot cruise-target changes from speed limit, navigation, SDI, speed-bump, traffic-light, and model-speed evidence. Speed Limit mode must be Assist before speed-limit data can change cruise targets."),
       param="CarrotActiveSpeedControlEnabled")
 
     self.curve_speed_mode = option_item_sp(
@@ -113,7 +113,7 @@ class CruiseLayout(Widget):
 
     self.auto_turn_control = toggle_item_sp(
       title=lambda: tr("Carrot Auto Turn Slowdown"),
-      description=lambda: tr("Use Carrot navigation and curve information to slow for turns and junctions."),
+      description=lambda: tr("Separate gate for turn/junction slowdown. It uses Turn Speed Control Mode and ATC Decel; it does not replace Speed Limit Assist or Traffic Light Stop."),
       param="CarrotAutoTurnControlEnabled")
 
     self.turn_speed_mode = option_item_sp(
@@ -121,7 +121,7 @@ class CruiseLayout(Widget):
       param="TurnSpeedControlMode",
       min_value=0, max_value=3, value_change_step=1,
       label_callback=self._turn_mode_label,
-      description=lambda: tr("Select the turn-speed strategy: Off, Carrot, Sunny, or Balanced."))
+      description=lambda: tr("Select the turn-speed strategy for ATC/turn slowdown: Off, Carrot, Sunny, or Balanced. This is separate from the speed-limit source policy."))
 
     self.navigation_decel_rate = option_item_sp(
       title=lambda: tr("Navigation Decel Rate"),
@@ -132,7 +132,7 @@ class CruiseLayout(Widget):
 
     self.traffic_stop = toggle_item_sp(
       title=lambda: tr("Carrot Traffic Light Stop"),
-      description=lambda: tr("Use Carrot traffic-light input for red-light stop behavior."),
+      description=lambda: tr("Separate gate for red-light stopping. It should be tested independently from Active Speed and Auto Turn because it can request a much lower target near intersections."),
       param="CarrotTrafficStopEnabled")
 
     self.traffic_light_mode = option_item_sp(
@@ -159,7 +159,7 @@ class CruiseLayout(Widget):
       param="CarrotCruiseAtcDecel",
       min_value=-1, max_value=200, value_change_step=5,
       label_callback=self._auto_percent_label,
-      description=lambda: tr("Deceleration target used by Auto Turn Control. Auto uses the current Carrot default."))
+      description=lambda: tr("Deceleration target used only by Auto Turn Control. Auto uses the current Carrot default; higher allows stronger requested turn slowdown, lower softens it."))
 
     self.stop_distance = option_item_sp(
       title=lambda: tr("Stop Distance"),
@@ -211,7 +211,7 @@ class CruiseLayout(Widget):
       description=lambda: tr("Time gap preset 4 used by Carrot tuning."))
 
     items = [
-      CruiseSectionHeader(lambda: tr("Speed Limit And Model-Speed"), lambda: tr("Phone speed, vehicle speed, map speed, and model-speed evidence stay visible here; detailed source policy is inside Speed Limit.")),
+      CruiseSectionHeader(lambda: tr("Speed Limit And Model-Speed"), lambda: tr("Default source order is Phone/APN/N first, then vehicle/cluster speed. Map/GPS limits are opt-in; Assist mode and Carrot Active Speed are separate gates before cruise targets change.")),
       self.sla_settings_button,
       self.phone_speed_source,
       self.carrot_active_speed,

@@ -34,7 +34,13 @@ The reference branches use several settings that look similar but control differ
 
 - `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, and `CarrotTrafficStopEnabled` default off and remain user-toggleable while offroad.
 - Their owner is the Carrot/Genius path, not Sunny ICBM/SCC-V/SCC-M.
-- Related settings that must be tracked together: `SpeedLimitMode`, `CurveSpeedControlMode`, `TurnSpeedControlMode`, `TrafficLightDetectMode`, `TrafficStopDistanceAdjust`, `CarrotCruiseDecel`, and `CarrotCruiseAtcDecel`.
+- These controls are staged gates, not one shared switch:
+  - `SpeedLimitPolicy=Phone First` only chooses the source order: fresh APN/N/Navipilot/Carrot phone data, then vehicle/cluster speed. OSM/mapd is opt-in through Map Only, Map First, Car First, or Combined and is not the default speed truth.
+  - `SpeedLimitMode=Assist` is the speed-limit-assist gate that allows resolved limits to change cruise targets; Info/Warning stay display/alert only.
+  - `CarrotActiveSpeedControlEnabled` is the Carrot cruise-target gate for speed-limit, navigation, SDI, speed-bump, traffic-light, and model-speed evidence.
+  - `CarrotAutoTurnControlEnabled` plus `TurnSpeedControlMode` owns ATC/turn slowdown; `CarrotCruiseAtcDecel` only affects this path.
+  - `CarrotTrafficStopEnabled` plus `TrafficLightDetectMode` owns red-light stopping and should be tested independently because it can request a much lower target near intersections.
+- Related settings that must be tracked together: `SpeedLimitMode`, `SpeedLimitPolicy`, `CarrotPhoneSpeedLimitEnabled`, `CurveSpeedControlMode`, `TurnSpeedControlMode`, `TrafficLightDetectMode`, `TrafficStopDistanceAdjust`, `CarrotCruiseDecel`, and `CarrotCruiseAtcDecel`.
 
 ## Auto-Tuner
 

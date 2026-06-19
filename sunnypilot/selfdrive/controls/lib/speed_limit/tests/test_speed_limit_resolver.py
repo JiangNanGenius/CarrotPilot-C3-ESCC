@@ -64,6 +64,7 @@ parametrized_policies = pytest.mark.parametrize(
     (Policy.car_state_priority, 'carStateSP', SpeedLimitSource.car),
     (Policy.map_data_only, 'liveMapDataSP', SpeedLimitSource.map),
     (Policy.map_data_priority, 'liveMapDataSP', SpeedLimitSource.map),
+    (Policy.phone_priority, 'carStateSP', SpeedLimitSource.car),
   ],
   ids=lambda val: val.name if hasattr(val, 'name') else str(val)
 )

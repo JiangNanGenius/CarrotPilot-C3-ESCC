@@ -118,13 +118,13 @@ CLOUD_PROCESS_PATTERNS = {
 }
 
 LOCAL_PROCESS_PATTERNS = {
-  "manager": r"(^|[ /])manager(\.py)?($|[ \t])",
-  "updated": r"(^|[ /])updated(\.py)?($|[ \t])",
-  "models_manager": r"(^|[ /])models_manager(\.py)?($|[ \t])",
-  "carrot_server": r"(^|[ /])carrot_server(\.py)?($|[ \t])",
+  "manager": r"(^|[ /])(\./)?manager(\.py)?($|[ \t])",
+  "updated": r"(^|[ /.])(system\.)?updated(\.updated|\.py)?($|[ \t])",
+  "models_manager": r"(^|[ /.])(sunnypilot\.models\.manager|models_manager(\.py)?)($|[ \t])",
+  "carrot_server": r"(^|[ /.])(selfdrive\.carrot\.carrot_server|carrot_server(\.py)?)($|[ \t])",
   "modeld": r"(^|[ /])modeld($|[ \t])",
   "modeld_tinygrad": r"(^|[ /])modeld_tinygrad($|[ \t])",
-  "mapd": r"(^|[ /])mapd($|[ \t])",
+  "mapd": r"(^|[ /.])(sunnypilot\.mapd\.mapd_manager|mapd)($|[ \t])",
   "sshd": r"(^|[ /])sshd($|[ \t])",
 }
 
@@ -548,7 +548,9 @@ def summarize_carrot_feature_gates(safe_params: dict[str, str], navigation: dict
 
 
 def process_snapshot() -> dict[str, Any]:
-  code, output = run(["ps", "-A"])
+  code, output = run(["ps", "-eo", "pid=,comm=,args="])
+  if code != 0:
+    code, output = run(["ps", "-A"])
   if code != 0:
     return {"available": False, "error": output, "cloud": {}, "local": {}, "matched": []}
 

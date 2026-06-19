@@ -47,12 +47,14 @@ Key params:
 - `SpeedLimitValueOffset`
 
 Default policy: fresh phone/APN/N/Navipilot/Carrot data first, then vehicle
-limit, then OSM/mapd.
+or cluster limit. OSM/mapd is opt-in through the map policies and is not the
+default speed truth.
 
 Default offset: none, value `0`.
 
-Start in information/display mode. Only move to assist after the phone, vehicle,
-and map sources have been compared.
+Start in information/display mode. Only move to assist after the phone and
+vehicle sources have been compared. Test map policies separately if you decide
+to use OSM/mapd.
 
 ## Carrot Map Overlay
 

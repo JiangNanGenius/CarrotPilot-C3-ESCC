@@ -93,13 +93,37 @@ acceleration in that band.
 
 | Key | Default | Direction |
 | --- | ---: | --- |
-| `CarrotLearningActive` | 0 | Collects local evidence only when enabled. |
-| `CarrotLearningAutoApply` | 0 | Default off. Manual review/apply is preferred. |
-| `CarrotTunerApplyLat` | 1 | Allows lateral recommendations to be applied manually. |
-| `CarrotTunerApplyLong` | 1 | Allows longitudinal recommendations to be applied manually. |
+| `CarrotLearningActive` | 0 | When on, collects local evidence for acceleration bands, following gaps, manual braking, lane-centering bias, and steering override during curve entry. It only prepares recommendations. |
+| `CarrotLearningAutoApply` | 0 | When on, applies pending recommendations only while parked/offroad. Leave off unless the listed target and direction have been reviewed. |
+| `CarrotTunerApplyLat` | 1 | Allows lateral recommendations: `PathOffset`, `SteerActuatorDelay`, and `SteerRatioRate`. |
+| `CarrotTunerApplyLong` | 1 | Allows longitudinal recommendations: `CruiseMaxVals*`, `TFollowGap*`, `JLeadFactor3`, `DynamicTFollow`, `TFollowDecelBoost`, and `StopDistanceCarrot`. |
 
-Auto-Tuner recommendations should preserve known-good values unless the evidence
-is clear. Auto apply remains off by default.
+Recommendation target meanings:
+
+| Target | Higher Value Means | Lower Value Means |
+| --- | --- | --- |
+| `CruiseMaxVals0..6` | Stronger requested acceleration in that speed band. | Softer acceleration in that speed band. |
+| `TFollowGap1..4` | Longer following time gap and more room to the lead car. | Shorter following time gap and closer following. |
+| `JLeadFactor3` / `RadarReactionFactor` | More lead-car reaction; can feel earlier or more conservative. | Less lead-car reaction; can feel smoother but may react later. |
+| `DynamicTFollow` | More speed/lead-dependent following adjustment. | Less automatic following adjustment. |
+| `TFollowDecelBoost` | Adds more gap while already decelerating. | Adds less deceleration-time gap. |
+| `StopDistanceCarrot` | Stops farther back from the target. | Stops closer to the target. |
+| `PathOffset` | Positive shifts the path right; negative values shift left. | Moving toward zero reduces the offset. |
+| `SteerActuatorDelay` | Adds more steering delay compensation. | Uses less added delay; `0` uses live/default delay. |
+| `SteerRatioRate` | Above `100` scales steering ratio upward. | Below `100` scales steering ratio downward. |
+
+No pending recommendation means no tuning value changes. A pending
+recommendation records captured/current/recommended values; apply writes only
+those listed values and is blocked while onroad.
+
+中文速记：
+
+- Auto-Tuner 不是一个单独的神秘参数，它只是根据驾驶证据给具体参数推荐值。
+- `CruiseMaxVals*` 调高就是对应速度段加速更强，调低就是更柔。
+- `TFollowGap*` 调高就是跟车距离/时间更大，调低就是更近。
+- `JLeadFactor3`、`RadarReactionFactor` 调高会更重视前车变化，可能更保守或更早反应。
+- `PathOffset` 正值向右，负值向左；`SteerActuatorDelay` 越高表示加入更多转向延迟补偿。
+- 没有待应用推荐时，点 Apply 不应该改任何调参值；有推荐时只写入列表里的推荐项。
 
 ## Fishop Hardware Evidence
 

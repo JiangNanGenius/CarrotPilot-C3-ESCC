@@ -920,8 +920,8 @@ msgid "Warning: Displays the limit and warns when current speed exceeds it."
 msgstr "警告：显示限速，并在当前速度超过限速时提醒。"
 
 #: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py
-msgid "Assist: May adjust cruise targets on supported cars. Use only after phone, car, and map sources have been verified."
-msgstr "辅助：在支持的车辆上可能调整巡航目标。只有在手机、车机和地图限速来源都验证后再使用。"
+msgid "Assist: May adjust cruise targets on supported cars. Use only after phone and vehicle sources have been verified; test map policies separately."
+msgstr "辅助：在支持的车辆上可能调整巡航目标。只有在手机和车辆限速来源验证后再使用；地图策略请单独测试。"
 
 #: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py
 msgid "None: No offset. This is the default and safest setting."
@@ -956,8 +956,8 @@ msgid "Combined: Use combined vehicle and OpenStreetMap/mapd data."
 msgstr "组合：结合车辆和 OpenStreetMap/mapd 限速数据。"
 
 #: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py
-msgid "Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle, then OpenStreetMap/mapd."
-msgstr "手机优先：优先使用新鲜的 APN/N、Navipilot 或 Carrot 手机限速数据。过期手机数据会超时，然后回退到车辆限速，再回退到 OpenStreetMap/mapd。"
+msgid "Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle/cluster data. OpenStreetMap/mapd is opt-in through the map policies."
+msgstr "手机优先：优先使用新鲜的 APN/N、Navipilot 或 Carrot 手机限速数据。过期手机数据会超时，然后回退到车辆/仪表限速。OpenStreetMap/mapd 只在地图策略中手动启用。"
 
 msgid "Models"
 msgstr "模型"

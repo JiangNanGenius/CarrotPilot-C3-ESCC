@@ -11,6 +11,7 @@ from openpilot.sunnypilot.selfdrive.car.sync_sunnylink_params import CAR_LIST_JS
 
 ONROAD_BRIGHTNESS_MIGRATION_VERSION: str = "1.0"
 ONROAD_BRIGHTNESS_TIMER_MIGRATION_VERSION: str = "1.0"
+SPEED_LIMIT_POLICY_MIGRATION_VERSION: str = "2.0"
 
 # index → seconds mapping for OnroadScreenOffTimer (SSoT)
 ONROAD_BRIGHTNESS_TIMER_VALUES = {0: 3, 1: 5, 2: 7, 3: 10, 4: 15, 5: 30, **{i: (i - 5) * 60 for i in range(6, 16)}}
@@ -78,5 +79,20 @@ def run_migration(_params):
       cloudlog.info(log_str + f" Setting OnroadScreenOffTimerMigrated to {ONROAD_BRIGHTNESS_TIMER_MIGRATION_VERSION}")
     except Exception as e:
       cloudlog.exception(f"Error migrating OnroadScreenOffTimer: {e}")
+
+  # migrate early Genius alpha SpeedLimitPolicy default.
+  if _params.get("GeniusSpeedLimitPolicyMigrated") != SPEED_LIMIT_POLICY_MIGRATION_VERSION:
+    try:
+      val = _params.get("SpeedLimitPolicy", return_default=True)
+      if val == 3:  # early alpha default: Map First; personal alpha default is Carrot-first Phone First
+        _params.put("SpeedLimitPolicy", 5, block=True)
+        log_str = "Successfully migrated SpeedLimitPolicy from 3 (Map First) to 5 (Phone First: phone > vehicle, map opt-in)."
+      else:
+        log_str = f"Migration not required for SpeedLimitPolicy: {val}."
+
+      _params.put("GeniusSpeedLimitPolicyMigrated", SPEED_LIMIT_POLICY_MIGRATION_VERSION, block=True)
+      cloudlog.info(log_str + f" Setting GeniusSpeedLimitPolicyMigrated to {SPEED_LIMIT_POLICY_MIGRATION_VERSION}")
+    except Exception as e:
+      cloudlog.exception(f"Error migrating SpeedLimitPolicy: {e}")
 
   _migrate_car_platform_bundle(_params)
