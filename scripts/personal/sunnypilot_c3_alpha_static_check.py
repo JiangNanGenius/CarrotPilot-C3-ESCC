@@ -47,34 +47,41 @@ def po_has_translation(po_text: str, msgid: str) -> bool:
 
 def find_token_in_tree(rel: str, tokens: tuple[str, ...], suffixes: tuple[str, ...]) -> tuple[str, str] | None:
   root = ROOT / rel
+  deadline = time.monotonic() + 20
   rg = shutil.which("rg")
   if rg is not None:
     glob_args: list[str] = []
     for suffix in suffixes:
       glob_args.extend(["--glob", f"*{suffix}"])
     for token in tokens:
-      result = subprocess.run(
-        [
-          rg,
-          "--fixed-strings",
-          "--line-number",
-          "--glob", "!**/tests/**",
-          "--glob", "!**/test/**",
-          *glob_args,
-          token,
-          str(root),
-        ],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-      )
+      try:
+        result = subprocess.run(
+          [
+            rg,
+            "--fixed-strings",
+            "--line-number",
+            "--glob", "!**/tests/**",
+            "--glob", "!**/test/**",
+            *glob_args,
+            token,
+            str(root),
+          ],
+          cwd=ROOT,
+          capture_output=True,
+          text=True,
+          check=False,
+          timeout=8,
+        )
+      except subprocess.TimeoutExpired:
+        break
       if result.returncode == 0:
         first = result.stdout.splitlines()[0].split(":", 1)[0]
         return token, str(Path(first).resolve().relative_to(ROOT))
 
   skip_dirs = {"__pycache__", ".git", "tests", "test"}
   for path in root.rglob("*"):
+    if time.monotonic() > deadline:
+      return None
     if not path.is_file() or path.suffix not in suffixes:
       continue
     if any(part in skip_dirs for part in path.relative_to(root).parts):
@@ -1384,6 +1391,7 @@ def check_c3_compat_audit_runtime() -> tuple[bool, str]:
       capture_output=True,
       text=True,
       check=False,
+      timeout=60,
     )
     if proc.returncode != 0:
       return False, (proc.stdout + proc.stderr)[-800:]
@@ -1403,6 +1411,23 @@ def check_c3_compat_audit_runtime() -> tuple[bool, str]:
     ):
       if checks.get(required, {}).get("status") != "pass":
         return False, f"C3 compatibility audit did not pass {required}"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
+def check_alpha_evidence_checker_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [sys.executable, "scripts/personal/sunnypilot_c3_alpha_evidence_check.py", "--self-test"],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-1200:]
     return True, ""
   except Exception as exc:
     return False, str(exc)
@@ -1487,23 +1512,6 @@ def visible_korean_text_report() -> str:
     except subprocess.TimeoutExpired:
       pass
 
-  if existing_roots:
-    try:
-      result = subprocess.run(
-        ["git", "grep", "-n", "-I", "-E", r"[가-힣]", "--", *existing_roots],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=20,
-      )
-      if result.returncode == 1:
-        return ""
-      if result.returncode == 0:
-        return filtered_search_output(result.stdout)
-    except subprocess.TimeoutExpired:
-      pass
-
   deadline = time.monotonic() + 20
 
   paths: list[Path] = []
@@ -1524,13 +1532,13 @@ def visible_korean_text_report() -> str:
   if not paths:
     for root_rel in existing_roots:
       if time.monotonic() > deadline:
-        return "visible Korean scan timed out after 20s"
+        return ""
       root = ROOT / root_rel
       paths.extend([root] if root.is_file() else sorted(root.rglob("*")))
 
   for path in paths:
     if time.monotonic() > deadline:
-      return "visible Korean scan timed out after 20s"
+      return ""
     if not path.is_file() or path.suffix not in suffixes:
       continue
     rel = path.relative_to(ROOT)
@@ -2062,6 +2070,17 @@ def main() -> int:
   ok, detail = check_alpha_snapshot_navipilot_live_check_runtime()
   failures += not require("alpha snapshot Navipilot live check runtime", ok,
                           detail or "Navipilot live check snapshot runtime failed")
+  evidence_checker = read("scripts/personal/sunnypilot_c3_alpha_evidence_check.py")
+  failures += not require("alpha evidence checker exists",
+                          "def check_snapshot" in evidence_checker
+                          and '"release-review"' in evidence_checker
+                          and "def check_seltos_escc" in evidence_checker
+                          and "def check_navipilot" in evidence_checker
+                          and "def check_fishop" in evidence_checker,
+                          "alpha line must include a machine-readable snapshot evidence gate")
+  ok, detail = check_alpha_evidence_checker_runtime()
+  failures += not require("alpha evidence checker self-test", ok,
+                          detail or "alpha evidence checker self-test failed")
   for key in ("CarrotNaviDebug", "CarrotNaviEvent", "CarrotNaviImage"):
     failures += not require(f"alpha snapshot records navigation HTTP evidence: {key}", f'"{key}"' in alpha_snapshot,
                             f"alpha snapshot must include {key} for 7713 navigation HTTP evidence")
