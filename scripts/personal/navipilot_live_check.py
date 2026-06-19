@@ -620,7 +620,7 @@ class _SelfTestNaviHttpHandler(BaseHTTPRequestHandler):
 def selftest_status_payload() -> dict[str, Any]:
   payload = {key: 0 for key in REQUIRED_STATUS_KEYS}
   payload.update({
-    "Carrot2": "CarrotPilot-C3-ESCC-alpha",
+    "Carrot2": "GeniusPilot-alpha",
     "IsOnroad": False,
     "CarrotRouteActive": False,
     "ip": DEFAULT_HOST,

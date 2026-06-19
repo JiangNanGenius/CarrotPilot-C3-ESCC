@@ -13,7 +13,7 @@ DEFAULT_OUTPUT = Path("/tmp/carrot_x_qt_compat")
 
 TARGET_REPO = b"https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
 TARGET_BRANCH = b"alpha-sunnypilot-c3"
-TARGET_TITLE = b"Installing CarrotPilot-C3-ESCC alpha"
+TARGET_TITLE = b"Installing Genius Pilot alpha"
 DISABLED_CACHE_PATH = b"/data/cp_no_cache"
 
 

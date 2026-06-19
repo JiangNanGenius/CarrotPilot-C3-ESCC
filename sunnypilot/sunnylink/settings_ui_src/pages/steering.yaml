@@ -14,7 +14,7 @@ sections:
   - key: Mads
     widget: toggle
     title: Enable Modular Assistive Driving System (MADS)
-    description: Enable MADS. Disable toggle to revert back to stock sunnypilot engagement/disengagement.
+    description: Enable MADS. Disable toggle to revert back to stock Genius Pilot engagement/disengagement.
     enablement:
     - $ref: '#/macros/offroad'
   sub_panels:
@@ -44,7 +44,7 @@ sections:
     - key: MadsSteeringMode
       widget: multiple_button
       title: Steering Mode on Brake Pedal
-      description: Choose how Automatic Lane Centering (ALC) behaves after the brake pedal is manually pressed in sunnypilot.
+      description: Choose how Automatic Lane Centering (ALC) behaves after the brake pedal is manually pressed in Genius Pilot.
       options:
       - value: 0
         label: Remain Active
@@ -103,7 +103,7 @@ sections:
   - key: EnforceTorqueControl
     widget: toggle
     title: Enforce Torque Lateral Control
-    description: Enable this to enforce sunnypilot to steer with Torque lateral control.
+    description: Enable this to enforce Genius Pilot to steer with Torque lateral control.
     visibility:
     - type: not
       condition:

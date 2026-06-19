@@ -2325,7 +2325,7 @@ def main() -> int:
                           and "root_launcher_keeps_shutdown_policy" in c3_compat_audit,
                           "alpha must include a repeatable audit for C3 launcher, channel, installer, local network, modeld, cloud, and power compatibility")
   failures += not require("alpha Pages installer audit tool exists",
-                          "CarrotPilot-C3-ESCC Installer Audit" in installer_audit
+                          "Genius Pilot Installer Audit" in installer_audit
                           and "DEFAULT_INSTALL_URL" in installer_audit
                           and "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x" in installer_audit
                           and "Initializing raylib" in installer_audit

@@ -191,6 +191,12 @@ class AlertItem(Widget):
 class MiciOffroadAlerts(Scroller):
   """Offroad alerts layout with vertical scrolling."""
 
+  CLOUD_SERVICE_ALERTS = {
+    "Offroad_ConnectivityNeeded",
+    "Offroad_ConnectivityNeededPrompt",
+    "Offroad_UnregisteredHardware",
+  }
+
   def __init__(self):
     # Create vertical scroller
     super().__init__(horizontal=False, spacing=12, pad=0)
@@ -211,6 +217,10 @@ class MiciOffroadAlerts(Scroller):
     self._params_thread = threading.Thread(target=self._params_worker, daemon=True)
     self._params_thread.start()
 
+  def _request_reboot_for_update(self):
+    self.params.put_bool("DoReboot", True, block=True)
+    HARDWARE.reboot()
+
   def active_alerts(self) -> int:
     return sum(alert.visible for alert in self.sorted_alerts)
 
@@ -228,7 +238,7 @@ class MiciOffroadAlerts(Scroller):
     update_alert_data = AlertData(key="UpdateAvailable", text="", severity=-1)
     self.sorted_alerts.append(update_alert_data)
     update_alert_item = AlertItem(update_alert_data)
-    update_alert_item.set_click_callback(lambda: HARDWARE.reboot())
+    update_alert_item.set_click_callback(self._request_reboot_for_update)
     self.alert_items.append(update_alert_item)
     self._scroller.add_widget(update_alert_item)
 
@@ -269,9 +279,9 @@ class MiciOffroadAlerts(Scroller):
           parts = new_desc.split(" / ")
           if len(parts) > 3:
             version, date = parts[0], parts[3]
-            version_string = f"\nsunnypilot {version}, {date}\n"
+            version_string = f"\nGenius Pilot {version}, {date}\n"
 
-        update_alert_data.text = f"Update available {version_string}. Click to update. Read the release notes at blog.comma.ai."
+        update_alert_data.text = f"Update available {version_string}. Tap to reboot and install."
         update_alert_data.visible = True
         active_count += 1
       else:
@@ -286,7 +296,9 @@ class MiciOffroadAlerts(Scroller):
       text = ""
       alert_json = self._pending_params[alert_data.key]
 
-      if alert_json:
+      if alert_data.key in self.CLOUD_SERVICE_ALERTS:
+        text = ""
+      elif alert_json:
         text = alert_json.get("text", "").replace("%1", alert_json.get("extra", ""))
 
       if text and not alert_data.visible:

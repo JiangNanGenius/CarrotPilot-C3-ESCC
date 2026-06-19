@@ -280,10 +280,11 @@ def local_checks() -> list[dict[str, Any]]:
     ),
     status(
       "public_installer_does_not_install_default_ssh_key",
-      token_inside_internal_block(installer, "GithubSshKeys")
+      "GithubSshKeys" not in installer
+      and "ssh-ed25519" not in installer
       and token_inside_internal_block(installer, "SshEnabled")
       and token_inside_internal_block(installer, "git remote set-url origin --push"),
-      "Default SSH trust and push remotes must stay inside the INTERNAL installer block only",
+      "Installer must not ship a default SSH public key; internal push remotes must stay inside the INTERNAL block only",
     ),
     status(
       "local_wifi_settings_retained",
