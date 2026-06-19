@@ -88,10 +88,10 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Wire C3/TICI `selfdrive/ui/onroad/model_renderer.py` to draw Sunny-compatible simple lanes, colored lane confidence, Carrot-style adjacent-lane emphasis, Carrot lead boxes, and optional radar speed tags.
 - [x] Keep visualization changes display-only: no planner, CAN, lane-change, or Fishop control output is added by these renderer switches.
 - [ ] Add Carrot path drawing modes as a separate renderer stage after checking the old path animation code against Sunny 0.11 `modelV2` and `lateralPlan` schemas.
-- [ ] Add a real Fishop overlay panel for lane curve, lidar left/right lane, lidar blindspot, navigation gate, and overtake suggestion evidence.
-- [ ] Decide final mutual exclusion rules after bench screenshots: Sunny minimal, Carrot dense, Fusion balanced, and Fishop overlay on top only when its data is fresh.
+- [x] Add a real Fishop overlay panel for lane curve, lidar left/right lane, lidar blindspot, navigation gate, and overtake suggestion evidence.
+- [x] Decide visualization coexistence rules: Sunny minimal, Carrot dense, Fusion balanced, and Fishop overlay independent on top only when local data is fresh.
 - [ ] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
-- [ ] Add Simplified/Traditional Chinese translations for the new visualization controls.
+- [x] Add Simplified/Traditional Chinese translations for the new visualization controls.
 
 ## Carrot, Auto-Tuner, And Fishop Hardware
 
@@ -107,8 +107,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Rebuild ARM64 `common/params_pyx.so` on the C3 so the new Carrot/ATC/curve/NNLC params are recognized at runtime.
 - [ ] Map CarrotPilot settings from ajouatom, mechanical/Auto-Tuner, and ESCC forks into personal alpha params with Chinese/English descriptions and defaults.
 - [ ] Add a Carrot cruise-control section covering button behavior, curve slowdown, traffic-light logic, speed-limit behavior, and model-speed behavior.
-- [ ] Add a Fishop hardware section for lane curve, lidar lane data, lidar blindspot, navigation gate, and auto-overtake, including how each input relates to the existing lane-change chain.
-- [ ] Migrate mechanical/masang-feiyang lane-line curve display, lidar left/right lane data, lidar blindspot data, navigation gate, and automatic-overtake switches as display-first features.
+- [x] Add a Fishop hardware section for lane curve, lidar lane data, lidar blindspot, navigation gate, and auto-overtake, including how each input relates to the existing lane-change chain.
+- [x] Migrate mechanical/masang-feiyang lane-line curve display, lidar left/right lane data, lidar blindspot data, navigation gate, and automatic-overtake switches as display-first features.
 - [ ] Preserve the user's current working masang-feiyang tuning values as a known-good baseline before replacing any longitudinal or braking behavior.
 - [ ] Compare ajouatom CarrotPilot, jixiexiaoge mechanical/Auto-Tuner, and ESCC fork settings one-by-one, then create the missing Genius Pilot controls instead of hiding behavior behind SunnyPilot defaults.
 

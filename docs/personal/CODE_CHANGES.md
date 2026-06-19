@@ -8,16 +8,17 @@ The driving screen now has explicit visualization modes instead of a single Sunn
 - Added `GeniusLaneLineStyle`: Simple, Colored, and Carrot lane-line drawing.
 - Added `GeniusLeadRadarVisualMode`: Sunny chevron, Carrot lead box, and radar speed labels.
 - Added `GeniusLaneChangeVisuals` for model lane-change intent cues.
-- Added `GeniusFishopVisualOverlay` as the future display-only entry for Fishop lane/lidar/blindspot evidence.
+- Added `GeniusFishopVisualOverlay` as an independent display-only entry for Fishop lane/lidar/blindspot evidence.
 
 The first renderer migration is display-only:
 
 - TICI/C3 onroad model rendering now supports Sunny-compatible simple lanes, Sunny/MICI colored lane confidence, and Carrot-style adjacent-lane emphasis.
 - Lead vehicles can be drawn as Carrot-style outline boxes, with radar/model colors and optional speed tags.
 - Lane-change intent cues use the existing onroad event stream and do not alter lane-change control.
-- Fishop overlay is documented and exposed, but direct Fishop control output remains outside this stage.
+- Fishop overlay reads fresh local `/data/fishop_hardware.jsonl` evidence and draws compact left/right lane, lidar, camera, dynamic-risk, and overtake-hint status on top of any base preset.
+- Visualization coexistence is explicit: Sunny, Carrot, and Fusion are mutually exclusive base presets; Fishop overlay is an independent top layer; every renderer switch remains display-only.
 
-Genius Pilot version is bumped to `2026.002.000-gp.20260620.2`.
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.3`.
 
 ## 2026-06-20 NNLC And Super Advanced Carrot Controls
 
