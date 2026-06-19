@@ -958,3 +958,192 @@ msgstr "组合：结合车辆和 OpenStreetMap/mapd 限速数据。"
 #: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py
 msgid "Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle, then OpenStreetMap/mapd."
 msgstr "手机优先：优先使用新鲜的 APN/N、Navipilot 或 Carrot 手机限速数据。过期手机数据会超时，然后回退到车辆限速，再回退到 OpenStreetMap/mapd。"
+
+msgid "Models"
+msgstr "模型"
+
+msgid "Carrot"
+msgstr "Carrot"
+
+msgid "Steering"
+msgstr "转向"
+
+msgid "Cruise"
+msgstr "巡航"
+
+msgid "Visuals"
+msgstr "显示"
+
+msgid "Display"
+msgstr "屏幕"
+
+msgid "Trips"
+msgstr "行程"
+
+msgid "Vehicle"
+msgstr "车型"
+
+msgid "Scan"
+msgstr "扫描"
+
+msgid "Scanning..."
+msgstr "扫描中..."
+
+msgid "Scanning Wi-Fi networks..."
+msgstr "正在扫描 Wi-Fi 网络..."
+
+msgid "Enable Tethering"
+msgstr "启用热点共享"
+
+msgid "Tethering Password"
+msgstr "热点密码"
+
+msgid "IP Address"
+msgstr "IP 地址"
+
+msgid "Wi-Fi Network Metered"
+msgstr "Wi-Fi 按流量计费"
+
+msgid "Prevent large data uploads when on a metered Wi-Fi connection"
+msgstr "连接按流量计费的 Wi-Fi 时，避免大流量上传。"
+
+msgid "Hidden Network"
+msgstr "隐藏网络"
+
+msgid "Enter SSID"
+msgstr "输入 Wi-Fi 名称"
+
+msgid "Enter password"
+msgstr "输入密码"
+
+msgid "Wrong password"
+msgstr "密码错误"
+
+msgid "Forget"
+msgstr "忘记"
+
+msgid "Forget Wi-Fi Network \"{}\"?"
+msgstr "忘记 Wi-Fi 网络“{}”？"
+
+msgid "default"
+msgstr "默认"
+
+msgid "metered"
+msgstr "计费"
+
+msgid "unmetered"
+msgstr "不限流量"
+
+msgid "Custom ACC Speed Increments"
+msgstr "自定义 ACC 调速步进"
+
+msgid "Short Press Increment"
+msgstr "短按步进"
+
+msgid "Long Press Increment"
+msgstr "长按步进"
+
+msgid "Customize Source"
+msgstr "设置来源优先级"
+
+msgid "Speed Limit"
+msgstr "限速"
+
+msgid "Speed Limit Offset"
+msgstr "限速偏移"
+
+msgid "This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, SCC-M, and Dynamic Experimental Control stay hidden and forced off; use Carrot and Speed Limit settings for staged experiments."
+msgstr "这个个人版的巡航控速逻辑以 CarrotPilot 为准。SunnyPilot 的 ICBM、SCC-V、SCC-M 和动态实验控制会隐藏并强制关闭；分阶段测试请使用 Carrot 和限速设置。"
+
+msgid "Phone Speed Limit Source"
+msgstr "手机限速来源"
+
+msgid "Use fresh APN/N, Navipilot, or Carrot phone speed-limit data before the vehicle and map sources. Stale phone data times out automatically."
+msgstr "优先使用新鲜的 APN/N、Navipilot 或 Carrot 手机限速数据，再回退到车机和地图来源。过期手机数据会自动超时。"
+
+msgid "Carrot Map Overlay"
+msgstr "Carrot 地图覆盖层"
+
+msgid "Show the optional Carrot route/map overlay. Default is Off; when Off, external map SDKs and map iframes are not loaded."
+msgstr "显示可选的 Carrot 路线/地图覆盖层。默认关闭；关闭时不会加载外部地图 SDK 或地图 iframe。"
+
+msgid "Auto-Tuner Learning"
+msgstr "Auto-Tuner 学习"
+
+msgid "Collect local driving evidence and prepare tuning recommendations. This does not apply changes by itself."
+msgstr "收集本地驾驶证据并生成调参建议。它本身不会自动应用修改。"
+
+msgid "Auto-Tuner Auto Apply"
+msgstr "Auto-Tuner 自动应用"
+
+msgid "Default is Off. Auto-apply is available only while parked and should stay Off until recommendations are reviewed after real drives."
+msgstr "默认关闭。自动应用只允许在停车时使用，并且在实车行驶后人工确认建议前应保持关闭。"
+
+msgid "Apply Lateral Recommendations"
+msgstr "应用横向建议"
+
+msgid "Apply Longitudinal Recommendations"
+msgstr "应用纵向建议"
+
+msgid "Fishop Lane Curve Input"
+msgstr "Fishop 车道曲线输入"
+
+msgid "Fishop Lidar Blindspot Input"
+msgstr "Fishop 激光雷达盲区输入"
+
+msgid "Fishop Lidar Lane Data Input"
+msgstr "Fishop 激光雷达车道数据输入"
+
+msgid "Carrot Active Speed Control"
+msgstr "Carrot 主动速度控制"
+
+msgid "Carrot Auto Turn Slowdown"
+msgstr "Carrot 自动转弯减速"
+
+msgid "Carrot Traffic Light Stop"
+msgstr "Carrot 红绿灯停车"
+
+msgid "Fishop Auto Overtake"
+msgstr "Fishop 自动超车"
+
+msgid "Locked Off in this alpha. The resolver can show speed-limit evidence, but this control-output path is not enabled yet."
+msgstr "此 alpha 版本锁定关闭。解析器可以显示限速证据，但控制输出路径尚未启用。"
+
+msgid "Locked Off in this alpha. Turn/curve evidence can be collected, but automatic slowdown must be validated separately."
+msgstr "此 alpha 版本锁定关闭。可以收集转弯/弯道证据，但自动减速必须单独验证。"
+
+msgid "Locked Off in this alpha. Traffic-light stop logic is not allowed to command braking until separate real-car validation is complete."
+msgstr "此 alpha 版本锁定关闭。红绿灯停车逻辑在完成单独实车验证前，不允许指令制动。"
+
+msgid "Locked Off in this alpha. Lane and blindspot hardware can be logged, but automatic overtaking is not connected to control output."
+msgstr "此 alpha 版本锁定关闭。车道和盲区硬件可以记录数据，但自动超车不会连接到控制输出。"
+
+msgid "Local Carrot Web"
+msgstr "本地 Carrot Web"
+
+msgid "Use the device LAN address with port 7000 for the local Carrot Web/API page. This is a local service, not cloud pairing."
+msgstr "使用设备局域网地址加 7000 端口访问本地 Carrot Web/API 页面。这是本地服务，不是云端配对。"
+
+msgid "Developer UI"
+msgstr "开发者信息显示"
+
+msgid "Display real-time parameters and metrics from various sources."
+msgstr "显示来自不同模块的实时参数和指标。"
+
+msgid "Display Metrics Below Chevron"
+msgstr "在前车标记下方显示指标"
+
+msgid "Show Blind Spot Warnings"
+msgstr "显示盲区警告"
+
+msgid "Steering Arc"
+msgstr "转向弧线"
+
+msgid "Display steering arc on the driving screen when lateral control is enabled."
+msgstr "横向控制启用时，在驾驶画面显示转向弧线。"
+
+msgid "Real-time Acceleration Bar"
+msgstr "实时加减速条"
+
+msgid "Show an indicator on the left side of the screen to display real-time vehicle acceleration and deceleration. This displays what the car is currently doing, not what the planner is requesting."
+msgstr "在屏幕左侧显示车辆实时加速/减速状态。它显示车辆当前正在做什么，而不是规划器正在请求什么。"

@@ -49,6 +49,7 @@ class SettingsLayout(Widget):
     super().__init__()
     self._current_panel = PanelType.DEVICE
     self._raw_touch_down = False
+    self._ignore_touch_until_release = False
 
     # Panel configuration
     wifi_manager = WifiManager()
@@ -85,6 +86,12 @@ class SettingsLayout(Widget):
     super()._update_state()
 
     mouse_down = rl.is_mouse_button_down(rl.MouseButton.MOUSE_BUTTON_LEFT)
+    if self._ignore_touch_until_release:
+      self._raw_touch_down = mouse_down
+      if not mouse_down and not any(e.left_released for e in gui_app.mouse_events):
+        self._ignore_touch_until_release = False
+      return
+
     was_down = self._raw_touch_down
     self._raw_touch_down = mouse_down
     if not mouse_down or was_down:
@@ -173,6 +180,10 @@ class SettingsLayout(Widget):
       panel.instance.render(content_rect)
 
   def _handle_mouse_release(self, mouse_pos: MousePos) -> None:
+    if self._ignore_touch_until_release:
+      self._ignore_touch_until_release = False
+      return
+
     # Check close button
     if rl.check_collision_point_rec(mouse_pos, self._close_btn_rect):
       if self._close_callback:
@@ -190,6 +201,10 @@ class SettingsLayout(Widget):
       self._panels[self._current_panel].instance.hide_event()
       self._current_panel = panel_type
       self._panels[self._current_panel].instance.show_event()
+
+  def ignore_current_touch(self):
+    self._ignore_touch_until_release = True
+    self._raw_touch_down = rl.is_mouse_button_down(rl.MouseButton.MOUSE_BUTTON_LEFT)
 
   def show_event(self):
     super().show_event()

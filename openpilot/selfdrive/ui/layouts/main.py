@@ -108,6 +108,8 @@ class MainLayout(Widget):
 
   def open_settings(self, panel_type: PanelType):
     self._layouts[MainState.SETTINGS].set_current_panel(panel_type)
+    if hasattr(self._layouts[MainState.SETTINGS], "ignore_current_touch"):
+      self._layouts[MainState.SETTINGS].ignore_current_touch()
     self._set_current_layout(MainState.SETTINGS)
     self._sidebar.set_visible(False)
 

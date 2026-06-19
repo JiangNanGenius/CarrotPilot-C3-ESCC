@@ -11,15 +11,26 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add `scripts/personal/build_c3_qt_compat_installer.py` so the Qt-compatible `/x` can be rebuilt reproducibly.
 - [x] Add `scripts/personal/sunnypilot_c3_installer_audit.py` so future updates reject incompatible Raylib/new-GLIBC and stale upstream installer binaries.
 - [x] Add `scripts/personal/sunnypilot_c3_device_collect.py` to collect installer crash logs or parked/model/no-cloud evidence from the C3 over SSH.
-- [ ] After the user retries `/x`, collect device evidence if it still exits after the download screen.
+- [x] Recover from the first `/x` boot failures: missing Python dependency, settings tap release handling, and onboarding/settings navigation blockers.
+- [ ] Rebuild or patch the packed TICI updater so its embedded Wi-Fi manager either includes the `jeepney` fallback or runs in an environment where `jeepney` is installed.
+- [ ] Add an installer/update audit that checks both the main source tree and the packed TICI updater for the Wi-Fi dependency contract.
+- [ ] Keep the welcome/training flow, but replace SunnyPilot-specific legal/consent copy with Genius Pilot personal-build copy that is short enough for C3 and advances reliably.
+- [ ] Rename user-facing alpha branding from SunnyPilot to Genius Pilot where accurate: welcome screen, version/about panel, settings headers, update prompts, and boot/update text.
+- [ ] Keep `/x` as the single short alpha entry; avoid new test URLs unless there is a clear rollback reason.
+- [ ] After the next clean `/x` install, collect device evidence even if the install succeeds, so the success path is documented.
 
 ## Base And C3
 
 - [x] Start from SunnyPilot 0.11.2 staging.
+- [x] Define the alpha product direction as CarrotPilot-first: SunnyPilot is the architecture base, while cruise/speed behavior should converge to CarrotPilot-style granular controls.
 - [x] Add C3/TICI channel gate for `alpha-sunnypilot-c3` and `experimental/sunnypilot-011-c3`.
 - [x] Route clone C3 `comma tici` devices through the C3 launcher.
 - [x] Keep normal shutdown policy; do not import Mr.One never-shutdown behavior.
 - [x] Keep local Wi-Fi, SSH, local web, GitHub update, and model download paths.
+- [x] Keep a robust local Wi-Fi UI on clone C3 even when the `jeepney` DBus dependency is absent; prefer DBus when available and fall back to `nmcli`.
+- [ ] Ensure `jeepney` is installed on fresh alpha installs, because the packed updater still imports it directly today.
+- [ ] Decide the permanent C3 rescue access policy: no GitHub/cloud registration required, no public hardcoded password in release builds, and a bench-only recovery method for the user's device.
+- [ ] Verify local LAN services after every install: Wi-Fi status, SSH, local web, updater, model manager, and no dependency crashes in `/tmp/launch_log`.
 - [ ] Run real device parking test on clone C3.
 - [ ] Pull a C3 evidence bundle with `sunnypilot_c3_device_collect.py` after `/x` install succeeds.
 
@@ -53,6 +64,10 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Default speed offset to zero.
 - [x] Add fixed and percentage speed offset modes.
 - [x] Default `CarrotMapOverlayEnabled` to off so Mapbox/Kakao overlay does not cover the HUD.
+- [x] Hide and hard-disable SunnyPilot ICBM, SCC-V, SCC-M, and Dynamic Experimental Control in the personal alpha; cruise-speed behavior should move toward CarrotPilot logic instead of SunnyPilot black-box toggles.
+- [ ] Remove or relabel any remaining user-facing SunnyPilot cruise concepts that conflict with Carrot behavior: ICBM, SCC-V, SCC-M, DEC, map-speed assumptions, and opaque speed-control presets.
+- [ ] Replace remaining Sunny speed-control internals with Carrot-style staged controls: display-only evidence first, then independent switches for active speed, curve/turn slowdown, traffic-light stop, and button management.
+- [ ] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, `SmartCruiseControlMap`, and `DynamicExperimentalControl` cannot affect control output after boot.
 - [ ] Validate speed source switching in display-only mode before enabling active speed assist.
 
 ## Carrot, Auto-Tuner, And Fishop Hardware
@@ -61,6 +76,13 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep Auto-Tuner auto-apply off by default.
 - [x] Keep high-risk controls gated off by default: traffic-light stop, auto-turn speed control, active speed control, Auto-Tuner auto-apply, and fishop auto-overtake.
 - [x] Add read-only fishop lane curve, lane quality, lidar blindspot, target, dynamic risk, navigation gate, and overtake suggestion evidence.
+- [ ] Expand the Carrot settings panel to match CarrotPilot's fine-grained controls instead of SunnyPilot-style black-box pages.
+- [ ] Map CarrotPilot settings from ajouatom, mechanical/Auto-Tuner, and ESCC forks into personal alpha params with Chinese/English descriptions, safe defaults, and per-feature evidence gates.
+- [ ] Add a Carrot cruise-control section covering button behavior, curve slowdown, traffic-light logic, speed-limit behavior, and model-speed behavior with each high-risk output disabled until validated.
+- [ ] Add a Fishop hardware section for lane curve, lidar lane data, lidar blindspot, navigation gate, and auto-overtake evidence; keep output paths disabled until logs prove safety.
+- [ ] Migrate mechanical/masang-feiyang lane-line curve display, lidar left/right lane data, lidar blindspot data, navigation gate, and automatic-overtake switches as display-first features.
+- [ ] Preserve the user's current working masang-feiyang tuning values as a known-good baseline before replacing any longitudinal or braking behavior.
+- [ ] Compare ajouatom CarrotPilot, jixiexiaoge mechanical/Auto-Tuner, and ESCC fork settings one-by-one, then create the missing Genius Pilot controls instead of hiding behavior behind SunnyPilot defaults.
 - [ ] Only after logs and rollback evidence exist, review whether any fishop hint can move from display-only to controlled experiment.
 
 ## Localization And Docs
@@ -68,7 +90,25 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Remove obvious Korean-only direct text from the personal alpha surface.
 - [x] Add Chinese/English descriptions for the confusing personal controls.
 - [x] Document installer split, rollback path, and alpha evidence checks.
+- [x] Add a Simplified Chinese translation overlay for the high-use alpha pages: Device, Network, Cruise, Speed Limit, Models, Carrot, Visuals, and Developer.
+- [ ] Replace remaining SunnyPilot wording with Genius Pilot / CarrotPilot wording where it is user-facing and accurate.
+- [ ] Keep docs current after every real-device hotfix: installer behavior, UI failures, parameter defaults, and known rollbacks.
 - [ ] Continue polishing Chinese descriptions after real-device feedback.
+- [ ] Add a user-facing README section for alpha use: `/i` stable rollback, `/x` alpha, Wi-Fi/SSH recovery, model manager, Carrot controls, Fishop hardware, and no-cloud policy.
+- [ ] Add a clear setting guide for high-risk toggles: what it changes, default state, when to test, and how to roll back.
+- [ ] Add a release note template that records installed branch, commit, installer hash, device evidence, cloud-process evidence, and road-test phase.
+
+## Current C3 UI Hotfixes
+
+- [x] Fix C3/TICI tap release handling so settings buttons and toggles receive release events.
+- [x] Fix Network page on clone C3: it could show endless "Scanning Wi-Fi networks..." while the system was already connected.
+- [x] Make the sidebar gear entry stable by preventing the opening touch from immediately hitting the settings close button.
+- [x] Display numeric device temperature in the left sidebar instead of only `GOOD`/`HIGH` when `deviceState.maxTempC` is available.
+- [x] Hide and hard-disable SunnyPilot cruise black-box toggles from the alpha Cruise panel.
+- [x] Sync the hotfix files to the user's C3 at `192.168.100.174` and restart UI for bench testing.
+- [ ] User visual confirmation: Network page leaves scanning state, sidebar gear opens settings consistently, temperature displays as a number, and toggles still work.
+- [ ] On the device, move from temporary synced dirty files to the pushed branch commit after the commit lands.
+- [ ] Remove the packed updater `jeepney` traceback from `/tmp/launch_log` on a clean alpha install.
 
 ## Update Checklist
 

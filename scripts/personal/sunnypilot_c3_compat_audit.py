@@ -300,8 +300,11 @@ def local_checks() -> list[dict[str, Any]]:
       "wifi_manager_jeepney_missing_fallback",
       "except ModuleNotFoundError:" in wifi_manager
       and "JEEPNEY_AVAILABLE = False" in wifi_manager
-      and "Wi-Fi manager disabled: python package 'jeepney' is unavailable" in wifi_manager
-      and "if self._exit:" in wifi_manager,
+      and "Wi-Fi manager using nmcli fallback: python package 'jeepney' is unavailable" in wifi_manager
+      and "self._nmcli_fallback = not JEEPNEY_AVAILABLE" in wifi_manager
+      and "def _nmcli_rows" in wifi_manager
+      and "nmcli" in wifi_manager
+      and "self._exit = True" not in wifi_manager.split("if not JEEPNEY_AVAILABLE:", 1)[1].split("else:", 1)[0],
       "Clone C3 setup may not have jeepney; missing DBus Python bindings must not crash manager/UI startup",
     ),
     status(

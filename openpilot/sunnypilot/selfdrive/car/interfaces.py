@@ -17,6 +17,13 @@ import openpilot.system.sentry as sentry
 
 from openpilot.sunnypilot.sunnylink.statsd import STATSLOGSP
 
+PERSONAL_DISABLED_CRUISE_PARAMS = (
+  "IntelligentCruiseButtonManagement",
+  "DynamicExperimentalControl",
+  "SmartCruiseControlVision",
+  "SmartCruiseControlMap",
+)
+
 
 def log_fingerprint(CP: structs.CarParams) -> None:
   if CP.carFingerprint == "MOCK":
@@ -59,9 +66,7 @@ def _initialize_intelligent_cruise_button_management(CP: structs.CarParams, CP_S
   if params is None:
     params = Params()
 
-  icbm_enabled = params.get_bool("IntelligentCruiseButtonManagement")
-  if icbm_enabled and CP_SP.intelligentCruiseButtonManagementAvailable and not CP.openpilotLongitudinalControl:
-    CP_SP.pcmCruiseSpeed = False
+  params.remove("IntelligentCruiseButtonManagement")
 
 
 def _initialize_torque_lateral_control(CI: CarInterfaceBase, CP: structs.CarParams, enforce_torque: bool, nnlc_enabled: bool) -> None:
@@ -77,6 +82,9 @@ def _cleanup_unsupported_params(CP: structs.CarParams, CP_SP: structs.CarParamsS
     cloudlog.warning("LateralJerkTorqueController and NeuralNetworkLateralControl both enabled, disabling both")
     params.put_bool("LateralJerkTorqueController", False, block=True)
     params.put_bool("NeuralNetworkLateralControl", False, block=True)
+
+  for param in PERSONAL_DISABLED_CRUISE_PARAMS:
+    params.remove(param)
 
   if CP.steerControlType == structs.CarParams.SteerControlType.angle:
     cloudlog.warning("SteerControlType is angle, cleaning up params")
