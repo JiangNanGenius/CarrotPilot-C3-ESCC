@@ -27,6 +27,8 @@ def check_sources() -> list[CheckResult]:
   snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
   evidence = read("scripts/personal/sunnypilot_c3_alpha_evidence_check.py")
   software = read("selfdrive/ui/layouts/settings/software.py")
+  mici_device = read("selfdrive/ui/mici/layouts/settings/device.py")
+  mici_toggles = read("selfdrive/ui/mici/layouts/settings/toggles.py")
   updater = read("system/updated/updated.py")
   readme = read("README.md")
   high_risk_guide = read("docs/personal/HIGH_RISK_SETTING_GUIDE.md")
@@ -51,6 +53,8 @@ def check_sources() -> list[CheckResult]:
     "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot",
     "privacy-safe SunnyPilot C3 alpha",
     "SunnyPilot ICBM",
+    "enable sunnypilot",
+    "update sunnypilot",
   )
   required_firehose_tokens = (
     "Data Uploads Disabled",
@@ -125,13 +129,16 @@ def check_sources() -> list[CheckResult]:
     ),
     CheckResult(
       "user-facing branding avoids old SunnyPilot copy",
-      not any(token in firehose + firehose_mici + cruise + snapshot + evidence + software + updater for token in forbidden_brand_tokens),
+      not any(token in firehose + firehose_mici + cruise + snapshot + evidence + software + mici_device + mici_toggles + updater for token in forbidden_brand_tokens),
       "selected user-facing alpha surfaces must not show old SunnyPilot branding",
     ),
     CheckResult(
       "visible updater/software branding remains Genius Pilot",
-      "Genius Pilot {version}" in updater and "Genius Pilot {get_version()}" in software,
-      "software and updater surfaces must show Genius Pilot",
+      "Genius Pilot {version}" in updater
+      and "Genius Pilot {get_version()}" in software
+      and "update Genius Pilot" in mici_device
+      and "enable Genius Pilot" in mici_toggles,
+      "software, updater, and MICI settings surfaces must show Genius Pilot",
     ),
     CheckResult(
       "README is Genius Pilot personal alpha copy",
