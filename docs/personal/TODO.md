@@ -375,6 +375,7 @@ flowchart TD
 - [x] alpha 设备快照新增 Carrot Web / 7705 只读证据块：记录 `/api/status_broadcast`、`/api/health`、`carrotManPeer`、`activeTargets`、`lastTargets`、`xState=0`、`trafficState=0` 和 `controlOutput=false`；本地 Carrot Web 不可用时只记录 unavailable，不阻塞开发机快照。
 - [x] alpha 新增 CP搭子 / Navipilot live check 工具：`scripts/personal/navipilot_live_check.py` 可验证 7000 健康/参数接口、7705 状态广播、7713 HTTP 导航健康、7712 TCP 导航健康和 `/api/navigation_event`；默认只读，安全导航探针和同值参数写回都必须显式开启。
 - [x] alpha 静态守门纳入 live check 自测：确认该工具不保留 `AlwaysOffroad` / `EnableEscc` 等旧别名，不引用 Sunnylink/上传类云依赖，并持续要求 `xState=0`、`trafficState=0`、`controlOutput=false`。
+- [x] alpha 设备快照可选纳入 CP搭子 / Navipilot live check：默认不运行；停车测试时可加 `--navipilot-live-check`，需要把它作为证据门槛时可加 `--require-navipilot-live-check`，安全导航探针和同值写回仍需单独显式开启。
 - [ ] alpha 7705 状态广播接入真正 CarrotMan / Carrot 控制运行态；在控制逻辑迁移前 `xState`、`trafficState` 必须继续保持 0。
 - [x] 迁移旧 CarrotMan 7713 导航 HTTP 兼容入口：`POST /api/navi`、`POST /api/navi/{version}` 和 `/health`，只记录 `rgdata`、`sinf`、`ssinf`、`vrtx/route`、`complexCrossroad` 证据，不发布控制。
 - [x] 迁移旧 CarrotMan 7712 TCP 导航输入兼容入口：接收行式 JSON `rgdata` / `vrtx`，只记录证据和安全导航摘要，不发布控制。
