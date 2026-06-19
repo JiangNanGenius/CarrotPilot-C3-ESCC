@@ -307,7 +307,7 @@
         "CarrotNaviDebug",
         "CarrotNaviImage"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": ""
     },
     {
@@ -498,7 +498,7 @@
         "ModelTurnSpeedFactor",
         "VisionCurveSpeedController"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": ""
     },
     {
@@ -622,7 +622,7 @@
       "source_keys": [
         "AutoNaviSpeedDecelRate"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": "percent"
     },
     {
@@ -654,7 +654,7 @@
         "AutoCruiseControl",
         "AutoSpeedUptoRoadSpeedLimit"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": ""
     },
     {
@@ -687,7 +687,7 @@
         "AutoTurnControlSpeedTurn",
         "AutoTurnControlTurnEnd"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": ""
     },
     {
@@ -719,7 +719,7 @@
         "TrafficLight",
         "TrafficLightDetectMode"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": ""
     },
     {
@@ -750,7 +750,7 @@
       "source_keys": [
         "TurnSpeedControlMode"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": ""
     },
     {
@@ -905,7 +905,7 @@
       "source_keys": [
         "TrafficLightDetectMode"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": ""
     },
     {
@@ -1091,7 +1091,7 @@
       "source_keys": [
         "CarrotCruiseDecel"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": "percent/auto"
     },
     {
@@ -1122,7 +1122,7 @@
       "source_keys": [
         "CarrotCruiseAtcDecel"
       ],
-      "ui_surface": "carrot",
+      "ui_surface": "cruise+carrot",
       "units": "percent/auto"
     },
     {

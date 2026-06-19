@@ -1286,6 +1286,45 @@ msgstr "Carrot 自动转弯减速"
 msgid "Carrot Traffic Light Stop"
 msgstr "Carrot 红绿灯停车"
 
+msgid "Use fresh APN/N, Navipilot, or Carrot phone speed-limit data before vehicle and map sources. Stale data times out automatically."
+msgstr "优先使用新鲜的 APN/N、Navipilot 或 Carrot 手机限速数据，再回退到车机和地图来源。过期数据会自动超时。"
+
+msgid "Allow Carrot speed-limit, navigation, SDI, speed-bump, traffic-light, and model-speed evidence to adjust cruise targets when the related assist mode is enabled."
+msgstr "在相关辅助模式启用时，允许 Carrot 使用限速、导航、SDI、减速带、红绿灯和模型速度证据调整巡航目标。"
+
+msgid "Deceleration strength for navigation speed events such as turns, speed cameras, speed bumps, and model-speed limits."
+msgstr "导航速度事件的减速强度，例如转弯、测速点、减速带和模型速度限制。"
+
+msgid "Speed Limit And Model-Speed"
+msgstr "限速与模型速度"
+
+msgid "Phone speed, vehicle speed, map speed, and model-speed evidence stay visible here; detailed source policy is inside Speed Limit."
+msgstr "手机限速、车机限速、地图限速和模型速度证据集中放在这里；详细来源策略在“限速”里设置。"
+
+msgid "Curve And Turn Slowdown"
+msgstr "弯道与转弯减速"
+
+msgid "Sunny curve quality, Carrot navigation turns, lane-line curve input, and model-speed events are selected by explicit modes."
+msgstr "Sunny 弯道质量、Carrot 导航转弯、车道线曲率输入和模型速度事件都通过明确模式选择。"
+
+msgid "Traffic Light Stop"
+msgstr "红绿灯停车"
+
+msgid "Red-light behavior remains a separate Carrot gate and should be tested independently."
+msgstr "红灯停车仍然是独立的 Carrot 开关，应单独测试。"
+
+msgid "Longitudinal Behavior"
+msgstr "纵向控制行为"
+
+msgid "DEC is separate from Carrot speed logic; the Carrot decel and following values remain user-tuneable while parked."
+msgstr "DEC 与 Carrot 速度逻辑分开；Carrot 减速和跟车数值仍可在停车状态下调整。"
+
+msgid "Cruise Button Behavior"
+msgstr "巡航按键行为"
+
+msgid "Button behavior stays limited to local cruise-speed increment settings. ICBM/SCC-V/SCC-M remain hidden because they overlap Carrot cruise logic."
+msgstr "按键行为仅限本地巡航速度步进设置。ICBM/SCC-V/SCC-M 与 Carrot 巡航逻辑重叠，因此继续隐藏。"
+
 msgid "Fishop Auto Overtake"
 msgstr "Fishop 自动超车"
 
