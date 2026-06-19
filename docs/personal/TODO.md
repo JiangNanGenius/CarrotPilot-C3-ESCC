@@ -92,6 +92,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add Chinese/English descriptions for the confusing personal controls.
 - [x] Document installer split, rollback path, and alpha evidence checks.
 - [x] Add a Simplified Chinese translation overlay for the high-use alpha pages: Device, Network, Cruise, Speed Limit, Models, Carrot, Visuals, and Developer.
+- [x] Replace the pixelated Chinese fallback with Noto Sans CJK SC for Simplified/Traditional Chinese and Japanese UI text; keep unifont as the broad symbol/script fallback.
 - [ ] Replace remaining SunnyPilot wording with Genius Pilot / CarrotPilot wording where it is user-facing and accurate.
 - [ ] Keep docs current after every real-device hotfix: installer behavior, UI failures, parameter defaults, and known rollbacks.
 - [ ] Continue polishing Chinese descriptions after real-device feedback.
@@ -106,6 +107,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Make the sidebar gear entry stable by preventing the opening touch from immediately hitting the settings close button.
 - [x] Display numeric device temperature in the left sidebar instead of only `GOOD`/`HIGH` when `deviceState.maxTempC` is available.
 - [x] Hide and hard-disable SunnyPilot cruise black-box toggles from the alpha Cruise panel.
+- [x] Make the sidebar gear less sensitive: settings now opens on touch release and ignores close/sidebar touches during the first 0.6 seconds after entry.
 - [x] Sync the hotfix files to the user's C3 at `192.168.100.174` and restart UI for bench testing.
 - [x] Verify the Wi-Fi fallback on device: after UI-style activation it reports SSID `zhao`, IP `192.168.100.174`, and scanned networks without `jeepney`.
 - [x] Move the device from temporary synced dirty files to pushed branch commit `ec7e73dc`.

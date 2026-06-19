@@ -15,6 +15,7 @@ METRIC_HEIGHT = 126
 METRIC_WIDTH = 240
 METRIC_MARGIN = 30
 FONT_SIZE = 35
+SETTINGS_TAP_MAX_MOVE = 56
 
 SETTINGS_BTN = rl.Rectangle(50, 35, 200, 117)
 HOME_BTN = rl.Rectangle(60, 860, 180, 180)
@@ -87,7 +88,7 @@ class Sidebar(Widget, SidebarSP):
     self._on_settings_click: Callable | None = None
     self._on_flag_click: Callable | None = None
     self._open_settings_callback: Callable | None = None
-    self._settings_opened_on_press = False
+    self._settings_press_pos: MousePos | None = None
 
   def set_callbacks(self, on_settings: Callable | None = None, on_flag: Callable | None = None,
                     open_settings: Callable | None = None):
@@ -145,14 +146,23 @@ class Sidebar(Widget, SidebarSP):
     if self._on_settings_click:
       self._on_settings_click()
 
+  def _settings_tap_moved_too_far(self, mouse_pos: MousePos) -> bool:
+    if self._settings_press_pos is None:
+      return True
+    return abs(mouse_pos.x - self._settings_press_pos.x) > SETTINGS_TAP_MAX_MOVE or abs(mouse_pos.y - self._settings_press_pos.y) > SETTINGS_TAP_MAX_MOVE
+
   def _handle_mouse_press(self, mouse_pos: MousePos):
     if rl.check_collision_point_rec(mouse_pos, SETTINGS_BTN):
-      self._settings_opened_on_press = True
-      self._open_settings_from_sidebar()
+      self._settings_press_pos = mouse_pos
+    else:
+      self._settings_press_pos = None
 
   def _handle_mouse_release(self, mouse_pos: MousePos):
-    if self._settings_opened_on_press:
-      self._settings_opened_on_press = False
+    if self._settings_press_pos is not None:
+      should_open = rl.check_collision_point_rec(mouse_pos, SETTINGS_BTN) and not self._settings_tap_moved_too_far(mouse_pos)
+      self._settings_press_pos = None
+      if should_open:
+        self._open_settings_from_sidebar()
       return
 
     if rl.check_collision_point_rec(mouse_pos, SETTINGS_BTN):

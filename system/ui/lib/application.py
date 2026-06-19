@@ -95,6 +95,7 @@ FONT_SCALE = 1.242 if BIG_UI else 1.16
 
 ASSETS_DIR = files("openpilot.selfdrive").joinpath("assets")
 FONT_DIR = ASSETS_DIR.joinpath("fonts")
+CJK_FONT_LANGUAGES = {"zh-CHT", "zh-CHS", "ja"}
 
 
 class FontWeight(StrEnum):
@@ -103,6 +104,7 @@ class FontWeight(StrEnum):
   BOLD = "Inter-Bold.fnt"
   SEMI_BOLD = "Inter-SemiBold.fnt"
   UNIFONT = "unifont.fnt"
+  CJK = "NotoSansCJKsc-Regular.fnt"
   AUDIOWIDE = "Audiowide-Regular.fnt"
 
   # Small UI fonts
@@ -112,7 +114,9 @@ class FontWeight(StrEnum):
 
 
 def font_fallback(font: rl.Font) -> rl.Font:
-  """Fall back to unifont for languages that require it."""
+  """Use language-specific fallback fonts for scripts Inter cannot render."""
+  if multilang.language in CJK_FONT_LANGUAGES:
+    return gui_app.font(FontWeight.CJK)
   if multilang.requires_unifont():
     return gui_app.font(FontWeight.UNIFONT)
   return font

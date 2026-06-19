@@ -179,7 +179,7 @@ class SettingsLayoutSP(OP.SettingsLayout):
       return
 
   def _handle_mouse_release(self, mouse_pos: MousePos) -> bool:
-    if self._ignore_touch_until_release:
+    if self._touch_guard_active():
       self._ignore_touch_until_release = False
       return True
 

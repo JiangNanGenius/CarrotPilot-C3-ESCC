@@ -19,6 +19,7 @@ CLOSE_BTN_SIZE = 200
 CLOSE_ICON_SIZE = 70
 NAV_BTN_HEIGHT = 110
 PANEL_MARGIN = 50
+OPEN_TOUCH_GUARD_S = 0.6
 
 # Colors
 SIDEBAR_COLOR = rl.BLACK
@@ -50,6 +51,7 @@ class SettingsLayout(Widget):
     self._current_panel = PanelType.DEVICE
     self._raw_touch_down = False
     self._ignore_touch_until_release = False
+    self._ignore_touch_guard_until = 0.0
 
     # Panel configuration
     wifi_manager = WifiManager()
@@ -82,13 +84,16 @@ class SettingsLayout(Widget):
     close_rect = getattr(self, "_close_btn_rect", rl.Rectangle(0, 0, 0, 0))
     return bool(rl.check_collision_point_rec(mouse_pos, close_rect))
 
+  def _touch_guard_active(self) -> bool:
+    return self._ignore_touch_until_release or rl.get_time() < self._ignore_touch_guard_until
+
   def _update_state(self):
     super()._update_state()
 
     mouse_down = rl.is_mouse_button_down(rl.MouseButton.MOUSE_BUTTON_LEFT)
-    if self._ignore_touch_until_release:
+    if self._touch_guard_active():
       self._raw_touch_down = mouse_down
-      if not mouse_down and not any(e.left_released for e in gui_app.mouse_events):
+      if not mouse_down:
         self._ignore_touch_until_release = False
       return
 
@@ -180,7 +185,7 @@ class SettingsLayout(Widget):
       panel.instance.render(content_rect)
 
   def _handle_mouse_release(self, mouse_pos: MousePos) -> None:
-    if self._ignore_touch_until_release:
+    if self._touch_guard_active():
       self._ignore_touch_until_release = False
       return
 
@@ -204,6 +209,7 @@ class SettingsLayout(Widget):
 
   def ignore_current_touch(self):
     self._ignore_touch_until_release = True
+    self._ignore_touch_guard_until = rl.get_time() + OPEN_TOUCH_GUARD_S
     self._raw_touch_down = rl.is_mouse_button_down(rl.MouseButton.MOUSE_BUTTON_LEFT)
 
   def show_event(self):

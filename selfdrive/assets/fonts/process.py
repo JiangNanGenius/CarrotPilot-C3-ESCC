@@ -12,6 +12,7 @@ LANGUAGES_FILE = TRANSLATIONS_DIR / "languages.json"
 GLYPH_PADDING = 6
 EXTRA_CHARS = "–‑✓×°§•X⚙✕◀▶✔⌫⇧␣○●↳çêüñ–‑✓×°§•€£¥"
 UNIFONT_LANGUAGES = {"th", "zh-CHT", "zh-CHS", "ja"}
+CJK_FONT_PREFIXES = ("notosanscjk", "sourcehansans")
 
 
 def _languages():
@@ -127,7 +128,8 @@ def main():
   for font in fonts:
     if "emoji" in font.name.lower():
       continue
-    glyphs = unifont_cp if font.stem.lower().startswith("unifont") else base_cp
+    stem = font.stem.lower()
+    glyphs = unifont_cp if stem.startswith(("unifont", *CJK_FONT_PREFIXES)) else base_cp
     _process_font(font, glyphs)
   return 0
 
