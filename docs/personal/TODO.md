@@ -100,9 +100,9 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
 - [x] Add Simplified/Traditional Chinese translations for the new visualization controls.
 - [ ] Map the remaining ajouatom Carrot cluster/world view into a separate optional surface: detected vehicles, source-colored objects, raw/merged side radar points, ajouatom-only lane-line type fields, and distance/speed labels.
-- [ ] Add an ajouatom cluster/world schema map that names every imported field, its fallback when missing, and whether it comes from model, radar, side radar, or Fishop.
+- [x] Add an ajouatom cluster/world schema map that names every imported field, its fallback when missing, and whether it comes from model, radar, side radar, or Fishop.
 - [ ] After cluster/world view mapping, decide whether it should be a standalone page, an explicit overlay, or a debug-only visual mode; do not merge it into the main HUD by default.
-- [ ] Add a cluster/world-view replay fixture before enabling that larger renderer on the C3.
+- [x] Add a cluster/world-view replay fixture before enabling that larger renderer on the C3.
 
 ## Carrot, Auto-Tuner, And Fishop Hardware
 

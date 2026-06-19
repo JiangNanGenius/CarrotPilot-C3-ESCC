@@ -1853,6 +1853,27 @@ def check_genius_curve_speed_contract_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_genius_cluster_world_contract_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_cluster_world_contract.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-1200:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_install_boot_contract() -> tuple[bool, str]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
@@ -2312,6 +2333,8 @@ def main() -> int:
   curve_speed_policy = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py")
   scc_vision_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/vision_controller.py")
   scc_map_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/map_controller.py")
+  cluster_world_contract = read("scripts/personal/genius_cluster_world_contract.py")
+  cluster_world_schema_md = read("docs/personal/CARROT_CLUSTER_WORLD_SCHEMA.md")
   agents_md = read("AGENTS.md")
   version_header = read("sunnypilot/common/version.h")
   versioning_md = read("docs/personal/VERSIONING.md")
@@ -3012,6 +3035,35 @@ def main() -> int:
                           "visualization policy must document base preset mutual exclusion, Fishop overlay independence, Carrot cluster plan, and safety boundary")
   ok, detail = check_genius_visualization_contract_runtime()
   failures += not require("Genius visualization contract runtime", ok, detail or "Genius visualization contract failed")
+  failures += not require("Genius cluster/world schema files present",
+                          all(token in cluster_world_schema_md + cluster_world_contract for token in (
+                            "GeniusClusterWorldSnapshot",
+                            "ClusterUiState",
+                            "DetectedVehicle",
+                            "RadarPoint",
+                            "LaneMarking",
+                            "ModelPathPoint",
+                            "radarState.leadOne/leadTwo",
+                            "modelV2.leadsV3",
+                            "liveTracks.points",
+                            "carState.leftLongDist/rightLongDist/leftRearLongDist/rightRearLongDist",
+                            "activeLaneLine unavailable",
+                            "controlOutput",
+                            "normalize_cluster_world_sample",
+                            "objects_from_radar_state",
+                            "objects_from_model",
+                            "objects_from_car_state",
+                            "objects_from_fishop",
+                            "radar_points_from_live_tracks",
+                          )),
+                          "cluster/world contract must map source fields, fallbacks, multi-source objects, radar points, and display-only boundary")
+  failures += not require("Genius cluster/world release gate wired",
+                          "scripts/personal/genius_cluster_world_contract.py" in release_gate
+                          and "Genius cluster/world schema contract" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must run the Carrot cluster/world schema contract")
+  ok, detail = check_genius_cluster_world_contract_runtime()
+  failures += not require("Genius cluster/world contract runtime", ok, detail or "Genius cluster/world contract failed")
   failures += not require("Genius settings matrix files present",
                           all(token in settings_matrix_script + settings_matrix_md + settings_matrix_json for token in (
                             "removed_cloud",
