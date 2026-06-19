@@ -152,6 +152,25 @@ def run_contract() -> list[str]:
         pass
     checked.append("cloud params absent")
 
+    empty_cluster = server.cluster_world_state()
+    check(empty_cluster.get("schema") == "GeniusClusterWorldSnapshot", "cluster world API state schema changed")
+    check(empty_cluster.get("controlOutput") is False and empty_cluster.get("readOnly") is True, "cluster world API must remain read-only")
+    live_snapshot = server.normalize_cluster_world_sample({
+      "carState": {"vEgo": 10.0, "cruiseState": {"speed": 12.5}},
+      "modelV2": {"position": {"x": [0.0, 5.0], "y": [0.0, 0.1], "z": [0.0, 0.0]}},
+      "onroadEvents": ["preLaneChangeRight"],
+    })
+    live_cluster = server.cluster_world_state({
+      "available": True,
+      "lastSample": {"carState": {"vEgo": 10.0}},
+      "lastUpdateAt": server.time.time(),
+      "snapshot": live_snapshot,
+    })
+    check(live_cluster.get("fresh") is True and live_cluster.get("hasLiveSample") is True, "cluster world live state did not become fresh")
+    check(live_cluster.get("snapshot", {}).get("base", {}).get("laneChangeIntent") == "right", "cluster world snapshot did not preserve lane-change evidence")
+    check(live_cluster.get("snapshot", {}).get("controlOutput") is False, "cluster world snapshot must not expose control output")
+    checked.append("cluster world read-only API")
+
     for name in READ_ONLY_PARAMS:
       state = server.params_bulk_state([name])
       check(state["writable"].get(name) is False, f"{name} should be read-only")

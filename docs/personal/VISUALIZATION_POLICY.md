@@ -16,6 +16,19 @@ The driving screen is drawn in this order:
 
 This means Sunny, Carrot, and Fusion do not fight over the same base path/lane renderer. Carrot World and Fishop can both be opened on top of any base preset because they are evidence overlays, not base presets.
 
+## Mode Relationship
+
+| Surface | Relationship | Default | Purpose |
+| --- | --- | --- | --- |
+| Sunny base | Mutually exclusive base preset | Off | Minimal upstream-style road renderer. |
+| Carrot base | Mutually exclusive base preset | Off | Dense Carrot-style lane/path/lead/radar display. |
+| Fusion base | Mutually exclusive base preset | On | Sunny HUD structure with Carrot-preferred lane/path/lead cues. |
+| Carrot World overlay | Additive evidence overlay | Off | Side-lane, blindspot, lane-change, lead, and radar context. |
+| Fishop overlay | Additive evidence overlay | Off | Extra hardware lane/lidar/blindspot/overtake evidence. |
+| Full Carrot cluster/world surface | Separate future page, overlay, or debug mode | Off | Source-colored objects, raw/merged radar points, distance/speed labels, and ajouatom-only fields when available. |
+
+The important rule is simple: choose one base display, then optionally add evidence layers. The Carrot-derived lane and lane-change visuals are preferred in `Carrot` and `Fusion` because they make adjacent lanes, blindspot context, and lane-change state easier to read than the stock Sunny road display.
+
 ## Base Presets
 
 One base preset is active at a time through `GeniusVisualMode`.
@@ -49,6 +62,8 @@ The ajouatom Carrot branches include a larger cluster/world visualization with d
 Genius Pilot imports the safe subset as `GeniusCarrotWorldOverlay`. The full cluster/world page still needs input schema mapping for ajouatom-only lane/radar fields, layout bounds, and C3 performance cost before it becomes more than an explicit overlay/debug surface.
 
 The input map for that future surface lives in `docs/personal/CARROT_CLUSTER_WORLD_SCHEMA.md`. It keeps detected vehicles, raw/merged radar points, lane style codes, road edges, and Fishop evidence in a display-only `GeniusClusterWorldSnapshot` and records missing ajouatom-only fields as fallbacks instead of inventing values. The surface decision remains standalone page, explicit overlay, or debug-only visual mode after schema, layout, and C3 performance checks.
+
+The live runtime snapshot for that future surface is exposed locally as `/api/cluster_world` by the Carrot Web service. It is read-only, display-only, and uses the same `GeniusClusterWorldSnapshot` schema as the replay contract.
 
 ## Safety Boundary
 

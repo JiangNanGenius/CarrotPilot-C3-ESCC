@@ -2334,6 +2334,7 @@ def main() -> int:
   scc_vision_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/vision_controller.py")
   scc_map_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/map_controller.py")
   cluster_world_contract = read("scripts/personal/genius_cluster_world_contract.py")
+  cluster_world_module = read("selfdrive/carrot/cluster_world.py")
   cluster_world_schema_md = read("docs/personal/CARROT_CLUSTER_WORLD_SCHEMA.md")
   agents_md = read("AGENTS.md")
   version_header = read("sunnypilot/common/version.h")
@@ -3036,7 +3037,7 @@ def main() -> int:
   ok, detail = check_genius_visualization_contract_runtime()
   failures += not require("Genius visualization contract runtime", ok, detail or "Genius visualization contract failed")
   failures += not require("Genius cluster/world schema files present",
-                          all(token in cluster_world_schema_md + cluster_world_contract for token in (
+                          all(token in cluster_world_schema_md + cluster_world_contract + cluster_world_module for token in (
                             "GeniusClusterWorldSnapshot",
                             "ClusterUiState",
                             "DetectedVehicle",
@@ -3057,6 +3058,18 @@ def main() -> int:
                             "radar_points_from_live_tracks",
                           )),
                           "cluster/world contract must map source fields, fallbacks, multi-source objects, radar points, and display-only boundary")
+  failures += not require("Genius cluster/world local API wired",
+                          all(token in carrot_server for token in (
+                            "from openpilot.selfdrive.carrot.cluster_world import default_cluster_world_snapshot, normalize_cluster_world_sample",
+                            "CLUSTER_WORLD_SERVICES = (",
+                            "def default_cluster_world_state",
+                            "def cluster_world_state",
+                            "async def cluster_world_loop",
+                            "async def api_cluster_world",
+                            'app.router.add_get("/api/cluster_world", api_cluster_world)',
+                            '"/api/cluster_world"',
+                          )),
+                          "carrot_server.py must expose the runtime Carrot cluster/world snapshot as a read-only local API")
   failures += not require("Genius cluster/world release gate wired",
                           "scripts/personal/genius_cluster_world_contract.py" in release_gate
                           and "Genius cluster/world schema contract" in release_gate
