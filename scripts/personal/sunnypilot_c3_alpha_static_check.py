@@ -136,6 +136,14 @@ def po_has_translation(po_text: str, msgid: str) -> bool:
   return False
 
 
+def bmfont_has_chars(font_text: str, chars: str) -> bool:
+  for ch in set(chars):
+    code = ord(ch)
+    if f"id={code:<4}" not in font_text and f"id={code} " not in font_text:
+      return False
+  return True
+
+
 def find_token_in_tree(rel: str, tokens: tuple[str, ...], suffixes: tuple[str, ...]) -> tuple[str, str] | None:
   root = ROOT / rel
   deadline = time.monotonic() + 20
@@ -2543,7 +2551,11 @@ def main() -> int:
   zh_cht_po = read("selfdrive/ui/translations/app_zh-CHT.po")
   languages_json = read("selfdrive/ui/translations/languages.json")
   multilang = read("system/ui/lib/multilang.py")
+  application = read("system/ui/lib/application.py")
+  label_widgets = read("system/ui/widgets/label.py")
   font_process = read("selfdrive/assets/fonts/process.py")
+  noto_cjk_font = read("selfdrive/assets/fonts/NotoSansCJKsc-Regular.fnt")
+  unifont = read("selfdrive/assets/fonts/unifont.fnt")
   mici_settings = read("selfdrive/ui/sunnypilot/mici/layouts/settings.py")
   main_onboarding = read("selfdrive/ui/layouts/onboarding.py")
   mici_onboarding = read("selfdrive/ui/mici/layouts/onboarding.py")
@@ -2599,6 +2611,22 @@ def main() -> int:
                           and "'ko':" not in multilang
                           and '"ko"' not in font_process,
                           "personal alpha should expose Chinese/English-oriented language choices without Korean as a visible option")
+  failures += not require("CJK UI font uses Noto Sans CJK",
+                          "CJK_FONT_LANGUAGES" in application
+                          and 'CJK = "NotoSansCJKsc-Regular.fnt"' in application
+                          and "FontWeight.CJK" in application
+                          and "notosanscjk" in font_process,
+                          "Simplified/Traditional Chinese and Japanese must use the non-pixelated Noto CJK fallback")
+  failures += not require("raygui labels use language fallback font",
+                          "font_fallback(gui_app.font(font_weight))" in label_widgets
+                          and "font_fallback(gui_app.font(FontWeight.NORMAL))" in label_widgets,
+                          "raygui text boxes must switch to CJK/unifont fallback, not the Inter-only GUI font")
+  failures += not require("Noto CJK glyph atlas covers Chinese UI text",
+                          bmfont_has_chars(noto_cjk_font, "中文简体设置限速地图导航手机车机来源覆盖层转弯红绿灯停车盲区激光雷达超车证据候选功能默认关闭"),
+                          "NotoSansCJKsc-Regular.fnt is missing glyphs used by the Chinese settings UI; regenerate fonts/process.py")
+  failures += not require("unifont remains full fallback",
+                          bmfont_has_chars(unifont, "中文简体设置限速地图导航手机车机来源覆盖层转弯红绿灯停车盲区激光雷达超车证据候选功能默认关闭⚙✕✔⌫↳"),
+                          "unifont must stay available for symbols/scripts not covered by Noto CJK")
   risk_text = settings_ui_device + settings_ui_json + read("sunnypilot/sunnylink/settings_ui_src/pages/cruise.yaml") + read("sunnypilot/sunnylink/settings_ui_src/pages/models.yaml") + read("sunnypilot/sunnylink/settings_ui_src/pages/developer.yaml")
   for token in (
     "Phone First",

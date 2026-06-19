@@ -104,6 +104,8 @@ NOTO_FONTS = {
   "zh-CHT": "NotoSansCJKtc-Regular.otf",
 }
 
+CJK_FONT_LANGUAGES = {"zh-CHT", "zh-CHS", "ja"}
+
 
 class FontWeight(StrEnum):
   NORMAL = "Inter-Regular.ttf" if BIG_UI else "Inter-Medium.ttf"
@@ -120,7 +122,9 @@ class FontWeight(StrEnum):
 
 
 def font_fallback(font: rl.Font) -> rl.Font:
-  """Use a Noto fallback for languages not covered by Inter."""
+  """Use a dedicated CJK font for CJK languages; otherwise use a Noto fallback for languages not covered by Inter."""
+  if multilang.language in CJK_FONT_LANGUAGES:
+    return gui_app.fallback_font()
   if multilang.requires_font_fallback():
     return gui_app.fallback_font()
   return font

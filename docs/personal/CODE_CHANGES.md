@@ -1,5 +1,24 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 CJK Font And Settings Entry Hotfix
+
+Real-device feedback showed the first Chinese localization pass could render some UI strings as question marks because the generated `unifont.fnt` atlas did not include newly added Chinese glyphs, and the unifont design was visibly pixelated.
+
+Changes:
+
+- Added Noto Sans CJK SC Regular as the CJK fallback font for Simplified Chinese, Traditional Chinese, and Japanese.
+- Kept `unifont` as the broad fallback for Thai and symbols/scripts not covered by Noto CJK.
+- Updated the font generator so CJK fonts receive the extended translation glyph set.
+- Updated raygui text boxes to use the same language fallback font path as normal text rendering.
+- Added static checks that the CJK fallback is wired, Noto CJK contains common Chinese settings glyphs, and unifont remains available as a broad fallback.
+
+Real-device feedback also showed the left sidebar gear was still too sensitive and could open settings and immediately close it from the same touch sequence.
+
+Changes:
+
+- Sidebar gear now opens settings on touch release instead of touch press.
+- Settings entry now ignores close/sidebar touch handling for 0.6 seconds after opening and until the opening touch is released.
+
 ## 2026-06-19 Installer Fix
 
 The first `/x` alpha installer on GitHub Pages was a SunnyPilot Raylib ARM64 installer patched for this repository. On the user's clone C3 it showed the setup download progress and then exited before the installer UI appeared.
