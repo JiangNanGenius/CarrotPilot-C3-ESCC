@@ -15,6 +15,7 @@ The driving screen is drawn in this order:
 - Sunny/Genius HUD, alerts, and driver-state widgets.
 
 This means Sunny, Carrot, and Fusion do not fight over the same base path/lane renderer. Carrot World and Fishop can both be opened on top of any base preset because they are evidence overlays, not base presets.
+The short form is: base road renderer, Carrot World overlay, Fishop overlay, then HUD/alerts.
 
 ## Mode Relationship
 

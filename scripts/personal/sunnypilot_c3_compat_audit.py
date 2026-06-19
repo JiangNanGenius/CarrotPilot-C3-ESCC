@@ -11,6 +11,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
+LEGACY_C3_RESCUE_PASSWORD = "".join(("C3", "Debug", "123456"))
 
 GIT_BLOB_FIRST_PATHS = {
   "sunnypilot/models/helpers.py",
@@ -196,6 +197,7 @@ def local_checks() -> list[dict[str, Any]]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
   c3_env = read("sunnypilot/system/hardware/c3/launch_env.sh")
+  c3_rescue = read("sunnypilot/system/hardware/c3/rescue_ssh.sh")
   root_launch = read("launch_chffrplus.sh")
   params_keys = read("common/params_keys.h")
   version = read("system/version.py")
@@ -285,6 +287,20 @@ def local_checks() -> list[dict[str, Any]]:
       and token_inside_internal_block(installer, "SshEnabled")
       and token_inside_internal_block(installer, "git remote set-url origin --push"),
       "Installer must not ship a default SSH public key; internal push remotes must stay inside the INTERNAL block only",
+    ),
+    status(
+      "c3_rescue_ssh_is_bench_only",
+      "CARROT_C3_RESCUE_ENABLE" in c3_rescue
+      and "/data/carrotpilot/bench_rescue_enable" in c3_rescue
+      and "/data/carrotpilot/bench_rescue_authorized_keys" in c3_rescue
+      and "CARROT_C3_RESCUE_PASSWORD" in c3_rescue
+      and "CARROT_C3_RESCUE_PUBKEY" in c3_rescue
+      and "rescue_is_armed" in c3_rescue
+      and "write_status \"disabled\"" in c3_rescue
+      and "GithubSshKeys" not in c3_rescue
+      and LEGACY_C3_RESCUE_PASSWORD not in c3_rescue
+      and "RESCUE_PUBKEY=" not in c3_rescue,
+      "C3 rescue SSH must be inert unless explicitly armed and must not ship a public password/key or write GithubSshKeys",
     ),
     status(
       "local_wifi_settings_retained",
