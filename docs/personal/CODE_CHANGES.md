@@ -1,5 +1,24 @@
 # 当前代码改动记录
 
+## 2026-06-19: alpha capnp 生成物同步和静态检查加固
+
+改动文件：
+
+- `cereal/gen/cpp/custom.capnp.h`
+- `cereal/gen/cpp/custom.capnp.c++`
+- `scripts/personal/sunnypilot_c3_alpha_static_check.py`
+
+改动内容：
+
+- 用 capnp 重新生成 alpha 的 custom C++ schema 生成物，补回 `LongitudinalPlanSP.SpeedLimit.Source.PHONE` 和 `sourceLabel` getter/setter。
+- alpha 静态检查新增 `capnp generated contract check`，防止 custom/log SP schema 更新后忘记同步 C++ 生成头。
+- 目录扫描改用带短超时的 `safe_read_text()`，macOS dataless 文件不会再卡死韩文、Mapbox 或高风险 token 扫描。
+
+验证：
+
+- `python3 -m py_compile scripts/personal/sunnypilot_c3_alpha_static_check.py`
+- `python3 scripts/personal/sunnypilot_c3_alpha_static_check.py`
+
 ## 2026-06-19: alpha 证据判定器和快照防挂
 
 改动内容：
