@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 import types
+import zipfile
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -107,6 +108,16 @@ def read_bytes(rel: str) -> bytes:
     return path.read_bytes()
   except OSError as exc:
     raise RuntimeError(f"unable to read {rel}; file may be unavailable") from exc
+
+
+def read_zip_member(rel: str, member: str) -> bytes:
+  path = ROOT / rel
+  materialize_path(path)
+  try:
+    with zipfile.ZipFile(path) as zf:
+      return zf.read(member)
+  except (OSError, KeyError, zipfile.BadZipFile) as exc:
+    raise RuntimeError(f"unable to read {member} from {rel}") from exc
 
 
 def read_tree(rel: str, suffixes: tuple[str, ...]) -> str:
@@ -1716,6 +1727,17 @@ def check_c3_install_boot_contract() -> tuple[bool, str]:
   for rel in required_files:
     if not (ROOT / rel).exists():
       return False, f"C3 install/boot file missing: {rel}"
+
+  updater_bytes = read_bytes("system/hardware/tici/updater")
+  if not updater_bytes.startswith(b"#!/usr/bin/env python3\nPK"):
+    return False, "packed TICI updater must keep the python3 zipapp shebang"
+  embedded_wifi = read_zip_member("system/hardware/tici/updater", "openpilot/system/ui/lib/wifi_manager.py").decode("utf-8", errors="replace")
+  main_wifi = read("system/ui/lib/wifi_manager.py")
+  if embedded_wifi != main_wifi:
+    return False, "packed TICI updater Wi-Fi manager must match system/ui/lib/wifi_manager.py"
+  for token in ("JEEPNEY_AVAILABLE = False", "_nmcli_fallback", "_nmcli_active_ssid", 'nmcli", "device", "wifi", "rescan', "_update_networks"):
+    if token not in embedded_wifi:
+      return False, f"packed TICI updater Wi-Fi manager missing fallback token {token!r}"
 
   launch_tokens = (
     'trap \'exec ./launch_chffrplus.sh\' ERR',

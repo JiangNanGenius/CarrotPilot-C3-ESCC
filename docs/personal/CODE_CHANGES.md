@@ -18,7 +18,7 @@ The first renderer migration is display-only:
 - Fishop overlay reads fresh local `/data/fishop_hardware.jsonl` evidence and draws compact left/right lane, lidar, camera, dynamic-risk, and overtake-hint status on top of any base preset.
 - Visualization coexistence is explicit: Sunny, Carrot, and Fusion are mutually exclusive base presets; Fishop overlay is an independent top layer; every renderer switch remains display-only.
 
-Genius Pilot version is bumped to `2026.002.000-gp.20260620.3`.
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.4`.
 
 ## 2026-06-20 NNLC And Super Advanced Carrot Controls
 
@@ -261,7 +261,8 @@ Implementation notes added after the first device sync:
 - The main source-tree Wi-Fi manager now keeps the `jeepney` DBus path when available and falls back to `nmcli` when that Python package is missing.
 - The user's C3 proved that the runtime virtualenv had `zmq` but did not have `jeepney`; the fallback successfully reported the connected SSID, IP address, and nearby networks.
 - A direct `pip install jeepney` into `/usr/local/venv` failed because that filesystem is read-only on the C3, so dependency repair must be part of the installer/update package rather than a manual device mutation.
-- The packed TICI updater is a separate embedded Python payload and still contained the old direct `jeepney` import. Fresh release work must either install `jeepney` before that updater runs or rebuild/patch the packed updater so it has the same fallback.
+- The packed TICI updater is a separate embedded Python payload. It is now patched with the same Wi-Fi manager as the main tree, so fresh installs and updater boots get the `nmcli` fallback when `jeepney` is absent.
+- `scripts/personal/patch_tici_updater_wifi_manager.py --check` and the alpha static/release gates now compare the updater's embedded `openpilot/system/ui/lib/wifi_manager.py` against `system/ui/lib/wifi_manager.py` and reject stale packed payloads.
 - Settings page touch handling now ignores the touch that opened the page, so the sidebar gear cannot immediately close settings.
 - SunnyPilot ICBM, SCC-V, and SCC-M are hidden and forced inert in the personal alpha. DEC is retained only as an off-by-default candidate because it controls E2E/classic longitudinal selection rather than directly replacing Carrot curve/map speed logic.
 - The sidebar temperature label now prefers numeric `maxTempC` and only uses the color state as a warning hint.
