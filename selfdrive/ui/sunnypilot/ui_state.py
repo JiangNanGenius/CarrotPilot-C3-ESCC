@@ -199,7 +199,7 @@ class UIStateSP:
     has_long = self.has_longitudinal_control
     CP = self.CP
 
-    for param in ("IntelligentCruiseButtonManagement", "DynamicExperimentalControl", "SmartCruiseControlVision", "SmartCruiseControlMap"):
+    for param in ("IntelligentCruiseButtonManagement", "SmartCruiseControlVision", "SmartCruiseControlMap"):
       self.params.remove(param)
     self.has_icbm = False
 

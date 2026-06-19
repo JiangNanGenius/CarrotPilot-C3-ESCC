@@ -24,7 +24,8 @@ Do not move `/i` or stable/latest to the alpha line until the C3 parked checks a
 - High-risk features stay independently gated and default off: traffic-light stop, auto-turn slowdown, active speed control, Auto-Tuner auto-apply, and fishop auto-overtake.
 - Fishop lane/lidar/blindspot/overtake work is evidence-only until staged logs, rollback, and real-car review prove the next step.
 - Product direction is CarrotPilot-first. SunnyPilot is the 0.11 architecture base, not the feature owner for cruise behavior.
-- Do not expose or enable SunnyPilot black-box cruise-speed features in the personal build: ICBM, SCC-V, SCC-M, and Dynamic Experimental Control must stay hidden or inert until explicitly replaced by Carrot-style granular controls.
+- Do not expose or enable SunnyPilot ICBM, SCC-V, or SCC-M in the personal build; they overlap with Carrot button, curve, map, and speed-limit paths.
+- Sunny DEC may be retained as an off-by-default advanced longitudinal candidate, but it must be documented separately and must not be combined with unvalidated Carrot active speed, turn slowdown, or traffic-light stop outputs.
 - Carrot-style settings are preferred: every control behavior should have a visible setting, a clear Chinese/English description, conservative default, validation gate, and rollback path.
 - User-facing alpha branding should move toward Genius Pilot. Keep upstream package/module names only where renaming would create code risk.
 - Do not rely on cloud registration for local recovery. Local Wi-Fi, SSH, and web access must work on the user's clone C3 without Sunnylink or comma connect.
@@ -64,6 +65,12 @@ Reference fetch/compare audit before upstream updates:
 
 ```bash
 python3 scripts/personal/sunnypilot_c3_alpha_update_audit.py --fetch --strict --scan-risk-tokens --json
+```
+
+Settings conflict audit after refreshing references:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_settings_conflict_audit.py --strict
 ```
 
 Full gate with reference fetch:
