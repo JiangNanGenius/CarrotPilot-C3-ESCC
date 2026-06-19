@@ -1730,6 +1730,27 @@ def check_device_collect_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_parked_hardware_probe_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/sunnypilot_c3_parked_hardware_probe.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_carrot_tuning_baseline_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -2382,6 +2403,7 @@ def main() -> int:
   release_gate = read("scripts/personal/sunnypilot_c3_alpha_release_gate.py")
   update_audit = read("scripts/personal/sunnypilot_c3_alpha_update_audit.py")
   device_collect = read("scripts/personal/sunnypilot_c3_device_collect.py")
+  parked_hardware_probe = read("scripts/personal/sunnypilot_c3_parked_hardware_probe.py")
   settings_matrix_script = read("scripts/personal/genius_settings_matrix.py")
   settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
   settings_matrix_json = read("docs/personal/settings_matrix.json")
@@ -2846,6 +2868,7 @@ def main() -> int:
                           and "sunnypilot_c3_alpha_static_check.py" in release_gate
                           and "sunnypilot_c3_alpha_update_audit.py" in release_gate
                           and "sunnypilot_c3_device_collect.py" in release_gate
+                          and "sunnypilot_c3_parked_hardware_probe.py" in release_gate
                           and "--fetch-references" in release_gate
                           and "--full" in release_gate
                           and "--snapshot" in release_gate,
@@ -2874,6 +2897,11 @@ def main() -> int:
                           and "DEFAULT_HOST = \"192.168.100.174\"" in device_collect
                           and "sunnypilot_c3_alpha_snapshot.py" in device_collect
                           and "sunnypilot_c3_alpha_evidence_check.py" in device_collect
+                          and "sunnypilot_c3_parked_hardware_probe.py" in device_collect
+                          and "parked_hardware_probe.json" in device_collect
+                          and "--parked-hardware-probe" in device_collect
+                          and "--skip-sound-probe" in device_collect
+                          and "--with-sound-probe" in device_collect
                           and "cloud_processes_seen.txt" in device_collect
                           and "CARROT_COLLECT_TARBALL=" in device_collect
                           and "GithubSshKeys" not in device_collect,
@@ -2881,6 +2909,22 @@ def main() -> int:
   ok, detail = check_device_collect_runtime()
   failures += not require("C3 remote evidence collect runtime", ok,
                           detail or "device collect self-test failed")
+  failures += not require("C3 parked hardware probe tool exists",
+                          "Genius Pilot C3 Parked Hardware Probe" in parked_hardware_probe
+                          and "modeld_tinygrad" in parked_hardware_probe
+                          and "camerad" in parked_hardware_probe
+                          and "sensord" in parked_hardware_probe
+                          and "soundd" in parked_hardware_probe
+                          and "cameraOdometry" in parked_hardware_probe
+                          and "accelerometer" in parked_hardware_probe
+                          and "gyroscope" in parked_hardware_probe
+                          and "--with-sound" in parked_hardware_probe
+                          and "if not args.with_sound" in parked_hardware_probe
+                          and "startedProcessesStopped" in parked_hardware_probe,
+                          "alpha must include a parked hardware probe that can start/sample/stop modeld, cameras, IMU, and opt-in speaker checks")
+  ok, detail = check_parked_hardware_probe_runtime()
+  failures += not require("C3 parked hardware probe runtime", ok,
+                          detail or "parked hardware probe self-test failed")
   baseline_tool = read("scripts/personal/carrot_tuning_baseline.py")
   failures += not require("Carrot tuning baseline tool exists",
                           "Genius Pilot Carrot tuning baseline" in baseline_tool

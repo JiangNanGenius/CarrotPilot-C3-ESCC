@@ -29,7 +29,7 @@ The reference branches use several settings that look similar but control differ
 - DEC is a separate Sunny longitudinal option. It must not lock or hide Carrot active speed control, ATC/auto-turn, or traffic-light stop settings.
 - `CurveSpeedControlMode` owns Sunny SCC-V participation. Sunny and Balanced modes may use SCC-V model-curvature slowdown; Off and Carrot modes do not.
 - Sunny SCC-M remains inert in all Genius Pilot modes because map target velocities are not trusted as default speed truth.
-- Outside curve-speed experimentation, cruise speed ownership should stay Carrot/Genius-first: fresh phone/APN/N/Navipilot/Carrot evidence, then vehicle/cluster speed. Sunny map/GPS speed control is opt-in only through explicit map policies.
+- Outside curve-speed experimentation, cruise speed ownership should stay Carrot/Genius-first: fresh phone/APN/N/Navipilot/Carrot evidence, then vehicle/cluster speed. Sunny map/GPS speed control and GPS-derived vehicle speed are not default truth sources; map/GPS is opt-in only through explicit map policies.
 
 ## Carrot Active Controls
 

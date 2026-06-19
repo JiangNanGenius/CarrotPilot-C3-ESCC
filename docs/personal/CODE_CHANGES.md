@@ -1,5 +1,19 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 C3 Parked Hardware Probe And Model Evidence Fix
+
+Added a parked hardware evidence path for the user's clone C3:
+
+- `scripts/personal/sunnypilot_c3_device_collect.py` now runs C3 snapshot/evidence checks through `/usr/local/venv/bin/python` with `PYTHONPATH=/data/openpilot`, so capnp/cereal imports work on device.
+- `scripts/personal/sunnypilot_c3_alpha_snapshot.py` now reads `ModelManager_ActiveBundle` as raw JSON and records only a safe summary/hash, avoiding false parse failures from sanitized large params.
+- Added `scripts/personal/sunnypilot_c3_parked_hardware_probe.py` to start, sample, and stop parked-only camera/modeld/IMU checks. It supports the existing no-panda modeld debug style without starting the control stack, and speaker checks are now explicit opt-in only.
+- `scripts/personal/sunnypilot_c3_device_collect.py --parked-hardware-probe` includes `parked_hardware_probe.json` in the C3 evidence bundle.
+- The release/static gates now self-test the parked hardware probe and require device collection to keep packaging it.
+- Documented the upstream comma offline-test split: use `selfdrive/test/process_replay` and `tools/replay` for code/message replay, while C3 parked probes stay focused on physical hardware and local-device integration.
+- Captured C3 evidence that three camera streams and `modeld_tinygrad` can produce `modelV2`, `drivingModelData`, and `cameraOdometry` while parked without a physical panda. IMU acceleration/gyroscope still needs a separate sensord-style hardware check.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.31`.
+
 ## 2026-06-20 C3 Params And Local Web Evidence Fixes
 
 Fixed another C3 runtime compatibility issue and tightened parked evidence:
