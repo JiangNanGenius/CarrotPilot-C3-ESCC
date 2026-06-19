@@ -119,10 +119,11 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Remove the old UI behavior that forced Carrot active speed, ATC, red-light stop, and Fishop auto-overtake back to off.
 - [x] Keep Sunny ICBM/SCC-V/SCC-M hidden because they overlap with Carrot cruise/speed behavior.
 - [x] Keep Sunny DEC as a separate option; it no longer disables Carrot active speed, ATC, or red-light stop.
-- [ ] Build a per-setting matrix for ajouatom CarrotPilot, jixiexiaoge/mechanical, and masang-feiyang/ESCC: param name, default, UI label, units, inverse semantics, source branch, code consumer, and conflict notes.
-- [ ] Classify every setting as one of: Carrot owner, Sunny primitive, Fishop hardware input, ESCC vehicle interface, model manager, local network/update, or removed cloud feature.
-- [ ] For each duplicated setting, choose exactly one owner and write the alias/removal decision; do not keep compatibility aliases unless a real on-device migration needs them.
-- [ ] Audit interactions among `DynamicExperimentalControl`, `SpeedLimitMode`, `CurveSpeedControlMode`, `TurnSpeedControlMode`, `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, `CarrotTrafficStopEnabled`, and `FishopAutoOvertakeEnabled`.
+- [x] Build a per-setting matrix for ajouatom CarrotPilot, jixiexiaoge/mechanical, and masang-feiyang/ESCC: param name, default, UI label, units, inverse semantics, source branch, code consumer, and conflict notes.
+- [x] Classify every setting as one of: Carrot owner, Sunny primitive, Fishop hardware input, ESCC vehicle interface, model manager, local network/update, visualization, or removed cloud feature.
+- [x] For each duplicated setting, choose exactly one owner and write the alias/removal decision; do not keep compatibility aliases unless a real on-device migration needs them.
+- [x] Audit interactions among `DynamicExperimentalControl`, `SpeedLimitMode`, `CurveSpeedControlMode`, `TurnSpeedControlMode`, `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, `CarrotTrafficStopEnabled`, and `FishopAutoOvertakeEnabled`.
+- [x] Add the settings owner matrix to the alpha release gate so future `/x` builds cannot silently reintroduce cloud, Sunny cruise, Carrot, Fishop, model, ESCC, local-network, or visualization conflicts.
 - [ ] Compare Sunny curve slowdown and Carrot curve slowdown in code and document when Fusion should use Sunny curvature, Carrot navigation turns, APN/N speed input, and lane-line curve input.
 - [ ] Find the source documentation for Carrot/CarrotPad settings and annotate confusing items, especially values where smaller/larger has inverse behavior.
 
@@ -132,6 +133,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Compile-check changed Python files: Super Advanced UI, Cruise UI, and local Carrot Web.
 - [x] Verify `common/params_pyx.so` contains the new runtime params: `CurveSpeedControlMode`, `CarrotCruiseAtcDecel`, `NeuralNetworkLateralControl`, and `FishopLaneCurveEnabled`.
 - [x] Add and run the local Genius visualization contract check for path/lane/lead/Fishop display-only wiring.
+- [x] Add and run the local Genius settings matrix check for Carrot/Sunny/Fishop/ESCC/model/local-network/cloud/visualization ownership.
 - [x] Run the full local release gate after documentation is updated: `python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full`.
 - [x] Push both `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3`, then audit `/x`.
 - [ ] Sync or reinstall on the user's C3 and confirm Super Advanced opens, NNLC defaults on, Seltos 2023 appears, and new Carrot params do not show unknown-key waits.
