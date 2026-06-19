@@ -91,7 +91,7 @@ def phase_set(phases: Iterable[str]) -> set[str]:
 def check_static(snapshot: dict[str, Any], report: EvidenceReport) -> None:
   report.require(
     "snapshot title",
-    get(snapshot, "metadata", "title") == "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot",
+    get(snapshot, "metadata", "title") == "Genius Pilot C3 Alpha Snapshot",
     "wrong or missing alpha snapshot metadata",
   )
   report.require("cloud processes absent", get(snapshot, "cloudGuard", "cloudForbiddenProcessesSeen") is False,
@@ -234,7 +234,7 @@ def good_snapshot() -> dict[str, Any]:
     "candidate": False,
   }
   return {
-    "metadata": {"title": "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot"},
+    "metadata": {"title": "Genius Pilot C3 Alpha Snapshot"},
     "cloudGuard": {
       "cloudForbiddenProcessesSeen": False,
       "cloudParams": {"SunnylinkEnabled": "0", "EnableSunnylinkUploader": "0", "OnroadUploads": "0"},

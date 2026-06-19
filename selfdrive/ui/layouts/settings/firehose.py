@@ -7,20 +7,20 @@ from openpilot.system.ui.lib.scroll_panel import GuiScrollPanel
 from openpilot.system.ui.lib.wrap_text import wrap_text
 from openpilot.selfdrive.ui.mici.layouts.settings.firehose import FirehoseLayoutBase
 
-TITLE = tr_noop("Firehose Mode")
+TITLE = tr_noop("Data Uploads Disabled")
 DESCRIPTION = tr_noop(
-  "sunnypilot learns to drive by watching humans, like you, drive.\n\n"
-  + "Firehose Mode allows you to maximize your training data uploads to improve "
-  + "openpilot's driving models. More data means bigger models, which means better Experimental Mode."
+  "Genius Pilot keeps cloud training uploads disabled in this personal C3 build.\n\n"
+  + "Local Wi-Fi, SSH, Web, GitHub updates, and model downloads remain available. "
+  + "Driving data is not uploaded from this page."
 )
 INSTRUCTIONS = tr_noop(
-  "For maximum effectiveness, bring your device inside and connect to a good USB-C adapter and Wi-Fi weekly.\n\n"
-  + "Firehose Mode can also work while you're driving if connected to a hotspot or unlimited SIM card.\n\n\n"
+  "For updates, bring your device inside and connect to a good USB-C adapter and Wi-Fi.\n\n"
+  + "Use the Software, Models, and Super Advanced pages for local maintenance. "
+  + "This page does not pair with comma, Sunnylink, or any cloud upload service.\n\n\n"
   + "Frequently Asked Questions\n\n"
-  + "Does it matter how or where I drive? Nope, just drive as you normally would.\n\n"
-  + "Do all of my segments get pulled in Firehose Mode? No, we selectively pull a subset of your segments.\n\n"
-  + "What's a good USB-C adapter? Any fast phone or laptop charger should be fine.\n\n"
-  + "Does it matter which software I run? Yes, only upstream openpilot (and particular forks) are able to be used for training."
+  + "Does this upload my drives? No. Cloud upload paths are disabled in Genius Pilot.\n\n"
+  + "Can I still update over Wi-Fi? Yes. GitHub updates and model downloads are local maintenance features.\n\n"
+  + "What should I use this page for? It is a reminder that cloud training upload mode is intentionally unavailable."
 )
 
 
@@ -64,14 +64,6 @@ class FirehoseLayout(FirehoseLayoutBase):
     status_text, status_color = self._get_status()
     y = self._draw_wrapped_text(x, y, w, status_text, gui_app.font(FontWeight.BOLD), 60, status_color)
     y += 20 + 20
-
-    # TODO: add back once reliable
-    # Contribution count (if available)
-    #if self._segment_count > 0:
-    #  contrib_text = trn("{} segment of your driving is in the training dataset so far.",
-    #                     "{} segments of your driving is in the training dataset so far.", self._segment_count).format(self._segment_count)
-    #  y = self._draw_wrapped_text(x, y, w, contrib_text, gui_app.font(FontWeight.BOLD), 52, rl.WHITE)
-    #  y += 20 + 20
 
     # Separator
     rl.draw_rectangle(x, y, w, 2, self.GRAY)
