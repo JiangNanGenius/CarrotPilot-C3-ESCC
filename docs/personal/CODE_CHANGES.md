@@ -1,5 +1,28 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Visualization Stack Contract
+
+Tightened the multi-visualization plan for Sunny, Carrot, Fusion, Carrot World, and Fishop:
+
+- `docs/personal/VISUALIZATION_POLICY.md` now records the exact driving-screen stack order: camera, base road renderer, Carrot World overlay, Fishop overlay, then HUD/alerts.
+- Carrot World and Fishop are explicitly additive overlays that can be opened together above any Sunny/Carrot/Fusion base preset.
+- Sunny, Carrot, and Fusion remain mutually exclusive base presets, so they do not fight over the main path/lane renderer.
+- `docs/personal/SETTINGS_CONFLICTS.md` and `docs/personal/TODO.md` now track the same rule, plus the next ajouatom cluster/world schema-mapping step.
+- `scripts/personal/genius_visualization_contract.py` now checks the render order so future visual imports cannot silently move overlays above HUD/alerts or merge them into the base renderer.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.17`.
+
+## 2026-06-20 Personal README And Release Docs
+
+Replaced the upstream SunnyPilot README with personal Genius Pilot alpha docs:
+
+- The README now documents `/i` stable rollback, `/x` alpha install, clone C3 target hardware, Seltos 2023 SCC, ESCC auto-detection, no-cloud policy, local Web/API, model manager, Carrot controls, and Fishop hardware.
+- Added `docs/personal/HIGH_RISK_SETTING_GUIDE.md` for Offroad, model manager, speed limits, Carrot active speed, auto-turn, traffic-light stop, Auto-Tuner, following/braking, Fishop, visualization, Sunny DEC, and rollback.
+- Added `docs/personal/RELEASE_TEMPLATE.md` to record branch, commit, installer hash, device evidence, no-cloud evidence, ESCC, model, Carrot, Fishop, and test-phase evidence for every alpha.
+- The branding contract now gates README, high-risk guide, and release template content so upstream cloud/sponsor copy cannot silently return.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.16`.
+
 ## 2026-06-20 Fishop Hardware Replay Contract
 
 Upgraded the Fishop hardware sample tool into a release-gated replay contract:

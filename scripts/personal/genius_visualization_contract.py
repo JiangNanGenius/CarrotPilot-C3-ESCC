@@ -130,6 +130,13 @@ def check_sources() -> list[CheckResult]:
     "self.carrot_world_overlay.render(self._content_rect)",
     "self.carrot_world_overlay.set_transform(video_transform @ calib_transform)",
   )
+  required_stack_order = (
+    "self.model_renderer.render(self._content_rect)",
+    "self.carrot_world_overlay.render(self._content_rect)",
+    "self.fishop_overlay.render(self._content_rect)",
+    "self._hud_renderer.render(self._content_rect)",
+    "self.alert_renderer.render(self._content_rect)",
+  )
   forbidden_path_tokens = (
     "PubMaster",
     "SubMaster",
@@ -144,6 +151,11 @@ def check_sources() -> list[CheckResult]:
     "controlOutputEnabled = True",
   )
   forbidden_lane_change_tokens = tuple(token for token in forbidden_path_tokens if token != "laneChange")
+  stack_tokens_present = all(token in augmented for token in required_stack_order)
+  stack_order_ok = stack_tokens_present and all(
+    augmented.index(required_stack_order[i]) < augmented.index(required_stack_order[i + 1])
+    for i in range(len(required_stack_order) - 1)
+  )
 
   results = [
     CheckResult(
@@ -180,6 +192,11 @@ def check_sources() -> list[CheckResult]:
       "Carrot world overlay wired",
       all(token in carrot_world for token in required_carrot_world) and all(token in augmented for token in required_augmented),
       "Carrot world overlay must be an independent display-only layer wired into onroad view",
+    ),
+    CheckResult(
+      "visual overlays render between base road and HUD",
+      stack_order_ok,
+      "onroad view must render base road, Carrot World, Fishop, HUD, and alerts in that order",
     ),
     CheckResult(
       "path renderer remains display-only",

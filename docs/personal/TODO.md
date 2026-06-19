@@ -95,9 +95,12 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Document that Fishop/lidar visual data is evidence-only and cannot enable auto-overtake or lane-change output by itself.
 - [x] Add `GeniusCarrotWorldOverlay` as an independent Carrot-style world evidence layer for side-lane, blindspot, lane-change, lead, and radar cues.
 - [x] Keep the Carrot world overlay display-only and default off, separate from the mutually exclusive Sunny/Carrot/Fusion base presets and from the Fishop hardware overlay.
+- [x] Define the render stack explicitly: base road renderer, Carrot World overlay, Fishop overlay, then HUD/alerts.
+- [x] Confirm Carrot World and Fishop overlays can be enabled together on top of any Sunny/Carrot/Fusion base preset while the base preset remains mutually exclusive.
 - [x] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
 - [x] Add Simplified/Traditional Chinese translations for the new visualization controls.
 - [ ] Map the remaining ajouatom Carrot cluster/world view into a separate optional surface: detected vehicles, source-colored objects, raw/merged side radar points, ajouatom-only lane-line type fields, and distance/speed labels.
+- [ ] Add an ajouatom cluster/world schema map that names every imported field, its fallback when missing, and whether it comes from model, radar, side radar, or Fishop.
 - [ ] After cluster/world view mapping, decide whether it should be a standalone page, an explicit overlay, or a debug-only visual mode; do not merge it into the main HUD by default.
 - [ ] Add a cluster/world-view replay fixture before enabling that larger renderer on the C3.
 
@@ -162,9 +165,9 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [ ] Replace remaining SunnyPilot wording with Genius Pilot / CarrotPilot wording where it is user-facing and accurate.
 - [ ] Keep docs current after every real-device hotfix: installer behavior, UI failures, parameter defaults, and known rollbacks.
 - [ ] Continue polishing Chinese descriptions after real-device feedback.
-- [ ] Add a user-facing README section for alpha use: `/i` stable rollback, `/x` alpha, Wi-Fi/SSH recovery, model manager, Carrot controls, Fishop hardware, and no-cloud policy.
-- [ ] Add a clear setting guide for high-risk toggles: what it changes, default state, when to test, and how to roll back.
-- [ ] Add a release note template that records installed branch, commit, installer hash, device evidence, cloud-process evidence, and road-test phase.
+- [x] Add a user-facing README section for alpha use: `/i` stable rollback, `/x` alpha, Wi-Fi/SSH recovery, model manager, Carrot controls, Fishop hardware, and no-cloud policy.
+- [x] Add a clear setting guide for high-risk toggles: what it changes, default state, when to test, and how to roll back.
+- [x] Add a release note template that records installed branch, commit, installer hash, device evidence, cloud-process evidence, and road-test phase.
 
 ## Current C3 UI Hotfixes
 

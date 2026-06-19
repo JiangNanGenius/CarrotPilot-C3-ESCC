@@ -28,6 +28,9 @@ def check_sources() -> list[CheckResult]:
   evidence = read("scripts/personal/sunnypilot_c3_alpha_evidence_check.py")
   software = read("selfdrive/ui/layouts/settings/software.py")
   updater = read("system/updated/updated.py")
+  readme = read("README.md")
+  high_risk_guide = read("docs/personal/HIGH_RISK_SETTING_GUIDE.md")
+  release_template = read("docs/personal/RELEASE_TEMPLATE.md")
 
   combined_firehose = firehose + "\n" + firehose_mici
   forbidden_firehose_tokens = (
@@ -55,6 +58,54 @@ def check_sources() -> list[CheckResult]:
     "Driving data is not uploaded from this page.",
     "DISABLED: cloud uploads are off in this personal build",
   )
+  forbidden_readme_tokens = (
+    "By default, sunnypilot uploads the driving data to comma servers",
+    "Firehose Mode allows you to maximize your training data uploads",
+    "Join the official sunnypilot community forum",
+    "Become a sponsor",
+    "PayPal this",
+    "sunnylink client-side implementation",
+  )
+  required_readme_tokens = (
+    "Genius Pilot C3 ESCC",
+    "Stable daily rollback line",
+    "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i",
+    "SunnyPilot 0.11 C3 alpha line",
+    "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x",
+    "Cloud services are intentionally disabled or inert",
+    "Local networking remains enabled for maintenance",
+    "KIA_SELTOS_2023",
+    "ESCC: automatic enhanced SCC detection through `0x2AB`",
+    "Super Advanced Carrot/Genius settings",
+    "GeniusCarrotWorldOverlay",
+    "GeniusFishopVisualOverlay",
+    "HIGH_RISK_SETTING_GUIDE.md",
+    "RELEASE_TEMPLATE.md",
+  )
+  required_high_risk_tokens = (
+    "Genius Pilot High-Risk Setting Guide",
+    "`OffroadMode`",
+    "`CarrotActiveSpeedControlEnabled`",
+    "`CarrotAutoTurnControlEnabled`",
+    "`CarrotTrafficStopEnabled`",
+    "`CarrotLearningAutoApply`",
+    "`FishopAutoOvertakeEnabled`",
+    "`GeniusVisualMode`",
+    "controlOutput=false",
+    "Install `/i` if the alpha branch itself is suspect",
+  )
+  required_release_tokens = (
+    "Genius Pilot Alpha Release Template",
+    "Installer SHA256",
+    "Stable rollback URL",
+    "No-Cloud Evidence",
+    "`athenad`",
+    "`uploader`",
+    "`sunnylinkd`",
+    "Enhanced SCC `0x2AB` detected",
+    "`modelV2` sampled",
+    "Control output remains false",
+  )
 
   return [
     CheckResult(
@@ -81,6 +132,26 @@ def check_sources() -> list[CheckResult]:
       "visible updater/software branding remains Genius Pilot",
       "Genius Pilot {version}" in updater and "Genius Pilot {get_version()}" in software,
       "software and updater surfaces must show Genius Pilot",
+    ),
+    CheckResult(
+      "README is Genius Pilot personal alpha copy",
+      all(token in readme for token in required_readme_tokens),
+      "README must describe /i, /x, C3/Seltos/ESCC, no-cloud policy, local Web/API, and personal docs",
+    ),
+    CheckResult(
+      "README has no upstream cloud/sponsor copy",
+      not any(token in readme for token in forbidden_readme_tokens),
+      "README must not keep upstream cloud-upload, Sunnylink, or sponsor marketing copy",
+    ),
+    CheckResult(
+      "high-risk setting guide exists",
+      all(token in high_risk_guide for token in required_high_risk_tokens),
+      "docs/personal/HIGH_RISK_SETTING_GUIDE.md must explain risky Carrot/Fishop/model/visual settings and rollback",
+    ),
+    CheckResult(
+      "release evidence template exists",
+      all(token in release_template for token in required_release_tokens),
+      "docs/personal/RELEASE_TEMPLATE.md must capture installer, device, no-cloud, ESCC, model, Carrot, and Fishop evidence",
     ),
   ]
 
