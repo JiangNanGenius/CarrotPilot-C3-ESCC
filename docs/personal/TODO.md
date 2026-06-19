@@ -61,6 +61,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Use SunnyPilot native model manager and `modeld_tinygrad`.
 - [x] Keep stock model as default.
 - [x] Restrict model download, verify, switch, and rollback to offroad.
+- [x] Add a no-car model manager contract for stock fallback, runner cache, invalid-bundle rollback, bounded active-bundle evidence, and atomic artifact install.
 - [ ] Verify model list download and active bundle evidence on C3.
 - [x] Confirm parked model startup can work without a physical panda: the C3 produced `modelV2`, `drivingModelData`, and `cameraOdometry` from `modeld_tinygrad` while parked.
 
@@ -172,7 +173,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Fix process-replay-discovered `controlsd` startup crashes: NNLC now falls back when `CarParamsSP.neuralNetworkLateralControl.model.path` is empty or missing, and legacy torque v0 clamps zero/negative `lat_delay` before lateral-jerk division.
 - [x] Run HYUNDAI `controlsd` process replay smoke. It completes crash-free after the NNLC and torque v0 fixes; it still reports expected upstream reference diffs in torque outputs because this fork intentionally changes lateral-control behavior.
 - [x] Run HYUNDAI `radard` process replay smoke; it passes against upstream reference data.
-- [ ] Complete upstream process replay coverage for affected non-hardware logic before promoting `/x`: `plannerd` is currently blocked on macOS `acados_ocp_solver_pyx.so`, and `locationd`/`paramsd` are currently blocked on macOS rednose `ekf_sym_pyx.so`. Model replay still requires camera frame inputs.
+- [x] Complete upstream process replay startup coverage for affected non-hardware logic before promoting `/x`: `controlsd`, `plannerd`, `radard`, `locationd`, and `paramsd` run crash-free with `nativeExtensionBlocked=false`; remaining failures are fork reference diffs.
+- [ ] Add model replay with camera frame inputs when a suitable FrameReader/log fixture is available.
 - [x] Push both `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3`, then audit `/x`.
 - [ ] Sync or reinstall on the user's C3 and confirm Super Advanced opens, NNLC defaults on, Seltos 2023 appears, and new Carrot params do not show unknown-key waits.
 - [ ] Run C3 parked checks with the device currently available: UI opens, Wi-Fi/network page reports connected state, local Web/API responds, no cloud processes exist, model manager opens, stock model runner starts.
@@ -208,7 +210,8 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Verify C3 local Web/API diagnostics without car in read-only mode: health, params bulk, status broadcast, UDP 7705 status, 7712 TCP health, 7713 HTTP health, navigation-event snapshot, phone speed state, Fishop evidence state, and no control-output fields.
 - [x] Archive the latest read-only LAN evidence under `~/Desktop/CarrotPilot-C3-ESCC-device-evidence/`: `navipilot_live_readonly_20260620_080046.json` and `.md`.
 - [ ] Re-run writable same-value and safe navigation probes only after the C3 clearly reports parked/offroad; the 2026-06-20 read-only live check reported `IsOnroad=true`, so writes and injected packets were intentionally skipped.
-- [ ] Verify model manager without car: model list/download availability, active bundle summary, runner cache, stock fallback, and no active bundle rollback behavior.
+- [x] Verify model manager without car through `genius_model_manager_contract.py`: active bundle summary, runner cache, stock fallback, invalid active bundle rollback, and atomic artifact install all pass locally.
+- [ ] Verify model manager live list/download availability on C3 after SSH/UI access is restored.
 - [ ] Verify Carrot/Super Advanced settings without car: all migrated controls visible, writable while offroad where intended, protected params read-only, and no unknown-key waits on C3.
 - [ ] Verify C3 UI/touch without car: settings opens reliably, Network page reports connected/scanned state, Seltos 2023 appears in the vehicle list, temperature displays numerically, and toggles retain state.
 - [ ] Archive each no-car diagnostic bundle on the Mac desktop under `CarrotPilot-C3-ESCC-device-evidence` with branch, commit, version, installer hash, and cloud-process evidence.

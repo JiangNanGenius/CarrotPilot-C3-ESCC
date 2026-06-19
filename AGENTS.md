@@ -163,6 +163,7 @@ python3 scripts/personal/genius_offline_replay_check.py --json
 PYTHONPATH=/tmp/gp-replay-shadow:/path/to/repo /tmp/gp-replay-py312/bin/python \
   scripts/personal/genius_offline_replay_check.py \
   --run-process-replay --procs controlsd,plannerd,radard,locationd,paramsd --cars HYUNDAI --jobs 1 --timeout 420
+/tmp/gp-replay-py312/bin/python scripts/personal/genius_model_manager_contract.py --json
 tools/replay/replay --demo
 ```
 
