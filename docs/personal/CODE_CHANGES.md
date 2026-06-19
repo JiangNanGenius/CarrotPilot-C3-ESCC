@@ -1,5 +1,18 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Local Carrot Web/API Contract
+
+Added a dedicated local API contract for the Carrot Web parameter bridge:
+
+- Added `scripts/personal/genius_carrot_web_api_contract.py`.
+- The contract writes and reads back Carrot active speed, auto-turn, traffic-light stop, Fishop overtake, curve-speed mode, NNLC, and Genius visualization params while offroad.
+- It confirms cloud params are not exposed through the local API.
+- It confirms read-only params such as `OffroadMode`, `SpeedFromPCM`, and `SshEnabled` reject writes.
+- It confirms changed writes are blocked while onroad while same-value probes remain harmless.
+- The alpha release gate and static check now run this contract explicitly.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.13`.
+
 ## 2026-06-20 Carrot World Visualization Overlay
 
 Added a separate Carrot-style world evidence overlay instead of mixing every visual system into one renderer:
