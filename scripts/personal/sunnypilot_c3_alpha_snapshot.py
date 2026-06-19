@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import http.client
 import json
 import os
 from pathlib import Path
@@ -128,6 +129,10 @@ LOCAL_PROCESS_PATTERNS = {
 }
 
 DEFAULT_FISHOP_JSONL = Path("/data/fishop_hardware.jsonl")
+CARROT_WEB_HOST = "127.0.0.1"
+CARROT_WEB_PORT = 7000
+CARROT_STATUS_BROADCAST_PATH = "/api/status_broadcast"
+CARROT_HEALTH_PATH = "/api/health"
 HYUNDAI_SP_ENHANCED_SCC_FLAG = 1
 HYUNDAI_SP_ESCC_SAFETY_PARAM = 1
 MESSAGING_SERVICES = (
@@ -537,6 +542,129 @@ def process_snapshot() -> dict[str, Any]:
   }
 
 
+def _local_carrot_json(path: str, timeout: float) -> tuple[bool, dict[str, Any], str]:
+  conn: http.client.HTTPConnection | None = None
+  try:
+    conn = http.client.HTTPConnection(CARROT_WEB_HOST, CARROT_WEB_PORT, timeout=timeout)
+    conn.request("GET", path, headers={"Accept": "application/json"})
+    response = conn.getresponse()
+    raw = response.read(96 * 1024)
+    if response.status >= 400:
+      return False, {}, f"http {response.status}"
+    data = json.loads(raw.decode("utf-8", errors="replace"))
+    if not isinstance(data, dict):
+      return False, {}, "non-object response"
+    return True, data, ""
+  except (OSError, TimeoutError, json.JSONDecodeError, http.client.HTTPException) as exc:
+    return False, {}, str(exc)[:240]
+  finally:
+    if conn is not None:
+      conn.close()
+
+
+def _string_list(value: object, limit: int = 20) -> list[str]:
+  if not isinstance(value, list):
+    return []
+  return [str(item)[:120] for item in value[:limit]]
+
+
+def summarize_carrot_web_status(timeout: float = 1.0) -> dict[str, Any]:
+  base_url = f"http://{CARROT_WEB_HOST}:{CARROT_WEB_PORT}"
+  result: dict[str, Any] = {
+    "available": False,
+    "host": CARROT_WEB_HOST,
+    "port": CARROT_WEB_PORT,
+    "statusBroadcastUrl": f"{base_url}{CARROT_STATUS_BROADCAST_PATH}",
+    "healthUrl": f"{base_url}{CARROT_HEALTH_PATH}",
+    "readOnly": True,
+    "controlOutput": False,
+    "statusBroadcast": {
+      "available": False,
+      "error": "",
+      "port": 0,
+      "targets": [],
+      "activeTargets": [],
+      "lastTargets": [],
+      "carrotManPeer": {},
+      "payload": {
+        "carrotManPeerActive": False,
+        "carrotManPeerHost": "",
+        "carrotManPeerAgeSec": None,
+        "xState": 0,
+        "trafficState": 0,
+        "controlOutput": False,
+      },
+    },
+    "health": {
+      "available": False,
+      "error": "",
+      "statusBroadcastActiveTargets": [],
+      "carrotManPeer": {},
+    },
+  }
+
+  status_ok, status_data, status_error = _local_carrot_json(CARROT_STATUS_BROADCAST_PATH, timeout)
+  result["statusBroadcast"]["available"] = status_ok
+  result["statusBroadcast"]["error"] = status_error
+  if status_ok:
+    payload = status_data.get("payload", {})
+    if not isinstance(payload, dict):
+      payload = {}
+    peer = status_data.get("carrotManPeer", {})
+    if not isinstance(peer, dict):
+      peer = {}
+    payload_summary = {
+      "carrotManPeerActive": bool(payload.get("carrotManPeerActive", False)),
+      "carrotManPeerHost": str(payload.get("carrotManPeerHost", ""))[:120],
+      "carrotManPeerAgeSec": payload.get("carrotManPeerAgeSec"),
+      "xState": int(payload.get("xState", 0) or 0),
+      "trafficState": int(payload.get("trafficState", 0) or 0),
+      "controlOutput": bool(payload.get("controlOutput", False)),
+    }
+    result["available"] = True
+    result["controlOutput"] = payload_summary["controlOutput"]
+    result["readOnly"] = (
+      payload_summary["controlOutput"] is False
+      and payload_summary["xState"] == 0
+      and payload_summary["trafficState"] == 0
+    )
+    result["statusBroadcast"].update({
+      "port": int(status_data.get("port", 0) or 0),
+      "targets": _string_list(status_data.get("targets")),
+      "activeTargets": _string_list(status_data.get("activeTargets")),
+      "lastTargets": _string_list(status_data.get("lastTargets")),
+      "carrotManPeer": {
+        "active": bool(peer.get("active", False)),
+        "host": str(peer.get("host", ""))[:120],
+        "port": int(peer.get("port", 0) or 0),
+        "source": str(peer.get("source", ""))[:80],
+        "ageSec": peer.get("ageSec"),
+      },
+      "payload": payload_summary,
+    })
+
+  health_ok, health_data, health_error = _local_carrot_json(CARROT_HEALTH_PATH, timeout)
+  result["health"]["available"] = health_ok
+  result["health"]["error"] = health_error
+  if health_ok:
+    peer = health_data.get("carrotManPeer", {})
+    if not isinstance(peer, dict):
+      peer = {}
+    result["available"] = True
+    result["health"].update({
+      "statusBroadcastActiveTargets": _string_list(health_data.get("statusBroadcastActiveTargets")),
+      "carrotManPeer": {
+        "active": bool(peer.get("active", False)),
+        "host": str(peer.get("host", ""))[:120],
+        "port": int(peer.get("port", 0) or 0),
+        "source": str(peer.get("source", ""))[:80],
+        "ageSec": peer.get("ageSec"),
+      },
+    })
+
+  return result
+
+
 def safe_attr(obj: object, name: str, default: object = None) -> object:
   try:
     return getattr(obj, name, default)
@@ -811,6 +939,7 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
   car_params = summarize_car_params()
   car_params_sp = summarize_car_params_sp()
   fishop = fishop_snapshot(fishop_jsonl)
+  carrot_web = summarize_carrot_web_status()
   navigation = summarize_navigation_event()
   auto_tuner = summarize_auto_tuner(safe_params)
   carrot_feature_gates = summarize_carrot_feature_gates(safe_params, navigation, auto_tuner, fishop)
@@ -841,6 +970,7 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
     },
     "speedLimitEvidence": summarize_speed_limit(safe_params, messaging),
     "navigationEvidence": navigation,
+    "carrotWeb": carrot_web,
     "carrotFeatureGates": carrot_feature_gates,
     "autoTuner": auto_tuner,
     "process": process,

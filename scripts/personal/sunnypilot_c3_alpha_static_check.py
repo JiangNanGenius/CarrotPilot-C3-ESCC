@@ -1196,6 +1196,96 @@ def check_fishop_release_gate_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_alpha_snapshot_carrot_web_runtime() -> tuple[bool, str]:
+  try:
+    snapshot = import_file("alpha_snapshot_carrot_web_static_check", "scripts/personal/sunnypilot_c3_alpha_snapshot.py")
+    payloads = {
+      "/api/status_broadcast": {
+        "port": 7705,
+        "targets": ["255.255.255.255", "127.0.0.1", "192.168.100.174"],
+        "activeTargets": ["127.0.0.1", "192.168.100.174"],
+        "lastTargets": ["127.0.0.1", "192.168.100.174"],
+        "carrotManPeer": {
+          "active": True,
+          "host": "192.168.100.174",
+          "port": 7705,
+          "source": "udp-7706",
+          "ageSec": 0.25,
+        },
+        "payload": {
+          "carrotManPeerActive": True,
+          "carrotManPeerHost": "192.168.100.174",
+          "carrotManPeerAgeSec": 0.25,
+          "xState": 0,
+          "trafficState": 0,
+          "controlOutput": False,
+        },
+      },
+      "/api/health": {
+        "statusBroadcastActiveTargets": ["127.0.0.1", "192.168.100.174"],
+        "carrotManPeer": {
+          "active": True,
+          "host": "192.168.100.174",
+          "port": 7705,
+          "source": "udp-7706",
+          "ageSec": 0.25,
+        },
+      },
+    }
+
+    class FakeResponse:
+      status = 200
+
+      def __init__(self, data: dict[str, object]) -> None:
+        self.data = data
+
+      def read(self, _limit: int = -1) -> bytes:
+        return json.dumps(self.data).encode("utf-8")
+
+    class FakeConnection:
+      def __init__(self, host: str, port: int, timeout: float) -> None:
+        self.host = host
+        self.port = port
+        self.timeout = timeout
+        self.path = ""
+
+      def request(self, method: str, path: str, headers: dict[str, str] | None = None) -> None:
+        self.path = path
+
+      def getresponse(self) -> FakeResponse:
+        return FakeResponse(payloads[self.path])
+
+      def close(self) -> None:
+        pass
+
+    previous_connection = snapshot.http.client.HTTPConnection
+    snapshot.http.client.HTTPConnection = FakeConnection
+    try:
+      report = snapshot.summarize_carrot_web_status(timeout=0.01)
+    finally:
+      snapshot.http.client.HTTPConnection = previous_connection
+
+    status = report.get("statusBroadcast", {})
+    health = report.get("health", {})
+    payload = status.get("payload", {})
+    peer = status.get("carrotManPeer", {})
+    if not report.get("available") or not report.get("readOnly") or report.get("controlOutput") is not False:
+      return False, "Carrot Web snapshot did not report available read-only local status"
+    if status.get("port") != 7705 or "192.168.100.174" not in status.get("activeTargets", []):
+      return False, "Carrot Web snapshot did not preserve 7705 active target evidence"
+    if peer.get("host") != "192.168.100.174" or peer.get("active") is not True:
+      return False, "Carrot Web snapshot did not preserve CarrotMan peer evidence"
+    if payload.get("carrotManPeerActive") is not True or payload.get("carrotManPeerHost") != "192.168.100.174":
+      return False, "Carrot Web snapshot did not preserve payload peer evidence"
+    if payload.get("xState") != 0 or payload.get("trafficState") != 0 or payload.get("controlOutput") is not False:
+      return False, "Carrot Web snapshot must keep Carrot control state inert/read-only"
+    if "192.168.100.174" not in health.get("statusBroadcastActiveTargets", []):
+      return False, "Carrot Web health snapshot did not preserve active target evidence"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_compat_audit_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -1253,13 +1343,70 @@ def visible_korean_text_report() -> str:
     Path("selfdrive/ui/translations"),
   }
   hits: list[str] = []
+  existing_roots = [root for root in scan_roots if (ROOT / root).exists()]
+
+  def is_allowed_hit(rel: Path) -> bool:
+    if rel in skipped:
+      return False
+    if any(rel == skipped_dir or skipped_dir in rel.parents for skipped_dir in skipped_dirs):
+      return False
+    return rel.suffix in suffixes
+
+  def filtered_search_output(output: str) -> str:
+    found: list[str] = []
+    for line in output.splitlines():
+      parts = line.split(":", 2)
+      if len(parts) < 3:
+        continue
+      rel = Path(parts[0])
+      if not is_allowed_hit(rel):
+        continue
+      found.append(f"{parts[0]}:{parts[1]}: {parts[2].strip()[:120]}")
+      if len(found) >= 8:
+        break
+    return "; ".join(found)
+
+  rg = shutil.which("rg")
+  if rg and existing_roots:
+    try:
+      result = subprocess.run(
+        [rg, "-n", "--color", "never", "--no-heading", "-I", r"[가-힣]", *existing_roots],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+      )
+      if result.returncode == 1:
+        return ""
+      if result.returncode == 0:
+        return filtered_search_output(result.stdout)
+    except subprocess.TimeoutExpired:
+      return "visible Korean rg scan timed out after 10s"
+
+  if existing_roots:
+    try:
+      result = subprocess.run(
+        ["git", "grep", "-n", "-I", "-E", r"[가-힣]", "--", *existing_roots],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=20,
+      )
+      if result.returncode == 1:
+        return ""
+      if result.returncode == 0:
+        return filtered_search_output(result.stdout)
+    except subprocess.TimeoutExpired:
+      return "visible Korean git grep timed out after 20s"
 
   deadline = time.monotonic() + 20
 
   paths: list[Path] = []
   try:
     result = subprocess.run(
-      ["git", "ls-files", "--", *scan_roots],
+      ["git", "ls-files", "--", *existing_roots],
       cwd=ROOT,
       capture_output=True,
       text=True,
@@ -1272,7 +1419,7 @@ def visible_korean_text_report() -> str:
     return "visible Korean git file listing timed out after 10s"
 
   if not paths:
-    for root_rel in scan_roots:
+    for root_rel in existing_roots:
       if time.monotonic() > deadline:
         return "visible Korean scan timed out after 20s"
       root = ROOT / root_rel
@@ -1284,9 +1431,7 @@ def visible_korean_text_report() -> str:
     if not path.is_file() or path.suffix not in suffixes:
       continue
     rel = path.relative_to(ROOT)
-    if rel in skipped:
-      continue
-    if any(rel == skipped_dir or skipped_dir in rel.parents for skipped_dir in skipped_dirs):
+    if not is_allowed_hit(rel):
       continue
     if path.stat().st_size > 200_000:
       continue
@@ -1731,6 +1876,23 @@ def main() -> int:
                           and '"controlOutputAllowed": False' in alpha_snapshot
                           and "real_car_gate_missing" in alpha_snapshot,
                           "alpha snapshot must summarize high-risk Carrot/fishop control gates as blocked until real-car evidence")
+  failures += not require("alpha snapshot records Carrot Web status broadcast evidence",
+                          "def summarize_carrot_web_status" in alpha_snapshot
+                          and "http.client.HTTPConnection" in alpha_snapshot
+                          and '"/api/status_broadcast"' in alpha_snapshot
+                          and '"carrotWeb": carrot_web' in alpha_snapshot
+                          and '"statusBroadcast"' in alpha_snapshot
+                          and '"carrotManPeer"' in alpha_snapshot
+                          and '"activeTargets"' in alpha_snapshot
+                          and '"lastTargets"' in alpha_snapshot
+                          and '"xState"' in alpha_snapshot
+                          and '"trafficState"' in alpha_snapshot
+                          and '"controlOutput": False' in alpha_snapshot
+                          and '"readOnly": True' in alpha_snapshot,
+                          "alpha snapshot must capture local Carrot Web 7705/CarrotMan peer evidence without enabling control output")
+  ok, detail = check_alpha_snapshot_carrot_web_runtime()
+  failures += not require("alpha snapshot Carrot Web runtime", ok,
+                          detail or "Carrot Web snapshot runtime check failed")
   for key in ("CarrotNaviDebug", "CarrotNaviEvent", "CarrotNaviImage"):
     failures += not require(f"alpha snapshot records navigation HTTP evidence: {key}", f'"{key}"' in alpha_snapshot,
                             f"alpha snapshot must include {key} for 7713 navigation HTTP evidence")
