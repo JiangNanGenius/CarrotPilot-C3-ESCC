@@ -1,5 +1,18 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Read-Only No-Car Web Evidence
+
+Extended `scripts/personal/navipilot_live_check.py` so the no-car LAN check now covers the full local Web evidence surface instead of only Navipilot/CPdazi compatibility:
+
+- Added `/api/phone_speed_limit` validation for the phone/APN/N speed source state, freshness fields, timeout value, and no-control-output boundary.
+- Added `/api/fishop_hardware` validation for Fishop lane, lidar/blindspot, navigation gate, and overtake evidence while requiring every nested control-output flag to stay false.
+- Added `/api/carrot_feature_gates`, `/api/fishop_hardware`, and `/api/cluster_world` to the required health endpoint contract.
+- Updated the live-check self-test and alpha static gate so future `/x` builds cannot silently drop phone-speed or Fishop read-only diagnostics.
+- Ran a read-only C3 LAN check against `192.168.100.174` and archived the JSON/markdown report under `~/Desktop/CarrotPilot-C3-ESCC-device-evidence/`. It passed health, params bulk, status broadcast, UDP 7705 status, 7712 TCP health, 7713 HTTP health, navigation-event snapshot, phone-speed state, and Fishop read-only state with `cloudServices=false` and `controlOutput=false`.
+- The same run reported `IsOnroad=true`, so same-value param writes and safe navigation packet injection were intentionally skipped until the device clearly reports parked/offroad.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.35`.
+
 ## 2026-06-20 UI Replay Python Path Fix
 
 Fixed the no-car UI replay wrapper so its subprocess always includes the repository root in `PYTHONPATH`. Without that, a clean macOS Python process could import `coverage` and `pyray` but fail before rendering because it could not resolve the local `cereal` package.

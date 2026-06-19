@@ -188,13 +188,16 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Add a process-replay wrapper for non-hardware logic: `controlsd`, `plannerd`, `radard`, `locationd`, and `paramsd`; keep reference updates opt-in only.
 - [x] Add a replay/UI diagnostic path using comma's `tools/replay/replay --demo` and UI diff replay so settings, HUD, visual modes, Carrot overlays, and Chinese text can be checked without the car.
 - [x] Make the no-car UI replay wrapper self-contained for clean macOS runs by injecting the repo `PYTHONPATH` into the replay subprocess.
+- [x] Extend the Navipilot/CPdazi live check so `/api/phone_speed_limit` and `/api/fishop_hardware` are part of the no-car read-only evidence contract, including nested no-control-output checks.
 - [x] Add a passive C3 UI/screen capture evidence path to the device tarball; it tries `screencap`, then `fbgrab`, then raw framebuffer fallback, without touching the screen or playing sound.
 - [x] Add a C3 camera snapshot evidence path using upstream `system/camerad/snapshot.py` or VisionIPC capture, separate from modeld control checks.
 - [x] Confirm parked camera/model path: three camera streams plus `modelV2`, `drivingModelData`, and `cameraOdometry` were observed without a physical panda.
 - [x] Add a silent C3 IMU probe based on upstream `system/sensord/tests/test_sensord.py`; require accelerometer and gyroscope, not only temperature.
 - [ ] Run the silent C3 IMU probe on the clone C3 and archive `c3_imu_probe.json`.
 - [x] Treat speaker output as already user-confirmed good; future speaker tests are opt-in only and must never run from default diagnostics.
-- [ ] Verify C3 local Web/API diagnostics without car: health, params bulk, same-value writes, status broadcast, Navipilot HTTP/TCP, phone speed input, Fishop evidence input, and no control-output fields.
+- [x] Verify C3 local Web/API diagnostics without car in read-only mode: health, params bulk, status broadcast, UDP 7705 status, 7712 TCP health, 7713 HTTP health, navigation-event snapshot, phone speed state, Fishop evidence state, and no control-output fields.
+- [x] Archive the latest read-only LAN evidence under `~/Desktop/CarrotPilot-C3-ESCC-device-evidence/`: `navipilot_live_readonly_20260620_080046.json` and `.md`.
+- [ ] Re-run writable same-value and safe navigation probes only after the C3 clearly reports parked/offroad; the 2026-06-20 read-only live check reported `IsOnroad=true`, so writes and injected packets were intentionally skipped.
 - [ ] Verify model manager without car: model list/download availability, active bundle summary, runner cache, stock fallback, and no active bundle rollback behavior.
 - [ ] Verify Carrot/Super Advanced settings without car: all migrated controls visible, writable while offroad where intended, protected params read-only, and no unknown-key waits on C3.
 - [ ] Verify C3 UI/touch without car: settings opens reliably, Network page reports connected/scanned state, Seltos 2023 appears in the vehicle list, temperature displays numerically, and toggles retain state.

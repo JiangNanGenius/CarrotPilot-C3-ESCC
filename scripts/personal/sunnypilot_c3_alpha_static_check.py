@@ -2648,9 +2648,15 @@ def main() -> int:
                           and '"/api/params_bulk"' in navipilot_live_check
                           and '"/api/param_set"' in navipilot_live_check
                           and '"/api/status_broadcast"' in navipilot_live_check
+                          and '"/api/carrot_feature_gates"' in navipilot_live_check
+                          and '"/api/fishop_hardware"' in navipilot_live_check
+                          and '"/api/cluster_world"' in navipilot_live_check
                           and '"/api/navigation_event"' in navipilot_live_check
                           and '"/api/navi"' in navipilot_live_check
-                          and '"/api/navi/tcp_health"' in navipilot_live_check,
+                          and '"/api/navi/tcp_health"' in navipilot_live_check
+                          and '"/api/phone_speed_limit"' in navipilot_live_check
+                          and "7000 phone speed source state" in navipilot_live_check
+                          and "7000 Fishop hardware read-only state" in navipilot_live_check,
                           "alpha must include a C3-side Navipilot / CPdazi live endpoint checker")
   failures += not require("Navipilot alpha live check safety boundary",
                           "http.client" in navipilot_live_check

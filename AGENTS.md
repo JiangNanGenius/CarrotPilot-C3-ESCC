@@ -115,6 +115,18 @@ python3 scripts/personal/sunnypilot_c3_device_collect.py \
   --require-no-cloud-processes
 ```
 
+Read-only LAN check when SSH is unavailable or the device may still report onroad:
+
+```bash
+python3 scripts/personal/navipilot_live_check.py \
+  --host 192.168.100.174 \
+  --listen-seconds 3 \
+  --json-output ~/Desktop/CarrotPilot-C3-ESCC-device-evidence/navipilot_live_readonly_$(date +%Y%m%d_%H%M%S).json \
+  --output ~/Desktop/CarrotPilot-C3-ESCC-device-evidence/navipilot_live_readonly_$(date +%Y%m%d_%H%M%S).md
+```
+
+This covers Carrot Web health, safe params bulk, UDP 7705 status, 7712/7713 Navipilot health, phone speed state, and Fishop read-only evidence. Do not add `--write-same-value` or `--send-navigation-probe` unless the C3 clearly reports parked/offroad.
+
 Parked hardware probe after install or model/camera/sensor/sound changes:
 
 ```bash
