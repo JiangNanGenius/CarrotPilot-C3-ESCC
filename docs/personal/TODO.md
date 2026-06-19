@@ -187,6 +187,7 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Create one repeatable Genius diagnostic command path that ties together C3 snapshot collection, parked camera/model sampling, IMU sampling, UI capture, and no-cloud evidence through `sunnypilot_c3_device_collect.py`.
 - [x] Add a process-replay wrapper for non-hardware logic: `controlsd`, `plannerd`, `radard`, `locationd`, and `paramsd`; keep reference updates opt-in only.
 - [x] Add a replay/UI diagnostic path using comma's `tools/replay/replay --demo` and UI diff replay so settings, HUD, visual modes, Carrot overlays, and Chinese text can be checked without the car.
+- [x] Make the no-car UI replay wrapper self-contained for clean macOS runs by injecting the repo `PYTHONPATH` into the replay subprocess.
 - [x] Add a passive C3 UI/screen capture evidence path to the device tarball; it tries `screencap`, then `fbgrab`, then raw framebuffer fallback, without touching the screen or playing sound.
 - [x] Add a C3 camera snapshot evidence path using upstream `system/camerad/snapshot.py` or VisionIPC capture, separate from modeld control checks.
 - [x] Confirm parked camera/model path: three camera streams plus `modelV2`, `drivingModelData`, and `cameraOdometry` were observed without a physical panda.

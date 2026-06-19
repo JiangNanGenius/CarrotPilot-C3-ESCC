@@ -1,5 +1,11 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 UI Replay Python Path Fix
+
+Fixed the no-car UI replay wrapper so its subprocess always includes the repository root in `PYTHONPATH`. Without that, a clean macOS Python process could import `coverage` and `pyray` but fail before rendering because it could not resolve the local `cereal` package.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.34`.
+
 ## 2026-06-20 No-Car UI Replay And Camera Snapshot Evidence
 
 Added the next code-level diagnostics that can run before real road testing:
