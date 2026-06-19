@@ -216,6 +216,7 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Verify model manager without car through `genius_model_manager_contract.py`: active bundle summary, runner cache, stock fallback, invalid active bundle rollback, and atomic artifact install all pass locally.
 - [ ] Verify model manager live list/download availability on C3 after SSH/UI access is restored.
 - [x] Verify Carrot/Super Advanced settings locally through `genius_super_advanced_contract.py`: all migrated controls are tracked, writable/offroad boundaries are explicit, protected params are read-only, and unknown-key waits are fail-soft.
+- [x] Verify C3 setup/update/settings touch fallback locally through `genius_c3_touch_contract.py`: expanded critical hit regions, press fallback, release fallback, disabled action blocking, overlap priority, setup wiring, updater wiring, and settings entry guard all pass.
 - [ ] Verify the same Super Advanced page on the physical C3 after SSH/UI access is restored: all migrated controls visible, writable while offroad where intended, protected params read-only, and no unknown-key waits.
 - [ ] Verify C3 UI/touch without car: settings opens reliably, Network page reports connected/scanned state, Seltos 2023 appears in the vehicle list, temperature displays numerically, and toggles retain state.
 - [ ] Archive each no-car diagnostic bundle on the Mac desktop under `CarrotPilot-C3-ESCC-device-evidence` with branch, commit, version, installer hash, and cloud-process evidence.
@@ -250,6 +251,7 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Make setup/update/install dependency buttons more tolerant on clone C3 without loosening ordinary widgets: per-widget tap-release movement is supported, and TICI setup/updater install buttons use wider release tolerance plus parent-level fallback actions.
 - [x] Add a direct fallback on the standalone TICI dependency/update prompt so critical install buttons do not depend only on child-button release callbacks.
 - [x] Add a direct fallback on the standalone TICI first-install setup prompt so recovery-mode software selection, network continue/back, custom-warning continue/back, and download-failure buttons do not depend only on child-button release callbacks.
+- [x] Add a release-gated touch fallback contract so the setup/updater fallback behavior is checked with a local behavior simulation instead of only string matching.
 - [x] Add `Kia Seltos 2023` to the Sunny manual vehicle selector list so the existing `KIA_SELTOS_2023` profile is visible in the UI.
 - [x] Sync the hotfix files to the user's C3 at `192.168.100.174` and restart UI for bench testing.
 - [x] Verify the Wi-Fi fallback on device: after UI-style activation it reports SSID `zhao`, IP `192.168.100.174`, and scanned networks without `jeepney`.
