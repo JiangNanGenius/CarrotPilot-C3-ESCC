@@ -63,6 +63,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     "scripts/personal/sunnypilot_c3_alpha_evidence_check.py",
     "scripts/personal/sunnypilot_c3_alpha_snapshot.py",
     "scripts/personal/sunnypilot_c3_alpha_static_check.py",
+    "scripts/personal/sunnypilot_c3_alpha_update_audit.py",
   ]
   steps: list[tuple[str, list[str], int]] = [
     ("python compile personal gates", [py(), "-m", "py_compile", *scripts], 60),
@@ -79,6 +80,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
       120,
     ),
     ("alpha evidence checker self-test", [py(), "scripts/personal/sunnypilot_c3_alpha_evidence_check.py", "--self-test"], 30),
+    ("alpha update audit self-test", [py(), "scripts/personal/sunnypilot_c3_alpha_update_audit.py", "--self-test"], 30),
   ]
 
   if not args.skip_online_installer:
@@ -89,6 +91,13 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     for phase in args.phase:
       snapshot_cmd.extend(["--phase", phase])
     steps.append(("device snapshot evidence check", snapshot_cmd, 30))
+
+  if args.fetch_references:
+    steps.append((
+      "upstream reference fetch/update audit",
+      [py(), "scripts/personal/sunnypilot_c3_alpha_update_audit.py", "--fetch", "--strict", "--scan-risk-tokens"],
+      900,
+    ))
 
   if args.full:
     steps.append(("full alpha static check", [py(), "scripts/personal/sunnypilot_c3_alpha_static_check.py"], 360))
@@ -127,6 +136,7 @@ def main() -> int:
   parser.add_argument("--full", action="store_true", help="also run the full alpha static check")
   parser.add_argument("--skip-online-installer", action="store_true", help="skip the live GitHub Pages /x installer audit")
   parser.add_argument("--snapshot", type=Path, help="optional device snapshot JSON to validate")
+  parser.add_argument("--fetch-references", action="store_true", help="fetch and compare configured upstream reference branches")
   parser.add_argument("--phase", action="append", default=["static"], help="snapshot evidence phase to validate")
   parser.add_argument("--json", action="store_true", help="print JSON report")
   parser.add_argument("--self-test", action="store_true", help="run the release gate's offline self-test")
