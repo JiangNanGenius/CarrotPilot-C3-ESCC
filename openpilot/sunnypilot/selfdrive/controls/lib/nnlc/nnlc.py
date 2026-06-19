@@ -6,6 +6,7 @@ See the LICENSE.md file in the root directory for more details.
 """
 from collections import deque
 import math
+import os
 import numpy as np
 
 from opendbc.car.lateral import FRICTION_THRESHOLD, get_friction
@@ -13,6 +14,7 @@ from opendbc.sunnypilot.car.interfaces import LatControlInputs
 from opendbc.sunnypilot.car.lateral_ext import get_friction as get_friction_in_torque_space
 from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.params import Params
+from openpilot.common.swaglog import cloudlog
 from openpilot.selfdrive.modeld.constants import ModelConstants
 from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_torque_ext_base import sign
 from openpilot.sunnypilot.selfdrive.controls.lib.latcontrol_torque_jerk_aware import LatControlTorqueJerkAware
@@ -38,12 +40,14 @@ class NeuralNetworkLateralControl(LatControlTorqueJerkAware):
     self.params = Params()
     self.enabled = self.params.get_bool("NeuralNetworkLateralControl")
     model_path = CP_SP.neuralNetworkLateralControl.model.path
-    self.has_nn_model = model_path not in (MOCK_MODEL_PATH, '')
+    self.has_nn_model = bool(model_path) and model_path != MOCK_MODEL_PATH and os.path.isfile(model_path)
 
     # NN model takes current v_ego, lateral_accel, lat accel/jerk error, roll, and past/future/planned data
     # of lat accel and roll
     # Past value is computed using previous desired lat accel and observed roll
     self.model = NNTorqueModel(model_path) if self.has_nn_model else None
+    if self.enabled and not self.has_nn_model:
+      cloudlog.warning(f"NNLC disabled for this session: missing neural network lateral model path {model_path!r}")
 
     self.pitch = FirstOrderFilter(0.0, 0.5, 0.01)
     self.pitch_last = 0.0

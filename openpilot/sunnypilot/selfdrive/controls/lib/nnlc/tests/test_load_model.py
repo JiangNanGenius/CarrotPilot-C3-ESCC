@@ -30,3 +30,18 @@ class TestNNTorqueModel(OpenpilotTestCase):
     controller = LatControlTorque(CP.as_reader(), CP_SP.as_reader(), CI, DT_CTRL)
 
     assert controller.extension.has_nn_model
+
+  def test_empty_model_path_does_not_crash(self):
+    params = Params()
+    params.put_bool("NeuralNetworkLateralControl", True, block=True)
+
+    CarInterface = interfaces[HYUNDAI.HYUNDAI_SANTA_CRUZ_1ST_GEN]
+    CP = CarInterface.get_non_essential_params(HYUNDAI.HYUNDAI_SANTA_CRUZ_1ST_GEN)
+    CP_SP = CarInterface.get_non_essential_params_sp(CP, HYUNDAI.HYUNDAI_SANTA_CRUZ_1ST_GEN)
+    CI = CarInterface(CP, CP_SP)
+
+    CP_SP = convert_to_capnp(CP_SP)
+    controller = LatControlTorque(CP.as_reader(), CP_SP.as_reader(), CI, DT_CTRL)
+
+    assert not controller.extension.has_nn_model
+    assert controller.extension.model is None
