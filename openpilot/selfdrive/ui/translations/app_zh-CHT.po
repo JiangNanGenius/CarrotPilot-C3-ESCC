@@ -958,3 +958,9 @@ msgstr "組合：結合車輛和 OpenStreetMap/mapd 限速資料。"
 #: openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py
 msgid "Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle, then OpenStreetMap/mapd."
 msgstr "手機優先：優先使用新鮮的 APN/N、Navipilot 或 Carrot 手機限速資料。過期手機資料會超時，然後回退到車輛限速，再回退到 OpenStreetMap/mapd。"
+
+msgid "Super Advanced"
+msgstr "Super Advanced"
+
+msgid "This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, and SCC-M stay hidden and forced off. Sunny DEC is available as an off-by-default advanced option in Cruise and Super Advanced settings."
+msgstr "這個個人版的巡航控速邏輯以 CarrotPilot 為準。SunnyPilot 的 ICBM、SCC-V 和 SCC-M 會隱藏並強制關閉。Sunny DEC 作為預設關閉的進階候選功能放在 Cruise 和 Super Advanced 設定裡。"

@@ -3,6 +3,7 @@ import time
 import datetime
 from openpilot.common.time_helpers import system_time_valid
 from openpilot.selfdrive.ui.ui_state import ui_state
+from openpilot.system.version import get_version
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.lib.multilang import tr, trn
 from openpilot.system.ui.widgets import Widget, DialogResult
@@ -56,7 +57,7 @@ class SoftwareLayout(Widget):
     super().__init__()
 
     self._onroad_label = ListItem(lambda: tr("Updates are only downloaded while the car is off."))
-    self._version_item = text_item(lambda: tr("Current Version"), ui_state.params.get("UpdaterCurrentDescription") or "")
+    self._version_item = text_item(lambda: tr("Current Version"), ui_state.params.get("UpdaterCurrentDescription") or f"Genius Pilot {get_version()}")
     self._download_btn = button_item(lambda: tr("Download"), lambda: tr("CHECK"), callback=self._on_download_update)
 
     # Install button is initially hidden
@@ -93,7 +94,7 @@ class SoftwareLayout(Widget):
     self._onroad_label.set_visible(ui_state.is_onroad())
 
     # Update current version and release notes
-    current_desc = ui_state.params.get("UpdaterCurrentDescription") or ""
+    current_desc = ui_state.params.get("UpdaterCurrentDescription") or f"Genius Pilot {get_version()}"
     current_release_notes = (ui_state.params.get("UpdaterCurrentReleaseNotes") or b"").decode("utf-8", "replace")
     self._version_item.action_item.set_text(current_desc)
     self._version_item.set_description(current_release_notes)

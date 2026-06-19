@@ -9,7 +9,7 @@ MOUSE_WHEEL_SCROLL_SPEED = 50
 BOUNCE_RETURN_RATE = 5              # ~0.92 at 60fps
 MIN_VELOCITY = 2                    # px/s, changes from auto scroll to steady state
 MIN_VELOCITY_FOR_CLICKING = 2 * 60  # px/s, accepts clicks while auto scrolling below this velocity
-DRAG_THRESHOLD = 12                 # pixels of movement to consider it a drag, not a click
+DRAG_THRESHOLD = 24                 # pixels of movement to consider it a drag, not a click
 
 DEBUG = False
 

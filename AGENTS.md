@@ -21,13 +21,16 @@ Do not move `/i` or stable/latest to the alpha line until the C3 parked checks a
 - Always-offroad semantics use `OffroadMode`. Do not add `AlwaysOffline`, `AlwaysOffroad`, or other confusing aliases.
 - `OffroadMode` must keep the device parked and panda in no-output mode. Do not import Mr.One never-shutdown behavior.
 - `CarrotMapOverlayEnabled` defaults off. When off, do not load Mapbox/Kakao iframe or external SDKs.
-- High-risk features stay independently gated and default off: traffic-light stop, auto-turn slowdown, active speed control, Auto-Tuner auto-apply, and fishop auto-overtake.
-- Fishop lane/lidar/blindspot/overtake work is evidence-only until staged logs, rollback, and real-car review prove the next step.
+- Carrot advanced features default off but must remain visible and user-toggleable while offroad: traffic-light stop, auto-turn slowdown/ATC, active speed control, Auto-Tuner auto-apply, and Fishop auto-overtake.
+- Fishop lane/lidar/blindspot/overtake inputs must remain tied to the existing safety-chain review; do not hide the settings, and do not publish direct planner/CAN outputs from the local Web bridge.
+- NNLC/NLC defaults on for supported cars through `NeuralNetworkLateralControl=1`; unsupported cars must be cleaned up by the existing Sunny support checks.
 - Product direction is CarrotPilot-first. SunnyPilot is the 0.11 architecture base, not the feature owner for cruise behavior.
 - Do not expose or enable SunnyPilot ICBM, SCC-V, or SCC-M in the personal build; they overlap with Carrot button, curve, map, and speed-limit paths.
-- Sunny DEC may be retained as an off-by-default advanced longitudinal candidate, but it must be documented separately and must not be combined with unvalidated Carrot active speed, turn slowdown, or traffic-light stop outputs.
-- Carrot-style settings are preferred: every control behavior should have a visible setting, a clear Chinese/English description, conservative default, validation gate, and rollback path.
+- Sunny DEC may be retained as an off-by-default advanced longitudinal option. It must not lock out Carrot active speed, turn slowdown/ATC, or traffic-light stop settings.
+- Carrot-style settings are preferred: every control behavior should have a visible setting, a clear Chinese/English description, conservative default, owner/source note, and rollback path.
+- When three reference lines disagree, build a setting matrix first: ajouatom CarrotPilot, jixiexiaoge/mechanical, and masang-feiyang/ESCC. Decide one owner per behavior and avoid unexplained compatibility aliases.
 - User-facing alpha branding should move toward Genius Pilot. Keep upstream package/module names only where renaming would create code risk.
+- Genius Pilot version numbers follow the SunnyPilot base and append the personal build suffix: `<SunnyPilot base>-gp.<YYYYMMDD>.<patch>`.
 - Do not rely on cloud registration for local recovery. Local Wi-Fi, SSH, and web access must work on the user's clone C3 without Sunnylink or comma connect.
 - Do not add a public default password to a release build. If bench recovery needs a password path, make it explicitly local, documented, and removable before release.
 
@@ -41,11 +44,13 @@ When the user says to update, use this order:
    In short: do not import private registration or upload/cloud client behavior from reference forks.
 4. Compare Carrot changes for Carrot Web, CarrotMan/Navipilot/APN/N input, speed-limit logic, model/map behavior, Auto-Tuner, localization, and fishop hardware fields.
    Treat CarrotPilot behavior and setting granularity as the target; use SunnyPilot implementation only when it is the safer/newer base primitive.
-5. Preserve personal defaults: stock model, map overlay off, speed offset zero, phone speed policy with timeout, cloud disabled, high-risk controls off.
-6. Run the release gate before pushing.
-7. Push `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3` together only after the gate passes.
-8. Audit the published `/x` installer before telling the user to retry installation.
-9. Update `docs/personal/TODO.md` and `docs/personal/CODE_CHANGES.md` in the same change whenever real-device behavior or safety assumptions change.
+5. Preserve personal defaults: stock model, NNLC on for supported cars, map overlay off, speed offset zero, phone speed policy with timeout, cloud disabled, Carrot advanced controls default off but available while offroad.
+6. Bump `sunnypilot/common/version.h` before pushing: keep the SunnyPilot base aligned to upstream, increment the same-day Genius patch, and reset patch to `1` on a new publish date.
+7. Run the release gate before pushing.
+8. Push `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3` together only after the gate passes.
+9. Audit the published `/x` installer before telling the user to retry installation.
+10. Update `docs/personal/TODO.md`, `docs/personal/CODE_CHANGES.md`, and `docs/personal/VERSIONING.md` in the same change whenever real-device behavior, versioning, or safety assumptions change.
+11. If `common/params_keys.h` changes, rebuild the ARM64 `common/params_pyx.so` on the C3 or another aarch64 Linux environment and verify the new key strings are present before publishing.
 
 ## Required Commands
 

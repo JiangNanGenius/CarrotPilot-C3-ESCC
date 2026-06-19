@@ -27,7 +27,7 @@ device = _get_device()
 W = TypeVar('W', bound='Widget')
 
 DEBUG = False
-TAP_RELEASE_MOVE_PX = 42
+TAP_RELEASE_MOVE_PX = 24
 
 
 class DialogResult(IntEnum):
@@ -49,6 +49,7 @@ class Widget(abc.ABC):
     # if current mouse/touch down started within the widget's rectangle
     self.__tracking_is_pressed = [False] * MAX_TOUCH_SLOTS
     self.__press_pos: list[MousePos | None] = [None] * MAX_TOUCH_SLOTS
+    self.__touch_cancelled = [False] * MAX_TOUCH_SLOTS
     self._touch_valid_callback: Callable[[], bool] | None = None
     self._click_delay: float | None = None  # seconds to hold is_pressed after release
     self._click_release_time: float | None = None
@@ -141,6 +142,7 @@ class Widget(abc.ABC):
       self.__is_pressed = [False] * MAX_TOUCH_SLOTS
       self.__tracking_is_pressed = [False] * MAX_TOUCH_SLOTS
       self.__press_pos = [None] * MAX_TOUCH_SLOTS
+      self.__touch_cancelled = [False] * MAX_TOUCH_SLOTS
 
     self.__was_awake = device.awake
 
@@ -165,6 +167,7 @@ class Widget(abc.ABC):
         abs(mouse_event.pos.x - press_pos.x) <= TAP_RELEASE_MOVE_PX and
         abs(mouse_event.pos.y - press_pos.y) <= TAP_RELEASE_MOVE_PX
       )
+      touch_cancelled = self.__touch_cancelled[mouse_event.slot]
 
       # Ignores touches/presses that start outside our rect
       # Allows touch to leave the rect and come back in focus if mouse did not release
@@ -174,19 +177,22 @@ class Widget(abc.ABC):
           self.__is_pressed[mouse_event.slot] = True
           self.__tracking_is_pressed[mouse_event.slot] = True
           self.__press_pos[mouse_event.slot] = mouse_event.pos
+          self.__touch_cancelled[mouse_event.slot] = False
           self._handle_mouse_event(mouse_event)
 
       elif mouse_event.left_released:
         self._handle_mouse_event(mouse_event)
-        if self.__tracking_is_pressed[mouse_event.slot] and mouse_in_rect and (self.__is_pressed[mouse_event.slot] or short_tap_release):
+        if self.__tracking_is_pressed[mouse_event.slot] and mouse_in_rect and short_tap_release and not touch_cancelled and touch_valid:
           self._handle_mouse_release(mouse_event.pos)
         self.__is_pressed[mouse_event.slot] = False
         self.__tracking_is_pressed[mouse_event.slot] = False
         self.__press_pos[mouse_event.slot] = None
+        self.__touch_cancelled[mouse_event.slot] = False
 
       # Callback such as scroll panel signifies user is scrolling
       elif not touch_valid:
         self.__is_pressed[mouse_event.slot] = False
+        self.__touch_cancelled[mouse_event.slot] = True
         if not short_tap_release:
           self.__tracking_is_pressed[mouse_event.slot] = False
           self.__press_pos[mouse_event.slot] = None
@@ -194,12 +200,16 @@ class Widget(abc.ABC):
       # Mouse/touch is still within our rect
       elif mouse_in_rect:
         if self.__tracking_is_pressed[mouse_event.slot]:
-          self.__is_pressed[mouse_event.slot] = True
+          self.__is_pressed[mouse_event.slot] = short_tap_release
+          if not short_tap_release:
+            self.__touch_cancelled[mouse_event.slot] = True
           self._handle_mouse_event(mouse_event)
 
       # Mouse/touch left our rect but may come back into focus later
       elif not mouse_in_rect:
         self.__is_pressed[mouse_event.slot] = False
+        if self.__tracking_is_pressed[mouse_event.slot]:
+          self.__touch_cancelled[mouse_event.slot] = True
         self._handle_mouse_event(mouse_event)
 
   def _layout(self) -> None:

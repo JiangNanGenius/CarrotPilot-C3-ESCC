@@ -52,6 +52,8 @@ class SettingsLayout(Widget):
     self._raw_touch_down = False
     self._ignore_touch_until_release = False
     self._ignore_touch_guard_until = 0.0
+    self._press_close = False
+    self._press_panel: PanelType | None = None
 
     # Panel configuration
     wifi_manager = WifiManager()
@@ -96,21 +98,7 @@ class SettingsLayout(Widget):
       if not mouse_down:
         self._ignore_touch_until_release = False
       return
-
-    was_down = self._raw_touch_down
     self._raw_touch_down = mouse_down
-    if not mouse_down or was_down:
-      return
-
-    mouse_pos = rl.get_mouse_position()
-    if self._close_at(mouse_pos):
-      if self._close_callback:
-        self._close_callback()
-      return
-
-    panel_type = self._panel_at(mouse_pos)
-    if panel_type is not None:
-      self.set_current_panel(panel_type)
 
   def _render(self, rect: rl.Rectangle):
     # Calculate layout
@@ -187,19 +175,33 @@ class SettingsLayout(Widget):
   def _handle_mouse_release(self, mouse_pos: MousePos) -> None:
     if self._touch_guard_active():
       self._ignore_touch_until_release = False
+      self._press_close = False
+      self._press_panel = None
       return
 
     # Check close button
-    if rl.check_collision_point_rec(mouse_pos, self._close_btn_rect):
+    if self._press_close and self._close_at(mouse_pos):
       if self._close_callback:
         self._close_callback()
+      self._press_close = False
+      self._press_panel = None
       return
 
     # Check navigation buttons
-    for panel_type, panel_info in self._panels.items():
-      if rl.check_collision_point_rec(mouse_pos, panel_info.button_rect):
-        self.set_current_panel(panel_type)
-        return
+    panel_type = self._press_panel
+    if panel_type is not None and self._panel_at(mouse_pos) == panel_type:
+      self.set_current_panel(panel_type)
+
+    self._press_close = False
+    self._press_panel = None
+
+  def _handle_mouse_press(self, mouse_pos: MousePos) -> None:
+    if self._touch_guard_active():
+      self._press_close = False
+      self._press_panel = None
+      return
+    self._press_close = self._close_at(mouse_pos)
+    self._press_panel = None if self._press_close else self._panel_at(mouse_pos)
 
   def set_current_panel(self, panel_type: PanelType):
     if panel_type != self._current_panel:
@@ -211,6 +213,8 @@ class SettingsLayout(Widget):
     self._ignore_touch_until_release = True
     self._ignore_touch_guard_until = rl.get_time() + OPEN_TOUCH_GUARD_S
     self._raw_touch_down = rl.is_mouse_button_down(rl.MouseButton.MOUSE_BUTTON_LEFT)
+    self._press_close = False
+    self._press_panel = None
 
   def show_event(self):
     super().show_event()

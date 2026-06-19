@@ -24,7 +24,8 @@ ICBM_DESC = tr_noop("When enabled, Genius Pilot will attempt to manage the built
 ICMB_UNAVAILABLE = tr_noop("Intelligent Cruise Button Management is currently unavailable on this platform.")
 ICMB_UNAVAILABLE_LONG_AVAILABLE = tr_noop("Disable the Genius Pilot Longitudinal Control (alpha) toggle to allow Intelligent Cruise Button Management.")
 ICMB_UNAVAILABLE_LONG_UNAVAILABLE = tr_noop("Genius Pilot Longitudinal Control is the default longitudinal control for this platform.")
-CARROT_CRUISE_POLICY = tr_noop("This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, and SCC-M stay hidden and forced off. Sunny DEC is available as an off-by-default advanced option in Carrot settings.")
+CARROT_CRUISE_POLICY = tr_noop("This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, and SCC-M stay hidden. Sunny DEC is available in Cruise and Super Advanced settings.")
+DEC_DESCRIPTION = tr_noop("Sunny dynamic experimental control. It can switch between classic longitudinal and E2E-style behavior when available.")
 
 ACC_ENABLED_DESCRIPTION = tr_noop("Enable custom Short & Long press increments for cruise speed increase/decrease.")
 ACC_NOLONG_DESCRIPTION = tr_noop("This feature can only be used with Genius Pilot longitudinal control enabled.")
@@ -84,15 +85,72 @@ class CruiseLayout(Widget):
     )
 
     self.dec_toggle = toggle_item_sp(
-      title=tr("Enable Dynamic Experimental Control"),
-      description=tr("Enable toggle to allow the model to determine when to use Genius Pilot ACC or End to End Longitudinal."),
+      title=lambda: tr("Sunny DEC Dynamic Experimental Control"),
+      description=lambda: tr(DEC_DESCRIPTION),
       param="DynamicExperimentalControl")
 
+    self.stop_distance = option_item_sp(
+      title=lambda: tr("Stop Distance"),
+      param="StopDistanceCarrot",
+      min_value=300, max_value=1200, value_change_step=10,
+      label_callback=lambda v: f"{v / 100:.2f} m",
+      description=lambda: tr("Carrot stop-distance target used by the tuning workflow. Keep your known-good value until braking logs are reviewed."))
+
+    self.dynamic_following = option_item_sp(
+      title=lambda: tr("Dynamic Following"),
+      param="DynamicTFollow",
+      min_value=0, max_value=100, value_change_step=5,
+      label_callback=lambda v: f"{v}%",
+      description=lambda: tr("Dynamic following strength. This is a tuning target and should be changed slowly after log review."))
+
+    self.decel_follow_boost = option_item_sp(
+      title=lambda: tr("Deceleration Follow Boost"),
+      param="TFollowDecelBoost",
+      min_value=0, max_value=100, value_change_step=5,
+      label_callback=lambda v: f"{v}%",
+      description=lambda: tr("Extra follow-distance behavior during deceleration. Higher values can feel more conservative."))
+
+    self.follow_gap_1 = option_item_sp(
+      title=lambda: tr("Follow Gap 1"),
+      param="TFollowGap1",
+      min_value=70, max_value=300, value_change_step=5,
+      label_callback=lambda v: f"{v / 100:.2f} s",
+      description=lambda: tr("Time gap preset 1 used by Carrot tuning."))
+
+    self.follow_gap_2 = option_item_sp(
+      title=lambda: tr("Follow Gap 2"),
+      param="TFollowGap2",
+      min_value=80, max_value=350, value_change_step=5,
+      label_callback=lambda v: f"{v / 100:.2f} s",
+      description=lambda: tr("Time gap preset 2 used by Carrot tuning."))
+
+    self.follow_gap_3 = option_item_sp(
+      title=lambda: tr("Follow Gap 3"),
+      param="TFollowGap3",
+      min_value=90, max_value=400, value_change_step=5,
+      label_callback=lambda v: f"{v / 100:.2f} s",
+      description=lambda: tr("Time gap preset 3 used by Carrot tuning."))
+
+    self.follow_gap_4 = option_item_sp(
+      title=lambda: tr("Follow Gap 4"),
+      param="TFollowGap4",
+      min_value=100, max_value=450, value_change_step=5,
+      label_callback=lambda v: f"{v / 100:.2f} s",
+      description=lambda: tr("Time gap preset 4 used by Carrot tuning."))
+
     items = [
+      self.sla_settings_button,
+      self.dec_toggle,
+      self.stop_distance,
+      self.dynamic_following,
+      self.decel_follow_boost,
+      self.follow_gap_1,
+      self.follow_gap_2,
+      self.follow_gap_3,
+      self.follow_gap_4,
       self.custom_acc_toggle,
       self.custom_acc_short_increment,
       self.custom_acc_long_increment,
-      self.sla_settings_button,
     ]
     return items
 
@@ -105,6 +163,9 @@ class CruiseLayout(Widget):
   def show_event(self):
     self._set_current_panel(PanelType.CRUISE)
     self._scroller.show_event()
+    self.dec_toggle.show_description(True)
+    self.stop_distance.show_description(True)
+    self.dynamic_following.show_description(True)
     self.custom_acc_toggle.show_description(True)
 
   def _set_current_panel(self, panel: PanelType):
@@ -134,8 +195,23 @@ class CruiseLayout(Widget):
     else:
       has_icbm = has_long = False
       self.icbm_toggle.action_item.set_enabled(False)
-      self.dec_toggle.action_item.set_enabled(False)
       self.icbm_toggle.set_description(tr(CARROT_CRUISE_POLICY))
+
+    self.dec_toggle.action_item.set_enabled(self._dec_enabled(has_long))
+    if self.dec_toggle.action_item.get_state() and not self.dec_toggle.action_item.enabled:
+      ui_state.params.remove("DynamicExperimentalControl")
+      self.dec_toggle.action_item.set_state(False)
+
+    for item in (
+      self.stop_distance,
+      self.dynamic_following,
+      self.decel_follow_boost,
+      self.follow_gap_1,
+      self.follow_gap_2,
+      self.follow_gap_3,
+      self.follow_gap_4,
+    ):
+      item.action_item.set_enabled(ui_state.is_offroad())
 
     show_custom_acc_desc = False
 
@@ -166,3 +242,7 @@ class CruiseLayout(Widget):
     self.custom_acc_long_increment.set_visible(state)
     self.custom_acc_short_increment.action_item.set_enabled(self.custom_acc_toggle.action_item.enabled)
     self.custom_acc_long_increment.action_item.set_enabled(self.custom_acc_toggle.action_item.enabled)
+
+  @staticmethod
+  def _dec_enabled(has_long: bool) -> bool:
+    return bool(ui_state.is_offroad() and has_long)

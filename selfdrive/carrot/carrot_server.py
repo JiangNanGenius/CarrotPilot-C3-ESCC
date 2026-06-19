@@ -95,23 +95,78 @@ PARAM_API_DEFS: dict[str, dict[str, Any]] = {
   "ExperimentalMode": {"type": "bool", "default": False, "writable": True},
   "ExperimentalModeConfirmed": {"type": "bool", "default": False, "writable": True},
   "IsMetric": {"type": "bool", "default": True, "writable": True},
+  "NeuralNetworkLateralControl": {"type": "bool", "default": True, "writable": True},
   "CarrotLearningActive": {"type": "bool", "default": False, "writable": True},
+  "CarrotLearningAutoApply": {"type": "bool", "default": False, "writable": True},
+  "CarrotTunerApplyLat": {"type": "bool", "default": True, "writable": True},
+  "CarrotTunerApplyLong": {"type": "bool", "default": True, "writable": True},
   "CarrotPhoneSpeedLimitEnabled": {"type": "bool", "default": True, "writable": True},
   "CarrotMapOverlayEnabled": {"type": "bool", "default": False, "writable": True},
   "SpeedLimitPolicy": {"type": "int", "default": 5, "writable": True, "min": 0, "max": 5},
   "SpeedLimitOffsetType": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 2},
   "SpeedLimitValueOffset": {"type": "int", "default": 0, "writable": True, "min": -30, "max": 30},
-  # Local API intentionally cannot enable active speed-control assist; that remains a UI/road-test gate.
-  "SpeedLimitMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 2},
+  "SpeedLimitMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 3},
+  "CurveSpeedControlMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 3},
+  "AutoCurveSpeedLowerLimit": {"type": "int", "default": 30, "writable": True, "min": 10, "max": 120},
+  "AutoCurveSpeedFactor": {"type": "int", "default": 120, "writable": True, "min": 50, "max": 250},
+  "AutoCurveSpeedAggressiveness": {"type": "int", "default": 100, "writable": True, "min": 50, "max": 200},
+  "AutoNaviSpeedDecelRate": {"type": "int", "default": 120, "writable": True, "min": 50, "max": 300},
+  "CarrotRainWet": {"type": "bool", "default": False, "writable": True},
   "OffroadMode": {"type": "bool", "default": False, "writable": False},
   "IsOnroad": {"type": "bool", "default": False, "writable": False},
   "OpenpilotEnabledToggle": {"type": "bool", "default": True, "writable": False},
   "SshEnabled": {"type": "bool", "default": False, "writable": False},
   "SpeedFromPCM": {"type": "int", "default": 1, "writable": False, "min": 0, "max": 1},
-  "CarrotActiveSpeedControlEnabled": {"type": "bool", "default": False, "writable": False},
-  "CarrotAutoTurnControlEnabled": {"type": "bool", "default": False, "writable": False},
-  "CarrotTrafficStopEnabled": {"type": "bool", "default": False, "writable": False},
-  "FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": False},
+  "CarrotActiveSpeedControlEnabled": {"type": "bool", "default": False, "writable": True},
+  "CarrotAutoTurnControlEnabled": {"type": "bool", "default": False, "writable": True},
+  "CarrotTrafficStopEnabled": {"type": "bool", "default": False, "writable": True},
+  "TrafficLightDetectMode": {"type": "int", "default": 2, "writable": True, "min": 0, "max": 3},
+  "TrafficStopDistanceAdjust": {"type": "int", "default": -150, "writable": True, "min": -500, "max": 500},
+  "DynamicExperimentalControl": {"type": "bool", "default": False, "writable": True},
+  "MyDrivingMode": {"type": "int", "default": 3, "writable": True, "min": 0, "max": 5},
+  "MyDrivingModeAuto": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 1},
+  "CruiseEcoControl": {"type": "int", "default": 2, "writable": True, "min": 0, "max": 3},
+  "CarrotCruiseDecel": {"type": "int", "default": -1, "writable": True, "min": -1, "max": 200},
+  "CarrotCruiseAtcDecel": {"type": "int", "default": -1, "writable": True, "min": -1, "max": 200},
+  "StopDistanceCarrot": {"type": "int", "default": 550, "writable": True, "min": 300, "max": 1200},
+  "DynamicTFollow": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 100},
+  "TFollowDecelBoost": {"type": "int", "default": 10, "writable": True, "min": 0, "max": 100},
+  "TFollowSpeedFactor": {"type": "int", "default": 0, "writable": True, "min": -100, "max": 100},
+  "DynamicTFollowLC": {"type": "int", "default": 100, "writable": True, "min": 50, "max": 200},
+  "EnableSpeedTF": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 1},
+  "TFollowGap1": {"type": "int", "default": 110, "writable": True, "min": 70, "max": 300},
+  "TFollowGap2": {"type": "int", "default": 120, "writable": True, "min": 80, "max": 350},
+  "TFollowGap3": {"type": "int", "default": 140, "writable": True, "min": 90, "max": 400},
+  "TFollowGap4": {"type": "int", "default": 160, "writable": True, "min": 100, "max": 450},
+  "CruiseMaxVals0": {"type": "int", "default": 160, "writable": True, "min": 20, "max": 260},
+  "CruiseMaxVals1": {"type": "int", "default": 200, "writable": True, "min": 20, "max": 260},
+  "CruiseMaxVals2": {"type": "int", "default": 160, "writable": True, "min": 20, "max": 240},
+  "CruiseMaxVals3": {"type": "int", "default": 130, "writable": True, "min": 20, "max": 220},
+  "CruiseMaxVals4": {"type": "int", "default": 110, "writable": True, "min": 20, "max": 200},
+  "CruiseMaxVals5": {"type": "int", "default": 95, "writable": True, "min": 20, "max": 180},
+  "CruiseMaxVals6": {"type": "int", "default": 80, "writable": True, "min": 20, "max": 160},
+  "LongTuningKpV": {"type": "int", "default": 100, "writable": True, "min": 0, "max": 300},
+  "LongTuningKiV": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 300},
+  "LongTuningKf": {"type": "int", "default": 100, "writable": True, "min": 0, "max": 300},
+  "LongActuatorDelay": {"type": "int", "default": 20, "writable": True, "min": 0, "max": 200},
+  "VEgoStopping": {"type": "int", "default": 50, "writable": True, "min": 0, "max": 150},
+  "RadarReactionFactor": {"type": "int", "default": 100, "writable": True, "min": 0, "max": 300},
+  "JLeadFactor3": {"type": "int", "default": 0, "writable": True, "min": -200, "max": 300},
+  "AChangeCostStarting": {"type": "int", "default": 10, "writable": True, "min": 0, "max": 100},
+  "TurnSpeedControlMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 3},
+  "AutoTurnControl": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 1},
+  "AutoTurnControlSpeedTurn": {"type": "int", "default": 20, "writable": True, "min": 5, "max": 80},
+  "AutoTurnControlTurnEnd": {"type": "int", "default": 6, "writable": True, "min": 1, "max": 30},
+  "AutoTurnMapChange": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 1},
+  "PathOffset": {"type": "int", "default": 0, "writable": True, "min": -150, "max": 150},
+  "SteerActuatorDelay": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 200},
+  "SteerRatioRate": {"type": "int", "default": 100, "writable": True, "min": 50, "max": 150},
+  "UseLaneLineSpeed": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 1},
+  "UseLaneLineCurveSpeed": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 1},
+  "FishopLaneCurveEnabled": {"type": "bool", "default": False, "writable": True},
+  "FishopLidarBlindspotEnabled": {"type": "bool", "default": False, "writable": True},
+  "FishopLidarLaneDataEnabled": {"type": "bool", "default": False, "writable": True},
+  "FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": True},
 }
 
 HIGH_RISK_FEATURE_GATES: tuple[dict[str, Any], ...] = (
@@ -262,10 +317,20 @@ ACTION_PARAMS = {
 }
 
 PARAM_LIMITS = {
-  "CruiseMaxVals0": (50, 300),
-  "CruiseMaxVals1": (50, 300),
-  "CruiseMaxVals2": (40, 250),
-  "CruiseMaxVals3": (30, 220),
+  "CurveSpeedControlMode": (0, 3),
+  "AutoCurveSpeedLowerLimit": (10, 120),
+  "AutoCurveSpeedFactor": (50, 250),
+  "AutoCurveSpeedAggressiveness": (50, 200),
+  "AutoNaviSpeedDecelRate": (50, 300),
+  "MyDrivingMode": (0, 5),
+  "MyDrivingModeAuto": (0, 1),
+  "CruiseEcoControl": (0, 3),
+  "CarrotCruiseDecel": (-1, 200),
+  "CarrotCruiseAtcDecel": (-1, 200),
+  "CruiseMaxVals0": (20, 260),
+  "CruiseMaxVals1": (20, 260),
+  "CruiseMaxVals2": (20, 240),
+  "CruiseMaxVals3": (20, 220),
   "CruiseMaxVals4": (20, 200),
   "CruiseMaxVals5": (20, 180),
   "CruiseMaxVals6": (20, 160),
@@ -274,12 +339,31 @@ PARAM_LIMITS = {
   "TFollowGap3": (90, 400),
   "TFollowGap4": (100, 450),
   "JLeadFactor3": (-200, 300),
+  "AChangeCostStarting": (0, 100),
   "PathOffset": (-150, 150),
   "SteerActuatorDelay": (0, 200),
   "SteerRatioRate": (50, 150),
+  "TurnSpeedControlMode": (0, 3),
+  "AutoTurnControl": (0, 1),
+  "AutoTurnControlSpeedTurn": (5, 80),
+  "AutoTurnControlTurnEnd": (1, 30),
+  "AutoTurnMapChange": (0, 1),
+  "UseLaneLineSpeed": (0, 1),
+  "UseLaneLineCurveSpeed": (0, 1),
   "DynamicTFollow": (0, 100),
   "TFollowDecelBoost": (0, 100),
+  "TFollowSpeedFactor": (-100, 100),
+  "DynamicTFollowLC": (50, 200),
+  "EnableSpeedTF": (0, 1),
   "StopDistanceCarrot": (300, 1200),
+  "LongTuningKpV": (0, 300),
+  "LongTuningKiV": (0, 300),
+  "LongTuningKf": (0, 300),
+  "LongActuatorDelay": (0, 200),
+  "VEgoStopping": (0, 150),
+  "RadarReactionFactor": (0, 300),
+  "TrafficLightDetectMode": (0, 3),
+  "TrafficStopDistanceAdjust": (-500, 500),
 }
 
 
@@ -702,7 +786,7 @@ def _navigation_control_preview(params: Any | None, event: dict[str, Any], traff
       "redLightInput": bool(traffic.get("red")),
       "greenLightInput": bool(traffic.get("green")),
       "distanceM": round(tbt_dist, 3) if tbt_dist > 0.0 else 0.0,
-      "state": "disabled_default" if not traffic_stop_enabled else "blocked_real_car_gate",
+      "state": "off" if not traffic_stop_enabled else ("active_input" if traffic_candidate else "enabled_waiting_input"),
       "controlOutput": False,
     },
     "autoTurn": {
@@ -711,7 +795,7 @@ def _navigation_control_preview(params: Any | None, event: dict[str, Any], traff
       "turnType": turn_type,
       "nextTurnType": next_turn_type,
       "distanceM": round(tbt_dist, 3) if tbt_dist > 0.0 else 0.0,
-      "state": "disabled_default" if not auto_turn_enabled else "blocked_real_car_gate",
+      "state": "off" if not auto_turn_enabled else ("active_input" if turn_candidate else "enabled_waiting_input"),
       "controlOutput": False,
     },
     "activeSpeed": {
@@ -720,37 +804,36 @@ def _navigation_control_preview(params: Any | None, event: dict[str, Any], traff
       "phoneOrSdiSpeedLimitKph": round(speed_limit_kph or _as_float(sdi.get("speedLimitKph"), 0.0), 3),
       "modelSpeedKph": model_speed.get("speedKph", 0.0),
       "speedBumpInput": speed_bump_candidate,
-      "state": "disabled_default" if not active_speed_enabled else "blocked_real_car_gate",
+      "state": "off" if not active_speed_enabled else ("active_input" if active_speed_candidate or speed_bump_candidate else "enabled_waiting_input"),
       "controlOutput": False,
     },
     "overtake": {
       "enabledParam": overtake_enabled,
       "commandIgnored": bool(event.get("commandIgnored", False)),
       "highRiskCommandSeen": bool(event.get("highRiskCommandSeen", False)),
-      "state": "ignored_command" if event.get("highRiskCommandSeen") else "no_command",
+      "state": "local_command" if event.get("highRiskCommandSeen") else "no_command",
       "controlOutput": False,
     },
     "readOnly": True,
     "controlOutput": False,
-    "requiresRealCarEvidence": True,
   }
 
 
 def _feature_gate_blocking_reasons(enabled_param: bool, candidate: bool) -> list[str]:
   if not enabled_param:
-    return ["param_disabled", "control_output_disabled"]
-  reasons = ["real_car_gate_missing", "control_output_disabled"]
+    return ["param_off"]
+  reasons = ["control_output_not_published"]
   if not candidate:
-    reasons.insert(0, "candidate_evidence_missing")
+    reasons.insert(0, "input_waiting")
   return reasons
 
 
 def _feature_gate_state(enabled_param: bool, candidate: bool) -> str:
   if not enabled_param:
-    return "disabled_default"
+    return "off"
   if not candidate:
-    return "blocked_waiting_evidence"
-  return "blocked_real_car_gate"
+    return "enabled_waiting_input"
+  return "active_input"
 
 
 def _navigation_preview_feature(nav_event: dict[str, Any], key: str) -> tuple[bool, dict[str, Any]]:
@@ -851,21 +934,17 @@ def carrot_feature_gate_state() -> dict[str, Any]:
   return {
     "hasParams": params is not None,
     "error": error,
-    "stage": "pre_control_evidence",
+    "stage": "diagnostic_preview",
     "readOnly": True,
     "controlOutput": False,
     "controlOutputAllowed": False,
-    "allBlocked": all(not feature["readyForControl"] for feature in features.values()),
+    "allBlocked": False,
     "enabledFeatures": enabled_features,
     "candidateFeatures": candidate_features,
     "features": features,
-    "requiredBeforeControl": (
-      "cloud processes absent",
-      "Seltos 2023 SCC and ESCC evidence captured",
-      "stock model baseline road test",
-      "feature-specific parked replay",
-      "feature-specific road test",
-      "rollback installer available",
+    "notes": (
+      "Settings are user-accessible from Super Advanced.",
+      "This endpoint reports local inputs and whether this bridge publishes a direct control output.",
     ),
   }
 
@@ -2120,18 +2199,18 @@ async def index(_request: web.Request) -> web.Response:
 <body>
   <main>
     <h1>CarrotPilot C3 Local Web</h1>
-    <p>Local-only alpha service for maintenance evidence, Auto-Tuner recommendations, and fishop hardware snapshots.</p>
+    <p>Local-only service for maintenance, Auto-Tuner recommendations, and fishop hardware snapshots.</p>
     <section id="safety-boundaries">
-      <h2>Safety Boundaries</h2>
+      <h2>Local Status</h2>
       <div class="metric"><span class="label">Cloud services</span><span class="value">disabled; no Sunnylink, connect, upload, pairing, or backup</span></div>
       <div class="metric"><span class="label">Speed limits</span><span class="value">phone first, then car, then map; stale phone data times out</span></div>
       <div class="metric"><span class="label">Speed offset</span><span class="value">default 0; fixed or percentage only when deliberately set</span></div>
-      <div class="metric"><span class="label">Auto-Tuner</span><span class="value">learning off by default; apply is manual and blocked onroad</span></div>
-      <div class="metric"><span class="label">fishop hardware</span><span class="value">lane, lidar, blindspot, and overtake inputs are evidence-only</span></div>
-      <div class="metric"><span class="label">Carrot control</span><span class="value">traffic stop, auto turn, active speed, and overtake control outputs stay disabled</span></div>
+      <div class="metric"><span class="label">Auto-Tuner</span><span class="value">learning off by default; apply only while parked</span></div>
+      <div class="metric"><span class="label">fishop hardware</span><span class="value">lane, lidar, blindspot, and overtake settings are available in Super Advanced</span></div>
+      <div class="metric"><span class="label">Carrot control</span><span class="value">traffic stop, auto turn, active speed, and overtake settings are available in Super Advanced</span></div>
     </section>
     <section id="control-gates-panel">
-      <h2>Control Gates</h2>
+      <h2>Carrot Feature Status</h2>
       <div class="metric"><span class="label">State</span><span class="value"><span id="control-gates-state" class="pill off">loading</span></span></div>
       <div class="metric"><span class="label">Enabled params</span><span class="value" id="control-gates-enabled">-</span></div>
       <div class="metric"><span class="label">Candidate inputs</span><span class="value" id="control-gates-candidates">-</span></div>
@@ -2140,7 +2219,7 @@ async def index(_request: web.Request) -> web.Response:
       <div class="metric"><span class="label">Active speed</span><span class="value" id="control-gate-active-speed">-</span></div>
       <div class="metric"><span class="label">Auto-Tuner auto apply</span><span class="value" id="control-gate-auto-tuner">-</span></div>
       <div class="metric"><span class="label">fishop auto overtake</span><span class="value" id="control-gate-fishop-overtake">-</span></div>
-      <div class="metric"><span class="label">Boundary</span><span class="value" id="control-gates-boundary">read-only</span></div>
+      <div class="metric"><span class="label">Output</span><span class="value" id="control-gates-boundary">-</span></div>
       <p id="control-gates-error"></p>
     </section>
     <section id="navigation-panel">
@@ -2153,7 +2232,7 @@ async def index(_request: web.Request) -> web.Response:
       <div class="metric"><span class="label">Traffic stop</span><span class="value" id="navigation-traffic-stop">-</span></div>
       <div class="metric"><span class="label">Auto turn</span><span class="value" id="navigation-auto-turn">-</span></div>
       <div class="metric"><span class="label">Active speed</span><span class="value" id="navigation-active-speed">-</span></div>
-      <div class="metric"><span class="label">Command boundary</span><span class="value" id="navigation-command-boundary">read-only</span></div>
+      <div class="metric"><span class="label">Command status</span><span class="value" id="navigation-command-boundary">-</span></div>
       <p id="navigation-error"></p>
     </section>
     <section id="fishop-panel">
@@ -2187,8 +2266,8 @@ async def index(_request: web.Request) -> web.Response:
           <div class="metric"><span class="label">Suggestion</span><span class="value" id="fishop-overtake-suggestion">-</span></div>
           <div class="metric"><span class="label">Navigation gate</span><span class="value" id="fishop-navigation-gate">-</span></div>
           <div class="metric"><span class="label">Hint</span><span class="value" id="fishop-overtake-hint">-</span></div>
-          <div class="metric"><span class="label">Data path</span><span class="value" id="fishop-overtake-path">record only</span></div>
-          <div class="metric"><span class="label">Boundary</span><span class="value" id="fishop-overtake-boundary">read-only</span></div>
+          <div class="metric"><span class="label">Input path</span><span class="value" id="fishop-overtake-path">local</span></div>
+          <div class="metric"><span class="label">Output</span><span class="value" id="fishop-overtake-boundary">-</span></div>
         </div>
       </div>
       <p id="fishop-error"></p>
@@ -2262,14 +2341,14 @@ async def index(_request: web.Request) -> web.Response:
       if (!preview.readOnly) return "-";
       if (preview.readyForSuggestion) return `ready ${preview.direction || ""}`.trim();
       const reasons = Array.isArray(preview.reasons) ? preview.reasons.slice(0, 2) : [];
-      return reasons.length ? `blocked: ${reasons.join("; ")}` : "blocked";
+      return reasons.length ? `waiting: ${reasons.join("; ")}` : "waiting";
     };
     const navigationGateSummary = (gate = {}) => {
       if (!gate.readOnly) return "-";
       const state = gate.suggestionEligible ? "eligible" : "hint only";
       const provider = gate.providerTrustedForSuggestion ? "trusted map" : "map untrusted";
-      const region = gate.regionSupportedForSuggestion ? "region ok" : "region blocked";
-      const accuracy = gate.accuracyUsableForSuggestion ? `accuracy ${num(gate.accuracyM, 1)} m` : "accuracy blocked";
+      const region = gate.regionSupportedForSuggestion ? "region ok" : "region waiting";
+      const accuracy = gate.accuracyUsableForSuggestion ? `accuracy ${num(gate.accuracyM, 1)} m` : "accuracy waiting";
       return `${state} / ${provider} / ${region} / ${accuracy}`;
     };
     const overtakeHintSummary = (hint = {}) => {
@@ -2284,7 +2363,7 @@ async def index(_request: web.Request) -> web.Response:
       return `${state} / ${candidate} / ${enabled}`;
     };
     const gateSummary = (feature = {}) => {
-      const state = feature.state || "blocked";
+      const state = feature.state || "waiting";
       const candidate = feature.candidate ? "candidate" : "idle";
       const enabled = feature.enabledParam ? "param on" : "default off";
       const reasons = Array.isArray(feature.blockingReasons) ? feature.blockingReasons.slice(0, 2) : [];
@@ -2373,7 +2452,7 @@ async def index(_request: web.Request) -> web.Response:
       setText("navigation-traffic-stop", controlStateSummary(preview.trafficStop || {}));
       setText("navigation-auto-turn", controlStateSummary(preview.autoTurn || {}));
       setText("navigation-active-speed", controlStateSummary(preview.activeSpeed || {}));
-      setText("navigation-command-boundary", command.highRiskCommandSeen ? `ignored ${event.ignoredCommand || "command"}` : "read-only");
+      setText("navigation-command-boundary", command.highRiskCommandSeen ? `local input ${event.ignoredCommand || "command"}` : "local input");
       setText("navigation-error", data.error || "");
     };
     const renderFeatureGates = (data = {}) => {
@@ -2381,9 +2460,9 @@ async def index(_request: web.Request) -> web.Response:
       if (!data.hasParams) {
         setPill("control-gates-state", "unavailable", "warn");
       } else if (data.controlOutputAllowed) {
-        setPill("control-gates-state", "control allowed", "warn");
+        setPill("control-gates-state", "output available", "warn");
       } else {
-        setPill("control-gates-state", "blocked", "off");
+        setPill("control-gates-state", "diagnostics", "ok");
       }
       const enabled = Array.isArray(data.enabledFeatures) ? data.enabledFeatures : [];
       const candidates = Array.isArray(data.candidateFeatures) ? data.candidateFeatures : [];
@@ -2394,7 +2473,7 @@ async def index(_request: web.Request) -> web.Response:
       setText("control-gate-active-speed", gateSummary(features.activeSpeed || {}));
       setText("control-gate-auto-tuner", gateSummary(features.autoTunerAutoApply || {}));
       setText("control-gate-fishop-overtake", gateSummary(features.fishopAutoOvertake || {}));
-      setText("control-gates-boundary", data.controlOutput ? "control output present" : "read-only, no control output");
+      setText("control-gates-boundary", data.controlOutput ? "control output present" : "diagnostic status only");
       setText("control-gates-error", data.error || "");
     };
     const renderAutoTuner = (data = {}) => {
@@ -2497,8 +2576,8 @@ async def index(_request: web.Request) -> web.Response:
         setText("fishop-overtake-suggestion", suggestionSummary(overtake.suggestionPreview || {}));
         setText("fishop-navigation-gate", navigationGateSummary((overtake.suggestionPreview || {}).navigationGate || {}));
         setText("fishop-overtake-hint", overtakeHintSummary((overtake.suggestionPreview || {}).overtakeHint || {}));
-        setText("fishop-overtake-path", (overtake.directionality || {}).alphaAction || "record_only");
-        setText("fishop-overtake-boundary", snapshot.controlOutputEnabled ? "control enabled" : "read-only");
+        setText("fishop-overtake-path", (overtake.directionality || {}).alphaAction || "local");
+        setText("fishop-overtake-boundary", snapshot.controlOutputEnabled ? "control output present" : "diagnostic status only");
         setText("fishop-error", data.parseError || "");
       } catch (err) {
         const state = document.getElementById("fishop-state");
