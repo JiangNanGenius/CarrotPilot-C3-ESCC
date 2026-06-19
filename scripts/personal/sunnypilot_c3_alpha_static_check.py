@@ -2495,6 +2495,7 @@ def main() -> int:
   model_manager_contract = read("scripts/personal/genius_model_manager_contract.py")
   super_advanced_contract = read("scripts/personal/genius_super_advanced_contract.py")
   c3_touch_contract = read("scripts/personal/genius_c3_touch_contract.py")
+  no_car_evidence_bundle = read("scripts/personal/genius_no_car_evidence_bundle.py")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
   nnlc_controller = read("sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
@@ -2978,6 +2979,7 @@ def main() -> int:
                           and "genius_model_manager_contract.py" in release_gate
                           and "genius_super_advanced_contract.py" in release_gate
                           and "genius_c3_touch_contract.py" in release_gate
+                          and "genius_no_car_evidence_bundle.py" in release_gate
                           and "genius_offline_replay_check.py" in release_gate
                           and "genius_ui_replay_check.py" in release_gate
                           and "--fetch-references" in release_gate
@@ -3730,6 +3732,29 @@ def main() -> int:
                           and "C3 Touch Fallback Contract" in code_changes_md
                           and "Verify C3 setup/update/settings touch fallback locally through `genius_c3_touch_contract.py`" in todo_md,
                           "agent guide, code changes, and TODO must document the C3 touch fallback contract")
+  failures += not require("Genius no-car evidence bundle tool exists",
+                          "Genius Pilot No-Car Evidence Bundle" in no_car_evidence_bundle
+                          and "DEFAULT_OUTPUT_ROOT" in no_car_evidence_bundle
+                          and "CarrotPilot-C3-ESCC-device-evidence" in no_car_evidence_bundle
+                          and "DISABLED_CLOUD_PROCESSES" in no_car_evidence_bundle
+                          and "cloud_process_evidence" in no_car_evidence_bundle
+                          and "parse_version" in no_car_evidence_bundle
+                          and "sunnypilot_c3_installer_audit.py" in no_car_evidence_bundle
+                          and "bundle.json" in no_car_evidence_bundle
+                          and "SUMMARY.md" in no_car_evidence_bundle
+                          and ".tar.gz" in no_car_evidence_bundle,
+                          "no-car evidence bundle tool must archive version, branch, commit, installer hash, command outputs, and no-cloud evidence")
+  failures += not require("Genius no-car evidence bundle release gate wired",
+                          "scripts/personal/genius_no_car_evidence_bundle.py" in release_gate
+                          and "Genius no-car evidence bundle" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must self-test the no-car evidence bundle tool")
+  failures += not require("Genius no-car evidence bundle documented",
+                          "genius_no_car_evidence_bundle.py --full-gate --json" in agents_md
+                          and "2026.002.000-gp.20260620.44" in code_changes_md
+                          and "No-Car Evidence Bundle" in code_changes_md
+                          and "Archive each no-car diagnostic bundle on the Mac desktop through `genius_no_car_evidence_bundle.py`" in todo_md,
+                          "agent guide, code changes, and TODO must document the no-car evidence bundle")
   failures += not require("Sidebar temperature is numeric Celsius",
                           "TEMP_FALLBACK_TEXT = tr_noop(\"--C\")" in sidebar_layout
                           and "TEMP_SCALAR_FIELDS" in sidebar_layout

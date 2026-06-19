@@ -88,6 +88,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     "scripts/personal/genius_model_manager_contract.py",
     "scripts/personal/genius_super_advanced_contract.py",
     "scripts/personal/genius_c3_touch_contract.py",
+    "scripts/personal/genius_no_car_evidence_bundle.py",
     "scripts/personal/genius_offline_replay_check.py",
     "scripts/personal/genius_ui_replay_check.py",
     "scripts/personal/genius_visualization_contract.py",
@@ -138,6 +139,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     ("Genius model manager contract", [py(), "scripts/personal/genius_model_manager_contract.py", "--self-test"], 30),
     ("Genius Super Advanced contract", [py(), "scripts/personal/genius_super_advanced_contract.py", "--self-test"], 30),
     ("Genius C3 touch fallback contract", [py(), "scripts/personal/genius_c3_touch_contract.py", "--self-test"], 30),
+    ("Genius no-car evidence bundle", [py(), "scripts/personal/genius_no_car_evidence_bundle.py", "--self-test"], 30),
     ("Genius offline replay check self-test", [py(), "scripts/personal/genius_offline_replay_check.py", "--self-test"], 30),
     ("Genius UI replay check self-test", [py(), "scripts/personal/genius_ui_replay_check.py", "--self-test"], 30),
   ]
