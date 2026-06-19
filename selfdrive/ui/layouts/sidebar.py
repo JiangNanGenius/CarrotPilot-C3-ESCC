@@ -124,11 +124,13 @@ class Sidebar(Widget, SidebarSP):
 
   def _update_temperature_status(self, device_state):
     thermal_status = device_state.thermalStatus
+    max_temp = int(round(device_state.maxTempC)) if device_state.maxTempC > 0 else 0
+    temp_text = f"{max_temp}C" if max_temp > 0 else tr_noop("GOOD")
 
     if thermal_status == ThermalStatus.ok:
-      self._temp_status.update(tr_noop("TEMP"), tr_noop("GOOD"), Colors.GOOD)
+      self._temp_status.update(tr_noop("TEMP"), temp_text, Colors.GOOD)
     else:
-      self._temp_status.update(tr_noop("TEMP"), tr_noop("HIGH"), Colors.DANGER)
+      self._temp_status.update(tr_noop("TEMP"), temp_text if max_temp > 0 else tr_noop("HIGH"), Colors.DANGER)
 
   def _update_connection_status(self, device_state):
     self._connect_status.update(tr_noop("LOCAL"), tr_noop("READY"), Colors.GOOD)

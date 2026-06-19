@@ -23,6 +23,12 @@ Do not move `/i` or stable/latest to the alpha line until the C3 parked checks a
 - `CarrotMapOverlayEnabled` defaults off. When off, do not load Mapbox/Kakao iframe or external SDKs.
 - High-risk features stay independently gated and default off: traffic-light stop, auto-turn slowdown, active speed control, Auto-Tuner auto-apply, and fishop auto-overtake.
 - Fishop lane/lidar/blindspot/overtake work is evidence-only until staged logs, rollback, and real-car review prove the next step.
+- Product direction is CarrotPilot-first. SunnyPilot is the 0.11 architecture base, not the feature owner for cruise behavior.
+- Do not expose or enable SunnyPilot black-box cruise-speed features in the personal build: ICBM, SCC-V, SCC-M, and Dynamic Experimental Control must stay hidden or inert until explicitly replaced by Carrot-style granular controls.
+- Carrot-style settings are preferred: every control behavior should have a visible setting, a clear Chinese/English description, conservative default, validation gate, and rollback path.
+- User-facing alpha branding should move toward Genius Pilot. Keep upstream package/module names only where renaming would create code risk.
+- Do not rely on cloud registration for local recovery. Local Wi-Fi, SSH, and web access must work on the user's clone C3 without Sunnylink or comma connect.
+- Do not add a public default password to a release build. If bench recovery needs a password path, make it explicitly local, documented, and removable before release.
 
 ## Update Workflow
 
@@ -33,10 +39,12 @@ When the user says to update, use this order:
 3. Pull only necessary C3/TICI compatibility patches from Mr.One. Do not import private registration, upload clients, cloud pairing, never-shutdown logic, or broad safety/opendbc changes.
    In short: do not import private registration or upload/cloud client behavior from reference forks.
 4. Compare Carrot changes for Carrot Web, CarrotMan/Navipilot/APN/N input, speed-limit logic, model/map behavior, Auto-Tuner, localization, and fishop hardware fields.
+   Treat CarrotPilot behavior and setting granularity as the target; use SunnyPilot implementation only when it is the safer/newer base primitive.
 5. Preserve personal defaults: stock model, map overlay off, speed offset zero, phone speed policy with timeout, cloud disabled, high-risk controls off.
 6. Run the release gate before pushing.
 7. Push `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3` together only after the gate passes.
 8. Audit the published `/x` installer before telling the user to retry installation.
+9. Update `docs/personal/TODO.md` and `docs/personal/CODE_CHANGES.md` in the same change whenever real-device behavior or safety assumptions change.
 
 ## Required Commands
 
@@ -117,6 +125,8 @@ python3 scripts/personal/sunnypilot_c3_alpha_evidence_check.py \
 - `/x` must install `https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git` and `alpha-sunnypilot-c3`.
 - `/x` must pass `scripts/personal/sunnypilot_c3_installer_audit.py`.
 - `/i` remains the rollback stable installer.
+- The packed TICI updater is not the same file as `system/ui/lib/wifi_manager.py`. If Wi-Fi or dependency handling changes, audit the embedded updater payload too.
+- Fresh `/x` installs must have `jeepney` available or the packed updater must carry the `nmcli` fallback; otherwise C3 update/setup paths can crash before the normal UI Wi-Fi fallback helps.
 
 ## Git Hygiene
 

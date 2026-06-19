@@ -114,6 +114,44 @@ Open evidence still required before promoting alpha to stable/latest:
 - Parked C3 snapshot showing no cloud/upload processes and working local Web/SSH/update/model manager.
 - Seltos 2023 SCC/ESCC road evidence with stock model and Carrot high-risk controls off.
 
+## 2026-06-19 Carrot-First Product Direction
+
+The alpha line is now documented as CarrotPilot-first:
+
+- SunnyPilot 0.11 remains the architecture base for C3 compatibility, model manager, and newer runtime structure.
+- User-facing cruise and speed-control behavior should converge toward CarrotPilot's granular settings and evidence-first workflow.
+- SunnyPilot ICBM, SCC-V, SCC-M, and Dynamic Experimental Control are not personal-build features; they are hidden from the Cruise panel and old params are removed during interface setup.
+- Carrot, Auto-Tuner, APN/N/Navipilot, Fishop hardware, and ESCC features should be migrated as explicit controls with Chinese/English descriptions, safe defaults, and per-feature validation gates.
+- High-risk output paths remain off until parked evidence, road logs, and rollback paths are proven.
+
+This direction is captured in `AGENTS.md` and `docs/personal/TODO.md` so future updates do not drift back to SunnyPilot black-box cruise behavior.
+
+## 2026-06-19 C3 UI Hotfix Direction
+
+Real-device feedback on the clone C3 found four UI issues after the settings tap fix:
+
+- Network page stayed at "Scanning Wi-Fi networks..." although NetworkManager was already connected. The C3 runtime lacked the Python `jeepney` DBus package, so the Wi-Fi manager never started. The fix keeps the DBus path when available and adds an `nmcli` fallback for scan, active SSID, saved connections, IP address, connect, forget, activate, and metered state.
+- Opening settings from the left sidebar gear could immediately close the page. The root cause is the opening touch being reused by the settings page. The fix adds a one-touch guard when settings is opened.
+- The sidebar temperature card showed only `GOOD`/`HIGH`. It now displays `deviceState.maxTempC` as a number when available, while preserving warning coloring.
+- Simplified Chinese localization needs continuous cleanup. The immediate target is the high-use alpha pages: Device, Network, Cruise, Speed Limit, Models, Carrot, Visuals, and Developer.
+
+Implementation notes added after the first device sync:
+
+- The main source-tree Wi-Fi manager now keeps the `jeepney` DBus path when available and falls back to `nmcli` when that Python package is missing.
+- The user's C3 proved that the runtime virtualenv had `zmq` but did not have `jeepney`; the fallback successfully reported the connected SSID, IP address, and nearby networks.
+- A direct `pip install jeepney` into `/usr/local/venv` failed because that filesystem is read-only on the C3, so dependency repair must be part of the installer/update package rather than a manual device mutation.
+- The packed TICI updater is a separate embedded Python payload and still contained the old direct `jeepney` import. Fresh release work must either install `jeepney` before that updater runs or rebuild/patch the packed updater so it has the same fallback.
+- Settings page touch handling now ignores the touch that opened the page, so the sidebar gear cannot immediately close settings.
+- SunnyPilot ICBM, SCC-V, SCC-M, and DEC are hidden and forced inert in the personal alpha. Any future speed-control work should be implemented as Carrot/Genius Pilot granular controls, not by re-enabling those SunnyPilot black-box toggles.
+- The sidebar temperature label now prefers numeric `maxTempC` and only uses the color state as a warning hint.
+- A Simplified Chinese overlay was added for the high-use alpha pages, but this is the first pass; real-device wording feedback should continue to update the `.po` file and the setting descriptions.
+
+Open follow-up from the same bench test:
+
+- Replace user-facing SunnyPilot branding with Genius Pilot where it is accurate and does not conflict with upstream package names.
+- Keep the welcome/training flow, but replace the long SunnyPilot consent copy with short personal-build copy and verify that Agree advances on C3.
+- Build a real Carrot-style settings surface. The alpha must not feel like SunnyPilot with a few hidden toggles; CarrotPilot, mechanical/Auto-Tuner, ESCC, APN/N, and Fishop controls need explicit settings, descriptions, defaults, and evidence gates.
+
 ## 2026-06-19 C3 Device Evidence Collector
 
 `scripts/personal/sunnypilot_c3_device_collect.py` can SSH to the clone C3, collect install/launch logs, process lists, safe params, network listeners, and a Carrot alpha snapshot, then fetch a tarball back to the Mac desktop.

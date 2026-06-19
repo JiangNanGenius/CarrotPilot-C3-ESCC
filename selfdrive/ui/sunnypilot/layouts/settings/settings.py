@@ -179,6 +179,10 @@ class SettingsLayoutSP(OP.SettingsLayout):
       return
 
   def _handle_mouse_release(self, mouse_pos: MousePos) -> bool:
+    if self._ignore_touch_until_release:
+      self._ignore_touch_until_release = False
+      return True
+
     # Check close button
     if rl.check_collision_point_rec(mouse_pos, self._close_btn_rect):
       if self._close_callback:

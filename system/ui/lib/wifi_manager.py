@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import atexit
+import os
 import threading
 import time
 import uuid
@@ -172,14 +173,14 @@ class WifiManager:
     self._networks: list[Network] = []  # an unsorted list of available Networks. a Network can be comprised of multiple APs
     self._active = True  # used to not run when not in settings
     self._exit = False
+    self._nmcli_fallback = not JEEPNEY_AVAILABLE
 
     # DBus connections
     if not JEEPNEY_AVAILABLE:
-      cloudlog.warning("Wi-Fi manager disabled: python package 'jeepney' is unavailable")
+      cloudlog.warning("Wi-Fi manager using nmcli fallback: python package 'jeepney' is unavailable")
       self._router_main = None
       self._conn_monitor = None
       self._nm = None
-      self._exit = True
     else:
       try:
         self._router_main = DBusRouter(open_dbus_connection_threading(bus="SYSTEM"))  # used by scanner / general method calls
@@ -229,27 +230,48 @@ class WifiManager:
 
   def _initialize(self):
     def worker():
-      self._wait_for_wifi_device()
-      if self._exit:
+      if self._nmcli_fallback:
+        self._wifi_device = self._nmcli_wifi_device()
+        if self._wifi_device is None:
+          cloudlog.warning("No WiFi device found, falling back to wlan0")
+          self._wifi_device = "wlan0"
+
+        self._scan_thread.start()
+        self._init_connections()
+        self._init_wifi_state()
+        self._request_scan()
+        self._update_networks()
+        self._tethering_password = DEFAULT_TETHERING_PASSWORD
+        cloudlog.debug("WifiManager initialized with nmcli fallback")
         return
+      else:
+        self._wait_for_wifi_device()
+        if self._exit:
+          return
 
-      # TODO: wait for state thread to start before adding tethering connection, tiny race currently
-      self._scan_thread.start()
-      self._state_thread.start()
+        # TODO: wait for state thread to start before adding tethering connection, tiny race currently
+        self._scan_thread.start()
+        self._state_thread.start()
 
-      self._init_connections()
-      if Params is not None and self._tethering_ssid not in self._connections:
-        self._add_tethering_connection()
+        self._init_connections()
+        if Params is not None and self._tethering_ssid not in self._connections:
+          self._add_tethering_connection()
 
-      self._init_wifi_state()
+        self._init_wifi_state()
 
-      self._tethering_password = self._get_tethering_password()
-      cloudlog.debug("WifiManager initialized")
+        self._tethering_password = self._get_tethering_password()
+        cloudlog.debug("WifiManager initialized")
 
     threading.Thread(target=worker, daemon=True).start()
 
   def _init_wifi_state(self, block: bool = True):
     def worker():
+      if self._nmcli_fallback:
+        ssid = self._nmcli_active_ssid()
+        self._wifi_state = WifiState(ssid=ssid, status=ConnectStatus.CONNECTED if ssid else ConnectStatus.DISCONNECTED)
+        self._update_active_connection_info()
+        return
+
       if self._wifi_device is None:
         cloudlog.warning("No WiFi device found")
         return
@@ -526,8 +548,92 @@ class WifiManager:
       if self._active:
         if time.monotonic() - self._last_network_scan > SCAN_PERIOD_SECONDS:
           self._request_scan()
+          if self._nmcli_fallback:
+            self._update_networks()
           self._last_network_scan = time.monotonic()
       time.sleep(1 / 2.)
+
+  @staticmethod
+  def _split_nmcli_row(row: str) -> list[str]:
+    values: list[str] = []
+    buf: list[str] = []
+    escaped = False
+
+    for ch in row.rstrip("\n"):
+      if escaped:
+        buf.append(ch)
+        escaped = False
+      elif ch == "\\":
+        escaped = True
+      elif ch == ":":
+        values.append("".join(buf))
+        buf = []
+      else:
+        buf.append(ch)
+
+    if escaped:
+      buf.append("\\")
+    values.append("".join(buf))
+    return values
+
+  @classmethod
+  def _nmcli_rows(cls, args: list[str], timeout: float = 10.0) -> list[list[str]]:
+    env = os.environ.copy()
+    env["LC_ALL"] = "C"
+
+    try:
+      proc = subprocess.run(["nmcli", "-t", *args], capture_output=True, text=True, timeout=timeout,
+                            check=False, env=env)
+    except (FileNotFoundError, subprocess.TimeoutExpired) as e:
+      cloudlog.warning(f"nmcli command unavailable: {args}: {e}")
+      return []
+
+    if proc.returncode != 0:
+      stderr = proc.stderr.strip()
+      if stderr:
+        cloudlog.warning(f"nmcli command failed: {args}: {stderr}")
+      return []
+
+    return [cls._split_nmcli_row(line) for line in proc.stdout.splitlines() if line.strip()]
+
+  @staticmethod
+  def _nmcli_security_type(security: str) -> SecurityType:
+    security = security.upper().strip()
+    if not security or security in ("--", "NONE"):
+      return SecurityType.OPEN
+    if "WPA3" in security:
+      return SecurityType.WPA3
+    if "WPA2" in security:
+      return SecurityType.WPA2
+    if "WPA" in security or "WEP" in security:
+      return SecurityType.WPA
+    return SecurityType.UNSUPPORTED
+
+  def _nmcli_wifi_device(self) -> str | None:
+    rows = self._nmcli_rows(["-f", "DEVICE,TYPE,STATE,CONNECTION", "device", "status"])
+    for row in rows:
+      if len(row) >= 2 and row[1] == "wifi" and row[0]:
+        return row[0]
+    return None
+
+  def _nmcli_active_ssid(self) -> str | None:
+    rows = self._nmcli_rows(["-f", "ACTIVE,SSID", "device", "wifi", "list"])
+    for row in rows:
+      if len(row) >= 2 and row[0] == "yes" and row[1]:
+        return row[1]
+    return None
+
+  def _nmcli_connection_ssid(self, name: str) -> str:
+    rows = self._nmcli_rows(["-f", "802-11-wireless.ssid", "connection", "show", name])
+    for row in rows:
+      if len(row) >= 2 and row[-1]:
+        return row[-1]
+    for prefix in ("sunnypilot connection ", "openpilot connection "):
+      if name.startswith(prefix):
+        return name.removeprefix(prefix)
+    if name == "Hotspot":
+      return self._tethering_ssid
+    return ""
 
   def _wait_for_wifi_device(self):
     while not self._exit:
@@ -551,6 +657,17 @@ class WifiManager:
     return None
 
   def _init_connections(self) -> None:
+    if self._nmcli_fallback:
+      conns: dict[str, str] = {}
+      rows = self._nmcli_rows(["-f", "NAME,TYPE,DEVICE", "connection", "show"])
+      for row in rows:
+        if len(row) >= 2 and row[1] == "802-11-wireless":
+          ssid = self._nmcli_connection_ssid(row[0])
+          if ssid:
+            conns[ssid] = row[0]
+      self._connections = conns
+      return
+
     settings_addr = DBusAddress(NM_SETTINGS_PATH, bus_name=NM, interface=NM_SETTINGS_IFACE)
     known_connections = self._router_main.send_and_get_reply(new_method_call(settings_addr, 'ListConnections')).body[0]
 
@@ -660,6 +777,39 @@ class WifiManager:
     self._set_connecting(ssid)
 
     def worker():
+      if self._nmcli_fallback:
+        self.forget_connection(ssid, block=True)
+        cmd = ["nmcli", "device", "wifi", "connect", ssid]
+        if password:
+          cmd += ["password", password]
+        if self._wifi_device:
+          cmd += ["ifname", self._wifi_device]
+        if hidden:
+          cmd += ["hidden", "yes"]
+
+        try:
+          proc = subprocess.run(cmd, capture_output=True, text=True, timeout=40, check=False)
+        except (FileNotFoundError, subprocess.TimeoutExpired) as e:
+          cloudlog.warning(f"Failed to connect to Wi-Fi network {ssid}: {e}")
+          self._set_connecting(None)
+          self._enqueue_callbacks(self._disconnected)
+          return
+
+        if proc.returncode == 0:
+          self._init_connections()
+          self._wifi_state = WifiState(ssid=ssid, status=ConnectStatus.CONNECTED)
+          self._update_active_connection_info()
+          self._update_networks()
+          self._enqueue_callbacks(self._activated)
+        else:
+          stderr = proc.stderr.strip()
+          if stderr:
+            cloudlog.warning(f"Failed to connect to Wi-Fi network {ssid}: {stderr}")
+          if password:
+            self._enqueue_callbacks(self._need_auth, ssid)
+          self._set_connecting(None)
+        return
+
       # Clear all connections that may already exist to the network we are connecting to
       self.forget_connection(ssid, block=True)
 
@@ -714,6 +864,20 @@ class WifiManager:
       return
 
     def worker():
+      if self._nmcli_fallback:
+        conn_name = self._connections.get(ssid, None)
+        if conn_name is not None:
+          subprocess.run(["nmcli", "connection", "delete", conn_name], capture_output=True, text=True,
+                         timeout=15, check=False)
+          self._connections.pop(ssid, None)
+          self._init_wifi_state()
+          self._update_networks()
+        else:
+          cloudlog.warning(f"Trying to forget unknown connection: {ssid}")
+
+        self._enqueue_callbacks(self._forgotten, ssid)
+        return
+
       conn_path = self._connections.get(ssid, None)
       if conn_path is None:
         cloudlog.warning(f"Trying to forget unknown connection: {ssid}")
@@ -736,6 +900,29 @@ class WifiManager:
     self._set_connecting(ssid)
 
     def worker():
+      if self._nmcli_fallback:
+        conn_name = self._connections.get(ssid, None)
+        if conn_name is None:
+          cloudlog.warning(f"Failed to activate connection for {ssid}: conn_name={conn_name}, wifi_device={self._wifi_device}")
+          self._init_wifi_state()
+          return
+
+        cmd = ["nmcli", "connection", "up", conn_name]
+        if self._wifi_device:
+          cmd += ["ifname", self._wifi_device]
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30, check=False)
+        if proc.returncode == 0:
+          self._wifi_state = WifiState(ssid=ssid, status=ConnectStatus.CONNECTED)
+          self._update_active_connection_info()
+          self._update_networks()
+          self._enqueue_callbacks(self._activated)
+        else:
+          stderr = proc.stderr.strip()
+          if stderr:
+            cloudlog.warning(f"Failed to activate connection for {ssid}: {stderr}")
+          self._init_wifi_state()
+        return
+
       conn_path = self._connections.get(ssid, None)
       if conn_path is None or self._wifi_device is None:
         cloudlog.warning(f"Failed to activate connection for {ssid}: conn_path={conn_path}, wifi_device={self._wifi_device}")
@@ -757,6 +944,15 @@ class WifiManager:
       threading.Thread(target=worker, daemon=True).start()
 
   def _deactivate_connection(self, ssid: str):
+    if self._nmcli_fallback:
+      conn_name = self._connections.get(ssid, None)
+      if conn_name is not None:
+        subprocess.run(["nmcli", "connection", "down", conn_name], capture_output=True, text=True,
+                       timeout=15, check=False)
+      self._init_wifi_state()
+      self._update_networks()
+      return
+
     for active_conn in self._get_active_connections():
       conn_addr = DBusAddress(active_conn, bus_name=NM, interface=NM_ACTIVE_CONNECTION_IFACE)
       reply = self._router_main.send_and_get_reply(Properties(conn_addr).get('SpecificObject'))
@@ -788,6 +984,12 @@ class WifiManager:
     if self._exit:
       cloudlog.warning("Wi-Fi manager unavailable; cannot set tethering password")
       return
+    if self._nmcli_fallback:
+      self._tethering_password = password
+      conn_name = self._connections.get(self._tethering_ssid, "Hotspot")
+      subprocess.run(["nmcli", "connection", "modify", conn_name, "802-11-wireless-security.psk", password],
+                     capture_output=True, text=True, timeout=15, check=False)
+      return
 
     def worker():
       conn_path = self._connections.get(self._tethering_ssid, None)
@@ -815,6 +1017,9 @@ class WifiManager:
     threading.Thread(target=worker, daemon=True).start()
 
   def _get_tethering_password(self) -> str:
+    if self._nmcli_fallback:
+      return DEFAULT_TETHERING_PASSWORD
+
     conn_path = self._connections.get(self._tethering_ssid, None)
     if conn_path is None:
       cloudlog.warning('No tethering connection found')
@@ -862,6 +1067,19 @@ class WifiManager:
       return
 
     def worker():
+      if self._nmcli_fallback:
+        ssid = self.connected_ssid
+        conn_name = self._connections.get(ssid or "", None)
+        if conn_name is None:
+          cloudlog.warning('No active WiFi connection found')
+          return
+        value = {MeteredType.UNKNOWN: "unknown", MeteredType.YES: "yes", MeteredType.NO: "no"}.get(metered, "unknown")
+        subprocess.run(["nmcli", "connection", "modify", conn_name, "connection.metered", value],
+                       capture_output=True, text=True, timeout=15, check=False)
+        self._current_network_metered = metered
+        self._enqueue_callbacks(self._networks_updated, self.networks)
+        return
+
       if self.is_tethering_active():
         return
 
@@ -893,6 +1111,11 @@ class WifiManager:
       cloudlog.warning("No WiFi device found")
       return
 
+    if self._nmcli_fallback:
+      subprocess.run(["nmcli", "device", "wifi", "rescan", "ifname", self._wifi_device],
+                     capture_output=True, text=True, timeout=10, check=False)
+      return
+
     wifi_addr = DBusAddress(self._wifi_device, bus_name=NM, interface=NM_WIRELESS_IFACE)
     reply = self._router_main.send_and_get_reply(new_method_call(wifi_addr, 'RequestScan', 'a{sv}', ({},)))
 
@@ -905,6 +1128,47 @@ class WifiManager:
 
     def worker():
       with self._scan_lock:
+        if self._nmcli_fallback:
+          rows = self._nmcli_rows(["-f", "ACTIVE,SSID,SIGNAL,SECURITY", "device", "wifi", "list"])
+          strongest: dict[str, Network] = {}
+          active_ssid: str | None = None
+
+          for row in rows:
+            if len(row) < 4:
+              continue
+
+            active, ssid, signal, security = row[0], row[1], row[2], row[3]
+            if not ssid:
+              continue
+
+            try:
+              strength = int(signal)
+            except ValueError:
+              strength = 0
+
+            if active == "yes":
+              active_ssid = ssid
+
+            network = Network(
+              ssid=ssid,
+              strength=100 if ssid == self._tethering_ssid else max(0, min(100, strength)),
+              security_type=self._nmcli_security_type(security),
+              is_tethering=ssid == self._tethering_ssid,
+            )
+
+            prev = strongest.get(ssid)
+            if prev is None or network.strength > prev.strength:
+              strongest[ssid] = network
+
+          self._networks = list(strongest.values())
+          if active_ssid:
+            self._wifi_state = WifiState(ssid=active_ssid, status=ConnectStatus.CONNECTED)
+          elif self._wifi_state.status == ConnectStatus.CONNECTED:
+            self._wifi_state = WifiState()
+          self._update_active_connection_info()
+          self._enqueue_callbacks(self._networks_updated, self.networks)
+          return
+
         if self._wifi_device is None:
           cloudlog.warning("No WiFi device found")
           return
@@ -957,6 +1221,29 @@ class WifiManager:
 
     ipv4_address = ""
     metered = MeteredType.UNKNOWN
+
+    if self._nmcli_fallback:
+      device = self._wifi_device or "wlan0"
+      for row in self._nmcli_rows(["-f", "IP4.ADDRESS", "device", "show", device]):
+        if len(row) >= 2 and row[1]:
+          ipv4_address = row[1].split("/", 1)[0]
+          break
+
+      ssid = self.connected_ssid or self._nmcli_active_ssid()
+      conn_name = self._connections.get(ssid or "", None)
+      if conn_name is not None:
+        for row in self._nmcli_rows(["-f", "connection.metered", "connection", "show", conn_name]):
+          if len(row) >= 2:
+            value = row[-1].strip().lower()
+            if value == "yes":
+              metered = MeteredType.YES
+            elif value == "no":
+              metered = MeteredType.NO
+            break
+
+      self._ipv4_address = ipv4_address
+      self._current_network_metered = metered
+      return
 
     conn_path, props = self._get_active_wifi_connection()
 

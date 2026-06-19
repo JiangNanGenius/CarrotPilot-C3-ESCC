@@ -199,6 +199,10 @@ class UIStateSP:
     has_long = self.has_longitudinal_control
     CP = self.CP
 
+    for param in ("IntelligentCruiseButtonManagement", "DynamicExperimentalControl", "SmartCruiseControlVision", "SmartCruiseControlMap"):
+      self.params.remove(param)
+    self.has_icbm = False
+
     if CP is not None:
       if self.params.get_bool("EnforceTorqueControl") and self.params.get_bool("NeuralNetworkLateralControl"):
         self.params.put_bool("EnforceTorqueControl", False, block=True)
@@ -227,20 +231,9 @@ class UIStateSP:
       self.params.remove("ExperimentalMode")
       self.params.remove("DynamicExperimentalControl")
 
-    # ICBM: clear if not available or if full longitudinal control is active
-    if self.CP_SP is not None:
-      if not self.CP_SP.intelligentCruiseButtonManagementAvailable or has_long:
-        self.params.remove("IntelligentCruiseButtonManagement")
-        self.has_icbm = False
-    else:
-      self.params.remove("IntelligentCruiseButtonManagement")
-      self.has_icbm = False
-
     # Cruise features requiring longitudinal or ICBM
     if not (has_long or self.has_icbm):
       self.params.remove("CustomAccIncrementsEnabled")
-      self.params.remove("SmartCruiseControlVision")
-      self.params.remove("SmartCruiseControlMap")
 
 
 class DeviceSP:

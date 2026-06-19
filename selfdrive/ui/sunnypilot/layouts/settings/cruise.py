@@ -24,6 +24,7 @@ ICBM_DESC = tr_noop("When enabled, Genius Pilot will attempt to manage the built
 ICMB_UNAVAILABLE = tr_noop("Intelligent Cruise Button Management is currently unavailable on this platform.")
 ICMB_UNAVAILABLE_LONG_AVAILABLE = tr_noop("Disable the Genius Pilot Longitudinal Control (alpha) toggle to allow Intelligent Cruise Button Management.")
 ICMB_UNAVAILABLE_LONG_UNAVAILABLE = tr_noop("Genius Pilot Longitudinal Control is the default longitudinal control for this platform.")
+CARROT_CRUISE_POLICY = tr_noop("This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, SCC-M, and Dynamic Experimental Control stay hidden and forced off; use Carrot and Speed Limit settings for staged experiments.")
 
 ACC_ENABLED_DESCRIPTION = tr_noop("Enable custom Short & Long press increments for cruise speed increase/decrease.")
 ACC_NOLONG_DESCRIPTION = tr_noop("This feature can only be used with Genius Pilot longitudinal control enabled.")
@@ -88,10 +89,6 @@ class CruiseLayout(Widget):
       param="DynamicExperimentalControl")
 
     items = [
-      self.icbm_toggle,
-      self.dec_toggle,
-      self.scc_v_toggle,
-      self.scc_m_toggle,
       self.custom_acc_toggle,
       self.custom_acc_short_increment,
       self.custom_acc_long_increment,
@@ -108,7 +105,6 @@ class CruiseLayout(Widget):
   def show_event(self):
     self._set_current_panel(PanelType.CRUISE)
     self._scroller.show_event()
-    self.icbm_toggle.show_description(True)
     self.custom_acc_toggle.show_description(True)
 
   def _set_current_panel(self, panel: PanelType):
@@ -120,47 +116,26 @@ class CruiseLayout(Widget):
     super()._update_state()
 
     if ui_state.CP is not None and ui_state.CP_SP is not None:
-      has_icbm = ui_state.has_icbm
       has_long = ui_state.has_longitudinal_control
+      has_icbm = False
 
-      if ui_state.CP_SP.intelligentCruiseButtonManagementAvailable and not has_long:
-        self.icbm_toggle.action_item.set_enabled(ui_state.is_offroad())
-        self.icbm_toggle.set_description(tr(ICBM_DESC))
-      else:
-        ui_state.params.remove("IntelligentCruiseButtonManagement")
-        self.icbm_toggle.action_item.set_enabled(False)
+      for param in ("IntelligentCruiseButtonManagement", "DynamicExperimentalControl", "SmartCruiseControlVision", "SmartCruiseControlMap"):
+        ui_state.params.remove(param)
+      self.icbm_toggle.action_item.set_enabled(False)
+      self.dec_toggle.action_item.set_enabled(False)
+      self.scc_v_toggle.action_item.set_enabled(False)
+      self.scc_m_toggle.action_item.set_enabled(False)
 
-        long_desc = ICMB_UNAVAILABLE
-        if has_long:
-          if ui_state.CP.alphaLongitudinalAvailable:
-            long_desc += " " + ICMB_UNAVAILABLE_LONG_AVAILABLE
-          else:
-            long_desc += " " + ICMB_UNAVAILABLE_LONG_UNAVAILABLE
-
-        new_desc = "<b>" + tr(long_desc) + "</b>\n\n" + tr(ICBM_DESC)
-        if self.icbm_toggle.description != new_desc:
-          self.icbm_toggle.set_description(new_desc)
-          self.icbm_toggle.show_description(True)
-
-      if has_long or has_icbm:
-        self.custom_acc_toggle.action_item.set_enabled(((has_long and not ui_state.CP.pcmCruise) or has_icbm) and ui_state.is_offroad())
-        self.dec_toggle.action_item.set_enabled(has_long)
-        self.scc_v_toggle.action_item.set_enabled(True)
-        self.scc_m_toggle.action_item.set_enabled(True)
+      if has_long:
+        self.custom_acc_toggle.action_item.set_enabled((has_long and not ui_state.CP.pcmCruise) and ui_state.is_offroad())
       else:
         ui_state.params.remove("CustomAccIncrementsEnabled")
-        ui_state.params.remove("DynamicExperimentalControl")
-        ui_state.params.remove("SmartCruiseControlVision")
-        ui_state.params.remove("SmartCruiseControlMap")
         self.custom_acc_toggle.action_item.set_enabled(False)
-        self.dec_toggle.action_item.set_enabled(False)
-        self.scc_v_toggle.action_item.set_enabled(False)
-        self.scc_m_toggle.action_item.set_enabled(False)
 
     else:
       has_icbm = has_long = False
       self.icbm_toggle.action_item.set_enabled(False)
-      self.icbm_toggle.set_description(tr(ONROAD_ONLY_DESCRIPTION))
+      self.icbm_toggle.set_description(tr(CARROT_CRUISE_POLICY))
 
     show_custom_acc_desc = False
 
