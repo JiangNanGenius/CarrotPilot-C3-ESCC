@@ -38,6 +38,8 @@ def command_env() -> dict[str, str]:
   env.setdefault("GIT_TERMINAL_PROMPT", "0")
   env.setdefault("GIT_OPTIONAL_LOCKS", "0")
   env.setdefault("CI", "1")
+  existing_pythonpath = env.get("PYTHONPATH", "")
+  env["PYTHONPATH"] = str(ROOT) if not existing_pythonpath else f"{ROOT}{os.pathsep}{existing_pythonpath}"
   return env
 
 
@@ -125,6 +127,7 @@ def self_test() -> int:
     "tools/replay/replay",
     "--demo",
     "selfdrive/ui/tests/diff/replay.py",
+    "PYTHONPATH",
     "replay_script.py",
     "GeniusVisualMode",
     "GeniusFishopVisualOverlay",
