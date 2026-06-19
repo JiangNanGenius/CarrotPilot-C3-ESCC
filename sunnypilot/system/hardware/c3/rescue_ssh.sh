@@ -3,7 +3,7 @@
 # Personal alpha rescue access for clone C3 devices while the MICI UI is being
 # stabilized. This script must never block boot: every operation is best-effort.
 
-RESCUE_PASSWORD="${CARROT_C3_RESCUE_PASSWORD:-CarrotC3-0619}"
+RESCUE_PASSWORD="${CARROT_C3_RESCUE_PASSWORD:-C3Debug123456}"
 RESCUE_PUBKEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHr0wvrENIuNyCoJCSgS7RwoUFxiTiXpWBXJRrR37d7o JiangNanGenius CarrotPilot C3 backup 2026-06-19"
 
 as_root() {
