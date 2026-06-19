@@ -5,6 +5,7 @@ import argparse
 import asyncio
 import datetime as dt
 import hashlib
+import ipaddress
 import json
 import sys
 import time
@@ -23,6 +24,7 @@ LOCAL_WEB_PORT = 7000
 STATUS_BROADCAST_PORT = 7705
 STATUS_BROADCAST_INTERVAL_S = 1.0
 STATUS_BROADCAST_TARGETS = ("255.255.255.255", "127.0.0.1")
+CARROT_MAN_PEER_MAX_AGE_S = 30.0
 MESSAGING_STATUS_SERVICES = (
   "carState",
   "selfdriveState",
@@ -1127,7 +1129,8 @@ def update_messaging_status_from_sm(sm: Any) -> dict[str, Any]:
 
 def build_status_payload(runtime_status: dict[str, Any] | None = None,
                          navi_http_status: dict[str, Any] | None = None,
-                         navi_tcp_status: dict[str, Any] | None = None) -> dict[str, Any]:
+                         navi_tcp_status: dict[str, Any] | None = None,
+                         carrot_man_peer_status: dict[str, Any] | None = None) -> dict[str, Any]:
   params, _error = _params_state()
   event_state = navigation_event_state()
   event = event_state.get("event", {}) if isinstance(event_state, dict) else {}
@@ -1136,6 +1139,7 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None,
   runtime_status = {**default_messaging_status(), **(runtime_status or {})}
   navi_http_status = {**default_navi_http_state(), **(navi_http_status or {})}
   navi_tcp_status = {**default_navi_tcp_state(), **(navi_tcp_status or {})}
+  carrot_man_peer_status = _carrot_man_peer_state(carrot_man_peer_status)
   navi_http_available = bool(navi_http_status.get("available", False))
   navi_tcp_available = bool(navi_tcp_status.get("available", False))
 
@@ -1159,6 +1163,10 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None,
     "naviTcpLastError": str(navi_tcp_status.get("lastError", "")),
     "carrotManCompatible": True,
     "carrotManControlStateAvailable": False,
+    "carrotManPeer": carrot_man_peer_status,
+    "carrotManPeerActive": bool(carrot_man_peer_status.get("active", False)),
+    "carrotManPeerHost": str(carrot_man_peer_status.get("host", "")),
+    "carrotManPeerAgeSec": carrot_man_peer_status.get("ageSec", 0.0),
     "active": active,
     "log_carrot": str(runtime_status.get("logCarrot", "")),
     "v_ego_kph": round(_as_float(runtime_status.get("vEgoKph")), 1),
@@ -1567,6 +1575,75 @@ def default_navi_tcp_state() -> dict[str, Any]:
   }
 
 
+def default_carrot_man_peer_state() -> dict[str, Any]:
+  return {
+    "active": False,
+    "host": "",
+    "port": 0,
+    "source": "",
+    "lastSeenAt": 0.0,
+    "ageSec": 0.0,
+    "maxAgeSec": CARROT_MAN_PEER_MAX_AGE_S,
+    "lastError": "",
+  }
+
+
+def _peer_host_allowed(host: str) -> bool:
+  try:
+    ip = ipaddress.ip_address(host)
+  except ValueError:
+    return False
+  return not ip.is_multicast and not ip.is_unspecified and (
+    ip.is_private or ip.is_loopback or ip.is_link_local
+  )
+
+
+def _record_carrot_man_peer(app: web.Application, peer: Any, source: str) -> None:
+  if not isinstance(peer, tuple) or len(peer) < 2:
+    return
+  host = str(peer[0])
+  if not _peer_host_allowed(host):
+    return
+  try:
+    port = int(peer[1])
+  except Exception:
+    port = 0
+  state = app.get("carrot_man_peer_state")
+  if not isinstance(state, dict):
+    return
+  state.update({
+    "active": True,
+    "host": host,
+    "port": port,
+    "source": source[:48],
+    "lastSeenAt": time.time(),
+    "ageSec": 0.0,
+    "maxAgeSec": CARROT_MAN_PEER_MAX_AGE_S,
+    "lastError": "",
+  })
+
+
+def _carrot_man_peer_state(state: dict[str, Any] | None) -> dict[str, Any]:
+  result = {**default_carrot_man_peer_state(), **(state or {})}
+  last_seen_at = _as_float(result.get("lastSeenAt"), 0.0)
+  age_sec = max(0.0, time.time() - last_seen_at) if last_seen_at > 0.0 else 0.0
+  result["ageSec"] = round(age_sec, 3)
+  result["active"] = bool(result.get("host")) and last_seen_at > 0.0 and age_sec <= CARROT_MAN_PEER_MAX_AGE_S
+  if not result["active"] and result.get("host"):
+    result["lastError"] = "peer expired"
+  return result
+
+
+def _status_broadcast_targets(peer_state: dict[str, Any] | None) -> list[tuple[str, int]]:
+  targets: list[tuple[str, int]] = [(target, STATUS_BROADCAST_PORT) for target in STATUS_BROADCAST_TARGETS]
+  peer = _carrot_man_peer_state(peer_state)
+  if peer["active"]:
+    target = (str(peer["host"]), STATUS_BROADCAST_PORT)
+    if target not in targets:
+      targets.append(target)
+  return targets
+
+
 def _detect_navi_event_type(payload: Any) -> str:
   if not isinstance(payload, dict):
     return "unknown"
@@ -1781,6 +1858,7 @@ async def api_health(_request: web.Request) -> web.Response:
   messaging_state = _request.app["messaging_status_state"]
   navi_http_state = _request.app["navi_http_state"]
   navi_tcp_state = _request.app["navi_tcp_state"]
+  carrot_man_peer_state = _carrot_man_peer_state(_request.app.get("carrot_man_peer_state"))
   nav_state = navigation_event_state()
   nav_event = nav_state.get("event", {}) if isinstance(nav_state, dict) else {}
   feature_gates = carrot_feature_gate_state()
@@ -1791,8 +1869,10 @@ async def api_health(_request: web.Request) -> web.Response:
     "port": LOCAL_WEB_PORT,
     "statusBroadcastPort": STATUS_BROADCAST_PORT,
     "statusBroadcastTargets": list(STATUS_BROADCAST_TARGETS),
+    "statusBroadcastActiveTargets": [f"{host}:{port}" for host, port in _status_broadcast_targets(carrot_man_peer_state)],
     "statusBroadcastLastSentAt": status_last_sent_at,
     "statusBroadcastError": status_last_error,
+    "carrotManPeer": carrot_man_peer_state,
     "messagingAvailable": bool(messaging_state.get("available", False)),
     "messagingLastUpdateAt": float(messaging_state.get("lastUpdateAt", 0.0)),
     "messagingLastError": str(messaging_state.get("lastError", "")),
@@ -1880,16 +1960,20 @@ async def api_status_broadcast(_request: web.Request) -> web.Response:
   messaging_state = _request.app["messaging_status_state"]
   navi_http_state = _request.app["navi_http_state"]
   navi_tcp_state = _request.app["navi_tcp_state"]
+  carrot_man_peer_state = _carrot_man_peer_state(_request.app.get("carrot_man_peer_state"))
   return _json_response({
     "ok": True,
     "port": STATUS_BROADCAST_PORT,
     "targets": list(STATUS_BROADCAST_TARGETS),
+    "activeTargets": [f"{host}:{port}" for host, port in _status_broadcast_targets(carrot_man_peer_state)],
+    "lastTargets": status_state.get("lastTargets", []),
+    "carrotManPeer": carrot_man_peer_state,
     "lastSentAt": float(status_state.get("lastSentAt", 0.0)),
     "lastError": str(status_state.get("lastError", "")),
     "messagingStatus": messaging_state,
     "naviHttpStatus": navi_http_state,
     "naviTcpStatus": navi_tcp_state,
-    "payload": status_state.get("lastPayload") or build_status_payload(messaging_state, navi_http_state, navi_tcp_state),
+    "payload": status_state.get("lastPayload") or build_status_payload(messaging_state, navi_http_state, navi_tcp_state, carrot_man_peer_state),
   })
 
 
@@ -1970,6 +2054,7 @@ async def api_navi_http_post(request: web.Request) -> web.Response:
     except Exception as exc:
       return _json_response({"ok": False, "error": f"invalid json: {exc}", "controlOutput": False}, status=400)
   try:
+    _record_carrot_man_peer(request.app, request.transport.get_extra_info("peername") if request.transport else None, "http-7713")
     result = record_navi_http_event(request.app, body, request.match_info.get("tmap_version", ""))
     return _json_response({"ok": True, **result})
   except Exception as exc:
@@ -2427,17 +2512,19 @@ async def index(_request: web.Request) -> web.Response:
 
 
 class NavigationUdpProtocol(asyncio.DatagramProtocol):
-  def __init__(self) -> None:
+  def __init__(self, app: web.Application) -> None:
+    self.app = app
     self.last_error = ""
     self.last_datagram_at = 0.0
     self.last_recorded_at = 0.0
 
-  def datagram_received(self, data: bytes, _addr: tuple[str, int]) -> None:
+  def datagram_received(self, data: bytes, addr: tuple[str, int]) -> None:
     self.last_datagram_at = time.time()
     try:
       payload = json.loads(data.decode("utf-8", errors="replace"))
       if not isinstance(payload, dict):
         raise ValueError("navigation UDP payload must be a JSON object")
+      _record_carrot_man_peer(self.app, addr, "udp-7706")
       record_navigation_event(payload, "udp-7706")
       self.last_recorded_at = time.time()
       self.last_error = ""
@@ -2447,7 +2534,7 @@ class NavigationUdpProtocol(asyncio.DatagramProtocol):
 
 async def start_navigation_udp(app: web.Application) -> None:
   loop = asyncio.get_running_loop()
-  protocol = NavigationUdpProtocol()
+  protocol = NavigationUdpProtocol(app)
   try:
     transport, _ = await loop.create_datagram_endpoint(
       lambda: protocol,
@@ -2510,15 +2597,19 @@ async def status_broadcast_loop(app: web.Application) -> None:
   messaging_state = app["messaging_status_state"]
   navi_http_state = app["navi_http_state"]
   navi_tcp_state = app["navi_tcp_state"]
+  carrot_man_peer_state = app["carrot_man_peer_state"]
 
   while True:
     try:
-      payload = build_status_payload(dict(messaging_state), dict(navi_http_state), dict(navi_tcp_state))
+      peer_state = _carrot_man_peer_state(carrot_man_peer_state)
+      payload = build_status_payload(dict(messaging_state), dict(navi_http_state), dict(navi_tcp_state), peer_state)
       data = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-      for target in STATUS_BROADCAST_TARGETS:
-        transport.sendto(data, (target, STATUS_BROADCAST_PORT))
+      targets = _status_broadcast_targets(peer_state)
+      for target in targets:
+        transport.sendto(data, target)
       status_state["lastPayload"] = payload
       status_state["lastSentAt"] = time.time()
+      status_state["lastTargets"] = [f"{host}:{port}" for host, port in targets]
       status_state["lastError"] = ""
     except Exception as exc:
       status_state["lastError"] = str(exc)[:200]
@@ -2559,6 +2650,7 @@ async def handle_navi_tcp_client(reader: asyncio.StreamReader, writer: asyncio.S
   peer_text = f"{peer[0]}:{peer[1]}" if isinstance(peer, tuple) and len(peer) >= 2 else str(peer or "")
   state["activeConnections"] = int(state.get("activeConnections", 0)) + 1
   state["lastPeer"] = peer_text
+  _record_carrot_man_peer(app, peer, "tcp-7712")
   try:
     while True:
       line = await reader.readline()
@@ -2623,6 +2715,7 @@ async def start_navi_http(app: web.Application) -> None:
   navi_app = web.Application(client_max_size=NAVI_HTTP_MAX_BODY_SIZE)
   navi_app["navi_http_state"] = app["navi_http_state"]
   navi_app["navi_tcp_state"] = app["navi_tcp_state"]
+  navi_app["carrot_man_peer_state"] = app["carrot_man_peer_state"]
   add_navi_http_routes(navi_app)
   runner = web.AppRunner(navi_app, access_log=None)
   try:
@@ -2648,10 +2741,11 @@ async def stop_navi_http(app: web.Application) -> None:
 
 def make_app() -> web.Application:
   app = web.Application(client_max_size=NAVI_HTTP_MAX_BODY_SIZE)
-  app["status_broadcast_state"] = {"lastPayload": {}, "lastSentAt": 0.0, "lastError": ""}
+  app["status_broadcast_state"] = {"lastPayload": {}, "lastSentAt": 0.0, "lastTargets": [], "lastError": ""}
   app["messaging_status_state"] = default_messaging_status()
   app["navi_http_state"] = default_navi_http_state()
   app["navi_tcp_state"] = default_navi_tcp_state()
+  app["carrot_man_peer_state"] = default_carrot_man_peer_state()
   app["background_tasks"] = {"messaging_status": None, "navi_http_runner": None, "navi_tcp_server": None}
   app.on_startup.append(start_messaging_status)
   app.on_startup.append(start_navi_tcp)

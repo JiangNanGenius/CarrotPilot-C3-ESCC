@@ -1053,6 +1053,11 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       "available": True,
       "port": server.NAVI_TCP_PORT,
       "lastError": "",
+    }, {
+      "host": "192.168.100.174",
+      "port": 53000,
+      "source": "udp-7706",
+      "lastSeenAt": server.time.time(),
     })
     for key in ("Carrot2", "IsOnroad", "CarrotRouteActive", "ip", "port", "navi_http_port", "navi_tcp_port", "log_carrot",
                 "active", "v_ego_kph", "v_cruise_kph", "carcruiseSpeed", "tbt_dist", "sdi_dist", "xState", "trafficState"):
@@ -1066,6 +1071,13 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       return False, "status payload did not expose the active navigation TCP compatibility server"
     if payload.get("carrotManCompatible") is not True or payload.get("carrotManControlStateAvailable") is not False:
       return False, "status payload did not declare the read-only CarrotMan compatibility boundary"
+    if payload.get("carrotManPeerActive") is not True or payload.get("carrotManPeerHost") != "192.168.100.174":
+      return False, "status payload did not expose the active CarrotMan peer"
+    targets = server._status_broadcast_targets(payload.get("carrotManPeer", {}))
+    if ("192.168.100.174", server.STATUS_BROADCAST_PORT) not in targets:
+      return False, "status broadcast targets did not include the active private CarrotMan peer"
+    if server._peer_host_allowed("8.8.8.8"):
+      return False, "public CarrotMan peer should not be accepted for local status unicast"
     if payload.get("log_carrot") != "status ok":
       return False, "status payload did not expose log_carrot evidence"
     if payload.get("active") is not True or payload.get("v_ego_kph") != 48.6 or payload.get("v_cruise_kph") != 82.0:
@@ -1460,6 +1472,9 @@ def main() -> int:
   failures += not require("Carrot Web status broadcast declares compatibility boundary",
                           "carrotManCompatible" in carrot_server
                           and "carrotManControlStateAvailable" in carrot_server
+                          and "carrotManPeer" in carrot_server
+                          and "_record_carrot_man_peer" in carrot_server
+                          and "_status_broadcast_targets" in carrot_server
                           and "naviHttpAvailable" in carrot_server
                           and "NAVI_HTTP_PORT = 7713" in carrot_server
                           and "NAVI_TCP_PORT = 7712" in carrot_server
@@ -1476,6 +1491,7 @@ def main() -> int:
   failures += not require("Carrot Web status broadcast runtime", ok, detail or "status broadcast runtime check failed")
   failures += not require("Carrot Web navigation UDP input", "NAVIGATION_UDP_PORT = 7706" in carrot_server
                           and "class NavigationUdpProtocol" in carrot_server
+                          and '_record_carrot_man_peer(self.app, addr, "udp-7706")' in carrot_server
                           and "record_navigation_event(payload, \"udp-7706\")" in carrot_server,
                           "Carrot Web must listen for local Navipilot/APN UDP 7706 navigation JSON")
   failures += not require("Carrot Web navigation input remains evidence-only", "CarrotNavigationEvent" in carrot_server
@@ -1502,6 +1518,7 @@ def main() -> int:
                           '"/api/navi/{tmap_version}"' in carrot_server
                           and '"/api/navi"' in carrot_server
                           and "record_navi_http_event" in carrot_server
+                          and '"http-7713"' in carrot_server
                           and "CarrotNaviEvent" in carrot_server
                           and "CarrotNaviDebug" in carrot_server
                           and "CarrotNaviImage" in carrot_server,
@@ -1510,6 +1527,7 @@ def main() -> int:
                           "handle_navi_tcp_client" in carrot_server
                           and "record_navi_tcp_event" in carrot_server
                           and "NAVI_TCP_MAX_LINE_BYTES" in carrot_server
+                          and '_record_carrot_man_peer(app, peer, "tcp-7712")' in carrot_server
                           and '"tcp-7712"' in carrot_server,
                           "Carrot Web must provide the old CarrotMan 7712 line-delimited TCP navigation compatibility input")
   failures += not require("Carrot Web navigation HTTP remains evidence-only",
