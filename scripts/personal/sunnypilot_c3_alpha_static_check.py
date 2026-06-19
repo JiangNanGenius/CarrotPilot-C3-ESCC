@@ -1172,6 +1172,8 @@ def check_fishop_release_gate_runtime() -> tuple[bool, str]:
           "emitsLateralCommand": False,
           "stage": "display_only",
           "decision": "ready_for_suggestion",
+          "navigationGate": {"controlEligible": False},
+          "overtakeHint": {"controlOutput": False, "emitsLateralCommand": False},
         }},
       },
     }
@@ -1768,9 +1770,13 @@ def main() -> int:
                           and 'id="fishop-dynamic-risk"' in carrot_server
                           and 'id="fishop-overtake-path"' in carrot_server
                           and 'id="fishop-overtake-suggestion"' in carrot_server
+                          and 'id="fishop-navigation-gate"' in carrot_server
+                          and 'id="fishop-overtake-hint"' in carrot_server
                           and "laneQualitySummary" in carrot_server
                           and "dynamicRiskSummary" in carrot_server
                           and "suggestionSummary" in carrot_server
+                          and "navigationGateSummary" in carrot_server
+                          and "overtakeHintSummary" in carrot_server
                           and "snapshot.controlOutputEnabled ? \"control enabled\" : \"read-only\"" in carrot_server
                           and 'method:' not in carrot_server[carrot_server.index('async function refreshFishopHardware'):carrot_server.index('setInterval(refreshFishopHardware')],
                           "Carrot Web must show fishop lane/curve/lidar/target evidence through read-only GET only")
@@ -1796,6 +1802,11 @@ def main() -> int:
                           and "leftLidarOnline" in fishop_hardware
                           and "rightCameraOnline" in fishop_hardware
                           and "lidar_car_lblind" in fishop_hardware
+                          and "NAVIGATION_CONTEXT_KEYS" in fishop_hardware
+                          and "NAVIGATION_ACCURACY_THRESHOLD_M" in fishop_hardware
+                          and "NavigationContextEvidence" in fishop_hardware
+                          and '"navigationGate": navigation_policy' in fishop_hardware
+                          and '"overtakeHint": _overtake_hint' in fishop_hardware
                           and "remoteCmd" in fishop_hardware
                           and "DYNAMIC_BLIND_REFERENCE_DEFAULTS" in fishop_hardware
                           and "def _side_object_risk" in fishop_hardware
@@ -2107,8 +2118,11 @@ def main() -> int:
                             and fishop_snapshot["overtake"]["suggestionPreview"]["readOnly"]
                             and fishop_snapshot["overtake"]["suggestionPreview"]["controlOutput"] is False
                             and fishop_snapshot["overtake"]["suggestionPreview"]["emitsLateralCommand"] is False
+                            and fishop_snapshot["overtake"]["suggestionPreview"]["navigationGate"]["controlEligible"] is False
+                            and fishop_snapshot["overtake"]["suggestionPreview"]["overtakeHint"]["controlOutput"] is False
                             and fishop_snapshot["overtake"]["cmdIndex"] == 7
                             and fishop_snapshot["overtake"]["remoteCmd"] == "OVERTAKE"
+                            and fishop_snapshot["navigation"]["policy"]["controlEligible"] is False
                             and not fishop_snapshot["controlOutputEnabled"],
                             "fishop overtake input must be evidence-only and never enable control output")
     blocked_preview = fishop_snapshot["overtake"]["suggestionPreview"]
@@ -2153,12 +2167,54 @@ def main() -> int:
     clear_state.update_from_payload({"device": "overtake", "index": 8, "cmd": "OVERTAKE", "arg": "right",
                                      "request": True}, 2000.0)
     clear_preview = clear_state.to_dict(2000.2)["overtake"]["suggestionPreview"]
-    failures += not require("fishop overtake suggestion ready only when evidence is clear", clear_preview["decision"] == "ready_for_suggestion"
-                            and clear_preview["readyForSuggestion"] is True
+    failures += not require("fishop overtake suggestion blocked without navigation gate", clear_preview["decision"] == "blocked"
+                            and clear_preview["readyForSuggestion"] is False
                             and clear_preview["direction"] == "right"
-                            and clear_preview["reasons"] == []
+                            and clear_preview["navigationGate"]["decision"] == "hint_only"
+                            and "navigation context is stale or missing" in clear_preview["reasons"]
+                            and clear_preview["overtakeHint"]["available"] is True
                             and clear_preview["emitsLateralCommand"] is False,
-                            "clean fishop evidence may only produce a display-only suggestion preview")
+                            "clean fishop evidence may only produce a hint unless navigation/region/accuracy evidence passes")
+
+    australia_state = FishopHardwareState()
+    australia_state.update_from_payload({"resp": "lane", "left_lane": 0, "right_lane": 0, "lineValid": True}, 2100.0)
+    australia_state.update_from_payload({"device": "lidar", "resp": "blindspot", "detect_side": 3,
+                                         "lidar_lblind": False, "lidar_rblind": False,
+                                         "lidar_car_lblind": False, "lidar_car_rblind": False}, 2100.0)
+    australia_state.update_from_payload({"device": "camera", "resp": "cam_blind", "detect_side": 3,
+                                         "left_blind": False, "right_blind": False}, 2100.0)
+    australia_state.update_from_payload({"device": "navi", "provider": "Mapbox", "country": "AU",
+                                         "accuracyM": 3.0, "lat": -33.8688, "lon": 151.2093}, 2100.0)
+    australia_state.update_from_payload({"device": "overtake", "index": 9, "cmd": "OVERTAKE", "arg": "right",
+                                         "request": True}, 2100.0)
+    australia_preview = australia_state.to_dict(2100.2)["overtake"]["suggestionPreview"]
+    failures += not require("fishop overtake downgrades outside domestic map coverage", australia_preview["decision"] == "blocked"
+                            and australia_preview["readyForSuggestion"] is False
+                            and australia_preview["navigationGate"]["providerTrustedForSuggestion"] is False
+                            and australia_preview["navigationGate"]["regionSupportedForSuggestion"] is False
+                            and australia_preview["overtakeHint"]["available"] is True
+                            and australia_preview["emitsLateralCommand"] is False,
+                            "fishop overtake must stay hint-only outside supported domestic navigation coverage")
+
+    china_state = FishopHardwareState()
+    china_state.update_from_payload({"resp": "lane", "left_lane": 0, "right_lane": 0, "lineValid": True}, 2200.0)
+    china_state.update_from_payload({"device": "lidar", "resp": "blindspot", "detect_side": 3,
+                                     "lidar_lblind": False, "lidar_rblind": False,
+                                     "lidar_car_lblind": False, "lidar_car_rblind": False}, 2200.0)
+    china_state.update_from_payload({"device": "camera", "resp": "cam_blind", "detect_side": 3,
+                                     "left_blind": False, "right_blind": False}, 2200.0)
+    china_state.update_from_payload({"device": "navi", "provider": "Amap", "country": "CN",
+                                     "accuracyM": 4.0, "lat": 31.2304, "lon": 121.4737}, 2200.0)
+    china_state.update_from_payload({"device": "overtake", "index": 10, "cmd": "OVERTAKE", "arg": "right",
+                                     "request": True}, 2200.0)
+    china_preview = china_state.to_dict(2200.2)["overtake"]["suggestionPreview"]
+    failures += not require("fishop overtake suggestion requires trusted domestic navigation evidence", china_preview["decision"] == "ready_for_suggestion"
+                            and china_preview["readyForSuggestion"] is True
+                            and china_preview["navigationGate"]["suggestionEligible"] is True
+                            and china_preview["navigationGate"]["controlEligible"] is False
+                            and china_preview["overtakeHint"]["available"] is False
+                            and china_preview["emitsLateralCommand"] is False,
+                            "fishop overtake may only reach suggestion review with fresh Amap/Gaode China navigation accuracy evidence")
   except Exception as exc:
     failures += not require("fishop parser import/sample", False, f"fishop parser import/sample failed: {exc}")
 

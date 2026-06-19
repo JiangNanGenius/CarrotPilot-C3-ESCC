@@ -830,7 +830,10 @@ def summarize_fishop_release_gate(safe_params: dict[str, str], process: dict[str
     ),
     "fishopOvertakeDisplayOnly": gate_check(
       bool(preview.get("readOnly")) and preview.get("controlOutput") is False and preview.get("emitsLateralCommand") is False
-      and preview.get("stage") == "display_only",
+      and preview.get("stage") == "display_only"
+      and preview.get("navigationGate", {}).get("controlEligible") is False
+      and preview.get("overtakeHint", {}).get("controlOutput") is False
+      and preview.get("overtakeHint", {}).get("emitsLateralCommand") is False,
       not isinstance(preview, dict) or not preview,
       "fishop overtake preview is not display-only/read-only",
       "fishop overtake preview is missing",
