@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Visualization Replay Contract
+
+Expanded `scripts/personal/genius_visualization_contract.py` so the local gate now checks the full display coexistence contract:
+
+- Sunny, Carrot, and Fusion remain distinct base visual presets.
+- Carrot path/ribbon, lane-line, lead-box, radar-label, and lane-change intent display paths are all required.
+- Synthetic C3 replay geometry verifies nonblank path, lanes, lead box, and lane-change cues.
+- The replay check keeps path, lanes, lead box, and lane-change cue below the top speed/HUD area.
+- Display code remains read-only: it cannot publish planner/CAN/control messages, write params, open sockets, or alter lane-change decisions.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.8`.
+
 ## 2026-06-20 Genius Settings Matrix
 
 Added a repeatable owner matrix for the imported settings and display modes:

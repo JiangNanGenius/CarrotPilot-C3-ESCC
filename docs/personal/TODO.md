@@ -90,7 +90,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add Carrot path drawing modes as a separate renderer stage: Sunny original path, Carrot route ribbon/track markers, and Fusion Sunny body with Carrot path cues.
 - [x] Add a real Fishop overlay panel for lane curve, lidar left/right lane, lidar blindspot, navigation gate, and overtake suggestion evidence.
 - [x] Decide visualization coexistence rules: Sunny minimal, Carrot dense, Fusion balanced, and Fishop overlay independent on top only when local data is fresh.
-- [ ] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
+- [x] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
 - [x] Add Simplified/Traditional Chinese translations for the new visualization controls.
 
 ## Carrot, Auto-Tuner, And Fishop Hardware
