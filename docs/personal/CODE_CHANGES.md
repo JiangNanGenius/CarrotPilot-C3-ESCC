@@ -1,5 +1,24 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Genius Visualization Modes
+
+The driving screen now has explicit visualization modes instead of a single SunnyPilot-style renderer:
+
+- Added `GeniusVisualMode`: Sunny, Carrot, and Fusion presets.
+- Added `GeniusLaneLineStyle`: Simple, Colored, and Carrot lane-line drawing.
+- Added `GeniusLeadRadarVisualMode`: Sunny chevron, Carrot lead box, and radar speed labels.
+- Added `GeniusLaneChangeVisuals` for model lane-change intent cues.
+- Added `GeniusFishopVisualOverlay` as the future display-only entry for Fishop lane/lidar/blindspot evidence.
+
+The first renderer migration is display-only:
+
+- TICI/C3 onroad model rendering now supports Sunny-compatible simple lanes, Sunny/MICI colored lane confidence, and Carrot-style adjacent-lane emphasis.
+- Lead vehicles can be drawn as Carrot-style outline boxes, with radar/model colors and optional speed tags.
+- Lane-change intent cues use the existing onroad event stream and do not alter lane-change control.
+- Fishop overlay is documented and exposed, but direct Fishop control output remains outside this stage.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.2`.
+
 ## 2026-06-20 NNLC And Super Advanced Carrot Controls
 
 The personal alpha now treats NNLC/NLC as a supported-car default:

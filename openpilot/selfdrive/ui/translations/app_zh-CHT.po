@@ -964,3 +964,51 @@ msgstr "Super Advanced"
 
 msgid "This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, and SCC-M stay hidden and forced off. Sunny DEC is available as an off-by-default advanced option in Cruise and Super Advanced settings."
 msgstr "這個個人版的巡航控速邏輯以 CarrotPilot 為準。SunnyPilot 的 ICBM、SCC-V 和 SCC-M 會隱藏並強制關閉。Sunny DEC 作為預設關閉的進階候選功能放在 Cruise 和 Super Advanced 設定裡。"
+
+msgid "Genius Lane Change Visuals"
+msgstr "Genius 變道視覺化"
+
+msgid "Show lane-change intent cues on the driving screen using the model lane-change events. This is display-only."
+msgstr "使用模型變道事件，在駕駛畫面顯示變道意圖提示。此功能只影響顯示。"
+
+msgid "Fishop Visual Overlay"
+msgstr "Fishop 視覺化疊加"
+
+msgid "Reserve the driving screen for Fishop lane, lidar lane, and blindspot visual evidence. This does not enable automatic overtake control."
+msgstr "為 Fishop 車道、雷射雷達車道和盲區證據預留駕駛畫面疊加層。它不會啟用自動超車控制。"
+
+msgid "Genius Visualization Preset"
+msgstr "Genius 視覺化預設"
+
+msgid "Choose a display preset. Sunny keeps the stock look, Carrot emphasizes lane and lead-car information, and Fusion combines Sunny HUD elements with Carrot-style road visualization."
+msgstr "選擇顯示預設。Sunny 保留原始風格，Carrot 強化車道和前車資訊，Fusion 把 Sunny HUD 和 Carrot 風格道路顯示結合起來。"
+
+msgid "Lane-Line Style"
+msgstr "車道線樣式"
+
+msgid "Simple uses white lanes and red road edges. Colored highlights active lane confidence. Carrot adds stronger adjacent-lane emphasis and torque color cues."
+msgstr "Simple 使用白色車道線和紅色道路邊緣。Colored 突出顯示車道信心度。Carrot 會加強相鄰車道顯示，並加入轉向力矩顏色提示。"
+
+msgid "Lead And Radar Display"
+msgstr "前車和雷達顯示"
+
+msgid "Chevron uses Sunny's lead marker. Box draws a Carrot-style lead-car frame. Radar also shows speed labels for tracked leads."
+msgstr "Chevron 使用 Sunny 的前車標記。Box 繪製 Carrot 風格前車框。Radar 還會給追蹤到的前車顯示速度標籤。"
+
+msgid "Fusion"
+msgstr "融合"
+
+msgid "Simple"
+msgstr "簡潔"
+
+msgid "Colored"
+msgstr "彩色"
+
+msgid "Chevron"
+msgstr "箭頭"
+
+msgid "Box"
+msgstr "方框"
+
+msgid "Radar"
+msgstr "雷達"

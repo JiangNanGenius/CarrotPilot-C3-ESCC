@@ -243,6 +243,11 @@ AUTO_TUNER_DEFAULTS = {
   "FishopLaneCurveEnabled": 0,
   "FishopLidarBlindspotEnabled": 0,
   "FishopLidarLaneDataEnabled": 0,
+  "GeniusFishopVisualOverlay": 0,
+  "GeniusLaneChangeVisuals": 1,
+  "GeniusLaneLineStyle": 1,
+  "GeniusLeadRadarVisualMode": 1,
+  "GeniusVisualMode": 2,
   "IsMetric": 1,
   "IsOnroad": 0,
   "NeuralNetworkLateralControl": 1,
@@ -2006,7 +2011,15 @@ def main() -> int:
                           "CarrotLearningAutoApply must default to 0")
   failures += not require("NNLC defaults on for supported cars", '{"NeuralNetworkLateralControl", {PERSISTENT | BACKUP, BOOL, "1"}}' in params,
                           "NeuralNetworkLateralControl must default to 1; unsupported cars are cleaned by Sunny support checks")
-  failures += not require("prebuilt params extension includes Carrot/Fishop keys",
+  failures += not require("Genius visualization defaults", all(token in params for token in (
+                            '{"GeniusVisualMode", {PERSISTENT | BACKUP, INT, "2"}}',
+                            '{"GeniusLaneLineStyle", {PERSISTENT | BACKUP, INT, "1"}}',
+                            '{"GeniusLeadRadarVisualMode", {PERSISTENT | BACKUP, INT, "1"}}',
+                            '{"GeniusLaneChangeVisuals", {PERSISTENT | BACKUP, BOOL, "1"}}',
+                            '{"GeniusFishopVisualOverlay", {PERSISTENT | BACKUP, BOOL, "0"}}',
+                          )),
+                          "Genius visualization params must exist with Fusion defaults and Fishop overlay off")
+  failures += not require("prebuilt params extension includes Carrot/Fishop/Genius keys",
                           all(token in params_pyx for token in (
                             b"CarrotPhoneSpeedLimitEnabled",
                             b"CarrotLearningActive",
@@ -2015,8 +2028,11 @@ def main() -> int:
                             b"CarrotCruiseAtcDecel",
                             b"FishopLaneCurveEnabled",
                             b"NeuralNetworkLateralControl",
+                            b"GeniusVisualMode",
+                            b"GeniusLaneLineStyle",
+                            b"GeniusLeadRadarVisualMode",
                           )),
-                          "common/params_pyx.so must be rebuilt when alpha params_keys.h adds local Carrot/Fishop keys")
+                          "common/params_pyx.so must be rebuilt when alpha params_keys.h adds local Carrot/Fishop/Genius keys")
   for key in (
     "CarrotLearningData",
     "CarrotLearningRecommend",
@@ -2183,6 +2199,8 @@ def main() -> int:
                           and '"SpeedFromPCM": {"type": "int", "default": 1, "writable": False' in carrot_server
                           and '"SpeedLimitMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 3}' in carrot_server
                           and '"CurveSpeedControlMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 3}' in carrot_server
+                          and '"GeniusVisualMode": {"type": "int", "default": 2, "writable": True, "min": 0, "max": 2}' in carrot_server
+                          and '"GeniusLeadRadarVisualMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 2}' in carrot_server
                           and '"FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": True}' in carrot_server,
                           "Carrot Web params API must expose an explicit whitelist, keep hardware-only params read-only, and allow Carrot advanced settings while offroad")
   failures += not require("Carrot Web params API preserves Navipilot response contract",
@@ -2662,6 +2680,9 @@ def main() -> int:
   settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
   carrot_settings = read("selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
   cruise_settings = read("selfdrive/ui/sunnypilot/layouts/settings/cruise.py")
+  visuals_settings = read("selfdrive/ui/sunnypilot/layouts/settings/visuals.py")
+  onroad_model_renderer = read("selfdrive/ui/onroad/model_renderer.py")
+  turn_signal_renderer = read("selfdrive/ui/sunnypilot/onroad/turn_signal.py")
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
   core_mici_settings = read("selfdrive/ui/mici/layouts/settings/settings.py")
   settings_ui_device = read("sunnypilot/sunnylink/settings_ui_src/pages/device.yaml")
@@ -2727,6 +2748,29 @@ def main() -> int:
                           and "self._params.put_bool(param, False)" not in carrot_settings
                           and "toggle.action_item.set_enabled(False)" not in carrot_settings,
                           "Carrot/fishop advanced controls must stay visible and user-toggleable while offroad")
+  failures += not require("Genius visualization settings exposed",
+                          all(token in visuals_settings for token in (
+                            "GeniusVisualMode",
+                            "GeniusLaneLineStyle",
+                            "GeniusLeadRadarVisualMode",
+                            "GeniusLaneChangeVisuals",
+                            "GeniusFishopVisualOverlay",
+                            "Genius Visualization Preset",
+                            "Lead And Radar Display",
+                          )),
+                          "Visuals settings must expose Genius visualization presets, lane style, radar lead mode, lane-change cues, and Fishop overlay")
+  failures += not require("Genius visualization renderer wired",
+                          all(token in onroad_model_renderer for token in (
+                            "_update_leads_carrot",
+                            "_draw_lead_rect",
+                            "_update_radar_info",
+                            "_get_lane_line_color",
+                            "genius_lead_radar_visual_mode",
+                            "genius_lane_line_style",
+                          ))
+                          and "LaneChangeIntentWidget" in turn_signal_renderer
+                          and "genius_lane_change_visuals" in turn_signal_renderer,
+                          "onroad renderer must wire Carrot-style lead boxes, radar labels, lane-line coloring, and lane-change intent cues")
   failures += not require("Cruise exposes staged Carrot longitudinal controls",
                           all(token in cruise_settings for token in (
                             "DynamicExperimentalControl",

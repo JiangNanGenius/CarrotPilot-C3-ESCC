@@ -28,6 +28,16 @@ class VisualsLayout(Widget):
 
   def _initialize_items(self):
     self._toggle_defs = {
+      "GeniusLaneChangeVisuals": (
+        lambda: tr("Genius Lane Change Visuals"),
+        tr("Show lane-change intent cues on the driving screen using the model lane-change events. This is display-only."),
+        None,
+      ),
+      "GeniusFishopVisualOverlay": (
+        lambda: tr("Fishop Visual Overlay"),
+        tr("Reserve the driving screen for Fishop lane, lidar lane, and blindspot visual evidence. This does not enable automatic overtake control."),
+        None,
+      ),
       "BlindSpot": (
         lambda: tr("Show Blind Spot Warnings"),
         tr("Enabling this will display warnings when a vehicle is detected in your " +
@@ -105,6 +115,32 @@ class VisualsLayout(Widget):
       )
       self._toggles[param] = toggle
 
+    self._genius_visual_mode = multiple_button_item_sp(
+      title=lambda: tr("Genius Visualization Preset"),
+      description=lambda: tr("Choose a display preset. Sunny keeps the stock look, Carrot emphasizes lane and lead-car information, and Fusion combines Sunny HUD elements with Carrot-style road visualization."),
+      buttons=[lambda: tr("Sunny"), lambda: tr("Carrot"), lambda: tr("Fusion")],
+      param="GeniusVisualMode",
+      callback=self._apply_visual_preset,
+      button_width=300,
+      inline=False,
+    )
+    self._genius_lane_line_style = multiple_button_item_sp(
+      title=lambda: tr("Lane-Line Style"),
+      description=lambda: tr("Simple uses white lanes and red road edges. Colored highlights active lane confidence. Carrot adds stronger adjacent-lane emphasis and torque color cues."),
+      buttons=[lambda: tr("Simple"), lambda: tr("Colored"), lambda: tr("Carrot")],
+      param="GeniusLaneLineStyle",
+      button_width=300,
+      inline=False,
+    )
+    self._genius_lead_radar_visual_mode = multiple_button_item_sp(
+      title=lambda: tr("Lead And Radar Display"),
+      description=lambda: tr("Chevron uses Sunny's lead marker. Box draws a Carrot-style lead-car frame. Radar also shows speed labels for tracked leads."),
+      buttons=[lambda: tr("Chevron"), lambda: tr("Box"), lambda: tr("Radar")],
+      param="GeniusLeadRadarVisualMode",
+      button_width=300,
+      inline=False,
+    )
+
     self._chevron_info = multiple_button_item_sp(
       title=lambda: tr("Display Metrics Below Chevron"),
       description="",
@@ -121,11 +157,29 @@ class VisualsLayout(Widget):
       inline=False
     )
 
-    items = list(self._toggles.values()) + [
+    items = [
+      self._genius_visual_mode,
+      self._genius_lane_line_style,
+      self._genius_lead_radar_visual_mode,
+    ] + list(self._toggles.values()) + [
       self._chevron_info,
       self._dev_ui_info,
     ]
     return items
+
+  def _apply_visual_preset(self, preset: int):
+    self._params.put("GeniusVisualMode", preset)
+    if preset == 0:
+      self._params.put("GeniusLaneLineStyle", 0)
+      self._params.put("GeniusLeadRadarVisualMode", 0)
+    elif preset == 1:
+      self._params.put("GeniusLaneLineStyle", 2)
+      self._params.put("GeniusLeadRadarVisualMode", 2)
+      self._params.put_bool("GeniusLaneChangeVisuals", True)
+    else:
+      self._params.put("GeniusLaneLineStyle", 1)
+      self._params.put("GeniusLeadRadarVisualMode", 1)
+      self._params.put_bool("GeniusLaneChangeVisuals", True)
 
   def _update_state(self):
     super()._update_state()
@@ -133,6 +187,9 @@ class VisualsLayout(Widget):
     for param in self._toggle_defs:
       self._toggles[param].action_item.set_state(self._params.get_bool(param))
 
+    self._genius_visual_mode.action_item.set_selected_button(self._params.get("GeniusVisualMode", return_default=True))
+    self._genius_lane_line_style.action_item.set_selected_button(self._params.get("GeniusLaneLineStyle", return_default=True))
+    self._genius_lead_radar_visual_mode.action_item.set_selected_button(self._params.get("GeniusLeadRadarVisualMode", return_default=True))
     self._dev_ui_info.action_item.set_selected_button(ui_state.params.get("DevUIInfo", return_default=True))
 
     if ui_state.has_longitudinal_control:

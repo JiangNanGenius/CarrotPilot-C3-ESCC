@@ -28,6 +28,7 @@ Do not move `/i` or stable/latest to the alpha line until the C3 parked checks a
 - Do not expose or enable SunnyPilot ICBM, SCC-V, or SCC-M in the personal build; they overlap with Carrot button, curve, map, and speed-limit paths.
 - Sunny DEC may be retained as an off-by-default advanced longitudinal option. It must not lock out Carrot active speed, turn slowdown/ATC, or traffic-light stop settings.
 - Carrot-style settings are preferred: every control behavior should have a visible setting, a clear Chinese/English description, conservative default, owner/source note, and rollback path.
+- Onroad visualization is separate from control behavior. `GeniusVisualMode`, `GeniusLaneLineStyle`, `GeniusLeadRadarVisualMode`, `GeniusLaneChangeVisuals`, and `GeniusFishopVisualOverlay` may combine Sunny HUD, Carrot lane/lead/radar drawing, and future Fishop evidence overlays, but they must not emit planner, CAN, lane-change, or overtake control output.
 - When three reference lines disagree, build a setting matrix first: ajouatom CarrotPilot, jixiexiaoge/mechanical, and masang-feiyang/ESCC. Decide one owner per behavior and avoid unexplained compatibility aliases.
 - User-facing alpha branding should move toward Genius Pilot. Keep upstream package/module names only where renaming would create code risk.
 - Genius Pilot version numbers follow the SunnyPilot base and append the personal build suffix: `<SunnyPilot base>-gp.<YYYYMMDD>.<patch>`.
@@ -44,6 +45,7 @@ When the user says to update, use this order:
    In short: do not import private registration or upload/cloud client behavior from reference forks.
 4. Compare Carrot changes for Carrot Web, CarrotMan/Navipilot/APN/N input, speed-limit logic, model/map behavior, Auto-Tuner, localization, and fishop hardware fields.
    Treat CarrotPilot behavior and setting granularity as the target; use SunnyPilot implementation only when it is the safer/newer base primitive.
+   For onroad visualization, keep Sunny, Carrot, and Fusion display modes available, and treat Fishop/lidar overlays as evidence display until a later safety-chain stage exists.
 5. Preserve personal defaults: stock model, NNLC on for supported cars, map overlay off, speed offset zero, phone speed policy with timeout, cloud disabled, Carrot advanced controls default off but available while offroad.
 6. Bump `sunnypilot/common/version.h` before pushing: keep the SunnyPilot base aligned to upstream, increment the same-day Genius patch, and reset patch to `1` on a new publish date.
 7. Run the release gate before pushing.
