@@ -2494,6 +2494,7 @@ def main() -> int:
   mac_replay_shadow = read("scripts/personal/build_mac_replay_shadow.py")
   model_manager_contract = read("scripts/personal/genius_model_manager_contract.py")
   super_advanced_contract = read("scripts/personal/genius_super_advanced_contract.py")
+  c3_touch_contract = read("scripts/personal/genius_c3_touch_contract.py")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
   nnlc_controller = read("sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
@@ -2976,6 +2977,7 @@ def main() -> int:
                           and "build_mac_replay_shadow.py" in release_gate
                           and "genius_model_manager_contract.py" in release_gate
                           and "genius_super_advanced_contract.py" in release_gate
+                          and "genius_c3_touch_contract.py" in release_gate
                           and "genius_offline_replay_check.py" in release_gate
                           and "genius_ui_replay_check.py" in release_gate
                           and "--fetch-references" in release_gate
@@ -3708,6 +3710,26 @@ def main() -> int:
                           and "self.set_tap_release_move_px(80)" in mici_setup
                           and "BigPillButton" in mici_updater,
                           "setup/update install buttons must keep wider per-widget release tolerance and parent hit-test fallback while ordinary widgets stay stricter")
+  failures += not require("Genius C3 touch fallback contract exists",
+                          "Genius Pilot C3 Touch Fallback Contract" in c3_touch_contract
+                          and "FallbackHarness" in c3_touch_contract
+                          and "expanded critical hit region accepts clone-C3 edge drift" in c3_touch_contract
+                          and "press fallback triggers once and release is suppressed" in c3_touch_contract
+                          and "release fallback still works when press event is lost" in c3_touch_contract
+                          and "disabled fallback action cannot fire" in c3_touch_contract
+                          and "later rendered fallback action wins overlapping hit regions" in c3_touch_contract,
+                          "C3 touch contract must simulate expanded hit regions, press/release fallback, disabled buttons, and overlap order")
+  failures += not require("Genius C3 touch fallback contract release gate wired",
+                          "scripts/personal/genius_c3_touch_contract.py" in release_gate
+                          and "Genius C3 touch fallback contract" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must self-test the C3 touch fallback contract")
+  failures += not require("Genius C3 touch fallback contract documented",
+                          "genius_c3_touch_contract.py --json" in agents_md
+                          and "2026.002.000-gp.20260620.43" in code_changes_md
+                          and "C3 Touch Fallback Contract" in code_changes_md
+                          and "Verify C3 setup/update/settings touch fallback locally through `genius_c3_touch_contract.py`" in todo_md,
+                          "agent guide, code changes, and TODO must document the C3 touch fallback contract")
   failures += not require("Sidebar temperature is numeric Celsius",
                           "TEMP_FALLBACK_TEXT = tr_noop(\"--C\")" in sidebar_layout
                           and "TEMP_SCALAR_FIELDS" in sidebar_layout

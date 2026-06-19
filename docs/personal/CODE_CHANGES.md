@@ -1,5 +1,36 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 C3 Touch Fallback Contract
+
+Published as `2026.002.000-gp.20260620.43`.
+
+Added `scripts/personal/genius_c3_touch_contract.py` so the clone C3
+setup/update/settings touch fallback is checked by a local behavior simulation,
+not only by source-string checks.
+
+The contract verifies:
+
+- TICI setup has parent-level fallback actions for first-install/recovery
+  screens.
+- TICI updater keeps expanded fallback hit regions for `Connect to Wi-Fi`,
+  `Install`, `Back`, and failure `Reboot`.
+- Settings entry keeps the longer open guard and relaxed sidebar tap handling.
+- Expanded critical hit regions accept expected clone-C3 edge drift.
+- Press-time fallback fires once and suppresses duplicate release handling.
+- Release-time fallback still works if the press callback is lost.
+- Disabled fallback actions cannot fire.
+- Later rendered fallback actions win overlapping hit regions.
+
+Local validation:
+
+```bash
+python3 scripts/personal/genius_c3_touch_contract.py --json
+```
+
+The release/static gates now self-test this contract. Physical C3 confirmation
+is still separate: after the next clean `/x` flash, the dependency/setup
+buttons and settings sidebar still need user or SSH/UI evidence.
+
 ## 2026-06-20 C3 Touch Fallback And Super Advanced Contract
 
 Published as `2026.002.000-gp.20260620.42`.
