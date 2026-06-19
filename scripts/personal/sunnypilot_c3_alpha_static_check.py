@@ -16,8 +16,26 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 
+def materialize_path(path: Path) -> None:
+  if sys.platform != "darwin" or shutil.which("brctl") is None:
+    return
+  try:
+    subprocess.run(
+      ["brctl", "download", str(path)],
+      cwd=ROOT,
+      stdout=subprocess.DEVNULL,
+      stderr=subprocess.DEVNULL,
+      check=False,
+      timeout=3,
+    )
+  except Exception:
+    pass
+
+
 def read(rel: str) -> str:
-  return (ROOT / rel).read_text(encoding="utf-8")
+  path = ROOT / rel
+  materialize_path(path)
+  return path.read_text(encoding="utf-8")
 
 
 def read_tree(rel: str, suffixes: tuple[str, ...]) -> str:
@@ -26,6 +44,7 @@ def read_tree(rel: str, suffixes: tuple[str, ...]) -> str:
   for path in root.rglob("*"):
     if not path.is_file() or path.suffix not in suffixes:
       continue
+    materialize_path(path)
     if path.stat().st_size > 1_000_000:
       continue
     chunks.append(path.read_text(encoding="utf-8", errors="ignore"))
@@ -48,7 +67,7 @@ def po_has_translation(po_text: str, msgid: str) -> bool:
 def find_token_in_tree(rel: str, tokens: tuple[str, ...], suffixes: tuple[str, ...]) -> tuple[str, str] | None:
   root = ROOT / rel
   deadline = time.monotonic() + 20
-  rg = shutil.which("rg")
+  rg = None if sys.platform == "darwin" else shutil.which("rg")
   if rg is not None:
     glob_args: list[str] = []
     for suffix in suffixes:
@@ -86,6 +105,7 @@ def find_token_in_tree(rel: str, tokens: tuple[str, ...], suffixes: tuple[str, .
       continue
     if any(part in skip_dirs for part in path.relative_to(root).parts):
       continue
+    materialize_path(path)
     if path.stat().st_size > 1_000_000:
       continue
     text = path.read_text(encoding="utf-8", errors="ignore")
@@ -1386,7 +1406,13 @@ def check_alpha_snapshot_navipilot_live_check_runtime() -> tuple[bool, str]:
 def check_c3_compat_audit_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
-      [sys.executable, "scripts/personal/sunnypilot_c3_compat_audit.py", "--strict"],
+      [
+        sys.executable,
+        "scripts/personal/sunnypilot_c3_compat_audit.py",
+        "--strict",
+        "--skip-reference-refs",
+        "--skip-git-metadata",
+      ],
       cwd=ROOT,
       capture_output=True,
       text=True,

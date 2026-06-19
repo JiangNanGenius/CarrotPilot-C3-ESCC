@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 from typing import Any
@@ -72,8 +73,26 @@ def run_git(args: list[str]) -> tuple[int, str]:
     return 124, f"{cmd} timed out after 15s\n{output}".strip()
 
 
+def materialize_path(path: Path) -> None:
+  if sys.platform != "darwin" or shutil.which("brctl") is None:
+    return
+  try:
+    subprocess.run(
+      ["brctl", "download", str(path)],
+      cwd=ROOT,
+      stdout=subprocess.DEVNULL,
+      stderr=subprocess.DEVNULL,
+      check=False,
+      timeout=3,
+    )
+  except Exception:
+    pass
+
+
 def read(rel: str) -> str:
-  return (ROOT / rel).read_text(encoding="utf-8", errors="ignore")
+  path = ROOT / rel
+  materialize_path(path)
+  return path.read_text(encoding="utf-8", errors="ignore")
 
 
 def file_exists(rel: str) -> bool:
@@ -308,11 +327,19 @@ def local_checks() -> list[dict[str, Any]]:
   ]
 
 
-def build_report(include_reference_diffs: bool = False) -> dict[str, Any]:
-  code, head = run_git(["rev-parse", "--short=12", "HEAD"])
-  code_branch, branch = run_git(["branch", "--show-current"])
+def build_report(
+  include_reference_diffs: bool = False,
+  include_references: bool = True,
+  include_git_metadata: bool = True,
+) -> dict[str, Any]:
+  if include_git_metadata:
+    code, head = run_git(["rev-parse", "--short=12", "HEAD"])
+    code_branch, branch = run_git(["branch", "--show-current"])
+  else:
+    code, head = 1, ""
+    code_branch, branch = 1, ""
   checks = local_checks()
-  refs = reference_state(include_reference_diffs)
+  refs = reference_state(include_reference_diffs) if include_references else {}
   return {
     "metadata": {
       "title": "CarrotPilot-C3-ESCC C3/TICI Compatibility Audit",
@@ -340,10 +367,16 @@ def main() -> int:
   parser.add_argument("--pretty", action="store_true", help="pretty-print JSON")
   parser.add_argument("--strict", action="store_true", help="fail if any local compatibility check fails")
   parser.add_argument("--include-reference-diffs", action="store_true", help="include git diff summaries against local reference refs")
+  parser.add_argument("--skip-reference-refs", action="store_true", help="skip optional reference ref discovery for fast local/static checks")
+  parser.add_argument("--skip-git-metadata", action="store_true", help="skip optional branch/commit discovery for fast local/static checks")
   parser.add_argument("--require-mrone-refs", action="store_true", help="also fail when Mr.One local refs are missing")
   args = parser.parse_args()
 
-  report = build_report(include_reference_diffs=args.include_reference_diffs)
+  report = build_report(
+    include_reference_diffs=args.include_reference_diffs and not args.skip_reference_refs,
+    include_references=not args.skip_reference_refs,
+    include_git_metadata=not args.skip_git_metadata,
+  )
   print(json.dumps(report, ensure_ascii=False, indent=2 if args.pretty else None, sort_keys=True))
   if args.strict and report["failedChecks"]:
     return 2
