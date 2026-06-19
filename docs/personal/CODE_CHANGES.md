@@ -88,6 +88,32 @@ Initial reference baseline fetched on 2026-06-19:
 
 Risk-token hits in reference branches do not fail the audit by themselves. They are review evidence so cloud/private/power behavior is not copied into this personal alpha by accident.
 
+## 2026-06-19 Alpha Verification Refresh
+
+After replacing `/x` with the Qt-compatible C3 installer, the alpha line was verified from a clean workspace at commit `31d58e626f4a99c573dd51d9771edf637e1bca51`.
+
+Passed gates:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py
+python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full
+python3 scripts/personal/sunnypilot_c3_installer_audit.py \
+  --expected-sha256 e284ab3c54c671f6409e966765f04ef9f1b90a1ea0bafa6dfd9a71c7d4189c8d
+python3 scripts/personal/build_c3_qt_compat_installer.py \
+  --source-file /tmp/gitop_cp \
+  --output /tmp/carrot_x_qt_compat_from_published_source
+python3 scripts/personal/sunnypilot_c3_alpha_update_audit.py \
+  --fetch --strict --scan-risk-tokens --json
+```
+
+Update audit result: `ok=True`, `watchPathCount=26`, `riskTokenCount=14`. Reference branches were refreshed and reviewed at the same commits listed in the initial baseline above. The highest-risk reviewed deltas remain SunnyPilot cloud/Sunnylink/uploader code in reference branches and are intentionally not imported into this personal alpha.
+
+Open evidence still required before promoting alpha to stable/latest:
+
+- `/x` install retry on the clone C3.
+- Parked C3 snapshot showing no cloud/upload processes and working local Web/SSH/update/model manager.
+- Seltos 2023 SCC/ESCC road evidence with stock model and Carrot high-risk controls off.
+
 ## 2026-06-19 C3 Device Evidence Collector
 
 `scripts/personal/sunnypilot_c3_device_collect.py` can SSH to the clone C3, collect install/launch logs, process lists, safe params, network listeners, and a Carrot alpha snapshot, then fetch a tarball back to the Mac desktop.
