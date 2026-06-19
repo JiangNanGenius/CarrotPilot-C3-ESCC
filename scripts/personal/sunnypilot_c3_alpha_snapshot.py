@@ -138,6 +138,7 @@ ALPHA_INSTALL_URL = "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x"
 STABLE_ROLLBACK_INSTALL_URL = "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i"
 HYUNDAI_SP_ENHANCED_SCC_FLAG = 1
 HYUNDAI_SP_ESCC_SAFETY_PARAM = 1
+COMMAND_TIMEOUT_S = 12.0
 MESSAGING_SERVICES = (
   "modelV2",
   "drivingModelData",
@@ -150,16 +151,36 @@ MESSAGING_SERVICES = (
 )
 
 
-def run(cmd: Sequence[str]) -> tuple[int, str]:
+def command_env() -> dict[str, str]:
+  env = os.environ.copy()
+  env.setdefault("GIT_TERMINAL_PROMPT", "0")
+  env.setdefault("GIT_OPTIONAL_LOCKS", "0")
+  return env
+
+
+def run(cmd: Sequence[str], timeout: float = COMMAND_TIMEOUT_S) -> tuple[int, str]:
   try:
-    proc = subprocess.run(list(cmd), cwd=str(ROOT), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    proc = subprocess.run(
+      list(cmd),
+      cwd=str(ROOT),
+      env=command_env(),
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      timeout=timeout,
+    )
     return proc.returncode, proc.stdout.strip()
+  except subprocess.TimeoutExpired:
+    return 124, f"{cmd[0]} timed out after {timeout:.0f}s"
   except OSError as exc:
     return 127, f"{cmd[0]} unavailable: {exc}"
 
 
 def git_value(args: Sequence[str]) -> str:
-  code, output = run(["git", *args])
+  git_args = ["-c", "core.fsmonitor=false", "-c", "gc.auto=0", "-c", "maintenance.auto=false", *args]
+  if list(args[:2]) == ["status", "--short"] and "--untracked-files=no" not in args:
+    git_args.append("--untracked-files=no")
+  code, output = run(["git", *git_args])
   return output if code == 0 and output else "unknown"
 
 
