@@ -11,7 +11,7 @@ from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.widgets.button import Button, ButtonStyle
 from openpilot.system.ui.widgets.label import Label
-from openpilot.system.version import sunnylink_consent_version, sunnylink_consent_declined
+from openpilot.system.version import sunnylink_consent_declined
 
 
 class SunnylinkConsentPage(Widget):
@@ -20,22 +20,19 @@ class SunnylinkConsentPage(Widget):
     self._done_callback = done_callback
     self._step = 0
 
-    self._title = self._child(Label(tr("sunnylink"), font_size=90, font_weight=FontWeight.BOLD, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT))
+    self._title = self._child(Label(tr("Genius Pilot Local Mode"), font_size=90, font_weight=FontWeight.BOLD, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT))
 
     self._content = [
       {
-        "text": tr("sunnylink enables secured remote access to your comma device from anywhere, " +
-                   "including settings management, remote monitoring, real-time dashboard, etc."),
-        "primary_btn": tr("Enable"),
-        "secondary_btn": tr("Disable"),
+        "text": tr("This personal build does not use Sunnylink or comma cloud pairing. Local Wi-Fi, SSH, Web, GitHub updates, and model downloads stay available."),
+        "primary_btn": tr("Continue"),
+        "secondary_btn": tr("Back"),
         "highlight_primary": True
       },
       {
-        "text": tr("sunnylink is designed to be enabled as part of sunnypilot's core functionality. " +
-                   "If sunnylink is disabled, features such as settings management, remote monitoring, " +
-                   "real-time dashboards will be unavailable."),
+        "text": tr("Cloud upload, remote pairing, Sunnylink backup, and onroad uploads are disabled in Genius Pilot C3 alpha."),
         "secondary_btn": tr("Back"),
-        "danger_btn": tr("Disable"),
+        "danger_btn": tr("Continue"),
         "highlight_primary": True
       }
     ]
@@ -47,8 +44,8 @@ class SunnylinkConsentPage(Widget):
 
   def _handle_choice(self, choice):
     if choice == "enable":
-      ui_state.params.put_bool("SunnylinkEnabled", True)
-      ui_state.params.put("CompletedSunnylinkConsentVersion", sunnylink_consent_version)
+      ui_state.params.put_bool("SunnylinkEnabled", False)
+      ui_state.params.put("CompletedSunnylinkConsentVersion", sunnylink_consent_declined)
       if self._done_callback:
         self._done_callback()
     elif choice == "secondary":
@@ -101,7 +98,9 @@ class SunnylinkConsentPage(Widget):
 class SunnylinkOnboarding:
   def __init__(self):
     self.consent_page = SunnylinkConsentPage(done_callback=self._on_done)
-    self.consent_done: bool = ui_state.params.get("CompletedSunnylinkConsentVersion") in {sunnylink_consent_version, sunnylink_consent_declined}
+    ui_state.params.put_bool("SunnylinkEnabled", False)
+    ui_state.params.put("CompletedSunnylinkConsentVersion", sunnylink_consent_declined)
+    self.consent_done: bool = True
 
   @property
   def completed(self) -> bool:
