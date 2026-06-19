@@ -204,6 +204,7 @@ python3 scripts/personal/sunnypilot_c3_alpha_evidence_check.py \
 - `/i` remains the rollback stable installer.
 - The packed TICI updater is not the same file as `system/ui/lib/wifi_manager.py`. If Wi-Fi or dependency handling changes, audit the embedded updater payload too.
 - Fresh `/x` installs must have `jeepney` available or the packed updater must carry the `nmcli` fallback; otherwise C3 update/setup paths can crash before the normal UI Wi-Fi fallback helps.
+- Clone C3 setup/update screens are more touch-jitter sensitive than normal settings pages. Keep the strict default tap threshold for settings/menu controls, but preserve the wider per-widget tolerance on TICI/MICI setup and updater install buttons so dependency/install prompts can advance reliably.
 
 ## Git Hygiene
 

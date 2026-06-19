@@ -259,6 +259,10 @@ class BigPillButton(BigButton):
     self._green = green
     self._disabled_background = disabled_background
     super().__init__(*args, **kwargs)
+    # Setup/update pages use large pill buttons on clone C3 screens. Keep the
+    # stricter default for settings, but tolerate release jitter here so the
+    # install/download buttons do not show pressed without firing.
+    self.set_tap_release_move_px(80)
 
     self._label.set_font_size(48)
     self._label.set_alignment(rl.GuiTextAlignment.TEXT_ALIGN_CENTER)

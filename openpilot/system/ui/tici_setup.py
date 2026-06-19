@@ -125,6 +125,24 @@ class Setup(Widget):
 
     self._downloading_body_label = Label("Downloading...", TITLE_FONT_SIZE, FontWeight.MEDIUM, text_padding=20)
 
+    setup_buttons = (
+      self._low_voltage_continue_button,
+      self._low_voltage_poweroff_button,
+      self._getting_started_button,
+      self._software_selection_openpilot_button,
+      self._software_selection_custom_software_button,
+      self._software_selection_continue_button,
+      self._software_selection_back_button,
+      self._download_failed_reboot_button,
+      self._download_failed_startover_button,
+      self._network_setup_back_button,
+      self._network_setup_continue_button,
+      self._custom_software_warning_continue_button,
+      self._custom_software_warning_back_button,
+    )
+    for button in setup_buttons:
+      button.set_tap_release_move_px(80)
+
     try:
       with open("/sys/class/hwmon/hwmon1/in1_input") as f:
         voltage = float(f.read().strip()) / 1000.0

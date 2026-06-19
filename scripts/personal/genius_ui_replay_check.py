@@ -39,7 +39,9 @@ def command_env() -> dict[str, str]:
   env.setdefault("GIT_OPTIONAL_LOCKS", "0")
   env.setdefault("CI", "1")
   existing_pythonpath = env.get("PYTHONPATH", "")
-  env["PYTHONPATH"] = str(ROOT) if not existing_pythonpath else f"{ROOT}{os.pathsep}{existing_pythonpath}"
+  # Keep caller-provided shim paths first. Local Mac replay runs may need native
+  # extension shadows ahead of the C3/Linux extension files checked into the repo.
+  env["PYTHONPATH"] = str(ROOT) if not existing_pythonpath else f"{existing_pythonpath}{os.pathsep}{ROOT}"
   return env
 
 
