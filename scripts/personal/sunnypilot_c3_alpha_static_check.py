@@ -3663,9 +3663,12 @@ def main() -> int:
   failures += not require("C3 setup updater install buttons tolerate touch jitter",
                           "button.set_tap_release_move_px(80)" in tici_setup
                           and "button.set_tap_release_move_px(80)" in tici_updater
+                          and "def _activate_at" in tici_updater
+                          and "self._install_button_rect" in tici_updater
+                          and "self.install_update()" in tici_updater
                           and "self.set_tap_release_move_px(80)" in mici_setup
                           and "BigPillButton" in mici_updater,
-                          "setup/update install buttons must keep wider per-widget release tolerance while normal settings taps stay strict")
+                          "setup/update install buttons must keep wider per-widget release tolerance and parent hit-test fallback while normal settings taps stay strict")
   failures += not require("Sidebar temperature is numeric Celsius",
                           "TEMP_FALLBACK_TEXT = tr_noop(\"--C\")" in sidebar_layout
                           and "TEMP_SCALAR_FIELDS" in sidebar_layout
