@@ -166,6 +166,7 @@ PYTHONPATH=/tmp/gp-replay-shadow:/path/to/repo /tmp/gp-replay-py312/bin/python \
 /tmp/gp-replay-py312/bin/python scripts/personal/genius_model_manager_contract.py --json
 python3 scripts/personal/genius_super_advanced_contract.py --json
 python3 scripts/personal/genius_c3_touch_contract.py --json
+python3 scripts/personal/genius_no_car_evidence_bundle.py --full-gate --json
 tools/replay/replay --demo
 ```
 

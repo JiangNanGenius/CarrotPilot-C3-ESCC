@@ -217,9 +217,10 @@ These checks should be run before any real road test. They are allowed while the
 - [ ] Verify model manager live list/download availability on C3 after SSH/UI access is restored.
 - [x] Verify Carrot/Super Advanced settings locally through `genius_super_advanced_contract.py`: all migrated controls are tracked, writable/offroad boundaries are explicit, protected params are read-only, and unknown-key waits are fail-soft.
 - [x] Verify C3 setup/update/settings touch fallback locally through `genius_c3_touch_contract.py`: expanded critical hit regions, press fallback, release fallback, disabled action blocking, overlap priority, setup wiring, updater wiring, and settings entry guard all pass.
+- [x] Archive each no-car diagnostic bundle on the Mac desktop through `genius_no_car_evidence_bundle.py`: branch, commit, version, installer hash, command outputs, and no-cloud process evidence are written to `~/Desktop/CarrotPilot-C3-ESCC-device-evidence`.
 - [ ] Verify the same Super Advanced page on the physical C3 after SSH/UI access is restored: all migrated controls visible, writable while offroad where intended, protected params read-only, and no unknown-key waits.
 - [ ] Verify C3 UI/touch without car: settings opens reliably, Network page reports connected/scanned state, Seltos 2023 appears in the vehicle list, temperature displays numerically, and toggles retain state.
-- [ ] Archive each no-car diagnostic bundle on the Mac desktop under `CarrotPilot-C3-ESCC-device-evidence` with branch, commit, version, installer hash, and cloud-process evidence.
+- [ ] Run `genius_no_car_evidence_bundle.py --full-gate --json` after each pushed alpha build so every published `/x` has a matching no-car evidence archive.
 - [x] Add release-gated self-tests for the no-car UI replay wrapper and the explicit C3 camera snapshot probe.
 
 ## Localization And Docs

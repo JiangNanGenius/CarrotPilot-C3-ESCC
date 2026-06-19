@@ -1,5 +1,31 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 No-Car Evidence Bundle
+
+Published as `2026.002.000-gp.20260620.44`.
+
+Added `scripts/personal/genius_no_car_evidence_bundle.py` as a repeatable
+desktop archive tool for no-car/code-level evidence:
+
+```bash
+python3 scripts/personal/genius_no_car_evidence_bundle.py --full-gate --json
+```
+
+The bundle is written under
+`~/Desktop/CarrotPilot-C3-ESCC-device-evidence/` as both a directory and a
+`.tar.gz` archive. It records:
+
+- branch, commit, Git status, and remote alpha branch pointers;
+- Genius Pilot version/base/patch metadata;
+- published `/x` installer URL, SHA256, size, and audit result;
+- release gate output and focused contract outputs;
+- no-cloud process evidence from `system/manager/process_config.py`,
+  `system/manager/manager.py`, and cloud-related param defaults.
+
+The release/static gates now self-test the archive tool. This is a local
+evidence bundle only; it does not replace physical C3 parked evidence after a
+successful `/x` install.
+
 ## 2026-06-20 C3 Touch Fallback Contract
 
 Published as `2026.002.000-gp.20260620.43`.
