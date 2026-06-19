@@ -1,5 +1,19 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Visualization Ownership Tightening
+
+Added `docs/personal/VISUALIZATION_POLICY.md` to make the display ownership rules explicit:
+
+- One base preset is active at a time: Sunny, Carrot, or Fusion.
+- Fusion remains the C3 default: Sunny HUD structure with Carrot-style lane/path/lead cues.
+- Lane-line style, lead/radar display, and lane-change cues are editable visual details.
+- Fishop/lidar is an independent evidence overlay, not a base preset and not a control gate.
+- ajouatom Carrot cluster/world visualization is tracked as a separate future surface instead of being mixed directly into the main HUD.
+
+`scripts/personal/genius_visualization_contract.py` now checks the policy doc, default visual params, preset callback behavior, and display-only boundaries.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.10`.
+
 ## 2026-06-20 Curve-Speed Ownership
 
 `CurveSpeedControlMode` now owns the Sunny model-curvature slowdown path:

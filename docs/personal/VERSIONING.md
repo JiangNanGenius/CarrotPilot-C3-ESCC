@@ -6,7 +6,7 @@ a personal-build suffix.
 Current alpha version:
 
 ```text
-Genius Pilot 2026.002.000-gp.20260620.9
+Genius Pilot 2026.002.000-gp.20260620.10
 ```
 
 Format:
@@ -39,5 +39,6 @@ Examples:
 2026.002.000-gp.20260620.7
 2026.002.000-gp.20260620.8
 2026.002.000-gp.20260620.9
+2026.002.000-gp.20260620.10
 2026.003.000-gp.20260705.1
 ```

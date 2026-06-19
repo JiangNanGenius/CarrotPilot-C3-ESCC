@@ -79,7 +79,9 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 ## Onroad Visualization
 
 - [x] Document the multi-visualization requirement: Sunny HUD remains available, Carrot lane/lead visualization is preferred for lane-change and lane display, and Fishop/lidar data needs a future display overlay.
+- [x] Define the visualization layer model: one mutually exclusive base preset, editable lane/lead details, and independent Fishop/lidar evidence overlay.
 - [x] Add `GeniusVisualMode` presets: Sunny, Carrot, and Fusion.
+- [x] Make Fusion the default C3 preset: Sunny HUD structure with Carrot-style lane/path/lead cues.
 - [x] Add `GeniusLaneLineStyle`: Simple, Colored, and Carrot.
 - [x] Add `GeniusLeadRadarVisualMode`: Sunny chevron, Carrot lead box, and radar speed labels.
 - [x] Add `GeniusLaneChangeVisuals` and render lane-change intent cues from the existing `onroadEvents` stream.
@@ -90,8 +92,12 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add Carrot path drawing modes as a separate renderer stage: Sunny original path, Carrot route ribbon/track markers, and Fusion Sunny body with Carrot path cues.
 - [x] Add a real Fishop overlay panel for lane curve, lidar left/right lane, lidar blindspot, navigation gate, and overtake suggestion evidence.
 - [x] Decide visualization coexistence rules: Sunny minimal, Carrot dense, Fusion balanced, and Fishop overlay independent on top only when local data is fresh.
+- [x] Document that Fishop/lidar visual data is evidence-only and cannot enable auto-overtake or lane-change output by itself.
 - [x] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
 - [x] Add Simplified/Traditional Chinese translations for the new visualization controls.
+- [ ] Map the ajouatom Carrot cluster/world view into a separate optional surface: detected vehicles, source-colored objects, raw/merged radar points, lane highlighting, and distance/speed labels.
+- [ ] After cluster/world view mapping, decide whether it should be a standalone page, an explicit overlay, or a debug-only visual mode; do not merge it into the main HUD by default.
+- [ ] Add a cluster/world-view replay fixture before enabling that larger renderer on the C3.
 
 ## Carrot, Auto-Tuner, And Fishop Hardware
 

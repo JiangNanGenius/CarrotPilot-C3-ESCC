@@ -128,11 +128,11 @@ MATRIX: tuple[MatrixRow, ...] = (
   MatrixRow("FishopAutoOvertakeEnabled", "fishop", "fishop_hardware", "FishopAutoOvertakeEnabled", "0", ("FishopAutoOvertakeEnabled", "overtake"), ui_surface="carrot", api=True, notes="Setting is user-toggleable; output remains display/read-only until safety chain is validated."),
   MatrixRow("KIA_SELTOS_2023", "escc_vehicle_interface", "vehicle", None, None, ("ENHANCED_SCC", "KIA_SELTOS", "0x2AB"), ui_surface="vehicle_selector", notes="Pure CAN SCC Seltos profile; ESCC is automatic through 0x2AB."),
   MatrixRow("ModelManager_ActiveBundle", "model_manager", "models", "ModelManager_ActiveBundle", None, ("ModelManager_ActiveBundle",), ui_surface="models", notes="Sunny model manager retained; switching stays offroad; missing/invalid bundle means stock."),
-  MatrixRow("GeniusVisualMode", "visualization", "onroad_visual", "GeniusVisualMode", "2", ("ShowPathMode", "ShowLaneInfo", "ShowRadarInfo"), ui_surface="visuals", api=True, notes="Mutually exclusive base preset: Sunny minimal, Carrot dense lane/path/lead/radar, Fusion mixed."),
+  MatrixRow("GeniusVisualMode", "visualization", "onroad_visual", "GeniusVisualMode", "2", ("ShowPathMode", "ShowLaneInfo", "ShowRadarInfo"), ui_surface="visuals", api=True, notes="Mutually exclusive base preset: Sunny minimal, Carrot dense lane/path/lead/radar, Fusion default with Sunny HUD structure and Carrot road cues."),
   MatrixRow("GeniusLaneLineStyle", "visualization", "onroad_visual", "GeniusLaneLineStyle", "1", ("ShowLaneInfo", "LaneLineCheck"), ui_surface="visuals", api=True, notes="Lane-line style detail; may be adjusted after choosing a preset."),
   MatrixRow("GeniusLeadRadarVisualMode", "visualization", "onroad_visual", "GeniusLeadRadarVisualMode", "1", ("ShowRadarInfo", "RadarTrackId"), ui_surface="visuals", api=True, notes="Lead/ radar detail: Sunny chevron, Carrot box, or radar speed labels."),
   MatrixRow("GeniusLaneChangeVisuals", "visualization", "onroad_visual", "GeniusLaneChangeVisuals", "1", ("LaneChange", "laneChange"), ui_surface="visuals", api=True, notes="Display-only lane-change intent cues from existing onroad events."),
-  MatrixRow("GeniusFishopVisualOverlay", "visualization", "onroad_visual", "GeniusFishopVisualOverlay", "0", ("lidar_car_lblind", "FishopLidarBlindspotEnabled"), ui_surface="visuals", api=True, notes="Independent top-layer Fishop/lidar evidence overlay; never a base preset."),
+  MatrixRow("GeniusFishopVisualOverlay", "visualization", "onroad_visual", "GeniusFishopVisualOverlay", "0", ("lidar_car_lblind", "FishopLidarBlindspotEnabled"), ui_surface="visuals", api=True, notes="Independent top-layer Fishop/lidar evidence overlay; never a base preset or control gate."),
 )
 
 
