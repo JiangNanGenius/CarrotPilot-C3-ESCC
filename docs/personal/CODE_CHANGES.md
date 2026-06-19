@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Cluster World Runtime API
+
+Moved the ajouatom Carrot cluster/world schema from documentation-only mapping into runtime code:
+
+- Added `selfdrive/carrot/cluster_world.py` as the shared `GeniusClusterWorldSnapshot` normalizer for model path/lane lines/road edges, radar leads, model leads, liveTracks radar points, carState corner detections, Fishop blindspot evidence, and lane-change intent.
+- Added `/api/cluster_world` to Carrot Web as a local read-only snapshot for future Carrot-style visualization surfaces.
+- The server subscribes only to local messaging/Fishop evidence and keeps `displayOnly=true`, `readOnly=true`, and `controlOutput=false`.
+- Updated the visualization policy to make the UI relationship explicit: Sunny/Carrot/Fusion are mutually exclusive base displays, while Carrot World and Fishop are additive evidence overlays.
+- Updated the cluster/world contract and Carrot Web API contract so tests exercise the runtime normalizer instead of a duplicated test-only copy.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.19`.
+
 ## 2026-06-20 Carrot Cluster World Schema
 
 Mapped the larger ajouatom Carrot cluster/world view into a Genius Pilot display-only contract:

@@ -17,6 +17,7 @@ from aiohttp import web
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from openpilot.selfdrive.carrot.cluster_world import default_cluster_world_snapshot, normalize_cluster_world_sample
 from openpilot.selfdrive.carrot.fishop_hardware import normalize_fishop_payloads
 
 
@@ -33,6 +34,16 @@ MESSAGING_STATUS_SERVICES = (
   "carStateSP",
 )
 MESSAGING_STATUS_INTERVAL_S = 0.2
+CLUSTER_WORLD_SERVICES = (
+  "carState",
+  "modelV2",
+  "radarState",
+  "liveTracks",
+  "onroadEvents",
+  "longitudinalPlan",
+)
+CLUSTER_WORLD_INTERVAL_S = 0.2
+CLUSTER_WORLD_FRESH_MAX_AGE_S = 1.0
 NAVIGATION_UDP_PORT = 7706
 NAVI_TCP_PORT = 7712
 NAVI_TCP_MAX_LINE_BYTES = 1024 * 1024
@@ -524,6 +535,51 @@ def _json_safe_value(value: Any) -> Any:
   if isinstance(value, (dict, list)):
     return value
   return str(value)
+
+
+def _plain_message(value: Any, depth: int = 0) -> Any:
+  if depth > 6:
+    return str(value)[:120]
+  if isinstance(value, bytes):
+    return value.decode("utf-8", errors="replace")
+  if isinstance(value, (str, int, float, bool)) or value is None:
+    return value
+  if isinstance(value, dict):
+    return {str(key): _plain_message(item, depth + 1) for key, item in value.items()}
+  if isinstance(value, (list, tuple)):
+    return [_plain_message(item, depth + 1) for item in value[:256]]
+  to_dict = getattr(value, "to_dict", None)
+  if callable(to_dict):
+    try:
+      return _plain_message(to_dict(), depth + 1)
+    except Exception:
+      pass
+  try:
+    return [_plain_message(item, depth + 1) for item in list(value)[:256]]
+  except Exception:
+    return {}
+
+
+def _cluster_world_sample_from_sm(sm: Any) -> tuple[dict[str, Any], dict[str, bool]]:
+  sample: dict[str, Any] = {}
+  alive: dict[str, bool] = {}
+  for service in CLUSTER_WORLD_SERVICES:
+    alive[service] = _sm_alive(sm, service)
+    message = _plain_message(_sm_message(sm, service))
+    if service == "liveTracks" and isinstance(message, list):
+      message = {"points": message}
+    if service == "onroadEvents" and not isinstance(message, list):
+      message = []
+    if message not in ({}, [], None):
+      sample[service] = message
+
+  fishop = fishop_state().get("snapshot", {})
+  if isinstance(fishop, dict) and fishop:
+    sample["fishop"] = fishop
+    alive["Fishop"] = True
+  else:
+    alive["Fishop"] = False
+  return sample, alive
 
 
 def _write_param_value(params: Any, name: str, value: Any, meta: dict[str, Any]) -> None:
@@ -1931,6 +1987,45 @@ def fishop_state() -> dict[str, Any]:
   return result
 
 
+def default_cluster_world_state() -> dict[str, Any]:
+  return {
+    "available": False,
+    "fresh": False,
+    "hasLiveSample": False,
+    "schema": "GeniusClusterWorldSnapshot",
+    "surfaceDecision": "future_optional_debug_surface",
+    "lastSample": {},
+    "sourceAlive": {},
+    "lastUpdateAt": 0.0,
+    "sampleAgeSec": 0.0,
+    "lastError": "",
+    "snapshot": default_cluster_world_snapshot(),
+    "readOnly": True,
+    "displayOnly": True,
+    "controlOutput": False,
+  }
+
+
+def cluster_world_state(state: dict[str, Any] | None = None) -> dict[str, Any]:
+  result = {**default_cluster_world_state(), **(state or {})}
+  last_update_at = _as_float(result.get("lastUpdateAt"), 0.0)
+  age_sec = max(0.0, time.time() - last_update_at) if last_update_at > 0.0 else 0.0
+  fresh = bool(result.get("available", False)) and last_update_at > 0.0 and age_sec <= CLUSTER_WORLD_FRESH_MAX_AGE_S
+  result["sampleAgeSec"] = round(age_sec, 3)
+  result["fresh"] = fresh
+  result["hasLiveSample"] = bool(result.get("lastSample")) and last_update_at > 0.0
+  result["readOnly"] = True
+  result["displayOnly"] = True
+  result["controlOutput"] = False
+  snapshot = result.get("snapshot")
+  if not isinstance(snapshot, dict):
+    result["snapshot"] = default_cluster_world_snapshot()
+  else:
+    snapshot["displayOnly"] = True
+    snapshot["controlOutput"] = False
+  return result
+
+
 async def api_health(_request: web.Request) -> web.Response:
   udp_error = str(_request.app.get("navigation_udp_error", ""))
   udp_protocol = _request.app.get("navigation_udp_protocol")
@@ -1943,6 +2038,7 @@ async def api_health(_request: web.Request) -> web.Response:
   messaging_state = _request.app["messaging_status_state"]
   navi_http_state = _request.app["navi_http_state"]
   navi_tcp_state = _request.app["navi_tcp_state"]
+  cluster_world = cluster_world_state(_request.app.get("cluster_world_state"))
   carrot_man_peer_state = _carrot_man_peer_state(_request.app.get("carrot_man_peer_state"))
   nav_state = navigation_event_state()
   nav_event = nav_state.get("event", {}) if isinstance(nav_state, dict) else {}
@@ -1961,6 +2057,9 @@ async def api_health(_request: web.Request) -> web.Response:
     "messagingAvailable": bool(messaging_state.get("available", False)),
     "messagingLastUpdateAt": float(messaging_state.get("lastUpdateAt", 0.0)),
     "messagingLastError": str(messaging_state.get("lastError", "")),
+    "clusterWorldAvailable": bool(cluster_world.get("available", False)),
+    "clusterWorldFresh": bool(cluster_world.get("fresh", False)),
+    "clusterWorldLastError": str(cluster_world.get("lastError", "")),
     "speedLimitEvidence": speed_limit_evidence_state(messaging_state),
     "navigationEvidence": _status_payload_navigation_evidence(nav_event if isinstance(nav_event, dict) else {}),
     "carrotFeatureGates": feature_gates,
@@ -1989,6 +2088,7 @@ async def api_health(_request: web.Request) -> web.Response:
       "/api/carrot_learning",
       "/api/carrot_feature_gates",
       "/api/fishop_hardware",
+      "/api/cluster_world",
       "/api/navigation_event",
       "/api/navi",
       "/api/navi/tcp_health",
@@ -2079,6 +2179,10 @@ async def api_carrot_learning_action(request: web.Request) -> web.Response:
 
 async def api_fishop_hardware(_request: web.Request) -> web.Response:
   return _json_response({"ok": True, **fishop_state()})
+
+
+async def api_cluster_world(_request: web.Request) -> web.Response:
+  return _json_response({"ok": True, **cluster_world_state(_request.app.get("cluster_world_state"))})
 
 
 async def api_navigation_event(_request: web.Request) -> web.Response:
@@ -2302,6 +2406,7 @@ async def index(_request: web.Request) -> web.Response:
         <li><a href="/api/carrot_learning"><code>/api/carrot_learning</code></a></li>
         <li><a href="/api/carrot_feature_gates"><code>/api/carrot_feature_gates</code></a></li>
         <li><a href="/api/fishop_hardware"><code>/api/fishop_hardware</code></a></li>
+        <li><a href="/api/cluster_world"><code>/api/cluster_world</code></a></li>
         <li><a href="/api/navigation_event"><code>/api/navigation_event</code></a></li>
         <li><a href="/api/phone_speed_limit"><code>/api/phone_speed_limit</code></a></li>
       </ul>
@@ -2691,6 +2796,57 @@ async def stop_messaging_status(app: web.Application) -> None:
     app["background_tasks"]["messaging_status"] = None
 
 
+async def cluster_world_loop(app: web.Application) -> None:
+  state = app["cluster_world_state"]
+  try:
+    from cereal import messaging
+    sm = messaging.SubMaster(list(CLUSTER_WORLD_SERVICES))
+  except Exception as exc:
+    state.update(default_cluster_world_state())
+    state["lastError"] = str(exc)[:200]
+    return
+
+  while True:
+    try:
+      sm.update(0)
+      sample, source_alive = _cluster_world_sample_from_sm(sm)
+      snapshot = normalize_cluster_world_sample(sample)
+      snapshot["displayOnly"] = True
+      snapshot["controlOutput"] = False
+      state.update({
+        "available": True,
+        "lastSample": sample,
+        "sourceAlive": source_alive,
+        "lastUpdateAt": time.time(),
+        "lastError": "",
+        "snapshot": snapshot,
+        "schema": "GeniusClusterWorldSnapshot",
+        "surfaceDecision": "future_optional_debug_surface",
+        "readOnly": True,
+        "displayOnly": True,
+        "controlOutput": False,
+      })
+    except Exception as exc:
+      state.update(default_cluster_world_state())
+      state["lastError"] = str(exc)[:200]
+    await asyncio.sleep(CLUSTER_WORLD_INTERVAL_S)
+
+
+async def start_cluster_world(app: web.Application) -> None:
+  app["background_tasks"]["cluster_world"] = asyncio.create_task(cluster_world_loop(app))
+
+
+async def stop_cluster_world(app: web.Application) -> None:
+  task = app["background_tasks"].get("cluster_world")
+  if task is not None:
+    task.cancel()
+    try:
+      await task
+    except asyncio.CancelledError:
+      pass
+    app["background_tasks"]["cluster_world"] = None
+
+
 async def status_broadcast_loop(app: web.Application) -> None:
   transport = app.get("status_broadcast_transport")
   if transport is None:
@@ -2845,11 +3001,13 @@ def make_app() -> web.Application:
   app = web.Application(client_max_size=NAVI_HTTP_MAX_BODY_SIZE)
   app["status_broadcast_state"] = {"lastPayload": {}, "lastSentAt": 0.0, "lastTargets": [], "lastError": ""}
   app["messaging_status_state"] = default_messaging_status()
+  app["cluster_world_state"] = default_cluster_world_state()
   app["navi_http_state"] = default_navi_http_state()
   app["navi_tcp_state"] = default_navi_tcp_state()
   app["carrot_man_peer_state"] = default_carrot_man_peer_state()
-  app["background_tasks"] = {"messaging_status": None, "navi_http_runner": None, "navi_tcp_server": None}
+  app["background_tasks"] = {"messaging_status": None, "cluster_world": None, "navi_http_runner": None, "navi_tcp_server": None}
   app.on_startup.append(start_messaging_status)
+  app.on_startup.append(start_cluster_world)
   app.on_startup.append(start_navi_tcp)
   app.on_startup.append(start_navi_http)
   app.on_startup.append(start_status_broadcast)
@@ -2857,6 +3015,7 @@ def make_app() -> web.Application:
   app.on_cleanup.append(stop_status_broadcast)
   app.on_cleanup.append(stop_navi_http)
   app.on_cleanup.append(stop_navi_tcp)
+  app.on_cleanup.append(stop_cluster_world)
   app.on_cleanup.append(stop_messaging_status)
   app.on_cleanup.append(stop_navigation_udp)
   app.router.add_get("/", index)
@@ -2869,6 +3028,7 @@ def make_app() -> web.Application:
   app.router.add_post("/api/carrot_learning", api_carrot_learning_action)
   app.router.add_get("/api/carrot_feature_gates", api_carrot_feature_gates)
   app.router.add_get("/api/fishop_hardware", api_fishop_hardware)
+  app.router.add_get("/api/cluster_world", api_cluster_world)
   app.router.add_get("/api/navigation_event", api_navigation_event)
   app.router.add_post("/api/navigation_event", api_navigation_event_action)
   add_navi_http_routes(app)
