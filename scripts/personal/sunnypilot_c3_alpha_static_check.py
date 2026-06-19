@@ -2768,6 +2768,7 @@ def main() -> int:
   unifont = read("selfdrive/assets/fonts/unifont.fnt")
   mici_settings = read("selfdrive/ui/sunnypilot/mici/layouts/settings.py")
   main_onboarding = read("selfdrive/ui/layouts/onboarding.py")
+  sunny_onboarding = read("selfdrive/ui/sunnypilot/layouts/onboarding.py")
   mici_onboarding = read("selfdrive/ui/mici/layouts/onboarding.py")
   hardwared = read("system/hardware/hardwared.py")
   panda_safety = read("selfdrive/pandad/panda_safety.cc")
@@ -2953,6 +2954,12 @@ def main() -> int:
                             "critical risk/default descriptions must remain translated in app_zh-CHT.po")
   failures += not require("TICI onboarding skips Sunnylink", "SunnylinkOnboarding" not in main_onboarding,
                           "Main onboarding still imports Sunnylink onboarding")
+  failures += not require("Sunnylink onboarding is inert if imported",
+                          'ui_state.params.put_bool("SunnylinkEnabled", True)' not in sunny_onboarding
+                          and "Genius Pilot Local Mode" in sunny_onboarding
+                          and "This personal build does not use Sunnylink or comma cloud pairing" in sunny_onboarding
+                          and "self.consent_done: bool = True" in sunny_onboarding,
+                          "legacy Sunnylink onboarding must not be able to enable cloud services")
   failures += not require("MICI onboarding skips Sunnylink", "SunnylinkConsentPage" not in mici_onboarding,
                           "MICI onboarding still imports Sunnylink consent")
   failures += not require("OffroadMode blocks onroad", 'offroad_mode = params.get_bool("OffroadMode")' in hardwared

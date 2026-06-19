@@ -15,7 +15,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Recover from the first `/x` boot failures: missing Python dependency, settings tap release handling, and onboarding/settings navigation blockers.
 - [x] Rebuild or patch the packed TICI updater so its embedded Wi-Fi manager includes the same `jeepney`/`nmcli` fallback as the main source tree.
 - [x] Add an installer/update audit that checks both the main source tree and the packed TICI updater for the Wi-Fi dependency contract.
-- [ ] Keep the welcome/training flow, but replace SunnyPilot-specific legal/consent copy with Genius Pilot personal-build copy that is short enough for C3 and advances reliably.
+- [x] Keep the welcome/training flow, but replace SunnyPilot-specific legal/consent copy with Genius Pilot personal-build copy that is short enough for C3 and advances reliably.
 - [ ] Rename user-facing alpha branding from SunnyPilot to Genius Pilot where accurate: welcome screen, version/about panel, settings headers, update prompts, and boot/update text.
 - [ ] Keep `/x` as the single short alpha entry; avoid new test URLs unless there is a clear rollback reason.
 - [ ] Bump the Genius Pilot suffix before every pushed alpha build: same date increments patch, new date resets patch to `1`, SunnyPilot base changes only when upstream base changes.

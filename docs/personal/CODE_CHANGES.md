@@ -20,7 +20,9 @@ The first renderer migration is display-only:
 - Added `scripts/personal/genius_visualization_contract.py` to gate the path/lane/lead/Fishop display-only wiring and a synthetic C3 geometry check before alpha publishing.
 - Visualization coexistence is explicit: Sunny, Carrot, and Fusion are mutually exclusive base presets; Fishop overlay is an independent top layer; every renderer switch remains display-only.
 
-Genius Pilot version is bumped to `2026.002.000-gp.20260620.5`.
+The legacy Sunnylink onboarding component is now inert if it is ever imported: it always keeps `SunnylinkEnabled=0`, records the cloud consent as declined, and shows short Genius Pilot local-mode text instead of remote-pairing copy.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.6`.
 
 ## 2026-06-20 NNLC And Super Advanced Carrot Controls
 

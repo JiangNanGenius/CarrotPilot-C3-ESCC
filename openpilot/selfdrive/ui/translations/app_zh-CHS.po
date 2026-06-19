@@ -1384,3 +1384,15 @@ msgstr "方框"
 
 msgid "Radar"
 msgstr "雷达"
+
+msgid "Genius Pilot Local Mode"
+msgstr "Genius Pilot 本地模式"
+
+msgid "This personal build does not use Sunnylink or comma cloud pairing. Local Wi-Fi, SSH, Web, GitHub updates, and model downloads stay available."
+msgstr "这个个人版不使用 Sunnylink 或 comma 云端配对。本地 Wi-Fi、SSH、Web、GitHub 更新和模型下载仍然可用。"
+
+msgid "Cloud upload, remote pairing, Sunnylink backup, and onroad uploads are disabled in Genius Pilot C3 alpha."
+msgstr "Genius Pilot C3 alpha 已禁用云端上传、远程配对、Sunnylink 备份和行驶中上传。"
+
+msgid "Continue"
+msgstr "继续"
