@@ -109,6 +109,7 @@ python3 scripts/personal/road_test_evidence_check.py \
 - `--sample-seconds 20` 期间观察 `carrotMan_updates`、`navInstructionCarrot_updates` 和导航字段。
 - 需要机器检查 CP搭子实连时，可在电脑端证据检查命令里加 `--require-cplink-sample`。
 - 需要机器检查 C3 侧 APP 端点时，可运行证据包时加 `--navipilot-check`，电脑端校验时加 `--require-navipilot-live-check`。
+- 如果使用新架构 alpha 快照，并且快照里已包含 `navipilotLiveCheck`，也可以把该 alpha 快照 JSON 直接作为 `--navipilot-live-check <alpha-snapshot.json>` 输入。
 
 如果测试只读 AmapNavi 状态桥，再额外采一次：
 

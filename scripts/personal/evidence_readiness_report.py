@@ -391,7 +391,7 @@ def main() -> int:
   parser = argparse.ArgumentParser(description="Summarize which real-car evidence stages are ready before a stable tag.")
   parser.add_argument("--road-test-log", help="completed road-test markdown log")
   parser.add_argument("--device-snapshot", action="append", default=[], help="privacy-safe snapshot generated on the C3; may be repeated")
-  parser.add_argument("--navipilot-live-check", action="append", default=[], help="JSON report from navipilot_live_check.py; may be repeated")
+  parser.add_argument("--navipilot-live-check", action="append", default=[], help="JSON report from navipilot_live_check.py or an alpha snapshot with navipilotLiveCheck; may be repeated")
   parser.add_argument("--evidence-dir", action="append", default=[], help="unpacked collect_real_car_evidence.py folder; may be repeated")
   parser.add_argument("--fail-when-not-ready", action="store_true", help="exit non-zero when stable readiness is incomplete")
   parser.add_argument("--self-test", action="store_true", help="run built-in readiness checks")

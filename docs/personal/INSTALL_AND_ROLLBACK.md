@@ -248,6 +248,15 @@ python3 scripts/personal/road_test_evidence_check.py \
   --require-navipilot-live-check
 ```
 
+如果这次使用的是新架构 alpha 快照，并且快照里已经有 `navipilotLiveCheck` 证据块，也可以额外传入：
+
+```bash
+python3 scripts/personal/road_test_evidence_check.py \
+  --road-test-log /path/to/road-test-log.md \
+  --navipilot-live-check /path/to/alpha-snapshot.json \
+  --require-navipilot-live-check
+```
+
 ## 建议参数
 
 Seltos 2023 初期建议：

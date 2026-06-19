@@ -505,27 +505,116 @@ def validate_navipilot_live_checks(paths: Sequence[str], require_navipilot_live_
     found = False
     errors: List[str] = []
     for data in reports:
-      overall_ok = bool_value_obj(data.get("overall_ok"))
-      param_ok = bool_value_obj(data.get("param_bulk_ok"))
-      status_requested = bool_value_obj(data.get("udp_7705_listen_requested"))
-      status_ok = not status_requested or (
-        bool_value_obj(data.get("udp_7705_seen")) and bool_value_obj(data.get("udp_7705_required_keys_ok"))
-      )
-      if overall_ok and param_ok and status_ok:
+      ok, detail = navipilot_report_ok(data)
+      if ok:
         found = True
         break
-      errors.append(
-        "overall_ok=%r param_bulk_ok=%r udp_7705_seen=%r udp_7705_required_keys_ok=%r"
-        % (
-          data.get("overall_ok"),
-          data.get("param_bulk_ok"),
-          data.get("udp_7705_seen"),
-          data.get("udp_7705_required_keys_ok"),
-        )
-      )
+      errors.append(detail)
     if not found:
       raise EvidenceError("Navipilot live check did not pass: " + "; ".join(errors))
   return reports
+
+
+def extract_navipilot_live_report(data: Dict[str, object]) -> Tuple[Dict[str, object], str]:
+  """Accept old live-check JSON, new alpha live-check JSON, or an alpha snapshot wrapper."""
+  wrapper = data.get("navipilotLiveCheck")
+  if isinstance(wrapper, dict):
+    if wrapper.get("requested") is not True:
+      return {}, "alpha snapshot navipilotLiveCheck was not requested"
+    if wrapper.get("overallOk") is not True:
+      return {}, f"alpha snapshot navipilotLiveCheck overallOk={wrapper.get('overallOk')!r}"
+    if wrapper.get("controlOutput") is not False:
+      return {}, "alpha snapshot navipilotLiveCheck controlOutput is not false"
+    if wrapper.get("cloudServices") is not False:
+      return {}, "alpha snapshot navipilotLiveCheck cloudServices is not false"
+    if wrapper.get("localOnly") is not True:
+      return {}, "alpha snapshot navipilotLiveCheck localOnly is not true"
+    nested = wrapper.get("report")
+    if not isinstance(nested, dict):
+      return {}, "alpha snapshot navipilotLiveCheck.report is missing"
+    return nested, "alpha snapshot navipilotLiveCheck.report"
+  return data, "navipilot live check report"
+
+
+def navipilot_check_statuses(report: Dict[str, object]) -> Dict[str, str]:
+  checks = report.get("checks")
+  if not isinstance(checks, list):
+    return {}
+  statuses: Dict[str, str] = {}
+  for item in checks:
+    if not isinstance(item, dict):
+      continue
+    name = str(item.get("name", "")).strip()
+    status = str(item.get("status", "")).strip().lower()
+    if name:
+      statuses[name] = status
+  return statuses
+
+
+def require_navipilot_check_pass(statuses: Dict[str, str], name: str, aliases: Sequence[str] = ()) -> bool:
+  for candidate in (name, *aliases):
+    if statuses.get(candidate) == "pass":
+      return True
+  return False
+
+
+def navipilot_report_ok(data: Dict[str, object]) -> Tuple[bool, str]:
+  report, source = extract_navipilot_live_report(data)
+  if not report:
+    return False, source
+
+  if "overallOk" in report or "checks" in report:
+    safety = report.get("safetyBoundary")
+    safety = safety if isinstance(safety, dict) else {}
+    statuses = navipilot_check_statuses(report)
+    failures: List[str] = []
+    if report.get("overallOk") is not True:
+      failures.append(f"overallOk={report.get('overallOk')!r}")
+    if safety.get("localOnly") is not True:
+      failures.append("safetyBoundary.localOnly is not true")
+    if safety.get("cloudServices") is not False:
+      failures.append("safetyBoundary.cloudServices is not false")
+    if safety.get("controlOutput") is not False:
+      failures.append("safetyBoundary.controlOutput is not false")
+    for required_name in (
+      "7000 health",
+      "7000 params bulk",
+      "7000 status broadcast snapshot",
+      "7000 navigation event snapshot",
+    ):
+      if not require_navipilot_check_pass(statuses, required_name):
+        failures.append(f"{required_name} did not pass")
+    if not (
+      require_navipilot_check_pass(statuses, "7705 UDP status broadcast")
+      or require_navipilot_check_pass(statuses, "7000 status broadcast snapshot")
+    ):
+      failures.append("7705/status broadcast evidence did not pass")
+    if not require_navipilot_check_pass(statuses, "7713 navigation HTTP health"):
+      failures.append("7713 navigation HTTP health did not pass")
+    if not require_navipilot_check_pass(statuses, "7712 navigation TCP health"):
+      failures.append("7712 navigation TCP health did not pass")
+    if failures:
+      return False, source + ": " + ", ".join(failures)
+    return True, source
+
+  overall_ok = bool_value_obj(report.get("overall_ok"))
+  param_ok = bool_value_obj(report.get("param_bulk_ok"))
+  status_requested = bool_value_obj(report.get("udp_7705_listen_requested"))
+  status_ok = not status_requested or (
+    bool_value_obj(report.get("udp_7705_seen")) and bool_value_obj(report.get("udp_7705_required_keys_ok"))
+  )
+  if overall_ok and param_ok and status_ok:
+    return True, source
+  return False, (
+    "%s: overall_ok=%r param_bulk_ok=%r udp_7705_seen=%r udp_7705_required_keys_ok=%r"
+    % (
+      source,
+      report.get("overall_ok"),
+      report.get("param_bulk_ok"),
+      report.get("udp_7705_seen"),
+      report.get("udp_7705_required_keys_ok"),
+    )
+  )
 
 
 def bool_value_obj(value: object) -> bool:
@@ -621,6 +710,38 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
     "udp_7705_seen": True,
     "udp_7705_required_keys_ok": True,
   }
+  good_alpha_navipilot = {
+    "overallOk": True,
+    "checks": [
+      {"name": "7000 health", "status": "pass"},
+      {"name": "7000 params bulk", "status": "pass"},
+      {"name": "7000 same-value param write", "status": "skip"},
+      {"name": "7000 status broadcast snapshot", "status": "pass"},
+      {"name": "7705 UDP status broadcast", "status": "pass"},
+      {"name": "7713 navigation HTTP health", "status": "pass"},
+      {"name": "7712 navigation TCP health", "status": "pass"},
+      {"name": "7000 navigation event snapshot", "status": "pass"},
+      {"name": "7706/7712/7713 safe navigation probe", "status": "skip"},
+    ],
+    "safetyBoundary": {
+      "localOnly": True,
+      "cloudServices": False,
+      "controlOutput": False,
+      "safeProbeCommandFieldsEmpty": True,
+    },
+  }
+  good_alpha_snapshot = {
+    "metadata": {"title": "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot"},
+    "navipilotLiveCheck": {
+      "requested": True,
+      "available": True,
+      "overallOk": True,
+      "controlOutput": False,
+      "cloudServices": False,
+      "localOnly": True,
+      "report": good_alpha_navipilot,
+    },
+  }
   offroad_snapshot = good_snapshot.replace("| `AlwaysOffroad` | 0 |", "| `AlwaysOffroad` | 1 |")
   validate_log(good_log)
   validate_snapshot_text("self-test snapshot", good_snapshot)
@@ -633,6 +754,8 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_carparams=True)
   validate_snapshots_from_text([("self-test snapshot", good_snapshot)], require_power_cycle_boot_flag=True)
   validate_navipilot_live_checks_from_objects([good_navipilot], require_navipilot_live_check=True)
+  validate_navipilot_live_checks_from_objects([good_alpha_navipilot], require_navipilot_live_check=True)
+  validate_navipilot_live_checks_from_objects([good_alpha_snapshot], require_navipilot_live_check=True)
 
   with tempfile.TemporaryDirectory() as tmp:
     bundle = Path(tmp)
@@ -684,6 +807,37 @@ This snapshot intentionally avoids VIN, dongle id, tokens, and route identifiers
     pass
   else:
     raise EvidenceError("self-test failed: bad Navipilot live check was accepted")
+
+  bad_alpha_navipilot = {
+    **good_alpha_navipilot,
+    "overallOk": True,
+    "checks": [
+      {"name": "7000 health", "status": "warn"},
+      {"name": "7000 params bulk", "status": "warn"},
+      {"name": "7000 status broadcast snapshot", "status": "warn"},
+    ],
+  }
+  try:
+    validate_navipilot_live_checks_from_objects([bad_alpha_navipilot], require_navipilot_live_check=True)
+  except EvidenceError:
+    pass
+  else:
+    raise EvidenceError("self-test failed: unavailable alpha Navipilot live check was accepted")
+
+  try:
+    validate_navipilot_live_checks_from_objects([
+      {
+        **good_alpha_snapshot,
+        "navipilotLiveCheck": {
+          **good_alpha_snapshot["navipilotLiveCheck"],
+          "requested": False,
+        },
+      }
+    ], require_navipilot_live_check=True)
+  except EvidenceError:
+    pass
+  else:
+    raise EvidenceError("self-test failed: alpha snapshot without requested Navipilot check was accepted")
 
 
 def validate_snapshots_from_text(
@@ -803,17 +957,8 @@ def validate_navipilot_live_checks_from_objects(
     raise EvidenceError("self-test failed: missing Navipilot live check was accepted")
   if require_navipilot_live_check:
     for data in reports:
-      if (
-        bool_value_obj(data.get("overall_ok"))
-        and bool_value_obj(data.get("param_bulk_ok"))
-        and (
-          not bool_value_obj(data.get("udp_7705_listen_requested"))
-          or (
-            bool_value_obj(data.get("udp_7705_seen"))
-            and bool_value_obj(data.get("udp_7705_required_keys_ok"))
-          )
-        )
-      ):
+      ok, _detail = navipilot_report_ok(data)
+      if ok:
         return list(reports)
     raise EvidenceError("self-test failed: Navipilot live check was not detected")
   return list(reports)
@@ -823,7 +968,7 @@ def main() -> int:
   parser = argparse.ArgumentParser(description="Validate real-car evidence before promoting a personal C3 ESCC tag.")
   parser.add_argument("--road-test-log", help="completed road-test markdown log")
   parser.add_argument("--device-snapshot", action="append", default=[], help="privacy-safe snapshot generated on the C3; may be repeated")
-  parser.add_argument("--navipilot-live-check", action="append", default=[], help="JSON report from navipilot_live_check.py; may be repeated")
+  parser.add_argument("--navipilot-live-check", action="append", default=[], help="JSON report from navipilot_live_check.py or an alpha snapshot with navipilotLiveCheck; may be repeated")
   parser.add_argument("--evidence-dir", action="append", default=[], help="unpacked folder generated by collect_real_car_evidence.py; may be repeated")
   parser.add_argument("--require-device-snapshot", action="store_true", help="fail when no device snapshot is supplied")
   parser.add_argument("--require-escc-sample", action="store_true", help="require EnableEscc=1 and sampled 0x2AB bus0 count > 0")

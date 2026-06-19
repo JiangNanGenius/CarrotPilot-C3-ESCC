@@ -1971,6 +1971,8 @@
 - `openpilot-sunnypilot-011-c3/scripts/personal/navipilot_live_check.py`
 - `openpilot-sunnypilot-011-c3/scripts/personal/sunnypilot_c3_alpha_snapshot.py`
 - `openpilot-sunnypilot-011-c3/scripts/personal/sunnypilot_c3_alpha_static_check.py`
+- `scripts/personal/road_test_evidence_check.py`
+- `scripts/personal/evidence_readiness_report.py`
 - `docs/personal/TODO.md`
 - `docs/personal/CODE_CHANGES.md`
 
@@ -1982,6 +1984,7 @@
 - 安全导航探针只发送空命令字段的证据包，继续要求 `xState=0`、`trafficState=0`、`controlOutput=false`。
 - alpha 静态守门新增 live check 自测，并检查工具不保留旧 `AlwaysOffroad` / `EnableEscc` 别名、不引用云连接/上传客户端依赖。
 - alpha 设备快照新增可选 `navipilotLiveCheck` 证据块；默认不运行，停车测试时加 `--navipilot-live-check`，需要作为证据门槛时加 `--require-navipilot-live-check`。
+- 稳定线证据校验器可直接读取 alpha 快照里的 `navipilotLiveCheck.report`，并要求 local-only、无云服务、无控制输出，以及 7000/7705/7712/7713 关键检查通过；旧 `navipilot-live-check.json` 格式继续兼容。
 
 验证：
 
@@ -1990,3 +1993,6 @@
 - `python3 scripts/personal/navipilot_live_check.py --host 127.0.0.1 --web-port 9 --navi-http-port 9 --listen-seconds 0 --allow-unavailable --json` 通过。
 - `python3 scripts/personal/sunnypilot_c3_alpha_snapshot.py --output /tmp/sunnypilot_c3_alpha_snapshot_check.json --pretty` 通过，默认 `navipilotLiveCheck.requested=false`。
 - `python3 -u scripts/personal/sunnypilot_c3_alpha_static_check.py` 通过。
+- `python3 scripts/personal/road_test_evidence_check.py --self-test` 通过。
+- `python3 scripts/personal/evidence_readiness_report.py --self-test` 通过。
+- 临时 alpha 快照 JSON 作为 `--navipilot-live-check` 输入并配合 `--require-navipilot-live-check` 通过。
