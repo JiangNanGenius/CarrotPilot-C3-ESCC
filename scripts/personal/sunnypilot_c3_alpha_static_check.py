@@ -2491,6 +2491,7 @@ def main() -> int:
   parked_hardware_probe = read("scripts/personal/sunnypilot_c3_parked_hardware_probe.py")
   c3_imu_probe = read("scripts/personal/sunnypilot_c3_imu_probe.py")
   c3_camera_snapshot_probe = read("scripts/personal/sunnypilot_c3_camera_snapshot_probe.py")
+  mac_replay_shadow = read("scripts/personal/build_mac_replay_shadow.py")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
   nnlc_controller = read("sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
@@ -2970,6 +2971,7 @@ def main() -> int:
                           and "sunnypilot_c3_parked_hardware_probe.py" in release_gate
                           and "sunnypilot_c3_imu_probe.py" in release_gate
                           and "sunnypilot_c3_camera_snapshot_probe.py" in release_gate
+                          and "build_mac_replay_shadow.py" in release_gate
                           and "genius_offline_replay_check.py" in release_gate
                           and "genius_ui_replay_check.py" in release_gate
                           and "--fetch-references" in release_gate
@@ -3064,6 +3066,30 @@ def main() -> int:
   ok, detail = check_c3_camera_snapshot_probe_runtime()
   failures += not require("C3 camera snapshot probe runtime", ok,
                           detail or "C3 camera snapshot probe self-test failed")
+  failures += not require("Mac process replay shadow builder exists",
+                          "Genius Pilot Mac Replay Shadow Builder" in mac_replay_shadow
+                          and "ekf_sym_pyx" in mac_replay_shadow
+                          and "libcar.dylib" in mac_replay_shadow
+                          and "libpose.dylib" in mac_replay_shadow
+                          and "acados_ocp_solver_pyx" in mac_replay_shadow
+                          and "LongitudinalMpc" in mac_replay_shadow
+                          and "GENIUS_REPLAY_SHADOW" in mac_replay_shadow
+                          and "--build-acados" in mac_replay_shadow
+                          and "--install-locationd-dylibs" in mac_replay_shadow,
+                          "macOS no-car process replay must have a builder for rednose and acados native extensions")
+  failures += not require("Mac process replay shadow builder release gate wired",
+                          "scripts/personal/build_mac_replay_shadow.py" in release_gate
+                          and "Mac replay shadow builder self-test" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must self-test the Mac native replay shadow builder")
+  failures += not require("Mac process replay shadow builder documented",
+                          "build_mac_replay_shadow.py --json" in agents_md
+                          and "native-unblocked" in agents_md
+                          and "fork reference diffs" in agents_md
+                          and "2026.002.000-gp.20260620.40" in code_changes_md
+                          and "nativeExtensionBlocked=false" in code_changes_md
+                          and "build_mac_replay_shadow.py" in todo_md,
+                          "agent guide, code changes, and TODO must document the macOS native replay builder and remaining fork reference diffs")
   failures += not require("Genius offline replay check exists",
                           "Genius Pilot Offline Replay Check" in offline_replay_check
                           and "selfdrive/test/process_replay/test_processes.py" in offline_replay_check

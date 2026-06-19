@@ -195,6 +195,9 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Extend the process-replay wrapper so it distinguishes crash-free upstream reference diffs from true crashes, timeouts, and local native-extension blockers.
 - [x] Add a replay/UI diagnostic path using comma's `tools/replay/replay --demo` and UI diff replay so settings, HUD, visual modes, Carrot overlays, and Chinese text can be checked without the car.
 - [x] Make the no-car UI replay wrapper self-contained for clean macOS runs by preserving caller `PYTHONPATH` shim precedence, appending the repo path, and creating a temporary `PARAMS_ROOT` for the replay subprocess.
+- [x] Add `scripts/personal/build_mac_replay_shadow.py` so macOS process replay can build rednose and acados native extensions without replacing checked-in C3/Linux binaries.
+- [x] Run HYUNDAI `controlsd`, `plannerd`, `radard`, `locationd`, and `paramsd` process replay with `crashFree=true` and `nativeExtensionBlocked=false`; remaining `ok=false` is documented as fork reference diffs.
+- [ ] Generate and review fork-owned process replay references before treating Carrot/Genius behavior diffs as pass/fail regressions.
 - [x] Extend the Navipilot/CPdazi live check so `/api/phone_speed_limit` and `/api/fishop_hardware` are part of the no-car read-only evidence contract, including nested no-control-output checks.
 - [x] Add a passive C3 UI/screen capture evidence path to the device tarball; it tries `screencap`, then `fbgrab`, then raw framebuffer fallback, without touching the screen or playing sound.
 - [x] Add a C3 camera snapshot evidence path using upstream `system/camerad/snapshot.py` or VisionIPC capture, separate from modeld control checks.

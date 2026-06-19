@@ -84,6 +84,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     "scripts/personal/sunnypilot_c3_settings_conflict_audit.py",
     "scripts/personal/patch_tici_updater_wifi_manager.py",
     "scripts/personal/fishop_hardware_sample.py",
+    "scripts/personal/build_mac_replay_shadow.py",
     "scripts/personal/genius_offline_replay_check.py",
     "scripts/personal/genius_ui_replay_check.py",
     "scripts/personal/genius_visualization_contract.py",
@@ -127,6 +128,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     ("C3 parked hardware probe self-test", [py(), "scripts/personal/sunnypilot_c3_parked_hardware_probe.py", "--self-test"], 30),
     ("C3 IMU probe self-test", [py(), "scripts/personal/sunnypilot_c3_imu_probe.py", "--self-test"], 30),
     ("C3 camera snapshot probe self-test", [py(), "scripts/personal/sunnypilot_c3_camera_snapshot_probe.py", "--self-test"], 30),
+    ("Mac replay shadow builder self-test", [py(), "scripts/personal/build_mac_replay_shadow.py", "--self-test"], 30),
     ("Genius offline replay check self-test", [py(), "scripts/personal/genius_offline_replay_check.py", "--self-test"], 30),
     ("Genius UI replay check self-test", [py(), "scripts/personal/genius_ui_replay_check.py", "--self-test"], 30),
   ]
