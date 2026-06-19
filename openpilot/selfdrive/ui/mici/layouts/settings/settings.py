@@ -12,7 +12,7 @@ from openpilot.selfdrive.ui.mici.layouts.settings.software import SoftwareLayout
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos
 
 TAP_OPEN_DELAY = 0.12
-TAP_MAX_MOVE = 18
+TAP_MAX_MOVE = 32
 
 
 class SettingsBigButton(BigButton):
@@ -26,6 +26,7 @@ class SettingsLayout(NavScroller):
     self._params = Params()
     self._tap_candidate: SettingsBigButton | None = None
     self._tap_start_pos: MousePos | None = None
+    self._tap_active_widget: object | None = None
     self._tap_start_t = 0.0
 
     toggles_panel = TogglesLayoutMici()
@@ -72,13 +73,16 @@ class SettingsLayout(NavScroller):
   def _clear_menu_tap(self):
     self._tap_candidate = None
     self._tap_start_pos = None
+    self._tap_active_widget = None
     self._tap_start_t = 0.0
 
   def _open_tap_candidate(self):
     candidate = self._tap_candidate
-    self._clear_menu_tap()
-    if candidate is None or gui_app.get_active_widget() is not self:
+    active_widget = self._tap_active_widget
+    if candidate is None or gui_app.get_active_widget() is not active_widget:
+      self._clear_menu_tap()
       return
+    self._clear_menu_tap()
     if candidate._click_callback:
       candidate._click_callback()
 
@@ -100,6 +104,7 @@ class SettingsLayout(NavScroller):
     super()._handle_mouse_press(mouse_pos)
     self._tap_candidate = self._settings_button_at(mouse_pos)
     self._tap_start_pos = mouse_pos if self._tap_candidate is not None else None
+    self._tap_active_widget = gui_app.get_active_widget() if self._tap_candidate is not None else None
     self._tap_start_t = rl.get_time() if self._tap_candidate is not None else 0.0
 
   def _handle_mouse_release(self, mouse_pos: MousePos):
