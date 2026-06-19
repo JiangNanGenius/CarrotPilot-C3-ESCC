@@ -12,6 +12,10 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 
+GIT_BLOB_FIRST_PATHS = {
+  "sunnypilot/models/helpers.py",
+}
+
 WATCHED_PATHS = (
   "launch_openpilot.sh",
   "launch_chffrplus.sh",
@@ -89,10 +93,38 @@ def materialize_path(path: Path) -> None:
     pass
 
 
+def read_git_blob(rel: str) -> str | None:
+  for spec in (f":{rel}", f"HEAD:{rel}"):
+    try:
+      proc = subprocess.run(
+        ["git", "show", spec],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+      )
+    except subprocess.TimeoutExpired:
+      continue
+    if proc.returncode == 0:
+      return proc.stdout
+  return None
+
+
 def read(rel: str) -> str:
+  if rel in GIT_BLOB_FIRST_PATHS:
+    text = read_git_blob(rel)
+    if text is not None:
+      return text
   path = ROOT / rel
   materialize_path(path)
-  return path.read_text(encoding="utf-8", errors="ignore")
+  try:
+    return path.read_text(encoding="utf-8", errors="ignore")
+  except OSError:
+    text = read_git_blob(rel)
+    if text is not None:
+      return text
+    raise
 
 
 def file_exists(rel: str) -> bool:
@@ -261,6 +293,14 @@ def local_checks() -> list[dict[str, Any]]:
       and "NetworkUISP" in sp_settings
       and "self._wifi_manager._request_scan()" in sp_network,
       "Local Wi-Fi settings and scan/connect UI must remain available without cloud services",
+    ),
+    status(
+      "wifi_manager_jeepney_missing_fallback",
+      "except ModuleNotFoundError:" in wifi_manager
+      and "JEEPNEY_AVAILABLE = False" in wifi_manager
+      and "Wi-Fi manager disabled: python package 'jeepney' is unavailable" in wifi_manager
+      and "if self._exit:" in wifi_manager,
+      "Clone C3 setup may not have jeepney; missing DBus Python bindings must not crash manager/UI startup",
     ),
     status(
       "local_ssh_keys_retained_without_cloud_dependency",

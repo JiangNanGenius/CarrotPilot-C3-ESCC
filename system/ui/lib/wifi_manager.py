@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import atexit
 import threading
 import time
@@ -7,13 +9,6 @@ from collections.abc import Callable
 from dataclasses import dataclass, replace
 from enum import IntEnum
 from typing import Any
-
-from jeepney import DBusAddress, new_method_call
-from jeepney.bus_messages import MatchRule, message_bus
-from jeepney.io.blocking import DBusConnection, open_dbus_connection as open_dbus_connection_blocking
-from jeepney.io.threading import DBusRouter, open_dbus_connection as open_dbus_connection_threading
-from jeepney.low_level import MessageType
-from jeepney.wrappers import Properties
 
 from openpilot.common.swaglog import cloudlog
 from openpilot.system.ui.lib.networkmanager import (NM, NM_WIRELESS_IFACE, NM_802_11_AP_SEC_PAIR_WEP40,
@@ -25,6 +20,27 @@ from openpilot.system.ui.lib.networkmanager import (NM, NM_WIRELESS_IFACE, NM_80
                                                     NM_SETTINGS_IFACE, NM_CONNECTION_IFACE, NM_DEVICE_IFACE,
                                                     NM_DEVICE_TYPE_WIFI, NM_ACTIVE_CONNECTION_IFACE,
                                                     NM_IP4_CONFIG_IFACE, NM_PROPERTIES_IFACE, NMDeviceState, NMDeviceStateReason)
+
+try:
+  from jeepney import DBusAddress, new_method_call
+  from jeepney.bus_messages import MatchRule, message_bus
+  from jeepney.io.blocking import DBusConnection, open_dbus_connection as open_dbus_connection_blocking
+  from jeepney.io.threading import DBusRouter, open_dbus_connection as open_dbus_connection_threading
+  from jeepney.low_level import MessageType
+  from jeepney.wrappers import Properties
+  JEEPNEY_AVAILABLE = True
+except ModuleNotFoundError:
+  DBusAddress = None
+  MatchRule = None
+  MessageType = None
+  Properties = None
+  message_bus = None
+  new_method_call = None
+  open_dbus_connection_blocking = None
+  open_dbus_connection_threading = None
+  DBusConnection = object
+  DBusRouter = object
+  JEEPNEY_AVAILABLE = False
 
 try:
   from openpilot.common.params import Params
@@ -158,16 +174,24 @@ class WifiManager:
     self._exit = False
 
     # DBus connections
-    try:
-      self._router_main = DBusRouter(open_dbus_connection_threading(bus="SYSTEM"))  # used by scanner / general method calls
-      _wrap_router(self._router_main)
-      self._conn_monitor = open_dbus_connection_blocking(bus="SYSTEM")  # used by state monitor thread
-      self._nm = DBusAddress(NM_PATH, bus_name=NM, interface=NM_IFACE)
-    except FileNotFoundError:
-      cloudlog.exception("Failed to connect to system D-Bus")
+    if not JEEPNEY_AVAILABLE:
+      cloudlog.warning("Wi-Fi manager disabled: python package 'jeepney' is unavailable")
       self._router_main = None
       self._conn_monitor = None
+      self._nm = None
       self._exit = True
+    else:
+      try:
+        self._router_main = DBusRouter(open_dbus_connection_threading(bus="SYSTEM"))  # used by scanner / general method calls
+        _wrap_router(self._router_main)
+        self._conn_monitor = open_dbus_connection_blocking(bus="SYSTEM")  # used by state monitor thread
+        self._nm = DBusAddress(NM_PATH, bus_name=NM, interface=NM_IFACE)
+      except FileNotFoundError:
+        cloudlog.exception("Failed to connect to system D-Bus")
+        self._router_main = None
+        self._conn_monitor = None
+        self._nm = None
+        self._exit = True
 
     # Store wifi device path
     self._wifi_device: str | None = None
@@ -206,6 +230,8 @@ class WifiManager:
   def _initialize(self):
     def worker():
       self._wait_for_wifi_device()
+      if self._exit:
+        return
 
       # TODO: wait for state thread to start before adding tethering connection, tiny race currently
       self._scan_thread.start()
@@ -319,6 +345,8 @@ class WifiManager:
 
   def set_active(self, active: bool):
     self._active = active
+    if self._exit:
+      return
 
     # Update networks and WiFi state (to self-heal) immediately when activating for UI
     if active:
@@ -625,6 +653,10 @@ class WifiManager:
     self._router_main.send_and_get_reply(new_method_call(settings_addr, 'AddConnection', 'a{sa{sv}}', (connection,)))
 
   def connect_to_network(self, ssid: str, password: str, hidden: bool = False):
+    if self._exit:
+      cloudlog.warning(f"Wi-Fi manager unavailable; cannot connect to network {ssid}")
+      return
+
     self._set_connecting(ssid)
 
     def worker():
@@ -676,6 +708,11 @@ class WifiManager:
     threading.Thread(target=worker, daemon=True).start()
 
   def forget_connection(self, ssid: str, block: bool = False):
+    if self._exit:
+      cloudlog.warning(f"Wi-Fi manager unavailable; cannot forget network {ssid}")
+      self._enqueue_callbacks(self._forgotten, ssid)
+      return
+
     def worker():
       conn_path = self._connections.get(ssid, None)
       if conn_path is None:
@@ -692,6 +729,10 @@ class WifiManager:
       threading.Thread(target=worker, daemon=True).start()
 
   def activate_connection(self, ssid: str, block: bool = False):
+    if self._exit:
+      cloudlog.warning(f"Wi-Fi manager unavailable; cannot activate network {ssid}")
+      return
+
     self._set_connecting(ssid)
 
     def worker():
@@ -744,6 +785,10 @@ class WifiManager:
     return ssid in self._connections
 
   def set_tethering_password(self, password: str):
+    if self._exit:
+      cloudlog.warning("Wi-Fi manager unavailable; cannot set tethering password")
+      return
+
     def worker():
       conn_path = self._connections.get(self._tethering_ssid, None)
       if conn_path is None:
@@ -794,6 +839,10 @@ class WifiManager:
     self._ipv4_forward = enabled
 
   def set_tethering_active(self, active: bool):
+    if self._exit:
+      cloudlog.warning("Wi-Fi manager unavailable; cannot change tethering state")
+      return
+
     def worker():
       if active:
         self.activate_connection(self._tethering_ssid, block=True)
@@ -808,6 +857,10 @@ class WifiManager:
     threading.Thread(target=worker, daemon=True).start()
 
   def set_current_network_metered(self, metered: MeteredType):
+    if self._exit:
+      cloudlog.warning("Wi-Fi manager unavailable; cannot set Wi-Fi metered state")
+      return
+
     def worker():
       if self.is_tethering_active():
         return
@@ -833,6 +886,9 @@ class WifiManager:
     threading.Thread(target=worker, daemon=True).start()
 
   def _request_scan(self):
+    if self._exit:
+      return
+
     if self._wifi_device is None:
       cloudlog.warning("No WiFi device found")
       return
@@ -844,7 +900,7 @@ class WifiManager:
       cloudlog.warning(f"Failed to request scan: {reply}")
 
   def _update_networks(self, block: bool = True):
-    if not self._active:
+    if not self._active or self._exit:
       return
 
     def worker():
@@ -896,6 +952,9 @@ class WifiManager:
       threading.Thread(target=worker, daemon=True).start()
 
   def _update_active_connection_info(self):
+    if self._exit:
+      return
+
     ipv4_address = ""
     metered = MeteredType.UNKNOWN
 

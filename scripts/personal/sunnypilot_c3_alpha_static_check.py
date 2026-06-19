@@ -16,6 +16,10 @@ import types
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+GIT_BLOB_FIRST_PATHS = {
+  "sunnypilot/models/helpers.py",
+}
+
 
 def materialize_path(path: Path) -> None:
   if sys.platform != "darwin" or shutil.which("brctl") is None:
@@ -61,12 +65,36 @@ def safe_read_text(path: Path, timeout_s: float = 2.0) -> str | None:
     return None
 
 
+def read_git_blob(rel: str) -> str | None:
+  for spec in (f":{rel}", f"HEAD:{rel}"):
+    try:
+      proc = subprocess.run(
+        ["git", "show", spec],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+      )
+    except subprocess.TimeoutExpired:
+      continue
+    if proc.returncode == 0:
+      return proc.stdout
+  return None
+
+
 def read(rel: str) -> str:
   path = ROOT / rel
+  if rel in GIT_BLOB_FIRST_PATHS:
+    text = read_git_blob(rel)
+    if text is not None:
+      return text
   text = safe_read_text(path, timeout_s=10.0)
   if text is None:
     time.sleep(0.5)
     text = safe_read_text(path, timeout_s=30.0)
+  if text is None:
+    text = read_git_blob(rel)
   if text is None:
     raise RuntimeError(f"unable to read {rel}; file may be unavailable or timed out")
   return text
