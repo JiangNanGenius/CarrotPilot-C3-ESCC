@@ -2492,6 +2492,7 @@ def main() -> int:
   c3_imu_probe = read("scripts/personal/sunnypilot_c3_imu_probe.py")
   c3_camera_snapshot_probe = read("scripts/personal/sunnypilot_c3_camera_snapshot_probe.py")
   mac_replay_shadow = read("scripts/personal/build_mac_replay_shadow.py")
+  model_manager_contract = read("scripts/personal/genius_model_manager_contract.py")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
   nnlc_controller = read("sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
@@ -2972,6 +2973,7 @@ def main() -> int:
                           and "sunnypilot_c3_imu_probe.py" in release_gate
                           and "sunnypilot_c3_camera_snapshot_probe.py" in release_gate
                           and "build_mac_replay_shadow.py" in release_gate
+                          and "genius_model_manager_contract.py" in release_gate
                           and "genius_offline_replay_check.py" in release_gate
                           and "genius_ui_replay_check.py" in release_gate
                           and "--fetch-references" in release_gate
@@ -3883,6 +3885,29 @@ def main() -> int:
   ok, detail = check_model_manager_download_contract()
   failures += not require("model manager atomic download and rollback contract", ok,
                           detail or "model downloads must verify temp artifacts before replacing files or writing active bundle")
+  failures += not require("Genius model manager contract exists",
+                          "Genius Pilot Model Manager Contract" in model_manager_contract
+                          and "FakeParams" in model_manager_contract
+                          and "ModelManager_ActiveBundle" in model_manager_contract
+                          and "ModelRunnerTypeCache" in model_manager_contract
+                          and "Runner.stock" in model_manager_contract
+                          and "Runner.tinygrad" in model_manager_contract
+                          and "validate_active_bundle" in model_manager_contract
+                          and "summarize_model_bundle" in model_manager_contract
+                          and "_install_downloaded_artifact" in model_manager_contract
+                          and "download request key can be cleared" in model_manager_contract,
+                          "no-car model manager contract must cover stock fallback, runner cache, active-bundle evidence, rollback, and atomic install")
+  failures += not require("Genius model manager contract release gate wired",
+                          "scripts/personal/genius_model_manager_contract.py" in release_gate
+                          and "Genius model manager contract" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must self-test the no-car model manager contract")
+  failures += not require("Genius model manager contract documented",
+                          "genius_model_manager_contract.py --json" in agents_md
+                          and "2026.002.000-gp.20260620.41" in code_changes_md
+                          and "No active bundle defaults to the stock runner" in code_changes_md
+                          and "Verify model manager without car through `genius_model_manager_contract.py`" in todo_md,
+                          "agent guide, code changes, and TODO must document the no-car model manager contract")
 
   try:
     from openpilot.selfdrive.carrot.fishop_hardware import FishopHardwareState

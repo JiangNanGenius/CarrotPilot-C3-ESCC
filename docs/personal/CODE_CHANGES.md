@@ -1,5 +1,37 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 No-Car Model Manager Contract
+
+Published as `2026.002.000-gp.20260620.41`.
+
+Added `scripts/personal/genius_model_manager_contract.py` as a runnable no-car
+contract for the retained Sunny model manager:
+
+```bash
+/tmp/gp-replay-py312/bin/python scripts/personal/genius_model_manager_contract.py --json
+```
+
+The runtime contract uses a temporary model directory plus in-memory fakes for
+params, hardware paths, logging, messaging, and network-only dependencies. It
+does not download real models and does not touch the user's real model cache.
+
+Validated behavior:
+
+- No active bundle defaults to the stock runner and writes
+  `ModelRunnerTypeCache=stock`.
+- A selected bundle with missing or bad local artifacts is removed and the
+  runner cache falls back to stock.
+- A locally valid bundle with matching artifact hashes survives validation and
+  selects the tinygrad runner.
+- Active bundle evidence is summarized without embedding the full model list.
+- Model artifact replacement uses a temp artifact before replacing the active
+  file.
+- `ModelManager_DownloadIndex` can be cleared after handling.
+
+The release/static gates now compile and self-test this contract. Live model
+list download and C3 UI evidence remain a device-side check, not something this
+offline contract claims.
+
 ## 2026-06-20 Mac No-Car Replay Native Shadow Builder
 
 Published as `2026.002.000-gp.20260620.40`.
