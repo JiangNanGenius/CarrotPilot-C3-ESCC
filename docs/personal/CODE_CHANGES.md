@@ -1963,3 +1963,27 @@
 - `python3 scripts/personal/localization_audit.py` 通过。
 - `python3 scripts/personal/install_target_check.py` 通过。
 - `python3 scripts/personal/smoke_check.py` 通过。
+
+## 2026-06-19: alpha CP搭子 / Navipilot live check
+
+改动文件：
+
+- `openpilot-sunnypilot-011-c3/scripts/personal/navipilot_live_check.py`
+- `openpilot-sunnypilot-011-c3/scripts/personal/sunnypilot_c3_alpha_static_check.py`
+- `docs/personal/TODO.md`
+- `docs/personal/CODE_CHANGES.md`
+
+改动内容：
+
+- 新架构 alpha 新增 CP搭子 / Navipilot 本地端点检查器。
+- 覆盖 7000 `/api/health`、`/api/params_bulk`、`/api/param_set`、`/api/status_broadcast`、7705 UDP 状态广播、7713 HTTP 导航健康、7712 TCP 导航健康和 `/api/navigation_event`。
+- 默认只读；同值参数写回需要显式 `--write-same-value`，安全导航探针需要显式 `--send-navigation-probe`。
+- 安全导航探针只发送空命令字段的证据包，继续要求 `xState=0`、`trafficState=0`、`controlOutput=false`。
+- alpha 静态守门新增 live check 自测，并检查工具不保留旧 `AlwaysOffroad` / `EnableEscc` 别名、不引用云连接/上传客户端依赖。
+
+验证：
+
+- `python3 -m py_compile scripts/personal/navipilot_live_check.py scripts/personal/sunnypilot_c3_alpha_static_check.py` 通过。
+- `python3 scripts/personal/navipilot_live_check.py --self-test` 通过。
+- `python3 scripts/personal/navipilot_live_check.py --host 127.0.0.1 --web-port 9 --navi-http-port 9 --listen-seconds 0 --allow-unavailable --json` 通过。
+- `python3 -u scripts/personal/sunnypilot_c3_alpha_static_check.py` 通过。
