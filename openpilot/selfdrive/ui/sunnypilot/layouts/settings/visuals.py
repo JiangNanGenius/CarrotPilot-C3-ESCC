@@ -117,7 +117,7 @@ class VisualsLayout(Widget):
 
     self._genius_visual_mode = multiple_button_item_sp(
       title=lambda: tr("Genius Visualization Preset"),
-      description=lambda: tr("Choose a base display preset. Sunny is minimal, Carrot emphasizes lane, lead, and radar information, and Fusion keeps the Sunny HUD with Carrot-style road visualization. Fishop overlay is independent."),
+      description=lambda: tr("Choose a base display preset. Sunny is minimal, Carrot emphasizes lane, path, lead, and radar information, and Fusion keeps the Sunny HUD with Carrot-style lane and path cues. Fishop overlay is independent."),
       buttons=[lambda: tr("Sunny"), lambda: tr("Carrot"), lambda: tr("Fusion")],
       param="GeniusVisualMode",
       callback=self._apply_visual_preset,

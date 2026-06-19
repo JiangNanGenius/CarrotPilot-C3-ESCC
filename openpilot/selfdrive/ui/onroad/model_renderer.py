@@ -32,6 +32,18 @@ NO_THROTTLE_COLORS = [
   rl.Color(242, 242, 242, 0),   # HSLF(112/360, 0.0, 0.95, 0.0)
 ]
 
+CARROT_PATH_ACTIVE_COLORS = [
+  rl.Color(0, 202, 255, 112),
+  rl.Color(31, 255, 134, 92),
+  rl.Color(31, 255, 134, 0),
+]
+
+CARROT_PATH_LIMITED_COLORS = [
+  rl.Color(255, 122, 0, 118),
+  rl.Color(255, 62, 52, 96),
+  rl.Color(255, 62, 52, 0),
+]
+
 LANE_LINE_COLORS = {
   UIStatus.DISENGAGED: rl.Color(200, 200, 200, 255),
   UIStatus.OVERRIDE: rl.Color(255, 255, 255, 255),
@@ -430,6 +442,17 @@ class ModelRenderer(Widget, ChevronMetrics, ModelRendererSP):
       self.rainbow_path.draw_rainbow_path(self._rect, self._path)
       return
 
+    if ui_state.genius_visual_mode == 1:
+      self._draw_path_carrot()
+      return
+
+    if ui_state.genius_visual_mode == 2:
+      self._draw_path_fusion()
+      return
+
+    self._draw_path_sunny()
+
+  def _draw_path_sunny(self):
     if self._experimental_mode:
       # Draw with acceleration coloring
       if len(self._exp_gradient.colors) > 1:
@@ -447,6 +470,67 @@ class ModelRenderer(Widget, ChevronMetrics, ModelRendererSP):
         stops=[0.0, 0.5, 1.0],
       )
       draw_polygon(self._rect, self._path.projected_points, gradient=gradient)
+
+  def _draw_path_carrot(self):
+    """Draw a denser Carrot-style route ribbon without changing the planner path."""
+    blend_factor = round(self._blend_filter.x * 100) / 100
+    blended_colors = self._blend_colors(CARROT_PATH_LIMITED_COLORS, CARROT_PATH_ACTIVE_COLORS, blend_factor)
+    gradient = Gradient(
+      start=(0.0, 1.0),
+      end=(0.0, 0.0),
+      colors=blended_colors,
+      stops=[0.0, 0.56, 1.0],
+    )
+    draw_polygon(self._rect, self._path.projected_points, gradient=gradient)
+    self._draw_path_edges(rl.Color(0, 245, 255, 160), rl.Color(255, 255, 255, 92), 4.0)
+    self._draw_carrot_path_markers(rl.Color(255, 255, 255, 150))
+
+  def _draw_path_fusion(self):
+    """Keep the Sunny path body and add a light Carrot track cue."""
+    self._draw_path_sunny()
+    self._draw_path_edges(rl.Color(0, 245, 255, 118), rl.Color(255, 255, 255, 72), 2.8)
+
+  def _path_edge_points(self) -> tuple[np.ndarray, np.ndarray] | tuple[None, None]:
+    points = self._path.projected_points
+    if points.shape[0] < 4:
+      return None, None
+    half = points.shape[0] // 2
+    left = points[:half]
+    right = points[half:][::-1]
+    if left.shape[0] < 2 or right.shape[0] < 2:
+      return None, None
+    return left, right
+
+  def _draw_path_edges(self, edge_color: rl.Color, center_color: rl.Color, thickness: float):
+    edge_points = self._path_edge_points()
+    if edge_points[0] is None or edge_points[1] is None:
+      return
+
+    left, right = edge_points
+    self._draw_polyline(left, thickness, edge_color)
+    self._draw_polyline(right, thickness, edge_color)
+    center = (left + right) * 0.5
+    self._draw_polyline(center, max(1.8, thickness * 0.45), center_color, stride=2)
+
+  def _draw_carrot_path_markers(self, color: rl.Color):
+    edge_points = self._path_edge_points()
+    if edge_points[0] is None or edge_points[1] is None:
+      return
+
+    left, right = edge_points
+    center = (left + right) * 0.5
+    phase = max(0, self._counter // 3) % 6
+    max_markers = min(center.shape[0], 44)
+    for i in range(3 + phase, max_markers, 6):
+      radius = float(np.clip(9.0 - i * 0.11, 3.0, 9.0))
+      rl.draw_circle_v(rl.Vector2(float(center[i, 0]), float(center[i, 1])), radius, color)
+
+  @staticmethod
+  def _draw_polyline(points: np.ndarray, thickness: float, color: rl.Color, stride: int = 1):
+    for i in range(0, points.shape[0] - 1, stride):
+      p0 = (float(points[i, 0]), float(points[i, 1]))
+      p1 = (float(points[i + 1, 0]), float(points[i + 1, 1]))
+      rl.draw_line_ex(p0, p1, thickness, color)
 
   def _draw_lead_indicator(self):
     # Draw lead vehicles if available
