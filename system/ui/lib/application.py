@@ -143,6 +143,7 @@ class MouseState:
     self._scale = scale
     self._events: deque[MouseEvent] = deque(maxlen=MOUSE_THREAD_RATE)  # bound event list
     self._prev_mouse_event: list[MouseEvent | None] = [None] * MAX_TOUCH_SLOTS
+    self._last_touch_pos: list[MousePos | None] = [None] * MAX_TOUCH_SLOTS
 
     self._rk = Ratekeeper(MOUSE_THREAD_RATE, print_delay_threshold=None)
     self._lock = threading.Lock()
@@ -181,12 +182,25 @@ class MouseState:
       mouse_pos = rl.get_touch_position(slot)
       x = mouse_pos.x / self._scale if self._scale != 1.0 else mouse_pos.x
       y = mouse_pos.y / self._scale if self._scale != 1.0 else mouse_pos.y
+      left_pressed = rl.is_mouse_button_pressed(slot)  # noqa: TID251
+      left_released = rl.is_mouse_button_released(slot)  # noqa: TID251
+      left_down = rl.is_mouse_button_down(slot)
+      pos = MousePos(x, y)
+
+      if left_pressed or left_down:
+        self._last_touch_pos[slot] = pos
+      elif left_released and self._last_touch_pos[slot] is not None:
+        # C3/TICI touch releases can report an empty/cleared position. Use the
+        # last valid touch position so short taps still release on the widget
+        # that was actually pressed.
+        pos = self._last_touch_pos[slot]
+
       ev = MouseEvent(
-        MousePos(x, y),
+        pos,
         slot,
-        rl.is_mouse_button_pressed(slot),  # noqa: TID251
-        rl.is_mouse_button_released(slot),  # noqa: TID251
-        rl.is_mouse_button_down(slot),
+        left_pressed,
+        left_released,
+        left_down,
         time.monotonic(),
       )
       # Only add changes
@@ -195,6 +209,8 @@ class MouseState:
         with self._lock:
           self._events.append(ev)
         self._prev_mouse_event[slot] = ev
+      if left_released:
+        self._last_touch_pos[slot] = None
 
 
 class GuiApplication(GuiApplicationExt):
