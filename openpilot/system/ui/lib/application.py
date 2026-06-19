@@ -25,6 +25,7 @@ from openpilot.common.realtime import Ratekeeper
 from openpilot.system.ui.sunnypilot.lib.application import GuiApplicationExt
 
 _DEFAULT_FPS = int(os.getenv("FPS", {'tizi': 20}.get(HARDWARE.get_device_type(), 60)))
+MAIN_THREAD_INPUT = PC or HARDWARE.get_device_type() == "tizi"
 FPS_LOG_INTERVAL = 5  # Seconds between logging FPS drops
 FPS_DROP_THRESHOLD = 0.9  # FPS drop threshold for triggering a warning
 FPS_CRITICAL_THRESHOLD = 0.5  # Critical threshold for triggering strict actions
@@ -342,7 +343,7 @@ class GuiApplication(GuiApplicationExt):
       if BURN_IN_MODE and self._burn_in_shader is None:
         self._burn_in_shader = rl.load_shader_from_memory(BURN_IN_VERTEX_SHADER, BURN_IN_FRAGMENT_SHADER)
 
-      if not PC:
+      if not MAIN_THREAD_INPUT:
         self._mouse.start()
 
   @contextmanager
@@ -579,7 +580,7 @@ class GuiApplication(GuiApplicationExt):
       rl.unload_shader(self._burn_in_shader)
       self._burn_in_shader = None
 
-    if not PC:
+    if not MAIN_THREAD_INPUT:
       self._mouse.stop()
 
     self.close_ffmpeg()
@@ -605,8 +606,10 @@ class GuiApplication(GuiApplicationExt):
       while not (self._window_close_requested or rl.window_should_close()):
         frame_start = time.monotonic()
 
-        if PC:
-          # Thread is not used on PC, need to manually add mouse events
+        if MAIN_THREAD_INPUT:
+          # On PC and C3/TIZI, poll input on the render thread. Raylib's
+          # touch state is not reliable from the background thread on C3.
+          rl.poll_input_events()
           self._mouse._handle_mouse_event()
 
         # Store all mouse events for the current frame
@@ -616,7 +619,7 @@ class GuiApplication(GuiApplicationExt):
 
         # Skip rendering when screen is off
         if not self._should_render:
-          if PC:
+          if MAIN_THREAD_INPUT:
             rl.poll_input_events()
           time.sleep(1 / self._target_fps)
           yield False, 0.0, 0.0
