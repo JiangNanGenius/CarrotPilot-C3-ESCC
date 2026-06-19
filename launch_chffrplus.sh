@@ -32,6 +32,12 @@ function launch {
   # Remove orphaned git lock if it exists on boot
   [ -f "$DIR/.git/index.lock" ] && rm -f $DIR/.git/index.lock
 
+  # Keep a temporary SSH rescue path available on clone C3 alpha builds, even
+  # when UI startup fails before the user can open settings.
+  if [ -x "$DIR/sunnypilot/system/hardware/c3/rescue_ssh.sh" ]; then
+    "$DIR/sunnypilot/system/hardware/c3/rescue_ssh.sh"
+  fi
+
   # Check to see if there's a valid overlay-based update available. Conditions
   # are as follows:
   #
