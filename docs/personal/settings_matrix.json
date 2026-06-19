@@ -2383,7 +2383,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "GeniusVisualMode",
-      "notes": "Mutually exclusive base preset: Sunny minimal, Carrot dense lane/path/lead/radar, Fusion mixed.",
+      "notes": "Mutually exclusive base preset: Sunny minimal, Carrot dense lane/path/lead/radar, Fusion default with Sunny HUD structure and Carrot road cues.",
       "owner": "visualization",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -2512,7 +2512,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "GeniusFishopVisualOverlay",
-      "notes": "Independent top-layer Fishop/lidar evidence overlay; never a base preset.",
+      "notes": "Independent top-layer Fishop/lidar evidence overlay; never a base preset or control gate.",
       "owner": "visualization",
       "reference_hits": {
         "ajouatom-c3-wip": false,

@@ -1,6 +1,6 @@
 # Genius Pilot C3 Settings Conflict Notes
 
-Last checked: 2026-06-20 with `scripts/personal/sunnypilot_c3_settings_conflict_audit.py --strict`, `scripts/personal/genius_settings_matrix.py --check`, and `scripts/personal/genius_curve_speed_contract.py --self-test`.
+Last checked: 2026-06-20 with `scripts/personal/sunnypilot_c3_settings_conflict_audit.py --strict`, `scripts/personal/genius_settings_matrix.py --check`, `scripts/personal/genius_curve_speed_contract.py --self-test`, and `scripts/personal/genius_visualization_contract.py --self-test`.
 
 ## Summary
 
@@ -52,11 +52,13 @@ The reference branches use several settings that look similar but control differ
 
 - Visualization settings are display-only and live in the Visuals page.
 - `GeniusVisualMode` is a preset selector: Sunny keeps the stock look, Carrot emphasizes lane/path/lead/radar information, and Fusion combines Sunny HUD elements with Carrot-style road visualization.
+- Fusion is the C3 alpha default because it keeps the familiar Sunny HUD structure while preferring Carrot-style lane/path/lead cues where the road display is clearer.
 - `GeniusVisualMode` also owns the path display style: Sunny keeps the original route body, Carrot uses a denser route ribbon with edge/center markers, and Fusion keeps the Sunny route body with lighter Carrot path cues.
 - `GeniusLaneLineStyle` and `GeniusLeadRadarVisualMode` may be adjusted independently after choosing a preset.
 - `GeniusLaneChangeVisuals` uses existing `onroadEvents` lane-change intent events and must not alter lane-change decisions.
 - `GeniusFishopVisualOverlay` is independent from the Sunny/Carrot/Fusion preset. It draws local Fishop/lidar evidence only while `/data/fishop_hardware.jsonl` is fresh and must not publish planner, CAN, or automatic-overtake outputs.
 - Coexistence rule: Sunny, Carrot, and Fusion are mutually exclusive base presets; lane-line and lead/radar style are editable details; Fishop overlay is an optional top-layer evidence display.
+- The ajouatom Carrot cluster/world visualization is tracked as a separate future surface. Do not merge its world-view renderer into the main HUD without a separate layout/performance/control-boundary pass.
 - Do not merge Carrot path animation, Fishop overlay, Sunny HUD, and cruise-control behavior by name alone; each renderer change needs a display-only owner and a separate control-owner decision.
 - `docs/personal/SETTINGS_MATRIX.md` is the source of truth for these owner decisions. If a new visual/control setting is added, it must be classified there before publishing `/x`.
 

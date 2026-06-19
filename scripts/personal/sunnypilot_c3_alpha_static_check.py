@@ -2900,6 +2900,17 @@ def main() -> int:
                           and "LaneChangeIntentWidget" in turn_signal_renderer
                           and "genius_lane_change_visuals" in turn_signal_renderer,
                           "onroad renderer must wire Carrot-style path cues, lead boxes, radar labels, lane-line coloring, and lane-change intent cues")
+  visualization_policy = read("docs/personal/VISUALIZATION_POLICY.md")
+  failures += not require("Genius visualization policy documented",
+                          all(token in visualization_policy for token in (
+                            "One base preset is active at a time",
+                            "`Fusion`: default C3 preset",
+                            "`GeniusFishopVisualOverlay` is not a base preset",
+                            "Carrot Cluster / World View",
+                            "Visualization settings must not publish control messages",
+                            "The C3 alpha default is `GeniusVisualMode=2`",
+                          )),
+                          "visualization policy must document base preset mutual exclusion, Fishop overlay independence, Carrot cluster plan, and safety boundary")
   ok, detail = check_genius_visualization_contract_runtime()
   failures += not require("Genius visualization contract runtime", ok, detail or "Genius visualization contract failed")
   failures += not require("Genius settings matrix files present",

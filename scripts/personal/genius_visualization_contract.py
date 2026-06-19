@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[2]
 MODEL_RENDERER = ROOT / "selfdrive/ui/onroad/model_renderer.py"
 VISUALS_LAYOUT = ROOT / "selfdrive/ui/sunnypilot/layouts/settings/visuals.py"
 TURN_SIGNAL = ROOT / "selfdrive/ui/sunnypilot/onroad/turn_signal.py"
+PARAM_KEYS = ROOT / "common/params_keys.h"
+VISUAL_POLICY = ROOT / "docs/personal/VISUALIZATION_POLICY.md"
 
 C3_CONTENT = (0.0, 0.0, 2160.0, 1080.0)
 HUD_SAFE_Y = 360.0
@@ -34,6 +36,8 @@ def check_sources() -> list[CheckResult]:
   renderer = MODEL_RENDERER.read_text(encoding="utf-8")
   visuals = VISUALS_LAYOUT.read_text(encoding="utf-8")
   turn_signal = TURN_SIGNAL.read_text(encoding="utf-8")
+  params = PARAM_KEYS.read_text(encoding="utf-8")
+  policy = VISUAL_POLICY.read_text(encoding="utf-8")
   path_section = source_section(renderer, "  def _draw_path(self, sm):", "  def _draw_lead_indicator(self):")
 
   required_renderer = (
@@ -62,6 +66,28 @@ def check_sources() -> list[CheckResult]:
     "Genius Visualization Preset",
     "Carrot emphasizes lane, path, lead, and radar information",
     "Carrot-style lane and path cues",
+    "callback=self._apply_visual_preset",
+    "self._params.put(\"GeniusLaneLineStyle\", 2)",
+    "self._params.put(\"GeniusLeadRadarVisualMode\", 2)",
+    "self._params.put(\"GeniusLaneLineStyle\", 1)",
+    "self._params.put(\"GeniusLeadRadarVisualMode\", 1)",
+  )
+  required_defaults = (
+    '{"GeniusVisualMode", {PERSISTENT | BACKUP, INT, "2"}}',
+    '{"GeniusLaneLineStyle", {PERSISTENT | BACKUP, INT, "1"}}',
+    '{"GeniusLeadRadarVisualMode", {PERSISTENT | BACKUP, INT, "1"}}',
+    '{"GeniusLaneChangeVisuals", {PERSISTENT | BACKUP, BOOL, "1"}}',
+    '{"GeniusFishopVisualOverlay", {PERSISTENT | BACKUP, BOOL, "0"}}',
+  )
+  required_policy = (
+    "One base preset is active at a time",
+    "`Sunny`: minimal upstream-style HUD",
+    "`Carrot`: denser Carrot-style road view",
+    "`Fusion`: default C3 preset",
+    "`GeniusFishopVisualOverlay` is not a base preset",
+    "Carrot Cluster / World View",
+    "Visualization settings must not publish control messages",
+    "The C3 alpha default is `GeniusVisualMode=2`",
   )
   required_lane_change = (
     "class LaneChangeIntentWidget",
@@ -96,7 +122,17 @@ def check_sources() -> list[CheckResult]:
     CheckResult(
       "visuals settings describe path presets",
       all(token in visuals for token in required_visuals),
-      "Visuals page must explain lane/path ownership for the base presets",
+      "Visuals page must explain lane/path ownership and preset callback defaults",
+    ),
+    CheckResult(
+      "visual params default to Fusion with Fishop off",
+      all(token in params for token in required_defaults),
+      "C3 defaults must keep Fusion as the base display and Fishop overlay off",
+    ),
+    CheckResult(
+      "visualization policy documents coexistence",
+      all(token in policy for token in required_policy),
+      "docs/personal/VISUALIZATION_POLICY.md must define base presets, overlay rules, and safety boundary",
     ),
     CheckResult(
       "renderer lane and lead modes wired",
@@ -230,7 +266,13 @@ def check_visual_modes() -> list[CheckResult]:
 
   results.append(CheckResult("visual base presets are mutually exclusive", len({m["mode"] for m in mode_expectations.values()}) == 3,
                              "Sunny, Carrot, and Fusion must remain distinct base presets"))
-  results.append(CheckResult("Fishop overlay remains independent of base preset", True,
+  results.append(CheckResult("Fusion is the default C3 base preset", mode_expectations["Fusion"]["mode"] == 2,
+                             "Fusion keeps Sunny HUD structure with Carrot road cues"))
+  results.append(CheckResult("Carrot preset is the dense lane/path/lead/radar preset",
+                             bool(mode_expectations["Carrot"]["carrot_edges"] and mode_expectations["Carrot"]["markers"]),
+                             "Carrot mode must keep the denser route ribbon and center markers"))
+  results.append(CheckResult("Fishop overlay remains independent of base preset",
+                             all("GeniusFishopVisualOverlay" != name for name in mode_expectations),
                              "Fishop overlay is a separate top layer checked in static UI/source tests"))
   return results
 
