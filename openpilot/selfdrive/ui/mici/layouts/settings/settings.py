@@ -12,7 +12,7 @@ from openpilot.selfdrive.ui.mici.layouts.settings.software import SoftwareLayout
 from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos
 
 TAP_OPEN_DELAY = 0.12
-TAP_MAX_MOVE = 32
+TAP_MAX_MOVE = 56
 
 
 class SettingsBigButton(BigButton):
@@ -88,6 +88,26 @@ class SettingsLayout(NavScroller):
 
   def _update_state(self):
     super()._update_state()
+
+    if gui_app.get_active_widget() is not self:
+      self._clear_menu_tap()
+      return
+
+    for mouse_event in gui_app.mouse_events:
+      if mouse_event.slot != 0:
+        continue
+
+      if mouse_event.left_pressed:
+        self._tap_candidate = self._settings_button_at(mouse_event.pos)
+        self._tap_start_pos = mouse_event.pos if self._tap_candidate is not None else None
+        self._tap_active_widget = self if self._tap_candidate is not None else None
+        self._tap_start_t = rl.get_time() if self._tap_candidate is not None else 0.0
+      elif self._tap_candidate is not None:
+        if self._tap_moved_too_far(mouse_event.pos) or self._scroller.scroll_panel.state == ScrollState.MANUAL_SCROLL:
+          self._clear_menu_tap()
+        elif mouse_event.left_released:
+          self._open_tap_candidate()
+          return
 
     if self._tap_candidate is None:
       return
