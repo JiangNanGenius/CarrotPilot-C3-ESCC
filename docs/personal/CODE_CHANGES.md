@@ -1,5 +1,19 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Bench Rescue SSH Policy
+
+Made clone C3 rescue access a bench-only opt-in path:
+
+- `sunnypilot/system/hardware/c3/rescue_ssh.sh` is now inert unless a local bench marker or `CARROT_C3_RESCUE_ENABLE=1` explicitly arms it.
+- Removed the public fallback password and public SSH key from the release tree.
+- The rescue helper no longer writes `GithubSshKeys`, contacts GitHub, or depends on any comma/Sunnylink/cloud registration path.
+- Credentials are provided only at recovery time through `CARROT_C3_RESCUE_PASSWORD`, `CARROT_C3_RESCUE_PUBKEY`, or `/data/carrotpilot/bench_rescue_authorized_keys`.
+- The C3 hardware README now documents the policy, and the alpha static gate checks that the script remains opt-in and no default credential is reintroduced.
+- Strengthened the visualization gate so the Sunny/Carrot/Fusion base preset remains mutually exclusive while Carrot World and Fishop stay independent overlays that can be opened together.
+- Rebuilt the ARM64 `common/params_pyx.so` in a linux/arm64 environment so `GeniusCarrotWorldOverlay` is recognized on the C3 runtime.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.23`.
+
 ## 2026-06-20 Cruise Carrot Control Sections
 
 Expanded the Cruise page from a small staged tuning list into a daily Carrot speed-control surface:

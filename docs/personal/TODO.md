@@ -31,7 +31,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep local Wi-Fi, SSH, local web, GitHub update, and model download paths.
 - [x] Keep a robust local Wi-Fi UI on clone C3 even when the `jeepney` DBus dependency is absent; prefer DBus when available and fall back to `nmcli`.
 - [x] Remove the fresh-install dependency on `jeepney` by patching the packed TICI updater to use the same `nmcli` fallback as the main Wi-Fi manager.
-- [ ] Decide the permanent C3 rescue access policy: no GitHub/cloud registration required, no public hardcoded password in release builds, and a bench-only recovery method for the user's device.
+- [x] Decide the permanent C3 rescue access policy: no GitHub/cloud registration required, no public hardcoded password in release builds, and a bench-only recovery method for the user's device.
 - [ ] Verify local LAN services after every install: Wi-Fi status, SSH, local web, updater, model manager, and no dependency crashes in `/tmp/launch_log`.
 - [ ] Run real device parking test on clone C3.
 - [ ] Pull a C3 evidence bundle with `sunnypilot_c3_device_collect.py` after `/x` install succeeds.

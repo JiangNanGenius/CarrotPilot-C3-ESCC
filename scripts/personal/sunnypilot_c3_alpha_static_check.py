@@ -16,6 +16,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+LEGACY_C3_RESCUE_PASSWORD = "".join(("C3", "Debug", "123456"))
 
 GIT_BLOB_FIRST_PATHS = {
   "sunnypilot/models/helpers.py",
@@ -2202,6 +2203,7 @@ def main() -> int:
                             '{"GeniusLaneLineStyle", {PERSISTENT | BACKUP, INT, "1"}}',
                             '{"GeniusLeadRadarVisualMode", {PERSISTENT | BACKUP, INT, "1"}}',
                             '{"GeniusLaneChangeVisuals", {PERSISTENT | BACKUP, BOOL, "1"}}',
+                            '{"GeniusCarrotWorldOverlay", {PERSISTENT | BACKUP, BOOL, "0"}}',
                             '{"GeniusFishopVisualOverlay", {PERSISTENT | BACKUP, BOOL, "0"}}',
                           )),
                           "Genius visualization params must exist with Fusion defaults and Fishop overlay off")
@@ -2217,6 +2219,7 @@ def main() -> int:
                             b"GeniusVisualMode",
                             b"GeniusLaneLineStyle",
                             b"GeniusLeadRadarVisualMode",
+                            b"GeniusCarrotWorldOverlay",
                           )),
                           "common/params_pyx.so must be rebuilt when alpha params_keys.h adds local Carrot/Fishop/Genius keys")
   for key in (
@@ -2319,6 +2322,10 @@ def main() -> int:
   fishop_sample = read("scripts/personal/fishop_hardware_sample.py")
   alpha_snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
   c3_compat_audit = read("scripts/personal/sunnypilot_c3_compat_audit.py")
+  c3_rescue = read("sunnypilot/system/hardware/c3/rescue_ssh.sh")
+  c3_readme = read("sunnypilot/system/hardware/c3/README.md")
+  c3_launch_script = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
+  root_launch_script = read("launch_chffrplus.sh")
   installer_audit = read("scripts/personal/sunnypilot_c3_installer_audit.py")
   release_gate = read("scripts/personal/sunnypilot_c3_alpha_release_gate.py")
   update_audit = read("scripts/personal/sunnypilot_c3_alpha_update_audit.py")
@@ -2735,8 +2742,26 @@ def main() -> int:
                           and "local_ssh_keys_retained_without_cloud_dependency" in c3_compat_audit
                           and "local_update_and_model_ui_retained" in c3_compat_audit
                           and "model_runner_split_present" in c3_compat_audit
+                          and "c3_rescue_ssh_is_bench_only" in c3_compat_audit
                           and "root_launcher_keeps_shutdown_policy" in c3_compat_audit,
                           "alpha must include a repeatable audit for C3 launcher, channel, installer, local network, modeld, cloud, and power compatibility")
+  failures += not require("C3 rescue SSH is bench-only opt-in",
+                          "CARROT_C3_RESCUE_ENABLE" in c3_rescue
+                          and "/data/carrotpilot/bench_rescue_enable" in c3_rescue
+                          and "/data/carrotpilot/bench_rescue_authorized_keys" in c3_rescue
+                          and "CARROT_C3_RESCUE_PASSWORD" in c3_rescue
+                          and "CARROT_C3_RESCUE_PUBKEY" in c3_rescue
+                          and "rescue_is_armed" in c3_rescue
+                          and "write_status \"disabled\"" in c3_rescue
+                          and "enabled-no-credential" in c3_rescue
+                          and "GithubSshKeys" not in c3_rescue
+                          and LEGACY_C3_RESCUE_PASSWORD not in c3_rescue
+                          and "RESCUE_PUBKEY=" not in c3_rescue
+                          and "bench-only opt-in" in c3_readme
+                          and "writes `GithubSshKeys`" in c3_readme
+                          and "Bench rescue is inert by default" in c3_launch_script
+                          and "Bench rescue is inert by default" in root_launch_script,
+                          "C3 rescue SSH must be inert unless explicitly armed and must not ship a default password/key or write GithubSshKeys")
   failures += not require("alpha Pages installer audit tool exists",
                           "Genius Pilot Installer Audit" in installer_audit
                           and "DEFAULT_INSTALL_URL" in installer_audit
@@ -2998,6 +3023,7 @@ def main() -> int:
                             "GeniusLaneLineStyle",
                             "GeniusLeadRadarVisualMode",
                             "GeniusLaneChangeVisuals",
+                            "GeniusCarrotWorldOverlay",
                             "GeniusFishopVisualOverlay",
                             "Genius Visualization Preset",
                             "Base Display Layer",
@@ -3027,12 +3053,24 @@ def main() -> int:
                           and "LaneChangeIntentWidget" in turn_signal_renderer
                           and "genius_lane_change_visuals" in turn_signal_renderer,
                           "onroad renderer must wire Carrot-style path cues, lead boxes, radar labels, lane-line coloring, and lane-change intent cues")
+  failures += not require("Carrot World overlay is attached and display-only",
+                          "from openpilot.selfdrive.ui.onroad.carrot_world_overlay import CarrotWorldOverlay" in augmented_road_view
+                          and "self.carrot_world_overlay = CarrotWorldOverlay()" in augmented_road_view
+                          and "self.carrot_world_overlay.render(self._content_rect)" in augmented_road_view
+                          and "class CarrotWorldOverlay" in read("selfdrive/ui/onroad/carrot_world_overlay.py")
+                          and "never writes params" in read("selfdrive/ui/onroad/carrot_world_overlay.py")
+                          and all(token not in read("selfdrive/ui/onroad/carrot_world_overlay.py") for token in (
+                            "PubMaster", "CarControl", "CANParser", "sendcan", ".put(", "desire_helper",
+                          )),
+                          "Carrot World overlay must stay attached above the base renderer and remain display-only")
   visualization_policy = read("docs/personal/VISUALIZATION_POLICY.md")
   failures += not require("Genius visualization policy documented",
                           all(token in visualization_policy for token in (
                             "One base preset is active at a time",
                             "`Fusion`: default C3 preset",
+                            "Carrot World and Fishop can both be opened",
                             "`GeniusFishopVisualOverlay` is not a base preset",
+                            "base road renderer, Carrot World overlay, Fishop overlay, then HUD/alerts",
                             "Carrot Cluster / World View",
                             "Visualization settings must not publish control messages",
                             "The C3 alpha default is `GeniusVisualMode=2`",
@@ -3102,8 +3140,10 @@ def main() -> int:
                             "GeniusLaneLineStyle",
                             "GeniusLeadRadarVisualMode",
                             "GeniusLaneChangeVisuals",
+                            "GeniusCarrotWorldOverlay",
                             "GeniusFishopVisualOverlay",
                             "Mutually exclusive base preset",
+                            "Independent Carrot world evidence overlay",
                             "Independent top-layer Fishop",
                           )),
                           "settings matrix must classify cloud, Sunny, Carrot, Fishop, ESCC, model, local-network, and visualization owners")

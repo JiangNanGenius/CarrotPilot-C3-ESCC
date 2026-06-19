@@ -32,8 +32,8 @@ function launch {
   # Remove orphaned git lock if it exists on boot
   [ -f "$DIR/.git/index.lock" ] && rm -f $DIR/.git/index.lock
 
-  # Keep a temporary SSH rescue path available on clone C3 alpha builds, even
-  # when UI startup fails before the user can open settings.
+  # Bench rescue is inert by default. It only starts local SSH when the device
+  # is explicitly armed from a local marker/env for recovery work.
   if [ -x "$DIR/sunnypilot/system/hardware/c3/rescue_ssh.sh" ]; then
     "$DIR/sunnypilot/system/hardware/c3/rescue_ssh.sh"
   fi
