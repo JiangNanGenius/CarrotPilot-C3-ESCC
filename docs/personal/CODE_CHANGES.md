@@ -1,5 +1,39 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Mac No-Car Replay Native Shadow Builder
+
+Published as `2026.002.000-gp.20260620.40`.
+
+Added a repeatable macOS native-extension builder for no-car process replay:
+
+```bash
+/tmp/gp-replay-py312/bin/python scripts/personal/build_mac_replay_shadow.py --json
+```
+
+The builder creates ignored local-only artifacts so macOS replay can load
+native code without replacing the checked-in C3/Linux binaries:
+
+- `/tmp/gp-replay-shadow/rednose/helpers/ekf_sym_pyx.cpython-312-darwin.so`
+- `selfdrive/locationd/models/generated/libcar.dylib`
+- `selfdrive/locationd/models/generated/libpose.dylib`
+- `selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/acados_ocp_solver_pyx.cpython-312-darwin.so`
+
+Validation evidence:
+
+- `rednose_shadow_ok (9,) (18,)` from `CarKalman` and `PoseKalman`.
+- `acados_shadow_ok LongitudinalMpc` from `long_mpc`.
+- HYUNDAI process replay for `controlsd`, `plannerd`, `radard`,
+  `locationd`, and `paramsd` now completes with `crashFree=true` and
+  `nativeExtensionBlocked=false`.
+- The replay still reports upstream reference diffs, which are expected until
+  this Carrot/Genius fork has its own reviewed reference baselines:
+  `controlsd` torque outputs, `plannerd` longitudinal plan outputs, and
+  `locationd` missing upstream `liveLocationKalman`.
+
+The release/static gates now compile and self-test
+`scripts/personal/build_mac_replay_shadow.py`, so the no-car replay bootstrap
+path cannot disappear silently.
+
 ## 2026-06-20 TICI Dependency Installer Touch Fallback
 
 Published as `2026.002.000-gp.20260620.39`.
@@ -55,11 +89,11 @@ Fixes included:
 - `sunnypilot/selfdrive/controls/lib/latcontrol_torque_v0.py` now clamps
   zero or negative `lat_delay` to `dt` before computing lateral jerk, preventing
   a `ZeroDivisionError` during replay startup.
-- `radard` HYUNDAI process replay passes. `plannerd`, `locationd`, and
-  `paramsd` are currently blocked on macOS native-extension availability
-  (`acados_ocp_solver_pyx.so` and `rednose` `ekf_sym_pyx.so`), not on device
-  control logic. Those remain TODO items before claiming full no-car process
-  replay coverage.
+- `radard` HYUNDAI process replay passes. At the time of this patch,
+  `plannerd`, `locationd`, and `paramsd` were still blocked on macOS native
+  extensions. That native-extension blocker is superseded by
+  `2026.002.000-gp.20260620.40`; remaining failures are classified as fork
+  reference diffs, not process crashes.
 
 ## 2026-06-20 No-Car UI Replay Runtime Fix
 

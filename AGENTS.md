@@ -159,14 +159,15 @@ Offline replay checks before or alongside C3 testing:
 python3 scripts/personal/genius_ui_replay_check.py --json
 python3 scripts/personal/genius_ui_replay_check.py --run-ui-replay
 python3 scripts/personal/genius_offline_replay_check.py --json
+/tmp/gp-replay-py312/bin/python scripts/personal/build_mac_replay_shadow.py --json
 PYTHONPATH=/tmp/gp-replay-shadow:/path/to/repo /tmp/gp-replay-py312/bin/python \
   scripts/personal/genius_offline_replay_check.py \
-  --run-process-replay --procs controlsd --cars HYUNDAI --jobs 1 --timeout 120
+  --run-process-replay --procs controlsd,plannerd,radard,locationd,paramsd --cars HYUNDAI --jobs 1 --timeout 420
 tools/replay/replay --demo
 ```
 
 Use process replay for logic regressions and C3 probes for physical hardware evidence. Model replay that needs camera frames should follow `selfdrive/test/process_replay/model_replay.py` or provide `FrameReader` inputs.
-When calling upstream `test_processes.py` directly, pass process and car whitelists as repeated arguments, not comma-separated strings. On macOS, run through the Genius wrapper or use Python 3.12 safe-path mode with a native-extension shadow; otherwise checked-in C3/Linux `.so` files can mask the Mac shadow and cause false failures. Current Mac process-replay limitations are `plannerd` needing macOS `acados_ocp_solver_pyx.so` and `locationd`/`paramsd` needing macOS rednose `ekf_sym_pyx.so`.
+When calling upstream `test_processes.py` directly, pass process and car whitelists as repeated arguments, not comma-separated strings. On macOS, run `scripts/personal/build_mac_replay_shadow.py` first with the replay Python 3.12 environment. It builds ignored local-only `rednose` and `acados` native extensions, preserving the checked-in C3/Linux `.so` files while letting `plannerd`, `locationd`, and `paramsd` import on Mac. Current HYUNDAI no-car replay is crash-free and native-unblocked, but still reports fork reference diffs until Genius/Carrot-owned baselines are generated.
 For macOS UI diff replay, keep caller-provided `PYTHONPATH` entries ahead of the repo path so temporary native extension shadows can override C3/Linux extension files, and keep a temporary `PARAMS_ROOT` so replay does not depend on the user's home params directory.
 
 On-device snapshot command, if already SSH'd into the C3:
