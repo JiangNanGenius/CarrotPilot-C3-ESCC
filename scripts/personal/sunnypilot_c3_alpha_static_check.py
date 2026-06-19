@@ -1773,6 +1773,27 @@ def check_genius_carrot_web_api_contract_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_genius_navipilot_replay_contract_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_navipilot_replay_contract.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-1200:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_genius_branding_contract_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -2268,6 +2289,7 @@ def main() -> int:
   settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
   settings_matrix_json = read("docs/personal/settings_matrix.json")
   carrot_web_api_contract = read("scripts/personal/genius_carrot_web_api_contract.py")
+  navipilot_replay_contract = read("scripts/personal/genius_navipilot_replay_contract.py")
   curve_speed_contract = read("scripts/personal/genius_curve_speed_contract.py")
   curve_speed_policy_md = read("docs/personal/CURVE_SPEED_POLICY.md")
   curve_speed_policy = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py")
@@ -3003,6 +3025,25 @@ def main() -> int:
                           "release gate must run the local Carrot Web/API contract")
   ok, detail = check_genius_carrot_web_api_contract_runtime()
   failures += not require("Genius Carrot Web API contract runtime", ok, detail or "Genius Carrot Web API contract failed")
+  failures += not require("Genius Navipilot/APN replay contract files present",
+                          all(token in navipilot_replay_contract for token in (
+                            "flat UDP/APN navigation replay",
+                            "rgdata HTTP/TCP compatibility replay",
+                            "sinf/ssinf traffic-light replay",
+                            "speed-bump evidence",
+                            "model speed",
+                            "traffic-stop preview",
+                            "phone speed",
+                            "controlOutput",
+                          )),
+                          "Navipilot replay contract must cover phone speed, SDI, speed-bump, traffic-light, turn, model-speed, compatibility wrapper, and no-control evidence")
+  failures += not require("Genius Navipilot/APN replay contract release gate wired",
+                          "scripts/personal/genius_navipilot_replay_contract.py" in release_gate
+                          and "Genius Navipilot/APN replay contract" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must run the local Navipilot/APN/N replay contract")
+  ok, detail = check_genius_navipilot_replay_contract_runtime()
+  failures += not require("Genius Navipilot/APN replay contract runtime", ok, detail or "Genius Navipilot/APN replay contract failed")
   failures += not require("Genius branding release gate wired",
                           "scripts/personal/genius_branding_contract.py" in release_gate
                           and "Genius branding contract" in release_gate,

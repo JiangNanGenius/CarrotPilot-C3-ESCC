@@ -1,5 +1,18 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Navipilot/APN/N Replay Contract
+
+Added a dedicated local replay contract for the Navipilot/APN/N navigation bridge:
+
+- Added `scripts/personal/genius_navipilot_replay_contract.py`.
+- The contract replays flat UDP/APN-style navigation input, `rgdata` compatibility input, and `sinf`/`ssinf` traffic-light input without needing a C3.
+- It confirms phone speed, SDI, speed-bump, red/green traffic-light, turn, and model-speed fields are parsed into local evidence.
+- It confirms Carrot status broadcast fields preserve TBT, SDI, speed-bump, model-speed, traffic-light, and phone-speed evidence.
+- It confirms high-risk navigation commands are kept as ignored evidence and every replay remains read-only with `controlOutput=false`.
+- The alpha release gate and static check now run this contract explicitly.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.14`.
+
 ## 2026-06-20 Local Carrot Web/API Contract
 
 Added a dedicated local API contract for the Carrot Web parameter bridge:
