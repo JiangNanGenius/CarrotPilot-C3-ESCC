@@ -13,8 +13,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add `scripts/personal/sunnypilot_c3_installer_audit.py` so future updates reject incompatible Raylib/new-GLIBC and stale upstream installer binaries.
 - [x] Add `scripts/personal/sunnypilot_c3_device_collect.py` to collect installer crash logs or parked/model/no-cloud evidence from the C3 over SSH.
 - [x] Recover from the first `/x` boot failures: missing Python dependency, settings tap release handling, and onboarding/settings navigation blockers.
-- [ ] Rebuild or patch the packed TICI updater so its embedded Wi-Fi manager either includes the `jeepney` fallback or runs in an environment where `jeepney` is installed.
-- [ ] Add an installer/update audit that checks both the main source tree and the packed TICI updater for the Wi-Fi dependency contract.
+- [x] Rebuild or patch the packed TICI updater so its embedded Wi-Fi manager includes the same `jeepney`/`nmcli` fallback as the main source tree.
+- [x] Add an installer/update audit that checks both the main source tree and the packed TICI updater for the Wi-Fi dependency contract.
 - [ ] Keep the welcome/training flow, but replace SunnyPilot-specific legal/consent copy with Genius Pilot personal-build copy that is short enough for C3 and advances reliably.
 - [ ] Rename user-facing alpha branding from SunnyPilot to Genius Pilot where accurate: welcome screen, version/about panel, settings headers, update prompts, and boot/update text.
 - [ ] Keep `/x` as the single short alpha entry; avoid new test URLs unless there is a clear rollback reason.
@@ -30,7 +30,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep normal shutdown policy; do not import Mr.One never-shutdown behavior.
 - [x] Keep local Wi-Fi, SSH, local web, GitHub update, and model download paths.
 - [x] Keep a robust local Wi-Fi UI on clone C3 even when the `jeepney` DBus dependency is absent; prefer DBus when available and fall back to `nmcli`.
-- [ ] Ensure `jeepney` is installed on fresh alpha installs, because the packed updater still imports it directly today.
+- [x] Remove the fresh-install dependency on `jeepney` by patching the packed TICI updater to use the same `nmcli` fallback as the main Wi-Fi manager.
 - [ ] Decide the permanent C3 rescue access policy: no GitHub/cloud registration required, no public hardcoded password in release builds, and a bench-only recovery method for the user's device.
 - [ ] Verify local LAN services after every install: Wi-Fi status, SSH, local web, updater, model manager, and no dependency crashes in `/tmp/launch_log`.
 - [ ] Run real device parking test on clone C3.
@@ -169,7 +169,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Verify the Wi-Fi fallback on device: after UI-style activation it reports SSID `zhao`, IP `192.168.100.174`, and scanned networks without `jeepney`.
 - [x] Move the device from temporary synced dirty files to pushed branch commit `ec7e73dc`.
 - [ ] User visual confirmation: Network page leaves scanning state, sidebar gear opens settings consistently, temperature displays as a number, and toggles still work.
-- [ ] Remove the packed updater `jeepney` traceback from `/tmp/launch_log` on a clean alpha install.
+- [x] Remove the packed updater `jeepney` traceback from clean alpha installs by patching the updater payload before publishing.
 
 ## Update Checklist
 
