@@ -1,8 +1,8 @@
 # Carrot Cluster World Schema
 
 This document maps the larger ajouatom Carrot cluster/world view into a Genius
-Pilot display-only schema. It is the contract to use before importing the full
-cluster renderer, standalone page, or debug surface.
+Pilot display-only schema. It is the contract used by the local
+`/cluster_world` debug surface and any future full cluster renderer.
 
 The source surface is the ajouatom Carrot cluster bundle under
 `selfdrive/carrot/cluster/`, especially:
@@ -75,8 +75,10 @@ display-only snapshot:
 | `objects[] from model` | `modelV2.leadsV3` | none | Labels `M1`, `M2`; source `modelV2.leadsV3`. |
 | `objects[] from carState corners` | `carState.leftLongDist/rightLongDist/leftRearLongDist/rightRearLongDist` | none | Labels `LF/RF/LR/RR`; source `carState`. |
 | `objects[] from Fishop` | `Fishop` blindspot/target evidence | none | Local evidence only; source `Fishop`. |
-| `radarPoints[]` | `liveTracks.points` | empty | Raw or merged display decided by surface mode. |
+| `objects[].sourceColor` | deterministic source palette | neutral gray | Used by the local debug page only. |
+| `radarPoints[]` | `liveTracks.points` | empty | Raw display evidence in the current debug surface. |
 | `radarPoints[].sourceColor` | `source` | deterministic default | Source-color objects stay display-only. |
+| `radarPoints[].raw` / `merged` | `liveTracks.points` | `raw=true`, `merged=false` | Raw radar points stay evidence until a future merge policy is reviewed. |
 | `plans.longitudinal` | `longitudinalPlan` | empty | Speeds, accels, jerk, FCW, should-stop evidence. |
 | `plans.lateral` | `lateralPlan` | empty | Curvature and lane-line-use evidence. |
 | `fishop` | local Fishop normalized sample | empty | Lane curve, lidar lane data, blindspot, navigation gate, overtake preview. |
@@ -89,10 +91,14 @@ The current decision is:
 
 - Keep the main C3 driving HUD on `GeniusVisualMode` plus optional
   `GeniusCarrotWorldOverlay` and `GeniusFishopVisualOverlay`.
-- Treat the full Carrot cluster/world renderer as a future optional surface,
-  most likely a debug page or external-display page, not a default HUD mode.
-- Enable it only after the schema map, replay fixture, C3 layout budget, and
-  performance budget pass locally.
+- Treat the full Carrot cluster/world renderer as a local debug surface, not a
+  default HUD mode.
+- The first surface is `/cluster_world` in Carrot Web. It renders
+  `GeniusClusterWorldSnapshot` with source-colored objects, raw radar points,
+  lane/path drawing, distance labels, speed labels, source availability, and
+  fallback evidence.
+- Promote it beyond debug-only only after C3 layout, performance, and
+  control-boundary evidence pass locally and on the device.
 
 ## Replay Requirements
 

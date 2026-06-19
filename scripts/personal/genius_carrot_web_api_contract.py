@@ -133,6 +133,7 @@ def run_contract() -> list[str]:
   previous_params = with_fake_params()
   try:
     server = import_file("genius_carrot_web_api_contract_server", "selfdrive/carrot/carrot_server.py")
+    cluster_world = import_file("genius_carrot_web_api_contract_cluster_world", "selfdrive/carrot/cluster_world.py")
     FakeParams.defaults = {key: meta.get("default") for key, meta in server.PARAM_API_DEFS.items()}
 
     checked: list[str] = []
@@ -169,6 +170,10 @@ def run_contract() -> list[str]:
     check(live_cluster.get("fresh") is True and live_cluster.get("hasLiveSample") is True, "cluster world live state did not become fresh")
     check(live_cluster.get("snapshot", {}).get("base", {}).get("laneChangeIntent") == "right", "cluster world snapshot did not preserve lane-change evidence")
     check(live_cluster.get("snapshot", {}).get("controlOutput") is False, "cluster world snapshot must not expose control output")
+    sample_cluster = cluster_world.normalize_cluster_world_sample(cluster_world.built_in_cluster_world_sample())
+    combined_items = sample_cluster.get("objects", []) + sample_cluster.get("radarPoints", [])
+    check(combined_items and all(item.get("sourceColor") for item in combined_items), "cluster world items must expose source colors for the debug page")
+    check(all(point.get("raw") is True and point.get("merged") is False for point in sample_cluster.get("radarPoints", [])), "cluster world radar points must remain raw display evidence")
     checked.append("cluster world read-only API")
 
     for name in READ_ONLY_PARAMS:

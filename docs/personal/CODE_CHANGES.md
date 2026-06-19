@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Cluster World Debug Surface
+
+Added the first complete, local-only Carrot cluster/world visualization surface:
+
+- Added `/cluster_world` to Carrot Web as a debug-only page backed by `/api/cluster_world`.
+- The page draws model path, lane lines, road edges, source-colored detected objects, raw `liveTracks` radar points, distance labels, speed labels, active sources, and fallback evidence.
+- `selfdrive/carrot/cluster_world.py` now assigns deterministic `sourceColor` values and marks live radar points as `raw=true`, `merged=false`.
+- The full cluster/world surface decision is now debug-only local Web, not the default driving HUD and not a control path.
+- The cluster/world and Carrot Web API contracts now check the page, source colors, raw radar evidence, and display-only boundary.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.20`.
+
 ## 2026-06-20 Cluster World Runtime API
 
 Moved the ajouatom Carrot cluster/world schema from documentation-only mapping into runtime code:

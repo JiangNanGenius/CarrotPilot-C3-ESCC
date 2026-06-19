@@ -4,6 +4,13 @@ from typing import Any
 
 
 KPH_TO_MS = 1000.0 / 3600.0
+SOURCE_COLORS = {
+  "radarState": "#ffaf03",
+  "modelV2.leadsV3": "#0078ff",
+  "carState": "#67e8f9",
+  "liveTracks": "#fde047",
+  "Fishop": "#a78bfa",
+}
 
 
 def finite_float(value: Any, default: float = 0.0) -> float:
@@ -28,6 +35,10 @@ def bool_value(value: Any) -> bool:
   if isinstance(value, str):
     return value.strip().lower() in ("1", "true", "yes", "on")
   return bool(value)
+
+
+def source_color(source: str) -> str:
+  return SOURCE_COLORS.get(source, "#e5e7eb")
 
 
 def normalize_model_path(model_v2: dict[str, Any]) -> list[dict[str, float]]:
@@ -84,6 +95,7 @@ def object_from_radar_lead(label: str, lead: dict[str, Any]) -> dict[str, Any] |
   return {
     "label": label,
     "source": "radarState",
+    "sourceColor": source_color("radarState"),
     "longitudinalM": d_rel,
     "lateralM": -finite_float(lead.get("yRel")),
     "relativeSpeedMps": finite_float(lead.get("vRel")),
@@ -121,6 +133,7 @@ def objects_from_model(model_v2: dict[str, Any]) -> list[dict[str, Any]]:
     objects.append({
       "label": f"M{index + 1}",
       "source": "modelV2.leadsV3",
+      "sourceColor": source_color("modelV2.leadsV3"),
       "longitudinalM": x_m,
       "lateralM": y_m,
       "probability": prob,
@@ -146,6 +159,7 @@ def objects_from_car_state(car_state: dict[str, Any]) -> list[dict[str, Any]]:
     objects.append({
       "label": label,
       "source": "carState",
+      "sourceColor": source_color("carState"),
       "longitudinalM": forward_sign * dist,
       "lateralM": side * abs(finite_float(car_state.get(lat_key))),
     })
@@ -163,6 +177,7 @@ def objects_from_fishop(fishop: dict[str, Any]) -> list[dict[str, Any]]:
       objects.append({
         "label": label,
         "source": "Fishop",
+        "sourceColor": source_color("Fishop"),
         "longitudinalM": 8.0,
         "lateralM": lateral,
         "probability": 0.8,
@@ -184,6 +199,9 @@ def radar_points_from_live_tracks(live_tracks: dict[str, Any], ego_speed_kph: fl
     points.append({
       "label": f"T{track_id}",
       "source": "liveTracks",
+      "sourceColor": source_color("liveTracks"),
+      "raw": True,
+      "merged": False,
       "longitudinalM": d_rel,
       "lateralM": -finite_float(track.get("yRel")),
       "relativeSpeedMps": v_rel,
@@ -363,4 +381,3 @@ def built_in_cluster_world_sample() -> dict[str, Any]:
       "overtake": {"suggestionPreview": {"direction": "LEFT", "readyForSuggestion": False}},
     },
   }
-

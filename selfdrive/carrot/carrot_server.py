@@ -2089,6 +2089,7 @@ async def api_health(_request: web.Request) -> web.Response:
       "/api/carrot_feature_gates",
       "/api/fishop_hardware",
       "/api/cluster_world",
+      "/cluster_world",
       "/api/navigation_event",
       "/api/navi",
       "/api/navi/tcp_health",
@@ -2267,6 +2268,227 @@ async def api_phone_speed_limit_action(request: web.Request) -> web.Response:
     return _json_response({"ok": False, "error": str(exc), **phone_speed_state()}, status=400)
 
 
+async def cluster_world_page(_request: web.Request) -> web.Response:
+  html = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Genius Pilot Cluster World</title>
+  <style>
+    :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: #0d1117; color: #e6edf3; }
+    main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 34px; }
+    header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    h1 { font-size: 24px; margin: 0; font-weight: 680; }
+    a { color: #7dd3fc; text-decoration: none; }
+    .grid { display: grid; grid-template-columns: minmax(300px, 2fr) minmax(260px, 1fr); gap: 14px; align-items: start; }
+    .panel { border: 1px solid #30363d; border-radius: 8px; background: #111820; padding: 12px; }
+    canvas { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 6px; background: #05080c; }
+    .metrics { display: grid; gap: 8px; }
+    .metric { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #26313b; padding-top: 8px; font-size: 14px; }
+    .metric:first-child { border-top: 0; padding-top: 0; }
+    .label { color: #9ba7b4; }
+    .value { text-align: right; overflow-wrap: anywhere; }
+    .pill { display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: 999px; background: #27313b; color: #cbd5e1; font-size: 13px; }
+    .pill.ok { background: #12352c; color: #86efac; }
+    .pill.warn { background: #3a2b12; color: #facc15; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th, td { border-top: 1px solid #26313b; padding: 6px 4px; text-align: left; }
+    th { color: #9ba7b4; font-weight: 600; }
+    .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } header { display: block; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Genius Pilot Cluster World</h1>
+      <a href="/">Local Web</a>
+    </header>
+    <div class="grid">
+      <section class="panel">
+        <canvas id="world" width="960" height="540"></canvas>
+      </section>
+      <section class="panel">
+        <div class="metrics">
+          <div class="metric"><span class="label">State</span><span class="value"><span id="state" class="pill">loading</span></span></div>
+          <div class="metric"><span class="label">Surface</span><span class="value" id="surface">debug</span></div>
+          <div class="metric"><span class="label">Age</span><span class="value" id="age">-</span></div>
+          <div class="metric"><span class="label">Speed</span><span class="value" id="speed">-</span></div>
+          <div class="metric"><span class="label">Lane change</span><span class="value" id="lane-change">-</span></div>
+          <div class="metric"><span class="label">Sources</span><span class="value" id="sources">-</span></div>
+          <div class="metric"><span class="label">Fallbacks</span><span class="value" id="fallbacks">-</span></div>
+          <div class="metric"><span class="label">Boundary</span><span class="value" id="boundary">read-only</span></div>
+        </div>
+        <table>
+          <thead><tr><th>Obj</th><th>Source</th><th>Dist</th><th>Speed</th></tr></thead>
+          <tbody id="objects"></tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+  <script>
+    const canvas = document.getElementById("world");
+    const ctx = canvas.getContext("2d");
+    const metersToPx = 7.2;
+    const origin = {x: canvas.width / 2, y: canvas.height - 34};
+    const sourceColor = (item, fallback = "#e5e7eb") => item && item.sourceColor ? item.sourceColor : fallback;
+    const num = (value, digits = 1) => Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : "-";
+    const setText = (id, value) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    };
+    const setState = (text, cls) => {
+      const node = document.getElementById("state");
+      if (!node) return;
+      node.textContent = text;
+      node.className = `pill ${cls}`;
+    };
+    const point = (forwardM, lateralM) => ({
+      x: origin.x + Number(lateralM || 0) * metersToPx,
+      y: origin.y - Number(forwardM || 0) * metersToPx,
+    });
+    const drawPolyline = (points, color, width = 2, dash = []) => {
+      if (!Array.isArray(points) || points.length < 2) return;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dash);
+      ctx.beginPath();
+      points.forEach((item, index) => {
+        const p = point(item.forwardM, item.lateralM);
+        if (index === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+      ctx.restore();
+    };
+    const drawGrid = () => {
+      ctx.fillStyle = "#05080c";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#1e2936";
+      ctx.lineWidth = 1;
+      ctx.font = "12px sans-serif";
+      ctx.fillStyle = "#718096";
+      for (let m = 0; m <= 70; m += 10) {
+        const y = origin.y - m * metersToPx;
+        ctx.beginPath();
+        ctx.moveTo(30, y);
+        ctx.lineTo(canvas.width - 30, y);
+        ctx.stroke();
+        ctx.fillText(`${m}m`, 36, y - 4);
+      }
+      for (let lane = -12; lane <= 12; lane += 3) {
+        const x = origin.x + lane * metersToPx;
+        ctx.beginPath();
+        ctx.moveTo(x, 18);
+        ctx.lineTo(x, origin.y + 8);
+        ctx.stroke();
+      }
+      ctx.fillStyle = "#d1d5db";
+      ctx.fillRect(origin.x - 16, origin.y - 24, 32, 48);
+    };
+    const drawObject = (item, radar = false) => {
+      const p = point(item.longitudinalM, item.lateralM);
+      const color = sourceColor(item, radar ? "#fde047" : "#e5e7eb");
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = item.primary ? 3 : 2;
+      if (radar) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.strokeRect(p.x - 16, p.y - 10, 32, 20);
+      }
+      ctx.font = "12px sans-serif";
+      const text = `${item.label || "?"} ${num(item.longitudinalM, 0)}m`;
+      ctx.fillText(text, p.x + 8, p.y - 8);
+      ctx.restore();
+    };
+    const renderTable = (objects = [], radarPoints = []) => {
+      const body = document.getElementById("objects");
+      if (!body) return;
+      body.textContent = "";
+      const rows = [...objects, ...radarPoints].slice(0, 18);
+      for (const item of rows) {
+        const row = document.createElement("tr");
+        const speed = item.absoluteSpeedKph === null || item.absoluteSpeedKph === undefined ? "-" : `${num(item.absoluteSpeedKph, 0)} kph`;
+        const labelCell = document.createElement("td");
+        labelCell.textContent = item.label || "-";
+        const sourceCell = document.createElement("td");
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        dot.style.background = sourceColor(item);
+        sourceCell.appendChild(dot);
+        sourceCell.appendChild(document.createTextNode(item.source || "-"));
+        const distanceCell = document.createElement("td");
+        distanceCell.textContent = `${num(item.longitudinalM, 1)} / ${num(item.lateralM, 1)}`;
+        const speedCell = document.createElement("td");
+        speedCell.textContent = speed;
+        row.appendChild(labelCell);
+        row.appendChild(sourceCell);
+        row.appendChild(distanceCell);
+        row.appendChild(speedCell);
+        body.appendChild(row);
+      }
+    };
+    const drawSnapshot = (snapshot = {}) => {
+      drawGrid();
+      const lanes = snapshot.lanes || {};
+      drawPolyline(lanes.roadEdges && lanes.roadEdges[0] ? lanes.roadEdges[0].points : [], "#ef4444", 2, [5, 5]);
+      drawPolyline(lanes.roadEdges && lanes.roadEdges[1] ? lanes.roadEdges[1].points : [], "#ef4444", 2, [5, 5]);
+      (lanes.laneLines || []).forEach((lane) => {
+        const alpha = Math.max(0.25, Math.min(1, Number(lane.prob || 0.3)));
+        drawPolyline(lane.points, `rgba(148, 163, 184, ${alpha})`, lane.index === 1 || lane.index === 2 ? 3 : 2);
+      });
+      drawPolyline(lanes.modelPath || [], "#22c55e", 4);
+      (snapshot.radarPoints || []).forEach((item) => drawObject(item, true));
+      (snapshot.objects || []).forEach((item) => drawObject(item, false));
+    };
+    const render = (data = {}) => {
+      const snapshot = data.snapshot || {};
+      drawSnapshot(snapshot);
+      const base = snapshot.base || {};
+      const sources = snapshot.sourceAvailability || {};
+      const activeSources = Object.entries(sources).filter(([, value]) => value).map(([key]) => key);
+      if (data.lastError) setState("error", "warn");
+      else if (data.fresh) setState("fresh", "ok");
+      else if (data.available) setState("stale", "warn");
+      else setState("waiting", "");
+      setText("surface", data.surfaceDecision || "debug-only");
+      setText("age", `${num(data.sampleAgeSec, 2)} s`);
+      setText("speed", `${num(base.speedKph, 1)} kph / cruise ${num(base.cruiseKph, 1)} kph`);
+      const leftBsm = base["left" + "Blindspot"];
+      const rightBsm = base["right" + "Blindspot"];
+      setText("lane-change", `${base.laneChangeIntent || "none"} / BSM L ${leftBsm ? "on" : "off"} R ${rightBsm ? "on" : "off"}`);
+      setText("sources", activeSources.length ? activeSources.join(", ") : "-");
+      setText("fallbacks", Array.isArray(snapshot.fallbacks) && snapshot.fallbacks.length ? snapshot.fallbacks.join("; ") : "-");
+      setText("boundary", snapshot.controlOutput ? "control output present" : "display-only / read-only");
+      renderTable(snapshot.objects || [], snapshot.radarPoints || []);
+    };
+    async function refresh() {
+      try {
+        const response = await fetch("/api/cluster_world", {cache: "no-store"});
+        const data = await response.json();
+        render(data);
+      } catch (err) {
+        drawGrid();
+        setState("error", "warn");
+        setText("fallbacks", String(err).slice(0, 160));
+      }
+    }
+    refresh();
+    setInterval(refresh, 500);
+  </script>
+</body>
+</html>
+"""
+  return web.Response(text=html, content_type="text/html", headers={"Cache-Control": "no-store"})
+
+
 async def index(_request: web.Request) -> web.Response:
   html = """<!doctype html>
 <html lang="en">
@@ -2407,6 +2629,7 @@ async def index(_request: web.Request) -> web.Response:
         <li><a href="/api/carrot_feature_gates"><code>/api/carrot_feature_gates</code></a></li>
         <li><a href="/api/fishop_hardware"><code>/api/fishop_hardware</code></a></li>
         <li><a href="/api/cluster_world"><code>/api/cluster_world</code></a></li>
+        <li><a href="/cluster_world"><code>/cluster_world</code></a></li>
         <li><a href="/api/navigation_event"><code>/api/navigation_event</code></a></li>
         <li><a href="/api/phone_speed_limit"><code>/api/phone_speed_limit</code></a></li>
       </ul>
@@ -3019,6 +3242,7 @@ def make_app() -> web.Application:
   app.on_cleanup.append(stop_messaging_status)
   app.on_cleanup.append(stop_navigation_udp)
   app.router.add_get("/", index)
+  app.router.add_get("/cluster_world", cluster_world_page)
   app.router.add_get("/api/health", api_health)
   app.router.add_get("/api/params_bulk", api_params_bulk)
   app.router.add_post("/api/params_bulk", api_params_bulk)

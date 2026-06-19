@@ -53,8 +53,9 @@ def check_documentation() -> list[CheckResult]:
   )
   required_policy = (
     "Carrot Cluster / World View",
-    "standalone page",
-    "debug-only visual mode",
+    "debug-only local Web page",
+    "/cluster_world",
+    "/api/cluster_world",
     "the base road view is mutually exclusive, but evidence overlays are additive",
     "Carrot's lane and lane-change presentation is preferred",
   )
@@ -76,10 +77,14 @@ def check_runtime_sources() -> list[CheckResult]:
   module = CLUSTER_WORLD_MODULE.read_text(encoding="utf-8")
   server = CARROT_SERVER.read_text(encoding="utf-8")
   required_module = (
+    "SOURCE_COLORS = {",
+    "def source_color",
     "def normalize_cluster_world_sample",
     "def built_in_cluster_world_sample",
     "def objects_from_radar_state",
     "def radar_points_from_live_tracks",
+    '"sourceColor": source_color',
+    '"raw": True',
     '"controlOutput": False',
     '"displayOnly": True',
   )
@@ -90,8 +95,12 @@ def check_runtime_sources() -> list[CheckResult]:
     "def cluster_world_state",
     "async def cluster_world_loop",
     "async def api_cluster_world",
+    "async def cluster_world_page",
     'app.router.add_get("/api/cluster_world", api_cluster_world)',
+    'app.router.add_get("/cluster_world", cluster_world_page)',
     '"/api/cluster_world"',
+    '"/cluster_world"',
+    'fetch("/api/cluster_world"',
   )
   forbidden_server = (
     "PubMaster",
@@ -130,6 +139,7 @@ def check_replay() -> list[CheckResult]:
   object_sources = {item["source"] for item in snapshot["objects"]}
   labels = {item["label"] for item in snapshot["objects"]}
   fallback_text = " ".join(snapshot["fallbacks"])
+  all_objects = snapshot["objects"] + snapshot["radarPoints"]
   return [
     CheckResult("cluster snapshot is display-only", snapshot["displayOnly"] and not snapshot["controlOutput"], "controlOutput must stay false"),
     CheckResult("cluster snapshot has base lane-change evidence", snapshot["base"]["laneChangeIntent"] == "left", "preLaneChangeLeft should normalize to left intent"),
@@ -138,6 +148,8 @@ def check_replay() -> list[CheckResult]:
     CheckResult("cluster snapshot preserves multi-source objects", {"radarState", "modelV2.leadsV3", "carState", "Fishop"}.issubset(object_sources), f"sources={sorted(object_sources)}"),
     CheckResult("cluster snapshot preserves corner labels", {"LF", "RF"}.issubset(labels), f"labels={sorted(labels)}"),
     CheckResult("cluster snapshot preserves liveTracks radar points", len(snapshot["radarPoints"]) >= 2 and all(point["source"] == "liveTracks" for point in snapshot["radarPoints"]), "liveTracks points should normalize to radarPoints"),
+    CheckResult("cluster snapshot colors every object source", all(item.get("sourceColor") for item in all_objects), "objects and radar points need deterministic source colors"),
+    CheckResult("cluster snapshot marks raw liveTracks points", all(point.get("raw") is True and point.get("merged") is False for point in snapshot["radarPoints"]), "liveTracks points must stay raw display evidence"),
     CheckResult("cluster snapshot records missing ajouatom-only fields", "activeLaneLine unavailable" in fallback_text, fallback_text),
     CheckResult("cluster snapshot has no output-channel keys", all(key not in snapshot for key in ("sendcan", "CarControl", "PubMaster", "controlCommand")), "schema must not expose output channels"),
   ]
