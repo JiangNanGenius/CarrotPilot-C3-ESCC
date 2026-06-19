@@ -1147,6 +1147,23 @@ def check_status_broadcast_runtime() -> tuple[bool, str]:
       sys.modules["openpilot.common.params"] = previous_params
 
 
+def check_navipilot_live_check_runtime() -> tuple[bool, str]:
+  script_path = ROOT / "scripts/personal/navipilot_live_check.py"
+  if not script_path.is_file():
+    return False, "scripts/personal/navipilot_live_check.py is missing"
+  result = subprocess.run(
+    [sys.executable, str(script_path), "--self-test"],
+    cwd=ROOT,
+    capture_output=True,
+    text=True,
+    timeout=15,
+    check=False,
+  )
+  if result.returncode != 0:
+    return False, (result.stdout + result.stderr).strip()
+  return True, result.stdout.strip()
+
+
 def check_fishop_release_gate_runtime() -> tuple[bool, str]:
   try:
     snapshot = import_file("alpha_snapshot_release_gate_static_check", "scripts/personal/sunnypilot_c3_alpha_snapshot.py")
@@ -1579,6 +1596,7 @@ def main() -> int:
   fishop_hardware = read("selfdrive/carrot/fishop_hardware.py")
   carrot_learning = read("selfdrive/carrot/carrot_learning.py")
   carrot_server = read("selfdrive/carrot/carrot_server.py")
+  navipilot_live_check = read("scripts/personal/navipilot_live_check.py")
   fishop_sample = read("scripts/personal/fishop_hardware_sample.py")
   alpha_snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
   c3_compat_audit = read("scripts/personal/sunnypilot_c3_compat_audit.py")
@@ -1660,6 +1678,36 @@ def main() -> int:
                           "UDP 7705 broadcast must stay local/LAN and explicitly read-only")
   ok, detail = check_status_broadcast_runtime()
   failures += not require("Carrot Web status broadcast runtime", ok, detail or "status broadcast runtime check failed")
+  failures += not require("Navipilot alpha live check exists",
+                          "DEFAULT_STATUS_PORT = 7705" in navipilot_live_check
+                          and "DEFAULT_NAV_PORT = 7706" in navipilot_live_check
+                          and "DEFAULT_NAVI_TCP_PORT = 7712" in navipilot_live_check
+                          and "DEFAULT_NAVI_HTTP_PORT = 7713" in navipilot_live_check
+                          and '"/api/health"' in navipilot_live_check
+                          and '"/api/params_bulk"' in navipilot_live_check
+                          and '"/api/param_set"' in navipilot_live_check
+                          and '"/api/status_broadcast"' in navipilot_live_check
+                          and '"/api/navigation_event"' in navipilot_live_check
+                          and '"/api/navi"' in navipilot_live_check
+                          and '"/api/navi/tcp_health"' in navipilot_live_check,
+                          "alpha must include a C3-side Navipilot / CPdazi live endpoint checker")
+  failures += not require("Navipilot alpha live check safety boundary",
+                          "http.client" in navipilot_live_check
+                          and "send_navigation_probe=False" in navipilot_live_check
+                          and '"carrotCmd": ""' in navipilot_live_check
+                          and '"carrotArg": ""' in navipilot_live_check
+                          and '"controlOutput"' in navipilot_live_check
+                          and '"xState"' in navipilot_live_check
+                          and '"trafficState"' in navipilot_live_check
+                          and '"Carrot2"' in navipilot_live_check
+                          and "write_same_value" in navipilot_live_check,
+                          "live check must default to read-only evidence and require explicit opt-in for safe probes")
+  for forbidden in ("AlwaysOffroad", "EnableEscc", "EnableESCC", "SunnylinkEnabled", "OnroadUploads",
+                    "DongleId", "athena", "uploader", "backup_manager", "requests.", "aiohttp"):
+    failures += not require(f"Navipilot alpha live check omits {forbidden}", forbidden not in navipilot_live_check,
+                            "live check must not keep old aliases, cloud params, or external cloud/client dependencies")
+  ok, detail = check_navipilot_live_check_runtime()
+  failures += not require("Navipilot alpha live check self-test", ok, detail or "live check self-test failed")
   failures += not require("Carrot Web navigation UDP input", "NAVIGATION_UDP_PORT = 7706" in carrot_server
                           and "class NavigationUdpProtocol" in carrot_server
                           and '_record_carrot_man_peer(self.app, addr, "udp-7706")' in carrot_server
