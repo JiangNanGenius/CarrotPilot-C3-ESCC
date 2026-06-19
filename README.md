@@ -95,7 +95,7 @@ Local networking remains enabled for maintenance:
   hardware.
 - Local Carrot Web/API on LAN for status, params, navigation evidence, Fishop
   evidence, and Auto-Tuner evidence.
-- Visualization modes: Sunny, Carrot, and Fusion base presets, with independent
+- Visualization modes: Sunny, Carrot, and Balanced base presets, with independent
   Carrot World and Fishop evidence overlays (`GeniusCarrotWorldOverlay` and
   `GeniusFishopVisualOverlay`).
 

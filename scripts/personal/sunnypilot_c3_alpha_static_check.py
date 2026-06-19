@@ -1770,6 +1770,27 @@ def check_genius_settings_matrix_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_genius_carrot_settings_guide_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_carrot_settings_guide_contract.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-1200:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_genius_carrot_web_api_contract_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -2206,7 +2227,7 @@ def main() -> int:
                             '{"GeniusCarrotWorldOverlay", {PERSISTENT | BACKUP, BOOL, "0"}}',
                             '{"GeniusFishopVisualOverlay", {PERSISTENT | BACKUP, BOOL, "0"}}',
                           )),
-                          "Genius visualization params must exist with Fusion defaults and Fishop overlay off")
+                          "Genius visualization params must exist with Balanced defaults and Fishop overlay off")
   failures += not require("prebuilt params extension includes Carrot/Fishop/Genius keys",
                           all(token in params_pyx for token in (
                             b"CarrotPhoneSpeedLimitEnabled",
@@ -2333,6 +2354,8 @@ def main() -> int:
   settings_matrix_script = read("scripts/personal/genius_settings_matrix.py")
   settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
   settings_matrix_json = read("docs/personal/settings_matrix.json")
+  carrot_settings_guide = read("docs/personal/CARROT_SETTINGS_GUIDE.md")
+  carrot_settings_guide_contract = read("scripts/personal/genius_carrot_settings_guide_contract.py")
   carrot_web_api_contract = read("scripts/personal/genius_carrot_web_api_contract.py")
   navipilot_replay_contract = read("scripts/personal/genius_navipilot_replay_contract.py")
   curve_speed_contract = read("scripts/personal/genius_curve_speed_contract.py")
@@ -3067,7 +3090,7 @@ def main() -> int:
   failures += not require("Genius visualization policy documented",
                           all(token in visualization_policy for token in (
                             "One base preset is active at a time",
-                            "`Fusion`: default C3 preset",
+                            "`Balanced`: default C3 preset",
                             "Carrot World and Fishop can both be opened",
                             "`GeniusFishopVisualOverlay` is not a base preset",
                             "base road renderer, Carrot World overlay, Fishop overlay, then HUD/alerts",
@@ -3154,6 +3177,36 @@ def main() -> int:
                           "release gate must run the settings owner matrix")
   ok, detail = check_genius_settings_matrix_runtime()
   failures += not require("Genius settings matrix runtime", ok, detail or "Genius settings matrix failed")
+  failures += not require("Genius Carrot settings guide documented",
+                          all(token in carrot_settings_guide for token in (
+                            "AutoCurveSpeedFactor",
+                            "Higher values make curve detection more sensitive",
+                            "AutoNaviSpeedDecelRate",
+                            "Lower values start slowing from farther away",
+                            "CruiseMaxVals0",
+                            "CruiseMaxVals6",
+                            "0.01 m/s^2",
+                            "PathOffset",
+                            "negative shifts left",
+                            "0 uses live/default delay",
+                            "数值越高",
+                            "负值",
+                          )),
+                          "Carrot settings guide must document units and tuning direction for confusing parameters")
+  failures += not require("Genius Carrot settings guide release gate wired",
+                          "scripts/personal/genius_carrot_settings_guide_contract.py" in release_gate
+                          and "Genius Carrot settings guide" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must run the Carrot settings guide contract")
+  failures += not require("Genius Carrot settings guide contract files present",
+                          all(token in carrot_settings_guide_contract for token in (
+                            "Higher values make curve detection more sensitive",
+                            "Lower values start slowing from farther away",
+                            "Off/Sunny/Carrot/Balanced selector",
+                          )),
+                          "Carrot settings guide contract must guard the corrected semantics")
+  ok, detail = check_genius_carrot_settings_guide_runtime()
+  failures += not require("Genius Carrot settings guide runtime", ok, detail or "Genius Carrot settings guide failed")
   failures += not require("Genius Carrot Web API contract files present",
                           all(token in carrot_web_api_contract for token in (
                             "WRITABLE_CASES",
@@ -3223,10 +3276,10 @@ def main() -> int:
                             "Sunny SCC-V",
                             "Sunny SCC-M",
                             "Carrot / Genius Inputs",
-                            "Fusion means Sunny model-curvature quality plus Carrot navigation/phone/lane inputs",
+                            "Balanced means Sunny model-curvature quality plus Carrot navigation/phone/lane inputs",
                             "SmartCruiseControlMap remains inert",
                           )),
-                          "curve-speed policy doc must explain Sunny/Carrot/Fusion and SCC-M boundaries")
+                          "curve-speed policy doc must explain Sunny/Carrot/Balanced and SCC-M boundaries")
   ok, detail = check_genius_curve_speed_contract_runtime()
   failures += not require("Genius curve-speed contract runtime", ok, detail or "Genius curve-speed contract failed")
   failures += not require("Cruise exposes staged Carrot longitudinal controls",

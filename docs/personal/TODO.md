@@ -7,6 +7,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep `/i` as the stable `personal/c3-escc-atune` installer.
 - [x] Publish `/x` as the alpha `alpha-sunnypilot-c3` installer.
 - [x] Add Genius Pilot versioning that follows the SunnyPilot base and appends the published date plus same-day patch number.
+- [x] Rename the user-facing Fusion preset to Balanced while keeping the internal mode value stable.
 - [x] Replace the incompatible Raylib `/x` binary with a C3 Qt-compatible ARM64 installer.
 - [x] Verify the published `/x` binary contains the CarrotPilot-C3-ESCC repo and `alpha-sunnypilot-c3` branch.
 - [x] Add `scripts/personal/build_c3_qt_compat_installer.py` so the Qt-compatible `/x` can be rebuilt reproducibly.
@@ -69,7 +70,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Default `CarrotMapOverlayEnabled` to off so Mapbox/Kakao overlay does not cover the HUD.
 - [x] Hide and hard-disable SunnyPilot ICBM, SCC-V, and SCC-M in the personal alpha; cruise-speed behavior should move toward CarrotPilot logic instead of SunnyPilot black-box toggles.
 - [x] Retain Sunny DEC as an off-by-default advanced longitudinal option, exposed in Cruise and Super Advanced without locking Carrot controls.
-- [x] Add `CurveSpeedControlMode` with Off / Sunny / Carrot / Fusion so Sunny curve quality and Carrot navigation/phone inputs can be compared and then combined.
+- [x] Add `CurveSpeedControlMode` with Off / Sunny / Carrot / Balanced so Sunny curve quality and Carrot navigation/phone inputs can be compared and then combined.
 - [x] Add Carrot curve-speed tuning params: lower speed limit, curve factor, curve aggressiveness, navigation decel rate, and wet-road mode.
 - [ ] Remove or relabel any remaining user-facing SunnyPilot cruise concepts that conflict with Carrot behavior: ICBM, SCC-V, SCC-M, map-speed assumptions, and opaque speed-control presets.
 - [ ] Replace remaining Sunny speed-control internals with Carrot-style staged controls: independent switches for active speed, curve/turn slowdown, traffic-light stop, ATC, and button management.
@@ -80,8 +81,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 
 - [x] Document the multi-visualization requirement: Sunny HUD remains available, Carrot lane/lead visualization is preferred for lane-change and lane display, and Fishop/lidar data needs a future display overlay.
 - [x] Define the visualization layer model: one mutually exclusive base preset, editable lane/lead details, and independent Fishop/lidar evidence overlay.
-- [x] Add `GeniusVisualMode` presets: Sunny, Carrot, and Fusion.
-- [x] Make Fusion the default C3 preset: Sunny HUD structure with Carrot-style lane/path/lead cues.
+- [x] Add `GeniusVisualMode` presets: Sunny, Carrot, and Balanced.
+- [x] Make Balanced the default C3 preset: Sunny HUD structure with Carrot-style lane/path/lead cues.
 - [x] Add `GeniusLaneLineStyle`: Simple, Colored, and Carrot.
 - [x] Add `GeniusLeadRadarVisualMode`: Sunny chevron, Carrot lead box, and radar speed labels.
 - [x] Add `GeniusLaneChangeVisuals` and render lane-change intent cues from the existing `onroadEvents` stream.
@@ -89,19 +90,19 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Move visualization controls into the Visuals settings page instead of mixing them with cruise or Super Advanced control settings.
 - [x] Wire C3/TICI `selfdrive/ui/onroad/model_renderer.py` to draw Sunny-compatible simple lanes, colored lane confidence, Carrot-style adjacent-lane emphasis, Carrot lead boxes, and optional radar speed tags.
 - [x] Keep visualization changes display-only: no planner, CAN, lane-change, or Fishop control output is added by these renderer switches.
-- [x] Add Carrot path drawing modes as a separate renderer stage: Sunny original path, Carrot route ribbon/track markers, and Fusion Sunny body with Carrot path cues.
+- [x] Add Carrot path drawing modes as a separate renderer stage: Sunny original path, Carrot route ribbon/track markers, and Balanced Sunny body with Carrot path cues.
 - [x] Add a real Fishop overlay panel for lane curve, lidar left/right lane, lidar blindspot, navigation gate, and overtake suggestion evidence.
-- [x] Decide visualization coexistence rules: Sunny minimal, Carrot dense, Fusion balanced, and Fishop overlay independent on top only when local data is fresh.
+- [x] Decide visualization coexistence rules: Sunny minimal, Carrot dense, Balanced default, and Fishop overlay independent on top only when local data is fresh.
 - [x] Document that Fishop/lidar visual data is evidence-only and cannot enable auto-overtake or lane-change output by itself.
 - [x] Add `GeniusCarrotWorldOverlay` as an independent Carrot-style world evidence layer for side-lane, blindspot, lane-change, lead, and radar cues.
-- [x] Keep the Carrot world overlay display-only and default off, separate from the mutually exclusive Sunny/Carrot/Fusion base presets and from the Fishop hardware overlay.
+- [x] Keep the Carrot world overlay display-only and default off, separate from the mutually exclusive Sunny/Carrot/Balanced base presets and from the Fishop hardware overlay.
 - [x] Define the render stack explicitly: base road renderer, Carrot World overlay, Fishop overlay, then HUD/alerts.
-- [x] Confirm Carrot World and Fishop overlays can be enabled together on top of any Sunny/Carrot/Fusion base preset while the base preset remains mutually exclusive.
+- [x] Confirm Carrot World and Fishop overlays can be enabled together on top of any Sunny/Carrot/Balanced base preset while the base preset remains mutually exclusive.
 - [x] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
 - [x] Add Simplified/Traditional Chinese translations for the new visualization controls.
-- [x] Make the visualization coexistence rule user-facing: Sunny/Carrot/Fusion are mutually exclusive base displays; Carrot World and Fishop can both be opened as evidence overlays.
+- [x] Make the visualization coexistence rule user-facing: Sunny/Carrot/Balanced are mutually exclusive base displays; Carrot World and Fishop can both be opened as evidence overlays.
 - [x] Group the Visuals settings page into base display, visual detail controls, evidence overlays, and normal HUD widgets so Carrot lane/merge visuals and Fishop/lidar overlays are not confused with each other.
-- [x] Prefer Carrot-style lane and lane-change presentation for Fusion/Carrot modes because it is clearer than Sunny's stock lane display on adjacent-lane awareness.
+- [x] Prefer Carrot-style lane and lane-change presentation for Balanced/Carrot modes because it is clearer than Sunny's stock lane display on adjacent-lane awareness.
 - [x] Map the remaining ajouatom Carrot cluster/world view into a separate optional surface: detected vehicles, source-colored objects, raw/merged side radar points, ajouatom-only lane-line type fields, and distance/speed labels.
 - [x] Add an ajouatom cluster/world schema map that names every imported field, its fallback when missing, and whether it comes from model, radar, side radar, or Fishop.
 - [x] Promote the ajouatom cluster/world schema into runtime code and expose `/api/cluster_world` as a local read-only snapshot for future Carrot-style visualization surfaces.
@@ -118,6 +119,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Expand the Carrot settings panel into categories: speed/maps/navigation, cruise/longitudinal, Auto-Tuner, steering/path, Fishop hardware, and local Web/diagnostics.
 - [x] Rename the Carrot sidebar entry to `Super Advanced` while keeping the page as the Carrot/Genius advanced feature hub.
 - [x] Embed common staged Carrot longitudinal controls into the Cruise page: speed-limit entry, Sunny DEC, stop distance, dynamic following, decel follow boost, and follow-gap presets.
+- [x] Add a bilingual Carrot settings guide that documents confusing units and tuning directions for curve speed, navigation decel, cruise acceleration table, longitudinal tuning, path offset, steering delay, Auto-Tuner, and Fishop evidence.
+- [x] Add a release-gated contract so corrected Carrot setting descriptions and the Balanced label cannot silently regress.
 - [x] Add Super Advanced controls for active speed, ATC/auto-turn, traffic-light stop, traffic-light detect mode, stop-distance adjustment, Carrot rain/wet mode, curve-speed strategy, curve tuning, driving mode, Eco, ATC decel, cruise decel, following, longitudinal gains, lane-line speed, and lane-line curve speed.
 - [x] Make the local Carrot Web/API match Super Advanced: advanced params are writable while offroad; `OffroadMode`, `SpeedFromPCM`, cloud params, and hardware-only params remain protected.
 - [x] Rebuild ARM64 `common/params_pyx.so` on the C3 so the new Carrot/ATC/curve/NNLC params are recognized at runtime.
@@ -140,7 +143,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] For each duplicated setting, choose exactly one owner and write the alias/removal decision; do not keep compatibility aliases unless a real on-device migration needs them.
 - [x] Audit interactions among `DynamicExperimentalControl`, `SpeedLimitMode`, `CurveSpeedControlMode`, `TurnSpeedControlMode`, `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, `CarrotTrafficStopEnabled`, and `FishopAutoOvertakeEnabled`.
 - [x] Add the settings owner matrix to the alpha release gate so future `/x` builds cannot silently reintroduce cloud, Sunny cruise, Carrot, Fishop, model, ESCC, local-network, or visualization conflicts.
-- [x] Compare Sunny curve slowdown and Carrot curve slowdown in code and document when Fusion should use Sunny curvature, Carrot navigation turns, APN/N speed input, and lane-line curve input.
+- [x] Compare Sunny curve slowdown and Carrot curve slowdown in code and document when Balanced should use Sunny curvature, Carrot navigation turns, APN/N speed input, and lane-line curve input.
 - [ ] Find the source documentation for Carrot/CarrotPad settings and annotate confusing items, especially values where smaller/larger has inverse behavior.
 
 ## Current Code And Local Test Phase

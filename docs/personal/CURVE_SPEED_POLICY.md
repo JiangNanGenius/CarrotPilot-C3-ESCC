@@ -48,9 +48,9 @@ participation:
 | 0 | Off | Off | Off for curve mode | Off |
 | 1 | Sunny | On | Off for curve mode | Off |
 | 2 | Carrot | Off | On | Off |
-| 3 | Fusion | On | On | Off |
+| 3 | Balanced | On | On | Off |
 
-Fusion means Sunny model-curvature quality plus Carrot navigation/phone/lane inputs. It does not mean enabling Sunny map-speed control.
+Balanced means Sunny model-curvature quality plus Carrot navigation/phone/lane inputs. It does not mean enabling Sunny map-speed control. Balanced is the user-facing label for the internal fusion mode value.
 
 ## Safety Boundary
 

@@ -1397,8 +1397,8 @@ msgstr "在当前显示预设上叠加 Carrot 风格的侧向车道、盲区、�
 msgid "Genius Visualization Preset"
 msgstr "Genius 可视化预设"
 
-msgid "Choose one base display preset. Sunny is minimal, Carrot emphasizes lane, path, lead, and radar information, and Fusion keeps the Sunny HUD with Carrot-style lane and path cues. Fishop and Carrot World overlays are independent top layers."
-msgstr "选择一个基础显示预设。Sunny 最简洁，Carrot 强化车道、路径、前车和雷达信息，Fusion 保留 Sunny HUD，并叠加 Carrot 风格车道和路径提示。Fishop 和 Carrot World 是独立的上层叠加显示。"
+msgid "Choose one base display preset. Sunny is minimal, Carrot emphasizes lane, path, lead, and radar information, and Balanced keeps the Sunny HUD with Carrot-style lane and path cues. Fishop and Carrot World overlays are independent top layers."
+msgstr "选择一个基础显示预设。Sunny 最简洁，Carrot 强化车道、路径、前车和雷达信息，平衡模式保留 Sunny HUD，并叠加 Carrot 风格车道和路径提示。Fishop 和 Carrot World 是独立的上层叠加显示。"
 
 msgid "Lane-Line Style"
 msgstr "车道线样式"
@@ -1436,8 +1436,101 @@ msgstr "普通 HUD 小组件"
 msgid "These are normal Sunny/Genius HUD widgets and do not select the base road renderer."
 msgstr "这些是普通 Sunny/Genius HUD 小组件，不负责选择基础道路渲染器。"
 
-msgid "Fusion"
-msgstr "融合"
+msgid "Balanced"
+msgstr "平衡"
+
+msgid "Select the curve-speed strategy: Off, Sunny, Carrot, or Balanced. Balanced keeps Sunny curve quality and Carrot navigation/phone inputs together."
+msgstr "选择弯道控速策略：关闭、Sunny、Carrot 或平衡。平衡模式会同时使用 Sunny 的模型弯道能力和 Carrot 的导航/手机输入。"
+
+msgid "Select the curve-speed strategy: Off, Sunny, Carrot, or Balanced. Balanced keeps Sunny model-curvature quality and Carrot navigation/phone/lane inputs together."
+msgstr "选择弯道控速策略：关闭、Sunny、Carrot 或平衡。平衡模式会同时使用 Sunny 的模型曲率能力，以及 Carrot 的导航、手机和车道输入。"
+
+msgid "Select the turn-speed strategy: Off, Carrot, Sunny, or Balanced."
+msgstr "选择转弯控速策略：关闭、Carrot、Sunny 或平衡。"
+
+msgid "Curve Speed Factor"
+msgstr "弯道速度因子"
+
+msgid "Main Carrot curve-speed scaling value. Higher values make curve detection more sensitive, usually lowering the curve target speed and slowing earlier. If the lower-limit speed is already reached, raising this may have no further effect."
+msgstr "Carrot 弯道速度主缩放值。数值越高，对弯道越敏感，通常会降低弯道目标速度并更早减速。如果已经降到最低弯道速度，继续调高可能不会再产生效果。"
+
+msgid "Curve Speed Aggressiveness"
+msgstr "弯道速度激进度"
+
+msgid "Secondary Carrot-compatible curve knob. Current active curve slowdown primarily uses Curve Speed Factor; keep this near 100 unless a later controller or Auto-Tuner recommendation explicitly uses it."
+msgstr "兼容 Carrot 的次级弯道旋钮。当前主动弯道减速主要使用弯道速度因子；除非后续控制器或 Auto-Tuner 明确建议使用，否则建议保持在 100 附近。"
+
+msgid "Navigation Decel Rate"
+msgstr "导航减速比例"
+
+msgid "Navigation-event deceleration scale. Lower values start slowing from farther away; higher values delay the slowdown and can feel later/stronger."
+msgstr "导航事件减速比例。数值越低，会从更远处开始减速；数值越高，会推迟减速，体感可能更晚也更强。"
+
+msgid "Cruise Accel Limit 0 km/h"
+msgstr "巡航加速度上限 0 km/h"
+
+msgid "Cruise Accel Limit 10 km/h"
+msgstr "巡航加速度上限 10 km/h"
+
+msgid "Cruise Accel Limit 40 km/h"
+msgstr "巡航加速度上限 40 km/h"
+
+msgid "Cruise Accel Limit 60 km/h"
+msgstr "巡航加速度上限 60 km/h"
+
+msgid "Cruise Accel Limit 80 km/h"
+msgstr "巡航加速度上限 80 km/h"
+
+msgid "Cruise Accel Limit 110 km/h"
+msgstr "巡航加速度上限 110 km/h"
+
+msgid "Cruise Accel Limit 140 km/h"
+msgstr "巡航加速度上限 140 km/h"
+
+msgid "Maximum requested cruise acceleration near 80 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "80 km/h 附近的巡航请求加速度上限，单位为 0.01 m/s^2。数值越高加速越强；除非 Auto-Tuner 明确建议，否则建议保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 0 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "0 km/h 附近的巡航请求加速度上限，单位为 0.01 m/s^2。数值越高加速越强；除非 Auto-Tuner 明确建议，否则建议保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 10 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "10 km/h 附近的巡航请求加速度上限，单位为 0.01 m/s^2。数值越高加速越强；除非 Auto-Tuner 明确建议，否则建议保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 40 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "40 km/h 附近的巡航请求加速度上限，单位为 0.01 m/s^2。数值越高加速越强；除非 Auto-Tuner 明确建议，否则建议保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 60 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "60 km/h 附近的巡航请求加速度上限，单位为 0.01 m/s^2。数值越高加速越强；除非 Auto-Tuner 明确建议，否则建议保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 110 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "110 km/h 附近的巡航请求加速度上限，单位为 0.01 m/s^2。数值越高加速越强；除非 Auto-Tuner 明确建议，否则建议保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 140 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "140 km/h 附近的巡航请求加速度上限，单位为 0.01 m/s^2。数值越高加速越强；除非 Auto-Tuner 明确建议，否则建议保留已知可用值。"
+
+msgid "Longitudinal Kp"
+msgstr "纵向 Kp"
+
+msgid "Carrot longitudinal proportional gain. Higher reacts harder to speed error; lower can reduce overshoot or oscillation."
+msgstr "Carrot 纵向比例增益。数值越高，对速度误差反应越强；数值降低可减少超调或震荡。"
+
+msgid "Long Actuator Delay"
+msgstr "纵向执行器延迟"
+
+msgid "Longitudinal actuator delay in 0.01 s units. Higher anticipates slower actuator response; too high may feel early."
+msgstr "纵向执行器延迟，单位为 0.01 秒。数值越高表示预判执行器反应更慢；过高可能会感觉动作过早。"
+
+msgid "Stopping Speed Threshold"
+msgstr "停车判定速度阈值"
+
+msgid "Stopping detection threshold in 0.01 m/s units. Higher can smooth harsh stops; too high can enter stopping behavior early."
+msgstr "停车判定速度阈值，单位为 0.01 m/s。数值调高可能缓和急停；过高可能过早进入停车逻辑。"
+
+msgid "Lane/path lateral offset used by Carrot tuning. Zero is neutral; negative shifts left, positive shifts right."
+msgstr "Carrot 调参使用的车道/路径横向偏移。0 为居中；负值向左偏，正值向右偏。"
+
+msgid "Additional steering actuator delay target used by Auto-Tuner. Zero uses live/default delay; higher adds custom delay compensation."
+msgstr "Auto-Tuner 使用的额外转向执行器延迟目标。0 使用实时/默认延迟；数值越高，自定义延迟补偿越多。"
 
 msgid "Simple"
 msgstr "简洁"

@@ -90,8 +90,8 @@ Key params:
 
 Default high-risk output switch: off.
 
-`CurveSpeedControlMode` lets Sunny, Carrot, and Fusion slowdown behavior be
-compared. Fusion means Sunny model-curvature quality plus Carrot
+`CurveSpeedControlMode` lets Sunny, Carrot, and Balanced slowdown behavior be
+compared. Balanced means Sunny model-curvature quality plus Carrot
 navigation/phone/lane inputs; it does not mean enabling every Sunny map-speed
 feature.
 
@@ -176,7 +176,7 @@ Key params:
 - `GeniusCarrotWorldOverlay`
 - `GeniusFishopVisualOverlay`
 
-Sunny, Carrot, and Fusion are mutually exclusive base display presets. Carrot
+Sunny, Carrot, and Balanced are mutually exclusive base display presets. Carrot
 World and Fishop are independent top-layer evidence overlays.
 
 Visualization settings are display-only and must not change lane-change,

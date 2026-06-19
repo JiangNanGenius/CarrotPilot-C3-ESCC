@@ -27,7 +27,7 @@ The reference branches use several settings that look similar but control differ
 - ICBM overlaps with cruise-button management and should stay hidden/inert in this personal alpha.
 - SCC-V and SCC-M overlap with Carrot curve, map, navigation, and speed-limit behavior and should stay hidden/inert.
 - DEC is a separate Sunny longitudinal option. It must not lock or hide Carrot active speed control, ATC/auto-turn, or traffic-light stop settings.
-- `CurveSpeedControlMode` owns Sunny SCC-V participation. Sunny and Fusion modes may use SCC-V model-curvature slowdown; Off and Carrot modes do not.
+- `CurveSpeedControlMode` owns Sunny SCC-V participation. Sunny and Balanced modes may use SCC-V model-curvature slowdown; Off and Carrot modes do not.
 - Sunny SCC-M remains inert in all Genius Pilot modes because map target velocities are not trusted as default speed truth.
 
 ## Carrot Active Controls
@@ -51,14 +51,14 @@ The reference branches use several settings that look similar but control differ
 ## Onroad Visualization
 
 - Visualization settings are display-only and live in the Visuals page.
-- `GeniusVisualMode` is a preset selector: Sunny keeps the stock look, Carrot emphasizes lane/path/lead/radar information, and Fusion combines Sunny HUD elements with Carrot-style road visualization.
-- Fusion is the C3 alpha default because it keeps the familiar Sunny HUD structure while preferring Carrot-style lane/path/lead cues where the road display is clearer.
-- `GeniusVisualMode` also owns the path display style: Sunny keeps the original route body, Carrot uses a denser route ribbon with edge/center markers, and Fusion keeps the Sunny route body with lighter Carrot path cues.
+- `GeniusVisualMode` is a preset selector: Sunny keeps the stock look, Carrot emphasizes lane/path/lead/radar information, and Balanced combines Sunny HUD elements with Carrot-style road visualization.
+- Balanced is the C3 alpha default because it keeps the familiar Sunny HUD structure while preferring Carrot-style lane/path/lead cues where the road display is clearer. It is the user-facing label for the internal fusion renderer.
+- `GeniusVisualMode` also owns the path display style: Sunny keeps the original route body, Carrot uses a denser route ribbon with edge/center markers, and Balanced keeps the Sunny route body with lighter Carrot path cues.
 - `GeniusLaneLineStyle` and `GeniusLeadRadarVisualMode` may be adjusted independently after choosing a preset.
 - `GeniusLaneChangeVisuals` uses existing `onroadEvents` lane-change intent events and must not alter lane-change decisions.
-- `GeniusCarrotWorldOverlay` is independent from the Sunny/Carrot/Fusion preset. It draws Carrot-style side-lane, blindspot, lane-change, lead, and radar evidence on top of any base preset.
-- `GeniusFishopVisualOverlay` is independent from the Sunny/Carrot/Fusion preset. It draws local Fishop/lidar evidence only while `/data/fishop_hardware.jsonl` is fresh and must not publish planner, CAN, or automatic-overtake outputs.
-- Coexistence rule: Sunny, Carrot, and Fusion are mutually exclusive base presets; lane-line and lead/radar style are editable details; Carrot World and Fishop are optional top-layer evidence displays and may be enabled together.
+- `GeniusCarrotWorldOverlay` is independent from the Sunny/Carrot/Balanced preset. It draws Carrot-style side-lane, blindspot, lane-change, lead, and radar evidence on top of any base preset.
+- `GeniusFishopVisualOverlay` is independent from the Sunny/Carrot/Balanced preset. It draws local Fishop/lidar evidence only while `/data/fishop_hardware.jsonl` is fresh and must not publish planner, CAN, or automatic-overtake outputs.
+- Coexistence rule: Sunny, Carrot, and Balanced are mutually exclusive base presets; lane-line and lead/radar style are editable details; Carrot World and Fishop are optional top-layer evidence displays and may be enabled together.
 - Render order rule: base road renderer first, Carrot World overlay second, Fishop overlay third, HUD/alerts last.
 - The ajouatom Carrot cluster/world visualization is tracked as a separate future surface. Do not merge its world-view renderer into the main HUD without a separate layout/performance/control-boundary pass.
 - Do not merge Carrot path animation, Fishop overlay, Sunny HUD, and cruise-control behavior by name alone; each renderer change needs a display-only owner and a separate control-owner decision.

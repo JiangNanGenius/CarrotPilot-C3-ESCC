@@ -986,8 +986,8 @@ msgstr "在目前顯示預設上疊加 Carrot 風格的側向車道、盲區、�
 msgid "Genius Visualization Preset"
 msgstr "Genius 視覺化預設"
 
-msgid "Choose one base display preset. Sunny is minimal, Carrot emphasizes lane, path, lead, and radar information, and Fusion keeps the Sunny HUD with Carrot-style lane and path cues. Fishop and Carrot World overlays are independent top layers."
-msgstr "選擇一個基礎顯示預設。Sunny 最簡潔，Carrot 強化車道、路徑、前車和雷達資訊，Fusion 保留 Sunny HUD，並疊加 Carrot 風格車道和路徑提示。Fishop 和 Carrot World 是獨立的上層疊加顯示。"
+msgid "Choose one base display preset. Sunny is minimal, Carrot emphasizes lane, path, lead, and radar information, and Balanced keeps the Sunny HUD with Carrot-style lane and path cues. Fishop and Carrot World overlays are independent top layers."
+msgstr "選擇一個基礎顯示預設。Sunny 最簡潔，Carrot 強化車道、路徑、前車和雷達資訊，平衡模式保留 Sunny HUD，並疊加 Carrot 風格車道和路徑提示。Fishop 和 Carrot World 是獨立的上層疊加顯示。"
 
 msgid "Lane-Line Style"
 msgstr "車道線樣式"
@@ -1082,8 +1082,101 @@ msgstr "巡航按鍵行為"
 msgid "Button behavior stays limited to local cruise-speed increment settings. ICBM/SCC-V/SCC-M remain hidden because they overlap Carrot cruise logic."
 msgstr "按鍵行為僅限本地巡航速度步進設定。ICBM/SCC-V/SCC-M 與 Carrot 巡航邏輯重疊，因此繼續隱藏。"
 
-msgid "Fusion"
-msgstr "融合"
+msgid "Balanced"
+msgstr "平衡"
+
+msgid "Select the curve-speed strategy: Off, Sunny, Carrot, or Balanced. Balanced keeps Sunny curve quality and Carrot navigation/phone inputs together."
+msgstr "選擇彎道控速策略：關閉、Sunny、Carrot 或平衡。平衡模式會同時使用 Sunny 的模型彎道能力和 Carrot 的導航/手機輸入。"
+
+msgid "Select the curve-speed strategy: Off, Sunny, Carrot, or Balanced. Balanced keeps Sunny model-curvature quality and Carrot navigation/phone/lane inputs together."
+msgstr "選擇彎道控速策略：關閉、Sunny、Carrot 或平衡。平衡模式會同時使用 Sunny 的模型曲率能力，以及 Carrot 的導航、手機和車道輸入。"
+
+msgid "Select the turn-speed strategy: Off, Carrot, Sunny, or Balanced."
+msgstr "選擇轉彎控速策略：關閉、Carrot、Sunny 或平衡。"
+
+msgid "Curve Speed Factor"
+msgstr "彎道速度因子"
+
+msgid "Main Carrot curve-speed scaling value. Higher values make curve detection more sensitive, usually lowering the curve target speed and slowing earlier. If the lower-limit speed is already reached, raising this may have no further effect."
+msgstr "Carrot 彎道速度主縮放值。數值越高，對彎道越敏感，通常會降低彎道目標速度並更早減速。如果已經降到最低彎道速度，繼續調高可能不會再產生效果。"
+
+msgid "Curve Speed Aggressiveness"
+msgstr "彎道速度激進度"
+
+msgid "Secondary Carrot-compatible curve knob. Current active curve slowdown primarily uses Curve Speed Factor; keep this near 100 unless a later controller or Auto-Tuner recommendation explicitly uses it."
+msgstr "相容 Carrot 的次級彎道旋鈕。目前主動彎道減速主要使用彎道速度因子；除非後續控制器或 Auto-Tuner 明確建議使用，否則建議保持在 100 附近。"
+
+msgid "Navigation Decel Rate"
+msgstr "導航減速比例"
+
+msgid "Navigation-event deceleration scale. Lower values start slowing from farther away; higher values delay the slowdown and can feel later/stronger."
+msgstr "導航事件減速比例。數值越低，會從更遠處開始減速；數值越高，會推遲減速，體感可能更晚也更強。"
+
+msgid "Cruise Accel Limit 0 km/h"
+msgstr "巡航加速度上限 0 km/h"
+
+msgid "Cruise Accel Limit 10 km/h"
+msgstr "巡航加速度上限 10 km/h"
+
+msgid "Cruise Accel Limit 40 km/h"
+msgstr "巡航加速度上限 40 km/h"
+
+msgid "Cruise Accel Limit 60 km/h"
+msgstr "巡航加速度上限 60 km/h"
+
+msgid "Cruise Accel Limit 80 km/h"
+msgstr "巡航加速度上限 80 km/h"
+
+msgid "Cruise Accel Limit 110 km/h"
+msgstr "巡航加速度上限 110 km/h"
+
+msgid "Cruise Accel Limit 140 km/h"
+msgstr "巡航加速度上限 140 km/h"
+
+msgid "Maximum requested cruise acceleration near 80 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "80 km/h 附近的巡航請求加速度上限，單位為 0.01 m/s^2。數值越高加速越強；除非 Auto-Tuner 明確建議，否則建議保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 0 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "0 km/h 附近的巡航請求加速度上限，單位為 0.01 m/s^2。數值越高加速越強；除非 Auto-Tuner 明確建議，否則建議保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 10 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "10 km/h 附近的巡航請求加速度上限，單位為 0.01 m/s^2。數值越高加速越強；除非 Auto-Tuner 明確建議，否則建議保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 40 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "40 km/h 附近的巡航請求加速度上限，單位為 0.01 m/s^2。數值越高加速越強；除非 Auto-Tuner 明確建議，否則建議保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 60 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "60 km/h 附近的巡航請求加速度上限，單位為 0.01 m/s^2。數值越高加速越強；除非 Auto-Tuner 明確建議，否則建議保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 110 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "110 km/h 附近的巡航請求加速度上限，單位為 0.01 m/s^2。數值越高加速越強；除非 Auto-Tuner 明確建議，否則建議保留已知可用值。"
+
+msgid "Maximum requested cruise acceleration near 140 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "140 km/h 附近的巡航請求加速度上限，單位為 0.01 m/s^2。數值越高加速越強；除非 Auto-Tuner 明確建議，否則建議保留已知可用值。"
+
+msgid "Longitudinal Kp"
+msgstr "縱向 Kp"
+
+msgid "Carrot longitudinal proportional gain. Higher reacts harder to speed error; lower can reduce overshoot or oscillation."
+msgstr "Carrot 縱向比例增益。數值越高，對速度誤差反應越強；數值降低可減少超調或震盪。"
+
+msgid "Long Actuator Delay"
+msgstr "縱向執行器延遲"
+
+msgid "Longitudinal actuator delay in 0.01 s units. Higher anticipates slower actuator response; too high may feel early."
+msgstr "縱向執行器延遲，單位為 0.01 秒。數值越高表示預判執行器反應更慢；過高可能會感覺動作過早。"
+
+msgid "Stopping Speed Threshold"
+msgstr "停車判定速度閾值"
+
+msgid "Stopping detection threshold in 0.01 m/s units. Higher can smooth harsh stops; too high can enter stopping behavior early."
+msgstr "停車判定速度閾值，單位為 0.01 m/s。數值調高可能緩和急停；過高可能過早進入停車邏輯。"
+
+msgid "Lane/path lateral offset used by Carrot tuning. Zero is neutral; negative shifts left, positive shifts right."
+msgstr "Carrot 調參使用的車道/路徑橫向偏移。0 為置中；負值向左偏，正值向右偏。"
+
+msgid "Additional steering actuator delay target used by Auto-Tuner. Zero uses live/default delay; higher adds custom delay compensation."
+msgstr "Auto-Tuner 使用的額外轉向執行器延遲目標。0 使用即時/預設延遲；數值越高，自訂延遲補償越多。"
 
 msgid "Simple"
 msgstr "簡潔"

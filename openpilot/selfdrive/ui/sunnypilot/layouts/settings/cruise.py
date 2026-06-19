@@ -131,7 +131,7 @@ class CruiseLayout(Widget):
       param="CurveSpeedControlMode",
       min_value=0, max_value=3, value_change_step=1,
       label_callback=self._curve_mode_label,
-      description=lambda: tr("Select the curve-speed strategy: Off, Sunny, Carrot, or Fusion. Fusion keeps Sunny model-curvature quality and Carrot navigation/phone/lane inputs together."))
+      description=lambda: tr("Select the curve-speed strategy: Off, Sunny, Carrot, or Balanced. Balanced keeps Sunny model-curvature quality and Carrot navigation/phone/lane inputs together."))
 
     self.auto_turn_control = toggle_item_sp(
       title=lambda: tr("Carrot Auto Turn Slowdown"),
@@ -143,14 +143,14 @@ class CruiseLayout(Widget):
       param="TurnSpeedControlMode",
       min_value=0, max_value=3, value_change_step=1,
       label_callback=self._turn_mode_label,
-      description=lambda: tr("Select the turn-speed strategy: Off, Carrot, Sunny, or Fusion."))
+      description=lambda: tr("Select the turn-speed strategy: Off, Carrot, Sunny, or Balanced."))
 
     self.navigation_decel_rate = option_item_sp(
       title=lambda: tr("Navigation Decel Rate"),
       param="AutoNaviSpeedDecelRate",
       min_value=50, max_value=300, value_change_step=5,
       label_callback=lambda v: f"{v}%",
-      description=lambda: tr("Deceleration strength for navigation speed events such as turns, speed cameras, speed bumps, and model-speed limits."))
+      description=lambda: tr("Navigation-event deceleration scale. Lower values start slowing from farther away; higher values delay the slowdown and can feel later/stronger."))
 
     self.traffic_stop = toggle_item_sp(
       title=lambda: tr("Carrot Traffic Light Stop"),
@@ -398,7 +398,7 @@ class CruiseLayout(Widget):
       0: tr("Off"),
       1: tr("Sunny"),
       2: tr("Carrot"),
-      3: tr("Fusion"),
+      3: tr("Balanced"),
     }.get(value, str(value))
 
   @staticmethod
@@ -407,7 +407,7 @@ class CruiseLayout(Widget):
       0: tr("Off"),
       1: tr("Carrot"),
       2: tr("Sunny"),
-      3: tr("Fusion"),
+      3: tr("Balanced"),
     }.get(value, str(value))
 
   @staticmethod
