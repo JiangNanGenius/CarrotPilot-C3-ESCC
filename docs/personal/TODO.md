@@ -101,10 +101,11 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add Simplified/Traditional Chinese translations for the new visualization controls.
 - [x] Make the visualization coexistence rule user-facing: Sunny/Carrot/Fusion are mutually exclusive base displays; Carrot World and Fishop can both be opened as evidence overlays.
 - [x] Prefer Carrot-style lane and lane-change presentation for Fusion/Carrot modes because it is clearer than Sunny's stock lane display on adjacent-lane awareness.
-- [ ] Map the remaining ajouatom Carrot cluster/world view into a separate optional surface: detected vehicles, source-colored objects, raw/merged side radar points, ajouatom-only lane-line type fields, and distance/speed labels.
+- [x] Map the remaining ajouatom Carrot cluster/world view into a separate optional surface: detected vehicles, source-colored objects, raw/merged side radar points, ajouatom-only lane-line type fields, and distance/speed labels.
 - [x] Add an ajouatom cluster/world schema map that names every imported field, its fallback when missing, and whether it comes from model, radar, side radar, or Fishop.
 - [x] Promote the ajouatom cluster/world schema into runtime code and expose `/api/cluster_world` as a local read-only snapshot for future Carrot-style visualization surfaces.
-- [ ] After cluster/world view mapping, decide whether it should be a standalone page, an explicit overlay, or a debug-only visual mode; do not merge it into the main HUD by default.
+- [x] Add `/cluster_world` as the first debug-only local Web surface for source-colored objects, raw radar points, lane/path drawing, distance labels, speed labels, and source/fallback evidence.
+- [x] After cluster/world view mapping, decide whether it should be a standalone page, an explicit overlay, or a debug-only visual mode; do not merge it into the main HUD by default.
 - [x] Add a cluster/world-view replay fixture before enabling that larger renderer on the C3.
 
 ## Carrot, Auto-Tuner, And Fishop Hardware

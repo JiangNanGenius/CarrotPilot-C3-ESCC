@@ -3056,6 +3056,9 @@ def main() -> int:
                             "objects_from_car_state",
                             "objects_from_fishop",
                             "radar_points_from_live_tracks",
+                            "SOURCE_COLORS",
+                            "sourceColor",
+                            '"raw": True',
                           )),
                           "cluster/world contract must map source fields, fallbacks, multi-source objects, radar points, and display-only boundary")
   failures += not require("Genius cluster/world local API wired",
@@ -3066,8 +3069,12 @@ def main() -> int:
                             "def cluster_world_state",
                             "async def cluster_world_loop",
                             "async def api_cluster_world",
+                            "async def cluster_world_page",
                             'app.router.add_get("/api/cluster_world", api_cluster_world)',
+                            'app.router.add_get("/cluster_world", cluster_world_page)',
                             '"/api/cluster_world"',
+                            '"/cluster_world"',
+                            'fetch("/api/cluster_world"',
                           )),
                           "carrot_server.py must expose the runtime Carrot cluster/world snapshot as a read-only local API")
   failures += not require("Genius cluster/world release gate wired",
