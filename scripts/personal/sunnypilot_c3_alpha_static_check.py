@@ -1535,6 +1535,27 @@ def check_installer_audit_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_release_gate_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/sunnypilot_c3_alpha_release_gate.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_install_boot_contract() -> tuple[bool, str]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
@@ -1904,6 +1925,8 @@ def main() -> int:
   alpha_snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
   c3_compat_audit = read("scripts/personal/sunnypilot_c3_compat_audit.py")
   installer_audit = read("scripts/personal/sunnypilot_c3_installer_audit.py")
+  release_gate = read("scripts/personal/sunnypilot_c3_alpha_release_gate.py")
+  agents_md = read("AGENTS.md")
   failures += not require("Auto-Tuner learner module exists", "class CarrotLearner" in carrot_learning
                           and "def apply_recommendations" in carrot_learning,
                           "CarrotLearner core module must exist in alpha")
@@ -2232,6 +2255,28 @@ def main() -> int:
   ok, detail = check_installer_audit_runtime()
   failures += not require("alpha Pages installer audit runtime", ok,
                           detail or "installer audit self-test failed")
+  failures += not require("alpha update/release gate exists",
+                          "CarrotPilot-C3-ESCC Alpha Release Gate" in release_gate
+                          and "sunnypilot_c3_installer_audit.py" in release_gate
+                          and "sunnypilot_c3_compat_audit.py" in release_gate
+                          and "sunnypilot_c3_alpha_evidence_check.py" in release_gate
+                          and "sunnypilot_c3_alpha_static_check.py" in release_gate
+                          and "--full" in release_gate
+                          and "--snapshot" in release_gate,
+                          "alpha must include a repeatable update/release gate")
+  ok, detail = check_release_gate_runtime()
+  failures += not require("alpha update/release gate runtime", ok,
+                          detail or "release gate self-test failed")
+  failures += not require("agent update guide exists",
+                          "CarrotPilot-C3-ESCC Agent Guide" in agents_md
+                          and "personal/c3-escc-atune" in agents_md
+                          and "alpha-sunnypilot-c3" in agents_md
+                          and "OffroadMode" in agents_md
+                          and "do not import private registration" in agents_md
+                          and "sunnypilot_c3_alpha_release_gate.py --full" in agents_md
+                          and "sunnypilot_c3_installer_audit.py" in agents_md
+                          and "Kia Seltos 2023" in agents_md,
+                          "root AGENTS.md must preserve the update strategy and safety boundaries")
   ok, detail = check_c3_install_boot_contract()
   failures += not require("C3 install/boot direct contract", ok,
                           detail or "C3 launcher, AGNOS manifest, installer, and branch channel gate contract failed")

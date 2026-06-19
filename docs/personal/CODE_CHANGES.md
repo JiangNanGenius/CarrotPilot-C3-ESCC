@@ -29,3 +29,23 @@ python3 scripts/personal/sunnypilot_c3_installer_audit.py \
 ## Safety Boundary
 
 This installer fix only changes the GitHub Pages `/x` binary and alpha verification tooling. It does not change vehicle control, model selection, ESCC, speed-limit resolution, or fishop hardware behavior.
+
+## 2026-06-19 Update Gate
+
+The alpha line now includes a repeatable future-agent workflow:
+
+- `AGENTS.md` records branch rules, user hardware, Seltos 2023 SCC assumptions, cloud-removal boundaries, installer rules, and update order.
+- `scripts/personal/sunnypilot_c3_alpha_release_gate.py` runs the fast local gate and can run the full pre-publish gate with `--full`.
+- `scripts/personal/sunnypilot_c3_alpha_static_check.py` verifies the guide and release gate exist, and self-tests the gate.
+
+Use the fast gate while developing:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py
+```
+
+Use the full gate before pushing an alpha installer change:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full
+```

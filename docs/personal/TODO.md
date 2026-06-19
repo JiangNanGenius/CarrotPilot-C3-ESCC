@@ -69,6 +69,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 
 ## Update Checklist
 
+- [x] Add `AGENTS.md` with the future-agent update strategy, safety boundaries, branch rules, and C3/Seltos context.
+- [x] Add `scripts/personal/sunnypilot_c3_alpha_release_gate.py` as a repeatable fast/full update gate.
 - [ ] Fetch SunnyPilot staging and compare watched paths.
 - [ ] Fetch CarrotPilot source and compare Carrot, speed, model, and map changes.
 - [ ] Fetch mechanical/Auto-Tuner source and compare Auto-Tuner, APN/N, fishop hardware, and local web changes.
