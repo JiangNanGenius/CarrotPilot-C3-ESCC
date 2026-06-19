@@ -1,6 +1,6 @@
 # Genius Pilot C3 Settings Conflict Notes
 
-Last checked: 2026-06-20 with `scripts/personal/sunnypilot_c3_settings_conflict_audit.py --strict`.
+Last checked: 2026-06-20 with `scripts/personal/sunnypilot_c3_settings_conflict_audit.py --strict` and `scripts/personal/genius_settings_matrix.py --check`.
 
 ## Summary
 
@@ -56,6 +56,7 @@ The reference branches use several settings that look similar but control differ
 - `GeniusFishopVisualOverlay` is independent from the Sunny/Carrot/Fusion preset. It draws local Fishop/lidar evidence only while `/data/fishop_hardware.jsonl` is fresh and must not publish planner, CAN, or automatic-overtake outputs.
 - Coexistence rule: Sunny, Carrot, and Fusion are mutually exclusive base presets; lane-line and lead/radar style are editable details; Fishop overlay is an optional top-layer evidence display.
 - Do not merge Carrot path animation, Fishop overlay, Sunny HUD, and cruise-control behavior by name alone; each renderer change needs a display-only owner and a separate control-owner decision.
+- `docs/personal/SETTINGS_MATRIX.md` is the source of truth for these owner decisions. If a new visual/control setting is added, it must be classified there before publishing `/x`.
 
 ## Current Policy
 

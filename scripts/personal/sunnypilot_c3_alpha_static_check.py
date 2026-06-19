@@ -1731,6 +1731,27 @@ def check_genius_visualization_contract_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_genius_settings_matrix_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_settings_matrix.py",
+        "--check",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-1200:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_install_boot_contract() -> tuple[bool, str]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
@@ -2180,6 +2201,9 @@ def main() -> int:
   release_gate = read("scripts/personal/sunnypilot_c3_alpha_release_gate.py")
   update_audit = read("scripts/personal/sunnypilot_c3_alpha_update_audit.py")
   device_collect = read("scripts/personal/sunnypilot_c3_device_collect.py")
+  settings_matrix_script = read("scripts/personal/genius_settings_matrix.py")
+  settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
+  settings_matrix_json = read("docs/personal/settings_matrix.json")
   agents_md = read("AGENTS.md")
   version_header = read("sunnypilot/common/version.h")
   versioning_md = read("docs/personal/VERSIONING.md")
@@ -2852,6 +2876,32 @@ def main() -> int:
                           "onroad renderer must wire Carrot-style path cues, lead boxes, radar labels, lane-line coloring, and lane-change intent cues")
   ok, detail = check_genius_visualization_contract_runtime()
   failures += not require("Genius visualization contract runtime", ok, detail or "Genius visualization contract failed")
+  failures += not require("Genius settings matrix files present",
+                          all(token in settings_matrix_script + settings_matrix_md + settings_matrix_json for token in (
+                            "removed_cloud",
+                            "sunny_primitive",
+                            "carrot",
+                            "fishop",
+                            "escc_vehicle_interface",
+                            "model_manager",
+                            "local_network_update",
+                            "visualization",
+                            "GeniusVisualMode",
+                            "GeniusLaneLineStyle",
+                            "GeniusLeadRadarVisualMode",
+                            "GeniusLaneChangeVisuals",
+                            "GeniusFishopVisualOverlay",
+                            "Mutually exclusive base preset",
+                            "Independent top-layer Fishop",
+                          )),
+                          "settings matrix must classify cloud, Sunny, Carrot, Fishop, ESCC, model, local-network, and visualization owners")
+  failures += not require("Genius settings matrix release gate wired",
+                          "scripts/personal/genius_settings_matrix.py" in release_gate
+                          and "Genius settings matrix" in release_gate
+                          and "--check" in release_gate,
+                          "release gate must run the settings owner matrix")
+  ok, detail = check_genius_settings_matrix_runtime()
+  failures += not require("Genius settings matrix runtime", ok, detail or "Genius settings matrix failed")
   failures += not require("Cruise exposes staged Carrot longitudinal controls",
                           all(token in cruise_settings for token in (
                             "DynamicExperimentalControl",

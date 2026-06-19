@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Genius Settings Matrix
+
+Added a repeatable owner matrix for the imported settings and display modes:
+
+- `scripts/personal/genius_settings_matrix.py` generates `docs/personal/SETTINGS_MATRIX.md` and `docs/personal/settings_matrix.json`.
+- The matrix classifies each setting family as Carrot, Sunny primitive, Fishop hardware input, ESCC vehicle interface, model manager, local network/update, visualization, or removed cloud.
+- Sunny/Carrot/Fusion visualization coexistence is now checked as a rule: one base visual preset at a time, with Fishop/lidar as an independent evidence overlay.
+- DEC remains a Sunny primitive when longitudinal support is available; ICBM, SCC-V, SCC-M, Sunnylink, upload, and connect-style cloud controls stay hidden or inert.
+- The alpha release gate and static check now run the settings matrix so future merges cannot silently reintroduce conflicting settings.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.7`.
+
 ## 2026-06-20 Genius Visualization Modes
 
 The driving screen now has explicit visualization modes instead of a single SunnyPilot-style renderer:

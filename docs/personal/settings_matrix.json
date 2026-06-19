@@ -1,0 +1,2534 @@
+{
+  "rows": [
+    {
+      "api": false,
+      "category": "cloud",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "SunnylinkEnabled",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "SunnylinkEnabled",
+      "notes": "Param may remain for compatibility, but no UI or process may honor it.",
+      "owner": "removed_cloud",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "SunnylinkEnabled"
+      ],
+      "ui_surface": "",
+      "units": ""
+    },
+    {
+      "api": false,
+      "category": "cloud",
+      "consumer_tokens": [],
+      "current": {
+        "default": "<none>",
+        "raw": "PERSISTENT | BACKUP, BOOL",
+        "type": "BOOL"
+      },
+      "current_key": "EnableSunnylinkUploader",
+      "default": null,
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "EnableSunnylinkUploader",
+      "notes": "Legacy Sunny uploader switch is inert; ui_state forces it back to false if an old value exists.",
+      "owner": "removed_cloud",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "EnableSunnylinkUploader"
+      ],
+      "ui_surface": "",
+      "units": ""
+    },
+    {
+      "api": false,
+      "category": "cloud",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "OnroadUploads",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "OnroadUploads",
+      "notes": "Uploader is removed; value cannot start upload code.",
+      "owner": "removed_cloud",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "OnroadUploads"
+      ],
+      "ui_surface": "",
+      "units": ""
+    },
+    {
+      "api": false,
+      "category": "cloud",
+      "consumer_tokens": [],
+      "current": {},
+      "current_key": null,
+      "default": null,
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "EnableConnect",
+      "notes": "Do not reintroduce comma/OpenPilot cloud connect.",
+      "owner": "removed_cloud",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "EnableConnect"
+      ],
+      "ui_surface": "",
+      "units": ""
+    },
+    {
+      "api": false,
+      "category": "parked_power",
+      "consumer_tokens": [],
+      "current": {
+        "default": "<none>",
+        "raw": "CLEAR_ON_MANAGER_START, BOOL",
+        "type": "BOOL"
+      },
+      "current_key": "OffroadMode",
+      "default": null,
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "OffroadMode",
+      "notes": "Only parked-maintenance mode. Local LAN remains available.",
+      "owner": "local_network_update",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "OffroadMode",
+        "AlwaysOffroad",
+        "AlwaysOffline"
+      ],
+      "ui_surface": "mici_offroad",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "longitudinal",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "DynamicExperimentalControl",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "DynamicExperimentalControl",
+      "notes": "Retain as Sunny DEC candidate, default off.",
+      "owner": "sunny_primitive",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "DynamicExperimentalControl"
+      ],
+      "ui_surface": "cruise+carrot",
+      "units": ""
+    },
+    {
+      "api": false,
+      "category": "longitudinal",
+      "consumer_tokens": [],
+      "current": {
+        "default": "<none>",
+        "raw": "PERSISTENT | BACKUP , BOOL",
+        "type": "BOOL"
+      },
+      "current_key": "IntelligentCruiseButtonManagement",
+      "default": null,
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "IntelligentCruiseButtonManagement",
+      "notes": "Hidden/inert because Carrot owns cruise-button behavior.",
+      "owner": "removed_sunny_conflict",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "IntelligentCruiseButtonManagement"
+      ],
+      "ui_surface": "",
+      "units": ""
+    },
+    {
+      "api": false,
+      "category": "speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "SmartCruiseControlVision",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "SmartCruiseControlVision",
+      "notes": "Hidden/inert because Carrot/Sunny curve selector owns curve behavior.",
+      "owner": "removed_sunny_conflict",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "SmartCruiseControlVision"
+      ],
+      "ui_surface": "",
+      "units": ""
+    },
+    {
+      "api": false,
+      "category": "speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "SmartCruiseControlMap",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "SmartCruiseControlMap",
+      "notes": "Hidden/inert because Carrot map/phone/speed resolver owns map speed behavior.",
+      "owner": "removed_sunny_conflict",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "SmartCruiseControlMap"
+      ],
+      "ui_surface": "",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "speed_limit",
+      "consumer_tokens": [],
+      "current": {
+        "default": "1",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"1\"",
+        "type": "BOOL"
+      },
+      "current_key": "CarrotPhoneSpeedLimitEnabled",
+      "default": "1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotPhoneSpeedLimitEnabled",
+      "notes": "Fresh APN/N/Navipilot/Carrot phone speed source.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CarrotPhoneSpeedLimitEnabled",
+        "CarrotNaviDebug",
+        "CarrotNaviImage"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "maps",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "CarrotMapOverlayEnabled",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotMapOverlayEnabled",
+      "notes": "Mapbox/Kakao overlay remains optional and default off.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "MapboxStyle",
+        "GMapKey",
+        "MapboxPublicKey"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "speed_limit",
+      "consumer_tokens": [],
+      "current": {
+        "default": "5",
+        "raw": "PERSISTENT | BACKUP, INT, \"5\"",
+        "type": "INT"
+      },
+      "current_key": "SpeedLimitPolicy",
+      "default": "5",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "SpeedLimitPolicy",
+      "notes": "Phone-first resolver policy.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "SpeedLimitPolicy"
+      ],
+      "ui_surface": "speed_limit",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "speed_limit",
+      "consumer_tokens": [],
+      "current": {
+        "default": "1",
+        "raw": "PERSISTENT | BACKUP, INT, \"1\"",
+        "type": "INT"
+      },
+      "current_key": "SpeedLimitMode",
+      "default": "1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "SpeedLimitMode",
+      "notes": "Speed-limit display/assist mode.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "SpeedLimitMode"
+      ],
+      "ui_surface": "speed_limit",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "speed_limit",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "SpeedLimitOffsetType",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "SpeedLimitOffsetType",
+      "notes": "Default no offset.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "SpeedLimitOffsetType"
+      ],
+      "ui_surface": "speed_limit",
+      "units": "mode"
+    },
+    {
+      "api": true,
+      "category": "speed_limit",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "SpeedLimitValueOffset",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "SpeedLimitValueOffset",
+      "notes": "Default zero.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "SpeedLimitValueOffset"
+      ],
+      "ui_surface": "speed_limit",
+      "units": "km/h or percent"
+    },
+    {
+      "api": true,
+      "category": "curve_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "1",
+        "raw": "PERSISTENT | BACKUP, INT, \"1\"",
+        "type": "INT"
+      },
+      "current_key": "CurveSpeedControlMode",
+      "default": "1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CurveSpeedControlMode",
+      "notes": "Off/Sunny/Carrot/Fusion selector.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoCurveSpeedFactor",
+        "MapTurnSpeedFactor",
+        "ModelTurnSpeedFactor",
+        "VisionCurveSpeedController"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "curve_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "30",
+        "raw": "PERSISTENT | BACKUP, INT, \"30\"",
+        "type": "INT"
+      },
+      "current_key": "AutoCurveSpeedLowerLimit",
+      "default": "30",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "AutoCurveSpeedLowerLimit",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoCurveSpeedLowerLimit"
+      ],
+      "ui_surface": "carrot",
+      "units": "km/h"
+    },
+    {
+      "api": true,
+      "category": "curve_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "120",
+        "raw": "PERSISTENT | BACKUP, INT, \"120\"",
+        "type": "INT"
+      },
+      "current_key": "AutoCurveSpeedFactor",
+      "default": "120",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "AutoCurveSpeedFactor",
+      "notes": "Higher usually keeps more speed through curves.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoCurveSpeedFactor"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "curve_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "100",
+        "raw": "PERSISTENT | BACKUP, INT, \"100\"",
+        "type": "INT"
+      },
+      "current_key": "AutoCurveSpeedAggressiveness",
+      "default": "100",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "AutoCurveSpeedAggressiveness",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoCurveSpeedAggressiveness"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "navigation_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "120",
+        "raw": "PERSISTENT | BACKUP, INT, \"120\"",
+        "type": "INT"
+      },
+      "current_key": "AutoNaviSpeedDecelRate",
+      "default": "120",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "AutoNaviSpeedDecelRate",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoNaviSpeedDecelRate"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "active_control_gate",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "CarrotActiveSpeedControlEnabled",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotActiveSpeedControlEnabled",
+      "notes": "User-toggleable while offroad; controls active speed path gate.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoCruiseControl",
+        "AutoSpeedUptoRoadSpeedLimit"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "active_control_gate",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "CarrotAutoTurnControlEnabled",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotAutoTurnControlEnabled",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoTurnControl",
+        "AutoTurnControlSpeedTurn",
+        "AutoTurnControlTurnEnd"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "active_control_gate",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "CarrotTrafficStopEnabled",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotTrafficStopEnabled",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TrafficLight",
+        "TrafficLightDetectMode"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "turn_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "1",
+        "raw": "PERSISTENT | BACKUP, INT, \"1\"",
+        "type": "INT"
+      },
+      "current_key": "TurnSpeedControlMode",
+      "default": "1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "TurnSpeedControlMode",
+      "notes": "Off/Carrot/Sunny/Fusion selector.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TurnSpeedControlMode"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "turn_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "AutoTurnControl",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "AutoTurnControl",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoTurnControl"
+      ],
+      "ui_surface": "carrot",
+      "units": "bool-int"
+    },
+    {
+      "api": true,
+      "category": "turn_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "20",
+        "raw": "PERSISTENT | BACKUP, INT, \"20\"",
+        "type": "INT"
+      },
+      "current_key": "AutoTurnControlSpeedTurn",
+      "default": "20",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "AutoTurnControlSpeedTurn",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoTurnControlSpeedTurn"
+      ],
+      "ui_surface": "carrot",
+      "units": "km/h"
+    },
+    {
+      "api": true,
+      "category": "turn_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "6",
+        "raw": "PERSISTENT | BACKUP, INT, \"6\"",
+        "type": "INT"
+      },
+      "current_key": "AutoTurnControlTurnEnd",
+      "default": "6",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "AutoTurnControlTurnEnd",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoTurnControlTurnEnd"
+      ],
+      "ui_surface": "carrot",
+      "units": "s/threshold"
+    },
+    {
+      "api": true,
+      "category": "turn_speed",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "AutoTurnMapChange",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "AutoTurnMapChange",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AutoTurnMapChange"
+      ],
+      "ui_surface": "carrot",
+      "units": "bool-int"
+    },
+    {
+      "api": true,
+      "category": "traffic_light",
+      "consumer_tokens": [],
+      "current": {
+        "default": "2",
+        "raw": "PERSISTENT | BACKUP, INT, \"2\"",
+        "type": "INT"
+      },
+      "current_key": "TrafficLightDetectMode",
+      "default": "2",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "TrafficLightDetectMode",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TrafficLightDetectMode"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "traffic_light",
+      "consumer_tokens": [],
+      "current": {
+        "default": "-150",
+        "raw": "PERSISTENT | BACKUP, INT, \"-150\"",
+        "type": "INT"
+      },
+      "current_key": "TrafficStopDistanceAdjust",
+      "default": "-150",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "TrafficStopDistanceAdjust",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TrafficStopDistanceAdjust"
+      ],
+      "ui_surface": "carrot",
+      "units": "cm"
+    },
+    {
+      "api": true,
+      "category": "driving_mode",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "CarrotRainWet",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotRainWet",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CarrotRainWet"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "driving_mode",
+      "consumer_tokens": [],
+      "current": {
+        "default": "3",
+        "raw": "PERSISTENT | BACKUP, INT, \"3\"",
+        "type": "INT"
+      },
+      "current_key": "MyDrivingMode",
+      "default": "3",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "MyDrivingMode",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "MyDrivingModeAuto"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "driving_mode",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "MyDrivingModeAuto",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "MyDrivingModeAuto",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "MyDrivingModeAuto"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "longitudinal",
+      "consumer_tokens": [],
+      "current": {
+        "default": "2",
+        "raw": "PERSISTENT | BACKUP, INT, \"2\"",
+        "type": "INT"
+      },
+      "current_key": "CruiseEcoControl",
+      "default": "2",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CruiseEcoControl",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CruiseEcoControl"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "longitudinal",
+      "consumer_tokens": [],
+      "current": {
+        "default": "-1",
+        "raw": "PERSISTENT | BACKUP, INT, \"-1\"",
+        "type": "INT"
+      },
+      "current_key": "CarrotCruiseDecel",
+      "default": "-1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotCruiseDecel",
+      "notes": "-1 means Auto.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CarrotCruiseDecel"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent/auto"
+    },
+    {
+      "api": true,
+      "category": "longitudinal",
+      "consumer_tokens": [],
+      "current": {
+        "default": "-1",
+        "raw": "PERSISTENT | BACKUP, INT, \"-1\"",
+        "type": "INT"
+      },
+      "current_key": "CarrotCruiseAtcDecel",
+      "default": "-1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotCruiseAtcDecel",
+      "notes": "-1 means Auto.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CarrotCruiseAtcDecel"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent/auto"
+    },
+    {
+      "api": true,
+      "category": "longitudinal",
+      "consumer_tokens": [],
+      "current": {
+        "default": "550",
+        "raw": "PERSISTENT | BACKUP, INT, \"550\"",
+        "type": "INT"
+      },
+      "current_key": "StopDistanceCarrot",
+      "default": "550",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "StopDistanceCarrot",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "StopDistanceCarrot"
+      ],
+      "ui_surface": "carrot+cruise",
+      "units": "cm"
+    },
+    {
+      "api": true,
+      "category": "following",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "DynamicTFollow",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "DynamicTFollow",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "DynamicTFollow"
+      ],
+      "ui_surface": "carrot+cruise",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "following",
+      "consumer_tokens": [],
+      "current": {
+        "default": "10",
+        "raw": "PERSISTENT | BACKUP, INT, \"10\"",
+        "type": "INT"
+      },
+      "current_key": "TFollowDecelBoost",
+      "default": "10",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "TFollowDecelBoost",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TFollowDecelBoost"
+      ],
+      "ui_surface": "carrot+cruise",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "following",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "TFollowSpeedFactor",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "TFollowSpeedFactor",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TFollowSpeedFactor"
+      ],
+      "ui_surface": "carrot",
+      "units": "signed percent"
+    },
+    {
+      "api": true,
+      "category": "following",
+      "consumer_tokens": [],
+      "current": {
+        "default": "100",
+        "raw": "PERSISTENT | BACKUP, INT, \"100\"",
+        "type": "INT"
+      },
+      "current_key": "DynamicTFollowLC",
+      "default": "100",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "DynamicTFollowLC",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "DynamicTFollowLC"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "following",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "EnableSpeedTF",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "EnableSpeedTF",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "EnableSpeedTF"
+      ],
+      "ui_surface": "carrot",
+      "units": "bool-int"
+    },
+    {
+      "api": true,
+      "category": "following",
+      "consumer_tokens": [],
+      "current": {
+        "default": "110",
+        "raw": "PERSISTENT | BACKUP, INT, \"110\"",
+        "type": "INT"
+      },
+      "current_key": "TFollowGap1",
+      "default": "110",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "TFollowGap1",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TFollowGap1"
+      ],
+      "ui_surface": "carrot+cruise",
+      "units": "centiseconds"
+    },
+    {
+      "api": true,
+      "category": "following",
+      "consumer_tokens": [],
+      "current": {
+        "default": "120",
+        "raw": "PERSISTENT | BACKUP, INT, \"120\"",
+        "type": "INT"
+      },
+      "current_key": "TFollowGap2",
+      "default": "120",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "TFollowGap2",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TFollowGap2"
+      ],
+      "ui_surface": "carrot+cruise",
+      "units": "centiseconds"
+    },
+    {
+      "api": true,
+      "category": "following",
+      "consumer_tokens": [],
+      "current": {
+        "default": "140",
+        "raw": "PERSISTENT | BACKUP, INT, \"140\"",
+        "type": "INT"
+      },
+      "current_key": "TFollowGap3",
+      "default": "140",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "TFollowGap3",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TFollowGap3"
+      ],
+      "ui_surface": "carrot+cruise",
+      "units": "centiseconds"
+    },
+    {
+      "api": true,
+      "category": "following",
+      "consumer_tokens": [],
+      "current": {
+        "default": "160",
+        "raw": "PERSISTENT | BACKUP, INT, \"160\"",
+        "type": "INT"
+      },
+      "current_key": "TFollowGap4",
+      "default": "160",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "TFollowGap4",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "TFollowGap4"
+      ],
+      "ui_surface": "carrot+cruise",
+      "units": "centiseconds"
+    },
+    {
+      "api": true,
+      "category": "accel_table",
+      "consumer_tokens": [],
+      "current": {
+        "default": "160",
+        "raw": "PERSISTENT | BACKUP, INT, \"160\"",
+        "type": "INT"
+      },
+      "current_key": "CruiseMaxVals0",
+      "default": "160",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CruiseMaxVals0",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CruiseMaxVals0"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "accel_table",
+      "consumer_tokens": [],
+      "current": {
+        "default": "200",
+        "raw": "PERSISTENT | BACKUP, INT, \"200\"",
+        "type": "INT"
+      },
+      "current_key": "CruiseMaxVals1",
+      "default": "200",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CruiseMaxVals1",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CruiseMaxVals1"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "accel_table",
+      "consumer_tokens": [],
+      "current": {
+        "default": "160",
+        "raw": "PERSISTENT | BACKUP, INT, \"160\"",
+        "type": "INT"
+      },
+      "current_key": "CruiseMaxVals2",
+      "default": "160",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CruiseMaxVals2",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CruiseMaxVals2"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "accel_table",
+      "consumer_tokens": [],
+      "current": {
+        "default": "130",
+        "raw": "PERSISTENT | BACKUP, INT, \"130\"",
+        "type": "INT"
+      },
+      "current_key": "CruiseMaxVals3",
+      "default": "130",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CruiseMaxVals3",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CruiseMaxVals3"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "accel_table",
+      "consumer_tokens": [],
+      "current": {
+        "default": "110",
+        "raw": "PERSISTENT | BACKUP, INT, \"110\"",
+        "type": "INT"
+      },
+      "current_key": "CruiseMaxVals4",
+      "default": "110",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CruiseMaxVals4",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CruiseMaxVals4"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "accel_table",
+      "consumer_tokens": [],
+      "current": {
+        "default": "95",
+        "raw": "PERSISTENT | BACKUP, INT, \"95\"",
+        "type": "INT"
+      },
+      "current_key": "CruiseMaxVals5",
+      "default": "95",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CruiseMaxVals5",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CruiseMaxVals5"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "accel_table",
+      "consumer_tokens": [],
+      "current": {
+        "default": "80",
+        "raw": "PERSISTENT | BACKUP, INT, \"80\"",
+        "type": "INT"
+      },
+      "current_key": "CruiseMaxVals6",
+      "default": "80",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CruiseMaxVals6",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CruiseMaxVals6"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "longitudinal_tune",
+      "consumer_tokens": [],
+      "current": {
+        "default": "100",
+        "raw": "PERSISTENT | BACKUP, INT, \"100\"",
+        "type": "INT"
+      },
+      "current_key": "LongTuningKpV",
+      "default": "100",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "LongTuningKpV",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "LongTuningKpV"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "longitudinal_tune",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "LongTuningKiV",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "LongTuningKiV",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "LongTuningKiV"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "longitudinal_tune",
+      "consumer_tokens": [],
+      "current": {
+        "default": "100",
+        "raw": "PERSISTENT | BACKUP, INT, \"100\"",
+        "type": "INT"
+      },
+      "current_key": "LongTuningKf",
+      "default": "100",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "LongTuningKf",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "LongTuningKf"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "longitudinal_tune",
+      "consumer_tokens": [],
+      "current": {
+        "default": "20",
+        "raw": "PERSISTENT | BACKUP, INT, \"20\"",
+        "type": "INT"
+      },
+      "current_key": "LongActuatorDelay",
+      "default": "20",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "LongActuatorDelay",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "LongActuatorDelay"
+      ],
+      "ui_surface": "carrot",
+      "units": "centiseconds"
+    },
+    {
+      "api": true,
+      "category": "longitudinal_tune",
+      "consumer_tokens": [],
+      "current": {
+        "default": "50",
+        "raw": "PERSISTENT | BACKUP, INT, \"50\"",
+        "type": "INT"
+      },
+      "current_key": "VEgoStopping",
+      "default": "50",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "VEgoStopping",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "VEgoStopping"
+      ],
+      "ui_surface": "carrot",
+      "units": "km/h scale"
+    },
+    {
+      "api": true,
+      "category": "longitudinal_tune",
+      "consumer_tokens": [],
+      "current": {
+        "default": "100",
+        "raw": "PERSISTENT | BACKUP, INT, \"100\"",
+        "type": "INT"
+      },
+      "current_key": "RadarReactionFactor",
+      "default": "100",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "RadarReactionFactor",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "RadarReactionFactor"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "longitudinal_tune",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "JLeadFactor3",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "JLeadFactor3",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "JLeadFactor3"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "longitudinal_tune",
+      "consumer_tokens": [],
+      "current": {
+        "default": "10",
+        "raw": "PERSISTENT | BACKUP, INT, \"10\"",
+        "type": "INT"
+      },
+      "current_key": "AChangeCostStarting",
+      "default": "10",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "AChangeCostStarting",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "AChangeCostStarting"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "auto_tuner",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "CarrotLearningActive",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotLearningActive",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CarrotLearningActive"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "auto_tuner",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "CarrotLearningAutoApply",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotLearningAutoApply",
+      "notes": "Default off. Manual apply is offroad-only.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CarrotLearningAutoApply"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "auto_tuner",
+      "consumer_tokens": [],
+      "current": {
+        "default": "1",
+        "raw": "PERSISTENT | BACKUP, INT, \"1\"",
+        "type": "INT"
+      },
+      "current_key": "CarrotTunerApplyLat",
+      "default": "1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotTunerApplyLat",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CarrotTunerApplyLat"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "auto_tuner",
+      "consumer_tokens": [],
+      "current": {
+        "default": "1",
+        "raw": "PERSISTENT | BACKUP, INT, \"1\"",
+        "type": "INT"
+      },
+      "current_key": "CarrotTunerApplyLong",
+      "default": "1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "CarrotTunerApplyLong",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "CarrotTunerApplyLong"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "steering_path",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "PathOffset",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "PathOffset",
+      "notes": "0 is neutral.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "PathOffset",
+        "IQLanePlannerPathOffset"
+      ],
+      "ui_surface": "carrot",
+      "units": "cm"
+    },
+    {
+      "api": true,
+      "category": "steering_path",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "SteerActuatorDelay",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "SteerActuatorDelay",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "SteerActuatorDelay"
+      ],
+      "ui_surface": "carrot",
+      "units": "centiseconds"
+    },
+    {
+      "api": true,
+      "category": "steering_path",
+      "consumer_tokens": [],
+      "current": {
+        "default": "100",
+        "raw": "PERSISTENT | BACKUP, INT, \"100\"",
+        "type": "INT"
+      },
+      "current_key": "SteerRatioRate",
+      "default": "100",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "SteerRatioRate",
+      "notes": "100 is neutral.",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "SteerRatioRate"
+      ],
+      "ui_surface": "carrot",
+      "units": "percent"
+    },
+    {
+      "api": true,
+      "category": "steering_path",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "UseLaneLineSpeed",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "UseLaneLineSpeed",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "UseLaneLineSpeed",
+        "IQLanePlannerUseLaneLineSpeed"
+      ],
+      "ui_surface": "carrot",
+      "units": "bool-int"
+    },
+    {
+      "api": true,
+      "category": "steering_path",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, INT, \"0\"",
+        "type": "INT"
+      },
+      "current_key": "UseLaneLineCurveSpeed",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "UseLaneLineCurveSpeed",
+      "notes": "",
+      "owner": "carrot",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "UseLaneLineCurveSpeed"
+      ],
+      "ui_surface": "carrot",
+      "units": "bool-int"
+    },
+    {
+      "api": true,
+      "category": "fishop_hardware",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "FishopLaneCurveEnabled",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "FishopLaneCurveEnabled",
+      "notes": "",
+      "owner": "fishop",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "FishopLaneCurveEnabled",
+        "UseLaneLineCurveSpeed"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "fishop_hardware",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "FishopLidarBlindspotEnabled",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "FishopLidarBlindspotEnabled",
+      "notes": "",
+      "owner": "fishop",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "FishopLidarBlindspotEnabled",
+        "lidar_car_lblind"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "fishop_hardware",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "FishopLidarLaneDataEnabled",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "FishopLidarLaneDataEnabled",
+      "notes": "",
+      "owner": "fishop",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "FishopLidarLaneDataEnabled",
+        "LaneLineCheck"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "fishop_hardware",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "FishopAutoOvertakeEnabled",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "FishopAutoOvertakeEnabled",
+      "notes": "Setting is user-toggleable; output remains display/read-only until safety chain is validated.",
+      "owner": "fishop",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "FishopAutoOvertakeEnabled",
+        "overtake"
+      ],
+      "ui_surface": "carrot",
+      "units": ""
+    },
+    {
+      "api": false,
+      "category": "vehicle",
+      "consumer_tokens": [],
+      "current": {},
+      "current_key": null,
+      "default": null,
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "KIA_SELTOS_2023",
+      "notes": "Pure CAN SCC Seltos profile; ESCC is automatic through 0x2AB.",
+      "owner": "escc_vehicle_interface",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "ENHANCED_SCC",
+        "KIA_SELTOS",
+        "0x2AB"
+      ],
+      "ui_surface": "vehicle_selector",
+      "units": ""
+    },
+    {
+      "api": false,
+      "category": "models",
+      "consumer_tokens": [],
+      "current": {
+        "default": "<none>",
+        "raw": "PERSISTENT, JSON",
+        "type": "JSON"
+      },
+      "current_key": "ModelManager_ActiveBundle",
+      "default": null,
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "ModelManager_ActiveBundle",
+      "notes": "Sunny model manager retained; switching stays offroad; missing/invalid bundle means stock.",
+      "owner": "model_manager",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "ModelManager_ActiveBundle"
+      ],
+      "ui_surface": "models",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "onroad_visual",
+      "consumer_tokens": [],
+      "current": {
+        "default": "2",
+        "raw": "PERSISTENT | BACKUP, INT, \"2\"",
+        "type": "INT"
+      },
+      "current_key": "GeniusVisualMode",
+      "default": "2",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "GeniusVisualMode",
+      "notes": "Mutually exclusive base preset: Sunny minimal, Carrot dense lane/path/lead/radar, Fusion mixed.",
+      "owner": "visualization",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "ShowPathMode",
+        "ShowLaneInfo",
+        "ShowRadarInfo"
+      ],
+      "ui_surface": "visuals",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "onroad_visual",
+      "consumer_tokens": [],
+      "current": {
+        "default": "1",
+        "raw": "PERSISTENT | BACKUP, INT, \"1\"",
+        "type": "INT"
+      },
+      "current_key": "GeniusLaneLineStyle",
+      "default": "1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "GeniusLaneLineStyle",
+      "notes": "Lane-line style detail; may be adjusted after choosing a preset.",
+      "owner": "visualization",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "ShowLaneInfo",
+        "LaneLineCheck"
+      ],
+      "ui_surface": "visuals",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "onroad_visual",
+      "consumer_tokens": [],
+      "current": {
+        "default": "1",
+        "raw": "PERSISTENT | BACKUP, INT, \"1\"",
+        "type": "INT"
+      },
+      "current_key": "GeniusLeadRadarVisualMode",
+      "default": "1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "GeniusLeadRadarVisualMode",
+      "notes": "Lead/ radar detail: Sunny chevron, Carrot box, or radar speed labels.",
+      "owner": "visualization",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "ShowRadarInfo",
+        "RadarTrackId"
+      ],
+      "ui_surface": "visuals",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "onroad_visual",
+      "consumer_tokens": [],
+      "current": {
+        "default": "1",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"1\"",
+        "type": "BOOL"
+      },
+      "current_key": "GeniusLaneChangeVisuals",
+      "default": "1",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "GeniusLaneChangeVisuals",
+      "notes": "Display-only lane-change intent cues from existing onroad events.",
+      "owner": "visualization",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": true
+      },
+      "required_sources": [],
+      "source_keys": [
+        "LaneChange",
+        "laneChange"
+      ],
+      "ui_surface": "visuals",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "onroad_visual",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
+      "current_key": "GeniusFishopVisualOverlay",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "GeniusFishopVisualOverlay",
+      "notes": "Independent top-layer Fishop/lidar evidence overlay; never a base preset.",
+      "owner": "visualization",
+      "reference_hits": {
+        "ajouatom-c3-wip": false,
+        "ajouatom-carrot-wip": false,
+        "dhvms-carrotpilot-master": false,
+        "jixiexiaoge-atune": false,
+        "jixiexiaoge-cp": false,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "lidar_car_lblind",
+        "FishopLidarBlindspotEnabled"
+      ],
+      "ui_surface": "visuals",
+      "units": ""
+    }
+  ]
+}
