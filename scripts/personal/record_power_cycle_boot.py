@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import datetime as dt
+import os
 import subprocess
 import sys
 import tempfile
@@ -9,6 +10,7 @@ from typing import Dict, Optional, Sequence, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[2]
+GIT_TIMEOUT_S = 12.0
 PARAM_ROOTS = [
   Path("/data/params/d"),
   Path("/data/params"),
@@ -27,20 +29,32 @@ class PowerCycleRecordError(Exception):
   pass
 
 
-def run(cmd: Sequence[str]) -> Tuple[int, str]:
-  proc = subprocess.run(
-    list(cmd),
-    cwd=str(ROOT),
-    text=True,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-  )
+def run(cmd: Sequence[str], timeout: float = GIT_TIMEOUT_S) -> Tuple[int, str]:
+  env = {
+    **os.environ,
+    "GIT_TERMINAL_PROMPT": "0",
+    "GIT_OPTIONAL_LOCKS": "0",
+  }
+  try:
+    proc = subprocess.run(
+      list(cmd),
+      cwd=str(ROOT),
+      env=env,
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      timeout=timeout,
+    )
+  except subprocess.TimeoutExpired:
+    return 124, f"{cmd[0]} timed out after {timeout:.0f}s"
+  except OSError as exc:
+    return 127, f"{cmd[0]} unavailable: {exc}"
   return proc.returncode, proc.stdout.strip()
 
 
-def git_value(args: Sequence[str]) -> str:
-  code, output = run(["git", *args])
-  return output if code == 0 and output else "unknown"
+def git_value(args: Sequence[str], missing: str = "unknown") -> str:
+  code, output = run(["git", "-c", "core.fsmonitor=false", "-c", "gc.auto=0", "-c", "maintenance.auto=false", *args])
+  return output if code == 0 and output else missing
 
 
 def resolve_params_dir(raw: Optional[str]) -> Path:
@@ -67,7 +81,7 @@ def values_for_record() -> Dict[str, str]:
   return {
     "PowerCycleBootOk": "1",
     "PowerCycleBootCommit": git_value(["rev-parse", "--short=12", "HEAD"]),
-    "PowerCycleBootTag": git_value(["tag", "--points-at", "HEAD"]).replace("\n", ", "),
+    "PowerCycleBootTag": git_value(["tag", "--points-at", "HEAD"], missing="").replace("\n", ", "),
     "PowerCycleBootRecordedAt": dt.datetime.now(dt.timezone.utc).astimezone().isoformat(timespec="seconds"),
   }
 

@@ -525,6 +525,8 @@ flowchart LR
 - [x] 静态检查 7712 TCP 导航输入兼容入口只接收行式 JSON、记录 `rgdata` / `vrtx` 证据，不发布控制。
 - [x] 静态检查 APN/N/Navipilot 导航增强证据：SDI/plus 摄像头、减速带、model speed、红灯停车/自动转弯/主动限速预览都必须作为 read-only evidence 进入 Carrot Web、7705 广播和设备快照，且 `controlOutput=false`。
 - [x] 静态检查 Carrot 高风险统一门禁：`/api/carrot_feature_gates`、Carrot Web `Control Gates`、快照 `carrotFeatureGates` 必须存在；红灯停车、自动转弯、主动限速、Auto-Tuner 自动应用和 fishop 自动超车即使参数置 1，也必须保持 `readyForControl=false`、`controlOutput=false` 并带 `real_car_gate_missing` / `control_output_disabled`。
+- [x] 新增 alpha 快照证据判定器 `sunnypilot_c3_alpha_evidence_check.py`，机器校验 `static`、`parked`、`model`、`seltos-escc`、`navipilot`、`fishop` 和 `release-review` 阶段，避免停车/实车证据只靠人眼看 JSON。
+- [x] alpha 快照脚本 Git 读取加超时、非交互环境和 `--untracked-files=no`，避免 C3 或开发机上 `git status` 卡住证据采集。
 - [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
 - [x] schema 文本契约检查通过：`custom.capnp` / `log.capnp` 无重复字段名/编号，Sunny SP 服务和手机限速 source/schema 字段存在；C3 设备端 capnp 编译仍留到停车验证补证据。
 - [x] params 检查通过。
@@ -584,3 +586,5 @@ flowchart LR
 - [ ] 本地化闭环：设置、onboarding、sidebar、Carrot Web、模型管理器、限速、Offroad、fishop、Auto-Tuner 的中文/英文说明完整；用户可见路径不直出韩文。
 - [ ] 安装闭环：`/x`、`installer_c3_escc_alpha`、`--channel alpha` 都指向 `alpha-sunnypilot-c3`；`/i`、`latest`、`install-c3-escc-test` 不被 alpha 污染。
 - [ ] 证据闭环：停车证据、低速路测证据、限速证据、模型证据、fishop 只读证据和回滚安装器都归档后，再考虑从 alpha 进入 test；没有 stable 证据前不移动 `daily_install_target`。
+  - [x] 代码侧已有 alpha snapshot evidence checker，可把同一份快照按 `static` / `parked` / `model` / `seltos-escc` / `navipilot` / `fishop` / `release-review` 分阶段判定。
+  - [ ] C3 停车快照、Navipilot live check、模型消息采样、ESCC CarParamsSP 和 fishop JSONL 证据仍需实机采集。

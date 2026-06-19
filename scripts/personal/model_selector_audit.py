@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -7,9 +8,10 @@ from typing import List, Optional, Sequence, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[2]
+GIT_TIMEOUT_S = 30.0
 SOURCE_REF_CANDIDATES = [
-  "origin/happymaj11r/carrot-wip-model_selector",
   "tracking/model-selector",
+  "origin/happymaj11r/carrot-wip-model_selector",
 ]
 SOURCE_FILES = [
   "carrot/model_selector/README.md",
@@ -31,13 +33,32 @@ class Check:
 
 
 def run_git(args: Sequence[str]) -> Tuple[int, str]:
-  proc = subprocess.run(
-    ["git", *args],
-    cwd=str(ROOT),
-    text=True,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-  )
+  env = {
+    **os.environ,
+    "GIT_TERMINAL_PROMPT": "0",
+    "GIT_OPTIONAL_LOCKS": "0",
+  }
+  cmd = [
+    "git",
+    "-c", "core.fsmonitor=false",
+    "-c", "gc.auto=0",
+    "-c", "maintenance.auto=false",
+    *args,
+  ]
+  try:
+    proc = subprocess.run(
+      cmd,
+      cwd=str(ROOT),
+      env=env,
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      timeout=GIT_TIMEOUT_S,
+    )
+  except subprocess.TimeoutExpired:
+    return 124, f"git {' '.join(args)} timed out after {GIT_TIMEOUT_S:.0f}s"
+  except OSError as exc:
+    return 127, f"git unavailable: {exc}"
   return proc.returncode, proc.stdout.strip()
 
 

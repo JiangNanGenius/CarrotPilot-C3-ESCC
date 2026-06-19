@@ -1,5 +1,27 @@
 # 当前代码改动记录
 
+## 2026-06-19: alpha 证据判定器和快照防挂
+
+改动内容：
+
+- alpha 新增 `scripts/personal/sunnypilot_c3_alpha_evidence_check.py`，可对 `sunnypilot_c3_alpha_snapshot.py` 生成的 JSON 做分阶段判定：
+  - `static`：云进程/云参数关闭、限速偏移中性、高风险控制只读。
+  - `parked`：manager、updated、models_manager、Carrot Web、mapd、SSH、本地 Web 可见。
+  - `model`：`modelV2`、`drivingModelData`、`cameraOdometry`、`modelManagerSP` 和 modeld runner 证据。
+  - `seltos-escc`：Seltos SCC CarParams、CarParamsSP `ENHANCED_SCC` 和 ESCC safety param。
+  - `navipilot`：本地 live check 必须 local-only、无云、无控制输出。
+  - `fishop`：fishop 输入解析、传感器新鲜、自动超车 display-only。
+  - `release-review`：组合上述门槛，用于 alpha 从停车证据走向 test 前的机器检查。
+- alpha 快照脚本 `git status` 改为有超时、非交互、禁用 fsmonitor 和不扫未跟踪文件，避免开发机/C3 上证据采集卡住。
+- alpha 静态检查纳入 evidence checker 自测，保证该证据门禁以后不会失效。
+- 稳定线 `model_selector_audit.py`、`app_navi_overtake_audit.py` 和 `record_power_cycle_boot.py` 的 Git 读取补超时和非交互配置，避免 smoke 在本地参考分支、Navipilot 源文件或 `git tag --points-at HEAD` 上卡住。
+- `model_selector_audit.py` 优先使用已审查的本地 `tracking/model-selector`，再回退到远端 tracking ref。
+
+刻意没有改：
+
+- 没有把 `parked`、`model`、`seltos-escc`、`navipilot` 或 `fishop` 证据标成已完成；这些仍必须在 C3 和实车上采集。
+- 没有放开任何 Carrot/fishop 高风险控制输出。
+
 ## 2026-06-19: 本地检查防挂和新架构 TODO 收口
 
 改动内容：

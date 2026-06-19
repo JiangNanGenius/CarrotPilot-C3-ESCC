@@ -41,7 +41,7 @@ NAVIPILOT_SOURCE_FILES = [
   "app/src/main/java/com/example/navipilot/AmapBroadcastHandlers.kt",
 ]
 
-GIT_TIMEOUT_S = 12.0
+GIT_TIMEOUT_S = 30.0
 
 
 @dataclass
