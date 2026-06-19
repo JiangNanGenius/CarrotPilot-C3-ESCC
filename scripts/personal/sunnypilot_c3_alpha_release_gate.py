@@ -94,6 +94,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     "scripts/personal/genius_carrot_web_api_contract.py",
     "scripts/personal/genius_navipilot_replay_contract.py",
     "scripts/personal/genius_cluster_world_contract.py",
+    "system/ui/tici_updater.py",
   ]
   steps: list[tuple[str, list[str], int]] = [
     ("python compile personal gates", [py(), "-m", "py_compile", *scripts], 60),

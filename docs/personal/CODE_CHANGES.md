@@ -1,5 +1,27 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 TICI Dependency Installer Touch Fallback
+
+Published as `2026.002.000-gp.20260620.39`.
+
+Real-device feedback showed the C3 system update/dependency prompt could draw
+button press feedback while `Connect to Wi-Fi`, `Install`, and failure `Reboot`
+still did not execute. This is the same clone C3 touch-release loss pattern
+seen earlier in setup/onboarding, but it lives in the standalone TICI updater
+screen rather than normal settings.
+
+Fixes included:
+
+- `system/ui/tici_updater.py` now keeps parent-level hit rectangles for the
+  prompt, Wi-Fi, progress, and reboot actions. A tap on press or release can
+  advance the critical dependency/install screen even if the child button
+  release callback is lost.
+- The install action is guarded against double-starting if the child button and
+  the parent fallback both see the same touch sequence.
+- The release/static gates now compile `system/ui/tici_updater.py` directly and
+  require the parent-level `_activate_at` fallback so this recovery path cannot
+  silently regress.
+
 ## 2026-06-20 Process Replay Crash Fixes
 
 Published as `2026.002.000-gp.20260620.38`.

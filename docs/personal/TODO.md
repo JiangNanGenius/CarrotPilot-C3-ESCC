@@ -19,6 +19,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add an installer/update audit that checks both the main source tree and the packed TICI updater for the Wi-Fi dependency contract.
 - [x] Keep the welcome/training flow, but replace SunnyPilot-specific legal/consent copy with Genius Pilot personal-build copy that is short enough for C3 and advances reliably.
 - [x] Rename user-facing alpha branding from SunnyPilot to Genius Pilot where accurate: welcome screen, version/about panel, settings headers, update prompts, boot/update text, and alpha evidence snapshots.
+- [x] Add a parent-level touch fallback to the TICI dependency/update prompt so `Connect to Wi-Fi`, `Install`, and failure `Reboot` can fire even when clone C3 loses the child button release event.
 - [ ] Keep `/x` as the single short alpha entry; avoid new test URLs unless there is a clear rollback reason.
 - [ ] Bump the Genius Pilot suffix before every pushed alpha build: same date increments patch, new date resets patch to `1`, SunnyPilot base changes only when upstream base changes.
 - [ ] After the next clean `/x` install, collect device evidence even if the install succeeds, so the success path is documented.
@@ -237,6 +238,7 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Make the sidebar gear less sensitive: settings now opens on touch release and ignores close/sidebar touches during the first 0.6 seconds after entry.
 - [x] Make settings/menu taps less sensitive on clone C3: reject drag/scroll releases, shrink tap movement tolerance, and defer sidebar panel switching until release.
 - [x] Make setup/update/install dependency buttons more tolerant on clone C3 without loosening normal settings taps: per-widget tap-release movement is supported, and TICI/MICI setup/updater install buttons use a wider release tolerance.
+- [x] Add a direct fallback on the standalone TICI dependency/update prompt so critical install buttons do not depend only on child-button release callbacks.
 - [x] Add `Kia Seltos 2023` to the Sunny manual vehicle selector list so the existing `KIA_SELTOS_2023` profile is visible in the UI.
 - [x] Sync the hotfix files to the user's C3 at `192.168.100.174` and restart UI for bench testing.
 - [x] Verify the Wi-Fi fallback on device: after UI-style activation it reports SSID `zhao`, IP `192.168.100.174`, and scanned networks without `jeepney`.

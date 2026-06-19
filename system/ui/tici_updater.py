@@ -44,6 +44,11 @@ class Updater(Widget):
     self.process = None
     self.update_thread = None
     self.wifi_manager_ui = WifiManagerUI(WifiManager())
+    self._ignore_release_after_press = False
+    self._wifi_button_rect = rl.Rectangle(0, 0, 0, 0)
+    self._install_button_rect = rl.Rectangle(0, 0, 0, 0)
+    self._back_button_rect = rl.Rectangle(0, 0, 0, 0)
+    self._reboot_button_rect = rl.Rectangle(0, 0, 0, 0)
 
     # Buttons
     self._wifi_button = Button("Connect to Wi-Fi", click_callback=lambda: self.set_current_screen(Screen.WIFI))
@@ -57,6 +62,8 @@ class Updater(Widget):
     self.current_screen = screen
 
   def install_update(self):
+    if self.current_screen == Screen.PROGRESS or (self.update_thread is not None and self.update_thread.is_alive()):
+      return
     self.set_current_screen(Screen.PROGRESS)
     self.progress_value = 0
     self.progress_text = "Downloading..."
@@ -95,6 +102,37 @@ class Updater(Widget):
       self.progress_text = "Update failed"
       self.show_reboot_button = True
 
+  def _activate_at(self, mouse_pos) -> bool:
+    # Clone C3 touch controllers can show button press feedback while losing the
+    # release event before the child Button callback fires. Keep a parent-level
+    # hit test for this critical recovery screen so dependency installs remain
+    # reachable before the main UI is usable.
+    if self.current_screen == Screen.PROMPT:
+      if rl.check_collision_point_rec(mouse_pos, self._install_button_rect):
+        self.install_update()
+        return True
+      if rl.check_collision_point_rec(mouse_pos, self._wifi_button_rect):
+        self.set_current_screen(Screen.WIFI)
+        return True
+    elif self.current_screen == Screen.WIFI:
+      if rl.check_collision_point_rec(mouse_pos, self._back_button_rect):
+        self.set_current_screen(Screen.PROMPT)
+        return True
+    elif self.current_screen == Screen.PROGRESS and self.show_reboot_button:
+      if rl.check_collision_point_rec(mouse_pos, self._reboot_button_rect):
+        HARDWARE.reboot()
+        return True
+    return False
+
+  def _handle_mouse_press(self, mouse_pos):
+    self._ignore_release_after_press = self._activate_at(mouse_pos)
+
+  def _handle_mouse_release(self, mouse_pos):
+    if self._ignore_release_after_press:
+      self._ignore_release_after_press = False
+      return
+    self._activate_at(mouse_pos)
+
   def render_prompt_screen(self, rect: rl.Rectangle):
     # Title
     title_rect = rl.Rectangle(MARGIN + 50, 250, rect.width - MARGIN * 2 - 100, TITLE_FONT_SIZE * FONT_SCALE)
@@ -112,12 +150,12 @@ class Updater(Widget):
     button_width = (rect.width - MARGIN * 3) // 2
 
     # WiFi button
-    wifi_button_rect = rl.Rectangle(MARGIN, button_y, button_width, BUTTON_HEIGHT)
-    self._wifi_button.render(wifi_button_rect)
+    self._wifi_button_rect = rl.Rectangle(MARGIN, button_y, button_width, BUTTON_HEIGHT)
+    self._wifi_button.render(self._wifi_button_rect)
 
     # Install button
-    install_button_rect = rl.Rectangle(MARGIN * 2 + button_width, button_y, button_width, BUTTON_HEIGHT)
-    self._install_button.render(install_button_rect)
+    self._install_button_rect = rl.Rectangle(MARGIN * 2 + button_width, button_y, button_width, BUTTON_HEIGHT)
+    self._install_button.render(self._install_button_rect)
 
   def render_wifi_screen(self, rect: rl.Rectangle):
     # Draw the Wi-Fi manager UI
@@ -127,8 +165,8 @@ class Updater(Widget):
     wifi_content_rect = rl.Rectangle(wifi_rect.x + 50, wifi_rect.y, wifi_rect.width - 100, wifi_rect.height)
     self.wifi_manager_ui.render(wifi_content_rect)
 
-    back_button_rect = rl.Rectangle(MARGIN, rect.height - MARGIN - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT)
-    self._back_button.render(back_button_rect)
+    self._back_button_rect = rl.Rectangle(MARGIN, rect.height - MARGIN - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT)
+    self._back_button.render(self._back_button_rect)
 
   def render_progress_screen(self, rect: rl.Rectangle):
     title_rect = rl.Rectangle(MARGIN + 100, 330, rect.width - MARGIN * 2 - 200, 100)
@@ -146,8 +184,8 @@ class Updater(Widget):
 
     # Show reboot button if needed
     if self.show_reboot_button:
-      reboot_rect = rl.Rectangle(MARGIN + 100, rect.height - MARGIN - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT)
-      self._reboot_button.render(reboot_rect)
+      self._reboot_button_rect = rl.Rectangle(MARGIN + 100, rect.height - MARGIN - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT)
+      self._reboot_button.render(self._reboot_button_rect)
 
   def _render(self, rect: rl.Rectangle):
     if self.current_screen == Screen.PROMPT:
