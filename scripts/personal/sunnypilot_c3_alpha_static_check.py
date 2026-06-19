@@ -65,6 +65,9 @@ def read(rel: str) -> str:
   path = ROOT / rel
   text = safe_read_text(path, timeout_s=10.0)
   if text is None:
+    time.sleep(0.5)
+    text = safe_read_text(path, timeout_s=30.0)
+  if text is None:
     raise RuntimeError(f"unable to read {rel}; file may be unavailable or timed out")
   return text
 
@@ -673,12 +676,18 @@ def check_phone_speed_limit_runtime() -> tuple[bool, str]:
       sys.modules["openpilot.common.params"] = previous_params
 
 
-def check_route_speed_truth_contract() -> tuple[bool, str]:
-  custom_capnp = read("cereal/custom.capnp")
-  resolver = read("sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
-  common = read("sunnypilot/selfdrive/controls/lib/speed_limit/common.py")
-  planner = read("sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
-  carrot_server = read("selfdrive/carrot/carrot_server.py")
+def check_route_speed_truth_contract(
+  custom_capnp: str | None = None,
+  resolver: str | None = None,
+  common: str | None = None,
+  planner: str | None = None,
+  carrot_server: str | None = None,
+) -> tuple[bool, str]:
+  custom_capnp = custom_capnp if custom_capnp is not None else read("cereal/custom.capnp")
+  resolver = resolver if resolver is not None else read("sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
+  common = common if common is not None else read("sunnypilot/selfdrive/controls/lib/speed_limit/common.py")
+  planner = planner if planner is not None else read("sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
+  carrot_server = carrot_server if carrot_server is not None else read("selfdrive/carrot/carrot_server.py")
 
   try:
     speed_limit_start = custom_capnp.index("struct SpeedLimit {")
@@ -1556,6 +1565,27 @@ def check_release_gate_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_update_audit_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/sunnypilot_c3_alpha_update_audit.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_install_boot_contract() -> tuple[bool, str]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
@@ -1926,6 +1956,7 @@ def main() -> int:
   c3_compat_audit = read("scripts/personal/sunnypilot_c3_compat_audit.py")
   installer_audit = read("scripts/personal/sunnypilot_c3_installer_audit.py")
   release_gate = read("scripts/personal/sunnypilot_c3_alpha_release_gate.py")
+  update_audit = read("scripts/personal/sunnypilot_c3_alpha_update_audit.py")
   agents_md = read("AGENTS.md")
   failures += not require("Auto-Tuner learner module exists", "class CarrotLearner" in carrot_learning
                           and "def apply_recommendations" in carrot_learning,
@@ -2261,12 +2292,30 @@ def main() -> int:
                           and "sunnypilot_c3_compat_audit.py" in release_gate
                           and "sunnypilot_c3_alpha_evidence_check.py" in release_gate
                           and "sunnypilot_c3_alpha_static_check.py" in release_gate
+                          and "sunnypilot_c3_alpha_update_audit.py" in release_gate
+                          and "--fetch-references" in release_gate
                           and "--full" in release_gate
                           and "--snapshot" in release_gate,
                           "alpha must include a repeatable update/release gate")
   ok, detail = check_release_gate_runtime()
   failures += not require("alpha update/release gate runtime", ok,
                           detail or "release gate self-test failed")
+  failures += not require("alpha upstream update audit exists",
+                          "CarrotPilot-C3-ESCC Alpha Update Audit" in update_audit
+                          and "sunnypilot-staging" in update_audit
+                          and "ajouatom-carrot-wip" in update_audit
+                          and "jixiexiaoge-master" in update_audit
+                          and "jixiexiaoge-atune" in update_audit
+                          and "dhvms-carrotpilot-master" in update_audit
+                          and "refs/remotes/carrot-audit" in update_audit
+                          and "--fetch" in update_audit
+                          and "--scan-risk-tokens" in update_audit
+                          and "WATCHED_PATHS" in update_audit
+                          and "RISK_TOKENS" in update_audit,
+                          "alpha must include a repeatable reference fetch/compare update audit")
+  ok, detail = check_update_audit_runtime()
+  failures += not require("alpha upstream update audit runtime", ok,
+                          detail or "update audit self-test failed")
   failures += not require("agent update guide exists",
                           "CarrotPilot-C3-ESCC Agent Guide" in agents_md
                           and "personal/c3-escc-atune" in agents_md
@@ -2274,6 +2323,7 @@ def main() -> int:
                           and "OffroadMode" in agents_md
                           and "do not import private registration" in agents_md
                           and "sunnypilot_c3_alpha_release_gate.py --full" in agents_md
+                          and "sunnypilot_c3_alpha_update_audit.py --fetch --strict" in agents_md
                           and "sunnypilot_c3_installer_audit.py" in agents_md
                           and "Kia Seltos 2023" in agents_md,
                           "root AGENTS.md must preserve the update strategy and safety boundaries")
@@ -2709,7 +2759,7 @@ def main() -> int:
                           "resolver must reject stale phone speed data")
   failures += not require("phone source priority", "Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car, SpeedLimitSource.map]" in resolver,
                           "phone_priority must resolve phone, car, then map")
-  ok, detail = check_route_speed_truth_contract()
+  ok, detail = check_route_speed_truth_contract(custom_capnp, resolver, common, planner, carrot_server)
   failures += not require("route/map overlay not speed truth", ok,
                           detail or "Mapbox/Kakao/Carrot route must stay display/evidence-only, not a speed-limit truth source")
   failures += not require("source label published", "resolver.sourceLabel = self.resolver.source_label" in planner,

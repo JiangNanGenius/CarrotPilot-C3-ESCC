@@ -52,6 +52,18 @@ Full pre-publish gate:
 python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full
 ```
 
+Reference fetch/compare audit before upstream updates:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_alpha_update_audit.py --fetch --strict --scan-risk-tokens --json
+```
+
+Full gate with reference fetch:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --fetch-references --full
+```
+
 Published installer audit:
 
 ```bash

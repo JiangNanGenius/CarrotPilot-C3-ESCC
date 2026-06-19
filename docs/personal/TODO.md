@@ -71,9 +71,12 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 
 - [x] Add `AGENTS.md` with the future-agent update strategy, safety boundaries, branch rules, and C3/Seltos context.
 - [x] Add `scripts/personal/sunnypilot_c3_alpha_release_gate.py` as a repeatable fast/full update gate.
-- [ ] Fetch SunnyPilot staging and compare watched paths.
-- [ ] Fetch CarrotPilot source and compare Carrot, speed, model, and map changes.
-- [ ] Fetch mechanical/Auto-Tuner source and compare Auto-Tuner, APN/N, fishop hardware, and local web changes.
+- [x] Add `scripts/personal/sunnypilot_c3_alpha_update_audit.py` to fetch/compare SunnyPilot, CarrotPilot, mechanical/Auto-Tuner, and ESCC reference branches.
+- [x] Fetch initial `refs/remotes/carrot-audit/*` reference baseline on 2026-06-19.
+- [ ] Run update audit with `--fetch --strict --scan-risk-tokens` before the next upstream merge.
+- [ ] Review SunnyPilot staging watched-path deltas.
+- [ ] Review CarrotPilot watched-path deltas for Carrot, speed, model, and map changes.
+- [ ] Review mechanical/Auto-Tuner watched-path deltas for Auto-Tuner, APN/N, fishop hardware, and local web changes.
 - [ ] Re-run static checks, compatibility audit, installer audit, and evidence checker self-tests.
 - [ ] Publish alpha only after `/x` installer audit passes.
 - [ ] Keep `/i` stable until C3 parking and road evidence are clean.
