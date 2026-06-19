@@ -1375,6 +1375,23 @@ def check_navipilot_live_check_runtime() -> tuple[bool, str]:
   return True, result.stdout.strip()
 
 
+def check_fishop_hardware_sample_runtime() -> tuple[bool, str]:
+  script_path = ROOT / "scripts/personal/fishop_hardware_sample.py"
+  if not script_path.is_file():
+    return False, "scripts/personal/fishop_hardware_sample.py is missing"
+  result = subprocess.run(
+    [sys.executable, str(script_path), "--self-test"],
+    cwd=ROOT,
+    capture_output=True,
+    text=True,
+    timeout=15,
+    check=False,
+  )
+  if result.returncode != 0:
+    return False, (result.stdout + result.stderr).strip()
+  return True, result.stdout.strip()
+
+
 def check_fishop_release_gate_runtime() -> tuple[bool, str]:
   try:
     snapshot = import_file("alpha_snapshot_release_gate_static_check", "scripts/personal/sunnypilot_c3_alpha_snapshot.py")
@@ -2658,6 +2675,23 @@ def main() -> int:
   failures += not require("fishop auto-overtake safety chain gate", ok, detail or "fishop auto-overtake safety chain gate failed")
   failures += not require("fishop hardware sample tool exists", "FishopHardwareState" in fishop_sample and "SAMPLE_PAYLOADS" in fishop_sample,
                           "fishop hardware sample tool must normalize captured JSON payloads")
+  failures += not require("fishop hardware sample replay contract",
+                          "assert_sample_snapshot" in fishop_sample
+                          and "left/right lane line values were not preserved" in fishop_sample
+                          and "lane curve values were not preserved" in fishop_sample
+                          and "left lidar blindspot was not preserved" in fishop_sample
+                          and "dynamic right-front risk preview missing" in fishop_sample
+                          and "navigation gate must downgrade outside domestic map coverage" in fishop_sample
+                          and "overtake preview must stay display-only" in fishop_sample
+                          and "carrot_server.fishop_state" in fishop_sample,
+                          "fishop sample replay must cover lane curve, left/right lanes, lidar/camera blindspot, dynamic risk, navigation gate, overtake preview, and Carrot Web/API state")
+  failures += not require("fishop hardware sample replay release gate wired",
+                          "scripts/personal/fishop_hardware_sample.py" in release_gate
+                          and "Fishop hardware sample replay" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must run the Fishop sample replay contract")
+  ok, detail = check_fishop_hardware_sample_runtime()
+  failures += not require("fishop hardware sample replay runtime", ok, detail or "fishop hardware sample replay failed")
   failures += not require("alpha snapshot tool exists", "Genius Pilot C3 Alpha Snapshot" in alpha_snapshot
                           and "MESSAGING_SERVICES" in alpha_snapshot and "fishopHardware" in alpha_snapshot,
                           "alpha snapshot must collect model, process, params, and fishop evidence")

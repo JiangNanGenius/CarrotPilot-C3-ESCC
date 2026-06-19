@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Fishop Hardware Replay Contract
+
+Upgraded the Fishop hardware sample tool into a release-gated replay contract:
+
+- `scripts/personal/fishop_hardware_sample.py --self-test` now validates the built-in lane/lidar/camera/navigation/overtake sample.
+- The self-test confirms lane curve, left/right lane line values, lidar/camera blindspot, dynamic risk preview, navigation gate, and overtake suggestion preview are preserved.
+- It also writes the sample to a temporary JSONL file and calls the Carrot Web/API Fishop state path, so `/api/fishop_hardware` coverage is checked without needing the C3.
+- All replayed Fishop evidence remains read-only and `controlOutput=false`.
+- The alpha release gate and static check now run this replay contract explicitly.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.15`.
+
 ## 2026-06-20 Navipilot/APN/N Replay Contract
 
 Added a dedicated local replay contract for the Navipilot/APN/N navigation bridge:
