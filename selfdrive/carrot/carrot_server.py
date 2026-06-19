@@ -1149,7 +1149,7 @@ def build_status_payload(runtime_status: dict[str, Any] | None = None,
   speed_limit_evidence = speed_limit_evidence_state(runtime_status)
 
   return {
-    "Carrot2": "CarrotPilot-C3-ESCC-alpha",
+    "Carrot2": "GeniusPilot-alpha",
     "IsOnroad": is_onroad,
     "CarrotRouteActive": bool(is_onroad and nav_fields["route_active"]),
     "ip": DEFAULT_HOST,
