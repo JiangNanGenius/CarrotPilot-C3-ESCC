@@ -1752,6 +1752,27 @@ def check_genius_settings_matrix_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_genius_carrot_web_api_contract_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_carrot_web_api_contract.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-1200:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_genius_branding_contract_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -2246,6 +2267,7 @@ def main() -> int:
   settings_matrix_script = read("scripts/personal/genius_settings_matrix.py")
   settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
   settings_matrix_json = read("docs/personal/settings_matrix.json")
+  carrot_web_api_contract = read("scripts/personal/genius_carrot_web_api_contract.py")
   curve_speed_contract = read("scripts/personal/genius_curve_speed_contract.py")
   curve_speed_policy_md = read("docs/personal/CURVE_SPEED_POLICY.md")
   curve_speed_policy = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py")
@@ -2606,10 +2628,10 @@ def main() -> int:
                           and "self.fishop_overlay.render(self._content_rect)" in augmented_road_view,
                           "C3/TICI augmented road view must render the Fishop overlay on top of the model visualization")
   failures += not require("visualization coexistence UI contract",
-                          "Fishop overlay is independent" in visuals_layout
-                          and "Choose a base display preset" in visuals_layout
+                          "Fishop and Carrot World overlays are independent top layers" in visuals_layout
+                          and "Choose one base display preset" in visuals_layout
                           and "Draw Fishop lane, lidar lane, blindspot, and overtake suggestion evidence" in visuals_layout,
-                          "Visuals settings must describe base presets separately from independent Fishop overlay")
+                          "Visuals settings must describe base presets separately from independent Fishop and Carrot World overlays")
   ok, detail = check_fishop_overtake_safety_contract()
   failures += not require("fishop auto-overtake safety chain gate", ok, detail or "fishop auto-overtake safety chain gate failed")
   failures += not require("fishop hardware sample tool exists", "FishopHardwareState" in fishop_sample and "SAMPLE_PAYLOADS" in fishop_sample,
@@ -2960,6 +2982,27 @@ def main() -> int:
                           "release gate must run the settings owner matrix")
   ok, detail = check_genius_settings_matrix_runtime()
   failures += not require("Genius settings matrix runtime", ok, detail or "Genius settings matrix failed")
+  failures += not require("Genius Carrot Web API contract files present",
+                          all(token in carrot_web_api_contract for token in (
+                            "WRITABLE_CASES",
+                            "CarrotActiveSpeedControlEnabled",
+                            "CarrotAutoTurnControlEnabled",
+                            "CarrotTrafficStopEnabled",
+                            "FishopAutoOvertakeEnabled",
+                            "CurveSpeedControlMode",
+                            "NeuralNetworkLateralControl",
+                            "GeniusCarrotWorldOverlay",
+                            "CLOUD_PARAMS",
+                            "onroad changed write was not blocked",
+                          )),
+                          "Carrot Web API contract must cover writable Carrot/Fishop/NNLC/visual params, cloud absence, and onroad write blocking")
+  failures += not require("Genius Carrot Web API contract release gate wired",
+                          "scripts/personal/genius_carrot_web_api_contract.py" in release_gate
+                          and "Genius Carrot Web API contract" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must run the local Carrot Web/API contract")
+  ok, detail = check_genius_carrot_web_api_contract_runtime()
+  failures += not require("Genius Carrot Web API contract runtime", ok, detail or "Genius Carrot Web API contract failed")
   failures += not require("Genius branding release gate wired",
                           "scripts/personal/genius_branding_contract.py" in release_gate
                           and "Genius branding contract" in release_gate,

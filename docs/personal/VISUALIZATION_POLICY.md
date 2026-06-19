@@ -2,6 +2,8 @@
 
 Genius Pilot keeps the driving screen split into two layers: one base visual preset and optional evidence overlays.
 
+This is the rule for mixing the several visual systems in this repository: the base road view is mutually exclusive, but evidence overlays are additive. Carrot's lane and lane-change presentation is preferred when it makes adjacent-lane awareness clearer than SunnyPilot's stock view.
+
 ## Base Presets
 
 One base preset is active at a time through `GeniusVisualMode`.
