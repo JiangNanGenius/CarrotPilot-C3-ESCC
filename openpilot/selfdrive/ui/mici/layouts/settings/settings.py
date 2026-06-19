@@ -1,4 +1,7 @@
+import pyray as rl
+
 from openpilot.common.params import Params
+from openpilot.system.ui.lib.scroll_panel2 import ScrollState
 from openpilot.system.ui.widgets.scroller import NavScroller
 from openpilot.selfdrive.ui.mici.widgets.button import BigButton
 from openpilot.selfdrive.ui.mici.layouts.settings.toggles import TogglesLayoutMici
@@ -6,33 +9,24 @@ from openpilot.selfdrive.ui.mici.layouts.settings.network.network_layout import 
 from openpilot.selfdrive.ui.mici.layouts.settings.device import DeviceLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.developer import DeveloperLayoutMici
 from openpilot.selfdrive.ui.mici.layouts.settings.software import SoftwareLayoutMici
-from openpilot.system.ui.lib.application import gui_app, FontWeight
+from openpilot.system.ui.lib.application import gui_app, FontWeight, MousePos
+
+TAP_OPEN_DELAY = 0.12
+TAP_MAX_MOVE = 18
 
 
 class SettingsBigButton(BigButton):
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    self._opened_on_press = False
-
   def _get_label_font_size(self):
     return 64
-
-  def _handle_mouse_press(self, _):
-    self._opened_on_press = True
-    if self._click_callback:
-      self._click_callback()
-
-  def _handle_mouse_release(self, mouse_pos):
-    if self._opened_on_press:
-      self._opened_on_press = False
-      return
-    super()._handle_mouse_release(mouse_pos)
 
 
 class SettingsLayout(NavScroller):
   def __init__(self):
     super().__init__()
     self._params = Params()
+    self._tap_candidate: SettingsBigButton | None = None
+    self._tap_start_pos: MousePos | None = None
+    self._tap_start_t = 0.0
 
     toggles_panel = TogglesLayoutMici()
     toggles_btn = SettingsBigButton("toggles", "", gui_app.texture("icons_mici/settings.png", 64, 64))
@@ -63,3 +57,54 @@ class SettingsLayout(NavScroller):
     ])
 
     self._font_medium = gui_app.font(FontWeight.MEDIUM)
+
+  def _settings_button_at(self, mouse_pos: MousePos) -> SettingsBigButton | None:
+    for item in reversed(self._scroller._items):
+      if isinstance(item, SettingsBigButton) and item.enabled and item.is_visible and rl.check_collision_point_rec(mouse_pos, item.rect):
+        return item
+    return None
+
+  def _tap_moved_too_far(self, mouse_pos: MousePos) -> bool:
+    if self._tap_start_pos is None:
+      return True
+    return abs(mouse_pos.x - self._tap_start_pos.x) > TAP_MAX_MOVE or abs(mouse_pos.y - self._tap_start_pos.y) > TAP_MAX_MOVE
+
+  def _clear_menu_tap(self):
+    self._tap_candidate = None
+    self._tap_start_pos = None
+    self._tap_start_t = 0.0
+
+  def _open_tap_candidate(self):
+    candidate = self._tap_candidate
+    self._clear_menu_tap()
+    if candidate is None or gui_app.get_active_widget() is not self:
+      return
+    if candidate._click_callback:
+      candidate._click_callback()
+
+  def _update_state(self):
+    super()._update_state()
+
+    if self._tap_candidate is None:
+      return
+
+    last_event = gui_app.last_mouse_event
+    if self._tap_moved_too_far(last_event.pos) or self._scroller.scroll_panel.state == ScrollState.MANUAL_SCROLL:
+      self._clear_menu_tap()
+    elif last_event.left_down and rl.get_time() - self._tap_start_t >= TAP_OPEN_DELAY:
+      self._open_tap_candidate()
+    elif not last_event.left_down and rl.get_time() - self._tap_start_t > 0.5:
+      self._clear_menu_tap()
+
+  def _handle_mouse_press(self, mouse_pos: MousePos):
+    super()._handle_mouse_press(mouse_pos)
+    self._tap_candidate = self._settings_button_at(mouse_pos)
+    self._tap_start_pos = mouse_pos if self._tap_candidate is not None else None
+    self._tap_start_t = rl.get_time() if self._tap_candidate is not None else 0.0
+
+  def _handle_mouse_release(self, mouse_pos: MousePos):
+    super()._handle_mouse_release(mouse_pos)
+    if self._tap_candidate is not None and not self._tap_moved_too_far(mouse_pos) and self._scroller.scroll_panel.state != ScrollState.MANUAL_SCROLL:
+      self._open_tap_candidate()
+    else:
+      self._clear_menu_tap()
