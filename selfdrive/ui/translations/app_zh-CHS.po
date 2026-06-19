@@ -1330,3 +1330,9 @@ msgstr "实时加减速条"
 
 msgid "Show an indicator on the left side of the screen to display real-time vehicle acceleration and deceleration. This displays what the car is currently doing, not what the planner is requesting."
 msgstr "在屏幕左侧显示车辆实时加速/减速状态。它显示车辆当前正在做什么，而不是规划器正在请求什么。"
+
+msgid "Super Advanced"
+msgstr "Super Advanced"
+
+msgid "This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, and SCC-M stay hidden and forced off. Sunny DEC is available as an off-by-default advanced option in Cruise and Super Advanced settings."
+msgstr "这个个人版的巡航控速逻辑以 CarrotPilot 为准。SunnyPilot 的 ICBM、SCC-V 和 SCC-M 会隐藏并强制关闭。Sunny DEC 作为默认关闭的高级候选功能放在 Cruise 和 Super Advanced 设置里。"

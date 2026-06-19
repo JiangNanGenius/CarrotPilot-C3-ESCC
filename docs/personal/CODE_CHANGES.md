@@ -1,5 +1,69 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 NNLC And Super Advanced Carrot Controls
+
+The personal alpha now treats NNLC/NLC as a supported-car default:
+
+- `NeuralNetworkLateralControl` defaults to `1`.
+- SunnyPilot's existing unsupported-car cleanup remains in place, so angle-steering or unsupported NNLC-model vehicles remove the param automatically.
+- The local Carrot Web/API whitelist exposes NNLC as a writable offroad setting.
+
+The `Super Advanced` page has been expanded from a small staged page into a Carrot-first control hub:
+
+- Speed/maps/navigation: phone speed source, map overlay, curve-speed mode, curve lower limit, curve factor, curve aggressiveness, navigation decel rate, active speed control, ATC/auto-turn, red-light stop, traffic-light mode, traffic-stop distance adjustment, and rain/wet mode.
+- Cruise/longitudinal: Sunny DEC, Carrot driving mode, auto driving mode, Eco, cruise decel, ATC decel, stop distance, dynamic following, speed-based following, lane-change following, follow gaps, cruise acceleration table, long gains, actuator delay, stopping threshold, radar reaction, lead response, and acceleration-change cost.
+- Steering/path: turn-speed mode, Auto Turn Control, turn-control speed/end/map adaptation, path offset, steer actuator delay, steer ratio rate, lane-line speed, and lane-line curve speed.
+- Fishop hardware: lane curve, lidar blindspot, lidar lane data, and auto-overtake settings.
+
+Important behavior changes:
+
+- Carrot active speed, ATC/auto-turn, red-light stop, and Fishop auto-overtake are no longer forcibly reset to off by the UI.
+- Those advanced settings default off but are user-toggleable while offroad.
+- Sunny DEC remains available and no longer disables Carrot active speed, ATC, or red-light stop.
+- Sunny ICBM, SCC-V, and SCC-M remain hidden/inert because they overlap with Carrot cruise and speed behavior.
+- The local Carrot Web/API now allows these advanced params to be changed while offroad, while onroad writes are still rejected.
+- `SpeedLimitMode` can be set through assist mode by the local API while offroad.
+- The local Web status page uses normal feature status wording instead of describing the Carrot/Fishop features as locked.
+
+Runtime parameter support:
+
+- Added the first batch of Carrot/CarrotPad-style params for ATC, curve speed, red-light stop, driving mode, longitudinal gains, follow behavior, lane-line curve input, and Fishop hardware.
+- Rebuilt `common/params_pyx.so` on the user's aarch64 C3 so the new params are recognized by the device runtime.
+- Static verification now checks the new key strings inside the ARM64 `.so`.
+
+Verification:
+
+```bash
+python3 -m py_compile \
+  selfdrive/ui/sunnypilot/layouts/settings/carrot.py \
+  selfdrive/ui/sunnypilot/layouts/settings/cruise.py \
+  selfdrive/carrot/carrot_server.py
+
+python3 scripts/personal/sunnypilot_c3_alpha_static_check.py
+```
+
+## 2026-06-20 Genius Pilot Versioning
+
+The alpha line now has its own visible version number while keeping the
+SunnyPilot upstream version as the base.
+
+Current format:
+
+```text
+Genius Pilot 2026.002.000-gp.20260620.1
+```
+
+Rules:
+
+- `2026.002.000` follows the SunnyPilot base.
+- `gp` marks the Genius Pilot personal build.
+- `20260620` is the publish date.
+- The final number is the same-day Genius Pilot alpha patch number.
+
+The version is now used by the updater description and by the home/software UI
+fallbacks, so the device no longer has to show a generic SunnyPilot version on
+the personal alpha line.
+
 ## 2026-06-20 CJK Font And Settings Entry Hotfix
 
 Real-device feedback showed the first Chinese localization pass could render some UI strings as question marks because the generated `unifont.fnt` atlas did not include newly added Chinese glyphs, and the unifont design was visibly pixelated.
@@ -18,6 +82,23 @@ Changes:
 
 - Sidebar gear now opens settings on touch release instead of touch press.
 - Settings entry now ignores close/sidebar touch handling for 0.6 seconds after opening and until the opening touch is released.
+
+## 2026-06-20 Clone C3 Menu Touch And Vehicle Selector Hotfix
+
+Real-device feedback showed settings menus were still too easy to trigger accidentally on the user's clone C3 touch panel.
+
+Changes:
+
+- Reduced generic tap movement tolerance from 42 px to 24 px.
+- Cancel a widget click if its touch becomes invalid during a scroll gesture.
+- Raised the vertical list drag threshold to 24 px so click and scroll thresholds align.
+- Settings sidebar panel selection now records press state and only switches panels on a valid release.
+
+UI organization changes:
+
+- The former `Carrot` sidebar panel is now labeled `Super Advanced`.
+- Cruise now exposes common staged longitudinal controls directly: Speed Limit entry, Sunny DEC, Carrot stop distance, dynamic following, decel follow boost, and follow-gap presets.
+- `Kia Seltos 2023` is now present in `sunnypilot/selfdrive/car/car_list.json` so the manual vehicle selector can show the `KIA_SELTOS_2023` profile.
 
 ## 2026-06-19 Installer Fix
 
@@ -185,7 +266,7 @@ Real-device feedback confirmed that the first Carrot settings page was operation
 - Fishop Hardware
 - Local Web and Evidence
 
-The first pass exposes existing personal params instead of inventing new control behavior: phone speed source, map overlay, Carrot locked high-risk outputs, DEC candidate mode, stop/follow/braking tuning targets, cruise acceleration table entries, Auto-Tuner apply/clear/reset actions, path/steer tuning values, and Fishop lane/lidar input gates.
+The first pass exposed existing personal params instead of inventing new control behavior: phone speed source, map overlay, Carrot advanced output switches, DEC candidate mode, stop/follow/braking tuning targets, cruise acceleration table entries, Auto-Tuner apply/clear/reset actions, path/steer tuning values, and Fishop lane/lidar input gates.
 
 Cross-branch setting conflict audit was added as `scripts/personal/sunnypilot_c3_settings_conflict_audit.py`. Current findings:
 

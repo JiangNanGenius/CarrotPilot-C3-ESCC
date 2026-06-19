@@ -18,7 +18,7 @@ from openpilot.common.markdown import parse_markdown
 from openpilot.common.swaglog import cloudlog
 from openpilot.selfdrive.selfdrived.alertmanager import set_offroad_alert
 from openpilot.system.hardware import AGNOS, HARDWARE
-from openpilot.system.version import get_build_metadata, SP_BRANCH_MIGRATIONS
+from openpilot.system.version import get_build_metadata, get_version, SP_BRANCH_MIGRATIONS
 
 LOCK_FILE = os.getenv("UPDATER_LOCK_FILE", "/tmp/safe_staging_overlay.lock")
 STAGING_ROOT = os.getenv("UPDATER_STAGING_ROOT", "/data/safe_staging")
@@ -294,8 +294,7 @@ class Updater:
       try:
         branch = self.get_branch(basedir)
         commit = self.get_commit_hash(basedir)[:7]
-        with open(os.path.join(basedir, "sunnypilot", "common", "version.h")) as f:
-          version = f.read().split('"')[1]
+        version = get_version(basedir)
 
         commit_unix_ts = run(["git", "show", "-s", "--format=%ct", "HEAD"], basedir).rstrip()
         dt = datetime.datetime.fromtimestamp(int(commit_unix_ts))

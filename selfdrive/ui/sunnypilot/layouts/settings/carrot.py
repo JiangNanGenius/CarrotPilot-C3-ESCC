@@ -26,7 +26,7 @@ class PanelType(IntEnum):
   LOCAL = 6
 
 
-LOCKED_CONTROL_PARAMS = {
+PRECONTROL_FEATURE_PARAMS = {
   "CarrotActiveSpeedControlEnabled",
   "CarrotAutoTurnControlEnabled",
   "CarrotTrafficStopEnabled",
@@ -106,6 +106,16 @@ class CarrotLayout(Widget):
     return toggle
 
   def _option(self, param: str, title, min_value: int, max_value: int, description, value_change_step: int = 1, label_callback=None):
+    if not self._param_available(param):
+      item = button_item_sp(
+        title=title,
+        button_text=lambda: tr("WAIT"),
+        description=self._description(param, description),
+        enabled=False,
+      )
+      self._all_items.append(item)
+      return item
+
     item = option_item_sp(
       title=title,
       param=param,
@@ -118,6 +128,85 @@ class CarrotLayout(Widget):
     )
     self._all_items.append(item)
     return item
+
+  @staticmethod
+  def _percent_label(value: int) -> str:
+    return f"{value}%"
+
+  @staticmethod
+  def _signed_percent_label(value: int) -> str:
+    return f"{value:+d}%"
+
+  @staticmethod
+  def _kph_label(value: int) -> str:
+    return f"{value} km/h"
+
+  @staticmethod
+  def _seconds_100_label(value: int) -> str:
+    return f"{value / 100:.2f} s"
+
+  @staticmethod
+  def _distance_100_label(value: int) -> str:
+    return f"{value / 100:.2f} m"
+
+  @staticmethod
+  def _signed_distance_100_label(value: int) -> str:
+    return f"{value / 100:+.2f} m"
+
+  @staticmethod
+  def _auto_percent_label(value: int) -> str:
+    return "Auto" if value < 0 else f"{value}%"
+
+  @staticmethod
+  def _curve_mode_label(value: int) -> str:
+    return {
+      0: "Off",
+      1: "Sunny",
+      2: "Carrot",
+      3: "Fusion",
+    }.get(value, str(value))
+
+  @staticmethod
+  def _turn_mode_label(value: int) -> str:
+    return {
+      0: "Off",
+      1: "Carrot",
+      2: "Sunny",
+      3: "Fusion",
+    }.get(value, str(value))
+
+  @staticmethod
+  def _eco_mode_label(value: int) -> str:
+    return {
+      0: "Off",
+      1: "Mild",
+      2: "Normal",
+      3: "Strong",
+    }.get(value, str(value))
+
+  @staticmethod
+  def _driving_mode_label(value: int) -> str:
+    return {
+      0: "Eco",
+      1: "Comfort",
+      2: "Normal",
+      3: "Carrot",
+      4: "Sport",
+      5: "Auto",
+    }.get(value, str(value))
+
+  @staticmethod
+  def _traffic_mode_label(value: int) -> str:
+    return {
+      0: "Off",
+      1: "Signal",
+      2: "Signal+Map",
+      3: "Strict",
+    }.get(value, str(value))
+
+  @staticmethod
+  def _toggle_label(value: int) -> str:
+    return "On" if value else "Off"
 
   def _home_button(self, panel: PanelType, title: str, description: str):
     item = button_item_sp(
@@ -139,7 +228,7 @@ class CarrotLayout(Widget):
       self._home_button(
         PanelType.LONGITUDINAL,
         "Cruise and Longitudinal Control",
-        "Cruise distance, stop distance, lead behavior, Sunny DEC candidate mode, and locked high-risk Carrot control outputs.",
+        "Cruise distance, stop distance, lead behavior, Sunny DEC, ATC, driving mode, and Carrot active speed settings.",
       ),
       self._home_button(
         PanelType.AUTOTUNER,
@@ -154,12 +243,12 @@ class CarrotLayout(Widget):
       self._home_button(
         PanelType.FISHOP,
         "Fishop Hardware",
-        "Lane curve, lidar lane data, blindspot, navigation gate, and auto-overtake evidence. Control output remains locked.",
+        "Lane curve, lidar lane data, blindspot, navigation gate, and auto-overtake settings for the extra hardware.",
       ),
       self._home_button(
         PanelType.LOCAL,
-        "Local Web and Evidence",
-        "Local Carrot Web/API, branch conflict notes, and safe testing reminders. This is local LAN, not cloud pairing.",
+        "Local Web and Diagnostics",
+        "Local Carrot Web/API, branch relationship notes, and diagnostics. This is local LAN, not cloud pairing.",
       ),
     ]
 
@@ -168,7 +257,7 @@ class CarrotLayout(Widget):
       self._toggle(
         "CarrotPhoneSpeedLimitEnabled",
         lambda: tr("Phone Speed Limit Source"),
-        lambda: tr("Use fresh APN/N, Navipilot, or Carrot phone speed-limit data before the vehicle and map sources. Stale phone data times out automatically."),
+        lambda: tr("Use APN/N, Navipilot, or Carrot phone speed-limit data before vehicle and map speed-limit sources. Stale phone data times out automatically."),
         True,
       ),
       self._toggle(
@@ -177,24 +266,93 @@ class CarrotLayout(Widget):
         lambda: tr("Show the optional Carrot route/map overlay. Default is Off; when Off, external map SDKs and map iframes are not loaded."),
         lambda: ui_state.is_offroad(),
       ),
+      self._option(
+        "CurveSpeedControlMode",
+        lambda: tr("Curve Speed Control Mode"),
+        0,
+        3,
+        lambda: tr("Select the curve-speed strategy: Off, Sunny, Carrot, or Fusion. Fusion keeps Sunny curve quality and Carrot navigation/phone inputs together."),
+        1,
+        self._curve_mode_label,
+      ),
+      self._option(
+        "AutoCurveSpeedLowerLimit",
+        lambda: tr("Curve Speed Lower Limit"),
+        10,
+        120,
+        lambda: tr("Lowest target speed allowed for automatic curve slowdown."),
+        5,
+        self._kph_label,
+      ),
+      self._option(
+        "AutoCurveSpeedFactor",
+        lambda: tr("Curve Speed Factor"),
+        50,
+        250,
+        lambda: tr("Main Carrot curve-speed scaling value. Higher values usually keep more speed through curves."),
+        5,
+        self._percent_label,
+      ),
+      self._option(
+        "AutoCurveSpeedAggressiveness",
+        lambda: tr("Curve Speed Aggressiveness"),
+        50,
+        200,
+        lambda: tr("Adjusts how strongly curve-speed control reacts to the detected curve."),
+        5,
+        self._percent_label,
+      ),
+      self._option(
+        "AutoNaviSpeedDecelRate",
+        lambda: tr("Navigation Decel Rate"),
+        50,
+        300,
+        lambda: tr("Deceleration strength for navigation speed events such as turns, speed cameras, and speed bumps."),
+        5,
+        self._percent_label,
+      ),
       LineSeparatorSP(40),
       self._toggle(
         "CarrotActiveSpeedControlEnabled",
         lambda: tr("Carrot Active Speed Control"),
-        lambda: tr("Locked Off in this alpha. The resolver can show speed-limit evidence, but this control-output path is not enabled yet."),
-        False,
+        lambda: tr("Allow Carrot speed-limit, navigation, and model-speed logic to adjust the cruise target."),
+        lambda: ui_state.is_offroad(),
       ),
       self._toggle(
         "CarrotAutoTurnControlEnabled",
         lambda: tr("Carrot Auto Turn Slowdown"),
-        lambda: tr("Locked Off in this alpha. Turn/curve evidence can be collected, but automatic slowdown must be validated separately."),
-        False,
+        lambda: tr("Use Carrot navigation and curve information to slow for turns and junctions."),
+        lambda: ui_state.is_offroad(),
       ),
       self._toggle(
         "CarrotTrafficStopEnabled",
         lambda: tr("Carrot Traffic Light Stop"),
-        lambda: tr("Locked Off in this alpha. Traffic-light stop logic is not allowed to command braking until separate real-car validation is complete."),
-        False,
+        lambda: tr("Use Carrot traffic-light input for red-light stop behavior."),
+        lambda: ui_state.is_offroad(),
+      ),
+      self._option(
+        "TrafficLightDetectMode",
+        lambda: tr("Traffic Light Detect Mode"),
+        0,
+        3,
+        lambda: tr("Select the traffic-light detection mode used by Carrot red-light stop."),
+        1,
+        self._traffic_mode_label,
+      ),
+      self._option(
+        "TrafficStopDistanceAdjust",
+        lambda: tr("Traffic Stop Distance Adjust"),
+        -500,
+        500,
+        lambda: tr("Fine adjustment for red-light stopping distance. Negative values stop earlier."),
+        10,
+        self._signed_distance_100_label,
+      ),
+      self._toggle(
+        "CarrotRainWet",
+        lambda: tr("Rain / Wet Road Mode"),
+        lambda: tr("Use more conservative Carrot speed and following behavior for wet roads."),
+        lambda: ui_state.is_offroad(),
       ),
     ]
 
@@ -203,8 +361,54 @@ class CarrotLayout(Widget):
       self._toggle(
         "DynamicExperimentalControl",
         lambda: tr("Sunny DEC Dynamic Experimental Control"),
-        lambda: tr("Candidate advanced longitudinal mode from SunnyPilot. Default is Off. It may switch between classic longitudinal and experimental/E2E behavior, so do not combine it with unvalidated Carrot active speed, turn slowdown, or traffic-light stop outputs."),
+        lambda: tr("Sunny dynamic experimental control. It can switch between classic longitudinal and E2E-style behavior when available."),
         self._dec_enabled,
+      ),
+      LineSeparatorSP(40),
+      self._option(
+        "MyDrivingMode",
+        lambda: tr("Carrot Driving Mode"),
+        0,
+        5,
+        lambda: tr("Primary Carrot driving style preset for cruise, following, and acceleration behavior."),
+        1,
+        self._driving_mode_label,
+      ),
+      self._option(
+        "MyDrivingModeAuto",
+        lambda: tr("Auto Driving Mode"),
+        0,
+        1,
+        lambda: tr("Allow Carrot to switch driving mode automatically from road and navigation context."),
+        1,
+        self._toggle_label,
+      ),
+      self._option(
+        "CruiseEcoControl",
+        lambda: tr("Cruise Eco Control"),
+        0,
+        3,
+        lambda: tr("Cruise economy strength. Higher values soften acceleration and can reduce unnecessary speed changes."),
+        1,
+        self._eco_mode_label,
+      ),
+      self._option(
+        "CarrotCruiseDecel",
+        lambda: tr("Cruise Decel"),
+        -1,
+        200,
+        lambda: tr("Carrot cruise deceleration target. Auto uses the current Carrot default."),
+        5,
+        self._auto_percent_label,
+      ),
+      self._option(
+        "CarrotCruiseAtcDecel",
+        lambda: tr("ATC Decel"),
+        -1,
+        200,
+        lambda: tr("Deceleration target used by Auto Turn Control. Auto uses the current Carrot default."),
+        5,
+        self._auto_percent_label,
       ),
       LineSeparatorSP(40),
       self._option(
@@ -212,7 +416,7 @@ class CarrotLayout(Widget):
         lambda: tr("Stop Distance"),
         300,
         1200,
-        lambda: tr("Carrot stop-distance target used by the tuning workflow. Keep your known-good value until braking logs are reviewed."),
+        lambda: tr("Carrot stop-distance target for longitudinal stopping behavior."),
         10,
         lambda v: f"{v / 100:.2f} m",
       ),
@@ -221,7 +425,7 @@ class CarrotLayout(Widget):
         lambda: tr("Dynamic Following"),
         0,
         100,
-        lambda: tr("Dynamic following strength. This is a tuning target and should be changed slowly after log review."),
+        lambda: tr("Dynamic following strength for Carrot longitudinal behavior."),
         5,
         lambda v: f"{v}%",
       ),
@@ -233,6 +437,33 @@ class CarrotLayout(Widget):
         lambda: tr("Extra follow-distance behavior during deceleration. Higher values can feel more conservative."),
         5,
         lambda v: f"{v}%",
+      ),
+      self._option(
+        "TFollowSpeedFactor",
+        lambda: tr("Speed Follow Factor"),
+        -100,
+        100,
+        lambda: tr("Adjusts following distance by speed. Positive values add more gap at higher speeds."),
+        5,
+        self._signed_percent_label,
+      ),
+      self._option(
+        "DynamicTFollowLC",
+        lambda: tr("Lane Change Follow"),
+        50,
+        200,
+        lambda: tr("Following-distance adjustment around lane-change behavior."),
+        5,
+        self._percent_label,
+      ),
+      self._option(
+        "EnableSpeedTF",
+        lambda: tr("Speed-Based Follow"),
+        0,
+        1,
+        lambda: tr("Enable speed-based following-distance adjustment."),
+        1,
+        self._toggle_label,
       ),
       LineSeparatorSP(40),
       self._option("TFollowGap1", lambda: tr("Follow Gap 1"), 70, 300, lambda: tr("Time gap preset 1 used by Carrot tuning."), 5, lambda v: f"{v / 100:.2f} s"),
@@ -248,7 +479,14 @@ class CarrotLayout(Widget):
       self._option("CruiseMaxVals5", lambda: tr("Cruise Accel Limit 5"), 20, 180, lambda: tr("Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."), 5),
       self._option("CruiseMaxVals6", lambda: tr("Cruise Accel Limit 6"), 20, 160, lambda: tr("Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."), 5),
       LineSeparatorSP(40),
-      self._option("JLeadFactor3", lambda: tr("Lead Response Factor"), -200, 300, lambda: tr("Lead-vehicle response tuning target. Change only after comparing braking and lead-distance logs."), 10),
+      self._option("LongTuningKpV", lambda: tr("Longitudinal Kp"), 0, 300, lambda: tr("Carrot longitudinal proportional gain scaling."), 5, self._percent_label),
+      self._option("LongTuningKiV", lambda: tr("Longitudinal Ki"), 0, 300, lambda: tr("Carrot longitudinal integral gain scaling."), 5, self._percent_label),
+      self._option("LongTuningKf", lambda: tr("Longitudinal Kf"), 0, 300, lambda: tr("Carrot longitudinal feed-forward scaling."), 5, self._percent_label),
+      self._option("LongActuatorDelay", lambda: tr("Long Actuator Delay"), 0, 200, lambda: tr("Longitudinal actuator delay used by Carrot tuning."), 5, self._seconds_100_label),
+      self._option("VEgoStopping", lambda: tr("Stopping Speed Threshold"), 0, 150, lambda: tr("Low-speed threshold used for stopping behavior."), 5, self._kph_label),
+      self._option("RadarReactionFactor", lambda: tr("Radar Reaction Factor"), 0, 300, lambda: tr("Lead-vehicle radar reaction strength. Higher values react more strongly to lead changes."), 5, self._percent_label),
+      self._option("JLeadFactor3", lambda: tr("Lead Response Factor"), -200, 300, lambda: tr("Lead-vehicle response tuning factor."), 10),
+      self._option("AChangeCostStarting", lambda: tr("Accel Change Cost"), 0, 100, lambda: tr("Smoothness cost for acceleration changes at the start of a maneuver."), 1),
     ]
 
   def _autotuner_items(self):
@@ -256,13 +494,13 @@ class CarrotLayout(Widget):
       self._toggle(
         "CarrotLearningActive",
         lambda: tr("Auto-Tuner Learning"),
-        lambda: tr("Collect local driving evidence and prepare tuning recommendations. This does not apply changes by itself."),
+        lambda: tr("Collect local driving data and prepare tuning recommendations. This does not apply changes by itself."),
         True,
       ),
       self._toggle(
         "CarrotLearningAutoApply",
         lambda: tr("Auto-Tuner Auto Apply"),
-        lambda: tr("Default is Off. Auto-apply is available only while parked and should stay Off until recommendations are reviewed after real drives."),
+        lambda: tr("Automatically apply Auto-Tuner recommendations while parked."),
         lambda: ui_state.is_offroad(),
       ),
       self._toggle(
@@ -311,11 +549,57 @@ class CarrotLayout(Widget):
   def _steering_items(self):
     return [
       self._option(
+        "TurnSpeedControlMode",
+        lambda: tr("Turn Speed Control Mode"),
+        0,
+        3,
+        lambda: tr("Select the turn-speed strategy: Off, Carrot, Sunny, or Fusion."),
+        1,
+        self._turn_mode_label,
+      ),
+      self._option(
+        "AutoTurnControl",
+        lambda: tr("Auto Turn Control"),
+        0,
+        1,
+        lambda: tr("Enable Carrot automatic turn-control behavior."),
+        1,
+        self._toggle_label,
+      ),
+      self._option(
+        "AutoTurnControlSpeedTurn",
+        lambda: tr("Turn Control Speed"),
+        5,
+        80,
+        lambda: tr("Target turn-control speed used around tight turns and intersections."),
+        5,
+        self._kph_label,
+      ),
+      self._option(
+        "AutoTurnControlTurnEnd",
+        lambda: tr("Turn End Distance"),
+        1,
+        30,
+        lambda: tr("Distance threshold used to end automatic turn-control behavior."),
+        1,
+        lambda v: f"{v} m",
+      ),
+      self._option(
+        "AutoTurnMapChange",
+        lambda: tr("Map Turn Adaptation"),
+        0,
+        1,
+        lambda: tr("Allow map and navigation events to adjust turn-control behavior."),
+        1,
+        self._toggle_label,
+      ),
+      LineSeparatorSP(40),
+      self._option(
         "PathOffset",
         lambda: tr("Path Offset"),
         -150,
         150,
-        lambda: tr("Lane/path lateral offset used by Carrot tuning. Zero is neutral; keep your known-good value unless testing carefully."),
+        lambda: tr("Lane/path lateral offset used by Carrot tuning. Zero is neutral."),
         5,
         lambda v: f"{v / 100:.2f} m",
       ),
@@ -324,7 +608,7 @@ class CarrotLayout(Widget):
         lambda: tr("Steer Actuator Delay"),
         0,
         200,
-        lambda: tr("Additional steering actuator delay target used by Auto-Tuner. Change only while parked and after reviewing logs."),
+        lambda: tr("Additional steering actuator delay target used by Auto-Tuner."),
         5,
         lambda v: f"{v / 100:.2f} s",
       ),
@@ -337,6 +621,24 @@ class CarrotLayout(Widget):
         5,
         lambda v: f"{v}%",
       ),
+      self._option(
+        "UseLaneLineSpeed",
+        lambda: tr("Lane Line Speed"),
+        0,
+        1,
+        lambda: tr("Use lane-line information in Carrot speed behavior."),
+        1,
+        self._toggle_label,
+      ),
+      self._option(
+        "UseLaneLineCurveSpeed",
+        lambda: tr("Lane Line Curve Speed"),
+        0,
+        1,
+        lambda: tr("Use lane-line curvature as an input for curve-speed behavior."),
+        1,
+        self._toggle_label,
+      ),
     ]
 
   def _fishop_items(self):
@@ -344,27 +646,27 @@ class CarrotLayout(Widget):
       self._toggle(
         "FishopLaneCurveEnabled",
         lambda: tr("Fishop Lane Curve Input"),
-        lambda: tr("Enable local Fishop lane-curve sensor input collection. This is an input gate only and does not enable automatic lane changes."),
+        lambda: tr("Enable Fishop lane-curve sensor input."),
         lambda: ui_state.is_offroad(),
       ),
       self._toggle(
         "FishopLidarBlindspotEnabled",
         lambda: tr("Fishop Lidar Blindspot Input"),
-        lambda: tr("Enable local Fishop lidar blindspot input collection. This is evidence/input data until road-tested gates are added."),
+        lambda: tr("Enable Fishop lidar blindspot input."),
         lambda: ui_state.is_offroad(),
       ),
       self._toggle(
         "FishopLidarLaneDataEnabled",
         lambda: tr("Fishop Lidar Lane Data Input"),
-        lambda: tr("Enable local Fishop lidar lane-data input collection. This does not modify steering or lane-change output in this alpha."),
+        lambda: tr("Enable Fishop lidar lane-data input."),
         lambda: ui_state.is_offroad(),
       ),
       LineSeparatorSP(40),
       self._toggle(
         "FishopAutoOvertakeEnabled",
         lambda: tr("Fishop Auto Overtake"),
-        lambda: tr("Locked Off in this alpha. Lane and blindspot hardware can be logged, but automatic overtaking is not connected to control output."),
-        False,
+        lambda: tr("Enable Fishop automatic overtake behavior using lane and blindspot inputs."),
+        lambda: ui_state.is_offroad(),
       ),
     ]
 
@@ -379,7 +681,7 @@ class CarrotLayout(Widget):
       self._tracked_item(button_item_sp(
         title=lambda: tr("Branch Conflict Notes"),
         button_text=lambda: tr("INFO"),
-        description=lambda: tr("Sunny DEC is a candidate advanced longitudinal feature. ICBM, SCC-V, and SCC-M overlap more directly with Carrot cruise behavior and remain hidden or inert in this personal alpha."),
+        description=lambda: tr("Review how Sunny DEC, NNLC, Carrot speed logic, ATC, and Fishop hardware settings relate to each other."),
         callback=self._show_conflict_info,
       )),
     ]
@@ -390,8 +692,7 @@ class CarrotLayout(Widget):
 
   def _dec_enabled(self) -> bool:
     return (self._param_available("DynamicExperimentalControl") and ui_state.is_offroad()
-            and ui_state.CP is not None and ui_state.has_longitudinal_control
-            and not any(self._param_bool(param) for param in LOCKED_CONTROL_PARAMS))
+            and ui_state.CP is not None and ui_state.has_longitudinal_control)
 
   def _set_current_panel(self, panel: PanelType):
     self._current_panel = panel
@@ -415,7 +716,7 @@ class CarrotLayout(Widget):
 
   @staticmethod
   def _show_conflict_info():
-    gui_app.push_widget(alert_dialog(tr("Conflict policy: keep Sunny DEC as an off-by-default candidate; keep ICBM, SCC-V, and SCC-M hidden or inert because they can overlap with Carrot button, curve, map, and speed-limit control paths.")))
+    gui_app.push_widget(alert_dialog(tr("Sunny DEC controls longitudinal mode selection. Carrot speed logic, ATC, red-light stop, and Fishop hardware settings are separate Genius Pilot feature paths. ICBM, SCC-V, and SCC-M are hidden here so cruise behavior stays Carrot-style.")))
 
   def _show_descriptions(self):
     for item in self._all_items:
@@ -428,17 +729,11 @@ class CarrotLayout(Widget):
     for param in SUNNY_CONFLICT_PARAMS:
       self._params.remove(param)
 
-    for param in LOCKED_CONTROL_PARAMS:
-      if self._param_bool(param):
-        self._params.put_bool(param, False)
-
     if self._param_bool("DynamicExperimentalControl") and not self._dec_enabled():
       self._params.put_bool("DynamicExperimentalControl", False)
 
     for param, toggle in self._toggles.items():
       toggle.action_item.set_state(self._param_bool(param))
-      if param in LOCKED_CONTROL_PARAMS:
-        toggle.action_item.set_enabled(False)
 
   def _render(self, rect):
     if self._current_panel == PanelType.HOME:

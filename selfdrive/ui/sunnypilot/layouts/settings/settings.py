@@ -113,7 +113,7 @@ class SettingsLayoutSP(OP.SettingsLayout):
       OP.PanelType.TOGGLES: PanelInfo(tr_noop("Toggles"), TogglesLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_toggle.png"),
       OP.PanelType.SOFTWARE: PanelInfo(tr_noop("Software"), SoftwareLayoutSP(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_software.png"),
       OP.PanelType.MODELS: PanelInfo(tr_noop("Models"), ModelsLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_models.png"),
-      OP.PanelType.CARROT: PanelInfo(tr_noop("Carrot"), CarrotLayout(), icon="icons/speed_limit.png"),
+      OP.PanelType.CARROT: PanelInfo(tr_noop("Super Advanced"), CarrotLayout(), icon="icons/speed_limit.png"),
       OP.PanelType.STEERING: PanelInfo(tr_noop("Steering"), SteeringLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_lateral.png"),
       OP.PanelType.CRUISE: PanelInfo(tr_noop("Cruise"), CruiseLayout(), icon="icons/speed_limit.png"),
       OP.PanelType.VISUALS: PanelInfo(tr_noop("Visuals"), VisualsLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_visuals.png"),
@@ -181,20 +181,28 @@ class SettingsLayoutSP(OP.SettingsLayout):
   def _handle_mouse_release(self, mouse_pos: MousePos) -> bool:
     if self._touch_guard_active():
       self._ignore_touch_until_release = False
+      self._press_close = False
+      self._press_panel = None
       return True
 
     # Check close button
-    if rl.check_collision_point_rec(mouse_pos, self._close_btn_rect):
+    if self._press_close and self._close_at(mouse_pos):
       if self._close_callback:
         self._close_callback()
+      self._press_close = False
+      self._press_panel = None
       return True
 
     # Check navigation buttons
-    for panel_type, panel_info in self._panels.items():
-      if rl.check_collision_point_rec(mouse_pos, panel_info.button_rect) and self._sidebar_scroller.scroll_panel.is_touch_valid():
-        self.set_current_panel(panel_type)
-        return True
+    panel_type = self._press_panel
+    if panel_type is not None and self._panel_at(mouse_pos) == panel_type and self._sidebar_scroller.scroll_panel.is_touch_valid():
+      self.set_current_panel(panel_type)
+      self._press_close = False
+      self._press_panel = None
+      return True
 
+    self._press_close = False
+    self._press_panel = None
     return False
 
   def show_event(self):

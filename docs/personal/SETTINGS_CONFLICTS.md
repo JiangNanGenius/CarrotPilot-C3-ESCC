@@ -26,26 +26,29 @@ The reference branches use several settings that look similar but control differ
 - DEC defaults off and switches longitudinal behavior between classic and experimental/E2E paths. It does not directly replace Carrot map/curve speed logic.
 - ICBM overlaps with cruise-button management and should stay hidden/inert in this personal alpha.
 - SCC-V and SCC-M overlap with Carrot curve, map, navigation, and speed-limit behavior and should stay hidden/inert.
-- DEC must not be combined with unvalidated Carrot active speed control, auto-turn slowdown, or traffic-light stop outputs.
+- DEC is a separate Sunny longitudinal option. It must not lock or hide Carrot active speed control, ATC/auto-turn, or traffic-light stop settings.
 
 ## Carrot Active Controls
 
-- `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, and `CarrotTrafficStopEnabled` default off and remain locked in the C3 alpha UI.
-- They can collect/display evidence through Carrot Web and settings, but they must not command braking or cruise targets until staged road evidence exists.
+- `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, and `CarrotTrafficStopEnabled` default off and remain user-toggleable while offroad.
+- Their owner is the Carrot/Genius path, not Sunny ICBM/SCC-V/SCC-M.
+- Related settings that must be tracked together: `SpeedLimitMode`, `CurveSpeedControlMode`, `TurnSpeedControlMode`, `TrafficLightDetectMode`, `TrafficStopDistanceAdjust`, `CarrotCruiseDecel`, and `CarrotCruiseAtcDecel`.
 
 ## Auto-Tuner
 
-- `CarrotLearningActive` is allowed as a local evidence collector.
+- `CarrotLearningActive` is allowed as a local data collector.
 - `CarrotLearningAutoApply` defaults off.
 - Manual apply is parked/offroad only and should preserve the user's known-good baseline until recommendations are reviewed.
 
 ## Fishop Hardware
 
-- Lane curve, lidar lane data, and lidar blindspot inputs are display/evidence gates first.
-- `FishopAutoOvertakeEnabled` defaults off and remains locked until hardware logs, navigation gate evidence, rollback, and road review exist.
+- Lane curve, lidar lane data, lidar blindspot inputs, navigation gate, and auto-overtake are visible Super Advanced settings.
+- `FishopAutoOvertakeEnabled` defaults off and remains user-toggleable while offroad.
+- Fishop behavior must be related back to the existing lane-change chain instead of introducing a separate hidden steering path.
 
 ## Current Policy
 
-- Retain: DEC as off-by-default advanced candidate, local Web, local Wi-Fi, SSH, GitHub update, model downloads, APN/N/Navipilot phone speed input, Auto-Tuner evidence, Fishop input evidence.
+- Retain: DEC as off-by-default advanced option, local Web, local Wi-Fi, SSH, GitHub update, model downloads, APN/N/Navipilot phone speed input, Auto-Tuner, Fishop inputs, Carrot active speed, ATC, red-light stop, and Fishop auto-overtake settings.
 - Hide or inert: Sunnylink/comma cloud, OnroadUploads, EnableConnect, ICBM, SCC-V, SCC-M, Fishop auto-overtake output.
-- Lock until validated: Carrot active speed, auto-turn slowdown, traffic-light stop, Auto-Tuner auto-apply.
+- Default off but user-toggleable while offroad: Carrot active speed, ATC/auto-turn slowdown, traffic-light stop, Auto-Tuner auto-apply, Fishop auto-overtake.
+- Future audit: produce a one-owner matrix for ajouatom CarrotPilot, jixiexiaoge/mechanical, and masang-feiyang/ESCC settings before importing more behavior.

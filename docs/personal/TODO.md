@@ -6,6 +6,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 
 - [x] Keep `/i` as the stable `personal/c3-escc-atune` installer.
 - [x] Publish `/x` as the alpha `alpha-sunnypilot-c3` installer.
+- [x] Add Genius Pilot versioning that follows the SunnyPilot base and appends the published date plus same-day patch number.
 - [x] Replace the incompatible Raylib `/x` binary with a C3 Qt-compatible ARM64 installer.
 - [x] Verify the published `/x` binary contains the CarrotPilot-C3-ESCC repo and `alpha-sunnypilot-c3` branch.
 - [x] Add `scripts/personal/build_c3_qt_compat_installer.py` so the Qt-compatible `/x` can be rebuilt reproducibly.
@@ -17,6 +18,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [ ] Keep the welcome/training flow, but replace SunnyPilot-specific legal/consent copy with Genius Pilot personal-build copy that is short enough for C3 and advances reliably.
 - [ ] Rename user-facing alpha branding from SunnyPilot to Genius Pilot where accurate: welcome screen, version/about panel, settings headers, update prompts, and boot/update text.
 - [ ] Keep `/x` as the single short alpha entry; avoid new test URLs unless there is a clear rollback reason.
+- [ ] Bump the Genius Pilot suffix before every pushed alpha build: same date increments patch, new date resets patch to `1`, SunnyPilot base changes only when upstream base changes.
 - [ ] After the next clean `/x` install, collect device evidence even if the install succeeds, so the success path is documented.
 
 ## Base And C3
@@ -47,6 +49,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep ESCC automatic through SunnyPilot enhanced SCC detection on `0x2AB`.
 - [x] Do not add a broad manual ESCC switch.
 - [x] Keep Non-SCC Seltos out of personal matching/selection.
+- [x] Default NNLC/NLC on for supported cars by setting `NeuralNetworkLateralControl=1`; keep SunnyPilot's unsupported-car cleanup path so unsupported vehicles remove it automatically.
 - [ ] Validate on the user's Kia Seltos 2023 with stock model and Carrot controls off first.
 
 ## Model Manager
@@ -65,32 +68,67 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add fixed and percentage speed offset modes.
 - [x] Default `CarrotMapOverlayEnabled` to off so Mapbox/Kakao overlay does not cover the HUD.
 - [x] Hide and hard-disable SunnyPilot ICBM, SCC-V, and SCC-M in the personal alpha; cruise-speed behavior should move toward CarrotPilot logic instead of SunnyPilot black-box toggles.
-- [x] Retain Sunny DEC only as an off-by-default advanced longitudinal candidate, exposed through Carrot/Genius settings with conflict warnings.
+- [x] Retain Sunny DEC as an off-by-default advanced longitudinal option, exposed in Cruise and Super Advanced without locking Carrot controls.
+- [x] Add `CurveSpeedControlMode` with Off / Sunny / Carrot / Fusion so Sunny curve quality and Carrot navigation/phone inputs can be compared and then combined.
+- [x] Add Carrot curve-speed tuning params: lower speed limit, curve factor, curve aggressiveness, navigation decel rate, and wet-road mode.
 - [ ] Remove or relabel any remaining user-facing SunnyPilot cruise concepts that conflict with Carrot behavior: ICBM, SCC-V, SCC-M, map-speed assumptions, and opaque speed-control presets.
-- [ ] Replace remaining Sunny speed-control internals with Carrot-style staged controls: display-only evidence first, then independent switches for active speed, curve/turn slowdown, traffic-light stop, and button management.
+- [ ] Replace remaining Sunny speed-control internals with Carrot-style staged controls: independent switches for active speed, curve/turn slowdown, traffic-light stop, ATC, and button management.
 - [ ] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, `SmartCruiseControlMap`, and `DynamicExperimentalControl` cannot affect control output after boot.
-- [ ] Validate speed source switching in display-only mode before enabling active speed assist.
+- [ ] Validate speed source switching before relying on active speed assist.
 
 ## Carrot, Auto-Tuner, And Fishop Hardware
 
 - [x] Bring over local Carrot Web, CarrotMan-style status, navigation event input, APN/N style phone speed input, SDI/speed-bump/model-speed evidence, and Auto-Tuner core.
 - [x] Keep Auto-Tuner auto-apply off by default.
-- [x] Keep high-risk controls gated off by default: traffic-light stop, auto-turn speed control, active speed control, Auto-Tuner auto-apply, and fishop auto-overtake.
-- [x] Add read-only fishop lane curve, lane quality, lidar blindspot, target, dynamic risk, navigation gate, and overtake suggestion evidence.
-- [x] Expand the Carrot settings panel into categories: speed/maps/navigation, cruise/longitudinal, Auto-Tuner, steering/path, Fishop hardware, and local Web/evidence.
-- [ ] Map CarrotPilot settings from ajouatom, mechanical/Auto-Tuner, and ESCC forks into personal alpha params with Chinese/English descriptions, safe defaults, and per-feature evidence gates.
-- [ ] Add a Carrot cruise-control section covering button behavior, curve slowdown, traffic-light logic, speed-limit behavior, and model-speed behavior with each high-risk output disabled until validated.
-- [ ] Add a Fishop hardware section for lane curve, lidar lane data, lidar blindspot, navigation gate, and auto-overtake evidence; keep output paths disabled until logs prove safety.
+- [x] Keep high-risk controls default off but user-toggleable while offroad: traffic-light stop, auto-turn speed control, active speed control, Auto-Tuner auto-apply, and Fishop auto-overtake.
+- [x] Add Fishop lane curve, lane quality, lidar blindspot, target, dynamic risk, navigation gate, and overtake status.
+- [x] Expand the Carrot settings panel into categories: speed/maps/navigation, cruise/longitudinal, Auto-Tuner, steering/path, Fishop hardware, and local Web/diagnostics.
+- [x] Rename the Carrot sidebar entry to `Super Advanced` while keeping the page as the Carrot/Genius advanced feature hub.
+- [x] Embed common staged Carrot longitudinal controls into the Cruise page: speed-limit entry, Sunny DEC, stop distance, dynamic following, decel follow boost, and follow-gap presets.
+- [x] Add Super Advanced controls for active speed, ATC/auto-turn, traffic-light stop, traffic-light detect mode, stop-distance adjustment, Carrot rain/wet mode, curve-speed strategy, curve tuning, driving mode, Eco, ATC decel, cruise decel, following, longitudinal gains, lane-line speed, and lane-line curve speed.
+- [x] Make the local Carrot Web/API match Super Advanced: advanced params are writable while offroad; `OffroadMode`, `SpeedFromPCM`, cloud params, and hardware-only params remain protected.
+- [x] Rebuild ARM64 `common/params_pyx.so` on the C3 so the new Carrot/ATC/curve/NNLC params are recognized at runtime.
+- [ ] Map CarrotPilot settings from ajouatom, mechanical/Auto-Tuner, and ESCC forks into personal alpha params with Chinese/English descriptions and defaults.
+- [ ] Add a Carrot cruise-control section covering button behavior, curve slowdown, traffic-light logic, speed-limit behavior, and model-speed behavior.
+- [ ] Add a Fishop hardware section for lane curve, lidar lane data, lidar blindspot, navigation gate, and auto-overtake, including how each input relates to the existing lane-change chain.
 - [ ] Migrate mechanical/masang-feiyang lane-line curve display, lidar left/right lane data, lidar blindspot data, navigation gate, and automatic-overtake switches as display-first features.
 - [ ] Preserve the user's current working masang-feiyang tuning values as a known-good baseline before replacing any longitudinal or braking behavior.
 - [ ] Compare ajouatom CarrotPilot, jixiexiaoge mechanical/Auto-Tuner, and ESCC fork settings one-by-one, then create the missing Genius Pilot controls instead of hiding behavior behind SunnyPilot defaults.
-- [ ] Only after logs and rollback evidence exist, review whether any fishop hint can move from display-only to controlled experiment.
+
+## Three-Branch Settings Relationship Plan
+
+- [x] Add `scripts/personal/sunnypilot_c3_settings_conflict_audit.py` to catch cross-branch conflicts before updates.
+- [x] Document the first conflict policy in `docs/personal/SETTINGS_CONFLICTS.md`.
+- [x] Remove the old UI behavior that forced Carrot active speed, ATC, red-light stop, and Fishop auto-overtake back to off.
+- [x] Keep Sunny ICBM/SCC-V/SCC-M hidden because they overlap with Carrot cruise/speed behavior.
+- [x] Keep Sunny DEC as a separate option; it no longer disables Carrot active speed, ATC, or red-light stop.
+- [ ] Build a per-setting matrix for ajouatom CarrotPilot, jixiexiaoge/mechanical, and masang-feiyang/ESCC: param name, default, UI label, units, inverse semantics, source branch, code consumer, and conflict notes.
+- [ ] Classify every setting as one of: Carrot owner, Sunny primitive, Fishop hardware input, ESCC vehicle interface, model manager, local network/update, or removed cloud feature.
+- [ ] For each duplicated setting, choose exactly one owner and write the alias/removal decision; do not keep compatibility aliases unless a real on-device migration needs them.
+- [ ] Audit interactions among `DynamicExperimentalControl`, `SpeedLimitMode`, `CurveSpeedControlMode`, `TurnSpeedControlMode`, `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, `CarrotTrafficStopEnabled`, and `FishopAutoOvertakeEnabled`.
+- [ ] Compare Sunny curve slowdown and Carrot curve slowdown in code and document when Fusion should use Sunny curvature, Carrot navigation turns, APN/N speed input, and lane-line curve input.
+- [ ] Find the source documentation for Carrot/CarrotPad settings and annotate confusing items, especially values where smaller/larger has inverse behavior.
+
+## Current Code And Local Test Phase
+
+- [x] Run local static verification after unlocking Carrot advanced settings: `python3 scripts/personal/sunnypilot_c3_alpha_static_check.py`.
+- [x] Compile-check changed Python files: Super Advanced UI, Cruise UI, and local Carrot Web.
+- [x] Verify `common/params_pyx.so` contains the new runtime params: `CurveSpeedControlMode`, `CarrotCruiseAtcDecel`, `NeuralNetworkLateralControl`, and `FishopLaneCurveEnabled`.
+- [ ] Run the full local release gate after documentation is updated: `python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full`.
+- [ ] Push both `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3`, then audit `/x`.
+- [ ] Sync or reinstall on the user's C3 and confirm Super Advanced opens, NNLC defaults on, Seltos 2023 appears, and new Carrot params do not show unknown-key waits.
+- [ ] Run C3 parked checks with the device currently available: UI opens, Wi-Fi/network page reports connected state, local Web/API responds, no cloud processes exist, model manager opens, stock model runner starts.
+- [ ] Run local Carrot Web/API checks: write and read `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, `CarrotTrafficStopEnabled`, `FishopAutoOvertakeEnabled`, `CurveSpeedControlMode`, and `NeuralNetworkLateralControl` while offroad.
+- [ ] Run Navipilot/APN/N input replay locally and confirm phone speed, SDI, speed-bump, traffic-light, turn, and model-speed fields are parsed.
+- [ ] Run Fishop sample replay locally and confirm lane curve, left/right lane, lidar blindspot, dynamic risk, navigation gate, and overtake fields render in Web/API.
+- [ ] Road testing is not required for this code/local phase; keep `/i` as rollback until later parked and real-car checks are intentionally performed.
 
 ## Localization And Docs
 
 - [x] Remove obvious Korean-only direct text from the personal alpha surface.
 - [x] Add Chinese/English descriptions for the confusing personal controls.
 - [x] Document installer split, rollback path, and alpha evidence checks.
+- [x] Document Genius Pilot version format in `docs/personal/VERSIONING.md`.
 - [x] Add a Simplified Chinese translation overlay for the high-use alpha pages: Device, Network, Cruise, Speed Limit, Models, Carrot, Visuals, and Developer.
 - [x] Replace the pixelated Chinese fallback with Noto Sans CJK SC for Simplified/Traditional Chinese and Japanese UI text; keep unifont as the broad symbol/script fallback.
 - [ ] Replace remaining SunnyPilot wording with Genius Pilot / CarrotPilot wording where it is user-facing and accurate.
@@ -108,6 +146,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Display numeric device temperature in the left sidebar instead of only `GOOD`/`HIGH` when `deviceState.maxTempC` is available.
 - [x] Hide and hard-disable SunnyPilot cruise black-box toggles from the alpha Cruise panel.
 - [x] Make the sidebar gear less sensitive: settings now opens on touch release and ignores close/sidebar touches during the first 0.6 seconds after entry.
+- [x] Make settings/menu taps less sensitive on clone C3: reject drag/scroll releases, shrink tap movement tolerance, and defer sidebar panel switching until release.
+- [x] Add `Kia Seltos 2023` to the Sunny manual vehicle selector list so the existing `KIA_SELTOS_2023` profile is visible in the UI.
 - [x] Sync the hotfix files to the user's C3 at `192.168.100.174` and restart UI for bench testing.
 - [x] Verify the Wi-Fi fallback on device: after UI-style activation it reports SSID `zhao`, IP `192.168.100.174`, and scanned networks without `jeepney`.
 - [x] Move the device from temporary synced dirty files to pushed branch commit `ec7e73dc`.

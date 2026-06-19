@@ -205,8 +205,19 @@ def require(name: str, condition: bool, detail: str) -> bool:
 
 
 AUTO_TUNER_DEFAULTS = {
+  "AChangeCostStarting": 10,
+  "AutoCurveSpeedAggressiveness": 100,
+  "AutoCurveSpeedFactor": 120,
+  "AutoCurveSpeedLowerLimit": 30,
+  "AutoNaviSpeedDecelRate": 120,
+  "AutoTurnControl": 0,
+  "AutoTurnControlSpeedTurn": 20,
+  "AutoTurnControlTurnEnd": 6,
+  "AutoTurnMapChange": 0,
   "CarrotActiveSpeedControlEnabled": 0,
   "CarrotAutoTurnControlEnabled": 0,
+  "CarrotCruiseAtcDecel": -1,
+  "CarrotCruiseDecel": -1,
   "CarrotLearningActive": 0,
   "CarrotLearningAutoApply": 0,
   "CarrotLearningApply": 0,
@@ -221,6 +232,7 @@ AUTO_TUNER_DEFAULTS = {
   "CarrotPhoneSpeedLimitUpdatedAt": 0,
   "CarrotMapOverlayEnabled": 0,
   "CarrotNavigationEvent": "{}",
+  "CarrotRainWet": 0,
   "CarrotTrafficStopEnabled": 0,
   "CarrotTunerApplyLat": 1,
   "CarrotTunerApplyLong": 1,
@@ -228,8 +240,12 @@ AUTO_TUNER_DEFAULTS = {
   "ExperimentalMode": 0,
   "ExperimentalModeConfirmed": 0,
   "FishopAutoOvertakeEnabled": 0,
+  "FishopLaneCurveEnabled": 0,
+  "FishopLidarBlindspotEnabled": 0,
+  "FishopLidarLaneDataEnabled": 0,
   "IsMetric": 1,
   "IsOnroad": 0,
+  "NeuralNetworkLateralControl": 1,
   "OffroadMode": 0,
   "OpenpilotEnabledToggle": 1,
   "SpeedLimitMode": 1,
@@ -244,9 +260,20 @@ AUTO_TUNER_DEFAULTS = {
   "CruiseMaxVals4": 110,
   "CruiseMaxVals5": 95,
   "CruiseMaxVals6": 80,
+  "CruiseEcoControl": 2,
+  "CurveSpeedControlMode": 1,
+  "DynamicTFollowLC": 100,
   "DynamicTFollow": 0,
+  "EnableSpeedTF": 0,
   "JLeadFactor3": 0,
+  "LongActuatorDelay": 20,
+  "LongTuningKf": 100,
+  "LongTuningKiV": 0,
+  "LongTuningKpV": 100,
+  "MyDrivingMode": 3,
+  "MyDrivingModeAuto": 0,
   "PathOffset": 0,
+  "RadarReactionFactor": 100,
   "SteerActuatorDelay": 0,
   "SteerRatioRate": 100,
   "StopDistanceCarrot": 550,
@@ -255,6 +282,13 @@ AUTO_TUNER_DEFAULTS = {
   "TFollowGap2": 120,
   "TFollowGap3": 140,
   "TFollowGap4": 160,
+  "TFollowSpeedFactor": 0,
+  "TrafficLightDetectMode": 2,
+  "TrafficStopDistanceAdjust": -150,
+  "TurnSpeedControlMode": 1,
+  "UseLaneLineCurveSpeed": 0,
+  "UseLaneLineSpeed": 0,
+  "VEgoStopping": 50,
 }
 
 
@@ -613,7 +647,7 @@ def check_fishop_overtake_safety_contract() -> tuple[bool, str]:
       return False, f"fishop hardware parser missing read-only overtaking contract token {token!r}"
 
   required_server_tokens = (
-    '"FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": False}',
+    '"FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": True}',
     '"OVERTAKE"',
     '"AUTO_OVERTAKE"',
     "commandIgnored",
@@ -941,10 +975,18 @@ def check_params_api_runtime() -> tuple[bool, str]:
     if unchanged.get("changed"):
       return False, "same-value param_set should report unchanged"
     server.set_param_from_api("SpeedLimitMode", 3)
-    if FakeParams.shared_store.get("SpeedLimitMode") != b"2":
-      return False, "SpeedLimitMode must clamp local API writes to warning, not assist"
+    if FakeParams.shared_store.get("SpeedLimitMode") != b"3":
+      return False, "SpeedLimitMode assist must be writable through the local API while offroad"
 
-    for blocked_name in ("OffroadMode", "SpeedFromPCM", "CarrotTrafficStopEnabled", "FishopAutoOvertakeEnabled"):
+    for writable_name in ("CarrotTrafficStopEnabled", "CarrotAutoTurnControlEnabled", "CarrotActiveSpeedControlEnabled", "FishopAutoOvertakeEnabled"):
+      result = server.set_param_from_api(writable_name, 1)
+      if not result.get("changed") or FakeParams.shared_store.get(writable_name) != b"1":
+        return False, f"{writable_name} should be writable through local API while offroad"
+    result = server.set_param_from_api("NeuralNetworkLateralControl", 0)
+    if not result.get("changed") or FakeParams.shared_store.get("NeuralNetworkLateralControl") != b"0":
+      return False, "NeuralNetworkLateralControl should be writable through local API while offroad"
+
+    for blocked_name in ("OffroadMode", "SpeedFromPCM"):
       try:
         server.set_param_from_api(blocked_name, 1)
         return False, f"{blocked_name} should be read-only through local API"
@@ -1032,8 +1074,8 @@ def check_navigation_event_runtime() -> tuple[bool, str]:
       return False, "navigation event did not produce read-only traffic-stop preview"
     if preview.get("autoTurn", {}).get("candidate") is not True or preview.get("activeSpeed", {}).get("candidate") is not True:
       return False, "navigation event did not produce auto-turn/active-speed evidence previews"
-    if preview.get("overtake", {}).get("state") != "ignored_command" or preview.get("controlOutput") is not False:
-      return False, "navigation event must keep overtake commands as ignored read-only evidence"
+    if preview.get("overtake", {}).get("state") != "local_command" or preview.get("controlOutput") is not False:
+      return False, "navigation event must keep overtake commands in the local diagnostics preview"
     raw_speed = FakeParams.shared_store.get("CarrotPhoneSpeedLimit", b"0").decode("utf-8")
     if abs(float(raw_speed) - 16.666667) > 0.001:
       return False, "navigation event did not update phone speed limit in m/s"
@@ -1097,8 +1139,8 @@ def check_carrot_feature_gates_runtime() -> tuple[bool, str]:
     gate = server.carrot_feature_gate_state()
     if gate.get("controlOutput") is not False or gate.get("controlOutputAllowed") is not False:
       return False, "feature gate reported control output as available"
-    if gate.get("allBlocked") is not True:
-      return False, "feature gate did not block every high-risk feature"
+    if gate.get("stage") != "diagnostic_preview" or gate.get("allBlocked") is not False:
+      return False, "feature status endpoint should report diagnostic preview state, not a locked feature page"
     features = gate.get("features", {})
     for key in ("trafficStop", "autoTurn", "activeSpeed", "autoTunerAutoApply", "fishopAutoOvertake"):
       feature = features.get(key, {})
@@ -1107,8 +1149,8 @@ def check_carrot_feature_gates_runtime() -> tuple[bool, str]:
       if feature.get("readyForControl") is not False or feature.get("controlOutput") is not False or feature.get("readOnly") is not True:
         return False, f"{key} is not held at read-only/no-control"
       reasons = feature.get("blockingReasons", [])
-      if "real_car_gate_missing" not in reasons or "control_output_disabled" not in reasons:
-        return False, f"{key} missing real-car/control-output blocking reasons"
+      if "control_output_not_published" not in reasons:
+        return False, f"{key} missing diagnostic output boundary reason"
     for key in ("trafficStop", "autoTurn", "activeSpeed", "autoTunerAutoApply"):
       if features.get(key, {}).get("candidate") is not True:
         return False, f"{key} did not preserve candidate evidence"
@@ -1962,12 +2004,17 @@ def main() -> int:
                           "CarrotLearningActive must default to 0")
   failures += not require("Carrot learning auto-apply default off", '{"CarrotLearningAutoApply", {PERSISTENT | BACKUP, BOOL, "0"}}' in params,
                           "CarrotLearningAutoApply must default to 0")
+  failures += not require("NNLC defaults on for supported cars", '{"NeuralNetworkLateralControl", {PERSISTENT | BACKUP, BOOL, "1"}}' in params,
+                          "NeuralNetworkLateralControl must default to 1; unsupported cars are cleaned by Sunny support checks")
   failures += not require("prebuilt params extension includes Carrot/Fishop keys",
                           all(token in params_pyx for token in (
                             b"CarrotPhoneSpeedLimitEnabled",
                             b"CarrotLearningActive",
                             b"CarrotMapOverlayEnabled",
+                            b"CurveSpeedControlMode",
+                            b"CarrotCruiseAtcDecel",
                             b"FishopLaneCurveEnabled",
+                            b"NeuralNetworkLateralControl",
                           )),
                           "common/params_pyx.so must be rebuilt when alpha params_keys.h adds local Carrot/Fishop keys")
   for key in (
@@ -1987,6 +2034,36 @@ def main() -> int:
     failures += not require(f"Auto-Tuner param exists: {key}", f'{{"{key}", ' in params,
                             f"{key} must be registered for Auto-Tuner migration")
   for key in (
+    "CurveSpeedControlMode",
+    "AutoCurveSpeedLowerLimit",
+    "AutoCurveSpeedFactor",
+    "AutoCurveSpeedAggressiveness",
+    "AutoNaviSpeedDecelRate",
+    "CarrotCruiseDecel",
+    "CarrotCruiseAtcDecel",
+    "CarrotRainWet",
+    "AutoTurnControl",
+    "AutoTurnControlSpeedTurn",
+    "AutoTurnControlTurnEnd",
+    "AutoTurnMapChange",
+    "TurnSpeedControlMode",
+    "TrafficLightDetectMode",
+    "TrafficStopDistanceAdjust",
+    "CruiseEcoControl",
+    "MyDrivingMode",
+    "MyDrivingModeAuto",
+    "LongTuningKpV",
+    "LongTuningKiV",
+    "LongTuningKf",
+    "LongActuatorDelay",
+    "VEgoStopping",
+    "RadarReactionFactor",
+    "TFollowSpeedFactor",
+    "DynamicTFollowLC",
+    "EnableSpeedTF",
+    "AChangeCostStarting",
+    "UseLaneLineSpeed",
+    "UseLaneLineCurveSpeed",
     "CruiseMaxVals0",
     "CruiseMaxVals1",
     "CruiseMaxVals2",
@@ -2042,6 +2119,43 @@ def main() -> int:
   update_audit = read("scripts/personal/sunnypilot_c3_alpha_update_audit.py")
   device_collect = read("scripts/personal/sunnypilot_c3_device_collect.py")
   agents_md = read("AGENTS.md")
+  version_header = read("sunnypilot/common/version.h")
+  versioning_md = read("docs/personal/VERSIONING.md")
+  code_changes_md = read("docs/personal/CODE_CHANGES.md")
+  todo_md = read("docs/personal/TODO.md")
+  home_layout = read("selfdrive/ui/layouts/home.py")
+  software_layout = read("selfdrive/ui/layouts/settings/software.py")
+  updated_py = read("system/updated/updated.py")
+  version_match = re.search(r'#define SUNNYPILOT_VERSION "(([0-9]{4}\.[0-9]{3}\.[0-9]{3})-gp\.([0-9]{8})\.([0-9]+))"', version_header)
+  base_match = re.search(r'#define SUNNYPILOT_BASE_VERSION "([0-9]{4}\.[0-9]{3}\.[0-9]{3})"', version_header)
+  genius_version = version_match.group(1) if version_match else ""
+  sunny_base_version = version_match.group(2) if version_match else ""
+  genius_patch = int(version_match.group(4)) if version_match else 0
+  failures += not require("Genius Pilot version follows SunnyPilot base",
+                          bool(version_match)
+                          and bool(base_match)
+                          and sunny_base_version == base_match.group(1)
+                          and genius_patch >= 1
+                          and "GENIUS_PILOT_PATCH_DATE" in version_header
+                          and "GENIUS_PILOT_PATCH_NUMBER" in version_header,
+                          "sunnypilot/common/version.h must use <SunnyPilot base>-gp.<YYYYMMDD>.<patch> and keep the base version explicit")
+  failures += not require("Genius Pilot version documented",
+                          bool(genius_version)
+                          and genius_version in versioning_md
+                          and genius_version in code_changes_md
+                          and "<SunnyPilot base>-gp.<YYYYMMDD>.<patch>" in versioning_md
+                          and "same-day Genius Pilot alpha patch number" in code_changes_md
+                          and "Bump the Genius Pilot suffix before every pushed alpha build" in todo_md,
+                          "docs must describe the SunnyPilot-base plus Genius date/patch version policy")
+  failures += not require("Genius Pilot version shown by updater and UI",
+                          "from openpilot.system.version import get_build_metadata, get_version, SP_BRANCH_MIGRATIONS" in updated_py
+                          and "version = get_version(basedir)" in updated_py
+                          and 'return f"Genius Pilot {version} / {branch} / {commit} / {commit_date}"' in updated_py
+                          and "from openpilot.system.version import get_version" in home_layout
+                          and 'description if description else f"Genius Pilot {get_version()}"' in home_layout
+                          and "from openpilot.system.version import get_version" in software_layout
+                          and 'f"Genius Pilot {get_version()}"' in software_layout,
+                          "home/software UI and updater description must use the shared Genius Pilot version value")
   failures += not require("Auto-Tuner learner module exists", "class CarrotLearner" in carrot_learning
                           and "def apply_recommendations" in carrot_learning,
                           "CarrotLearner core module must exist in alpha")
@@ -2064,10 +2178,13 @@ def main() -> int:
                             f"carrot_server missing {route}")
   failures += not require("Carrot Web params API whitelist", "PARAM_API_DEFS" in carrot_server
                           and '"ExperimentalMode": {"type": "bool", "default": False, "writable": True}' in carrot_server
+                          and '"NeuralNetworkLateralControl": {"type": "bool", "default": True, "writable": True}' in carrot_server
                           and '"OffroadMode": {"type": "bool", "default": False, "writable": False}' in carrot_server
                           and '"SpeedFromPCM": {"type": "int", "default": 1, "writable": False' in carrot_server
-                          and '"FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": False}' in carrot_server,
-                          "Carrot Web params API must expose only an explicit whitelist and keep high-risk/Mazda-only params read-only")
+                          and '"SpeedLimitMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 3}' in carrot_server
+                          and '"CurveSpeedControlMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 3}' in carrot_server
+                          and '"FishopAutoOvertakeEnabled": {"type": "bool", "default": False, "writable": True}' in carrot_server,
+                          "Carrot Web params API must expose an explicit whitelist, keep hardware-only params read-only, and allow Carrot advanced settings while offroad")
   failures += not require("Carrot Web params API preserves Navipilot response contract",
                           'app.router.add_post("/api/params_bulk", api_params_bulk)' in carrot_server
                           and '"has_params": params is not None' in carrot_server
@@ -2078,8 +2195,8 @@ def main() -> int:
   failures += not require("Carrot Web params API blocks onroad changes", 'params.get_bool("IsOnroad") and changed' in carrot_server
                           and "Cannot change params while onroad" in carrot_server,
                           "param_set must reject changed values while onroad")
-  failures += not require("Carrot Web params API clamps active speed mode", '"SpeedLimitMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 2}' in carrot_server,
-                          "local param_set must not enable SpeedLimitMode assist through the phone API")
+  failures += not require("Carrot Web params API exposes active speed assist mode", '"SpeedLimitMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 3}' in carrot_server,
+                          "local param_set must allow SpeedLimitMode assist while offroad")
   ok, detail = check_params_api_runtime()
   failures += not require("Carrot Web params API runtime", ok, detail or "params API runtime check failed")
   failures += not require("Carrot Web status broadcast exists", "STATUS_BROADCAST_PORT = 7705" in carrot_server
@@ -2207,9 +2324,10 @@ def main() -> int:
                           and "def api_carrot_feature_gates" in carrot_server
                           and '"readyForControl": False' in carrot_server
                           and '"controlOutputAllowed": False' in carrot_server
-                          and '"real_car_gate_missing"' in carrot_server
+                          and '"stage": "diagnostic_preview"' in carrot_server
+                          and '"control_output_not_published"' in carrot_server
                           and 'app.router.add_get("/api/carrot_feature_gates", api_carrot_feature_gates)' in carrot_server,
-                          "Carrot high-risk controls must be exposed through a read-only real-car gate API")
+                          "Carrot advanced controls must expose local status without publishing a direct Web/API control output")
   ok, detail = check_carrot_feature_gates_runtime()
   failures += not require("Carrot Web feature gate runtime", ok,
                           detail or "Carrot feature gate runtime check failed")
@@ -2272,7 +2390,7 @@ def main() -> int:
                           and 'id="control-gate-active-speed"' in carrot_server
                           and 'id="control-gate-auto-tuner"' in carrot_server
                           and 'id="control-gate-fishop-overtake"' in carrot_server,
-                          "Carrot Web home page must show read-only high-risk control gate status")
+                          "Carrot Web home page must show Carrot advanced feature status")
   failures += not require("Carrot Web fishop hardware read-only panel",
                           'id="fishop-panel"' in carrot_server
                           and "refreshFishopHardware" in carrot_server
@@ -2291,9 +2409,9 @@ def main() -> int:
                           and "suggestionSummary" in carrot_server
                           and "navigationGateSummary" in carrot_server
                           and "overtakeHintSummary" in carrot_server
-                          and "snapshot.controlOutputEnabled ? \"control enabled\" : \"read-only\"" in carrot_server
+                          and "snapshot.controlOutputEnabled ? \"control output present\" : \"diagnostic status only\"" in carrot_server
                           and 'method:' not in carrot_server[carrot_server.index('async function refreshFishopHardware'):carrot_server.index('setInterval(refreshFishopHardware')],
-                          "Carrot Web must show fishop lane/curve/lidar/target evidence through read-only GET only")
+                          "Carrot Web must show fishop lane/curve/lidar/target status through GET without mutating controls")
   for forbidden in ("requests.", "urllib.", "websocket", "ClientSession", "common.api", "SunnylinkApi", "DongleId"):
     failures += not require(f"Carrot Web omits cloud client token {forbidden}", forbidden not in carrot_server,
                             "local Carrot Web must not include outbound cloud/client code")
@@ -2543,6 +2661,7 @@ def main() -> int:
 
   settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
   carrot_settings = read("selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
+  cruise_settings = read("selfdrive/ui/sunnypilot/layouts/settings/cruise.py")
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
   core_mici_settings = read("selfdrive/ui/mici/layouts/settings/settings.py")
   settings_ui_device = read("sunnypilot/sunnylink/settings_ui_src/pages/device.yaml")
@@ -2563,35 +2682,75 @@ def main() -> int:
   panda_safety = read("selfdrive/pandad/panda_safety.cc")
   pandad = read("selfdrive/pandad/pandad.cc")
   system_statsd = read("system/statsd.py")
+  widget_core = read("system/ui/widgets/__init__.py")
+  scroll_panel = read("system/ui/lib/scroll_panel.py")
   failures += not require("Sunnylink panel removed", "SunnylinkLayout" not in settings and "SUNNYLINK" not in settings,
                           "Sunnylink panel is still wired into settings")
   failures += not require("Carrot settings panel wired",
-                          "CarrotLayout" in settings and "OP.PanelType.CARROT" in settings,
-                          "Carrot/Genius local feature panel is not wired into the settings sidebar")
+                          "CarrotLayout" in settings and "OP.PanelType.CARROT" in settings and 'tr_noop("Super Advanced")' in settings,
+                          "Carrot/Genius local feature panel must be wired into the settings sidebar as Super Advanced")
   failures += not require("Carrot settings exposes local feature toggles",
                           all(token in carrot_settings for token in (
                             "CarrotPhoneSpeedLimitEnabled",
                             "CarrotMapOverlayEnabled",
+                            "CurveSpeedControlMode",
+                            "AutoCurveSpeedLowerLimit",
+                            "CarrotActiveSpeedControlEnabled",
+                            "CarrotAutoTurnControlEnabled",
+                            "CarrotTrafficStopEnabled",
+                            "TrafficLightDetectMode",
+                            "TrafficStopDistanceAdjust",
+                            "CarrotCruiseAtcDecel",
+                            "AutoTurnControl",
+                            "TurnSpeedControlMode",
                             "CarrotLearningActive",
                             "CarrotLearningAutoApply",
                             "CarrotTunerApplyLat",
                             "CarrotTunerApplyLong",
+                            "UseLaneLineCurveSpeed",
                             "FishopLaneCurveEnabled",
                             "FishopLidarBlindspotEnabled",
                             "FishopLidarLaneDataEnabled",
+                            "FishopAutoOvertakeEnabled",
                           )),
-                          "Carrot/Genius settings panel must expose phone limit, map overlay, Auto-Tuner, and fishop input gates")
-  failures += not require("Carrot high-risk settings locked off",
+                          "Carrot/Genius settings panel must expose phone limit, map overlay, curve/ATC/red-light, Auto-Tuner, steering, and fishop gates")
+  failures += not require("Carrot advanced settings are usable in Super Advanced",
                           all(token in carrot_settings for token in (
                             "CarrotActiveSpeedControlEnabled",
                             "CarrotAutoTurnControlEnabled",
                             "CarrotTrafficStopEnabled",
                             "FishopAutoOvertakeEnabled",
-                            "LOCKED_CONTROL_PARAMS",
-                            "self._params.put_bool(param, False)",
-                            "toggle.action_item.set_enabled(False)",
-                          )),
-                          "high-risk Carrot/fishop control gates must stay visible but locked off in alpha UI")
+                            "lambda: ui_state.is_offroad()",
+                            "PRECONTROL_FEATURE_PARAMS",
+                          ))
+                          and "LOCKED_CONTROL_PARAMS" not in carrot_settings
+                          and "self._params.put_bool(param, False)" not in carrot_settings
+                          and "toggle.action_item.set_enabled(False)" not in carrot_settings,
+                          "Carrot/fishop advanced controls must stay visible and user-toggleable while offroad")
+  failures += not require("Cruise exposes staged Carrot longitudinal controls",
+                          all(token in cruise_settings for token in (
+                            "DynamicExperimentalControl",
+                            "StopDistanceCarrot",
+                            "DynamicTFollow",
+                            "TFollowDecelBoost",
+                            "TFollowGap1",
+                            "TFollowGap2",
+                            "TFollowGap3",
+                            "TFollowGap4",
+                          ))
+                          and "CarrotActiveSpeedControlEnabled" not in cruise_settings
+                          and "CarrotAutoTurnControlEnabled" not in cruise_settings
+                          and "CarrotTrafficStopEnabled" not in cruise_settings
+                          and "return bool(ui_state.is_offroad() and has_long)" in cruise_settings,
+                          "Cruise panel should expose common longitudinal tuning, while full Carrot advanced settings live in Super Advanced")
+  failures += not require("C3 touch menu requires deliberate release tap",
+                          "TAP_RELEASE_MOVE_PX = 24" in widget_core
+                          and "__touch_cancelled" in widget_core
+                          and "short_tap_release and not touch_cancelled and touch_valid" in widget_core
+                          and "DRAG_THRESHOLD = 24" in scroll_panel
+                          and "OPEN_TOUCH_GUARD_S = 0.6" in read("selfdrive/ui/layouts/settings/settings.py")
+                          and "_press_panel" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py"),
+                          "clone C3 touch handling must reject drag/scroll releases and avoid press-time sidebar navigation")
   failures += not require("MICI Sunnylink panel removed", "SunnylinkLayoutMici" not in mici_settings and "sunnylink_btn" not in mici_settings,
                           "MICI Sunnylink panel is still wired into settings")
   failures += not require("Onroad Uploads setting removed", "Onroad Uploads" not in device_settings,
@@ -2648,11 +2807,12 @@ def main() -> int:
                             "settings UI source and compiled JSON must explain defaults, risk boundaries, and when not to enable high-risk features")
   failures += not require("Carrot Web safety boundary panel",
                           'id="safety-boundaries"' in carrot_server
+                          and "Local Status" in carrot_server
                           and "Cloud services" in carrot_server
                           and "Speed offset" in carrot_server
                           and "fishop hardware" in carrot_server
-                          and "control outputs stay disabled" in carrot_server,
-                          "Carrot Web home page must explain local/cloud, speed, Auto-Tuner, fishop, and control-output boundaries")
+                          and "settings are available in Super Advanced" in carrot_server,
+                          "Carrot Web home page must explain local/cloud, speed, Auto-Tuner, fishop, and Carrot advanced setting availability")
   for msgid in (
     "Controls the state of the device after boot/sleep. Use Offroad only for parked updates or harness debugging.",
     "Offroad: Device will boot into parked maintenance mode and keep panda in no-output mode.",
@@ -2697,12 +2857,16 @@ def main() -> int:
   car_fingerprints = read("opendbc_repo/opendbc/car/fingerprints.py")
   hyundai_fingerprints = read("opendbc_repo/opendbc/car/hyundai/fingerprints.py")
   fingerprints_ext = read("opendbc_repo/opendbc/sunnypilot/car/hyundai/fingerprints_ext.py")
+  ui_car_list = read("sunnypilot/selfdrive/car/car_list.json")
   failures += not require("KIA_SELTOS_2023 exists", "KIA_SELTOS_2023 = HyundaiPlatformConfig" in values,
                           "KIA_SELTOS_2023 must be a normal SCC HyundaiPlatformConfig")
   failures += not require("KIA_SELTOS_2023 reuses Seltos specs", "KIA_SELTOS.specs" in values,
                           "KIA_SELTOS_2023 should reuse KIA_SELTOS specs")
   failures += not require("KIA_SELTOS_2023 manual mapping exists", '"KIA SELTOS 2023": HYUNDAI.KIA_SELTOS_2023' in car_fingerprints,
                           "KIA SELTOS 2023 manual mapping missing")
+  failures += not require("Kia Seltos 2023 visible in manual vehicle list",
+                          '"Kia Seltos 2023"' in ui_car_list and '"platform": "KIA_SELTOS_2023"' in ui_car_list,
+                          "Sunny vehicle selector car_list.json must include Kia Seltos 2023")
   failures += not require("KIA_SELTOS_2023 FW entry exists", "CAR.KIA_SELTOS_2023" in hyundai_fingerprints,
                           "KIA_SELTOS_2023 FW fingerprint entry missing")
   failures += not require("Seltos Non-SCC personal entry removed",
