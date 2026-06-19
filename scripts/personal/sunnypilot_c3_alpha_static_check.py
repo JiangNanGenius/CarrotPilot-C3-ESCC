@@ -1193,6 +1193,30 @@ def check_fishop_release_gate_runtime() -> tuple[bool, str]:
     blocked = snapshot.summarize_fishop_release_gate(safe_params, process, car_params, car_params_sp, messaging, fishop)
     if blocked.get("readyForNextStageReview") is not False or "esccDetected" not in blocked.get("blockingChecks", []):
       return False, "missing ESCC evidence did not block the fishop release gate"
+
+    stages = snapshot.summarize_fishop_overtake_stages(fishop, gate)
+    if stages.get("readOnly") is not True or stages.get("controlOutput") is not False:
+      return False, "fishop overtake stage plan must stay read-only"
+    if stages.get("rollbackRequiredForEveryStage") is not True or stages.get("cloudEvidenceRequiredEveryStage") is not True:
+      return False, "fishop overtake stage plan must require rollback and cloud evidence for every stage"
+    if stages.get("allImplementedStagesNoControlOutput") is not True:
+      return False, "implemented fishop overtake stages may not publish desire or lateral output"
+    stage_map = {stage.get("stageId"): stage for stage in stages.get("stages", [])}
+    for stage_id in (1, 2, 3, 4, 5):
+      stage = stage_map.get(stage_id, {})
+      rollback = stage.get("rollback", {})
+      if rollback.get("stableRollbackInstaller") != snapshot.STABLE_ROLLBACK_INSTALL_URL:
+        return False, f"stage {stage_id} does not include stable rollback installer"
+      if not stage.get("requiredLog"):
+        return False, f"stage {stage_id} does not declare a required log"
+      if stage.get("controlOutput") is not False or stage.get("mayPublishDesire") is not False or stage.get("maySendLateralCommand") is not False:
+        return False, f"stage {stage_id} exposes a control output path"
+    if stage_map.get(3, {}).get("name") != "hint_only_no_desire" or stage_map.get(3, {}).get("implemented") is not True:
+      return False, "stage 3 hint-only evidence is not implemented"
+    if stage_map.get(4, {}).get("status") != "locked" or stage_map.get(4, {}).get("currentAllowed") is not False:
+      return False, "stage 4 must remain locked before existing safety-chain integration"
+    if stage_map.get(5, {}).get("status") != "locked" or stage_map.get(5, {}).get("currentAllowed") is not False:
+      return False, "stage 5 must remain locked before controlled execution evidence"
     return True, ""
   except Exception as exc:
     return False, str(exc)
@@ -1849,11 +1873,25 @@ def main() -> int:
                           detail or "C3 compatibility audit failed")
   failures += not require("alpha snapshot records fishop release gate",
                           "def summarize_fishop_release_gate" in alpha_snapshot
-                          and '"fishopReleaseGate": summarize_fishop_release_gate' in alpha_snapshot
+                          and "fishop_release_gate = summarize_fishop_release_gate" in alpha_snapshot
+                          and '"fishopReleaseGate": fishop_release_gate' in alpha_snapshot
                           and '"readyForNextStageReview"' in alpha_snapshot
                           and '"requiredBeforeControl"' in alpha_snapshot
                           and "--require-fishop-release-gate" in alpha_snapshot,
                           "alpha snapshot must summarize the fishop pre-control evidence gate")
+  failures += not require("alpha snapshot records fishop overtake staged evidence",
+                          "def summarize_fishop_overtake_stages" in alpha_snapshot
+                          and '"fishopOvertakeStages": fishop_overtake_stages' in alpha_snapshot
+                          and "data_only_capture" in alpha_snapshot
+                          and "display_only_web_snapshot" in alpha_snapshot
+                          and "hint_only_no_desire" in alpha_snapshot
+                          and "suggestion_review_existing_safety_chain" in alpha_snapshot
+                          and "controlled_execution_experiment" in alpha_snapshot
+                          and "STABLE_ROLLBACK_INSTALL_URL" in alpha_snapshot
+                          and '"mayPublishDesire": False' in alpha_snapshot
+                          and '"maySendLateralCommand": False' in alpha_snapshot
+                          and '"rollbackRequiredForEveryStage": True' in alpha_snapshot,
+                          "alpha snapshot must expose staged fishop overtake evidence, logs, rollback, and locked future stages")
   ok, detail = check_fishop_release_gate_runtime()
   failures += not require("alpha snapshot fishop release gate runtime", ok,
                           detail or "fishop release gate runtime check failed")
