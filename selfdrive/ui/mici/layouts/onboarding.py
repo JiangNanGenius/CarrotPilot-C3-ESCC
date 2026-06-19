@@ -274,11 +274,29 @@ class TrainingGuide(NavWidget):
     self._steps[0].render(self._rect)
 
 
+class PressAcceptBigPillButton(BigPillButton):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self._press_activated = False
+
+  def _handle_mouse_press(self, mouse_pos):
+    super()._handle_mouse_press(mouse_pos)
+    self._press_activated = True
+    if self._click_callback:
+      self._click_callback()
+
+  def _handle_mouse_release(self, mouse_pos):
+    if self._press_activated:
+      self._press_activated = False
+      return
+    super()._handle_mouse_release(mouse_pos)
+
+
 class TermsPage(Scroller):
   def __init__(self, on_accept, on_decline):
     super().__init__()
 
-    self._accept_button = BigPillButton("accept terms")
+    self._accept_button = PressAcceptBigPillButton("accept terms")
     self._accept_button.set_click_callback(on_accept)
     self._decline_button = BigConfirmationCircleButton("decline &\nuninstall", gui_app.texture("icons_mici/setup/cancel.png", 64, 64), on_decline,
                                                        red=True, exit_on_confirm=False)
@@ -312,8 +330,6 @@ class OnboardingWindow(Widget):
     self._training_done: bool = ui_state.params.get("CompletedTrainingVersion") == training_version
     self._sunnylink_consent_done: bool = True
 
-    self._complete_personal_alpha_onboarding()
-
     self.set_rect(rl.Rectangle(0, 0, gui_app.width, gui_app.height))
 
     # Windows — all pushed onto nav stack, _terms is always rendered as base layer
@@ -324,17 +340,6 @@ class OnboardingWindow(Widget):
     self._training_guide.set_enabled(lambda: self.enabled)  # for nav stack
 
     self._needs_initial_push = False
-
-  def _complete_personal_alpha_onboarding(self):
-    # Personal alpha builds are installed by an experienced owner/operator. Do
-    # not block first boot on upstream onboarding touch widgets on clone C3.
-    if not self._accepted_terms:
-      ui_state.params.put("HasAcceptedTerms", terms_version)
-      ui_state.params.put("HasAcceptedTermsSP", terms_version_sp)
-      self._accepted_terms = True
-    if not self._training_done:
-      ui_state.params.put("CompletedTrainingVersion", training_version)
-      self._training_done = True
 
   def _on_uninstall(self):
     ui_state.params.put_bool("DoUninstall", True, block=True)
