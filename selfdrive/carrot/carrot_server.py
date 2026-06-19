@@ -462,10 +462,13 @@ def _put_float(params: Any, key: str, value: float) -> None:
 def _param_int(params: Any | None, key: str, default: int = 0) -> int:
   if params is None:
     return default
-  try:
-    return int(params.get_int(key))
-  except Exception:
-    return int(_as_float(_params_get(params, key, default), float(default)))
+  get_int = getattr(params, "get_int", None)
+  if callable(get_int):
+    try:
+      return int(get_int(key))
+    except Exception:
+      pass
+  return int(_as_float(_params_get(params, key, default), float(default)))
 
 
 def _param_bool(params: Any | None, key: str, default: bool = False) -> bool:
@@ -1129,6 +1132,13 @@ def _status_payload_navigation_evidence(event: dict[str, Any]) -> dict[str, Any]
   model_speed = model_speed if isinstance(model_speed, dict) else {}
   control_preview = control_preview if isinstance(control_preview, dict) else {}
   traffic = traffic if isinstance(traffic, dict) else {}
+  if control_preview.get("controlOutput") is not False or "readOnly" not in control_preview:
+    control_preview = {
+      **_navigation_control_preview(None, {}, {}),
+      **control_preview,
+      "readOnly": True,
+      "controlOutput": False,
+    }
   speed_bump = hazards.get("speedBump") if isinstance(hazards.get("speedBump"), dict) else {}
   sdi = hazards.get("sdi") if isinstance(hazards.get("sdi"), dict) else {}
   return {
@@ -1383,7 +1393,7 @@ def _normalize_recommendations(payload: dict[str, Any] | None, params: Any | Non
     try:
       captured_current = int(info.get("current", 0))
       recommended = _clamp_param(key, info.get("recommended", captured_current))
-      current_value = params.get_int(key) if params is not None else captured_current
+      current_value = _param_int(params, key, captured_current)
     except Exception:
       continue
     applied = current_value == recommended
@@ -1464,8 +1474,8 @@ def get_learning_state() -> dict[str, Any]:
     "pending": bool(recs),
     "popupReady": params.get_bool("CarrotLearningPopupReady"),
     "autoApply": params.get_bool("CarrotLearningAutoApply"),
-    "applyLat": params.get_int("CarrotTunerApplyLat") != 0,
-    "applyLong": params.get_int("CarrotTunerApplyLong") != 0,
+    "applyLat": _param_int(params, "CarrotTunerApplyLat", 1) != 0,
+    "applyLong": _param_int(params, "CarrotTunerApplyLong", 1) != 0,
     "source": str(payload.get("source", "")) if isinstance(payload, dict) else "",
     "createdAt": payload.get("created_at", 0) if isinstance(payload, dict) else 0,
     "recommendationSummary": recommendation_summary,
@@ -1490,12 +1500,12 @@ def apply_learning_recommendations() -> dict[str, Any]:
   for rec in recs:
     key = rec["key"]
     category = rec.get("category", "long")
-    if category == "lat" and params.get_int("CarrotTunerApplyLat") == 0:
+    if category == "lat" and _param_int(params, "CarrotTunerApplyLat", 1) == 0:
       continue
-    if category == "long" and params.get_int("CarrotTunerApplyLong") == 0:
+    if category == "long" and _param_int(params, "CarrotTunerApplyLong", 1) == 0:
       continue
     value = _clamp_param(key, rec["recommended"])
-    params.put_int(key, value)
+    params.put(key, value)
     applied[key] = value
 
   if applied:

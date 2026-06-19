@@ -1730,6 +1730,27 @@ def check_device_collect_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_carrot_tuning_baseline_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/carrot_tuning_baseline.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_genius_visualization_contract_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -2423,6 +2444,15 @@ def main() -> int:
   failures += not require("Auto-Tuner apply blocked onroad", 'get_bool("IsOnroad")' in carrot_learning
                           and "if self.is_onroad()" in carrot_learning,
                           "CarrotLearner must not apply recommendations while onroad")
+  c3_params_compat_sources = {
+    "carrot_server": carrot_server,
+    "carrot_learning": carrot_learning,
+    "ui_state": read("selfdrive/ui/sunnypilot/ui_state.py"),
+    "curve_speed_policy": read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py"),
+  }
+  failures += not require("C3 Params integer API compatibility",
+                          all(".get_int(" not in source and ".put_int(" not in source for source in c3_params_compat_sources.values()),
+                          "C3 Params exposes get()/get_bool()/put(), so runtime code must use compatibility helpers instead of direct get_int/put_int")
   ok, detail = check_carrot_learning_runtime()
   failures += not require("Auto-Tuner runtime guard", ok, detail or "runtime guard check failed")
   ok, detail = check_carrot_learning_api_runtime()
@@ -2851,6 +2881,16 @@ def main() -> int:
   ok, detail = check_device_collect_runtime()
   failures += not require("C3 remote evidence collect runtime", ok,
                           detail or "device collect self-test failed")
+  baseline_tool = read("scripts/personal/carrot_tuning_baseline.py")
+  failures += not require("Carrot tuning baseline tool exists",
+                          "Genius Pilot Carrot tuning baseline" in baseline_tool
+                          and "settings_matrix.json" in baseline_tool
+                          and "BASELINE_OWNERS" in baseline_tool
+                          and "CarrotLearningHistory" in baseline_tool,
+                          "alpha line must include a repeatable C3 tuning baseline exporter")
+  ok, detail = check_carrot_tuning_baseline_runtime()
+  failures += not require("Carrot tuning baseline runtime", ok,
+                          detail or "carrot tuning baseline self-test failed")
   failures += not require("agent update guide exists",
                           "CarrotPilot-C3-ESCC Agent Guide" in agents_md
                           and "personal/c3-escc-atune" in agents_md
@@ -2861,6 +2901,7 @@ def main() -> int:
                           and "sunnypilot_c3_alpha_update_audit.py --fetch --strict" in agents_md
                           and "sunnypilot_c3_device_collect.py" in agents_md
                           and "sunnypilot_c3_installer_audit.py" in agents_md
+                          and "carrot_tuning_baseline.py" in agents_md
                           and "Kia Seltos 2023" in agents_md,
                           "root AGENTS.md must preserve the update strategy and safety boundaries")
   ok, detail = check_c3_install_boot_contract()

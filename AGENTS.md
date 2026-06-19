@@ -45,14 +45,15 @@ When the user says to update, use this order:
    In short: do not import private registration or upload/cloud client behavior from reference forks.
 4. Compare Carrot changes for Carrot Web, CarrotMan/Navipilot/APN/N input, speed-limit logic, model/map behavior, Auto-Tuner, localization, and fishop hardware fields.
    Treat CarrotPilot behavior and setting granularity as the target; use SunnyPilot implementation only when it is the safer/newer base primitive.
-   For onroad visualization, keep Sunny, Carrot, and Fusion display modes available, and treat Fishop/lidar overlays as evidence display until a later safety-chain stage exists.
-5. Preserve personal defaults: stock model, NNLC on for supported cars, map overlay off, speed offset zero, phone speed policy with timeout, cloud disabled, Carrot advanced controls default off but available while offroad.
-6. Bump `sunnypilot/common/version.h` before pushing: keep the SunnyPilot base aligned to upstream, increment the same-day Genius patch, and reset patch to `1` on a new publish date.
-7. Run the release gate before pushing.
-8. Push `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3` together only after the gate passes.
-9. Audit the published `/x` installer before telling the user to retry installation.
-10. Update `docs/personal/TODO.md`, `docs/personal/CODE_CHANGES.md`, and `docs/personal/VERSIONING.md` in the same change whenever real-device behavior, versioning, or safety assumptions change.
-11. If `common/params_keys.h` changes, rebuild the ARM64 `common/params_pyx.so` on the C3 or another aarch64 Linux environment and verify the new key strings are present before publishing.
+   For onroad visualization, keep Sunny, Carrot, and Balanced display modes available, and treat Fishop/lidar overlays as evidence display until a later safety-chain stage exists.
+5. Export the user's current Carrot/Fishop/model/visual tuning baseline from the C3 before changing longitudinal, braking, ATC, speed-limit, or Auto-Tuner behavior.
+6. Preserve personal defaults: stock model, NNLC on for supported cars, map overlay off, speed offset zero, phone speed policy with timeout, cloud disabled, Carrot advanced controls default off but available while offroad.
+7. Bump `sunnypilot/common/version.h` before pushing: keep the SunnyPilot base aligned to upstream, increment the same-day Genius patch, and reset patch to `1` on a new publish date.
+8. Run the release gate before pushing.
+9. Push `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3` together only after the gate passes.
+10. Audit the published `/x` installer before telling the user to retry installation.
+11. Update `docs/personal/TODO.md`, `docs/personal/CODE_CHANGES.md`, and `docs/personal/VERSIONING.md` in the same change whenever real-device behavior, versioning, or safety assumptions change.
+12. If `common/params_keys.h` changes, rebuild the ARM64 `common/params_pyx.so` on the C3 or another aarch64 Linux environment and verify the new key strings are present before publishing.
 
 ## Required Commands
 
@@ -78,6 +79,14 @@ Settings conflict audit after refreshing references:
 
 ```bash
 python3 scripts/personal/sunnypilot_c3_settings_conflict_audit.py --strict
+```
+
+Carrot/Fishop/model/visual tuning baseline before behavior changes:
+
+```bash
+python3 scripts/personal/carrot_tuning_baseline.py \
+  --output /data/genius_carrot_tuning_baseline.json \
+  --pretty
 ```
 
 Full gate with reference fetch:

@@ -51,6 +51,29 @@ def _clamp(key, value):
   return int(max(low, min(high, value)))
 
 
+def _param_int(params, key, default=0):
+  get_int = getattr(params, "get_int", None)
+  if callable(get_int):
+    try:
+      return int(get_int(key))
+    except Exception:
+      pass
+  try:
+    raw = params.get(key, return_default=True)
+  except TypeError:
+    raw = params.get(key)
+  except Exception:
+    raw = default
+  if raw is None:
+    raw = default
+  if isinstance(raw, bytes):
+    raw = raw.decode("utf-8", errors="ignore")
+  try:
+    return int(float(raw))
+  except (TypeError, ValueError):
+    return int(default)
+
+
 def _speed_band(v_ego_kph):
   for i in range(len(SPEED_BANDS_KPH) - 1, -1, -1):
     if v_ego_kph >= SPEED_BANDS_KPH[i]:
@@ -220,10 +243,10 @@ class CarrotLearner:
     raw = self.params.get(key)
     if raw is None:
       return default
-    return self.params.get_int(key) != 0
+    return _param_int(self.params, key, 1 if default else 0) != 0
 
   def _add_recommendation(self, recs, key, recommended, reason, evidence):
-    current = self.params.get_int(key)
+    current = _param_int(self.params, key)
     recommended = _clamp(key, recommended)
     if recommended == current:
       return
@@ -249,7 +272,7 @@ class CarrotLearner:
       band = self.data["accel"][i]
       gas_sec = float(band.get("gas_sec", 0.0))
       brake_after_gas_sec = float(band.get("brake_after_gas_sec", 0.0))
-      current = self.params.get_int(key)
+      current = _param_int(self.params, key)
       if gas_sec >= 10.0:
         self._add_recommendation(
           recs, key, int(current * 1.10),
@@ -267,7 +290,7 @@ class CarrotLearner:
       gap = self.data["follow"][i]
       gas_sec = float(gap.get("gas_sec", 0.0))
       brake_sec = float(gap.get("brake_sec", 0.0))
-      current = self.params.get_int(key)
+      current = _param_int(self.params, key)
       if brake_sec >= 10.0:
         self._add_recommendation(
           recs, key, current + 5,
@@ -285,7 +308,7 @@ class CarrotLearner:
     brake_count = int(brake.get("count", 0))
     if brake_count >= 5:
       avg_drel = float(brake.get("lead_drel_sum", 0.0)) / max(1, brake_count)
-      current = self.params.get_int("JLeadFactor3")
+      current = _param_int(self.params, "JLeadFactor3")
       if avg_drel < 30.0:
         recommended = current + 20
         reason = "Manual braking usually happens close to the lead car."
@@ -302,7 +325,7 @@ class CarrotLearner:
     if straight_samples >= 200:
       avg_steer = float(steer.get("straight_angle_sum", 0.0)) / straight_samples
       if abs(avg_steer) >= 1.5:
-        current = self.params.get_int("PathOffset")
+        current = _param_int(self.params, "PathOffset")
         self._add_recommendation(
           recs, "PathOffset", current + int(round(avg_steer * 10.0)),
           "Straight-road steering angle shows a persistent lane-centering bias.",
@@ -312,7 +335,7 @@ class CarrotLearner:
     curve_entries = int(steer.get("curve_entries", 0))
     curve_overrides = int(steer.get("curve_overrides", 0))
     if curve_entries >= 10 and curve_overrides / max(1, curve_entries) >= 0.5:
-      current = self.params.get_int("SteerActuatorDelay")
+      current = _param_int(self.params, "SteerActuatorDelay")
       self._add_recommendation(
         recs, "SteerActuatorDelay", current + 10,
         "Driver often overrides steering during curve entry.",
@@ -363,7 +386,7 @@ class CarrotLearner:
       if category == "long" and not self._param_enabled("CarrotTunerApplyLong", True):
         continue
       recommended = _clamp(key, int(info["recommended"]))
-      self.params.put_int(key, recommended)
+      self.params.put(key, recommended)
       applied[key] = recommended
 
     if applied:

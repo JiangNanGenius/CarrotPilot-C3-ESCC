@@ -19,6 +19,29 @@ MADSState = custom.ModularAssistiveDrivingSystem.ModularAssistiveDrivingSystemSt
 ONROAD_BRIGHTNESS_TIMER_PAUSED = -1
 
 
+def _param_int(params: Params, key: str, default: int = 0) -> int:
+  get_int = getattr(params, "get_int", None)
+  if callable(get_int):
+    try:
+      return int(get_int(key))
+    except Exception:
+      pass
+  try:
+    raw = params.get(key, return_default=True)
+  except TypeError:
+    raw = params.get(key)
+  except Exception:
+    raw = default
+  if raw is None:
+    raw = default
+  if isinstance(raw, bytes):
+    raw = raw.decode("utf-8", errors="ignore")
+  try:
+    return int(float(raw))
+  except (TypeError, ValueError):
+    return int(default)
+
+
 class OnroadTimerStatus(Enum):
   NONE = 0
   PAUSE = 1
@@ -179,9 +202,9 @@ class UIStateSP:
     self.genius_carrot_world_overlay = self.params.get_bool("GeniusCarrotWorldOverlay")
     self.genius_fishop_visual_overlay = self.params.get_bool("GeniusFishopVisualOverlay")
     self.genius_lane_change_visuals = self.params.get_bool("GeniusLaneChangeVisuals")
-    self.genius_lane_line_style = self.params.get_int("GeniusLaneLineStyle")
-    self.genius_lead_radar_visual_mode = self.params.get_int("GeniusLeadRadarVisualMode")
-    self.genius_visual_mode = self.params.get_int("GeniusVisualMode")
+    self.genius_lane_line_style = _param_int(self.params, "GeniusLaneLineStyle", 1)
+    self.genius_lead_radar_visual_mode = _param_int(self.params, "GeniusLeadRadarVisualMode", 1)
+    self.genius_visual_mode = _param_int(self.params, "GeniusVisualMode", 2)
     self.hide_v_ego_ui = self.params.get_bool("HideVEgoUI")
     self.onroad_brightness = int(float(self.params.get("OnroadScreenOffBrightness", return_default=True)))
     self.onroad_brightness_timer_param = self.params.get("OnroadScreenOffTimer", return_default=True)
