@@ -23,12 +23,6 @@ class PanelType(IntEnum):
   SLA = 1
 
 
-ICBM_DESC = tr_noop("When enabled, Genius Pilot will attempt to manage the built-in cruise control buttons " +
-                    "by emulating button presses for limited longitudinal control.")
-ICMB_UNAVAILABLE = tr_noop("Intelligent Cruise Button Management is currently unavailable on this platform.")
-ICMB_UNAVAILABLE_LONG_AVAILABLE = tr_noop("Disable the Genius Pilot Longitudinal Control (alpha) toggle to allow Intelligent Cruise Button Management.")
-ICMB_UNAVAILABLE_LONG_UNAVAILABLE = tr_noop("Genius Pilot Longitudinal Control is the default longitudinal control for this platform.")
-CARROT_CRUISE_POLICY = tr_noop("This personal build keeps cruise-speed behavior aligned with CarrotPilot. ICBM, SCC-V, and SCC-M stay hidden. Sunny DEC is available in Cruise and Super Advanced settings.")
 DEC_DESCRIPTION = tr_noop("Sunny dynamic experimental control. It can switch between classic longitudinal and E2E-style behavior when available.")
 
 ACC_ENABLED_DESCRIPTION = tr_noop("Enable custom Short & Long press increments for cruise speed increase/decrease.")
@@ -75,22 +69,6 @@ class CruiseLayout(Widget):
     self._scroller = Scroller(items, line_separator=True, spacing=0)
 
   def _initialize_items(self):
-
-    self.icbm_toggle = toggle_item_sp(
-      title=tr("Intelligent Cruise Button Management (ICBM) (Alpha)"),
-      description="",
-      param="IntelligentCruiseButtonManagement")
-
-    self.scc_v_toggle = toggle_item_sp(
-      title=tr("Smart Cruise Control - Vision"),
-      description=tr("Use vision path predictions to estimate the appropriate speed to drive through turns ahead."),
-      param="SmartCruiseControlVision")
-
-    self.scc_m_toggle = toggle_item_sp(
-      title=tr("Smart Cruise Control - Map"),
-      description=tr("Use map data to estimate the appropriate speed to drive through turns ahead."),
-      param="SmartCruiseControlMap")
-
     self.custom_acc_toggle = toggle_item_sp(
       title=tr("Custom ACC Speed Increments"),
       description="",
@@ -256,7 +234,7 @@ class CruiseLayout(Widget):
       self.follow_gap_2,
       self.follow_gap_3,
       self.follow_gap_4,
-      CruiseSectionHeader(lambda: tr("Cruise Button Behavior"), lambda: tr("Button behavior stays limited to local cruise-speed increment settings. ICBM/SCC-V/SCC-M remain hidden because they overlap Carrot cruise logic.")),
+      CruiseSectionHeader(lambda: tr("Cruise Button Behavior"), lambda: tr("Button behavior is limited to local cruise-speed increment settings. Curve, map, navigation, and traffic-light behavior are handled by the staged Carrot controls above.")),
       self.custom_acc_toggle,
       self.custom_acc_short_increment,
       self.custom_acc_long_increment,
@@ -309,9 +287,6 @@ class CruiseLayout(Widget):
 
       for param in ("IntelligentCruiseButtonManagement", "SmartCruiseControlVision", "SmartCruiseControlMap"):
         ui_state.params.remove(param)
-      self.icbm_toggle.action_item.set_enabled(False)
-      self.scc_v_toggle.action_item.set_enabled(False)
-      self.scc_m_toggle.action_item.set_enabled(False)
 
       if has_long:
         self.custom_acc_toggle.action_item.set_enabled((has_long and not ui_state.CP.pcmCruise) and ui_state.is_offroad())
@@ -321,8 +296,6 @@ class CruiseLayout(Widget):
 
     else:
       has_icbm = has_long = False
-      self.icbm_toggle.action_item.set_enabled(False)
-      self.icbm_toggle.set_description(tr(CARROT_CRUISE_POLICY))
 
     self.dec_toggle.action_item.set_enabled(self._dec_enabled(has_long))
     if self.dec_toggle.action_item.get_state() and not self.dec_toggle.action_item.enabled:

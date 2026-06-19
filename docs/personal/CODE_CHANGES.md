@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Sunny ICBM Runtime Removal
+
+Removed the remaining hidden Sunny cruise-button management path from the personal alpha:
+
+- `selfdrive/selfdrived/selfdrived.py` no longer imports, instantiates, or runs SunnyPilot Intelligent Cruise Button Management.
+- `selfdriveStateSP.intelligentCruiseButtonManagement` now publishes explicit inactive/none evidence values so downstream UI/log readers stay stable without control output.
+- The Cruise page no longer creates hidden ICBM/SCC-V/SCC-M widgets; it only exposes local cruise-speed increment settings and staged Carrot controls.
+- Updated the Cruise copy in English, Simplified Chinese, and Traditional Chinese so user-facing button behavior no longer names the hidden Sunny black-box controls.
+- Strengthened the alpha static gate to reject any future reintroduction of ICBM runtime wiring or Cruise-page ICBM/SCC-V/SCC-M widgets.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.25`.
+
 ## 2026-06-20 Carrot Settings Semantics
 
 Clarified the confusing visual-mode and Carrot tuning semantics:

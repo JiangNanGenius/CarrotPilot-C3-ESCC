@@ -72,7 +72,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Retain Sunny DEC as an off-by-default advanced longitudinal option, exposed in Cruise and Super Advanced without locking Carrot controls.
 - [x] Add `CurveSpeedControlMode` with Off / Sunny / Carrot / Balanced so Sunny curve quality and Carrot navigation/phone inputs can be compared and then combined.
 - [x] Add Carrot curve-speed tuning params: lower speed limit, curve factor, curve aggressiveness, navigation decel rate, and wet-road mode.
-- [ ] Remove or relabel any remaining user-facing SunnyPilot cruise concepts that conflict with Carrot behavior: ICBM, SCC-V, SCC-M, map-speed assumptions, and opaque speed-control presets.
+- [x] Remove or relabel any remaining user-facing SunnyPilot cruise concepts that conflict with Carrot behavior: ICBM, SCC-V, SCC-M, map-speed assumptions, and opaque speed-control presets.
 - [ ] Replace remaining Sunny speed-control internals with Carrot-style staged controls: independent switches for active speed, curve/turn slowdown, traffic-light stop, ATC, and button management.
 - [x] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, `SmartCruiseControlMap`, and `DynamicExperimentalControl` cannot affect control output after boot.
 - [ ] Validate speed source switching before relying on active speed assist.
@@ -121,6 +121,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Embed common staged Carrot longitudinal controls into the Cruise page: speed-limit entry, Sunny DEC, stop distance, dynamic following, decel follow boost, and follow-gap presets.
 - [x] Add a bilingual Carrot settings guide that documents confusing units and tuning directions for curve speed, navigation decel, cruise acceleration table, longitudinal tuning, path offset, steering delay, Auto-Tuner, and Fishop evidence.
 - [x] Add a release-gated contract so corrected Carrot setting descriptions and the Balanced label cannot silently regress.
+- [x] Remove the remaining hidden Sunny ICBM runtime from `selfdrived` and keep its state output inactive/none for log compatibility.
 - [x] Add Super Advanced controls for active speed, ATC/auto-turn, traffic-light stop, traffic-light detect mode, stop-distance adjustment, Carrot rain/wet mode, curve-speed strategy, curve tuning, driving mode, Eco, ATC decel, cruise decel, following, longitudinal gains, lane-line speed, and lane-line curve speed.
 - [x] Make the local Carrot Web/API match Super Advanced: advanced params are writable while offroad; `OffroadMode`, `SpeedFromPCM`, cloud params, and hardware-only params remain protected.
 - [x] Rebuild ARM64 `common/params_pyx.so` on the C3 so the new Carrot/ATC/curve/NNLC params are recognized at runtime.

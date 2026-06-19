@@ -2363,6 +2363,7 @@ def main() -> int:
   curve_speed_policy = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py")
   scc_vision_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/vision_controller.py")
   scc_map_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/map_controller.py")
+  selfdrived = read("selfdrive/selfdrived/selfdrived.py")
   cluster_world_contract = read("scripts/personal/genius_cluster_world_contract.py")
   cluster_world_module = read("selfdrive/carrot/cluster_world.py")
   cluster_world_schema_md = read("docs/personal/CARROT_CLUSTER_WORLD_SCHEMA.md")
@@ -3266,6 +3267,14 @@ def main() -> int:
                           and 'get_bool("SmartCruiseControlVision")' not in scc_vision_controller
                           and 'get_bool("SmartCruiseControlMap")' not in scc_map_controller,
                           "CurveSpeedControlMode must own Sunny SCC-V participation; SCC-M map speed must remain inert")
+  failures += not require("Sunny ICBM runtime disabled",
+                          "intelligent_cruise_button_management.controller" not in selfdrived
+                          and ".icbm.run(" not in selfdrived
+                          and "self.icbm =" not in selfdrived
+                          and "ICBM_INACTIVE_STATE" in selfdrived
+                          and "ICBM_NONE_BUTTON" in selfdrived
+                          and "icbm.vTarget = 0" in selfdrived,
+                          "selfdrived must not import, instantiate, or run Sunny ICBM in the personal alpha")
   failures += not require("Genius curve-speed release gate wired",
                           "scripts/personal/genius_curve_speed_contract.py" in release_gate
                           and "Genius curve-speed contract" in release_gate
@@ -3305,10 +3314,18 @@ def main() -> int:
                             "TFollowGap4",
                             "Cruise Button Behavior",
                             "model-speed evidence",
-                            "ICBM/SCC-V/SCC-M remain hidden",
+                            "staged Carrot controls above",
                           ))
-                          and "return bool(ui_state.is_offroad() and has_long)" in cruise_settings,
-                          "Cruise panel should expose daily Carrot speed, curve, traffic-light, model-speed, following, and button behavior controls while full fine tuning stays in Super Advanced")
+                          and "return bool(ui_state.is_offroad() and has_long)" in cruise_settings
+                          and all(token not in cruise_settings for token in (
+                            "Intelligent Cruise Button Management (ICBM) (Alpha)",
+                            "Smart Cruise Control - Vision",
+                            "Smart Cruise Control - Map",
+                            "icbm_toggle",
+                            "scc_v_toggle",
+                            "scc_m_toggle",
+                          )),
+                          "Cruise panel should expose daily Carrot speed, curve, traffic-light, model-speed, following, and local speed-increment controls without legacy Sunny ICBM/SCC-V/SCC-M widgets")
   failures += not require("C3 touch menu requires deliberate release tap",
                           "TAP_RELEASE_MOVE_PX = 24" in widget_core
                           and "__touch_cancelled" in widget_core

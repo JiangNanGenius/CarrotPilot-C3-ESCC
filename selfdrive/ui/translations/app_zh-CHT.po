@@ -1082,6 +1082,9 @@ msgstr "巡航按鍵行為"
 msgid "Button behavior stays limited to local cruise-speed increment settings. ICBM/SCC-V/SCC-M remain hidden because they overlap Carrot cruise logic."
 msgstr "按鍵行為僅限本地巡航速度步進設定。ICBM/SCC-V/SCC-M 與 Carrot 巡航邏輯重疊，因此繼續隱藏。"
 
+msgid "Button behavior is limited to local cruise-speed increment settings. Curve, map, navigation, and traffic-light behavior are handled by the staged Carrot controls above."
+msgstr "按鍵行為僅限本地巡航速度步進設定。彎道、地圖、導航和紅綠燈行為由上方分階段的 Carrot 控制項處理。"
+
 msgid "Balanced"
 msgstr "平衡"
 
