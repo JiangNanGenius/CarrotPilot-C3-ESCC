@@ -76,7 +76,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add Carrot curve-speed tuning params: lower speed limit, curve factor, curve aggressiveness, navigation decel rate, and wet-road mode.
 - [x] Remove or relabel any remaining user-facing SunnyPilot cruise concepts that conflict with Carrot behavior: ICBM, SCC-V, SCC-M, map-speed assumptions, and opaque speed-control presets.
 - [x] Replace remaining Sunny speed-control internals with Carrot-style staged controls: independent switches for active speed, curve/turn slowdown, traffic-light stop, ATC, and button management.
-- [x] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, `SmartCruiseControlMap`, and `DynamicExperimentalControl` cannot affect control output after boot.
+- [x] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, and `SmartCruiseControlMap` stay hidden/inert; `DynamicExperimentalControl` remains a separate off-by-default DEC candidate only when longitudinal support is actually available.
+- [x] Make non-curve speed control Carrot/Genius-owned by default: APN/N/Navipilot/Carrot phone data first, vehicle/cluster speed second, with Sunny map/GPS speed control opt-in only through explicit map policies.
 - [ ] Validate speed source switching before relying on active speed assist.
 
 ## Onroad Visualization

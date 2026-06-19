@@ -1,5 +1,15 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Carrot Cruise Ownership Clarification
+
+Tightened the alpha maintenance contract for cruise-speed ownership:
+
+- Documented that non-curve speed control should stay Carrot/Genius-owned by default: fresh APN/N/Navipilot/Carrot phone evidence first, then vehicle/cluster speed.
+- Reconfirmed Sunny map/GPS speed control is opt-in only through explicit map policies and must not become default speed truth again.
+- Corrected the TODO wording so DEC is not grouped with hidden Sunny conflict controls: ICBM, SCC-V, and SCC-M stay hidden/inert, while `DynamicExperimentalControl` remains a separate off-by-default DEC candidate when longitudinal support is available.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.29`.
+
 ## 2026-06-20 Carrot-First Speed Policy
 
 Made the default speed-limit path match the Carrot/Genius owner decision:
