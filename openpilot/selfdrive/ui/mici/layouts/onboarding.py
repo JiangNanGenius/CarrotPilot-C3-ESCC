@@ -277,40 +277,26 @@ class TrainingGuide(NavWidget):
     self._steps[0].render(self._rect)
 
 
-class QRCodeWidget(Widget):
-  def __init__(self, url: str, size: int = 170):
-    super().__init__()
-    self.set_rect(rl.Rectangle(0, 0, size, size))
-    self._size = size
-    self._qr_texture = make_texture(url, inverted=True)
-
-  def _render(self, _):
-    if self._qr_texture:
-      scale = self._size / self._qr_texture.height
-      rl.draw_texture_ex(self._qr_texture, rl.Vector2(round(self._rect.x), round(self._rect.y)), 0.0, scale, rl.WHITE)
-
-  def __del__(self):
-    if self._qr_texture and self._qr_texture.id != 0:
-      rl.unload_texture(self._qr_texture)
-
 
 class TermsPage(Scroller):
   def __init__(self, on_accept, on_decline):
     super().__init__()
 
-    self._accept_button = BigConfirmationCircleButton("accept\nterms", gui_app.texture("icons_mici/setup/driver_monitoring/dm_check.png", 64, 64), on_accept)
+    self._accept_button = BigPillButton("accept terms")
+    self._accept_button.set_click_callback(on_accept)
     self._decline_button = BigConfirmationCircleButton("decline &\nuninstall", gui_app.texture("icons_mici/setup/cancel.png", 64, 64), on_decline,
                                                        red=True, exit_on_confirm=False)
 
-    self._terms_header = GreyBigButton("terms of\nservice", "scroll to continue",
+    self._terms_header = GreyBigButton("CarrotPilot\nC3 ESCC", "personal alpha terms",
                                        gui_app.texture("icons_mici/setup/green_info.png", 64, 64))
-    self._must_accept_card = GreyBigButton("", "You must accept the Terms of Service to use sunnypilot.")
+    self._must_accept_card = GreyBigButton("", "Accept these safety terms before using this build.")
 
     self._scroller.add_widgets([
       self._terms_header,
-      GreyBigButton("swipe for QR code", "or go to https://sunnypilot.ai/terms",
-                    gui_app.texture("icons_mici/setup/small_slider/slider_arrow.png", 64, 56, flip_x=True)),
-      QRCodeWidget("https://sunnypilot.ai/terms"),
+      GreyBigButton("experimental\npersonal build", "For C3 clone hardware and Kia Seltos SCC testing."),
+      GreyBigButton("driver remains\nresponsible", "Hands on wheel. Watch the road. Take over immediately."),
+      GreyBigButton("local only\ncloud disabled", "No Sunnylink, comma connect pairing, cloud uploads, or cloud backup."),
+      GreyBigButton("test order", "Parked test first. Low speed test next. Normal road use only after verification."),
       self._must_accept_card,
       self._accept_button,
       self._decline_button,
@@ -365,8 +351,8 @@ class OnboardingWindow(Widget):
     self._completed_callback()
 
   def _on_terms_accepted(self):
-    ui_state.params.put("HasAcceptedTerms", terms_version, block=True)
-    ui_state.params.put("HasAcceptedTermsSP", terms_version_sp, block=True)
+    ui_state.params.put("HasAcceptedTerms", terms_version)
+    ui_state.params.put("HasAcceptedTermsSP", terms_version_sp)
     self._accepted_terms = True
     if not self._training_done:
       gui_app.push_widget(self._training_guide)
@@ -389,7 +375,7 @@ class OnboardingWindow(Widget):
       self.close()
 
   def _on_completed_training(self):
-    ui_state.params.put("CompletedTrainingVersion", training_version, block=True)
+    ui_state.params.put("CompletedTrainingVersion", training_version)
     self._training_done = True
     self.close()
 
