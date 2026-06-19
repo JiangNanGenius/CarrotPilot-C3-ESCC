@@ -11,6 +11,8 @@ LANE_MAX_AGE_S = 1.0
 BLINDSPOT_MAX_AGE_S = 2.0
 LIDAR_DISTANCE_MAX_AGE_S = 1.0
 OVERTAKE_MAX_AGE_S = 1.0
+NAVIGATION_CONTEXT_MAX_AGE_S = 5.0
+NAVIGATION_ACCURACY_THRESHOLD_M = 15.0
 FISHOP_PROTOCOL = {
   "opListenPort": 4211,
   "laneRemotePort": 4212,
@@ -59,6 +61,13 @@ TARGET_KEYS = (
   "lf_vrel", "lb_vrel", "rf_vrel", "rb_vrel",
 )
 OVERTAKE_KEYS = ("overtake", "overtake_request", "request", "direction", "reason", "index", "cmd", "arg")
+OVERTAKE_TRIGGER_KEYS = ("overtake", "overtake_request", "request", "index", "cmd", "arg")
+NAVIGATION_CONTEXT_KEYS = (
+  "provider", "mapProvider", "navProvider", "navigationProvider", "map_provider",
+  "country", "countryCode", "country_code", "region", "navRegion", "navigationRegion", "locale",
+  "accuracyM", "gpsAccuracyM", "horizontalAccuracyM", "navAccuracyM", "precisionM", "locationAccuracyM",
+  "lat", "latitude", "lon", "lng", "longitude",
+)
 OVERTAKE_DIRECTIONS = {
   "l": "left",
   "left": "left",
@@ -144,6 +153,28 @@ def _overtake_direction(*values: Any) -> str:
       if token in text:
         return direction
   return ""
+
+
+def _first_text(payload: dict[str, Any], *keys: str) -> str:
+  for key in keys:
+    text = _limited_text(payload.get(key))
+    if text:
+      return text
+  return ""
+
+
+def _first_float(payload: dict[str, Any], *keys: str) -> float | None:
+  for key in keys:
+    if key in payload:
+      value = _as_float(payload.get(key))
+      if value is not None:
+        return value
+  return None
+
+
+def _text_has_any(text: str, needles: tuple[str, ...]) -> bool:
+  lower = text.lower()
+  return any(needle.lower() in lower for needle in needles)
 
 
 def _side_object_risk(drel_mm: float | None, vrel_mps: float | None, v_ego_mps: float | None,
@@ -456,7 +487,133 @@ class OvertakeEvidence:
     }
 
 
-def _overtake_suggestion_preview(lane: dict[str, Any], blindspot: dict[str, Any], overtake: dict[str, Any]) -> dict[str, Any]:
+@dataclass
+class NavigationContextEvidence:
+  last_update_s: float = 0.
+  provider: str = ""
+  country: str = ""
+  region: str = ""
+  locale: str = ""
+  accuracy_m: float | None = None
+  precision_m: float | None = None
+  latitude: float | None = None
+  longitude: float | None = None
+
+  def update(self, payload: dict[str, Any], now_s: float) -> None:
+    provider = _first_text(payload, "provider", "mapProvider", "navProvider", "navigationProvider", "map_provider")
+    source = _limited_text(payload.get("source", payload.get("resp", payload.get("type", payload.get("device")))))
+    if not provider and _text_has_any(source, ("amap", "gaode", "autonavi", "高德", "导航")):
+      provider = source
+    if provider:
+      self.provider = provider
+
+    country = _first_text(payload, "country", "countryCode", "country_code")
+    if country:
+      self.country = country
+    region = _first_text(payload, "region", "navRegion", "navigationRegion")
+    if region:
+      self.region = region
+    locale = _first_text(payload, "locale")
+    if locale:
+      self.locale = locale
+
+    accuracy = _first_float(payload, "accuracyM", "gpsAccuracyM", "horizontalAccuracyM", "navAccuracyM", "locationAccuracyM")
+    if accuracy is not None:
+      self.accuracy_m = accuracy
+    precision = _first_float(payload, "precisionM")
+    if precision is not None:
+      self.precision_m = precision
+
+    lat = _first_float(payload, "lat", "latitude")
+    lon = _first_float(payload, "lon", "lng", "longitude")
+    if lat is not None:
+      self.latitude = lat
+    if lon is not None:
+      self.longitude = lon
+    self.last_update_s = now_s
+
+  def policy(self, fresh: bool) -> dict[str, Any]:
+    provider_text = " ".join(text for text in (self.provider, self.region, self.locale) if text)
+    country_text = " ".join(text for text in (self.country, self.region, self.locale) if text)
+    provider_supported = fresh and _text_has_any(provider_text, ("amap", "gaode", "autonavi", "高德"))
+    region_supported = fresh and (
+      _text_has_any(country_text, ("cn", "chn", "china", "中国", "mainland"))
+      or self.country.upper() in ("CN", "CHN")
+    )
+    accuracy = self.accuracy_m if self.accuracy_m is not None else self.precision_m
+    accuracy_usable = fresh and accuracy is not None and accuracy <= NAVIGATION_ACCURACY_THRESHOLD_M
+    suggestion_eligible = provider_supported and region_supported and accuracy_usable
+    reasons: list[str] = []
+    if not fresh:
+      reasons.append("navigation context is stale or missing")
+    if fresh and not provider_supported:
+      reasons.append("navigation provider is not a trusted domestic Amap/Gaode source")
+    if fresh and not region_supported:
+      reasons.append("navigation region is not mainland China; downgrade outside domestic map coverage")
+    if fresh and not accuracy_usable:
+      reasons.append("navigation accuracy is missing or worse than threshold")
+    return {
+      "readOnly": True,
+      "controlOutput": False,
+      "fresh": fresh,
+      "providerTrustedForSuggestion": provider_supported,
+      "regionSupportedForSuggestion": region_supported,
+      "accuracyUsableForSuggestion": accuracy_usable,
+      "accuracyM": _round_float(accuracy),
+      "accuracyThresholdM": NAVIGATION_ACCURACY_THRESHOLD_M,
+      "suggestionEligible": suggestion_eligible,
+      "controlEligible": False,
+      "decision": "eligible_for_suggestion_review" if suggestion_eligible else "hint_only",
+      "reasons": reasons,
+      "downgradeOutsideDomesticMap": True,
+      "notUsedFor": ("lane-change execution", "steering target", "path output"),
+    }
+
+  def to_dict(self, now_s: float) -> dict[str, Any]:
+    fresh = _fresh(self.last_update_s, now_s, NAVIGATION_CONTEXT_MAX_AGE_S)
+    return {
+      "fresh": fresh,
+      "ageSec": _age(self.last_update_s, now_s),
+      "lastUpdateMonotonicSec": self.last_update_s if self.last_update_s > 0. else None,
+      "provider": self.provider if fresh else "",
+      "country": self.country if fresh else "",
+      "region": self.region if fresh else "",
+      "locale": self.locale if fresh else "",
+      "accuracyM": _round_float(self.accuracy_m if fresh else None),
+      "precisionM": _round_float(self.precision_m if fresh else None),
+      "positionAvailable": fresh and self.latitude is not None and self.longitude is not None,
+      "latitude": _round_float(self.latitude, 6) if fresh else None,
+      "longitude": _round_float(self.longitude, 6) if fresh else None,
+      "readOnly": True,
+      "controlOutput": False,
+      "policy": self.policy(fresh),
+    }
+
+
+def _overtake_hint(basic_ready: bool, navigation_policy: dict[str, Any], direction: str, reasons: list[str]) -> dict[str, Any]:
+  available = basic_ready and not navigation_policy.get("suggestionEligible", False)
+  if available:
+    message = "overtake request is clear for hint-only display; navigation gate blocks lane-change suggestion"
+  elif basic_ready:
+    message = "overtake request is clear for suggestion review; control output remains disabled"
+  else:
+    message = "overtake hint blocked by sensor or request evidence"
+  return {
+    "readOnly": True,
+    "controlOutput": False,
+    "emitsLateralCommand": False,
+    "stage": "hint_only",
+    "available": available,
+    "direction": direction if available or basic_ready else "",
+    "message": message,
+    "blockingReasons": list(reasons),
+    "navigationRequiredBeforeSuggestion": True,
+    "downgradeOutsideDomesticMap": bool(navigation_policy.get("downgradeOutsideDomesticMap", True)),
+  }
+
+
+def _overtake_suggestion_preview(lane: dict[str, Any], blindspot: dict[str, Any],
+                                 overtake: dict[str, Any], navigation: dict[str, Any]) -> dict[str, Any]:
   direction = overtake.get("direction", "")
   reasons: list[str] = []
 
@@ -488,6 +645,11 @@ def _overtake_suggestion_preview(lane: dict[str, Any], blindspot: dict[str, Any]
   if direction == "right" and any(str(item).startswith("r") for item in active_dynamic):
     reasons.append("right dynamic blind preview blocks the suggestion")
 
+  basic_ready = not reasons
+  navigation_policy = navigation.get("policy", {}) if isinstance(navigation.get("policy"), dict) else {}
+  for reason in navigation_policy.get("reasons", []):
+    reasons.append(str(reason))
+
   ready = not reasons
   return {
     "readOnly": True,
@@ -497,11 +659,14 @@ def _overtake_suggestion_preview(lane: dict[str, Any], blindspot: dict[str, Any]
     "readyForSuggestion": ready,
     "direction": direction,
     "reasons": reasons,
+    "navigationGate": navigation_policy,
+    "overtakeHint": _overtake_hint(basic_ready, navigation_policy, direction, reasons),
     "evidence": {
       "overtakeFresh": bool(overtake.get("fresh")),
       "requestActive": bool(overtake.get("requested")),
       "laneFresh": bool(lane.get("fresh")),
       "blindspotFresh": bool(blindspot.get("fresh")),
+      "navigationFresh": bool(navigation.get("fresh")),
       "targetLaneLineClear": direction == "left" and not lane.get("leftLaneBlind") or direction == "right" and not lane.get("rightLaneBlind"),
       "blindspotClear": direction == "left" and not (blindspot.get("leftLidarBlind") or blindspot.get("leftLidarCarBlind") or blindspot.get("leftCameraBlind"))
                          or direction == "right" and not (blindspot.get("rightLidarBlind") or blindspot.get("rightLidarCarBlind") or blindspot.get("rightCameraBlind")),
@@ -518,6 +683,7 @@ class FishopHardwareState:
   lane: LaneEvidence = field(default_factory=LaneEvidence)
   blindspot: BlindspotEvidence = field(default_factory=BlindspotEvidence)
   overtake: OvertakeEvidence = field(default_factory=OvertakeEvidence)
+  navigation: NavigationContextEvidence = field(default_factory=NavigationContextEvidence)
 
   def update_from_payload(self, payload: dict[str, Any], now_s: float | None = None) -> None:
     now_s = _now() if now_s is None else now_s
@@ -529,7 +695,10 @@ class FishopHardwareState:
     if source in ("blindspot", "cam_blind", "lidar", "camera") or any(key in payload for key in BLINDSPOT_KEYS):
       self.blindspot.update(payload, now_s)
 
-    if source in ("overtake", "navi") or any(key in payload for key in OVERTAKE_KEYS):
+    if source in ("navi", "navigation", "route", "amap") or any(key in payload for key in NAVIGATION_CONTEXT_KEYS):
+      self.navigation.update(payload, now_s)
+
+    if source == "overtake" or any(key in payload for key in OVERTAKE_TRIGGER_KEYS):
       self.overtake.update(payload, now_s)
 
   def to_dict(self, now_s: float | None = None) -> dict[str, Any]:
@@ -537,12 +706,14 @@ class FishopHardwareState:
     lane = self.lane.to_dict(now_s)
     blindspot = self.blindspot.to_dict(now_s)
     overtake = self.overtake.to_dict(now_s)
-    overtake["suggestionPreview"] = _overtake_suggestion_preview(lane, blindspot, overtake)
+    navigation = self.navigation.to_dict(now_s)
+    overtake["suggestionPreview"] = _overtake_suggestion_preview(lane, blindspot, overtake, navigation)
     last_updates = [
       value for value in (
         self.lane.last_update_s,
         self.blindspot.last_update_s,
         self.overtake.last_update_s,
+        self.navigation.last_update_s,
       ) if value > 0.
     ]
     return {
@@ -554,6 +725,7 @@ class FishopHardwareState:
       "lastUpdateMonotonicSec": max(last_updates) if last_updates else None,
       "lane": lane,
       "blindspot": blindspot,
+      "navigation": navigation,
       "overtake": overtake,
     }
 

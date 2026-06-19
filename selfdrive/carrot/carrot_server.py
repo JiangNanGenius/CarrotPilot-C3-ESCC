@@ -2185,6 +2185,8 @@ async def index(_request: web.Request) -> web.Response:
           <div class="metric"><span class="label">Request</span><span class="value" id="fishop-overtake-request">-</span></div>
           <div class="metric"><span class="label">Direction</span><span class="value" id="fishop-overtake-direction">-</span></div>
           <div class="metric"><span class="label">Suggestion</span><span class="value" id="fishop-overtake-suggestion">-</span></div>
+          <div class="metric"><span class="label">Navigation gate</span><span class="value" id="fishop-navigation-gate">-</span></div>
+          <div class="metric"><span class="label">Hint</span><span class="value" id="fishop-overtake-hint">-</span></div>
           <div class="metric"><span class="label">Data path</span><span class="value" id="fishop-overtake-path">record only</span></div>
           <div class="metric"><span class="label">Boundary</span><span class="value" id="fishop-overtake-boundary">read-only</span></div>
         </div>
@@ -2261,6 +2263,19 @@ async def index(_request: web.Request) -> web.Response:
       if (preview.readyForSuggestion) return `ready ${preview.direction || ""}`.trim();
       const reasons = Array.isArray(preview.reasons) ? preview.reasons.slice(0, 2) : [];
       return reasons.length ? `blocked: ${reasons.join("; ")}` : "blocked";
+    };
+    const navigationGateSummary = (gate = {}) => {
+      if (!gate.readOnly) return "-";
+      const state = gate.suggestionEligible ? "eligible" : "hint only";
+      const provider = gate.providerTrustedForSuggestion ? "trusted map" : "map untrusted";
+      const region = gate.regionSupportedForSuggestion ? "region ok" : "region blocked";
+      const accuracy = gate.accuracyUsableForSuggestion ? `accuracy ${num(gate.accuracyM, 1)} m` : "accuracy blocked";
+      return `${state} / ${provider} / ${region} / ${accuracy}`;
+    };
+    const overtakeHintSummary = (hint = {}) => {
+      if (!hint.readOnly) return "-";
+      const state = hint.available ? "hint ready" : "no hint";
+      return `${state}: ${hint.message || "-"}`;
     };
     const controlStateSummary = (preview = {}) => {
       const state = preview.state || "display_only";
@@ -2480,6 +2495,8 @@ async def index(_request: web.Request) -> web.Response:
         setText("fishop-overtake-request", yesNo(overtake.requested));
         setText("fishop-overtake-direction", overtake.direction || "-");
         setText("fishop-overtake-suggestion", suggestionSummary(overtake.suggestionPreview || {}));
+        setText("fishop-navigation-gate", navigationGateSummary((overtake.suggestionPreview || {}).navigationGate || {}));
+        setText("fishop-overtake-hint", overtakeHintSummary((overtake.suggestionPreview || {}).overtakeHint || {}));
         setText("fishop-overtake-path", (overtake.directionality || {}).alphaAction || "record_only");
         setText("fishop-overtake-boundary", snapshot.controlOutputEnabled ? "control enabled" : "read-only");
         setText("fishop-error", data.parseError || "");

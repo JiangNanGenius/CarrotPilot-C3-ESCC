@@ -23,6 +23,8 @@ SAMPLE_PAYLOADS: list[dict[str, Any]] = [
    "lidar_lblind": True, "lidar_car_lblind": True, "rf_drel": 4200, "rb_drel": -1800,
    "rf_xrel": 850, "rf_vrel": -1.2, "v_ego_mps": 15.0},
   {"device": "camera", "resp": "cam_blind", "detect_side": 1, "left_blind": True},
+  {"device": "navi", "provider": "Mapbox", "country": "AU", "accuracyM": 3.0,
+   "lat": -33.8688, "lon": 151.2093},
   {"device": "overtake", "index": 7, "cmd": "OVERTAKE", "arg": "left",
    "request": True, "direction": "left", "reason": "hardware sample only"},
 ]
