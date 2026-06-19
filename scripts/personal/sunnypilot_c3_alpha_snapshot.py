@@ -133,6 +133,7 @@ CARROT_WEB_HOST = "127.0.0.1"
 CARROT_WEB_PORT = 7000
 CARROT_STATUS_BROADCAST_PATH = "/api/status_broadcast"
 CARROT_HEALTH_PATH = "/api/health"
+NAVIPILOT_LIVE_CHECK_SCRIPT = ROOT / "scripts/personal/navipilot_live_check.py"
 ALPHA_INSTALL_URL = "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x"
 STABLE_ROLLBACK_INSTALL_URL = "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i"
 HYUNDAI_SP_ENHANCED_SCC_FLAG = 1
@@ -667,6 +668,79 @@ def summarize_carrot_web_status(timeout: float = 1.0) -> dict[str, Any]:
   return result
 
 
+def summarize_navipilot_live_check(requested: bool, host: str, listen_seconds: float,
+                                   send_navigation_probe: bool, write_same_value: bool) -> dict[str, Any]:
+  result: dict[str, Any] = {
+    "requested": requested,
+    "available": False,
+    "overallOk": False,
+    "returnCode": None,
+    "script": str(NAVIPILOT_LIVE_CHECK_SCRIPT),
+    "host": host,
+    "listenSeconds": max(float(listen_seconds), 0.0),
+    "sendNavigationProbe": send_navigation_probe,
+    "writeSameValue": write_same_value,
+    "error": "",
+    "report": {},
+  }
+  if not requested:
+    result["overallOk"] = True
+    return result
+  if not NAVIPILOT_LIVE_CHECK_SCRIPT.is_file():
+    result["error"] = "navipilot live check script is missing"
+    return result
+
+  cmd = [
+    sys.executable,
+    str(NAVIPILOT_LIVE_CHECK_SCRIPT),
+    "--host",
+    host,
+    "--listen-seconds",
+    f"{max(float(listen_seconds), 0.0):.3f}",
+    "--json",
+  ]
+  if send_navigation_probe:
+    cmd.append("--send-navigation-probe")
+  if write_same_value:
+    cmd.append("--write-same-value")
+
+  try:
+    proc = subprocess.run(
+      cmd,
+      cwd=str(ROOT),
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE,
+      timeout=max(15.0, float(listen_seconds) + 10.0),
+      check=False,
+    )
+  except Exception as exc:
+    result["error"] = str(exc)[:400]
+    return result
+
+  result["returnCode"] = proc.returncode
+  if proc.stderr.strip():
+    result["stderr"] = proc.stderr.strip()[-800:]
+  try:
+    report = json.loads(proc.stdout)
+  except Exception as exc:
+    result["error"] = f"cannot parse navipilot live check JSON: {exc}"
+    result["stdoutTail"] = proc.stdout[-800:]
+    return result
+  if not isinstance(report, dict):
+    result["error"] = "navipilot live check did not return a JSON object"
+    return result
+
+  result["available"] = True
+  result["report"] = report
+  result["overallOk"] = proc.returncode == 0 and report.get("overallOk") is True
+  safety = report.get("safetyBoundary", {}) if isinstance(report.get("safetyBoundary"), dict) else {}
+  result["controlOutput"] = safety.get("controlOutput")
+  result["cloudServices"] = safety.get("cloudServices")
+  result["localOnly"] = safety.get("localOnly")
+  return result
+
+
 def safe_attr(obj: object, name: str, default: object = None) -> object:
   try:
     return getattr(obj, name, default)
@@ -1080,7 +1154,12 @@ def sample_messaging(seconds: int) -> dict[str, Any]:
   return result
 
 
-def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, Any]:
+def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None,
+                   navipilot_live_check_requested: bool = False,
+                   navipilot_host: str = CARROT_WEB_HOST,
+                   navipilot_listen_seconds: float = 3.0,
+                   navipilot_send_navigation_probe: bool = False,
+                   navipilot_write_same_value: bool = False) -> dict[str, Any]:
   safe_params = read_safe_params()
   process = process_snapshot()
   messaging = sample_messaging(sample_seconds)
@@ -1088,6 +1167,13 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
   car_params_sp = summarize_car_params_sp()
   fishop = fishop_snapshot(fishop_jsonl)
   carrot_web = summarize_carrot_web_status()
+  navipilot_live_check = summarize_navipilot_live_check(
+    navipilot_live_check_requested,
+    navipilot_host,
+    navipilot_listen_seconds,
+    navipilot_send_navigation_probe,
+    navipilot_write_same_value,
+  )
   navigation = summarize_navigation_event()
   auto_tuner = summarize_auto_tuner(safe_params)
   carrot_feature_gates = summarize_carrot_feature_gates(safe_params, navigation, auto_tuner, fishop)
@@ -1121,6 +1207,7 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None) -> dict[str, 
     "speedLimitEvidence": summarize_speed_limit(safe_params, messaging),
     "navigationEvidence": navigation,
     "carrotWeb": carrot_web,
+    "navipilotLiveCheck": navipilot_live_check,
     "carrotFeatureGates": carrot_feature_gates,
     "autoTuner": auto_tuner,
     "process": process,
@@ -1141,11 +1228,25 @@ def main() -> int:
   parser.add_argument("--fishop-jsonl", type=Path, help="optional fishop hardware JSON Lines capture")
   parser.add_argument("--output", type=Path, help="write JSON report to this path")
   parser.add_argument("--pretty", action="store_true", help="pretty-print JSON")
+  parser.add_argument("--navipilot-live-check", action="store_true", help="run the local Navipilot / CPdazi endpoint live check")
+  parser.add_argument("--navipilot-host", default=CARROT_WEB_HOST, help="host used for the Navipilot live check")
+  parser.add_argument("--navipilot-listen-seconds", type=float, default=3.0, help="seconds to listen for UDP 7705 during the live check")
+  parser.add_argument("--navipilot-send-navigation-probe", action="store_true", help="send one safe evidence-only navigation probe while parked")
+  parser.add_argument("--navipilot-write-same-value", action="store_true", help="test /api/param_set by writing a safe param back to its current value")
   parser.add_argument("--require-no-cloud-processes", action="store_true", help="fail if disabled cloud/upload processes are running")
   parser.add_argument("--require-fishop-release-gate", action="store_true", help="fail if fishop next-stage evidence gate is not satisfied")
+  parser.add_argument("--require-navipilot-live-check", action="store_true", help="fail if the Navipilot live check is not clean")
   args = parser.parse_args()
 
-  snapshot = build_snapshot(max(args.sample_seconds, 0), args.fishop_jsonl)
+  snapshot = build_snapshot(
+    max(args.sample_seconds, 0),
+    args.fishop_jsonl,
+    navipilot_live_check_requested=args.navipilot_live_check or args.require_navipilot_live_check,
+    navipilot_host=args.navipilot_host,
+    navipilot_listen_seconds=args.navipilot_listen_seconds,
+    navipilot_send_navigation_probe=args.navipilot_send_navigation_probe,
+    navipilot_write_same_value=args.navipilot_write_same_value,
+  )
   text = json.dumps(snapshot, ensure_ascii=False, indent=2 if args.pretty else None, sort_keys=True)
   if args.output:
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -1158,6 +1259,8 @@ def main() -> int:
     return 2
   if args.require_fishop_release_gate and not snapshot["fishopReleaseGate"]["readyForNextStageReview"]:
     return 3
+  if args.require_navipilot_live_check and not snapshot["navipilotLiveCheck"]["overallOk"]:
+    return 4
   return 0
 
 

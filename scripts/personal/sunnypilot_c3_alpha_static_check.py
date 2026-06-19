@@ -1329,6 +1329,53 @@ def check_alpha_snapshot_carrot_web_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_alpha_snapshot_navipilot_live_check_runtime() -> tuple[bool, str]:
+  try:
+    snapshot = import_file("alpha_snapshot_navipilot_live_check_static_check", "scripts/personal/sunnypilot_c3_alpha_snapshot.py")
+
+    idle = snapshot.summarize_navipilot_live_check(False, "127.0.0.1", 0.0, False, False)
+    if idle.get("requested") is not False or idle.get("overallOk") is not True:
+      return False, "navipilot live check idle snapshot should be non-blocking"
+
+    class FakeCompleted:
+      returncode = 0
+      stderr = ""
+      stdout = json.dumps({
+        "overallOk": True,
+        "checks": [{"name": "7000 health", "status": "pass"}],
+        "safetyBoundary": {
+          "localOnly": True,
+          "cloudServices": False,
+          "controlOutput": False,
+        },
+      })
+
+    def fake_run(cmd, **_kwargs):
+      joined = " ".join(str(item) for item in cmd)
+      if "navipilot_live_check.py" not in joined or "--json" not in cmd or "--host" not in cmd:
+        raise RuntimeError(f"unexpected navipilot live check command: {joined}")
+      if "--send-navigation-probe" in cmd:
+        raise RuntimeError("safe navigation probe should be opt-in and absent in this runtime check")
+      return FakeCompleted()
+
+    previous_run = snapshot.subprocess.run
+    snapshot.subprocess.run = fake_run
+    try:
+      report = snapshot.summarize_navipilot_live_check(True, "127.0.0.1", 0.0, False, True)
+    finally:
+      snapshot.subprocess.run = previous_run
+
+    if report.get("requested") is not True or report.get("available") is not True or report.get("overallOk") is not True:
+      return False, "navipilot live check requested snapshot did not record a clean report"
+    if report.get("controlOutput") is not False or report.get("cloudServices") is not False or report.get("localOnly") is not True:
+      return False, "navipilot live check snapshot did not preserve safety boundary"
+    if report.get("writeSameValue") is not True or report.get("sendNavigationProbe") is not False:
+      return False, "navipilot live check snapshot did not preserve requested options"
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_compat_audit_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -1990,6 +2037,18 @@ def main() -> int:
   ok, detail = check_alpha_snapshot_carrot_web_runtime()
   failures += not require("alpha snapshot Carrot Web runtime", ok,
                           detail or "Carrot Web snapshot runtime check failed")
+  failures += not require("alpha snapshot records Navipilot live check",
+                          "NAVIPILOT_LIVE_CHECK_SCRIPT" in alpha_snapshot
+                          and "def summarize_navipilot_live_check" in alpha_snapshot
+                          and '"navipilotLiveCheck": navipilot_live_check' in alpha_snapshot
+                          and "--navipilot-live-check" in alpha_snapshot
+                          and "--navipilot-send-navigation-probe" in alpha_snapshot
+                          and "--navipilot-write-same-value" in alpha_snapshot
+                          and "--require-navipilot-live-check" in alpha_snapshot,
+                          "alpha snapshot must optionally run the C3-side Navipilot / CPdazi live endpoint check")
+  ok, detail = check_alpha_snapshot_navipilot_live_check_runtime()
+  failures += not require("alpha snapshot Navipilot live check runtime", ok,
+                          detail or "Navipilot live check snapshot runtime failed")
   for key in ("CarrotNaviDebug", "CarrotNaviEvent", "CarrotNaviImage"):
     failures += not require(f"alpha snapshot records navigation HTTP evidence: {key}", f'"{key}"' in alpha_snapshot,
                             f"alpha snapshot must include {key} for 7713 navigation HTTP evidence")
