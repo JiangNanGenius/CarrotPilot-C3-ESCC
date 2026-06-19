@@ -1,5 +1,16 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 MICI Branding Cleanup
+
+Cleaned up the last obvious old-brand strings that could still appear on C3/MICI settings surfaces:
+
+- The MICI main toggle now says `enable Genius Pilot` instead of `enable sunnypilot`.
+- The MICI update button now says `update Genius Pilot` instead of `update sunnypilot`.
+- Expanded `scripts/personal/genius_branding_contract.py` so future builds check the MICI device/update and toggle pages for old visible SunnyPilot copy.
+- Kept internal package paths and copyright headers unchanged because they are upstream structure, not user-facing product branding.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.26`.
+
 ## 2026-06-20 Sunny ICBM Runtime Removal
 
 Removed the remaining hidden Sunny cruise-button management path from the personal alpha:
