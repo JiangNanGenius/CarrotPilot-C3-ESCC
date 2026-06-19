@@ -2508,6 +2508,7 @@ def main() -> int:
                             f"alpha snapshot must report disabled cloud process {disabled_process}")
 
   settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+  carrot_settings = read("selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
   core_mici_settings = read("selfdrive/ui/mici/layouts/settings/settings.py")
   settings_ui_device = read("sunnypilot/sunnylink/settings_ui_src/pages/device.yaml")
@@ -2526,6 +2527,33 @@ def main() -> int:
   system_statsd = read("system/statsd.py")
   failures += not require("Sunnylink panel removed", "SunnylinkLayout" not in settings and "SUNNYLINK" not in settings,
                           "Sunnylink panel is still wired into settings")
+  failures += not require("Carrot settings panel wired",
+                          "CarrotLayout" in settings and "OP.PanelType.CARROT" in settings,
+                          "Carrot/Genius local feature panel is not wired into the settings sidebar")
+  failures += not require("Carrot settings exposes local feature toggles",
+                          all(token in carrot_settings for token in (
+                            "CarrotPhoneSpeedLimitEnabled",
+                            "CarrotMapOverlayEnabled",
+                            "CarrotLearningActive",
+                            "CarrotLearningAutoApply",
+                            "CarrotTunerApplyLat",
+                            "CarrotTunerApplyLong",
+                            "FishopLaneCurveEnabled",
+                            "FishopLidarBlindspotEnabled",
+                            "FishopLidarLaneDataEnabled",
+                          )),
+                          "Carrot/Genius settings panel must expose phone limit, map overlay, Auto-Tuner, and fishop input gates")
+  failures += not require("Carrot high-risk settings locked off",
+                          all(token in carrot_settings for token in (
+                            "CarrotActiveSpeedControlEnabled",
+                            "CarrotAutoTurnControlEnabled",
+                            "CarrotTrafficStopEnabled",
+                            "FishopAutoOvertakeEnabled",
+                            "LOCKED_CONTROL_PARAMS",
+                            "self._params.put_bool(param, False)",
+                            "toggle.action_item.set_enabled(False)",
+                          )),
+                          "high-risk Carrot/fishop control gates must stay visible but locked off in alpha UI")
   failures += not require("MICI Sunnylink panel removed", "SunnylinkLayoutMici" not in mici_settings and "sunnylink_btn" not in mici_settings,
                           "MICI Sunnylink panel is still wired into settings")
   failures += not require("Onroad Uploads setting removed", "Onroad Uploads" not in device_settings,
