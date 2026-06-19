@@ -79,3 +79,26 @@ Initial reference baseline fetched on 2026-06-19:
 - `dhvms-carrotpilot-master`: `be766a9dad2b`, watched changes `403`, risk hits `2`
 
 Risk-token hits in reference branches do not fail the audit by themselves. They are review evidence so cloud/private/power behavior is not copied into this personal alpha by accident.
+
+## 2026-06-19 C3 Device Evidence Collector
+
+`scripts/personal/sunnypilot_c3_device_collect.py` can SSH to the clone C3, collect install/launch logs, process lists, safe params, network listeners, and a Carrot alpha snapshot, then fetch a tarball back to the Mac desktop.
+
+Normal parked evidence after `/x` installs:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_device_collect.py \
+  --host 192.168.100.174 \
+  --navipilot-live-check \
+  --require-no-cloud-processes
+```
+
+Installer crash/download-screen exit evidence:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_device_collect.py \
+  --host 192.168.100.174 \
+  --skip-snapshot
+```
+
+The collector intentionally reads only safe params and logs. It does not collect SSH private keys and does not write vehicle-control params.
