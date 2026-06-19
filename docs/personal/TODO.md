@@ -363,12 +363,14 @@ flowchart TD
 
 ### P8.8: Carrot / 机械小哥功能迁移
 
-- [ ] 迁移 CarrotMan。
+- [x] 迁移 CarrotMan 协议兼容层：alpha 复刻旧 CarrotMan 的 7705 状态广播、7706 UDP 导航输入、7712 TCP 导航输入和 7713 HTTP 导航输入，保持只读证据模式，不迁移 tmux/FTP/远程上传/控制输出。
+- [x] alpha CarrotMan APP 发现兼容：7706/7712/7713 收到本地 APP 输入后记录私有 LAN peer，7705 除广播外会向最近活跃 peer 单播状态；peer 超时后自动回到广播，公网 peer 不参与单播。
 - [x] alpha Carrot Web 新增只读 UDP 7705 状态广播骨架，包含 Navipilot APP 驾驶评分启动需要的 `Carrot2`、`IsOnroad`、`active`、`v_ego_kph`、`v_cruise_kph`、`carcruiseSpeed`、`tbt_dist`、`sdi_dist`、`xState`、`trafficState`。
 - [x] alpha 7705 状态广播会带出最近一次导航输入里的 TBT/SDI/限速摘要，并明确 `controlOutput=false`。
 - [x] alpha 7705 状态广播接入真实 messaging 只读缓存：`carState` 车速/巡航、`selfdriveState` active/enabled、`longitudinalPlanSP` / `carStateSP` 限速摘要。
 - [x] alpha 7705 状态广播补齐旧 CarrotMan / CP搭子发现兼容字段：`CarrotRouteActive`、`ip`、`port`、`navi_http_port`、`log_carrot`；7713 导航 HTTP 绑定成功后才广播 `navi_http_port=7713` / `naviHttpAvailable=true`。
 - [x] alpha 7705 状态广播补充 `navi_tcp_port=7712` / `naviTcpAvailable`，仅在 7712 TCP 导航输入服务绑定成功后宣称可用。
+- [x] alpha 7705 状态广播补充 `carrotManPeer` / `carrotManPeerActive` / `carrotManPeerHost` 证据，`/api/status_broadcast` 返回 `activeTargets` 和 `lastTargets`，便于停车测试确认 APP 单播发现。
 - [ ] alpha 7705 状态广播接入真正 CarrotMan / Carrot 控制运行态；在控制逻辑迁移前 `xState`、`trafficState` 必须继续保持 0。
 - [x] 迁移旧 CarrotMan 7713 导航 HTTP 兼容入口：`POST /api/navi`、`POST /api/navi/{version}` 和 `/health`，只记录 `rgdata`、`sinf`、`ssinf`、`vrtx/route`、`complexCrossroad` 证据，不发布控制。
 - [x] 迁移旧 CarrotMan 7712 TCP 导航输入兼容入口：接收行式 JSON `rgdata` / `vrtx`，只记录证据和安全导航摘要，不发布控制。
