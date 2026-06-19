@@ -1,5 +1,23 @@
 # 当前代码改动记录
 
+## 2026-06-19: alpha C3 启动安装链路门禁
+
+改动文件：
+
+- `scripts/personal/sunnypilot_c3_alpha_static_check.py`
+
+改动内容：
+
+- 新增 `check_c3_install_boot_contract()`，直接检查 C3 launcher 跳转、C3 专用 `AGNOS_VERSION=12.8`、C3 `agnos.json` 分区 manifest、TICI/TIZI/MICI binary installer 分支迁移和 alpha channel=tici 门禁。
+- `read()` 改为复用 `safe_read_text()`，避免 macOS dataless/占位文件让完整静态检查卡死。
+- 重建本地 alpha 工作树，旧目录保留为 `openpilot-sunnypilot-011-c3.dataless-backup-20260619-134831`，新目录指向 `b93c9c4`。
+
+验证：
+
+- `python3 -m py_compile scripts/personal/sunnypilot_c3_alpha_static_check.py`
+- `check_c3_install_boot_contract()` 单独返回 `True`
+- `/tmp/carrot-alpha-c3-gate` 中 `python3 scripts/personal/sunnypilot_c3_alpha_static_check.py`
+
 ## 2026-06-19: alpha capnp 生成物同步和静态检查加固
 
 改动文件：

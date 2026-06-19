@@ -530,6 +530,7 @@ flowchart LR
 - [x] alpha 设备证据快照脚本语法检查、无设备输出、fishop JSONL 样例输出通过。
 - [x] schema 文本契约检查通过：`custom.capnp` / `log.capnp` 无重复字段名/编号，Sunny SP 服务和手机限速 source/schema 字段存在；C3 设备端 capnp 编译仍留到停车验证补证据。
 - [x] capnp 生成物契约检查通过：alpha 静态检查确认 `cereal/gen/cpp/custom.capnp.h` 已包含 phone source、sourceLabel、speedLimitFinal 和 SP 结构，避免 schema 更新后忘记同步生成头。
+- [x] C3 install/boot 直接契约检查通过：alpha 静态检查直接验证 `launch_openpilot.sh` C3 跳转、C3 专用 12.8 AGNOS manifest、TICI/TIZI/MICI installer 迁移和 alpha channel=tici 门禁。
 - [x] params 检查通过。
 - [x] services 检查通过：`cereal/services.py` 与生成的 `services.h` 一致，模型管理器、`longitudinalPlanSP`、`carStateSP`、`modelDataV2SP` 等服务参数受静态守门覆盖。
 - [x] Hyundai interface 检查通过。
@@ -577,6 +578,7 @@ flowchart LR
 - [ ] Mr.One 补丁复核：重新抓取 `devc3/res`，只把 C3/TICI 启动、installer、硬件识别、modeld 兼容补丁归类到 patch queue；私有注册、上传、额外 client、永不关机和大面积 safety/opendbc 改动继续列入拒绝清单。
 - [ ] C3 构建闭环：在 alpha 工作树跑 Python/JS/YAML/schema 静态检查，补一次 capnp 生成文件一致性检查，并确认 C3 launcher、AGNOS manifest、installer 和 branch channel gate 全部指向 `tici`/C3 路径。
   - [x] alpha 已补 `capnp generated contract check`，并重新生成 `cereal/gen/cpp/custom.capnp.h/.c++`，修复 phone/sourceLabel schema 与生成物不同步。
+  - [x] alpha 已补 `C3 install/boot direct contract`，静态检查直接验证 C3 launcher、12.8 AGNOS 分区 manifest、installer TICI/TIZI/MICI 分支迁移和 `alpha-sunnypilot-c3` / `experimental/sunnypilot-011-c3` 的 `tici` channel gate。
 - [ ] 云服务闭环：用静态检查和设备快照双重证明 `athenad`、Sunnylink、uploader、`statsd_sp`、backup manager、remote pairing、cloud backup 都不会启动；本地 Wi-Fi、SSH、Web、更新、模型下载仍可用。
 - [ ] Seltos 2023 闭环：用静态检查证明 2023 SCC 纯 CAN 仍复用 2021 配置，Non-SCC/CANFD/HDA2/Camera-SCC 不会误入；用设备 CarParams 证明实际识别路径正确。
 - [ ] ESCC 闭环：只接受 0x2AB 自动识别 `ENHANCED_SCC`；设备快照必须记录 0x2AB、spFlags、安全参数和无云进程证据。
