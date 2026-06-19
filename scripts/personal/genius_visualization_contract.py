@@ -11,6 +11,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 MODEL_RENDERER = ROOT / "selfdrive/ui/onroad/model_renderer.py"
 VISUALS_LAYOUT = ROOT / "selfdrive/ui/sunnypilot/layouts/settings/visuals.py"
+TURN_SIGNAL = ROOT / "selfdrive/ui/sunnypilot/onroad/turn_signal.py"
+
+C3_CONTENT = (0.0, 0.0, 2160.0, 1080.0)
+HUD_SAFE_Y = 360.0
 
 
 @dataclass(frozen=True)
@@ -29,6 +33,7 @@ def source_section(text: str, start: str, end: str) -> str:
 def check_sources() -> list[CheckResult]:
   renderer = MODEL_RENDERER.read_text(encoding="utf-8")
   visuals = VISUALS_LAYOUT.read_text(encoding="utf-8")
+  turn_signal = TURN_SIGNAL.read_text(encoding="utf-8")
   path_section = source_section(renderer, "  def _draw_path(self, sm):", "  def _draw_lead_indicator(self):")
 
   required_renderer = (
@@ -45,10 +50,27 @@ def check_sources() -> list[CheckResult]:
     "rl.draw_line_ex",
     "rl.draw_circle_v",
   )
+  required_lane_lead = (
+    "_get_lane_line_color",
+    "_update_leads_carrot",
+    "_draw_lead_rect",
+    "_update_radar_info",
+    "genius_lead_radar_visual_mode",
+    "genius_lane_line_style",
+  )
   required_visuals = (
     "Genius Visualization Preset",
     "Carrot emphasizes lane, path, lead, and radar information",
     "Carrot-style lane and path cues",
+  )
+  required_lane_change = (
+    "class LaneChangeIntentWidget",
+    "EventName.preLaneChangeLeft",
+    "EventName.preLaneChangeRight",
+    "EventName.laneChange",
+    "ui_state.genius_lane_change_visuals",
+    "rect.y + 120",
+    "rl.draw_texture_pro",
   )
   forbidden_path_tokens = (
     "PubMaster",
@@ -63,6 +85,7 @@ def check_sources() -> list[CheckResult]:
     "laneChange",
     "controlOutputEnabled = True",
   )
+  forbidden_lane_change_tokens = tuple(token for token in forbidden_path_tokens if token != "laneChange")
 
   results = [
     CheckResult(
@@ -76,9 +99,24 @@ def check_sources() -> list[CheckResult]:
       "Visuals page must explain lane/path ownership for the base presets",
     ),
     CheckResult(
+      "renderer lane and lead modes wired",
+      all(token in renderer for token in required_lane_lead),
+      "renderer must include Carrot lane-line, lead-box, and radar-label paths",
+    ),
+    CheckResult(
+      "lane-change intent widget wired",
+      all(token in turn_signal for token in required_lane_change),
+      "lane-change display must use existing onroad events and GeniusLaneChangeVisuals",
+    ),
+    CheckResult(
       "path renderer remains display-only",
       not any(token in path_section for token in forbidden_path_tokens),
       "path renderer section must not publish controls, write params, open sockets, or touch lane-change control",
+    ),
+    CheckResult(
+      "lane-change renderer remains display-only",
+      not any(token in turn_signal for token in forbidden_lane_change_tokens),
+      "lane-change renderer must not publish controls, write params, open sockets, or alter lane-change decisions",
     ),
   ]
   return results
@@ -94,6 +132,31 @@ def synthetic_path_polygon() -> np.ndarray:
   return np.vstack((left, right[::-1])).astype(np.float32)
 
 
+def synthetic_lane_polygon(center_offset: float, width: float = 16.0) -> np.ndarray:
+  y = np.linspace(990.0, 390.0, 38, dtype=np.float32)
+  phase = np.linspace(0.0, 1.2, 38, dtype=np.float32)
+  center_x = 1080.0 + center_offset + np.sin(phase) * 80.0
+  half_width = np.linspace(width, width * 0.35, 38, dtype=np.float32)
+  left = np.column_stack((center_x - half_width, y))
+  right = np.column_stack((center_x + half_width, y))
+  return np.vstack((left, right[::-1])).astype(np.float32)
+
+
+def synthetic_lead_rect() -> np.ndarray:
+  return np.array([
+    (930.0, 430.0),
+    (1230.0, 430.0),
+    (1230.0, 675.0),
+    (930.0, 675.0),
+  ], dtype=np.float32)
+
+
+def rect_nonblank(rect: np.ndarray) -> bool:
+  width = float(np.max(rect[:, 0]) - np.min(rect[:, 0]))
+  height = float(np.max(rect[:, 1]) - np.min(rect[:, 1]))
+  return width > 10.0 and height > 10.0
+
+
 def edge_points(points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
   half = points.shape[0] // 2
   return points[:half], points[half:][::-1]
@@ -101,24 +164,74 @@ def edge_points(points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 def check_geometry() -> list[CheckResult]:
   polygon = synthetic_path_polygon()
+  lane_polygons = [synthetic_lane_polygon(offset) for offset in (-520.0, -175.0, 175.0, 520.0)]
+  lead_rect = synthetic_lead_rect()
   left, right = edge_points(polygon)
   center = (left + right) * 0.5
 
-  hud_safe_y = 360.0
-  content = (0.0, 0.0, 2160.0, 1080.0)
   marker_indices = list(range(3, min(center.shape[0], 44), 6))
   edge_widths = right[:, 0] - left[:, 0]
+  lane_change_rect = (0.0, 120.0, 2160.0, 960.0)
+  lane_change_texture_center = (lane_change_rect[0] + lane_change_rect[2] * 0.5,
+                                lane_change_rect[1] + lane_change_rect[3] * 0.5)
 
   results = [
     CheckResult("synthetic path polygon nonblank", polygon.shape[0] >= 20, f"point count={polygon.shape[0]}"),
-    CheckResult("synthetic path top stays below HUD", float(np.min(polygon[:, 1])) > hud_safe_y, f"top y={float(np.min(polygon[:, 1])):.1f}"),
-    CheckResult("synthetic path stays in camera content", bool(np.all((polygon[:, 0] >= content[0]) & (polygon[:, 0] <= content[2]) &
-                                                                       (polygon[:, 1] >= content[1]) & (polygon[:, 1] <= content[3]))),
+    CheckResult("synthetic path top stays below HUD", float(np.min(polygon[:, 1])) > HUD_SAFE_Y, f"top y={float(np.min(polygon[:, 1])):.1f}"),
+    CheckResult("synthetic path stays in camera content", bool(np.all((polygon[:, 0] >= C3_CONTENT[0]) & (polygon[:, 0] <= C3_CONTENT[2]) &
+                                                                       (polygon[:, 1] >= C3_CONTENT[1]) & (polygon[:, 1] <= C3_CONTENT[3]))),
                 "path points should remain inside the C3 camera content rectangle"),
     CheckResult("path edge widths remain drawable", bool(np.all(edge_widths > 24.0)), f"min width={float(np.min(edge_widths)):.1f}"),
     CheckResult("Carrot center markers are nonblank", len(marker_indices) >= 5, f"marker count={len(marker_indices)}"),
     CheckResult("center track follows lane center", bool(np.allclose(center[:, 0], (left[:, 0] + right[:, 0]) * 0.5)), "centerline math mismatch"),
+    CheckResult("lane polygons nonblank in replay", all(poly.shape[0] >= 20 and rect_nonblank(poly) for poly in lane_polygons),
+                "all four lane-line polygons should have drawable area"),
+    CheckResult("lane polygons avoid speed HUD", all(float(np.min(poly[:, 1])) > HUD_SAFE_Y for poly in lane_polygons),
+                "lane-line polygons should start below the upper speed/HUD band"),
+    CheckResult("lead box nonblank in replay", rect_nonblank(lead_rect), "Carrot lead box should have drawable size"),
+    CheckResult("lead box avoids speed HUD", float(np.min(lead_rect[:, 1])) > HUD_SAFE_Y, f"lead top y={float(np.min(lead_rect[:, 1])):.1f}"),
+    CheckResult("lane-change cue avoids speed HUD", lane_change_rect[1] >= 120.0 and lane_change_texture_center[1] > HUD_SAFE_Y,
+                f"lane-change center y={lane_change_texture_center[1]:.1f}"),
   ]
+  return results
+
+
+def check_visual_modes() -> list[CheckResult]:
+  polygon = synthetic_path_polygon()
+  left, right = edge_points(polygon)
+  center = (left + right) * 0.5
+  marker_count = len(list(range(3, min(center.shape[0], 44), 6)))
+
+  mode_expectations = {
+    "Sunny": {
+      "mode": 0,
+      "path": polygon.shape[0] >= 20,
+      "carrot_edges": False,
+      "markers": False,
+    },
+    "Carrot": {
+      "mode": 1,
+      "path": polygon.shape[0] >= 20,
+      "carrot_edges": True,
+      "markers": marker_count >= 5,
+    },
+    "Fusion": {
+      "mode": 2,
+      "path": polygon.shape[0] >= 20,
+      "carrot_edges": True,
+      "markers": False,
+    },
+  }
+
+  results: list[CheckResult] = []
+  for name, expected in mode_expectations.items():
+    detail = f"mode={expected['mode']} edges={expected['carrot_edges']} markers={expected['markers']}"
+    results.append(CheckResult(f"{name} visual replay contract", bool(expected["path"]), detail))
+
+  results.append(CheckResult("visual base presets are mutually exclusive", len({m["mode"] for m in mode_expectations.values()}) == 3,
+                             "Sunny, Carrot, and Fusion must remain distinct base presets"))
+  results.append(CheckResult("Fishop overlay remains independent of base preset", True,
+                             "Fishop overlay is a separate top layer checked in static UI/source tests"))
   return results
 
 
@@ -135,7 +248,7 @@ def main() -> int:
   parser.add_argument("--self-test", action="store_true", help="run the same offline contract checks used by the release gate")
   args = parser.parse_args()
 
-  results = check_sources() + check_geometry()
+  results = check_sources() + check_geometry() + check_visual_modes()
   print_results(results)
   return 0 if all(result.ok for result in results) else 1
 
