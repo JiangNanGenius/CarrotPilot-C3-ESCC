@@ -5,6 +5,7 @@ import threading
 import time
 import urllib.request
 import urllib.error
+from collections.abc import Callable
 from urllib.parse import urlparse
 from enum import IntEnum
 
@@ -29,6 +30,7 @@ NEXT_BUTTON_WIDTH = 310
 BODY_FONT_SIZE = 80
 BUTTON_HEIGHT = 160
 BUTTON_SPACING = 50
+CRITICAL_TAP_EXPAND_PX = 55
 
 OPENPILOT_URL = "https://openpilot.comma.ai"
 USER_AGENT = f"AGNOSSetup-{HARDWARE.get_os_version()}"
@@ -61,6 +63,8 @@ class Setup(Widget):
     self.download_url = ""
     self.download_progress = 0
     self.download_thread = None
+    self._fallback_actions: list[tuple[rl.Rectangle, Callable[[], None], Callable[[], bool]]] = []
+    self._ignore_release_after_press = False
     self.wifi_ui = WifiManagerUI(WifiManager())
     self.keyboard = Keyboard()
     self.selected_radio = None
@@ -134,7 +138,7 @@ class Setup(Widget):
       self._custom_software_warning_back_button,
     )
     for button in setup_buttons:
-      button.set_tap_release_move_px(80)
+      button.set_tap_release_move_px(140)
 
     try:
       with open("/sys/class/hwmon/hwmon1/in1_input") as f:
@@ -145,6 +149,7 @@ class Setup(Widget):
       self.state = SetupState.LOW_VOLTAGE
 
   def _render(self, rect: rl.Rectangle):
+    self._fallback_actions = []
     if self.state == SetupState.LOW_VOLTAGE:
       self.render_low_voltage(rect)
     elif self.state == SetupState.GETTING_STARTED:
@@ -194,11 +199,51 @@ class Setup(Widget):
     self.state = SetupState.SOFTWARE_SELECTION
 
   def _network_setup_continue_button_callback(self):
+    if not self.network_connected.is_set():
+      return
     self.stop_network_check_thread.set()
     if self._software_selection_openpilot_button.selected:
       self.download(OPENPILOT_URL)
     else:
       self.state = SetupState.CUSTOM_SOFTWARE
+
+  def _select_openpilot(self):
+    self._software_selection_openpilot_button.selected = True
+    self._software_selection_custom_software_button.selected = False
+    self._software_selection_continue_button.set_enabled(True)
+
+  def _select_custom_software(self):
+    self._software_selection_custom_software_button.selected = True
+    self._software_selection_openpilot_button.selected = False
+    self._software_selection_continue_button.set_enabled(True)
+
+  def _critical_tap_rect(self, rect: rl.Rectangle) -> rl.Rectangle:
+    return rl.Rectangle(rect.x - CRITICAL_TAP_EXPAND_PX,
+                        rect.y - CRITICAL_TAP_EXPAND_PX,
+                        rect.width + CRITICAL_TAP_EXPAND_PX * 2,
+                        rect.height + CRITICAL_TAP_EXPAND_PX * 2)
+
+  def _set_fallback_actions(self, actions: list[tuple[rl.Rectangle, Callable[[], None], Callable[[], bool] | bool]]):
+    self._fallback_actions = []
+    for rect, callback, enabled in actions:
+      enabled_cb = enabled if callable(enabled) else (lambda value=bool(enabled): value)
+      self._fallback_actions.append((self._critical_tap_rect(rect), callback, enabled_cb))
+
+  def _activate_at(self, mouse_pos) -> bool:
+    for rect, callback, enabled_cb in reversed(self._fallback_actions):
+      if enabled_cb() and rl.check_collision_point_rec(mouse_pos, rect):
+        callback()
+        return True
+    return False
+
+  def _handle_mouse_press(self, mouse_pos):
+    self._ignore_release_after_press = self._activate_at(mouse_pos)
+
+  def _handle_mouse_release(self, mouse_pos):
+    if self._ignore_release_after_press:
+      self._ignore_release_after_press = False
+      return
+    self._activate_at(mouse_pos)
 
   def render_low_voltage(self, rect: rl.Rectangle):
     rl.draw_texture_ex(self.warning, rl.Vector2(rect.x + 150, rect.y + 110), 0.0, 1.0, rl.WHITE)
@@ -208,8 +253,14 @@ class Setup(Widget):
 
     button_width = (rect.width - MARGIN * 3) / 2
     button_y = rect.height - MARGIN - BUTTON_HEIGHT
-    self._low_voltage_poweroff_button.render(rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT))
-    self._low_voltage_continue_button.render(rl.Rectangle(rect.x + MARGIN * 2 + button_width, button_y, button_width, BUTTON_HEIGHT))
+    poweroff_rect = rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT)
+    continue_rect = rl.Rectangle(rect.x + MARGIN * 2 + button_width, button_y, button_width, BUTTON_HEIGHT)
+    self._set_fallback_actions([
+      (poweroff_rect, HARDWARE.shutdown, True),
+      (continue_rect, self._low_voltage_continue_button_callback, True),
+    ])
+    self._low_voltage_poweroff_button.render(poweroff_rect)
+    self._low_voltage_continue_button.render(continue_rect)
 
   def render_getting_started(self, rect: rl.Rectangle):
     self._getting_started_title_label.render(rl.Rectangle(rect.x + 165, rect.y + 280, rect.width - 265, TITLE_FONT_SIZE * FONT_SCALE))
@@ -217,6 +268,7 @@ class Setup(Widget):
                                                          BODY_FONT_SIZE * FONT_SCALE * 3))
 
     btn_rect = rl.Rectangle(rect.width - NEXT_BUTTON_WIDTH, 0, NEXT_BUTTON_WIDTH, rect.height)
+    self._set_fallback_actions([(btn_rect, self._getting_started_button_callback, True)])
     self._getting_started_button.render(btn_rect)
     triangle = gui_app.texture("images/button_continue_triangle.png", 54, int(btn_rect.height))
     rl.draw_texture_v(triangle, rl.Vector2(btn_rect.x + btn_rect.width / 2 - triangle.width / 2, btn_rect.height / 2 - triangle.height / 2), rl.WHITE)
@@ -257,14 +309,20 @@ class Setup(Widget):
     button_width = (rect.width - BUTTON_SPACING - MARGIN * 2) / 2
     button_y = rect.height - BUTTON_HEIGHT - MARGIN
 
-    self._network_setup_back_button.render(rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT))
+    back_rect = rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT)
 
     # Check network connectivity status
     continue_enabled = self.network_connected.is_set()
     self._network_setup_continue_button.set_enabled(continue_enabled)
     continue_text = ("Continue" if self.wifi_connected.is_set() else "Continue without Wi-Fi") if continue_enabled else "Waiting for internet"
     self._network_setup_continue_button.set_text(continue_text)
-    self._network_setup_continue_button.render(rl.Rectangle(rect.x + MARGIN + button_width + BUTTON_SPACING, button_y, button_width, BUTTON_HEIGHT))
+    continue_rect = rl.Rectangle(rect.x + MARGIN + button_width + BUTTON_SPACING, button_y, button_width, BUTTON_HEIGHT)
+    self._set_fallback_actions([
+      (back_rect, self._network_setup_back_button_callback, True),
+      (continue_rect, self._network_setup_continue_button_callback, lambda: self.network_connected.is_set()),
+    ])
+    self._network_setup_back_button.render(back_rect)
+    self._network_setup_continue_button.render(continue_rect)
 
   def render_software_selection(self, rect: rl.Rectangle):
     self._software_selection_title_label.render(rl.Rectangle(rect.x + MARGIN, rect.y + MARGIN, rect.width - MARGIN * 2, TITLE_FONT_SIZE * FONT_SCALE))
@@ -292,8 +350,16 @@ class Setup(Widget):
     button_width = (rect.width - BUTTON_SPACING - MARGIN * 2) / 2
     button_y = rect.height - BUTTON_HEIGHT - MARGIN
 
-    self._software_selection_back_button.render(rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT))
-    self._software_selection_continue_button.render(rl.Rectangle(rect.x + MARGIN + button_width + BUTTON_SPACING, button_y, button_width, BUTTON_HEIGHT))
+    back_rect = rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT)
+    continue_rect = rl.Rectangle(rect.x + MARGIN + button_width + BUTTON_SPACING, button_y, button_width, BUTTON_HEIGHT)
+    self._set_fallback_actions([
+      (openpilot_rect, self._select_openpilot, True),
+      (custom_rect, self._select_custom_software, True),
+      (back_rect, self._software_selection_back_button_callback, True),
+      (continue_rect, self._software_selection_continue_button_callback, lambda: self._software_selection_continue_button.enabled),
+    ])
+    self._software_selection_back_button.render(back_rect)
+    self._software_selection_continue_button.render(continue_rect)
 
   def render_downloading(self, rect: rl.Rectangle):
     self._downloading_body_label.render(rl.Rectangle(rect.x, rect.y + rect.height / 2 - TITLE_FONT_SIZE * FONT_SCALE / 2, rect.width,
@@ -309,8 +375,14 @@ class Setup(Widget):
 
     button_width = (rect.width - BUTTON_SPACING - MARGIN * 2) / 2
     button_y = rect.height - BUTTON_HEIGHT - MARGIN
-    self._download_failed_reboot_button.render(rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT))
-    self._download_failed_startover_button.render(rl.Rectangle(rect.x + MARGIN + button_width + BUTTON_SPACING, button_y, button_width, BUTTON_HEIGHT))
+    reboot_rect = rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT)
+    startover_rect = rl.Rectangle(rect.x + MARGIN + button_width + BUTTON_SPACING, button_y, button_width, BUTTON_HEIGHT)
+    self._set_fallback_actions([
+      (reboot_rect, HARDWARE.reboot, True),
+      (startover_rect, self._download_failed_startover_button_callback, True),
+    ])
+    self._download_failed_reboot_button.render(reboot_rect)
+    self._download_failed_startover_button.render(startover_rect)
 
   def render_custom_software_warning(self, rect: rl.Rectangle):
     warn_rect = rl.Rectangle(rect.x, rect.y, rect.width, 1500)
@@ -325,9 +397,17 @@ class Setup(Widget):
     self._custom_software_warning_body_label.render(rl.Rectangle(rect.x + 50, y_offset + 400, rect.width - 50, BODY_FONT_SIZE * FONT_SCALE * 3))
     rl.end_scissor_mode()
 
-    self._custom_software_warning_back_button.render(rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT))
-    self._custom_software_warning_continue_button.render(rl.Rectangle(rect.x + MARGIN * 2 + button_width, button_y, button_width, BUTTON_HEIGHT))
-    if offset < (rect.height - warn_rect.height):
+    back_rect = rl.Rectangle(rect.x + MARGIN, button_y, button_width, BUTTON_HEIGHT)
+    continue_rect = rl.Rectangle(rect.x + MARGIN * 2 + button_width, button_y, button_width, BUTTON_HEIGHT)
+    continue_enabled = offset < (rect.height - warn_rect.height)
+    self._custom_software_warning_continue_button.set_enabled(continue_enabled)
+    self._set_fallback_actions([
+      (back_rect, self._custom_software_warning_back_button_callback, True),
+      (continue_rect, self._custom_software_warning_continue_button_callback, lambda: self._custom_software_warning_continue_button.enabled),
+    ])
+    self._custom_software_warning_back_button.render(back_rect)
+    self._custom_software_warning_continue_button.render(continue_rect)
+    if continue_enabled:
       self._custom_software_warning_continue_button.set_enabled(True)
       self._custom_software_warning_continue_button.set_text("Continue")
 

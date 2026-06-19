@@ -2493,6 +2493,7 @@ def main() -> int:
   c3_camera_snapshot_probe = read("scripts/personal/sunnypilot_c3_camera_snapshot_probe.py")
   mac_replay_shadow = read("scripts/personal/build_mac_replay_shadow.py")
   model_manager_contract = read("scripts/personal/genius_model_manager_contract.py")
+  super_advanced_contract = read("scripts/personal/genius_super_advanced_contract.py")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
   nnlc_controller = read("sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
@@ -2974,6 +2975,7 @@ def main() -> int:
                           and "sunnypilot_c3_camera_snapshot_probe.py" in release_gate
                           and "build_mac_replay_shadow.py" in release_gate
                           and "genius_model_manager_contract.py" in release_gate
+                          and "genius_super_advanced_contract.py" in release_gate
                           and "genius_offline_replay_check.py" in release_gate
                           and "genius_ui_replay_check.py" in release_gate
                           and "--fetch-references" in release_gate
@@ -3685,18 +3687,27 @@ def main() -> int:
                           and "__touch_cancelled" in widget_core
                           and "short_tap_release and not touch_cancelled and touch_valid" in widget_core
                           and "DRAG_THRESHOLD = 24" in scroll_panel
-                          and "OPEN_TOUCH_GUARD_S = 0.6" in read("selfdrive/ui/layouts/settings/settings.py")
-                          and "_press_panel" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py"),
-                          "clone C3 touch handling must reject drag/scroll releases and avoid press-time sidebar navigation")
+                          and "OPEN_TOUCH_GUARD_S = 1.2" in read("selfdrive/ui/layouts/settings/settings.py")
+                          and "_ignore_touch_guard_until" in read("selfdrive/ui/layouts/settings/settings.py")
+                          and "SIDEBAR_NAV_TAP_MAX_MOVE = 96" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+                          and "_panel_at_relaxed" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+                          and "_press_panel_pos" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py"),
+                          "clone C3 touch handling must reject drag/scroll releases, avoid open-then-close, and allow small sidebar tap drift")
   failures += not require("C3 setup updater install buttons tolerate touch jitter",
-                          "button.set_tap_release_move_px(80)" in tici_setup
-                          and "button.set_tap_release_move_px(80)" in tici_updater
+                          "button.set_tap_release_move_px(140)" in tici_setup
+                          and "button.set_tap_release_move_px(140)" in tici_updater
+                          and "CRITICAL_TAP_EXPAND_PX = 55" in tici_setup
+                          and "CRITICAL_TAP_EXPAND_PX = 55" in tici_updater
+                          and "def _activate_at" in tici_setup
+                          and "self._fallback_actions" in tici_setup
+                          and "_software_selection_continue_button_callback" in tici_setup
+                          and "_network_setup_continue_button_callback" in tici_setup
                           and "def _activate_at" in tici_updater
                           and "self._install_button_rect" in tici_updater
                           and "self.install_update()" in tici_updater
                           and "self.set_tap_release_move_px(80)" in mici_setup
                           and "BigPillButton" in mici_updater,
-                          "setup/update install buttons must keep wider per-widget release tolerance and parent hit-test fallback while normal settings taps stay strict")
+                          "setup/update install buttons must keep wider per-widget release tolerance and parent hit-test fallback while ordinary widgets stay stricter")
   failures += not require("Sidebar temperature is numeric Celsius",
                           "TEMP_FALLBACK_TEXT = tr_noop(\"--C\")" in sidebar_layout
                           and "TEMP_SCALAR_FIELDS" in sidebar_layout
@@ -3908,6 +3919,28 @@ def main() -> int:
                           and "No active bundle defaults to the stock runner" in code_changes_md
                           and "Verify model manager without car through `genius_model_manager_contract.py`" in todo_md,
                           "agent guide, code changes, and TODO must document the no-car model manager contract")
+  failures += not require("Genius Super Advanced contract exists",
+                          "Genius Pilot Super Advanced Contract" in super_advanced_contract
+                          and "CRITICAL_PARAMS" in super_advanced_contract
+                          and "SUPER_ADVANCED_KEYS" in super_advanced_contract
+                          and "API_WRITABLE_KEYS" in super_advanced_contract
+                          and "CarrotPhoneSpeedLimitEnabled" in super_advanced_contract
+                          and "FishopAutoOvertakeEnabled" in super_advanced_contract
+                          and "NeuralNetworkLateralControl" in super_advanced_contract
+                          and "UnknownKeyName" in super_advanced_contract
+                          and "conflict notes keep owners separate" in super_advanced_contract,
+                          "no-car Super Advanced contract must cover defaults, visible controls, API boundaries, fallback text, NNLC, Fishop, and conflict docs")
+  failures += not require("Genius Super Advanced contract release gate wired",
+                          "scripts/personal/genius_super_advanced_contract.py" in release_gate
+                          and "Genius Super Advanced contract" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must self-test the Super Advanced settings contract")
+  failures += not require("Genius Super Advanced contract documented",
+                          "genius_super_advanced_contract.py --json" in agents_md
+                          and "2026.002.000-gp.20260620.42" in code_changes_md
+                          and "C3 Touch Fallback And Super Advanced Contract" in code_changes_md
+                          and "Verify Carrot/Super Advanced settings locally through `genius_super_advanced_contract.py`" in todo_md,
+                          "agent guide, code changes, and TODO must document the Super Advanced no-car contract")
 
   try:
     from openpilot.selfdrive.carrot.fishop_hardware import FishopHardwareState

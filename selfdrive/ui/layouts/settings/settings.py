@@ -19,7 +19,7 @@ CLOSE_BTN_SIZE = 200
 CLOSE_ICON_SIZE = 70
 NAV_BTN_HEIGHT = 110
 PANEL_MARGIN = 50
-OPEN_TOUCH_GUARD_S = 0.6
+OPEN_TOUCH_GUARD_S = 1.2
 
 # Colors
 SIDEBAR_COLOR = rl.BLACK
@@ -95,7 +95,7 @@ class SettingsLayout(Widget):
     mouse_down = rl.is_mouse_button_down(rl.MouseButton.MOUSE_BUTTON_LEFT)
     if self._touch_guard_active():
       self._raw_touch_down = mouse_down
-      if not mouse_down:
+      if not mouse_down and rl.get_time() >= self._ignore_touch_guard_until:
         self._ignore_touch_until_release = False
       return
     self._raw_touch_down = mouse_down

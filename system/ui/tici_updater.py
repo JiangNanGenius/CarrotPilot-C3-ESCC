@@ -23,6 +23,7 @@ BODY_FONT_SIZE = 65
 BACKGROUND_COLOR = rl.BLACK
 PROGRESS_BG_COLOR = rl.Color(41, 41, 41, 255)
 PROGRESS_COLOR = rl.Color(54, 77, 239, 255)
+CRITICAL_TAP_EXPAND_PX = 55
 
 
 class Screen(IntEnum):
@@ -56,7 +57,7 @@ class Updater(Widget):
     self._back_button = Button("Back", click_callback=lambda: self.set_current_screen(Screen.PROMPT))
     self._reboot_button = Button("Reboot", click_callback=lambda: HARDWARE.reboot())
     for button in (self._wifi_button, self._install_button, self._back_button, self._reboot_button):
-      button.set_tap_release_move_px(80)
+      button.set_tap_release_move_px(140)
 
   def set_current_screen(self, screen: Screen):
     self.current_screen = screen
@@ -102,24 +103,33 @@ class Updater(Widget):
       self.progress_text = "Update failed"
       self.show_reboot_button = True
 
+  def _critical_tap_rect(self, rect: rl.Rectangle) -> rl.Rectangle:
+    return rl.Rectangle(rect.x - CRITICAL_TAP_EXPAND_PX,
+                        rect.y - CRITICAL_TAP_EXPAND_PX,
+                        rect.width + CRITICAL_TAP_EXPAND_PX * 2,
+                        rect.height + CRITICAL_TAP_EXPAND_PX * 2)
+
+  def _tap_in(self, mouse_pos, rect: rl.Rectangle) -> bool:
+    return bool(rl.check_collision_point_rec(mouse_pos, self._critical_tap_rect(rect)))
+
   def _activate_at(self, mouse_pos) -> bool:
     # Clone C3 touch controllers can show button press feedback while losing the
     # release event before the child Button callback fires. Keep a parent-level
     # hit test for this critical recovery screen so dependency installs remain
     # reachable before the main UI is usable.
     if self.current_screen == Screen.PROMPT:
-      if rl.check_collision_point_rec(mouse_pos, self._install_button_rect):
+      if self._tap_in(mouse_pos, self._install_button_rect):
         self.install_update()
         return True
-      if rl.check_collision_point_rec(mouse_pos, self._wifi_button_rect):
+      if self._tap_in(mouse_pos, self._wifi_button_rect):
         self.set_current_screen(Screen.WIFI)
         return True
     elif self.current_screen == Screen.WIFI:
-      if rl.check_collision_point_rec(mouse_pos, self._back_button_rect):
+      if self._tap_in(mouse_pos, self._back_button_rect):
         self.set_current_screen(Screen.PROMPT)
         return True
     elif self.current_screen == Screen.PROGRESS and self.show_reboot_button:
-      if rl.check_collision_point_rec(mouse_pos, self._reboot_button_rect):
+      if self._tap_in(mouse_pos, self._reboot_button_rect):
         HARDWARE.reboot()
         return True
     return False
