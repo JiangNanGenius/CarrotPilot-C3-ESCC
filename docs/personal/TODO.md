@@ -9,6 +9,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Replace the old Qt-style `/x` binary with a SunnyPilot Raylib ARM64 installer.
 - [x] Verify the published `/x` binary contains the CarrotPilot-C3-ESCC repo and `alpha-sunnypilot-c3` branch.
 - [x] Add `scripts/personal/sunnypilot_c3_installer_audit.py` so future updates can reject old Qt installer binaries.
+- [x] Add `scripts/personal/sunnypilot_c3_device_collect.py` to collect installer crash logs or parked/model/no-cloud evidence from the C3 over SSH.
 - [ ] After the user retries `/x`, collect device evidence if it still exits after the download screen.
 
 ## Base And C3
@@ -19,6 +20,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep normal shutdown policy; do not import Mr.One never-shutdown behavior.
 - [x] Keep local Wi-Fi, SSH, local web, GitHub update, and model download paths.
 - [ ] Run real device parking test on clone C3.
+- [ ] Pull a C3 evidence bundle with `sunnypilot_c3_device_collect.py` after `/x` install succeeds.
 
 ## Cloud Removal
 

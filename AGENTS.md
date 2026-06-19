@@ -73,6 +73,15 @@ python3 scripts/personal/sunnypilot_c3_installer_audit.py
 Device snapshot after install:
 
 ```bash
+python3 scripts/personal/sunnypilot_c3_device_collect.py \
+  --host 192.168.100.174 \
+  --navipilot-live-check \
+  --require-no-cloud-processes
+```
+
+On-device snapshot command, if already SSH'd into the C3:
+
+```bash
 python3 scripts/personal/sunnypilot_c3_alpha_snapshot.py \
   --sample-seconds 10 \
   --navipilot-live-check \
@@ -83,6 +92,14 @@ python3 scripts/personal/sunnypilot_c3_alpha_evidence_check.py \
   /data/carrot_alpha_snapshot.json \
   --phase parked \
   --phase model
+```
+
+Installer crash / download-screen exit evidence:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_device_collect.py \
+  --host 192.168.100.174 \
+  --skip-snapshot
 ```
 
 Real Seltos/ESCC evidence check, only after parked checks pass:

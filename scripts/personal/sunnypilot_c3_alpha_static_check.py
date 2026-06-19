@@ -1586,6 +1586,27 @@ def check_update_audit_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_device_collect_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/sunnypilot_c3_device_collect.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_install_boot_contract() -> tuple[bool, str]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
@@ -1957,6 +1978,7 @@ def main() -> int:
   installer_audit = read("scripts/personal/sunnypilot_c3_installer_audit.py")
   release_gate = read("scripts/personal/sunnypilot_c3_alpha_release_gate.py")
   update_audit = read("scripts/personal/sunnypilot_c3_alpha_update_audit.py")
+  device_collect = read("scripts/personal/sunnypilot_c3_device_collect.py")
   agents_md = read("AGENTS.md")
   failures += not require("Auto-Tuner learner module exists", "class CarrotLearner" in carrot_learning
                           and "def apply_recommendations" in carrot_learning,
@@ -2293,6 +2315,7 @@ def main() -> int:
                           and "sunnypilot_c3_alpha_evidence_check.py" in release_gate
                           and "sunnypilot_c3_alpha_static_check.py" in release_gate
                           and "sunnypilot_c3_alpha_update_audit.py" in release_gate
+                          and "sunnypilot_c3_device_collect.py" in release_gate
                           and "--fetch-references" in release_gate
                           and "--full" in release_gate
                           and "--snapshot" in release_gate,
@@ -2316,6 +2339,18 @@ def main() -> int:
   ok, detail = check_update_audit_runtime()
   failures += not require("alpha upstream update audit runtime", ok,
                           detail or "update audit self-test failed")
+  failures += not require("C3 remote evidence collect tool exists",
+                          "CarrotPilot-C3-ESCC C3 Device Collect" in device_collect
+                          and "DEFAULT_HOST = \"192.168.100.174\"" in device_collect
+                          and "sunnypilot_c3_alpha_snapshot.py" in device_collect
+                          and "sunnypilot_c3_alpha_evidence_check.py" in device_collect
+                          and "cloud_processes_seen.txt" in device_collect
+                          and "CARROT_COLLECT_TARBALL=" in device_collect
+                          and "GithubSshKeys" not in device_collect,
+                          "alpha must include a safe SSH collector for install logs, no-cloud evidence, and parked/model snapshot bundles")
+  ok, detail = check_device_collect_runtime()
+  failures += not require("C3 remote evidence collect runtime", ok,
+                          detail or "device collect self-test failed")
   failures += not require("agent update guide exists",
                           "CarrotPilot-C3-ESCC Agent Guide" in agents_md
                           and "personal/c3-escc-atune" in agents_md
@@ -2324,6 +2359,7 @@ def main() -> int:
                           and "do not import private registration" in agents_md
                           and "sunnypilot_c3_alpha_release_gate.py --full" in agents_md
                           and "sunnypilot_c3_alpha_update_audit.py --fetch --strict" in agents_md
+                          and "sunnypilot_c3_device_collect.py" in agents_md
                           and "sunnypilot_c3_installer_audit.py" in agents_md
                           and "Kia Seltos 2023" in agents_md,
                           "root AGENTS.md must preserve the update strategy and safety boundaries")
