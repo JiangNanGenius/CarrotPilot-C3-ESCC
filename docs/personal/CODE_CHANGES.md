@@ -1,5 +1,47 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 C3 Touch Fallback And Super Advanced Contract
+
+Published as `2026.002.000-gp.20260620.42`.
+
+User feedback after reboot showed the dependency/update prompt still could draw
+button press feedback without advancing. SSH was not reachable during this
+hotfix attempt (`192.168.100.174` and `192.168.5.11` did not answer SSH), so
+this change is prepared for the next `/x` flash rather than claimed as
+device-verified.
+
+Fixes included:
+
+- `system/ui/tici_updater.py` now expands the critical `Connect to Wi-Fi`,
+  `Install`, `Back`, and failure `Reboot` hit regions and uses a wider release
+  tolerance for that standalone recovery screen.
+- `system/ui/tici_setup.py` now has the same parent-level fallback action path
+  for first-install/setup buttons, including software selection, network
+  continue/back, custom warning continue/back, and download-failure recovery.
+- The normal settings entry guard is longer and no longer clears before the
+  release event has a chance to be swallowed, reducing the sidebar gear
+  open-then-close behavior on the clone C3 touchscreen.
+- The Sunny/Genius settings sidebar now allows small press-to-release drift for
+  panel switching while keeping larger drags as scrolls, so menu taps are less
+  likely to be misclassified as scrolling.
+- Added `scripts/personal/genius_super_advanced_contract.py` to verify that the
+  Super Advanced page exposes Carrot, Fishop, NNLC, speed-limit, and Auto-Tuner
+  controls, that critical defaults match the personal alpha policy, that
+  protected params are not writable through Carrot Web/API, and that the guide,
+  matrix, and conflict notes stay in sync.
+
+Local validation:
+
+```bash
+python3 -m py_compile system/ui/tici_updater.py system/ui/tici_setup.py selfdrive/ui/layouts/settings/settings.py selfdrive/ui/sunnypilot/layouts/settings/settings.py scripts/personal/genius_super_advanced_contract.py
+python3 scripts/personal/genius_super_advanced_contract.py --json
+```
+
+The release/static gates now compile these UI files and self-test the Super
+Advanced contract. The remaining proof is physical C3 confirmation that the
+dependency installer buttons advance and the settings/sidebar touch behavior is
+stable.
+
 ## 2026-06-20 No-Car Model Manager Contract
 
 Published as `2026.002.000-gp.20260620.41`.

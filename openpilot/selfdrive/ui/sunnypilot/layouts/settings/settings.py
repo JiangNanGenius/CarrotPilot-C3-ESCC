@@ -35,6 +35,9 @@ from openpilot.system.ui.widgets.scroller_tici import Scroller
 
 OP.PANEL_COLOR = rl.Color(10, 10, 10, 255)
 ICON_SIZE = 70
+SIDEBAR_NAV_TAP_MAX_MOVE = 96
+CLOSE_TAP_MAX_MOVE = 44
+SIDEBAR_RELEASE_EXPAND_PX = 40
 
 OP.PanelType = IntEnum(  # type: ignore[assignment] # ty: ignore[invalid-assignment]
   "PanelType",
@@ -99,6 +102,8 @@ class SettingsLayoutSP(OP.SettingsLayout):
   def __init__(self):
     OP.SettingsLayout.__init__(self)
     self._nav_items: list[Widget] = []
+    self._press_close_pos: MousePos | None = None
+    self._press_panel_pos: MousePos | None = None
 
     # Create sidebar scroller
     self._sidebar_scroller = Scroller([], spacing=0, line_separator=False, pad_end=False)
@@ -177,6 +182,71 @@ class SettingsLayoutSP(OP.SettingsLayout):
     if self._nav_items:
       self._sidebar_scroller.render(nav_rect)
       return
+
+  def _tap_moved_too_far(self, press_pos: MousePos | None, mouse_pos: MousePos, max_move: int) -> bool:
+    if press_pos is None:
+      return True
+    return abs(mouse_pos.x - press_pos.x) > max_move or abs(mouse_pos.y - press_pos.y) > max_move
+
+  def _panel_at_relaxed(self, mouse_pos: MousePos) -> OP.PanelType | None:
+    for panel_type, panel_info in self._panels.items():
+      rect = panel_info.button_rect
+      relaxed_rect = rl.Rectangle(rect.x - SIDEBAR_RELEASE_EXPAND_PX,
+                                  rect.y - SIDEBAR_RELEASE_EXPAND_PX,
+                                  rect.width + SIDEBAR_RELEASE_EXPAND_PX * 2,
+                                  rect.height + SIDEBAR_RELEASE_EXPAND_PX * 2)
+      if rl.check_collision_point_rec(mouse_pos, relaxed_rect):
+        return panel_type
+    return None
+
+  def _handle_mouse_press(self, mouse_pos: MousePos) -> bool:
+    if self._touch_guard_active():
+      self._press_close = False
+      self._press_panel = None
+      self._press_close_pos = None
+      self._press_panel_pos = None
+      return True
+    self._press_close = self._close_at(mouse_pos)
+    self._press_panel = None if self._press_close else self._panel_at(mouse_pos)
+    self._press_close_pos = mouse_pos if self._press_close else None
+    self._press_panel_pos = mouse_pos if self._press_panel is not None else None
+    return bool(self._press_close or self._press_panel is not None)
+
+  def _handle_mouse_release(self, mouse_pos: MousePos) -> bool:
+    if self._touch_guard_active():
+      self._ignore_touch_until_release = False
+      self._press_close = False
+      self._press_panel = None
+      self._press_close_pos = None
+      self._press_panel_pos = None
+      return True
+
+    # Check close button
+    if self._press_close and self._close_at(mouse_pos) and not self._tap_moved_too_far(self._press_close_pos, mouse_pos, CLOSE_TAP_MAX_MOVE):
+      if self._close_callback:
+        self._close_callback()
+      self._press_close = False
+      self._press_panel = None
+      self._press_close_pos = None
+      self._press_panel_pos = None
+      return True
+
+    # Check navigation buttons
+    panel_type = self._press_panel
+    nav_tap = not self._tap_moved_too_far(self._press_panel_pos, mouse_pos, SIDEBAR_NAV_TAP_MAX_MOVE)
+    if panel_type is not None and nav_tap and self._panel_at_relaxed(mouse_pos) == panel_type:
+      self.set_current_panel(panel_type)
+      self._press_close = False
+      self._press_panel = None
+      self._press_close_pos = None
+      self._press_panel_pos = None
+      return True
+
+    self._press_close = False
+    self._press_panel = None
+    self._press_close_pos = None
+    self._press_panel_pos = None
+    return False
 
   def show_event(self):
     super().show_event()

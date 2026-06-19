@@ -20,6 +20,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep the welcome/training flow, but replace SunnyPilot-specific legal/consent copy with Genius Pilot personal-build copy that is short enough for C3 and advances reliably.
 - [x] Rename user-facing alpha branding from SunnyPilot to Genius Pilot where accurate: welcome screen, version/about panel, settings headers, update prompts, boot/update text, and alpha evidence snapshots.
 - [x] Add a parent-level touch fallback to the TICI dependency/update prompt so `Connect to Wi-Fi`, `Install`, and failure `Reboot` can fire even when clone C3 loses the child button release event.
+- [x] Extend the parent-level touch fallback to the first-install TICI setup flow and widen critical setup/update hit regions for clone C3 touch jitter.
 - [ ] Keep `/x` as the single short alpha entry; avoid new test URLs unless there is a clear rollback reason.
 - [ ] Bump the Genius Pilot suffix before every pushed alpha build: same date increments patch, new date resets patch to `1`, SunnyPilot base changes only when upstream base changes.
 - [ ] After the next clean `/x` install, collect device evidence even if the install succeeds, so the success path is documented.
@@ -39,6 +40,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [ ] Run real device parking test on clone C3.
 - [ ] Pull a C3 evidence bundle with `sunnypilot_c3_device_collect.py` after `/x` install succeeds.
 - [ ] Run `sunnypilot_c3_device_collect.py --parked-hardware-probe` on the connected clone C3 and archive camera/modeld/IMU evidence; keep the probe silent unless the user explicitly asks for `--with-sound-probe`.
+- [ ] Restore C3 SSH access after the next successful boot; current checks see the LAN name but SSH to `192.168.100.174` and USB `192.168.5.11` does not answer.
 
 ## Cloud Removal
 
@@ -175,6 +177,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Run HYUNDAI `radard` process replay smoke; it passes against upstream reference data.
 - [x] Complete upstream process replay startup coverage for affected non-hardware logic before promoting `/x`: `controlsd`, `plannerd`, `radard`, `locationd`, and `paramsd` run crash-free with `nativeExtensionBlocked=false`; remaining failures are fork reference diffs.
 - [ ] Add model replay with camera frame inputs when a suitable FrameReader/log fixture is available.
+- [x] Verify Carrot/Super Advanced settings locally through `genius_super_advanced_contract.py`: migrated controls are present, default policy is enforced, offroad-toggleable controls remain visible, API boundaries are protected, and missing params fail soft with `WAIT`.
 - [x] Push both `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3`, then audit `/x`.
 - [ ] Sync or reinstall on the user's C3 and confirm Super Advanced opens, NNLC defaults on, Seltos 2023 appears, and new Carrot params do not show unknown-key waits.
 - [ ] Run C3 parked checks with the device currently available: UI opens, Wi-Fi/network page reports connected state, local Web/API responds, no cloud processes exist, model manager opens, stock model runner starts.
@@ -212,7 +215,8 @@ These checks should be run before any real road test. They are allowed while the
 - [ ] Re-run writable same-value and safe navigation probes only after the C3 clearly reports parked/offroad; the 2026-06-20 read-only live check reported `IsOnroad=true`, so writes and injected packets were intentionally skipped.
 - [x] Verify model manager without car through `genius_model_manager_contract.py`: active bundle summary, runner cache, stock fallback, invalid active bundle rollback, and atomic artifact install all pass locally.
 - [ ] Verify model manager live list/download availability on C3 after SSH/UI access is restored.
-- [ ] Verify Carrot/Super Advanced settings without car: all migrated controls visible, writable while offroad where intended, protected params read-only, and no unknown-key waits on C3.
+- [x] Verify Carrot/Super Advanced settings locally through `genius_super_advanced_contract.py`: all migrated controls are tracked, writable/offroad boundaries are explicit, protected params are read-only, and unknown-key waits are fail-soft.
+- [ ] Verify the same Super Advanced page on the physical C3 after SSH/UI access is restored: all migrated controls visible, writable while offroad where intended, protected params read-only, and no unknown-key waits.
 - [ ] Verify C3 UI/touch without car: settings opens reliably, Network page reports connected/scanned state, Seltos 2023 appears in the vehicle list, temperature displays numerically, and toggles retain state.
 - [ ] Archive each no-car diagnostic bundle on the Mac desktop under `CarrotPilot-C3-ESCC-device-evidence` with branch, commit, version, installer hash, and cloud-process evidence.
 - [x] Add release-gated self-tests for the no-car UI replay wrapper and the explicit C3 camera snapshot probe.
@@ -241,10 +245,11 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Add left-sidebar phone/Navipilot status from local Carrot phone/navigation inputs, with fresh/stale/off states and no cloud pairing dependency.
 - [x] Add left-sidebar GPS status from `gpsLocationExternal`/`gpsLocation`, showing fix/accuracy/weak/off state.
 - [x] Hide and hard-disable SunnyPilot cruise black-box toggles from the alpha Cruise panel.
-- [x] Make the sidebar gear less sensitive: settings now opens on touch release and ignores close/sidebar touches during the first 0.6 seconds after entry.
+- [x] Make the sidebar gear less sensitive: settings now opens on touch release and ignores close/sidebar touches during the first 1.2 seconds after entry.
 - [x] Make settings/menu taps less sensitive on clone C3: reject drag/scroll releases, shrink tap movement tolerance, and defer sidebar panel switching until release.
-- [x] Make setup/update/install dependency buttons more tolerant on clone C3 without loosening normal settings taps: per-widget tap-release movement is supported, and TICI/MICI setup/updater install buttons use a wider release tolerance.
+- [x] Make setup/update/install dependency buttons more tolerant on clone C3 without loosening ordinary widgets: per-widget tap-release movement is supported, and TICI setup/updater install buttons use wider release tolerance plus parent-level fallback actions.
 - [x] Add a direct fallback on the standalone TICI dependency/update prompt so critical install buttons do not depend only on child-button release callbacks.
+- [x] Add a direct fallback on the standalone TICI first-install setup prompt so recovery-mode software selection, network continue/back, custom-warning continue/back, and download-failure buttons do not depend only on child-button release callbacks.
 - [x] Add `Kia Seltos 2023` to the Sunny manual vehicle selector list so the existing `KIA_SELTOS_2023` profile is visible in the UI.
 - [x] Sync the hotfix files to the user's C3 at `192.168.100.174` and restart UI for bench testing.
 - [x] Verify the Wi-Fi fallback on device: after UI-style activation it reports SSID `zhao`, IP `192.168.100.174`, and scanned networks without `jeepney`.
