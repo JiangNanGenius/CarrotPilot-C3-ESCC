@@ -5,16 +5,35 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdio>
 #include <csignal>
 #include <unordered_map>
 
 #include "common/params_keys.h"
 #include "common/queue.h"
-#include "common/swaglog.h"
 #include "common/util.h"
 #include "common/hardware/hw.h"
 
 namespace {
+
+std::string comma_home() {
+  return util::getenv("HOME", "/tmp") + "/.comma" + util::getenv("OPENPILOT_PREFIX", "");
+}
+
+std::string default_params_path() {
+  if (const char *env = getenv("PARAMS_ROOT")) {
+    return env;
+  }
+
+#ifdef __APPLE__
+  return comma_home() + "/params";
+#else
+  if (util::file_exists("/data")) {
+    return "/data/params";
+  }
+  return comma_home() + "/params";
+#endif
+}
 
 volatile sig_atomic_t params_do_exit = 0;
 void params_sig_handler(int signal) {
@@ -65,7 +84,7 @@ bool create_params_path(const std::string &param_path, const std::string &key_pa
 }
 
 std::string ensure_params_path(const std::string &prefix, const std::string &path = {}) {
-  std::string params_path = path.empty() ? Path::params() : path;
+  std::string params_path = path.empty() ? default_params_path() : path;
   if (!create_params_path(params_path, params_path + prefix)) {
     throw std::runtime_error(util::string_format(
         "Failed to ensure params path, errno=%d, path=%s, param_prefix=%s",
@@ -79,7 +98,7 @@ public:
   FileLock(const std::string &fn) {
     fd_ = HANDLE_EINTR(open(fn.c_str(), O_CREAT, 0775));
     if (fd_ < 0 || HANDLE_EINTR(flock(fd_, LOCK_EX)) < 0) {
-      LOGE("Failed to lock file %s, errno=%d", fn.c_str(), errno);
+      fprintf(stderr, "Failed to lock file %s, errno=%d\n", fn.c_str(), errno);
     }
   }
   ~FileLock() { close(fd_); }
