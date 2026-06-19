@@ -75,6 +75,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     "scripts/personal/genius_branding_contract.py",
     "scripts/personal/genius_carrot_web_api_contract.py",
     "scripts/personal/genius_navipilot_replay_contract.py",
+    "scripts/personal/genius_cluster_world_contract.py",
   ]
   steps: list[tuple[str, list[str], int]] = [
     ("python compile personal gates", [py(), "-m", "py_compile", *scripts], 60),
@@ -98,6 +99,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     ("Genius settings matrix", [py(), "scripts/personal/genius_settings_matrix.py", "--check"], 30),
     ("Genius Carrot Web API contract", [py(), "scripts/personal/genius_carrot_web_api_contract.py", "--self-test"], 30),
     ("Genius Navipilot/APN replay contract", [py(), "scripts/personal/genius_navipilot_replay_contract.py", "--self-test"], 30),
+    ("Genius cluster/world schema contract", [py(), "scripts/personal/genius_cluster_world_contract.py", "--self-test"], 30),
     ("Fishop hardware sample replay", [py(), "scripts/personal/fishop_hardware_sample.py", "--self-test"], 30),
     ("Genius curve-speed contract", [py(), "scripts/personal/genius_curve_speed_contract.py", "--self-test"], 30),
     ("Genius branding contract", [py(), "scripts/personal/genius_branding_contract.py", "--self-test"], 30),

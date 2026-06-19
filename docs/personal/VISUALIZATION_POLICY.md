@@ -48,6 +48,8 @@ The ajouatom Carrot branches include a larger cluster/world visualization with d
 
 Genius Pilot imports the safe subset as `GeniusCarrotWorldOverlay`. The full cluster/world page still needs input schema mapping for ajouatom-only lane/radar fields, layout bounds, and C3 performance cost before it becomes more than an explicit overlay/debug surface.
 
+The input map for that future surface lives in `docs/personal/CARROT_CLUSTER_WORLD_SCHEMA.md`. It keeps detected vehicles, raw/merged radar points, lane style codes, road edges, and Fishop evidence in a display-only `GeniusClusterWorldSnapshot` and records missing ajouatom-only fields as fallbacks instead of inventing values. The surface decision remains standalone page, explicit overlay, or debug-only visual mode after schema, layout, and C3 performance checks.
+
 ## Safety Boundary
 
 Visualization settings must not publish control messages, write planner/CAN state, open sockets, or change lane-change decisions.

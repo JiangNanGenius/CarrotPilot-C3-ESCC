@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Carrot Cluster World Schema
+
+Mapped the larger ajouatom Carrot cluster/world view into a Genius Pilot display-only contract:
+
+- Added `docs/personal/CARROT_CLUSTER_WORLD_SCHEMA.md` with the source files, normalized `GeniusClusterWorldSnapshot`, field priorities, fallbacks, and replay requirements.
+- Added `scripts/personal/genius_cluster_world_contract.py` with a local replay fixture covering model path/lane lines/road edges, radarState leads, model leads, liveTracks radar points, carState corner detections, Fishop blindspot evidence, and lane-change availability.
+- The replay fixture proves `controlOutput=false` and records missing ajouatom-only fields such as `activeLaneLine` as fallbacks instead of fabricating them.
+- The full cluster/world renderer is still not merged into the default C3 HUD; it remains a future optional/debug surface pending layout and performance evidence.
+- The alpha release gate and static check now run the cluster/world schema contract.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.18`.
+
 ## 2026-06-20 Visualization Stack Contract
 
 Tightened the multi-visualization plan for Sunny, Carrot, Fusion, Carrot World, and Fishop:
