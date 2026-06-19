@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Cruise Carrot Control Sections
+
+Expanded the Cruise page from a small staged tuning list into a daily Carrot speed-control surface:
+
+- Added Cruise sections for speed-limit/model-speed behavior, curve and turn slowdown, traffic-light stop, longitudinal behavior, and cruise-button behavior.
+- Exposed daily Carrot gates directly in Cruise: phone speed source, active speed control, curve mode, auto-turn slowdown, turn-speed mode, navigation decel rate, traffic-light stop, traffic-light detect mode, cruise decel, and ATC decel.
+- Kept ICBM, SCC-V, and SCC-M hidden/inert; the Cruise page now explains that button behavior is limited to local cruise-speed increment settings.
+- Super Advanced remains the full fine-tuning surface; Cruise now mirrors the common high-use Carrot controls for easier parked setup.
+- Updated Simplified/Traditional Chinese strings, the settings owner matrix, and the alpha static gate so these controls remain visible in future builds.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.22`.
+
 ## 2026-06-20 Visualization Settings Layering
 
 Made the multi-visualization relationship explicit in the on-device Visuals page:

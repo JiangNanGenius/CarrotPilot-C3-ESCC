@@ -1025,6 +1025,63 @@ msgstr "一般 HUD 小組件"
 msgid "These are normal Sunny/Genius HUD widgets and do not select the base road renderer."
 msgstr "這些是一般 Sunny/Genius HUD 小組件，不負責選擇基礎道路渲染器。"
 
+msgid "Phone Speed Limit Source"
+msgstr "手機限速來源"
+
+msgid "Use fresh APN/N, Navipilot, or Carrot phone speed-limit data before vehicle and map sources. Stale data times out automatically."
+msgstr "優先使用新鮮的 APN/N、Navipilot 或 Carrot 手機限速資料，再回退到車機和地圖來源。過期資料會自動逾時。"
+
+msgid "Carrot Active Speed Control"
+msgstr "Carrot 主動速度控制"
+
+msgid "Allow Carrot speed-limit, navigation, SDI, speed-bump, traffic-light, and model-speed evidence to adjust cruise targets when the related assist mode is enabled."
+msgstr "在相關輔助模式啟用時，允許 Carrot 使用限速、導航、SDI、減速帶、紅綠燈和模型速度證據調整巡航目標。"
+
+msgid "Carrot Auto Turn Slowdown"
+msgstr "Carrot 自動轉彎減速"
+
+msgid "Use Carrot navigation and curve information to slow for turns and junctions."
+msgstr "使用 Carrot 導航和彎道資訊，在轉彎和路口前減速。"
+
+msgid "Carrot Traffic Light Stop"
+msgstr "Carrot 紅綠燈停車"
+
+msgid "Use Carrot traffic-light input for red-light stop behavior."
+msgstr "使用 Carrot 紅綠燈輸入執行紅燈停車行為。"
+
+msgid "Deceleration strength for navigation speed events such as turns, speed cameras, speed bumps, and model-speed limits."
+msgstr "導航速度事件的減速強度，例如轉彎、測速點、減速帶和模型速度限制。"
+
+msgid "Speed Limit And Model-Speed"
+msgstr "限速與模型速度"
+
+msgid "Phone speed, vehicle speed, map speed, and model-speed evidence stay visible here; detailed source policy is inside Speed Limit."
+msgstr "手機限速、車機限速、地圖限速和模型速度證據集中放在這裡；詳細來源策略在「限速」裡設定。"
+
+msgid "Curve And Turn Slowdown"
+msgstr "彎道與轉彎減速"
+
+msgid "Sunny curve quality, Carrot navigation turns, lane-line curve input, and model-speed events are selected by explicit modes."
+msgstr "Sunny 彎道品質、Carrot 導航轉彎、車道線曲率輸入和模型速度事件都透過明確模式選擇。"
+
+msgid "Traffic Light Stop"
+msgstr "紅綠燈停車"
+
+msgid "Red-light behavior remains a separate Carrot gate and should be tested independently."
+msgstr "紅燈停車仍然是獨立的 Carrot 開關，應單獨測試。"
+
+msgid "Longitudinal Behavior"
+msgstr "縱向控制行為"
+
+msgid "DEC is separate from Carrot speed logic; the Carrot decel and following values remain user-tuneable while parked."
+msgstr "DEC 與 Carrot 速度邏輯分開；Carrot 減速和跟車數值仍可在停車狀態下調整。"
+
+msgid "Cruise Button Behavior"
+msgstr "巡航按鍵行為"
+
+msgid "Button behavior stays limited to local cruise-speed increment settings. ICBM/SCC-V/SCC-M remain hidden because they overlap Carrot cruise logic."
+msgstr "按鍵行為僅限本地巡航速度步進設定。ICBM/SCC-V/SCC-M 與 Carrot 巡航邏輯重疊，因此繼續隱藏。"
+
 msgid "Fusion"
 msgstr "融合"
 

@@ -3191,7 +3191,18 @@ def main() -> int:
   failures += not require("Genius curve-speed contract runtime", ok, detail or "Genius curve-speed contract failed")
   failures += not require("Cruise exposes staged Carrot longitudinal controls",
                           all(token in cruise_settings for token in (
+                            "Speed Limit And Model-Speed",
+                            "CarrotPhoneSpeedLimitEnabled",
+                            "CarrotActiveSpeedControlEnabled",
+                            "CurveSpeedControlMode",
+                            "CarrotAutoTurnControlEnabled",
+                            "TurnSpeedControlMode",
+                            "AutoNaviSpeedDecelRate",
+                            "CarrotTrafficStopEnabled",
+                            "TrafficLightDetectMode",
                             "DynamicExperimentalControl",
+                            "CarrotCruiseDecel",
+                            "CarrotCruiseAtcDecel",
                             "StopDistanceCarrot",
                             "DynamicTFollow",
                             "TFollowDecelBoost",
@@ -3199,12 +3210,12 @@ def main() -> int:
                             "TFollowGap2",
                             "TFollowGap3",
                             "TFollowGap4",
+                            "Cruise Button Behavior",
+                            "model-speed evidence",
+                            "ICBM/SCC-V/SCC-M remain hidden",
                           ))
-                          and "CarrotActiveSpeedControlEnabled" not in cruise_settings
-                          and "CarrotAutoTurnControlEnabled" not in cruise_settings
-                          and "CarrotTrafficStopEnabled" not in cruise_settings
                           and "return bool(ui_state.is_offroad() and has_long)" in cruise_settings,
-                          "Cruise panel should expose common longitudinal tuning, while full Carrot advanced settings live in Super Advanced")
+                          "Cruise panel should expose daily Carrot speed, curve, traffic-light, model-speed, following, and button behavior controls while full fine tuning stays in Super Advanced")
   failures += not require("C3 touch menu requires deliberate release tap",
                           "TAP_RELEASE_MOVE_PX = 24" in widget_core
                           and "__touch_cancelled" in widget_core

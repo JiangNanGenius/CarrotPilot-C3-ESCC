@@ -6,11 +6,15 @@ See the LICENSE.md file in the root directory for more details.
 """
 from enum import IntEnum
 
+import pyray as rl
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.cruise_sub_layouts.speed_limit_settings import SpeedLimitSettingsLayout
 from openpilot.selfdrive.ui.ui_state import ui_state
+from openpilot.system.ui.lib.application import FontWeight
 from openpilot.system.ui.lib.multilang import tr, tr_noop
+from openpilot.system.ui.sunnypilot.lib.styles import style
 from openpilot.system.ui.sunnypilot.widgets.list_view import toggle_item_sp, option_item_sp, simple_button_item_sp
 from openpilot.system.ui.widgets import Widget
+from openpilot.system.ui.widgets.label import gui_label
 from openpilot.system.ui.widgets.scroller_tici import Scroller
 
 
@@ -31,6 +35,34 @@ ACC_ENABLED_DESCRIPTION = tr_noop("Enable custom Short & Long press increments f
 ACC_NOLONG_DESCRIPTION = tr_noop("This feature can only be used with Genius Pilot longitudinal control enabled.")
 ACC_PCMCRUISE_DISABLED_DESCRIPTION = tr_noop("This feature is not supported on this platform due to vehicle limitations.")
 ONROAD_ONLY_DESCRIPTION = tr_noop("Start the vehicle to check vehicle compatibility.")
+
+
+class CruiseSectionHeader(Widget):
+  def __init__(self, title, description=None):
+    super().__init__()
+    self._title = title
+    self._description = description
+    self._rect = rl.Rectangle(0, 0, 0, 112 if description else 72)
+
+  @staticmethod
+  def _resolve(value) -> str:
+    return value() if callable(value) else str(value)
+
+  def set_parent_rect(self, parent_rect: rl.Rectangle) -> None:
+    super().set_parent_rect(parent_rect)
+    self._rect.width = parent_rect.width
+
+  def _render(self, _) -> None:
+    content_x = self._rect.x + style.ITEM_PADDING
+    content_w = self._rect.width - style.ITEM_PADDING * 2
+    title_rect = rl.Rectangle(content_x, self._rect.y + 8, content_w, 44)
+    gui_label(title_rect, self._resolve(self._title), font_size=34, color=rl.Color(150, 205, 255, 255),
+              font_weight=FontWeight.SEMI_BOLD, alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
+
+    if self._description:
+      desc_rect = rl.Rectangle(content_x, self._rect.y + 54, content_w, 36)
+      gui_label(desc_rect, self._resolve(self._description), font_size=26, color=style.ITEM_TEXT_VALUE_COLOR,
+                alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
 
 
 class CruiseLayout(Widget):
@@ -84,10 +116,72 @@ class CruiseLayout(Widget):
       callback=lambda: self._set_current_panel(PanelType.SLA)
     )
 
+    self.phone_speed_source = toggle_item_sp(
+      title=lambda: tr("Phone Speed Limit Source"),
+      description=lambda: tr("Use fresh APN/N, Navipilot, or Carrot phone speed-limit data before vehicle and map sources. Stale data times out automatically."),
+      param="CarrotPhoneSpeedLimitEnabled")
+
+    self.carrot_active_speed = toggle_item_sp(
+      title=lambda: tr("Carrot Active Speed Control"),
+      description=lambda: tr("Allow Carrot speed-limit, navigation, SDI, speed-bump, traffic-light, and model-speed evidence to adjust cruise targets when the related assist mode is enabled."),
+      param="CarrotActiveSpeedControlEnabled")
+
+    self.curve_speed_mode = option_item_sp(
+      title=lambda: tr("Curve Speed Control Mode"),
+      param="CurveSpeedControlMode",
+      min_value=0, max_value=3, value_change_step=1,
+      label_callback=self._curve_mode_label,
+      description=lambda: tr("Select the curve-speed strategy: Off, Sunny, Carrot, or Fusion. Fusion keeps Sunny model-curvature quality and Carrot navigation/phone/lane inputs together."))
+
+    self.auto_turn_control = toggle_item_sp(
+      title=lambda: tr("Carrot Auto Turn Slowdown"),
+      description=lambda: tr("Use Carrot navigation and curve information to slow for turns and junctions."),
+      param="CarrotAutoTurnControlEnabled")
+
+    self.turn_speed_mode = option_item_sp(
+      title=lambda: tr("Turn Speed Control Mode"),
+      param="TurnSpeedControlMode",
+      min_value=0, max_value=3, value_change_step=1,
+      label_callback=self._turn_mode_label,
+      description=lambda: tr("Select the turn-speed strategy: Off, Carrot, Sunny, or Fusion."))
+
+    self.navigation_decel_rate = option_item_sp(
+      title=lambda: tr("Navigation Decel Rate"),
+      param="AutoNaviSpeedDecelRate",
+      min_value=50, max_value=300, value_change_step=5,
+      label_callback=lambda v: f"{v}%",
+      description=lambda: tr("Deceleration strength for navigation speed events such as turns, speed cameras, speed bumps, and model-speed limits."))
+
+    self.traffic_stop = toggle_item_sp(
+      title=lambda: tr("Carrot Traffic Light Stop"),
+      description=lambda: tr("Use Carrot traffic-light input for red-light stop behavior."),
+      param="CarrotTrafficStopEnabled")
+
+    self.traffic_light_mode = option_item_sp(
+      title=lambda: tr("Traffic Light Detect Mode"),
+      param="TrafficLightDetectMode",
+      min_value=0, max_value=3, value_change_step=1,
+      label_callback=self._traffic_mode_label,
+      description=lambda: tr("Select the traffic-light detection mode used by Carrot red-light stop."))
+
     self.dec_toggle = toggle_item_sp(
       title=lambda: tr("Sunny DEC Dynamic Experimental Control"),
       description=lambda: tr(DEC_DESCRIPTION),
       param="DynamicExperimentalControl")
+
+    self.cruise_decel = option_item_sp(
+      title=lambda: tr("Cruise Decel"),
+      param="CarrotCruiseDecel",
+      min_value=-1, max_value=200, value_change_step=5,
+      label_callback=self._auto_percent_label,
+      description=lambda: tr("Carrot cruise deceleration target. Auto uses the current Carrot default."))
+
+    self.atc_decel = option_item_sp(
+      title=lambda: tr("ATC Decel"),
+      param="CarrotCruiseAtcDecel",
+      min_value=-1, max_value=200, value_change_step=5,
+      label_callback=self._auto_percent_label,
+      description=lambda: tr("Deceleration target used by Auto Turn Control. Auto uses the current Carrot default."))
 
     self.stop_distance = option_item_sp(
       title=lambda: tr("Stop Distance"),
@@ -139,8 +233,22 @@ class CruiseLayout(Widget):
       description=lambda: tr("Time gap preset 4 used by Carrot tuning."))
 
     items = [
+      CruiseSectionHeader(lambda: tr("Speed Limit And Model-Speed"), lambda: tr("Phone speed, vehicle speed, map speed, and model-speed evidence stay visible here; detailed source policy is inside Speed Limit.")),
       self.sla_settings_button,
+      self.phone_speed_source,
+      self.carrot_active_speed,
+      CruiseSectionHeader(lambda: tr("Curve And Turn Slowdown"), lambda: tr("Sunny curve quality, Carrot navigation turns, lane-line curve input, and model-speed events are selected by explicit modes.")),
+      self.curve_speed_mode,
+      self.auto_turn_control,
+      self.turn_speed_mode,
+      self.navigation_decel_rate,
+      CruiseSectionHeader(lambda: tr("Traffic Light Stop"), lambda: tr("Red-light behavior remains a separate Carrot gate and should be tested independently.")),
+      self.traffic_stop,
+      self.traffic_light_mode,
+      CruiseSectionHeader(lambda: tr("Longitudinal Behavior"), lambda: tr("DEC is separate from Carrot speed logic; the Carrot decel and following values remain user-tuneable while parked.")),
       self.dec_toggle,
+      self.cruise_decel,
+      self.atc_decel,
       self.stop_distance,
       self.dynamic_following,
       self.decel_follow_boost,
@@ -148,6 +256,7 @@ class CruiseLayout(Widget):
       self.follow_gap_2,
       self.follow_gap_3,
       self.follow_gap_4,
+      CruiseSectionHeader(lambda: tr("Cruise Button Behavior"), lambda: tr("Button behavior stays limited to local cruise-speed increment settings. ICBM/SCC-V/SCC-M remain hidden because they overlap Carrot cruise logic.")),
       self.custom_acc_toggle,
       self.custom_acc_short_increment,
       self.custom_acc_long_increment,
@@ -163,10 +272,28 @@ class CruiseLayout(Widget):
   def show_event(self):
     self._set_current_panel(PanelType.CRUISE)
     self._scroller.show_event()
-    self.dec_toggle.show_description(True)
-    self.stop_distance.show_description(True)
-    self.dynamic_following.show_description(True)
-    self.custom_acc_toggle.show_description(True)
+    for item in (
+      self.phone_speed_source,
+      self.carrot_active_speed,
+      self.curve_speed_mode,
+      self.auto_turn_control,
+      self.turn_speed_mode,
+      self.navigation_decel_rate,
+      self.traffic_stop,
+      self.traffic_light_mode,
+      self.dec_toggle,
+      self.cruise_decel,
+      self.atc_decel,
+      self.stop_distance,
+      self.dynamic_following,
+      self.decel_follow_boost,
+      self.follow_gap_1,
+      self.follow_gap_2,
+      self.follow_gap_3,
+      self.follow_gap_4,
+      self.custom_acc_toggle,
+    ):
+      item.show_description(True)
 
   def _set_current_panel(self, panel: PanelType):
     self._current_panel = panel
@@ -202,7 +329,21 @@ class CruiseLayout(Widget):
       ui_state.params.remove("DynamicExperimentalControl")
       self.dec_toggle.action_item.set_state(False)
 
+    for toggle in (
+      self.phone_speed_source,
+      self.carrot_active_speed,
+      self.auto_turn_control,
+      self.traffic_stop,
+    ):
+      toggle.action_item.set_enabled(ui_state.is_offroad())
+
     for item in (
+      self.curve_speed_mode,
+      self.turn_speed_mode,
+      self.navigation_decel_rate,
+      self.traffic_light_mode,
+      self.cruise_decel,
+      self.atc_decel,
       self.stop_distance,
       self.dynamic_following,
       self.decel_follow_boost,
@@ -246,3 +387,34 @@ class CruiseLayout(Widget):
   @staticmethod
   def _dec_enabled(has_long: bool) -> bool:
     return bool(ui_state.is_offroad() and has_long)
+
+  @staticmethod
+  def _auto_percent_label(value: int) -> str:
+    return tr("Auto") if value < 0 else f"{value}%"
+
+  @staticmethod
+  def _curve_mode_label(value: int) -> str:
+    return {
+      0: tr("Off"),
+      1: tr("Sunny"),
+      2: tr("Carrot"),
+      3: tr("Fusion"),
+    }.get(value, str(value))
+
+  @staticmethod
+  def _turn_mode_label(value: int) -> str:
+    return {
+      0: tr("Off"),
+      1: tr("Carrot"),
+      2: tr("Sunny"),
+      3: tr("Fusion"),
+    }.get(value, str(value))
+
+  @staticmethod
+  def _traffic_mode_label(value: int) -> str:
+    return {
+      0: tr("Off"),
+      1: tr("Signal"),
+      2: tr("Signal+Map"),
+      3: tr("Strict"),
+    }.get(value, str(value))
