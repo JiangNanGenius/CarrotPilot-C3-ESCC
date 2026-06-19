@@ -1752,6 +1752,27 @@ def check_genius_settings_matrix_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_genius_branding_contract_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_branding_contract.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-1200:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_genius_curve_speed_contract_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -2593,7 +2614,7 @@ def main() -> int:
   failures += not require("fishop auto-overtake safety chain gate", ok, detail or "fishop auto-overtake safety chain gate failed")
   failures += not require("fishop hardware sample tool exists", "FishopHardwareState" in fishop_sample and "SAMPLE_PAYLOADS" in fishop_sample,
                           "fishop hardware sample tool must normalize captured JSON payloads")
-  failures += not require("alpha snapshot tool exists", "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot" in alpha_snapshot
+  failures += not require("alpha snapshot tool exists", "Genius Pilot C3 Alpha Snapshot" in alpha_snapshot
                           and "MESSAGING_SERVICES" in alpha_snapshot and "fishopHardware" in alpha_snapshot,
                           "alpha snapshot must collect model, process, params, and fishop evidence")
   failures += not require("alpha snapshot records CarParamsSP ESCC evidence",
@@ -2939,6 +2960,12 @@ def main() -> int:
                           "release gate must run the settings owner matrix")
   ok, detail = check_genius_settings_matrix_runtime()
   failures += not require("Genius settings matrix runtime", ok, detail or "Genius settings matrix failed")
+  failures += not require("Genius branding release gate wired",
+                          "scripts/personal/genius_branding_contract.py" in release_gate
+                          and "Genius branding contract" in release_gate,
+                          "release gate must run the user-facing branding/no-cloud Firehose contract")
+  ok, detail = check_genius_branding_contract_runtime()
+  failures += not require("Genius branding contract runtime", ok, detail or "Genius branding contract failed")
   failures += not require("Genius curve-speed policy wired",
                           all(token in curve_speed_policy + scc_vision_controller + scc_map_controller + curve_speed_contract for token in (
                             "CurveSpeedControlMode",

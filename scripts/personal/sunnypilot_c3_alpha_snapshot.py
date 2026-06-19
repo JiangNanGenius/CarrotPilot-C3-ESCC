@@ -1208,7 +1208,7 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None,
 
   return {
     "metadata": {
-      "title": "CarrotPilot-C3-ESCC SunnyPilot Alpha Snapshot",
+      "title": "Genius Pilot C3 Alpha Snapshot",
       "timestamp": dt.datetime.now(dt.timezone.utc).astimezone().isoformat(timespec="seconds"),
       "repo": str(ROOT),
       "branch": git_value(["branch", "--show-current"]),
@@ -1244,7 +1244,7 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None,
 
 
 def main() -> int:
-  parser = argparse.ArgumentParser(description="Collect a privacy-safe SunnyPilot C3 alpha validation snapshot.")
+  parser = argparse.ArgumentParser(description="Collect a privacy-safe Genius Pilot C3 alpha validation snapshot.")
   parser.add_argument("--sample-seconds", type=int, default=0, help="sample live messaging for model and speed evidence")
   parser.add_argument("--fishop-jsonl", type=Path, help="optional fishop hardware JSON Lines capture")
   parser.add_argument("--output", type=Path, help="write JSON report to this path")

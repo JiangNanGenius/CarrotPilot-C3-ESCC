@@ -1,5 +1,18 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 User-Facing Branding And Firehose Cloud Removal
+
+Cleaned up another user-facing SunnyPilot/cloud-upload surface:
+
+- Firehose now displays `Data Uploads Disabled` and explains that Genius Pilot keeps cloud training uploads off.
+- The Firehose page no longer imports or calls the upstream firehose API, device token helper, registration dongle ID, or request session.
+- The alpha snapshot title is now `Genius Pilot C3 Alpha Snapshot`.
+- Cruise policy copy no longer labels the hidden ICBM/SCC-V/SCC-M group as a SunnyPilot feature in the visible description.
+- Simplified and Traditional Chinese translations were added for the new local/no-cloud Firehose copy.
+- Added `scripts/personal/genius_branding_contract.py` and wired it into static/release gates so old SunnyPilot branding and Firehose upload client paths cannot silently return.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.11`.
+
 ## 2026-06-20 Visualization Ownership Tightening
 
 Added `docs/personal/VISUALIZATION_POLICY.md` to make the display ownership rules explicit:

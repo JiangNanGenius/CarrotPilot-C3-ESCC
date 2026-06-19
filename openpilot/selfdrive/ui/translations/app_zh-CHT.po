@@ -1024,3 +1024,48 @@ msgstr "Genius Pilot C3 alpha 已停用雲端上傳、遠端配對、Sunnylink �
 
 msgid "Continue"
 msgstr "繼續"
+
+msgid "Data Uploads Disabled"
+msgstr "資料上傳已關閉"
+
+msgid ""
+"Genius Pilot keeps cloud training uploads disabled in this personal C3 build.\n"
+"\n"
+"Local Wi-Fi, SSH, Web, GitHub updates, and model downloads remain available. Driving data is not uploaded from this page."
+msgstr ""
+"這個 Genius Pilot C3 個人版已關閉雲端訓練資料上傳。\n"
+"\n"
+"本地 Wi-Fi、SSH、Web、GitHub 更新和模型下載仍然可用。此頁面不會上傳駕駛資料。"
+
+msgid ""
+"For updates, bring your device inside and connect to a good USB-C adapter and Wi-Fi.\n"
+"\n"
+"Use the Software, Models, and Super Advanced pages for local maintenance. This page does not pair with comma, Sunnylink, or any cloud upload service."
+msgstr ""
+"需要更新時，把設備帶到室內並連接穩定的 USB-C 電源和 Wi-Fi。\n"
+"\n"
+"本地維護請使用 Software、Models 和 Super Advanced 頁面。此頁面不會與 comma、Sunnylink 或任何雲端上傳服務配對。"
+
+msgid "Does this upload my drives?"
+msgstr "這會上傳我的駕駛資料嗎？"
+
+msgid "No. Cloud upload paths are disabled in Genius Pilot."
+msgstr "不會。Genius Pilot 已停用雲端上傳路徑。"
+
+msgid "Can I still update over Wi-Fi?"
+msgstr "還能透過 Wi-Fi 更新嗎？"
+
+msgid "Yes. GitHub updates and model downloads are local maintenance features."
+msgstr "可以。GitHub 更新和模型下載屬於本地維護功能。"
+
+msgid "What should I use this page for?"
+msgstr "這個頁面用來做什麼？"
+
+msgid "It is a reminder that cloud training upload mode is intentionally unavailable."
+msgstr "它用於提示：雲端訓練上傳模式在本版本中被有意關閉。"
+
+msgid "DISABLED: cloud uploads are off in this personal build"
+msgstr "已停用：此個人版已關閉雲端上傳"
+
+msgid "This personal build keeps cruise-speed behavior aligned with CarrotPilot. ICBM, SCC-V, and SCC-M stay hidden. Sunny DEC is available in Cruise and Super Advanced settings."
+msgstr "這個個人版的巡航控速邏輯以 CarrotPilot 為準。ICBM、SCC-V 和 SCC-M 會隱藏。Sunny DEC 可在 Cruise 和 Super Advanced 設定中使用。"
