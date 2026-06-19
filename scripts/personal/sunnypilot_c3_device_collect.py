@@ -138,6 +138,7 @@ def remote_collect_script(args: argparse.Namespace) -> str:
   sample_seconds = max(0, int(args.sample_seconds))
   hardware_probe_seconds = max(1, int(args.hardware_probe_seconds))
   imu_probe_seconds = max(1, int(args.imu_probe_seconds))
+  camera_snapshot_timeout = max(1, int(args.camera_snapshot_timeout))
   navipilot_flag = "--navipilot-live-check" if args.navipilot_live_check else ""
   require_cloud_flag = "--require-no-cloud-processes" if args.require_no_cloud_processes else ""
   sound_probe_flag = "--skip-sound" if args.skip_sound_probe else ""
@@ -213,6 +214,30 @@ if [ -d /data/openpilot ]; then
       --pretty > "$OUT/c3_imu_probe_stdout.txt" 2> "$OUT/c3_imu_probe_stderr.txt" || echo "$?" > "$OUT/c3_imu_probe_exit_code.txt"
   else
     echo "C3 IMU probe script missing" > "$OUT/c3_imu_probe_missing.txt"
+  fi
+fi
+"""
+  camera_snapshot_block = "true"
+  if args.camera_snapshot:
+    camera_snapshot_block = f"""
+if [ -d /data/openpilot ]; then
+  cd /data/openpilot
+  OPENPILOT_PYTHON="/usr/local/venv/bin/python"
+  if [ ! -x "$OPENPILOT_PYTHON" ]; then
+    OPENPILOT_PYTHON="$(command -v python3 || command -v python)"
+  fi
+  echo "$OPENPILOT_PYTHON" > "$OUT/python_runtime.txt"
+  mkdir -p "$OUT/camera_snapshot"
+  if [ -f scripts/personal/sunnypilot_c3_camera_snapshot_probe.py ]; then
+    PYTHONPATH=/data/openpilot "$OPENPILOT_PYTHON" scripts/personal/sunnypilot_c3_camera_snapshot_probe.py \\
+      --output-dir "$OUT/camera_snapshot" \\
+      --timeout {camera_snapshot_timeout} \\
+      --pretty > "$OUT/camera_snapshot_stdout.txt" 2> "$OUT/camera_snapshot_stderr.txt" || echo "$?" > "$OUT/camera_snapshot_exit_code.txt"
+    test -f "$OUT/camera_snapshot/camera_snapshot_probe.json" || true
+  elif [ -f system/camerad/snapshot.py ]; then
+    echo "personal camera snapshot probe missing; upstream snapshot.py is present" > "$OUT/camera_snapshot_missing.txt"
+  else
+    echo "camera snapshot scripts missing" > "$OUT/camera_snapshot_missing.txt"
   fi
 fi
 """
@@ -301,6 +326,8 @@ done
 
 {imu_probe_block}
 
+{camera_snapshot_block}
+
 {ui_capture_block}
 
 tarball="$OUT.tar.gz"
@@ -385,12 +412,14 @@ def self_test() -> int:
     sample_seconds = 2
     hardware_probe_seconds = 2
     imu_probe_seconds = 2
+    camera_snapshot_timeout = 2
     navipilot_live_check = True
     require_no_cloud_processes = True
     skip_snapshot = False
     parked_hardware_probe = True
     skip_sound_probe = True
     imu_probe = True
+    camera_snapshot = True
     ui_capture = True
 
   script = remote_collect_script(Args())
@@ -402,6 +431,10 @@ def self_test() -> int:
     "--skip-sound",
     "sunnypilot_c3_imu_probe.py",
     "c3_imu_probe.json",
+    "sunnypilot_c3_camera_snapshot_probe.py",
+    "camera_snapshot_probe.json",
+    "camera_snapshot_stdout.txt",
+    "system/camerad/snapshot.py",
     "UI capture is passive",
     "screencap",
     "fb0.raw",
@@ -440,6 +473,8 @@ def main() -> int:
   parser.add_argument("--hardware-probe-seconds", type=int, default=12, help="seconds to sample camera/modeld during parked hardware probe")
   parser.add_argument("--imu-probe", action="store_true", help="run the silent C3 IMU accelerometer/gyroscope probe")
   parser.add_argument("--imu-probe-seconds", type=int, default=5, help="seconds to sample IMU services")
+  parser.add_argument("--camera-snapshot", action="store_true", help="run the upstream camerad snapshot path and collect back/front JPEG evidence")
+  parser.add_argument("--camera-snapshot-timeout", type=int, default=25, help="seconds to allow for C3 camera snapshot capture")
   parser.add_argument("--ui-capture", action="store_true", help="passively collect a C3 UI screenshot/framebuffer artifact when available")
   parser.add_argument("--skip-sound-probe", action="store_true", default=True, help="keep parked hardware probe silent; this is the default")
   parser.add_argument("--with-sound-probe", action="store_true", help="explicitly allow the parked hardware probe to play a short speaker test sound")

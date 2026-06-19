@@ -186,9 +186,9 @@ These checks should be run before any real road test. They are allowed while the
 
 - [x] Create one repeatable Genius diagnostic command path that ties together C3 snapshot collection, parked camera/model sampling, IMU sampling, UI capture, and no-cloud evidence through `sunnypilot_c3_device_collect.py`.
 - [x] Add a process-replay wrapper for non-hardware logic: `controlsd`, `plannerd`, `radard`, `locationd`, and `paramsd`; keep reference updates opt-in only.
-- [ ] Add a replay/UI diagnostic path using comma's `tools/replay/replay --demo` and UI diff replay so settings, HUD, visual modes, Carrot overlays, and Chinese text can be checked without the car.
+- [x] Add a replay/UI diagnostic path using comma's `tools/replay/replay --demo` and UI diff replay so settings, HUD, visual modes, Carrot overlays, and Chinese text can be checked without the car.
 - [x] Add a passive C3 UI/screen capture evidence path to the device tarball; it tries `screencap`, then `fbgrab`, then raw framebuffer fallback, without touching the screen or playing sound.
-- [ ] Add a C3 camera snapshot evidence path using upstream `system/camerad/snapshot.py` or VisionIPC capture, separate from modeld control checks.
+- [x] Add a C3 camera snapshot evidence path using upstream `system/camerad/snapshot.py` or VisionIPC capture, separate from modeld control checks.
 - [x] Confirm parked camera/model path: three camera streams plus `modelV2`, `drivingModelData`, and `cameraOdometry` were observed without a physical panda.
 - [x] Add a silent C3 IMU probe based on upstream `system/sensord/tests/test_sensord.py`; require accelerometer and gyroscope, not only temperature.
 - [ ] Run the silent C3 IMU probe on the clone C3 and archive `c3_imu_probe.json`.
@@ -198,6 +198,7 @@ These checks should be run before any real road test. They are allowed while the
 - [ ] Verify Carrot/Super Advanced settings without car: all migrated controls visible, writable while offroad where intended, protected params read-only, and no unknown-key waits on C3.
 - [ ] Verify C3 UI/touch without car: settings opens reliably, Network page reports connected/scanned state, Seltos 2023 appears in the vehicle list, temperature displays numerically, and toggles retain state.
 - [ ] Archive each no-car diagnostic bundle on the Mac desktop under `CarrotPilot-C3-ESCC-device-evidence` with branch, commit, version, installer hash, and cloud-process evidence.
+- [x] Add release-gated self-tests for the no-car UI replay wrapper and the explicit C3 camera snapshot probe.
 
 ## Localization And Docs
 

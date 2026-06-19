@@ -129,9 +129,23 @@ python3 scripts/personal/sunnypilot_c3_device_collect.py \
 
 This probe is silent by default. Only add `--with-sound-probe` when the user explicitly wants an audible speaker test.
 
+Explicit C3 camera snapshot evidence, separate from modeld/camera stream checks:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_device_collect.py \
+  --host 192.168.100.174 \
+  --require-no-cloud-processes \
+  --camera-snapshot \
+  --ui-capture
+```
+
+The camera snapshot path uses `scripts/personal/sunnypilot_c3_camera_snapshot_probe.py`, which wraps upstream `system/camerad/snapshot.py`. It is opt-in and silent.
+
 Offline replay checks before or alongside C3 testing:
 
 ```bash
+python3 scripts/personal/genius_ui_replay_check.py --json
+python3 scripts/personal/genius_ui_replay_check.py --run-ui-replay
 python3 selfdrive/test/process_replay/test_processes.py --whitelist-procs controlsd,plannerd,radard,locationd,paramsd
 tools/replay/replay --demo
 ```
