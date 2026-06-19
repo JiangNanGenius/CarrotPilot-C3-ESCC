@@ -63,6 +63,33 @@ def process_seen(name: str, ps_text: str | None = None) -> bool:
   return re.search(pattern, text, re.MULTILINE) is not None
 
 
+def matching_pids(name: str, ps_text: str | None = None) -> set[int]:
+  pattern = PROCESS_PATTERNS[name]
+  text = ps_snapshot() if ps_text is None else ps_text
+  pids: set[int] = set()
+  for line in text.splitlines():
+    if not re.search(pattern, line, re.MULTILINE):
+      continue
+    fields = line.strip().split(maxsplit=1)
+    if not fields:
+      continue
+    try:
+      pids.add(int(fields[0]))
+    except ValueError:
+      pass
+  return pids
+
+
+def pid_running(pid: int) -> bool:
+  try:
+    os.kill(pid, 0)
+    return True
+  except ProcessLookupError:
+    return False
+  except PermissionError:
+    return True
+
+
 def safe_attr(obj: Any, attr: str, default: Any = None) -> Any:
   try:
     return getattr(obj, attr)
@@ -108,6 +135,7 @@ def process_env() -> dict[str, str]:
 def start_manual_process(name: str, manual_processes: dict[str, subprocess.Popen]) -> dict[str, Any]:
   if name != "modeld_tinygrad":
     raise ValueError(f"unsupported manual process: {name}")
+  before_pids = matching_pids(name)
   MANUAL_PROCESS_LOG_DIR.mkdir(parents=True, exist_ok=True)
   stdout_path = MANUAL_PROCESS_LOG_DIR / f"{name}.stdout"
   stderr_path = MANUAL_PROCESS_LOG_DIR / f"{name}.stderr"
@@ -125,14 +153,18 @@ def start_manual_process(name: str, manual_processes: dict[str, subprocess.Popen
   stderr.close()
   manual_processes[name] = proc
   time.sleep(1.2)
+  after_pids = matching_pids(name)
+  proc_pid = int(proc.pid or 0)
   return {
     "name": name,
     "kind": "manual",
     "alreadyRunning": False,
     "started": True,
-    "pid": int(proc.pid or 0),
+    "pid": proc_pid,
     "runningAfterStart": proc.poll() is None,
     "exitCodeAfterStart": proc.poll(),
+    "beforePids": sorted(before_pids),
+    "newPids": sorted(after_pids - before_pids | ({proc_pid} if proc_pid else set())),
     "stdout": str(stdout_path),
     "stderr": str(stderr_path),
   }
@@ -175,35 +207,74 @@ def stop_manual_process(name: str, manual_processes: dict[str, subprocess.Popen]
   }
 
 
+def stop_tracked_pids(action: dict[str, Any]) -> list[dict[str, Any]]:
+  stopped: list[dict[str, Any]] = []
+  for raw_pid in action.get("newPids", []):
+    try:
+      pid = int(raw_pid)
+    except (TypeError, ValueError):
+      continue
+    if pid <= 0 or not pid_running(pid):
+      continue
+    step: dict[str, Any] = {"pid": pid, "sigint": False, "sigkill": False, "runningAfter": True}
+    try:
+      os.kill(pid, signal.SIGINT)
+      step["sigint"] = True
+      deadline = time.monotonic() + 3.0
+      while time.monotonic() < deadline and pid_running(pid):
+        time.sleep(0.05)
+      if pid_running(pid):
+        os.kill(pid, signal.SIGKILL)
+        step["sigkill"] = True
+        time.sleep(0.2)
+      step["runningAfter"] = pid_running(pid)
+    except ProcessLookupError:
+      step["runningAfter"] = False
+    except Exception as exc:
+      step["error"] = str(exc)[:240]
+      step["runningAfter"] = pid_running(pid)
+    stopped.append(step)
+  return stopped
+
+
 def start_process(name: str, managed_processes: dict[str, Any],
                   manual_processes: dict[str, subprocess.Popen]) -> dict[str, Any]:
   before = ps_snapshot()
+  before_pids = matching_pids(name, before)
   if process_seen(name, before):
-    return {"name": name, "alreadyRunning": True, "started": False, "pid": 0}
+    return {"name": name, "alreadyRunning": True, "started": False, "pid": 0, "beforePids": sorted(before_pids), "newPids": []}
   if name == "modeld_tinygrad":
     return start_manual_process(name, manual_processes)
   proc = managed_processes[name]
   proc.start()
   time.sleep(0.8)
+  after_pids = matching_pids(name)
   return {
     "name": name,
     "alreadyRunning": False,
     "started": True,
     "pid": int(proc.proc.pid or 0) if proc.proc is not None else 0,
     "runningAfterStart": process_seen(name),
+    "beforePids": sorted(before_pids),
+    "newPids": sorted(after_pids - before_pids),
   }
 
 
-def stop_process(name: str, managed_processes: dict[str, Any],
+def stop_process(action: dict[str, Any], managed_processes: dict[str, Any],
                  manual_processes: dict[str, subprocess.Popen]) -> dict[str, Any]:
+  name = str(action["name"])
   if name in manual_processes:
-    return stop_manual_process(name, manual_processes)
+    stopped = stop_manual_process(name, manual_processes)
+    stopped["trackedPids"] = stop_tracked_pids(action)
+    stopped["runningAfterStop"] = process_seen(name)
+    return stopped
   proc = managed_processes[name]
   try:
     code = proc.stop(retry=True, block=True)
   except Exception as exc:
     return {"name": name, "stopped": False, "error": str(exc)[:240]}
-  return {"name": name, "stopped": True, "exitCode": code, "runningAfterStop": process_seen(name)}
+  tracked = stop_tracked_pids(action)
+  return {"name": name, "stopped": True, "exitCode": code, "trackedPids": tracked, "runningAfterStop": process_seen(name)}
 
 
 def ensure_car_params(params: Any, car: Any, messaging: Any) -> tuple[Any, bool]:
@@ -347,7 +418,7 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
   if not args.skip_sound:
     requested.append("soundd")
 
-  started: list[str] = []
+  started: list[dict[str, Any]] = []
   manual_processes: dict[str, subprocess.Popen] = {}
   process_actions: list[dict[str, Any]] = []
   cleanup_actions: list[dict[str, Any]] = []
@@ -378,7 +449,7 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
       action = start_process(name, managed_processes, manual_processes)
       process_actions.append(action)
       if action.get("started"):
-        started.append(name)
+        started.append(action)
 
     pm, msgs = make_publishers(messaging, car, log, HARDWARE)
     publish_errors: dict[str, str] = result["publishErrors"]
@@ -393,8 +464,8 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
   except Exception as exc:
     result["error"] = str(exc)[:400]
   finally:
-    for name in reversed(started):
-      cleanup_actions.append(stop_process(name, managed_processes, manual_processes))
+    for action in reversed(started):
+      cleanup_actions.append(stop_process(action, managed_processes, manual_processes))
     if created_car_params:
       try:
         params.remove("CarParams")
@@ -436,6 +507,7 @@ def self_test() -> int:
     "cameraOdometry",
     "accelerometer",
     "gyroscope",
+    "--with-imu",
     "AudibleAlert.engage",
     "--with-sound",
     "if not args.with_sound",
@@ -458,6 +530,7 @@ def main() -> int:
   parser.add_argument("--skip-camera", action="store_true")
   parser.add_argument("--skip-model", action="store_true")
   parser.add_argument("--skip-imu", action="store_true")
+  parser.add_argument("--with-imu", action="store_true", help="explicitly include the IMU services in this mixed parked probe")
   parser.add_argument("--skip-sound", action="store_true")
   parser.add_argument("--with-sound", action="store_true", help="explicitly play a short audible alert during the speaker probe")
   parser.add_argument("--output", type=Path)
@@ -467,6 +540,8 @@ def main() -> int:
 
   if args.self_test:
     return self_test()
+  if not args.with_imu:
+    args.skip_imu = True
   if not args.with_sound:
     args.skip_sound = True
 

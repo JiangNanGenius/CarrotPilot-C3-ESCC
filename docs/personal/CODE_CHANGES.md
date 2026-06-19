@@ -1,5 +1,22 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 No-Car Diagnostics Matrix And Temperature Fallback
+
+Expanded the code-level diagnostics that can run before the car is used:
+
+- Added `scripts/personal/genius_offline_replay_check.py` as a local wrapper around comma's `selfdrive/test/process_replay` and `tools/replay` paths. It checks replay readiness by default; actually running process replay and updating references are explicit opt-ins.
+- Added `scripts/personal/sunnypilot_c3_imu_probe.py`, a silent C3 IMU probe based on the upstream `sensord` test shape. It validates accelerometer and gyroscope evidence instead of treating temperature alone as IMU proof.
+- Extended `scripts/personal/sunnypilot_c3_device_collect.py` with `--imu-probe` and `--ui-capture`. UI capture is passive and attempts `screencap`, `fbgrab`, then raw framebuffer fallback without tapping the screen or playing sound.
+- Narrowed the mixed parked hardware probe to default camera/model sampling; IMU and speaker checks are explicit opt-ins through `--with-imu` and `--with-sound`.
+- Fixed the sidebar temperature card so it derives a numeric Celsius value from any available `deviceState` temperature source (`maxTempC`, CPU, GPU, PMIC, memory, thermal zones, etc.). If no sensor value is available, it now shows `--C` instead of translating the value to `GOOD`/`HIGH`.
+- Reworked the left sidebar into four personal-build cards: temperature, vehicle, phone/Navipilot input, and GPS. The phone card reads local `CarrotPhoneSpeedLimit*` / `CarrotNavigationEvent` freshness and never depends on Sunnylink/comma pairing. The GPS card reads `gpsLocationExternal` / `gpsLocation` fix, satellite, and horizontal-accuracy data.
+- Added Simplified/Traditional Chinese translations for the new sidebar phone/GPS labels and short status values.
+- Added a static alpha gate for the temperature card so future `/x` builds cannot silently return to status words instead of numeric temperature.
+- Added a static alpha gate for the four-card sidebar contract so future `/x` builds cannot silently return to the old Sunnylink-style two-card layout.
+- Wired the new diagnostics into the alpha release/static gates and updated the TODO/agent guide so future checks separate offline replay, C3 hardware evidence, and later real-car evidence.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.32`.
+
 ## 2026-06-20 C3 Parked Hardware Probe And Model Evidence Fix
 
 Added a parked hardware evidence path for the user's clone C3:

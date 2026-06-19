@@ -32,6 +32,8 @@ Do not move `/i` or stable/latest to the alpha line until the C3 parked checks a
 - Onroad visualization is separate from control behavior. `GeniusVisualMode`, `GeniusLaneLineStyle`, `GeniusLeadRadarVisualMode`, `GeniusLaneChangeVisuals`, and `GeniusFishopVisualOverlay` may combine Sunny HUD, Carrot lane/lead/radar drawing, and future Fishop evidence overlays, but they must not emit planner, CAN, lane-change, or overtake control output.
 - Prefer comma's offline replay tools for code behavior checks: use `selfdrive/test/process_replay` for process output regressions and `tools/replay` for UI/message replay. C3 parked probes are for real hardware paths such as cameras, IMU, local services, and device integration.
 - Do not play device sounds during routine collection. Speaker checks are opt-in only with `--with-sound` or `--with-sound-probe`, and only after the user explicitly asks for an audible test.
+- The C3 sidebar temperature card must show numeric Celsius from available `deviceState` temperature sources. If sensors are not ready, show `--C`; do not fall back to translated `GOOD`/`HIGH` status text.
+- The C3 sidebar should stay personal-build focused: four cards for temperature, vehicle, phone/Navipilot input freshness, and GPS fix/accuracy. Phone status must use local Carrot/APN/N/Navipilot params, not Sunnylink or comma pairing.
 - When three reference lines disagree, build a setting matrix first: ajouatom CarrotPilot, jixiexiaoge/mechanical, and masang-feiyang/ESCC. Decide one owner per behavior and avoid unexplained compatibility aliases.
 - User-facing alpha branding should move toward Genius Pilot. Keep upstream package/module names only where renaming would create code risk.
 - Genius Pilot version numbers follow the SunnyPilot base and append the personal build suffix: `<SunnyPilot base>-gp.<YYYYMMDD>.<patch>`.
@@ -120,7 +122,9 @@ python3 scripts/personal/sunnypilot_c3_device_collect.py \
   --host 192.168.100.174 \
   --navipilot-live-check \
   --require-no-cloud-processes \
-  --parked-hardware-probe
+  --parked-hardware-probe \
+  --imu-probe \
+  --ui-capture
 ```
 
 This probe is silent by default. Only add `--with-sound-probe` when the user explicitly wants an audible speaker test.

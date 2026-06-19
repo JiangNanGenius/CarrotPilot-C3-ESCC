@@ -436,6 +436,46 @@ msgstr "OK"
 msgid "ONLINE"
 msgstr "ONLINE"
 
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "PHONE"
+msgstr "PHONE"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "GPS"
+msgstr "GPS"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "OFF"
+msgstr "OFF"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "NAVI"
+msgstr "NAVI"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "APN"
+msgstr "APN"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "SDI"
+msgstr "SDI"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "CARROT"
+msgstr "CARROT"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "STALE"
+msgstr "STALE"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "NO FIX"
+msgstr "NO FIX"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "WEAK"
+msgstr "WEAK"
+
 #: openpilot/selfdrive/ui/widgets/setup.py
 msgid "Open"
 msgstr "Open"
@@ -870,4 +910,3 @@ msgstr "✓ SUBSCRIBED"
 #: openpilot/selfdrive/ui/widgets/setup.py
 msgid "🔥 Firehose Mode 🔥"
 msgstr "🔥 Firehose Mode 🔥"
-

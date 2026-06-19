@@ -377,6 +377,46 @@ msgid "ONLINE"
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "PHONE"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "GPS"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "OFF"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "NAVI"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "APN"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "SDI"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "CARROT"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "STALE"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "NO FIX"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "WEAK"
+msgstr ""
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "OFFLINE"
 msgstr ""
 
@@ -868,4 +908,3 @@ msgstr ""
 #: openpilot/selfdrive/ui/onroad/driver_camera_dialog.py
 msgid "camera starting"
 msgstr ""
-

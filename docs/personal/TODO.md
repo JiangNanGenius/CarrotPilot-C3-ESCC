@@ -165,7 +165,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add and run the local Genius settings matrix check for Carrot/Sunny/Fishop/ESCC/model/local-network/cloud/visualization ownership.
 - [x] Run the full local release gate after documentation is updated: `python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full`.
 - [x] Research comma/openpilot offline testing: use `selfdrive/test/process_replay` for process output regression, `tools/replay` for UI/message replay, and reserve C3 parked probes for physical hardware evidence.
-- [ ] Add a Genius offline replay checklist or wrapper for Seltos/Carrot logic once a suitable local route/rlog is available.
+- [x] Add a Genius offline replay checklist/wrapper for Seltos/Carrot logic; readiness checks are local-only, while real process replay is opt-in when route artifacts/network budget are available.
 - [ ] Run upstream process replay for affected non-hardware logic before promoting `/x`: controlsd/plannerd/radard/locationd/paramsd first, model replay only when camera frame inputs are available.
 - [x] Push both `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3`, then audit `/x`.
 - [ ] Sync or reinstall on the user's C3 and confirm Super Advanced opens, NNLC defaults on, Seltos 2023 appears, and new Carrot params do not show unknown-key waits.
@@ -179,6 +179,25 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Run Navipilot/APN/N input replay locally and confirm phone speed, SDI, speed-bump, traffic-light, turn, and model-speed fields are parsed.
 - [x] Run Fishop sample replay locally and confirm lane curve, left/right lane, lidar blindspot, dynamic risk, navigation gate, and overtake fields render in Web/API.
 - [ ] Road testing is not required for this code/local phase; keep `/i` as rollback until later parked and real-car checks are intentionally performed.
+
+## No-Car Diagnostics Matrix
+
+These checks should be run before any real road test. They are allowed while the C3 is on a desk or in recovery/offroad mode, and they must stay silent unless the user explicitly asks for an audible speaker test.
+
+- [x] Create one repeatable Genius diagnostic command path that ties together C3 snapshot collection, parked camera/model sampling, IMU sampling, UI capture, and no-cloud evidence through `sunnypilot_c3_device_collect.py`.
+- [x] Add a process-replay wrapper for non-hardware logic: `controlsd`, `plannerd`, `radard`, `locationd`, and `paramsd`; keep reference updates opt-in only.
+- [ ] Add a replay/UI diagnostic path using comma's `tools/replay/replay --demo` and UI diff replay so settings, HUD, visual modes, Carrot overlays, and Chinese text can be checked without the car.
+- [x] Add a passive C3 UI/screen capture evidence path to the device tarball; it tries `screencap`, then `fbgrab`, then raw framebuffer fallback, without touching the screen or playing sound.
+- [ ] Add a C3 camera snapshot evidence path using upstream `system/camerad/snapshot.py` or VisionIPC capture, separate from modeld control checks.
+- [x] Confirm parked camera/model path: three camera streams plus `modelV2`, `drivingModelData`, and `cameraOdometry` were observed without a physical panda.
+- [x] Add a silent C3 IMU probe based on upstream `system/sensord/tests/test_sensord.py`; require accelerometer and gyroscope, not only temperature.
+- [ ] Run the silent C3 IMU probe on the clone C3 and archive `c3_imu_probe.json`.
+- [x] Treat speaker output as already user-confirmed good; future speaker tests are opt-in only and must never run from default diagnostics.
+- [ ] Verify C3 local Web/API diagnostics without car: health, params bulk, same-value writes, status broadcast, Navipilot HTTP/TCP, phone speed input, Fishop evidence input, and no control-output fields.
+- [ ] Verify model manager without car: model list/download availability, active bundle summary, runner cache, stock fallback, and no active bundle rollback behavior.
+- [ ] Verify Carrot/Super Advanced settings without car: all migrated controls visible, writable while offroad where intended, protected params read-only, and no unknown-key waits on C3.
+- [ ] Verify C3 UI/touch without car: settings opens reliably, Network page reports connected/scanned state, Seltos 2023 appears in the vehicle list, temperature displays numerically, and toggles retain state.
+- [ ] Archive each no-car diagnostic bundle on the Mac desktop under `CarrotPilot-C3-ESCC-device-evidence` with branch, commit, version, installer hash, and cloud-process evidence.
 
 ## Localization And Docs
 
@@ -200,7 +219,9 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Fix C3/TICI tap release handling so settings buttons and toggles receive release events.
 - [x] Fix Network page on clone C3: it could show endless "Scanning Wi-Fi networks..." while the system was already connected.
 - [x] Make the sidebar gear entry stable by preventing the opening touch from immediately hitting the settings close button.
-- [x] Display numeric device temperature in the left sidebar instead of only `GOOD`/`HIGH` when `deviceState.maxTempC` is available.
+- [x] Display numeric device temperature in the left sidebar from any available `deviceState` temperature source; fall back to `--C`, never `GOOD`/`HIGH`.
+- [x] Add left-sidebar phone/Navipilot status from local Carrot phone/navigation inputs, with fresh/stale/off states and no cloud pairing dependency.
+- [x] Add left-sidebar GPS status from `gpsLocationExternal`/`gpsLocation`, showing fix/accuracy/weak/off state.
 - [x] Hide and hard-disable SunnyPilot cruise black-box toggles from the alpha Cruise panel.
 - [x] Make the sidebar gear less sensitive: settings now opens on touch release and ignores close/sidebar touches during the first 0.6 seconds after entry.
 - [x] Make settings/menu taps less sensitive on clone C3: reject drag/scroll releases, shrink tap movement tolerance, and defer sidebar panel switching until release.
@@ -210,6 +231,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Move the device from temporary synced dirty files to pushed branch commit `ec7e73dc`.
 - [ ] User visual confirmation: Network page leaves scanning state, sidebar gear opens settings consistently, temperature displays as a number, and toggles still work.
 - [x] Remove the packed updater `jeepney` traceback from clean alpha installs by patching the updater payload before publishing.
+- [x] Add a release-gated contract so the sidebar temperature card cannot regress to translated `GOOD`/`HIGH` status text.
+- [x] Add a release-gated contract so the sidebar keeps four personal-build cards: temperature, vehicle, phone/Navipilot, and GPS.
 
 ## Update Checklist
 
