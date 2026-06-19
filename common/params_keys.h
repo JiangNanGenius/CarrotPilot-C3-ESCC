@@ -155,6 +155,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"DevUIInfo", {PERSISTENT | BACKUP, INT, "0"}},
     {"EnableCopyparty", {PERSISTENT | BACKUP, BOOL}},
     {"EnableGithubRunner", {PERSISTENT | BACKUP, BOOL}},
+    {"GeniusCarrotWorldOverlay", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"GeniusFishopVisualOverlay", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"GeniusLaneChangeVisuals", {PERSISTENT | BACKUP, BOOL, "1"}},
     {"GeniusLaneLineStyle", {PERSISTENT | BACKUP, INT, "1"}},

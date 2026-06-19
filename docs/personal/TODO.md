@@ -93,9 +93,11 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add a real Fishop overlay panel for lane curve, lidar left/right lane, lidar blindspot, navigation gate, and overtake suggestion evidence.
 - [x] Decide visualization coexistence rules: Sunny minimal, Carrot dense, Fusion balanced, and Fishop overlay independent on top only when local data is fresh.
 - [x] Document that Fishop/lidar visual data is evidence-only and cannot enable auto-overtake or lane-change output by itself.
+- [x] Add `GeniusCarrotWorldOverlay` as an independent Carrot-style world evidence layer for side-lane, blindspot, lane-change, lead, and radar cues.
+- [x] Keep the Carrot world overlay display-only and default off, separate from the mutually exclusive Sunny/Carrot/Fusion base presets and from the Fishop hardware overlay.
 - [x] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
 - [x] Add Simplified/Traditional Chinese translations for the new visualization controls.
-- [ ] Map the ajouatom Carrot cluster/world view into a separate optional surface: detected vehicles, source-colored objects, raw/merged radar points, lane highlighting, and distance/speed labels.
+- [ ] Map the remaining ajouatom Carrot cluster/world view into a separate optional surface: detected vehicles, source-colored objects, raw/merged side radar points, ajouatom-only lane-line type fields, and distance/speed labels.
 - [ ] After cluster/world view mapping, decide whether it should be a standalone page, an explicit overlay, or a debug-only visual mode; do not merge it into the main HUD by default.
 - [ ] Add a cluster/world-view replay fixture before enabling that larger renderer on the C3.
 

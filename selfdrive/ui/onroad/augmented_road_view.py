@@ -8,6 +8,7 @@ from openpilot.selfdrive.ui.onroad.alert_renderer import AlertRenderer
 from openpilot.selfdrive.ui.onroad.driver_state import DriverStateRenderer
 from openpilot.selfdrive.ui.onroad.hud_renderer import HudRenderer
 from openpilot.selfdrive.ui.onroad.model_renderer import ModelRenderer
+from openpilot.selfdrive.ui.onroad.carrot_world_overlay import CarrotWorldOverlay
 from openpilot.selfdrive.ui.onroad.fishop_overlay import FishopVisualOverlay
 from openpilot.selfdrive.ui.onroad.cameraview import CameraView
 from openpilot.system.ui.lib.application import gui_app
@@ -54,6 +55,7 @@ class AugmentedRoadView(CameraView, AugmentedRoadViewSP):
     self._content_rect = rl.Rectangle()
 
     self.model_renderer = ModelRenderer()
+    self.carrot_world_overlay = CarrotWorldOverlay()
     self.fishop_overlay = FishopVisualOverlay()
     self._hud_renderer = HudRenderer()
     self.alert_renderer = AlertRenderer()
@@ -91,6 +93,7 @@ class AugmentedRoadView(CameraView, AugmentedRoadViewSP):
 
     # Draw all UI overlays
     self.model_renderer.render(self._content_rect)
+    self.carrot_world_overlay.render(self._content_rect)
     self.fishop_overlay.render(self._content_rect)
     AugmentedRoadViewSP.update_fade_out_bottom_overlay(self, self._content_rect)
     self._hud_renderer.render(self._content_rect)
@@ -217,6 +220,7 @@ class AugmentedRoadView(CameraView, AugmentedRoadViewSP):
       [0.0, 0.0, 1.0]
     ])
     self.model_renderer.set_transform(video_transform @ calib_transform)
+    self.carrot_world_overlay.set_transform(video_transform @ calib_transform)
 
     return self._cached_matrix
 

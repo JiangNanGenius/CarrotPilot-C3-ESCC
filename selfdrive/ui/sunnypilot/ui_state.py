@@ -60,6 +60,7 @@ class UIStateSP:
     self.chevron_metrics = None
     self.custom_interactive_timeout: int = 0
     self.developer_ui = None
+    self.genius_carrot_world_overlay: bool = False
     self.genius_fishop_visual_overlay: bool = False
     self.genius_lane_change_visuals: bool = True
     self.genius_lane_line_style: int = 1
@@ -170,6 +171,7 @@ class UIStateSP:
     self.chevron_metrics = self.params.get("ChevronInfo")
     self.custom_interactive_timeout = self.params.get("InteractivityTimeout", return_default=True)
     self.developer_ui = self.params.get("DevUIInfo")
+    self.genius_carrot_world_overlay = self.params.get_bool("GeniusCarrotWorldOverlay")
     self.genius_fishop_visual_overlay = self.params.get_bool("GeniusFishopVisualOverlay")
     self.genius_lane_change_visuals = self.params.get_bool("GeniusLaneChangeVisuals")
     self.genius_lane_line_style = self.params.get_int("GeniusLaneLineStyle")
