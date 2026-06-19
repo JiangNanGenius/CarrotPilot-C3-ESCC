@@ -23,11 +23,11 @@ DESCRIPTIONS = {
     "from github.com, or paste a public SSH key directly for fully local setup. Never add keys you do not control."
   ),
   'alpha_longitudinal': tr_noop(
-    "<b>WARNING: sunnypilot longitudinal control is in alpha for this car and may disable Automatic Emergency Braking (AEB).</b><br><br>" +
-    "On this car, sunnypilot defaults to the car's built-in ACC instead of sunnypilot's longitudinal control. " +
-    "Enable this to switch to sunnypilot longitudinal control. " +
-    "Enabling Experimental mode is recommended when enabling sunnypilot longitudinal control alpha. " +
-    "Changing this setting will restart sunnypilot if the car is powered on."
+    "<b>WARNING: Genius Pilot longitudinal control is in alpha for this car and may disable Automatic Emergency Braking (AEB).</b><br><br>" +
+    "On this car, Genius Pilot defaults to the car's built-in ACC instead of its own longitudinal control. " +
+    "Enable this to switch to Genius Pilot longitudinal control. " +
+    "Enabling Experimental mode is recommended when enabling Genius Pilot longitudinal control alpha. " +
+    "Changing this setting will restart Genius Pilot if the car is powered on."
   ),
 }
 
@@ -79,7 +79,7 @@ class DeveloperLayout(Widget):
     )
 
     self._alpha_long_toggle = toggle_item(
-      lambda: tr("sunnypilot Longitudinal Control (Alpha)"),
+      lambda: tr("Genius Pilot Longitudinal Control (Alpha)"),
       description=lambda: tr(DESCRIPTIONS["alpha_longitudinal"]),
       initial_state=self._params.get_bool("AlphaLongitudinalEnabled"),
       callback=self._on_alpha_long_enabled,

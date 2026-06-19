@@ -19,7 +19,7 @@ sections:
   - key: DynamicExperimentalControl
     widget: toggle
     title: Dynamic Experimental Control
-    description: Let the model decide when to use sunnypilot ACC or sunnypilot End to End Longitudinal.
+    description: Let the model decide when to use Genius Pilot ACC or End to End Longitudinal.
     visibility:
     - $ref: '#/macros/longitudinal'
     enablement:
@@ -31,8 +31,8 @@ sections:
   - key: LongitudinalPersonality
     widget: multiple_button
     title: Driving Personality
-    description: Standard is recommended. In aggressive mode, sunnypilot will follow lead cars closer and be more aggressive
-      with the gas and brake. In relaxed mode sunnypilot will stay further away from lead cars. On supported cars, you can
+    description: Standard is recommended. In aggressive mode, Genius Pilot will follow lead cars closer and be more aggressive
+      with the gas and brake. In relaxed mode Genius Pilot will stay further away from lead cars. On supported cars, you can
       cycle through these personalities with your steering wheel distance button.
     options:
     - value: 0

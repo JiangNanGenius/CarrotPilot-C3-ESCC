@@ -130,9 +130,8 @@ class TermsPage(Widget):
     self._title = Label("Welcome to Genius Pilot", font_size=90, font_weight=FontWeight.BOLD,
                         text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
     self._desc = Label(
-      "Personal alpha for C3 clone + Kia Seltos SCC. Experimental driver assistance only. "
-      "You are responsible for driving. Hands on wheel, eyes on road, take over anytime. "
-      "Cloud services are disabled. Test parked first, then low speed.",
+      "Personal alpha for C3 clone + Kia Seltos SCC. Driver assistance only. "
+      "You are responsible for driving. Cloud services are disabled. Test parked first.",
       font_size=72, font_weight=FontWeight.MEDIUM, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
 
     self._decline_btn = Button("Decline", click_callback=self._decline)

@@ -14,8 +14,8 @@ sections:
   - key: OpenpilotEnabledToggle
     widget: toggle
     needs_onroad_cycle: true
-    title: Enable sunnypilot
-    description: Use the sunnypilot system for adaptive cruise control and lane keep driver assistance. Your attention is
+    title: Enable Genius Pilot
+    description: Use Genius Pilot for adaptive cruise control and lane keep driver assistance. Your attention is
       required at all times to use this feature.
     enablement:
     - $ref: '#/macros/offroad'
@@ -27,7 +27,7 @@ sections:
   - key: AlwaysOnDM
     widget: toggle
     title: Always-On Driver Monitoring
-    description: Enable driver monitoring even when sunnypilot is not engaged.
+    description: Enable driver monitoring even when Genius Pilot is not engaged.
   - key: IsMetric
     widget: toggle
     title: Use Metric System
@@ -39,11 +39,10 @@ sections:
   - key: RecordFront
     widget: toggle
     needs_onroad_cycle: true
-    title: Record and Upload Driver Camera
-    description: Upload data from the driver facing camera and help improve the driver monitoring algorithm.
+    title: Record Driver Camera
+    description: Record driver-facing camera video locally for dashcam and diagnostics. Cloud uploads are disabled in this build.
   - key: RecordAudio
     widget: toggle
     needs_onroad_cycle: true
-    title: Record and Upload Microphone Audio
-    description: Record and store microphone audio while driving. The audio will be included in the dashcam video in comma
-      connect.
+    title: Record Microphone Audio
+    description: Record and store microphone audio locally while driving. Audio is included only in local dashcam video.

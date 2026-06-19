@@ -31,11 +31,11 @@ sections:
   - key: AlphaLongitudinalEnabled
     widget: toggle
     needs_onroad_cycle: true
-    title: sunnypilot Longitudinal Control (Alpha)
-    description: 'WARNING: sunnypilot longitudinal control is in alpha for this car and will disable Automatic Emergency Braking
-      (AEB). On this car, sunnypilot defaults to the car''s built-in ACC instead of sunnypilot''s longitudinal control. Enable
-      this to switch to sunnypilot longitudinal control. Enabling Experimental mode is recommended when enabling sunnypilot
-      longitudinal control alpha. Changing this setting will restart sunnypilot if the car is powered on.'
+    title: Genius Pilot Longitudinal Control (Alpha)
+    description: 'WARNING: Genius Pilot longitudinal control is in alpha for this car and will disable Automatic Emergency Braking
+      (AEB). On this car, Genius Pilot defaults to the car''s built-in ACC instead of its own longitudinal control. Enable
+      this to switch to Genius Pilot longitudinal control. Enabling Experimental mode is recommended when enabling Genius Pilot
+      longitudinal control alpha. Changing this setting will restart Genius Pilot if the car is powered on.'
     visibility:
     - type: all
       conditions:
@@ -99,7 +99,7 @@ sections:
   - key: ShowAdvancedControls
     widget: toggle
     title: Show Advanced Controls
-    description: Toggle visibility of advanced sunnypilot controls. This only changes the visibility of the toggles; it does
+    description: Toggle visibility of advanced Genius Pilot controls. This only changes the visibility of the toggles; it does
       not change the actual enabled/disabled state.
   - key: EnableGithubRunner
     widget: toggle

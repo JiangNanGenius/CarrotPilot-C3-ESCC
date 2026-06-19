@@ -26,11 +26,11 @@
     "severity": 1
   },
   "Offroad_CarUnrecognized": {
-    "text": "sunnypilot was unable to identify your car. Your car is either unsupported or its ECUs are not recognized. Please select your vehicle manually at https://www.sunnylink.ai/. Need help? Visit https://community.sunnypilot.ai/",
+    "text": "Genius Pilot was unable to identify your car. Your car is either unsupported or its ECUs are not recognized. Check the vehicle selection and firmware before driving.",
     "severity": 0
   },
   "Offroad_Recalibration": {
-    "text": "sunnypilot detected a change in the device's mounting position. Ensure the device is fully seated in the mount and the mount is firmly secured to the windshield.",
+    "text": "Genius Pilot detected a change in the device's mounting position. Ensure the device is fully seated in the mount and the mount is firmly secured to the windshield.",
     "severity": 0
   },
   "Offroad_OSMUpdateRequired": {
@@ -42,7 +42,7 @@
     "severity": 0
   },
   "Offroad_ExcessiveActuation": {
-    "text": "Excessive %1 actuation detected on your last drive. Please visit https://community.sunnypilot.ai/ and share your device's Dongle ID for troubleshooting.",
+    "text": "Excessive %1 actuation detected on your last drive. Recheck calibration, harness, and vehicle selection before driving again.",
     "severity": 1,
     "_comment": "Set extra field to lateral or longitudinal."
   },

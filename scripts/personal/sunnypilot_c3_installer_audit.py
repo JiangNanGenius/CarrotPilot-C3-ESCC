@@ -14,7 +14,7 @@ DEFAULT_INSTALL_URL = "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x"
 DEFAULT_MIN_SIZE_BYTES = 180_000
 
 REQUIRED_TOKENS = (
-  b"Installing CarrotPilot-C3-ESCC alpha",
+  b"Installing Genius Pilot alpha",
   b"https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git",
   b"git checkout alpha-sunnypilot-c3",
   b"git reset --hard origin/alpha-sunnypilot-c3",
@@ -72,7 +72,7 @@ def audit_bytes(data: bytes, source: str, min_size: int, expected_sha256: str | 
 
   ok = all(item["ok"] for item in checks)
   return {
-    "title": "CarrotPilot-C3-ESCC Installer Audit",
+    "title": "Genius Pilot Installer Audit",
     "source": source,
     "ok": ok,
     "size": len(data),
@@ -118,7 +118,7 @@ def self_test() -> int:
 
 
 def main() -> int:
-  parser = argparse.ArgumentParser(description="Audit the published CarrotPilot-C3-ESCC C3 installer binary.")
+  parser = argparse.ArgumentParser(description="Audit the published Genius Pilot C3 installer binary.")
   parser.add_argument("--url", default=DEFAULT_INSTALL_URL, help="Installer URL to download when --file is not supplied.")
   parser.add_argument("--file", type=Path, help="Already downloaded installer binary to audit.")
   parser.add_argument("--expected-sha256", help="Optional exact SHA256 expected for a pinned release asset.")

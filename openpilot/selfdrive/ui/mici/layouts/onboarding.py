@@ -62,8 +62,8 @@ class TrainingGuidePreDMTutorial(NavScroller):
     self._scroller.add_widgets([
       GreyBigButton("driver monitoring\ncheck", "scroll to continue",
                     gui_app.texture("icons_mici/setup/green_dm.png", 64, 64)),
-      GreyBigButton("", "Next, we'll check if comma four can detect the driver properly."),
-      GreyBigButton("", "sunnypilot uses the cabin camera to check if the driver is distracted."),
+      GreyBigButton("", "Next, we'll check if the device can detect the driver properly."),
+      GreyBigButton("", "Genius Pilot uses the cabin camera to check if the driver is distracted."),
       GreyBigButton("", "If it does not have a clear view of the driver, unplug and remount before continuing."),
       continue_button,
     ])
@@ -82,7 +82,7 @@ class DMBadFaceDetected(NavScroller):
     back_button.set_click_callback(self.dismiss)
 
     self._scroller.add_widgets([
-      GreyBigButton("looking for driver", "make sure comma\nfour can see your face",
+      GreyBigButton("looking for driver", "make sure the device\ncan see your face",
                     gui_app.texture("icons_mici/setup/orange_dm.png", 64, 64)),
       GreyBigButton("", "Remount if your face is blocked, or driver monitoring has difficulty tracking your face."),
       back_button,
@@ -226,16 +226,16 @@ class TrainingGuideRecordFront(NavScroller):
       ui_state.params.put_bool("RecordFront", False)
       continue_callback()
 
-    self._accept_button = BigConfirmationCircleButton("allow data uploading", gui_app.texture("icons_mici/setup/driver_monitoring/dm_check.png", 64, 64),
+    self._accept_button = BigConfirmationCircleButton("record locally", gui_app.texture("icons_mici/setup/driver_monitoring/dm_check.png", 64, 64),
                                                       on_accept, exit_on_confirm=False)
 
-    self._decline_button = BigConfirmationCircleButton("no, don't upload", gui_app.texture("icons_mici/setup/cancel.png", 64, 64), on_decline,
+    self._decline_button = BigConfirmationCircleButton("do not record", gui_app.texture("icons_mici/setup/cancel.png", 64, 64), on_decline,
                                                        exit_on_confirm=False)
 
     self._scroller.add_widgets([
-      GreyBigButton("driver camera data", "do you want to share video data for training?",
+      GreyBigButton("driver camera data", "record driver camera video locally?",
                     gui_app.texture("icons_mici/setup/green_dm.png", 64, 64)),
-      GreyBigButton("", "Sharing your data with comma helps improve openpilot and sunnypilot for everyone."),
+      GreyBigButton("", "Cloud uploads are disabled. This setting only controls local driver camera recording."),
       self._accept_button,
       self._decline_button,
     ])
@@ -249,9 +249,9 @@ class TrainingGuideAttentionNotice(Scroller):
     continue_button.set_click_callback(continue_callback)
 
     self._scroller.add_widgets([
-      GreyBigButton("what is sunnypilot?", "scroll to continue",
+      GreyBigButton("what is Genius Pilot?", "scroll to continue",
                     gui_app.texture("icons_mici/setup/green_info.png", 64, 64)),
-      GreyBigButton("", "1. sunnypilot is a driver assistance system."),
+      GreyBigButton("", "1. Genius Pilot is a driver assistance system."),
       GreyBigButton("", "2. You must pay attention at all times."),
       GreyBigButton("", "3. You must be ready to take over at any time."),
       GreyBigButton("", "4. You are fully responsible for driving the car."),
@@ -304,13 +304,13 @@ class TermsPage(Scroller):
     self._decline_button = BigConfirmationCircleButton("decline &\nuninstall", gui_app.texture("icons_mici/setup/cancel.png", 64, 64), on_decline,
                                                        red=True, exit_on_confirm=False)
 
-    self._terms_header = GreyBigButton("CarrotPilot\nC3 ESCC", "personal alpha terms",
+    self._terms_header = GreyBigButton("Genius\nPilot", "personal alpha terms",
                                        gui_app.texture("icons_mici/setup/green_info.png", 64, 64))
     self._must_accept_card = GreyBigButton("", "Accept these safety terms before using this build.")
 
     self._scroller.add_widgets([
       self._terms_header,
-      GreyBigButton("experimental\npersonal build", "C3 clone + Kia Seltos SCC."),
+      GreyBigButton("experimental\nalpha build", "C3 clone + Kia Seltos SCC."),
       GreyBigButton("driver remains\nresponsible", "Hands on wheel. Eyes on road. Take over anytime."),
       GreyBigButton("local only", "Cloud services are disabled."),
       GreyBigButton("test order", "Parked first. Low speed next."),
