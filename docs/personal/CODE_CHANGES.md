@@ -16,9 +16,11 @@ The first renderer migration is display-only:
 - Lead vehicles can be drawn as Carrot-style outline boxes, with radar/model colors and optional speed tags.
 - Lane-change intent cues use the existing onroad event stream and do not alter lane-change control.
 - Fishop overlay reads fresh local `/data/fishop_hardware.jsonl` evidence and draws compact left/right lane, lidar, camera, dynamic-risk, and overtake-hint status on top of any base preset.
+- The route path itself now follows the visual preset: Sunny keeps the stock path, Carrot draws a route ribbon with edge/center track cues, and Fusion keeps the Sunny path body with light Carrot cues.
+- Added `scripts/personal/genius_visualization_contract.py` to gate the path/lane/lead/Fishop display-only wiring and a synthetic C3 geometry check before alpha publishing.
 - Visualization coexistence is explicit: Sunny, Carrot, and Fusion are mutually exclusive base presets; Fishop overlay is an independent top layer; every renderer switch remains display-only.
 
-Genius Pilot version is bumped to `2026.002.000-gp.20260620.4`.
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.5`.
 
 ## 2026-06-20 NNLC And Super Advanced Carrot Controls
 

@@ -87,7 +87,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Move visualization controls into the Visuals settings page instead of mixing them with cruise or Super Advanced control settings.
 - [x] Wire C3/TICI `selfdrive/ui/onroad/model_renderer.py` to draw Sunny-compatible simple lanes, colored lane confidence, Carrot-style adjacent-lane emphasis, Carrot lead boxes, and optional radar speed tags.
 - [x] Keep visualization changes display-only: no planner, CAN, lane-change, or Fishop control output is added by these renderer switches.
-- [ ] Add Carrot path drawing modes as a separate renderer stage after checking the old path animation code against Sunny 0.11 `modelV2` and `lateralPlan` schemas.
+- [x] Add Carrot path drawing modes as a separate renderer stage: Sunny original path, Carrot route ribbon/track markers, and Fusion Sunny body with Carrot path cues.
 - [x] Add a real Fishop overlay panel for lane curve, lidar left/right lane, lidar blindspot, navigation gate, and overtake suggestion evidence.
 - [x] Decide visualization coexistence rules: Sunny minimal, Carrot dense, Fusion balanced, and Fishop overlay independent on top only when local data is fresh.
 - [ ] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
@@ -131,8 +131,9 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Run local static verification after unlocking Carrot advanced settings: `python3 scripts/personal/sunnypilot_c3_alpha_static_check.py`.
 - [x] Compile-check changed Python files: Super Advanced UI, Cruise UI, and local Carrot Web.
 - [x] Verify `common/params_pyx.so` contains the new runtime params: `CurveSpeedControlMode`, `CarrotCruiseAtcDecel`, `NeuralNetworkLateralControl`, and `FishopLaneCurveEnabled`.
-- [ ] Run the full local release gate after documentation is updated: `python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full`.
-- [ ] Push both `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3`, then audit `/x`.
+- [x] Add and run the local Genius visualization contract check for path/lane/lead/Fishop display-only wiring.
+- [x] Run the full local release gate after documentation is updated: `python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full`.
+- [x] Push both `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3`, then audit `/x`.
 - [ ] Sync or reinstall on the user's C3 and confirm Super Advanced opens, NNLC defaults on, Seltos 2023 appears, and new Carrot params do not show unknown-key waits.
 - [ ] Run C3 parked checks with the device currently available: UI opens, Wi-Fi/network page reports connected state, local Web/API responds, no cloud processes exist, model manager opens, stock model runner starts.
 - [ ] Run local Carrot Web/API checks: write and read `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, `CarrotTrafficStopEnabled`, `FishopAutoOvertakeEnabled`, `CurveSpeedControlMode`, and `NeuralNetworkLateralControl` while offroad.

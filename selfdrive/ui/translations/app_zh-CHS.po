@@ -1352,8 +1352,8 @@ msgstr "在任意显示预设上叠加 Fishop 车道、激光雷达车道、盲�
 msgid "Genius Visualization Preset"
 msgstr "Genius 可视化预设"
 
-msgid "Choose a base display preset. Sunny is minimal, Carrot emphasizes lane, lead, and radar information, and Fusion keeps the Sunny HUD with Carrot-style road visualization. Fishop overlay is independent."
-msgstr "选择基础显示预设。Sunny 最简洁，Carrot 强化车道、前车和雷达信息，Fusion 保留 Sunny HUD 并使用 Carrot 风格道路显示。Fishop 叠加层独立开关。"
+msgid "Choose a base display preset. Sunny is minimal, Carrot emphasizes lane, path, lead, and radar information, and Fusion keeps the Sunny HUD with Carrot-style lane and path cues. Fishop overlay is independent."
+msgstr "选择基础显示预设。Sunny 最简洁，Carrot 强化车道、路径、前车和雷达信息，Fusion 保留 Sunny HUD，并叠加 Carrot 风格车道和路径提示。Fishop 叠加层独立开关。"
 
 msgid "Lane-Line Style"
 msgstr "车道线样式"

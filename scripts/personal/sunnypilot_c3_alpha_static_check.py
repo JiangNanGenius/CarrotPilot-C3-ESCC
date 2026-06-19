@@ -1710,6 +1710,27 @@ def check_device_collect_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_genius_visualization_contract_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_visualization_contract.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-1200:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_install_boot_contract() -> tuple[bool, str]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
@@ -2805,21 +2826,31 @@ def main() -> int:
                             "GeniusLaneChangeVisuals",
                             "GeniusFishopVisualOverlay",
                             "Genius Visualization Preset",
+                            "Carrot-style lane and path cues",
                             "Lead And Radar Display",
                           )),
                           "Visuals settings must expose Genius visualization presets, lane style, radar lead mode, lane-change cues, and Fishop overlay")
   failures += not require("Genius visualization renderer wired",
                           all(token in onroad_model_renderer for token in (
+                            "_draw_path_carrot",
+                            "_draw_path_fusion",
+                            "_draw_path_edges",
+                            "_draw_carrot_path_markers",
+                            "CARROT_PATH_ACTIVE_COLORS",
                             "_update_leads_carrot",
                             "_draw_lead_rect",
                             "_update_radar_info",
                             "_get_lane_line_color",
+                            "genius_visual_mode == 1",
+                            "genius_visual_mode == 2",
                             "genius_lead_radar_visual_mode",
                             "genius_lane_line_style",
                           ))
                           and "LaneChangeIntentWidget" in turn_signal_renderer
                           and "genius_lane_change_visuals" in turn_signal_renderer,
-                          "onroad renderer must wire Carrot-style lead boxes, radar labels, lane-line coloring, and lane-change intent cues")
+                          "onroad renderer must wire Carrot-style path cues, lead boxes, radar labels, lane-line coloring, and lane-change intent cues")
+  ok, detail = check_genius_visualization_contract_runtime()
+  failures += not require("Genius visualization contract runtime", ok, detail or "Genius visualization contract failed")
   failures += not require("Cruise exposes staged Carrot longitudinal controls",
                           all(token in cruise_settings for token in (
                             "DynamicExperimentalControl",
