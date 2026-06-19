@@ -1325,6 +1325,9 @@ msgstr "巡航按键行为"
 msgid "Button behavior stays limited to local cruise-speed increment settings. ICBM/SCC-V/SCC-M remain hidden because they overlap Carrot cruise logic."
 msgstr "按键行为仅限本地巡航速度步进设置。ICBM/SCC-V/SCC-M 与 Carrot 巡航逻辑重叠，因此继续隐藏。"
 
+msgid "Button behavior is limited to local cruise-speed increment settings. Curve, map, navigation, and traffic-light behavior are handled by the staged Carrot controls above."
+msgstr "按键行为仅限本地巡航速度步进设置。弯道、地图、导航和红绿灯行为由上方分阶段的 Carrot 控制项处理。"
+
 msgid "Fishop Auto Overtake"
 msgstr "Fishop 自动超车"
 
