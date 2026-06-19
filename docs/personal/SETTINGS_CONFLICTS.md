@@ -56,8 +56,10 @@ The reference branches use several settings that look similar but control differ
 - `GeniusVisualMode` also owns the path display style: Sunny keeps the original route body, Carrot uses a denser route ribbon with edge/center markers, and Fusion keeps the Sunny route body with lighter Carrot path cues.
 - `GeniusLaneLineStyle` and `GeniusLeadRadarVisualMode` may be adjusted independently after choosing a preset.
 - `GeniusLaneChangeVisuals` uses existing `onroadEvents` lane-change intent events and must not alter lane-change decisions.
+- `GeniusCarrotWorldOverlay` is independent from the Sunny/Carrot/Fusion preset. It draws Carrot-style side-lane, blindspot, lane-change, lead, and radar evidence on top of any base preset.
 - `GeniusFishopVisualOverlay` is independent from the Sunny/Carrot/Fusion preset. It draws local Fishop/lidar evidence only while `/data/fishop_hardware.jsonl` is fresh and must not publish planner, CAN, or automatic-overtake outputs.
-- Coexistence rule: Sunny, Carrot, and Fusion are mutually exclusive base presets; lane-line and lead/radar style are editable details; Fishop overlay is an optional top-layer evidence display.
+- Coexistence rule: Sunny, Carrot, and Fusion are mutually exclusive base presets; lane-line and lead/radar style are editable details; Carrot World and Fishop are optional top-layer evidence displays and may be enabled together.
+- Render order rule: base road renderer first, Carrot World overlay second, Fishop overlay third, HUD/alerts last.
 - The ajouatom Carrot cluster/world visualization is tracked as a separate future surface. Do not merge its world-view renderer into the main HUD without a separate layout/performance/control-boundary pass.
 - Do not merge Carrot path animation, Fishop overlay, Sunny HUD, and cruise-control behavior by name alone; each renderer change needs a display-only owner and a separate control-owner decision.
 - `docs/personal/SETTINGS_MATRIX.md` is the source of truth for these owner decisions. If a new visual/control setting is added, it must be classified there before publishing `/x`.

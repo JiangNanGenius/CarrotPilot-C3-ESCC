@@ -1,74 +1,165 @@
-![](https://user-images.githubusercontent.com/47793918/233812617-beab2e71-57b9-479e-8bff-c3931347ca40.png)
+# Genius Pilot C3 ESCC
 
-## 🌞 What is sunnypilot?
-[sunnypilot](https://github.com/sunnyhaibin/sunnypilot) is a fork of comma.ai's openpilot, an open source driver assistance system. sunnypilot offers the user a unique driving experience for over 300+ supported car makes and models with modified behaviors of driving assist engagements. sunnypilot complies with comma.ai's safety rules as accurately as possible.
+Genius Pilot is a personal C3/TICI alpha build for a clone comma C3 and a Kia
+Seltos 2023 SCC pure-CAN car. It uses SunnyPilot 0.11 architecture as the base,
+but the product direction is CarrotPilot-first: granular Carrot controls,
+ESCC detection, APN/N/Navipilot inputs, Auto-Tuner evidence, and Fishop hardware
+evidence are explicit instead of hidden behind cloud services or black-box
+settings.
 
-## 💭 Join our Community Forum
-Join the official sunnypilot community forum to stay up to date with all the latest features and be a part of shaping the future of sunnypilot!
-* https://community.sunnypilot.ai/
+This repository is for personal research and testing. It is not a product and
+does not replace driver responsibility.
 
-## Documentation
-https://docs.sunnypilot.ai/ is your one stop shop for everything from features to installation to FAQ about the sunnypilot
+## 中文快速说明
 
-## 🚘 Running on a dedicated device in a car
-First, check out this list of items you'll need to [get started](https://community.sunnypilot.ai/t/getting-started-using-sunnypilot-in-your-supported-car/251).
+这是给克隆版 C3/TICI 和 Kia Seltos 2023 SCC 纯 CAN 车使用的个人 alpha
+版本。日常稳定回滚线用 `/i`，新架构测试线用 `/x`。
 
-## Installation
-Next, refer to the sunnypilot community forum for [installation instructions](https://community.sunnypilot.ai/t/read-before-installing-sunnypilot/254), as well as a complete list of [Recommended Branch Installations](https://community.sunnypilot.ai/t/recommended-branch-installations/235).
+- 稳定回滚：`https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i`
+- 当前 alpha：`https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x`
+- 车型：`KIA_SELTOS_2023`
+- ESCC：通过 `0x2AB` 自动识别，不提供普通手动开关
+- 云服务：Sunnylink、comma connect、上传、远程配对、云备份都禁用或无效
+- 本地服务：Wi-Fi、SSH、本地 Carrot Web/API、GitHub 更新、模型下载保留
+- 默认模型：stock model
+- 默认地图覆盖：关闭，不让 Mapbox/Kakao 盖住 HUD
+- 高风险功能：主动控速、自动转弯减速、红绿灯停车、Auto-Tuner 自动应用、
+  Fishop 自动超车都要停车/offroad 分开测试
 
-## 🎆 Pull Requests
-We welcome both pull requests and issues on GitHub. Bug fixes are encouraged.
+先做停车测试，再做只显示/只读证据测试，最后才逐项测试控制相关功能。出现不确定行为时，先关闭对应功能；必要时刷回 `/i`。
 
-Pull requests should be against the most current `master` branch.
+## Install
 
-## 📊 User Data
+Stable daily rollback line:
 
-By default, sunnypilot uploads the driving data to comma servers. You can also access your data through [comma connect](https://connect.comma.ai/).
+```text
+https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i
+```
 
-sunnypilot is open source software. The user is free to disable data collection if they wish to do so.
+SunnyPilot 0.11 C3 alpha line:
 
-sunnypilot logs the road-facing camera, CAN, GPS, IMU, magnetometer, thermal sensors, crashes, and operating system logs.
-The driver-facing camera and microphone are only logged if you explicitly opt-in in settings.
+```text
+https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x
+```
 
-By using this software, you understand that use of this software or its related services will generate certain types of user data, which may be logged and stored at the sole discretion of comma. By accepting this agreement, you grant an irrevocable, perpetual, worldwide right to comma for the use of this data.
+Use `/i` as the known stable rollback path. Use `/x` only for the current
+Genius Pilot alpha. The `/x` installer is intentionally short and points to the
+`alpha-sunnypilot-c3` branch.
 
-## Licensing
+## Hardware And Vehicle Target
 
-sunnypilot is released under the [MIT License](LICENSE). This repository includes original work as well as significant portions of code derived from [openpilot by comma.ai](https://github.com/commaai/openpilot), which is also released under the MIT license with additional disclaimers.
+- Device: clone comma C3/TICI, not C3X and not C4.
+- Primary vehicle: Kia Seltos 2023 SCC pure CAN.
+- Vehicle profile: `KIA_SELTOS_2023`, based on the known-working Seltos 2021
+  SCC path.
+- ESCC: automatic enhanced SCC detection through `0x2AB`; there is no broad
+  manual ESCC toggle.
+- NNLC/NLC: default on for supported cars.
 
-The original openpilot license notice, including comma.ai’s indemnification and alpha software disclaimer, is reproduced below as required:
+Other cars are not the target of this personal build.
 
-> openpilot is released under the MIT license. Some parts of the software are released under other licenses as specified.
->
-> Any user of this software shall indemnify and hold harmless Comma.ai, Inc. and its directors, officers, employees, agents, stockholders, affiliates, subcontractors and customers from and against all allegations, claims, actions, suits, demands, damages, liabilities, obligations, losses, settlements, judgments, costs and expenses (including without limitation attorneys’ fees and costs) which arise out of, relate to or result from any use of this software by user.
->
-> **THIS IS ALPHA QUALITY SOFTWARE FOR RESEARCH PURPOSES ONLY. THIS IS NOT A PRODUCT.
-> YOU ARE RESPONSIBLE FOR COMPLYING WITH LOCAL LAWS AND REGULATIONS.
-> NO WARRANTY EXPRESSED OR IMPLIED.**
+## Cloud Policy
 
-For full license terms, please see the [`LICENSE`](LICENSE) file.
+Cloud services are intentionally disabled or inert:
 
-## 💰 Support sunnypilot
-If you find any of the features useful, consider becoming a [sponsor on GitHub](https://github.com/sponsors/sunnyhaibin) to support future feature development and improvements.
+- Sunnylink
+- comma connect / athenad pairing
+- uploader and Onroad Uploads
+- cloud backups
+- remote pairing
+- cloud training upload flows
 
+Local networking remains enabled for maintenance:
 
-By becoming a sponsor, you will gain access to exclusive content, early access to new features, and the opportunity to directly influence the project's development.
+- local Wi-Fi and LAN access
+- SSH when enabled locally
+- local Carrot Web/API
+- GitHub update/install flow
+- model list and model downloads requested by the user
 
+## Main Features
 
-<h3>GitHub Sponsor</h3>
+- C3/TICI compatibility patches for the SunnyPilot 0.11 architecture.
+- Genius Pilot versioning that follows the SunnyPilot base and adds a date plus
+  same-day patch suffix.
+- Seltos 2023 SCC profile and ESCC auto-detection.
+- Sunny native model manager and `modeld_tinygrad`, with stock model as the
+  default.
+- Phone-first speed-limit input from APN/N/Navipilot/Carrot, then vehicle speed
+  limit, then OSM/mapd.
+- Fixed and percentage speed-limit offset; default offset is zero.
+- `CarrotMapOverlayEnabled=0` by default so external map overlays do not cover
+  the HUD.
+- Super Advanced Carrot/Genius settings for active speed, auto-turn, red-light
+  stop, curve speed, following, longitudinal tuning, Auto-Tuner, and Fishop
+  hardware.
+- Local Carrot Web/API on LAN for status, params, navigation evidence, Fishop
+  evidence, and Auto-Tuner evidence.
+- Visualization modes: Sunny, Carrot, and Fusion base presets, with independent
+  Carrot World and Fishop evidence overlays (`GeniusCarrotWorldOverlay` and
+  `GeniusFishopVisualOverlay`).
 
-<a href="https://github.com/sponsors/sunnyhaibin">
-  <img src="https://user-images.githubusercontent.com/47793918/244135584-9800acbd-69fd-4b2b-bec9-e5fa2d85c817.png" alt="Become a Sponsor" width="300" style="max-width: 100%; height: auto;">
-</a>
-<br>
+## Local Web And Evidence
 
-<h3>PayPal</h3>
+The local Web/API is a local maintenance surface, not a cloud pairing service.
+Important endpoints include:
 
-<a href="https://paypal.me/sunnyhaibin0850" target="_blank">
-<img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="PayPal this" title="PayPal - The safer, easier way to pay online!" border="0" />
-</a>
-<br></br>
+- `/api/health`
+- `/api/params_bulk`
+- `/api/param_set`
+- `/api/status_broadcast`
+- `/api/navigation_event`
+- `/api/phone_speed_limit`
+- `/api/fishop_hardware`
+- `/api/carrot_learning`
 
-Your continuous love and support are greatly appreciated! Enjoy 🥰
+Changed parameter writes are blocked while onroad. High-risk Carrot/Fishop
+features expose evidence and state, but the local Web/API does not publish CAN,
+planner, lane-change, or lateral control output.
 
-<span>-</span> Jason, Founder of sunnypilot
+## Testing Order
+
+Use a staged test flow:
+
+1. Parked/offroad install and boot check from `/x`.
+2. Confirm no cloud/upload processes are running.
+3. Confirm local Wi-Fi, SSH, local Web/API, updater, and model manager work.
+4. Confirm stock model starts before trying a custom model.
+5. Confirm Seltos 2023 and ESCC evidence.
+6. Test speed-limit sources in information/display mode first.
+7. Test one higher-risk feature at a time.
+
+Keep `/i` ready as rollback until parked checks and later road evidence are
+clean.
+
+## Docs
+
+Personal alpha docs live under `docs/personal/`:
+
+- `TODO.md`: current development checklist.
+- `VERSIONING.md`: Genius Pilot version format.
+- `SETTINGS_MATRIX.md`: owner matrix for Carrot, Sunny, Fishop, ESCC, model,
+  local-network, visualization, and removed cloud settings.
+- `SETTINGS_CONFLICTS.md`: conflict policy across imported branches.
+- `HIGH_RISK_SETTING_GUIDE.md`: practical guide for risky toggles.
+- `RELEASE_TEMPLATE.md`: release/evidence note template.
+
+## Attribution
+
+This personal build includes work derived from or inspired by:
+
+- comma.ai openpilot
+- SunnyPilot
+- ajouatom CarrotPilot / CarrotPilot-style functions
+- jixiexiaoge mechanical / Auto-Tuner / local Web work
+- masang-feiyang ESCC-oriented work
+- dhvms and other related CarrotPilot forks
+
+The code remains subject to the licenses in this repository, including
+`LICENSE` and `LICENSE.md`.
+
+## Safety And License
+
+This is alpha-quality research software. You are responsible for complying with
+local laws and regulations and for supervising the vehicle at all times. No
+warranty is expressed or implied.

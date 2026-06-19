@@ -4,6 +4,18 @@ Genius Pilot keeps the driving screen split into two layers: one base visual pre
 
 This is the rule for mixing the several visual systems in this repository: the base road view is mutually exclusive, but evidence overlays are additive. Carrot's lane and lane-change presentation is preferred when it makes adjacent-lane awareness clearer than SunnyPilot's stock view.
 
+## Stack Order
+
+The driving screen is drawn in this order:
+
+- Camera/video frame.
+- Base road renderer selected by `GeniusVisualMode`.
+- `GeniusCarrotWorldOverlay`, if enabled.
+- `GeniusFishopVisualOverlay`, if enabled and local sensor data is fresh.
+- Sunny/Genius HUD, alerts, and driver-state widgets.
+
+This means Sunny, Carrot, and Fusion do not fight over the same base path/lane renderer. Carrot World and Fishop can both be opened on top of any base preset because they are evidence overlays, not base presets.
+
 ## Base Presets
 
 One base preset is active at a time through `GeniusVisualMode`.
@@ -27,6 +39,8 @@ The current C3 alpha implementation only uses fields already present in the new 
 `GeniusFishopVisualOverlay` is not a base preset. It is an optional top-layer evidence overlay drawn on top of Sunny, Carrot, or Fusion only while local Fishop/lidar data is fresh.
 
 The Fishop overlay may show lane curve evidence, lidar lane status, lidar/camera blindspot state, dynamic blindspot risk, navigation gate status, and overtake suggestion evidence. It must remain display-only unless a separate safety-reviewed control path is intentionally added later.
+
+The recommended stack for your C3 is `Fusion` base plus optional Carrot World and Fishop overlays during parked/debug review. For daily driving, leave the large overlays off unless you are deliberately checking lane-change, blindspot, or extra-hardware evidence.
 
 ## Carrot Cluster / World View
 
