@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -7,6 +8,7 @@ from typing import List, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[2]
+GIT_TIMEOUT_S = 12.0
 
 
 class Report:
@@ -44,13 +46,32 @@ def read_text(path: str) -> str:
 
 
 def git(args: List[str]) -> Tuple[int, str]:
-  proc = subprocess.run(
-    ["git"] + args,
-    cwd=str(ROOT),
-    text=True,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-  )
+  env = {
+    **os.environ,
+    "GIT_TERMINAL_PROMPT": "0",
+    "GIT_OPTIONAL_LOCKS": "0",
+  }
+  cmd = [
+    "git",
+    "-c", "core.fsmonitor=false",
+    "-c", "gc.auto=0",
+    "-c", "maintenance.auto=false",
+    *args,
+  ]
+  try:
+    proc = subprocess.run(
+      cmd,
+      cwd=str(ROOT),
+      env=env,
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      timeout=GIT_TIMEOUT_S,
+    )
+  except subprocess.TimeoutExpired:
+    return 124, f"git {' '.join(args)} timed out after {GIT_TIMEOUT_S:.0f}s"
+  except OSError as exc:
+    return 127, f"git unavailable: {exc}"
   return proc.returncode, proc.stdout.strip()
 
 

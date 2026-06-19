@@ -12,6 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[2]
+COMMAND_TIMEOUT_S = 180
 FORBIDDEN_LEGACY_PARAMS = (
   "Always" + "Offline",
   "device_go" + "_off_road",
@@ -97,17 +98,39 @@ def rel(path: Path) -> str:
   return str(path.relative_to(ROOT))
 
 
-def run(cmd: List[str], label: str, optional: bool = False) -> Tuple[bool, str]:
+def command_env() -> Dict[str, str]:
+  env = os.environ.copy()
+  env.setdefault("GIT_TERMINAL_PROMPT", "0")
+  env.setdefault("GIT_OPTIONAL_LOCKS", "0")
+  return env
+
+
+def timeout_text(value: Any) -> str:
+  if value is None:
+    return ""
+  if isinstance(value, bytes):
+    return value.decode("utf-8", errors="replace")
+  return str(value)
+
+
+def run(cmd: List[str], label: str, optional: bool = False, timeout: int = COMMAND_TIMEOUT_S) -> Tuple[bool, str]:
   if optional and shutil.which(cmd[0]) is None:
     return True, "SKIP: missing " + cmd[0]
 
-  proc = subprocess.run(
-    cmd,
-    cwd=str(ROOT),
-    text=True,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-  )
+  try:
+    proc = subprocess.run(
+      cmd,
+      cwd=str(ROOT),
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      timeout=timeout,
+      env=command_env(),
+    )
+  except subprocess.TimeoutExpired as exc:
+    output = timeout_text(exc.stdout) + timeout_text(exc.stderr)
+    detail = ("\n" + output[-4000:]) if output else ""
+    raise CheckFailure("%s timed out after %ds%s" % (label, timeout, detail)) from exc
   if proc.returncode != 0:
     raise CheckFailure(label + " failed:\n" + proc.stdout[-4000:])
   return True, proc.stdout.strip()
@@ -120,12 +143,13 @@ def changed_candidate_paths(cached: bool = False) -> List[Path]:
   cmd.extend(["--", *WHITESPACE_CANDIDATES])
   try:
     proc = subprocess.run(
-      cmd,
+      ["git", "-c", "core.fsmonitor=false", "-c", "gc.auto=0", "-c", "maintenance.auto=false", *cmd[1:]],
       cwd=str(ROOT),
       text=True,
       stdout=subprocess.PIPE,
       stderr=subprocess.STDOUT,
       timeout=20,
+      env=command_env(),
     )
   except subprocess.TimeoutExpired:
     return []

@@ -89,12 +89,12 @@ scripts/personal/install_c3_escc.sh --list-channels
 - `personal/c3-escc-atune`: main integration branch.
 - `install-c3-escc-test`: current controlled-test install branch.
 - `latest` tag/release: points to the current controlled-test install target.
-- `experimental/latest-model-supercombo`: alpha model-runtime experiment development branch.
-- `alpha-supercombo`: short install alias for `experimental/latest-model-supercombo`, required because the binary installer template cannot use branch names with `/`.
+- `experimental/latest-model-supercombo`: legacy alpha model-runtime experiment branch. Keep it separate from the SunnyPilot 0.11+ architecture line.
+- `alpha-supercombo`: legacy short install alias for `experimental/latest-model-supercombo`; do not use it as the current `/x` alpha target.
 - `experimental/sunnypilot-011-c3`: full SunnyPilot 0.11+ C3 alpha architecture branch based on official SunnyPilot `staging`.
 - `alpha-sunnypilot-c3`: short install alias for `experimental/sunnypilot-011-c3`.
 - `/x`: GitHub Pages short installer entry for `alpha-sunnypilot-c3`; `/i`, `latest`, and controlled-test release assets must keep pointing at the stable C3 line unless the user explicitly promotes a verified build.
-- Installer may expose `alpha-supercombo` as `--channel alpha`, but it is not a daily driving target.
+- Installer `--channel alpha` and Pages `/x` should point to `alpha-sunnypilot-c3`. The older `alpha-supercombo` line is not the current alpha target and is not a daily driving target.
 - Do not promote `experimental/latest-model-supercombo` to `latest`, `stable`, or default install without explicit road-test evidence.
 
 ## Latest Model / Supercombo Rule
@@ -141,7 +141,7 @@ git push -f github refs/tags/latest
 
 When `scripts/personal/install_c3_escc.sh` changes, update the release script asset and GitHub Pages `/s` short script as part of the same release task.
 
-If exposing alpha through Custom Software, build/upload a separate `installer_c3_escc_alpha` binary pointing at `alpha-supercombo`; do not repoint the default `installer_c3_escc`.
+If exposing alpha through Custom Software, build/upload a separate `installer_c3_escc_alpha` binary pointing at `alpha-sunnypilot-c3`; do not repoint the default `installer_c3_escc`.
 
 ## Safety Notes
 

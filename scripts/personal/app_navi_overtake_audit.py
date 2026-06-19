@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -40,6 +41,8 @@ NAVIPILOT_SOURCE_FILES = [
   "app/src/main/java/com/example/navipilot/AmapBroadcastHandlers.kt",
 ]
 
+GIT_TIMEOUT_S = 12.0
+
 
 @dataclass
 class Check:
@@ -48,16 +51,34 @@ class Check:
   detail: str
 
 
-def run_git(args: Sequence[str]) -> Tuple[int, str]:
-  proc = subprocess.run(
-    ["git", *args],
-    cwd=str(ROOT),
-    text=True,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-  )
+def run_git(args: Sequence[str], timeout: float = GIT_TIMEOUT_S) -> Tuple[int, str]:
+  env = {
+    **os.environ,
+    "GIT_TERMINAL_PROMPT": "0",
+    "GIT_OPTIONAL_LOCKS": "0",
+  }
+  cmd = [
+    "git",
+    "-c", "core.fsmonitor=false",
+    "-c", "gc.auto=0",
+    "-c", "maintenance.auto=false",
+    *args,
+  ]
+  try:
+    proc = subprocess.run(
+      cmd,
+      cwd=str(ROOT),
+      env=env,
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      timeout=timeout,
+    )
+  except subprocess.TimeoutExpired:
+    return 124, f"git {' '.join(args)} timed out after {timeout:.0f}s"
+  except OSError as exc:
+    return 127, f"git unavailable: {exc}"
   return proc.returncode, proc.stdout.strip()
-
 
 def ref_exists(ref: str) -> bool:
   code, _ = run_git(["rev-parse", "--verify", "--quiet", ref])

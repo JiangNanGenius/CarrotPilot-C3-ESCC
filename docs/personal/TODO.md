@@ -565,3 +565,22 @@ flowchart LR
 - [ ] 第八轮：在前七轮全部通过后，才考虑受控自动超车实验。
 - [ ] 每轮证据都要求云进程不存在。
 - [ ] 每轮都保留回滚安装器和上一轮可用 tag。
+
+### P8.16: 新架构代码完成定义
+
+这部分是“从开始到结束”的代码级收尾清单。只有全部完成并有设备证据后，`experimental/sunnypilot-011-c3` 才能从 alpha 候选进入上车测试候选。
+
+- [ ] 上游基座复核：重新抓取官方 SunnyPilot `staging/master/dev/release-tizi/staging-tici`，记录当前提交、`COMMA_VERSION`、模型管理器 schema 和 manager 进程差异。
+- [ ] Mr.One 补丁复核：重新抓取 `devc3/res`，只把 C3/TICI 启动、installer、硬件识别、modeld 兼容补丁归类到 patch queue；私有注册、上传、额外 client、永不关机和大面积 safety/opendbc 改动继续列入拒绝清单。
+- [ ] C3 构建闭环：在 alpha 工作树跑 Python/JS/YAML/schema 静态检查，补一次 capnp 生成文件一致性检查，并确认 C3 launcher、AGNOS manifest、installer 和 branch channel gate 全部指向 `tici`/C3 路径。
+- [ ] 云服务闭环：用静态检查和设备快照双重证明 `athenad`、Sunnylink、uploader、`statsd_sp`、backup manager、remote pairing、cloud backup 都不会启动；本地 Wi-Fi、SSH、Web、更新、模型下载仍可用。
+- [ ] Seltos 2023 闭环：用静态检查证明 2023 SCC 纯 CAN 仍复用 2021 配置，Non-SCC/CANFD/HDA2/Camera-SCC 不会误入；用设备 CarParams 证明实际识别路径正确。
+- [ ] ESCC 闭环：只接受 0x2AB 自动识别 `ENHANCED_SCC`；设备快照必须记录 0x2AB、spFlags、安全参数和无云进程证据。
+- [ ] 模型管理器闭环：证明 stock model、active bundle、runner cache、tinygrad runner、下载校验、失败回滚、`modelV2`、`drivingModelData`、`cameraOdometry` 都有停车证据。
+- [ ] 限速闭环：证明手机/APN/N/Navipilot、车机限速、OSM/mapd 三类来源能按新鲜度切换；固定偏移和百分比偏移默认都为 0；Mapbox/Kakao/route 不会默认成为限速真值。
+- [ ] Carrot Web 闭环：7000 本地 Web、7705 状态广播、7706 UDP、7712 TCP、7713 HTTP、参数白名单、Auto-Tuner、feature gate、live check 都有停车证据；所有高风险控制仍 `controlOutput=false`。
+- [ ] fishop 硬件闭环：车道识线/曲线、左右车道、激光雷达左右盲区、侧向目标、传感器健康、动态盲区预览和自动超车输入先只读；证明左右方向、单位、超时、断线清零和导航地区降级都正确。
+- [ ] 自动超车闭环：阶段 1/2/3 只记录、只显示、只提示；阶段 4 才能交给现有安全变道链路做建议；阶段 5 受控执行必须另开 tag、证据包、回滚入口和驾驶员确认。
+- [ ] 本地化闭环：设置、onboarding、sidebar、Carrot Web、模型管理器、限速、Offroad、fishop、Auto-Tuner 的中文/英文说明完整；用户可见路径不直出韩文。
+- [ ] 安装闭环：`/x`、`installer_c3_escc_alpha`、`--channel alpha` 都指向 `alpha-sunnypilot-c3`；`/i`、`latest`、`install-c3-escc-test` 不被 alpha 污染。
+- [ ] 证据闭环：停车证据、低速路测证据、限速证据、模型证据、fishop 只读证据和回滚安装器都归档后，再考虑从 alpha 进入 test；没有 stable 证据前不移动 `daily_install_target`。

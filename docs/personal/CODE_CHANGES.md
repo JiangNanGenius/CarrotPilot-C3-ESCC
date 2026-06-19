@@ -1,5 +1,22 @@
 # 当前代码改动记录
 
+## 2026-06-19: 本地检查防挂和新架构 TODO 收口
+
+改动内容：
+
+- `smoke_check.py` 给所有外部子检查加 180 秒超时和非交互 Git 环境，避免本地 Git/子脚本异常时无限等待。
+- `app_navi_overtake_audit.py`、`cplink_preflight.py`、`escc_offroad_preflight.py` 的 Git 探测加超时和非交互参数。
+- `escc_offroad_preflight.py` 把旧分支祖先关系从硬失败改为发布前警告；ESCC、Seltos、AlwaysOffroad、Connect 和 panda safety 检查仍为硬门禁。
+- `INSTALL_TARGETS.json` 更新到当前稳定线准备创建的 `carrotpilot-c3-escc-20260619-static1` 和 `carrotpilot-c3-escc-20260619-test1`，修正旧 tag 不在当前分支历史中的问题。
+- `TODO.md` 新增 P8.16 “新架构代码完成定义”，把 SunnyPilot 0.11 C3 alpha 从基座、C3 补丁、云服务、车型、ESCC、模型、限速、Carrot Web、fishop 硬件、自动超车、本地化、安装和证据闭环拆到可执行粒度。
+- `AGENTS.md` 修正 alpha 规则：当前 `/x`、`--channel alpha` 和 `installer_c3_escc_alpha` 指向 `alpha-sunnypilot-c3`，旧 `alpha-supercombo` 只保留为历史模型实验线。
+
+刻意没有改：
+
+- 没有放宽 ESCC、AlwaysOffroad、Connect、云进程或 fishop 自动超车安全门禁。
+- 没有移动 `/i`、`latest`、`install-c3-escc-test` 或 stable 目标。
+- 没有把 alpha 新架构合回当前日常稳定线。
+
 ## 2026-06-19: 新架构 alpha 安装入口和说明同步
 
 改动内容：

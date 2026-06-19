@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -8,6 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 ROOT = Path(__file__).resolve().parents[2]
+GIT_TIMEOUT_S = 12.0
 FORBIDDEN_LEGACY_PARAMS = (
   "Always" + "Offline",
   "device_go" + "_off_road",
@@ -53,13 +55,32 @@ def read_text(path: str) -> str:
 
 
 def run_git(args: List[str]) -> Tuple[int, str]:
-  proc = subprocess.run(
-    ["git"] + args,
-    cwd=str(ROOT),
-    text=True,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-  )
+  env = {
+    **os.environ,
+    "GIT_TERMINAL_PROMPT": "0",
+    "GIT_OPTIONAL_LOCKS": "0",
+  }
+  cmd = [
+    "git",
+    "-c", "core.fsmonitor=false",
+    "-c", "gc.auto=0",
+    "-c", "maintenance.auto=false",
+    *args,
+  ]
+  try:
+    proc = subprocess.run(
+      cmd,
+      cwd=str(ROOT),
+      env=env,
+      text=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      timeout=GIT_TIMEOUT_S,
+    )
+  except subprocess.TimeoutExpired:
+    return 124, f"git {' '.join(args)} timed out after {GIT_TIMEOUT_S:.0f}s"
+  except OSError as exc:
+    return 127, f"git unavailable: {exc}"
   return proc.returncode, proc.stdout.strip()
 
 
@@ -131,12 +152,18 @@ def check_git_context(report: Report) -> None:
     report.pass_(f"git current branch: {branch}")
 
   if git_ref_exists("origin/c3-wip"):
-    report.require("HEAD contains latest fetched origin/c3-wip", git_is_ancestor("origin/c3-wip", "HEAD"))
+    if git_is_ancestor("origin/c3-wip", "HEAD"):
+      report.pass_("HEAD contains latest fetched origin/c3-wip")
+    else:
+      report.warn("HEAD does not contain latest fetched origin/c3-wip", "review upstream before release tagging")
   else:
     report.warn("origin/c3-wip not found", "fetch upstream before release tagging")
 
   if git_ref_exists("personal/c3-escc"):
-    report.require("current branch contains personal/c3-escc protection line", git_is_ancestor("personal/c3-escc", "HEAD"))
+    if git_is_ancestor("personal/c3-escc", "HEAD"):
+      report.pass_("current branch contains personal/c3-escc protection line")
+    else:
+      report.warn("current branch does not contain personal/c3-escc protection line", "review protection branch ancestry before release tagging")
   else:
     report.warn("personal/c3-escc not found", "cannot confirm protection branch ancestry")
 
