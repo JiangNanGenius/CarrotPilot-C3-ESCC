@@ -2049,7 +2049,8 @@ def check_c3_install_boot_contract() -> tuple[bool, str]:
   main_wifi = read("system/ui/lib/wifi_manager.py")
   if embedded_wifi != main_wifi:
     return False, "packed TICI updater Wi-Fi manager must match system/ui/lib/wifi_manager.py"
-  for token in ("JEEPNEY_AVAILABLE = False", "_nmcli_fallback", "_nmcli_active_ssid", 'nmcli", "device", "wifi", "rescan', "_update_networks"):
+  for token in ("JEEPNEY_AVAILABLE = False", "_nmcli_fallback", "_run_nmcli", "_nmcli_active_ssid",
+                '"device", "wifi", "rescan"', "nmcli command unavailable", "_update_networks"):
     if token not in embedded_wifi:
       return False, f"packed TICI updater Wi-Fi manager missing fallback token {token!r}"
 
@@ -3081,6 +3082,8 @@ def main() -> int:
                           and "GeniusVisualMode" in ui_replay_check
                           and "GeniusFishopVisualOverlay" in ui_replay_check
                           and "app_zh-CHS.po" in ui_replay_check
+                          and "PARAMS_ROOT" in ui_replay_check
+                          and "TemporaryDirectory" in ui_replay_check
                           and "--run-ui-replay" in ui_replay_check
                           and "--run-tools-replay-demo" in ui_replay_check,
                           "alpha must include a no-car UI replay readiness wrapper for tools/replay demo and UI diff replay")

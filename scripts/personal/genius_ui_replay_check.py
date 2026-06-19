@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 from typing import Any, Sequence
 
 
@@ -49,6 +50,12 @@ def run(cmd: Sequence[str], timeout_s: int, extra_env: dict[str, str] | None = N
   env = command_env()
   if extra_env:
     env.update(extra_env)
+  temp_params: tempfile.TemporaryDirectory[str] | None = None
+  if not env.get("PARAMS_ROOT"):
+    temp_params = tempfile.TemporaryDirectory(prefix="genius_ui_replay_params_")
+    env["PARAMS_ROOT"] = temp_params.name
+  else:
+    Path(env["PARAMS_ROOT"]).mkdir(parents=True, exist_ok=True)
   try:
     proc = subprocess.run(
       list(cmd),
@@ -78,6 +85,9 @@ def run(cmd: Sequence[str], timeout_s: int, extra_env: dict[str, str] | None = N
     }
   except OSError as exc:
     return {"command": list(cmd), "ok": False, "returnCode": 127, "output": str(exc), "timeoutS": timeout_s}
+  finally:
+    if temp_params is not None:
+      temp_params.cleanup()
 
 
 def ui_replay_command(variant: str) -> list[str]:
@@ -130,6 +140,7 @@ def self_test() -> int:
     "--demo",
     "selfdrive/ui/tests/diff/replay.py",
     "PYTHONPATH",
+    "PARAMS_ROOT",
     "replay_script.py",
     "GeniusVisualMode",
     "GeniusFishopVisualOverlay",

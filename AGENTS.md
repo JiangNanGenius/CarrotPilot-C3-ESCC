@@ -163,6 +163,7 @@ tools/replay/replay --demo
 ```
 
 Use process replay for logic regressions and C3 probes for physical hardware evidence. Model replay that needs camera frames should follow `selfdrive/test/process_replay/model_replay.py` or provide `FrameReader` inputs.
+For macOS UI diff replay, keep caller-provided `PYTHONPATH` entries ahead of the repo path so temporary native extension shadows can override C3/Linux extension files, and keep a temporary `PARAMS_ROOT` so replay does not depend on the user's home params directory.
 
 On-device snapshot command, if already SSH'd into the C3:
 

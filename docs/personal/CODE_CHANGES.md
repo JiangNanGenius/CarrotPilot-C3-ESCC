@@ -1,5 +1,35 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 No-Car UI Replay Runtime Fix
+
+Published as `2026.002.000-gp.20260620.37`.
+
+The TICI UI diff replay now runs locally on macOS with the temporary native
+extension shadow path:
+
+```bash
+PYTHONPATH=/tmp/gp-replay-shadow:/tmp/cp-jeepney-hotfix \
+  /tmp/gp-replay-py312/bin/python \
+  scripts/personal/genius_ui_replay_check.py \
+  --run-ui-replay --ui-replay-timeout 180 --json
+```
+
+The run passed and produced `selfdrive/ui/tests/diff/report/genius_tizi_ui_replay.mp4`
+plus `selfdrive/ui/tests/diff/report/htmlcov-tizi/index.html`.
+
+Fixes included:
+
+- `scripts/personal/genius_ui_replay_check.py` now creates a temporary
+  `PARAMS_ROOT` for replay subprocesses when the caller does not provide one,
+  so `Params()` has a valid lock directory and does not write into the user's
+  macOS home params path.
+- `system/ui/lib/wifi_manager.py` now routes all `nmcli` fallback operations
+  through one safe wrapper. Missing `nmcli` or timeouts log a warning and return
+  control to the UI instead of crashing setup/settings replay.
+- The packed TICI updater Wi-Fi manager was synchronized with the main source
+  tree, and static/compatibility gates now require the safe `nmcli` wrapper and
+  replay `PARAMS_ROOT` behavior.
+
 ## 2026-06-20 Read-Only No-Car Web Evidence
 
 Extended `scripts/personal/navipilot_live_check.py` so the no-car LAN check now covers the full local Web evidence surface instead of only Navipilot/CPdazi compatibility:
