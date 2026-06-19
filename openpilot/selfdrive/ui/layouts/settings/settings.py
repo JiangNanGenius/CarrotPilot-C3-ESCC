@@ -27,6 +27,7 @@ CLOSE_BTN_COLOR = rl.Color(41, 41, 41, 255)
 CLOSE_BTN_PRESSED = rl.Color(59, 59, 59, 255)
 TEXT_NORMAL = rl.Color(128, 128, 128, 255)
 TEXT_SELECTED = rl.WHITE
+TAP_MAX_MOVE = 56
 
 
 class PanelType(IntEnum):
@@ -48,6 +49,9 @@ class SettingsLayout(Widget):
   def __init__(self):
     super().__init__()
     self._current_panel = PanelType.DEVICE
+    self._tap_panel_type: PanelType | None = None
+    self._tap_close = False
+    self._tap_start_pos: MousePos | None = None
 
     # Panel configuration
     wifi_manager = WifiManager()
@@ -69,6 +73,56 @@ class SettingsLayout(Widget):
 
   def set_callbacks(self, on_close: Callable):
     self._close_callback = on_close
+
+  def _panel_at(self, mouse_pos: MousePos) -> PanelType | None:
+    for panel_type, panel_info in self._panels.items():
+      if rl.check_collision_point_rec(mouse_pos, panel_info.button_rect):
+        return panel_type
+    return None
+
+  def _close_at(self, mouse_pos: MousePos) -> bool:
+    close_rect = getattr(self, "_close_btn_rect", rl.Rectangle(0, 0, 0, 0))
+    return bool(rl.check_collision_point_rec(mouse_pos, close_rect))
+
+  def _tap_moved_too_far(self, mouse_pos: MousePos) -> bool:
+    if self._tap_start_pos is None:
+      return True
+    return abs(mouse_pos.x - self._tap_start_pos.x) > TAP_MAX_MOVE or abs(mouse_pos.y - self._tap_start_pos.y) > TAP_MAX_MOVE
+
+  def _clear_tap(self):
+    self._tap_panel_type = None
+    self._tap_close = False
+    self._tap_start_pos = None
+
+  def _activate_tap(self):
+    if self._tap_close:
+      self._clear_tap()
+      if self._close_callback:
+        self._close_callback()
+      return
+
+    panel_type = self._tap_panel_type
+    self._clear_tap()
+    if panel_type is not None:
+      self.set_current_panel(panel_type)
+
+  def _update_state(self):
+    super()._update_state()
+
+    for mouse_event in gui_app.mouse_events:
+      if mouse_event.slot != 0:
+        continue
+
+      if mouse_event.left_pressed:
+        self._tap_close = self._close_at(mouse_event.pos)
+        self._tap_panel_type = None if self._tap_close else self._panel_at(mouse_event.pos)
+        self._tap_start_pos = mouse_event.pos if self._tap_close or self._tap_panel_type is not None else None
+      elif self._tap_close or self._tap_panel_type is not None:
+        if self._tap_moved_too_far(mouse_event.pos):
+          self._clear_tap()
+        elif mouse_event.left_released:
+          self._activate_tap()
+          return
 
   def _render(self, rect: rl.Rectangle):
     # Calculate layout
