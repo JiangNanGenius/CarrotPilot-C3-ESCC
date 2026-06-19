@@ -202,6 +202,12 @@ class AbstractAlert(Widget, ABC):
 
 
 class OffroadAlert(AbstractAlert):
+  CLOUD_SERVICE_ALERTS = {
+    "Offroad_ConnectivityNeeded",
+    "Offroad_ConnectivityNeededPrompt",
+    "Offroad_UnregisteredHardware",
+  }
+
   def __init__(self):
     super().__init__(has_reboot_btn=False)
     self.sorted_alerts: list[AlertData] = []
@@ -218,7 +224,9 @@ class OffroadAlert(AbstractAlert):
       text = ""
       alert_json = self.params.get(alert_data.key)
 
-      if alert_json:
+      if alert_data.key in self.CLOUD_SERVICE_ALERTS:
+        text = ""
+      elif alert_json:
         text = alert_json.get("text", "").replace("%1", alert_json.get("extra", ""))
 
       alert_data.text = text

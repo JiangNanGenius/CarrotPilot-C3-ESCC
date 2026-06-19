@@ -1,5 +1,4 @@
 import pyray as rl
-import time
 from dataclasses import dataclass
 from collections.abc import Callable
 from cereal import log
@@ -73,7 +72,7 @@ class Sidebar(Widget, SidebarSP):
 
     self._temp_status = MetricData(tr_noop("TEMP"), tr_noop("GOOD"), Colors.GOOD)
     self._panda_status = MetricData(tr_noop("VEHICLE"), tr_noop("ONLINE"), Colors.GOOD)
-    self._connect_status = MetricData(tr_noop("CONNECT"), tr_noop("OFFLINE"), Colors.WARNING)
+    self._connect_status = MetricData(tr_noop("LOCAL"), tr_noop("READY"), Colors.GOOD)
     self._recording_audio = False
 
     self._home_img = gui_app.texture("images/button_home.png", HOME_BTN.width, HOME_BTN.height)
@@ -88,6 +87,7 @@ class Sidebar(Widget, SidebarSP):
     self._on_settings_click: Callable | None = None
     self._on_flag_click: Callable | None = None
     self._open_settings_callback: Callable | None = None
+    self._settings_opened_on_press = False
 
   def set_callbacks(self, on_settings: Callable | None = None, on_flag: Callable | None = None,
                     open_settings: Callable | None = None):
@@ -131,13 +131,7 @@ class Sidebar(Widget, SidebarSP):
       self._temp_status.update(tr_noop("TEMP"), tr_noop("HIGH"), Colors.DANGER)
 
   def _update_connection_status(self, device_state):
-    last_ping = device_state.lastAthenaPingTime
-    if last_ping == 0:
-      self._connect_status.update(tr_noop("CONNECT"), tr_noop("OFFLINE"), Colors.WARNING)
-    elif time.monotonic_ns() - last_ping < 80_000_000_000:  # 80 seconds in nanoseconds
-      self._connect_status.update(tr_noop("CONNECT"), tr_noop("ONLINE"), Colors.GOOD)
-    else:
-      self._connect_status.update(tr_noop("CONNECT"), tr_noop("ERROR"), Colors.DANGER)
+    self._connect_status.update(tr_noop("LOCAL"), tr_noop("READY"), Colors.GOOD)
 
   def _update_panda_status(self):
     if ui_state.panda_type == log.PandaState.PandaType.unknown:
@@ -145,10 +139,23 @@ class Sidebar(Widget, SidebarSP):
     else:
       self._panda_status.update(tr_noop("VEHICLE"), tr_noop("ONLINE"), Colors.GOOD)
 
+  def _open_settings_from_sidebar(self):
+    if self._on_settings_click:
+      self._on_settings_click()
+
+  def _handle_mouse_press(self, mouse_pos: MousePos):
+    if rl.check_collision_point_rec(mouse_pos, SETTINGS_BTN):
+      self._settings_opened_on_press = True
+      self._open_settings_from_sidebar()
+
   def _handle_mouse_release(self, mouse_pos: MousePos):
+    if self._settings_opened_on_press:
+      self._settings_opened_on_press = False
+      return
+
     if rl.check_collision_point_rec(mouse_pos, SETTINGS_BTN):
       if self._on_settings_click:
-        self._on_settings_click()
+        self._open_settings_from_sidebar()
     elif rl.check_collision_point_rec(mouse_pos, HOME_BTN) and ui_state.started:
       if self._on_flag_click:
         self._on_flag_click()

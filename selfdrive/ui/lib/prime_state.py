@@ -12,6 +12,9 @@ from openpilot.system.athena.registration import UNREGISTERED_DONGLE_ID
 from openpilot.selfdrive.ui.lib.api_helpers import get_token
 
 
+PERSONAL_CLOUD_PRIME_DISABLED = True
+
+
 class PrimeType(IntEnum):
   UNKNOWN = -2
   UNPAIRED = -1
@@ -38,6 +41,9 @@ class PrimeState:
     self._thread = None
 
   def _load_initial_state(self) -> PrimeType:
+    if PERSONAL_CLOUD_PRIME_DISABLED:
+      return PrimeType.NONE
+
     prime_type_str = os.getenv("PRIME_TYPE") or self._params.get("PrimeType")
     try:
       if prime_type_str is not None:
@@ -70,6 +76,9 @@ class PrimeState:
         cloudlog.info(f"Prime type updated to {prime_type}")
 
   def _worker_thread(self) -> None:
+    if PERSONAL_CLOUD_PRIME_DISABLED:
+      return
+
     drop_realtime()
     from openpilot.selfdrive.ui.ui_state import ui_state, device
     while self._running:
@@ -82,6 +91,9 @@ class PrimeState:
         time.sleep(self.SLEEP_INTERVAL)
 
   def start(self) -> None:
+    if PERSONAL_CLOUD_PRIME_DISABLED:
+      return
+
     if self._thread and self._thread.is_alive():
       return
     self._running = True
@@ -102,6 +114,9 @@ class PrimeState:
       return bool(self.prime_type > PrimeType.NONE)
 
   def is_paired(self) -> bool:
+    if PERSONAL_CLOUD_PRIME_DISABLED:
+      return True
+
     with self._lock:
       return self.prime_type > PrimeType.UNPAIRED
 

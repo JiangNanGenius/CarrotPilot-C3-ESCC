@@ -32,9 +32,9 @@ DESCRIPTIONS = {
     "without a turn signal activated while driving over 31 mph (50 km/h)."
   ),
   "AlwaysOnDM": tr_noop("Enable driver monitoring even when sunnypilot is not engaged."),
-  'RecordFront': tr_noop("Upload data from the driver facing camera and help improve the driver monitoring algorithm."),
+  'RecordFront': tr_noop("Record driver-facing camera video locally for dashcam and diagnostics. Cloud uploads are disabled in this build."),
   "IsMetric": tr_noop("Display speed in km/h instead of mph."),
-  "RecordAudio": tr_noop("Record and store microphone audio while driving. The audio will be included in the dashcam video in comma connect."),
+  "RecordAudio": tr_noop("Record and store microphone audio locally while driving. Audio is included only in local dashcam video."),
 }
 
 
@@ -77,13 +77,13 @@ class TogglesLayout(Widget):
         False,
       ),
       "RecordFront": (
-        lambda: tr("Record and Upload Driver Camera"),
+        lambda: tr("Record Driver Camera"),
         DESCRIPTIONS["RecordFront"],
         "monitoring.png",
         True,
       ),
       "RecordAudio": (
-        lambda: tr("Record and Upload Microphone Audio"),
+        lambda: tr("Record Microphone Audio"),
         DESCRIPTIONS["RecordAudio"],
         "microphone.png",
         True,

@@ -15,6 +15,7 @@ from openpilot.system.version import RELEASE_BRANCHES
 HEAD_BUTTON_FONT_SIZE = 40
 HOME_PADDING = 8
 ALERTS_ZONE_WIDTH = 180
+SETTINGS_ZONE_WIDTH = 90
 
 NetworkType = log.DeviceState.NetworkType
 
@@ -135,6 +136,7 @@ class MiciHomeLayout(Widget):
     self._mouse_down_t: None | float = None
     self._did_long_press = False
     self._is_pressed_prev = False
+    self._settings_opened_on_press = False
 
     self._version_text = self._get_version_text()
 
@@ -188,7 +190,20 @@ class MiciHomeLayout(Widget):
     self._alert_count_callback = alert_count_callback
     self._alerts_pill.set_alert_count_callback(alert_count_callback, max_severity_callback)
 
+  def _handle_mouse_press(self, mouse_pos: MousePos):
+    if mouse_pos.x - self.rect.x <= SETTINGS_ZONE_WIDTH and mouse_pos.y >= self.rect.y + self.rect.height - 96:
+      self._settings_opened_on_press = True
+      self._mouse_down_t = None
+      self._did_long_press = False
+      self._is_pressed_prev = True
+      if self._on_settings_click:
+        self._on_settings_click()
+
   def _handle_mouse_release(self, mouse_pos: MousePos):
+    if self._settings_opened_on_press:
+      self._settings_opened_on_press = False
+      return
+
     if not self._did_long_press:
       relative_x = mouse_pos.x - self.rect.x
       has_alerts = self._alert_count_callback and self._alert_count_callback() > 0
