@@ -21,10 +21,12 @@ log() {
 write_param() {
   local key="$1"
   local value="$2"
+  local path="/data/params/d/${key}"
 
   as_root mkdir -p /data/params/d || return 0
-  printf "%s" "$value" | as_root tee "/data/params/d/${key}" >/dev/null || true
-  as_root chmod 600 "/data/params/d/${key}" >/dev/null 2>&1 || true
+  printf "%s" "$value" | as_root tee "$path" >/dev/null || true
+  as_root chown comma:comma "$path" >/dev/null 2>&1 || true
+  as_root chmod 644 "$path" >/dev/null 2>&1 || true
 }
 
 install_authorized_key() {

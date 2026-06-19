@@ -127,7 +127,7 @@ class TermsPage(Widget):
     self._decline_rect = rl.Rectangle(0, 0, 0, 0)
     self._accept_rect = rl.Rectangle(0, 0, 0, 0)
 
-    self._title = Label("Welcome to CarrotPilot-C3-ESCC", font_size=90, font_weight=FontWeight.BOLD,
+    self._title = Label("Welcome to Genius Pilot", font_size=90, font_weight=FontWeight.BOLD,
                         text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
     self._desc = Label(
       "Personal alpha for C3 clone + Kia Seltos SCC. Experimental driver assistance only. "
@@ -204,7 +204,7 @@ class TermsPage(Widget):
 class DeclinePage(Widget):
   def __init__(self, back_callback=None):
     super().__init__()
-    self._text = Label("You must accept the CarrotPilot-C3-ESCC safety terms before using this build.",
+    self._text = Label("You must accept the Genius Pilot safety terms before using this build.",
                        font_size=90, font_weight=FontWeight.MEDIUM, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
     self._back_btn = Button("Back", click_callback=back_callback)
     self._uninstall_btn = Button("Decline, uninstall", button_style=ButtonStyle.DANGER,

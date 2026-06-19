@@ -301,7 +301,7 @@ class Updater:
         commit_date = dt.strftime("%b %d")
       except Exception:
         cloudlog.exception("updater.get_description")
-      return f"{version} / {branch} / {commit} / {commit_date}"
+      return f"Genius Pilot {version} / {branch} / {commit} / {commit_date}"
     self.params.put("UpdaterCurrentDescription", get_description(BASEDIR), block=True)
     self.params.put("UpdaterCurrentReleaseNotes", parse_release_notes(BASEDIR), block=True)
     self.params.put("UpdaterNewDescription", get_description(FINALIZED), block=True)
