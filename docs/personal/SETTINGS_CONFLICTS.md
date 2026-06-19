@@ -52,7 +52,8 @@ The reference branches use several settings that look similar but control differ
 - `GeniusVisualMode` is a preset selector: Sunny keeps the stock look, Carrot emphasizes lane/lead/radar information, and Fusion combines Sunny HUD elements with Carrot-style road visualization.
 - `GeniusLaneLineStyle` and `GeniusLeadRadarVisualMode` may be adjusted independently after choosing a preset.
 - `GeniusLaneChangeVisuals` uses existing `onroadEvents` lane-change intent events and must not alter lane-change decisions.
-- `GeniusFishopVisualOverlay` is reserved for Fishop/lidar evidence display. It must not publish planner, CAN, or automatic-overtake outputs.
+- `GeniusFishopVisualOverlay` is independent from the Sunny/Carrot/Fusion preset. It draws local Fishop/lidar evidence only while `/data/fishop_hardware.jsonl` is fresh and must not publish planner, CAN, or automatic-overtake outputs.
+- Coexistence rule: Sunny, Carrot, and Fusion are mutually exclusive base presets; lane-line and lead/radar style are editable details; Fishop overlay is an optional top-layer evidence display.
 - Do not merge Carrot path animation, Fishop overlay, Sunny HUD, and cruise-control behavior by name alone; each renderer change needs a display-only owner and a separate control-owner decision.
 
 ## Current Policy

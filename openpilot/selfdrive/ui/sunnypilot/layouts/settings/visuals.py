@@ -35,7 +35,7 @@ class VisualsLayout(Widget):
       ),
       "GeniusFishopVisualOverlay": (
         lambda: tr("Fishop Visual Overlay"),
-        tr("Reserve the driving screen for Fishop lane, lidar lane, and blindspot visual evidence. This does not enable automatic overtake control."),
+        tr("Draw Fishop lane, lidar lane, blindspot, and overtake suggestion evidence on top of any visual preset only while the local hardware data is fresh. This does not enable automatic overtake control."),
         None,
       ),
       "BlindSpot": (
@@ -117,7 +117,7 @@ class VisualsLayout(Widget):
 
     self._genius_visual_mode = multiple_button_item_sp(
       title=lambda: tr("Genius Visualization Preset"),
-      description=lambda: tr("Choose a display preset. Sunny keeps the stock look, Carrot emphasizes lane and lead-car information, and Fusion combines Sunny HUD elements with Carrot-style road visualization."),
+      description=lambda: tr("Choose a base display preset. Sunny is minimal, Carrot emphasizes lane, lead, and radar information, and Fusion keeps the Sunny HUD with Carrot-style road visualization. Fishop overlay is independent."),
       buttons=[lambda: tr("Sunny"), lambda: tr("Carrot"), lambda: tr("Fusion")],
       param="GeniusVisualMode",
       callback=self._apply_visual_preset,

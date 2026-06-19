@@ -1346,14 +1346,14 @@ msgstr "使用模型变道事件，在驾驶画面显示变道意图提示。此
 msgid "Fishop Visual Overlay"
 msgstr "Fishop 可视化叠加"
 
-msgid "Reserve the driving screen for Fishop lane, lidar lane, and blindspot visual evidence. This does not enable automatic overtake control."
-msgstr "为 Fishop 车道、激光雷达车道和盲区证据预留驾驶画面叠加层。它不会启用自动超车控制。"
+msgid "Draw Fishop lane, lidar lane, blindspot, and overtake suggestion evidence on top of any visual preset only while the local hardware data is fresh. This does not enable automatic overtake control."
+msgstr "在任意显示预设上叠加 Fishop 车道、激光雷达车道、盲区和超车建议证据；只有本地硬件数据新鲜时才会显示。它不会启用自动超车控制。"
 
 msgid "Genius Visualization Preset"
 msgstr "Genius 可视化预设"
 
-msgid "Choose a display preset. Sunny keeps the stock look, Carrot emphasizes lane and lead-car information, and Fusion combines Sunny HUD elements with Carrot-style road visualization."
-msgstr "选择显示预设。Sunny 保留原始风格，Carrot 强化车道和前车信息，Fusion 把 Sunny HUD 和 Carrot 风格道路显示结合起来。"
+msgid "Choose a base display preset. Sunny is minimal, Carrot emphasizes lane, lead, and radar information, and Fusion keeps the Sunny HUD with Carrot-style road visualization. Fishop overlay is independent."
+msgstr "选择基础显示预设。Sunny 最简洁，Carrot 强化车道、前车和雷达信息，Fusion 保留 Sunny HUD 并使用 Carrot 风格道路显示。Fishop 叠加层独立开关。"
 
 msgid "Lane-Line Style"
 msgstr "车道线样式"

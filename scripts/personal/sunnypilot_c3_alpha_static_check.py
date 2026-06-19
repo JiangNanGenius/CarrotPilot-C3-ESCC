@@ -2124,6 +2124,9 @@ def main() -> int:
                             f"{key} must exist and default to 0")
 
   fishop_hardware = read("selfdrive/carrot/fishop_hardware.py")
+  fishop_overlay = read("selfdrive/ui/onroad/fishop_overlay.py")
+  augmented_road_view = read("selfdrive/ui/onroad/augmented_road_view.py")
+  visuals_layout = read("selfdrive/ui/sunnypilot/layouts/settings/visuals.py")
   carrot_learning = read("selfdrive/carrot/carrot_learning.py")
   carrot_server = read("selfdrive/carrot/carrot_server.py")
   navipilot_live_check = read("scripts/personal/navipilot_live_check.py")
@@ -2469,6 +2472,30 @@ def main() -> int:
   for forbidden in ("socket", "PubMaster", "SubMaster", "CarControl", "CANParser", "sendto", ".bind(", "desire_helper", "blinker_ctrl"):
     failures += not require(f"fishop hardware parser omits {forbidden}", forbidden not in fishop_hardware,
                             "fishop hardware parser must not open network sockets, publish controls, or touch lane-change control")
+  failures += not require("Fishop onroad visual overlay exists",
+                          "class FishopVisualOverlay" in fishop_overlay
+                          and 'FISHOP_JSONL = Path("/data/fishop_hardware.jsonl")' in fishop_overlay
+                          and "MAX_SOURCE_AGE_S = 2.5" in fishop_overlay
+                          and "normalize_fishop_payloads(payloads, now_s=now)" in fishop_overlay
+                          and "_draw_side_panel" in fishop_overlay
+                          and "_draw_overtake_pill" in fishop_overlay,
+                          "onroad UI must include a fresh-data Fishop overlay for lane/lidar/blindspot/overtake evidence")
+  failures += not require("Fishop onroad visual overlay is display-only",
+                          all(token not in fishop_overlay for token in (
+                            "PubMaster", "SubMaster", "CarControl", "CANParser", "sendto", ".bind(",
+                            "Params(", ".put(", "desire_helper", "laneChange", "controlOutputEnabled = True",
+                          )),
+                          "Fishop overlay must not publish controls, open sockets, write params, or touch lane-change control")
+  failures += not require("Fishop overlay is attached to camera view",
+                          "from openpilot.selfdrive.ui.onroad.fishop_overlay import FishopVisualOverlay" in augmented_road_view
+                          and "self.fishop_overlay = FishopVisualOverlay()" in augmented_road_view
+                          and "self.fishop_overlay.render(self._content_rect)" in augmented_road_view,
+                          "C3/TICI augmented road view must render the Fishop overlay on top of the model visualization")
+  failures += not require("visualization coexistence UI contract",
+                          "Fishop overlay is independent" in visuals_layout
+                          and "Choose a base display preset" in visuals_layout
+                          and "Draw Fishop lane, lidar lane, blindspot, and overtake suggestion evidence" in visuals_layout,
+                          "Visuals settings must describe base presets separately from independent Fishop overlay")
   ok, detail = check_fishop_overtake_safety_contract()
   failures += not require("fishop auto-overtake safety chain gate", ok, detail or "fishop auto-overtake safety chain gate failed")
   failures += not require("fishop hardware sample tool exists", "FishopHardwareState" in fishop_sample and "SAMPLE_PAYLOADS" in fishop_sample,
