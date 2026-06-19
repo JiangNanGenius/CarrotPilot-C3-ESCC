@@ -8,7 +8,7 @@
 
 #ifndef CAPNP_VERSION
 #error "CAPNP_VERSION is not defined, is capnp/generated-header-support.h missing?"
-#elif CAPNP_VERSION != 1000001
+#elif CAPNP_VERSION != 1004000
 #error "Version mismatch between generated code and library headers.  You must use the same version of the Cap'n Proto compiler and library."
 #endif
 
@@ -156,6 +156,7 @@ enum class Source_a838e963f5ce795d: uint16_t {
   NONE,
   CAR,
   MAP,
+  PHONE,
 };
 CAPNP_DECLARE_ENUM(Source, a838e963f5ce795d);
 CAPNP_DECLARE_SCHEMA(e1c0f68d47cabe9e);
@@ -581,7 +582,7 @@ struct LongitudinalPlanSP::SpeedLimit::Resolver {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(ddc5f84b422c0a68, 4, 0)
+    CAPNP_DECLARE_STRUCT_HEADER(ddc5f84b422c0a68, 4, 1)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -2909,6 +2910,9 @@ public:
 
   inline bool getSpeedLimitLastValid() const;
 
+  inline bool hasSourceLabel() const;
+  inline  ::capnp::Text::Reader getSourceLabel() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -2963,6 +2967,13 @@ public:
 
   inline bool getSpeedLimitLastValid();
   inline void setSpeedLimitLastValid(bool value);
+
+  inline bool hasSourceLabel();
+  inline  ::capnp::Text::Builder getSourceLabel();
+  inline void setSourceLabel( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initSourceLabel(unsigned int size);
+  inline void adoptSourceLabel(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownSourceLabel();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -7371,6 +7382,40 @@ inline bool LongitudinalPlanSP::SpeedLimit::Resolver::Builder::getSpeedLimitLast
 inline void LongitudinalPlanSP::SpeedLimit::Resolver::Builder::setSpeedLimitLastValid(bool value) {
   _builder.setDataField<bool>(
       ::capnp::bounded<81>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool LongitudinalPlanSP::SpeedLimit::Resolver::Reader::hasSourceLabel() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
+}
+inline bool LongitudinalPlanSP::SpeedLimit::Resolver::Builder::hasSourceLabel() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader LongitudinalPlanSP::SpeedLimit::Resolver::Reader::getSourceLabel() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder LongitudinalPlanSP::SpeedLimit::Resolver::Builder::getSourceLabel() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+inline void LongitudinalPlanSP::SpeedLimit::Resolver::Builder::setSourceLabel( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder LongitudinalPlanSP::SpeedLimit::Resolver::Builder::initSourceLabel(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), size);
+}
+inline void LongitudinalPlanSP::SpeedLimit::Resolver::Builder::adoptSourceLabel(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> LongitudinalPlanSP::SpeedLimit::Resolver::Builder::disownSourceLabel() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
 }
 
 inline  ::cereal::LongitudinalPlanSP::SpeedLimit::AssistState LongitudinalPlanSP::SpeedLimit::Assist::Reader::getState() const {

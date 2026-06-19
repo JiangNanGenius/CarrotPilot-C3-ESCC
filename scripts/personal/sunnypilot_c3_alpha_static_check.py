@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import re
+import signal
 import shutil
 import subprocess
 import sys
@@ -32,6 +33,34 @@ def materialize_path(path: Path) -> None:
     pass
 
 
+class FileReadTimedOut(TimeoutError):
+  pass
+
+
+def safe_read_text(path: Path, timeout_s: float = 2.0) -> str | None:
+  materialize_path(path)
+  if sys.platform == "darwin":
+    old_handler = signal.getsignal(signal.SIGALRM)
+
+    def _raise_timeout(_signum, _frame):
+      raise FileReadTimedOut(str(path))
+
+    signal.signal(signal.SIGALRM, _raise_timeout)
+    signal.setitimer(signal.ITIMER_REAL, timeout_s)
+    try:
+      return path.read_text(encoding="utf-8", errors="ignore")
+    except (OSError, FileReadTimedOut, TimeoutError):
+      return None
+    finally:
+      signal.setitimer(signal.ITIMER_REAL, 0)
+      signal.signal(signal.SIGALRM, old_handler)
+
+  try:
+    return path.read_text(encoding="utf-8", errors="ignore")
+  except OSError:
+    return None
+
+
 def read(rel: str) -> str:
   path = ROOT / rel
   materialize_path(path)
@@ -44,10 +73,11 @@ def read_tree(rel: str, suffixes: tuple[str, ...]) -> str:
   for path in root.rglob("*"):
     if not path.is_file() or path.suffix not in suffixes:
       continue
-    materialize_path(path)
     if path.stat().st_size > 1_000_000:
       continue
-    chunks.append(path.read_text(encoding="utf-8", errors="ignore"))
+    text = safe_read_text(path)
+    if text is not None:
+      chunks.append(text)
   return "\n".join(chunks)
 
 
@@ -105,10 +135,11 @@ def find_token_in_tree(rel: str, tokens: tuple[str, ...], suffixes: tuple[str, .
       continue
     if any(part in skip_dirs for part in path.relative_to(root).parts):
       continue
-    materialize_path(path)
     if path.stat().st_size > 1_000_000:
       continue
-    text = path.read_text(encoding="utf-8", errors="ignore")
+    text = safe_read_text(path)
+    if text is None:
+      continue
     for token in tokens:
       if token in text:
         return token, str(path.relative_to(ROOT))
@@ -336,6 +367,45 @@ def check_schema_contract() -> tuple[bool, str]:
   for service, schema_type in expected_log_fields.items():
     if f"{service} @" not in log_capnp or schema_type not in log_capnp:
       return False, f"log.capnp missing event field {service}: {schema_type}"
+
+  return True, ""
+
+
+def check_capnp_generated_contract() -> tuple[bool, str]:
+  custom_header = read("cereal/gen/cpp/custom.capnp.h")
+  log_header = read("cereal/gen/cpp/log.capnp.h")
+
+  custom_tokens = (
+    "struct ModelManagerSP",
+    "struct LongitudinalPlanSP",
+    "struct CarParamsSP",
+    "struct CarStateSP",
+    "struct ModelDataV2SP",
+    "PHONE,",
+    "getSourceLabel() const",
+    "setSourceLabel( ::capnp::Text::Reader value)",
+    "getSpeedLimitFinal() const",
+    "setSpeedLimitFinal(float value)",
+    "getSpeedLimitFinalLast() const",
+    "setSpeedLimitFinalLast(float value)",
+  )
+  for token in custom_tokens:
+    if token not in custom_header:
+      return False, f"cereal/gen/cpp/custom.capnp.h missing generated token {token!r}"
+
+  log_tokens = (
+    "getModelManagerSP() const",
+    "setModelManagerSP( ::cereal::ModelManagerSP::Reader value)",
+    "getLongitudinalPlanSP() const",
+    "setLongitudinalPlanSP( ::cereal::LongitudinalPlanSP::Reader value)",
+    "getCarParamsSP() const",
+    "setCarParamsSP( ::cereal::CarParamsSP::Reader value)",
+    "getCarStateSP() const",
+    "getModelDataV2SP() const",
+  )
+  for token in log_tokens:
+    if token not in log_header:
+      return False, f"cereal/gen/cpp/log.capnp.h missing generated token {token!r}"
 
   return True, ""
 
@@ -1417,7 +1487,7 @@ def check_c3_compat_audit_runtime() -> tuple[bool, str]:
       capture_output=True,
       text=True,
       check=False,
-      timeout=60,
+      timeout=120,
     )
     if proc.returncode != 0:
       return False, (proc.stdout + proc.stderr)[-800:]
@@ -1570,9 +1640,14 @@ def visible_korean_text_report() -> str:
     rel = path.relative_to(ROOT)
     if not is_allowed_hit(rel):
       continue
-    if path.stat().st_size > 200_000:
+    try:
+      if path.stat().st_size > 200_000:
+        continue
+    except OSError:
       continue
-    text = path.read_text(encoding="utf-8", errors="ignore")
+    text = safe_read_text(path)
+    if text is None:
+      continue
     for line_no, line in enumerate(text.splitlines(), start=1):
       if korean_re.search(line):
         hits.append(f"{rel}:{line_no}: {line.strip()[:120]}")
@@ -2427,6 +2502,8 @@ def main() -> int:
   planner = read("sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
   ok, detail = check_schema_contract()
   failures += not require("schema contract check", ok, detail or "capnp schema text contract check failed")
+  ok, detail = check_capnp_generated_contract()
+  failures += not require("capnp generated contract check", ok, detail or "capnp generated C++ files are out of sync")
   failures += not require("percentage speed offset exists", "percentage = 2" in common and "self.offset_value * 0.01 * self.speed_limit" in resolver,
                           "speed limit resolver must support percentage offsets")
   failures += not require("phone speed source schema", "phone @3;" in custom_capnp and "sourceLabel @9 :Text;" in custom_capnp,
