@@ -10,8 +10,23 @@ from openpilot.system.ui.lib.application import gui_app, FontWeight
 
 
 class SettingsBigButton(BigButton):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self._opened_on_press = False
+
   def _get_label_font_size(self):
     return 64
+
+  def _handle_mouse_press(self, _):
+    self._opened_on_press = True
+    if self._click_callback:
+      self._click_callback()
+
+  def _handle_mouse_release(self, mouse_pos):
+    if self._opened_on_press:
+      self._opened_on_press = False
+      return
+    super()._handle_mouse_release(mouse_pos)
 
 
 class SettingsLayout(NavScroller):
