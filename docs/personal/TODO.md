@@ -76,6 +76,23 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [ ] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, `SmartCruiseControlMap`, and `DynamicExperimentalControl` cannot affect control output after boot.
 - [ ] Validate speed source switching before relying on active speed assist.
 
+## Onroad Visualization
+
+- [x] Document the multi-visualization requirement: Sunny HUD remains available, Carrot lane/lead visualization is preferred for lane-change and lane display, and Fishop/lidar data needs a future display overlay.
+- [x] Add `GeniusVisualMode` presets: Sunny, Carrot, and Fusion.
+- [x] Add `GeniusLaneLineStyle`: Simple, Colored, and Carrot.
+- [x] Add `GeniusLeadRadarVisualMode`: Sunny chevron, Carrot lead box, and radar speed labels.
+- [x] Add `GeniusLaneChangeVisuals` and render lane-change intent cues from the existing `onroadEvents` stream.
+- [x] Add `GeniusFishopVisualOverlay` as a display-only Fishop/lidar visual entry with default off.
+- [x] Move visualization controls into the Visuals settings page instead of mixing them with cruise or Super Advanced control settings.
+- [x] Wire C3/TICI `selfdrive/ui/onroad/model_renderer.py` to draw Sunny-compatible simple lanes, colored lane confidence, Carrot-style adjacent-lane emphasis, Carrot lead boxes, and optional radar speed tags.
+- [x] Keep visualization changes display-only: no planner, CAN, lane-change, or Fishop control output is added by these renderer switches.
+- [ ] Add Carrot path drawing modes as a separate renderer stage after checking the old path animation code against Sunny 0.11 `modelV2` and `lateralPlan` schemas.
+- [ ] Add a real Fishop overlay panel for lane curve, lidar left/right lane, lidar blindspot, navigation gate, and overtake suggestion evidence.
+- [ ] Decide final mutual exclusion rules after bench screenshots: Sunny minimal, Carrot dense, Fusion balanced, and Fishop overlay on top only when its data is fresh.
+- [ ] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
+- [ ] Add Simplified/Traditional Chinese translations for the new visualization controls.
+
 ## Carrot, Auto-Tuner, And Fishop Hardware
 
 - [x] Bring over local Carrot Web, CarrotMan-style status, navigation event input, APN/N style phone speed input, SDI/speed-bump/model-speed evidence, and Auto-Tuner core.

@@ -46,9 +46,18 @@ The reference branches use several settings that look similar but control differ
 - `FishopAutoOvertakeEnabled` defaults off and remains user-toggleable while offroad.
 - Fishop behavior must be related back to the existing lane-change chain instead of introducing a separate hidden steering path.
 
+## Onroad Visualization
+
+- Visualization settings are display-only and live in the Visuals page.
+- `GeniusVisualMode` is a preset selector: Sunny keeps the stock look, Carrot emphasizes lane/lead/radar information, and Fusion combines Sunny HUD elements with Carrot-style road visualization.
+- `GeniusLaneLineStyle` and `GeniusLeadRadarVisualMode` may be adjusted independently after choosing a preset.
+- `GeniusLaneChangeVisuals` uses existing `onroadEvents` lane-change intent events and must not alter lane-change decisions.
+- `GeniusFishopVisualOverlay` is reserved for Fishop/lidar evidence display. It must not publish planner, CAN, or automatic-overtake outputs.
+- Do not merge Carrot path animation, Fishop overlay, Sunny HUD, and cruise-control behavior by name alone; each renderer change needs a display-only owner and a separate control-owner decision.
+
 ## Current Policy
 
-- Retain: DEC as off-by-default advanced option, local Web, local Wi-Fi, SSH, GitHub update, model downloads, APN/N/Navipilot phone speed input, Auto-Tuner, Fishop inputs, Carrot active speed, ATC, red-light stop, and Fishop auto-overtake settings.
+- Retain: DEC as off-by-default advanced option, local Web, local Wi-Fi, SSH, GitHub update, model downloads, APN/N/Navipilot phone speed input, Auto-Tuner, Fishop inputs, Carrot active speed, ATC, red-light stop, Fishop auto-overtake settings, and Genius visualization modes.
 - Hide or inert: Sunnylink/comma cloud, OnroadUploads, EnableConnect, ICBM, SCC-V, SCC-M, Fishop auto-overtake output.
 - Default off but user-toggleable while offroad: Carrot active speed, ATC/auto-turn slowdown, traffic-light stop, Auto-Tuner auto-apply, Fishop auto-overtake.
 - Future audit: produce a one-owner matrix for ajouatom CarrotPilot, jixiexiaoge/mechanical, and masang-feiyang/ESCC settings before importing more behavior.

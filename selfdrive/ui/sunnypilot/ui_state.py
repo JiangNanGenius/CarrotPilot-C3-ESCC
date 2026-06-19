@@ -60,6 +60,11 @@ class UIStateSP:
     self.chevron_metrics = None
     self.custom_interactive_timeout: int = 0
     self.developer_ui = None
+    self.genius_fishop_visual_overlay: bool = False
+    self.genius_lane_change_visuals: bool = True
+    self.genius_lane_line_style: int = 1
+    self.genius_lead_radar_visual_mode: int = 1
+    self.genius_visual_mode: int = 2
     self.hide_v_ego_ui: bool = False
     self.onroad_brightness: int = 0
     self.onroad_brightness_timer: int = 0
@@ -165,6 +170,11 @@ class UIStateSP:
     self.chevron_metrics = self.params.get("ChevronInfo")
     self.custom_interactive_timeout = self.params.get("InteractivityTimeout", return_default=True)
     self.developer_ui = self.params.get("DevUIInfo")
+    self.genius_fishop_visual_overlay = self.params.get_bool("GeniusFishopVisualOverlay")
+    self.genius_lane_change_visuals = self.params.get_bool("GeniusLaneChangeVisuals")
+    self.genius_lane_line_style = self.params.get_int("GeniusLaneLineStyle")
+    self.genius_lead_radar_visual_mode = self.params.get_int("GeniusLeadRadarVisualMode")
+    self.genius_visual_mode = self.params.get_int("GeniusVisualMode")
     self.hide_v_ego_ui = self.params.get_bool("HideVEgoUI")
     self.onroad_brightness = int(float(self.params.get("OnroadScreenOffBrightness", return_default=True)))
     self.onroad_brightness_timer_param = self.params.get("OnroadScreenOffTimer", return_default=True)
