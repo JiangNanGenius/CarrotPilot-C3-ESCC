@@ -58,6 +58,9 @@ REQUIRED_HEALTH_ENDPOINTS = {
   "/api/params_bulk",
   "/api/param_set",
   "/api/status_broadcast",
+  "/api/carrot_feature_gates",
+  "/api/fishop_hardware",
+  "/api/cluster_world",
   "/api/navigation_event",
   "/api/navi",
   "/api/navi/tcp_health",
@@ -255,6 +258,90 @@ def validate_status_payload(payload: dict[str, Any]) -> tuple[bool, str, dict[st
   return not failures, "; ".join(failures), evidence
 
 
+def validate_phone_speed_limit(payload: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
+  failures: list[str] = []
+  speed_kph = payload.get("speedLimitKph")
+  age_sec = payload.get("ageSec")
+  max_age_sec = payload.get("maxAgeSec")
+  evidence = {
+    "hasParams": payload.get("hasParams"),
+    "enabled": payload.get("enabled"),
+    "fresh": payload.get("fresh"),
+    "speedLimitKph": speed_kph,
+    "source": payload.get("source"),
+    "ageSec": age_sec,
+    "maxAgeSec": max_age_sec,
+    "controlOutput": payload.get("controlOutput", False),
+  }
+
+  if payload.get("hasParams") is not True:
+    failures.append("phone speed Params unavailable")
+  if not isinstance(payload.get("fresh"), bool):
+    failures.append("fresh must be a boolean")
+  if not isinstance(speed_kph, (int, float)):
+    failures.append("speedLimitKph must be numeric")
+  if not isinstance(age_sec, (int, float)):
+    failures.append("ageSec must be numeric")
+  if not isinstance(max_age_sec, (int, float)) or float(max_age_sec) <= 0.0:
+    failures.append("maxAgeSec must be positive")
+  if payload.get("controlOutput", False) is not False:
+    failures.append("phone speed endpoint must not expose control output")
+
+  return not failures, "; ".join(failures), evidence
+
+
+def validate_fishop_hardware(payload: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
+  snapshot = payload.get("snapshot") if isinstance(payload.get("snapshot"), dict) else {}
+  lane = snapshot.get("lane") if isinstance(snapshot.get("lane"), dict) else {}
+  lane_quality = lane.get("laneQuality") if isinstance(lane.get("laneQuality"), dict) else {}
+  blindspot = snapshot.get("blindspot") if isinstance(snapshot.get("blindspot"), dict) else {}
+  dynamic_blind = blindspot.get("dynamicBlind") if isinstance(blindspot.get("dynamicBlind"), dict) else {}
+  navigation = snapshot.get("navigation") if isinstance(snapshot.get("navigation"), dict) else {}
+  navigation_policy = navigation.get("policy") if isinstance(navigation.get("policy"), dict) else {}
+  overtake = snapshot.get("overtake") if isinstance(snapshot.get("overtake"), dict) else {}
+  directionality = overtake.get("directionality") if isinstance(overtake.get("directionality"), dict) else {}
+  suggestion = overtake.get("suggestionPreview") if isinstance(overtake.get("suggestionPreview"), dict) else {}
+
+  failures: list[str] = []
+  evidence = {
+    "inputAvailable": payload.get("inputAvailable"),
+    "payloadCount": payload.get("payloadCount"),
+    "parseError": payload.get("parseError"),
+    "readOnly": snapshot.get("readOnly"),
+    "controlOutputEnabled": snapshot.get("controlOutputEnabled"),
+    "sensorOnline": snapshot.get("sensorOnline"),
+    "laneFresh": lane.get("fresh"),
+    "blindspotFresh": blindspot.get("fresh"),
+    "navigationFresh": navigation.get("fresh"),
+    "overtakeFresh": overtake.get("fresh"),
+    "laneQualityControlOutput": lane_quality.get("controlOutput"),
+    "dynamicBlindControlOutput": dynamic_blind.get("controlOutput"),
+    "navigationControlOutput": navigation.get("controlOutput"),
+    "navigationPolicyControlOutput": navigation_policy.get("controlOutput"),
+    "overtakeControlOutput": directionality.get("controlOutput"),
+    "suggestionControlOutput": suggestion.get("controlOutput"),
+  }
+
+  if not isinstance(snapshot, dict) or not snapshot:
+    failures.append("fishop snapshot missing")
+  if snapshot.get("readOnly") is not True:
+    failures.append("fishop snapshot must be read-only")
+  if snapshot.get("controlOutputEnabled") is not False:
+    failures.append("fishop controlOutputEnabled must be false")
+  for label, value in (
+    ("laneQuality.controlOutput", lane_quality.get("controlOutput")),
+    ("dynamicBlind.controlOutput", dynamic_blind.get("controlOutput")),
+    ("navigation.controlOutput", navigation.get("controlOutput")),
+    ("navigation.policy.controlOutput", navigation_policy.get("controlOutput")),
+    ("overtake.directionality.controlOutput", directionality.get("controlOutput")),
+    ("overtake.suggestionPreview.controlOutput", suggestion.get("controlOutput")),
+  ):
+    if value is not False:
+      failures.append(f"{label} must be false")
+
+  return not failures, "; ".join(failures), evidence
+
+
 def safe_navigation_payload() -> dict[str, Any]:
   return {
     "carrotIndex": 1,
@@ -430,6 +517,18 @@ def run_live_check(args: argparse.Namespace) -> dict[str, Any]:
     })
   checks.append(navigation_check)
 
+  phone_payload, phone_check = query_json_check(args.host, args.web_port, "/api/phone_speed_limit", args.timeout, args.allow_unavailable, "7000 phone speed source state")
+  if phone_payload:
+    ok, detail, evidence = validate_phone_speed_limit(phone_payload)
+    phone_check = check("7000 phone speed source state", "pass" if ok else "fail", detail, evidence)
+  checks.append(phone_check)
+
+  fishop_payload, fishop_check = query_json_check(args.host, args.web_port, "/api/fishop_hardware", args.timeout, args.allow_unavailable, "7000 Fishop hardware read-only state")
+  if fishop_payload:
+    ok, detail, evidence = validate_fishop_hardware(fishop_payload)
+    fishop_check = check("7000 Fishop hardware read-only state", "pass" if ok else "fail", detail, evidence)
+  checks.append(fishop_check)
+
   if args.send_navigation_probe:
     ok, error = send_udp_navigation(args.host, args.nav_port)
     if not ok:
@@ -587,6 +686,30 @@ class _SelfTestWebHandler(BaseHTTPRequestHandler):
     if path == "/api/navigation_event":
       self.send_json({"ok": True, "hasParams": True, "event": {"source": "self-test", "controlOutput": False}})
       return
+    if path == "/api/phone_speed_limit":
+      self.send_json({
+        "ok": True,
+        "hasParams": True,
+        "enabled": True,
+        "fresh": False,
+        "speedLimitMS": 0.0,
+        "speedLimitKph": 0.0,
+        "source": "phone",
+        "updatedAt": 0.0,
+        "ageSec": 0.0,
+        "maxAgeSec": 10.0,
+      })
+      return
+    if path == "/api/fishop_hardware":
+      self.send_json({
+        "ok": True,
+        "inputPath": "/data/fishop_hardware.jsonl",
+        "inputAvailable": False,
+        "payloadCount": 0,
+        "parseError": "",
+        "snapshot": selftest_fishop_snapshot(),
+      })
+      return
     if path == "/api/navi/tcp_health":
       self.send_json({"ok": True, "service": "carrot_navi_tcp", "port": DEFAULT_NAVI_TCP_PORT, "available": True, "controlOutput": False})
       return
@@ -652,6 +775,48 @@ def selftest_status_payload() -> dict[str, Any]:
   return payload
 
 
+def selftest_fishop_snapshot() -> dict[str, Any]:
+  return {
+    "readOnly": True,
+    "controlOutputEnabled": False,
+    "sensorOnline": False,
+    "lane": {
+      "fresh": False,
+      "laneQuality": {
+        "readOnly": True,
+        "controlOutput": False,
+      },
+    },
+    "blindspot": {
+      "fresh": False,
+      "dynamicBlind": {
+        "readOnly": True,
+        "controlOutput": False,
+      },
+    },
+    "navigation": {
+      "fresh": False,
+      "readOnly": True,
+      "controlOutput": False,
+      "policy": {
+        "readOnly": True,
+        "controlOutput": False,
+      },
+    },
+    "overtake": {
+      "fresh": False,
+      "directionality": {
+        "alphaAction": "record_only",
+        "controlOutput": False,
+      },
+      "suggestionPreview": {
+        "readOnly": True,
+        "controlOutput": False,
+      },
+    },
+  }
+
+
 def start_server(handler: type[BaseHTTPRequestHandler]) -> tuple[HTTPServer, int]:
   server = HTTPServer(("127.0.0.1", 0), handler)
   port = int(server.server_address[1])
@@ -706,7 +871,8 @@ def self_test() -> None:
   if not result.get("overallOk"):
     raise LiveCheckError(json.dumps(result, ensure_ascii=False, sort_keys=True))
   report = markdown_report(result)
-  for token in ("7000 health", "7705 UDP status broadcast", "7713 navigation HTTP health"):
+  for token in ("7000 health", "7705 UDP status broadcast", "7713 navigation HTTP health",
+                "7000 phone speed source state", "7000 Fishop hardware read-only state"):
     if token not in report:
       raise LiveCheckError(f"missing self-test report token: {token}")
 
