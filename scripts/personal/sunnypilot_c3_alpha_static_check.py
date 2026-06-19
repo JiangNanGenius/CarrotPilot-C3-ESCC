@@ -100,6 +100,15 @@ def read(rel: str) -> str:
   return text
 
 
+def read_bytes(rel: str) -> bytes:
+  path = ROOT / rel
+  materialize_path(path)
+  try:
+    return path.read_bytes()
+  except OSError as exc:
+    raise RuntimeError(f"unable to read {rel}; file may be unavailable") from exc
+
+
 def read_tree(rel: str, suffixes: tuple[str, ...]) -> str:
   root = ROOT / rel
   chunks: list[str] = []
@@ -1922,6 +1931,15 @@ def main() -> int:
   failures += not require("services contract check", ok, detail or "cereal services contract check failed")
 
   params = read("common/params_keys.h")
+  params_cc = read("common/params.cc")
+  params_pyx = read_bytes("common/params_pyx.so")
+  failures += not require("params keys avoid capnp dependency", "cereal/gen/cpp/log.capnp.h" not in params,
+                          "params_keys.h must not require capnp just to build common/params_pyx.so")
+  failures += not require("params native core is standalone-buildable",
+                          "system/hardware/hw.h" not in params_cc
+                          and "common/swaglog.h" not in params_cc
+                          and "default_params_path()" in params_cc,
+                          "params.cc must stay buildable without hardware/capnp/swaglog dependencies for C3 prebuilt refreshes")
   failures += not require("OffroadMode param exists", '{"OffroadMode", {CLEAR_ON_MANAGER_START, BOOL}}' in params,
                           "OffroadMode must be the only Always Offroad param")
   failures += not require("no AlwaysOffline alias", "AlwaysOffline" not in params and "AlwaysOffroad" not in params,
@@ -1936,6 +1954,14 @@ def main() -> int:
                           "CarrotLearningActive must default to 0")
   failures += not require("Carrot learning auto-apply default off", '{"CarrotLearningAutoApply", {PERSISTENT | BACKUP, BOOL, "0"}}' in params,
                           "CarrotLearningAutoApply must default to 0")
+  failures += not require("prebuilt params extension includes Carrot/Fishop keys",
+                          all(token in params_pyx for token in (
+                            b"CarrotPhoneSpeedLimitEnabled",
+                            b"CarrotLearningActive",
+                            b"CarrotMapOverlayEnabled",
+                            b"FishopLaneCurveEnabled",
+                          )),
+                          "common/params_pyx.so must be rebuilt when alpha params_keys.h adds local Carrot/Fishop keys")
   for key in (
     "CarrotLearningData",
     "CarrotLearningRecommend",

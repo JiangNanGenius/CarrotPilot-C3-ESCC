@@ -1,7 +1,7 @@
 """
 Local-only Genius Pilot / Carrot feature settings.
 """
-from openpilot.common.params import Params
+from openpilot.common.params import Params, UnknownKeyName
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.lib.multilang import tr
@@ -24,8 +24,40 @@ class CarrotLayout(Widget):
     super().__init__()
     self._params = Params()
     self._toggles = {}
+    self._available_params = {}
     items = self._initialize_items()
     self._scroller = Scroller(items, line_separator=True, spacing=0)
+
+  def _param_available(self, param: str) -> bool:
+    if param not in self._available_params:
+      try:
+        self._params.check_key(param)
+        self._available_params[param] = True
+      except UnknownKeyName:
+        self._available_params[param] = False
+    return self._available_params[param]
+
+  def _param_bool(self, param: str) -> bool:
+    if not self._param_available(param):
+      return False
+    try:
+      return self._params.get_bool(param)
+    except UnknownKeyName:
+      self._available_params[param] = False
+      return False
+
+  def _toggle_enabled(self, param: str, enabled) -> bool:
+    if not self._param_available(param):
+      return False
+    return enabled() if callable(enabled) else bool(enabled)
+
+  def _description(self, param: str, description):
+    def wrapped() -> str:
+      text = description() if callable(description) else description
+      if not self._param_available(param):
+        text += "\n\n" + tr("This setting is waiting for the updated Genius Pilot parameter table. Update or reinstall this alpha build before using it.")
+      return text
+    return wrapped
 
   def _initialize_items(self):
     self._toggle_defs = {
@@ -100,10 +132,10 @@ class CarrotLayout(Widget):
     for param, (title, description, enabled) in self._toggle_defs.items():
       toggle = toggle_item_sp(
         title=title,
-        description=description,
-        param=param,
-        initial_state=self._params.get_bool(param),
-        enabled=enabled,
+        description=self._description(param, description),
+        param=param if self._param_available(param) else None,
+        initial_state=self._param_bool(param),
+        enabled=lambda param=param, enabled=enabled: self._toggle_enabled(param, enabled),
       )
       self._toggles[param] = toggle
       items.append(toggle)
@@ -129,11 +161,11 @@ class CarrotLayout(Widget):
     super()._update_state()
 
     for param in LOCKED_CONTROL_PARAMS:
-      if self._params.get_bool(param):
+      if self._param_bool(param):
         self._params.put_bool(param, False)
 
     for param, toggle in self._toggles.items():
-      toggle.action_item.set_state(self._params.get_bool(param))
+      toggle.action_item.set_state(self._param_bool(param))
       if param in LOCKED_CONTROL_PARAMS:
         toggle.action_item.set_enabled(False)
 
