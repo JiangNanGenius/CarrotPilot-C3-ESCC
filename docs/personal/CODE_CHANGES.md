@@ -1,5 +1,18 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Carrot Settings Semantics
+
+Clarified the confusing visual-mode and Carrot tuning semantics:
+
+- Renamed the user-facing `Fusion` visual/curve label to `Balanced` while keeping the internal mode value stable for existing params.
+- Corrected `AutoCurveSpeedFactor`: higher values make Carrot curve detection more sensitive, usually lower the curve target speed, and slow earlier; the lower-speed clamp can make further increases ineffective.
+- Corrected `AutoNaviSpeedDecelRate`: lower values start slowing from farther away, while higher values delay the slowdown.
+- Added `docs/personal/CARROT_SETTINGS_GUIDE.md` with bilingual unit/direction notes for curve speed, navigation decel, acceleration table, longitudinal tuning, path offset, steering delay, Auto-Tuner, and Fishop evidence settings.
+- Added `scripts/personal/genius_carrot_settings_guide_contract.py` and wired it into the alpha release gate/static gate so stale misleading tuning text cannot return silently.
+- Updated Simplified/Traditional Chinese strings for Balanced mode and the highest-risk Carrot tuning descriptions.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.24`.
+
 ## 2026-06-20 Bench Rescue SSH Policy
 
 Made clone C3 rescue access a bench-only opt-in path:

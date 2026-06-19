@@ -96,7 +96,7 @@ def check_sources() -> list[CheckResult]:
     "One base preset is active at a time",
     "`Sunny`: minimal upstream-style HUD",
     "`Carrot`: denser Carrot-style road view",
-    "`Fusion`: default C3 preset",
+    "`Balanced`: default C3 preset",
     "`GeniusCarrotWorldOverlay` is independent",
     "`GeniusFishopVisualOverlay` is not a base preset",
     "the base road view is mutually exclusive, but evidence overlays are additive",
@@ -165,7 +165,7 @@ def check_sources() -> list[CheckResult]:
     CheckResult(
       "renderer path mode entry points",
       all(token in renderer for token in required_renderer),
-      "missing one or more Carrot/Fusion path renderer tokens",
+      "missing one or more Carrot/Balanced path renderer tokens",
     ),
     CheckResult(
       "visuals settings describe path presets",
@@ -173,9 +173,9 @@ def check_sources() -> list[CheckResult]:
       "Visuals page must explain lane/path ownership and preset callback defaults",
     ),
     CheckResult(
-      "visual params default to Fusion with Fishop off",
+      "visual params default to Balanced with Fishop off",
       all(token in params for token in required_defaults),
-      "C3 defaults must keep Fusion as the base display and Carrot/Fishop overlays off",
+      "C3 defaults must keep Balanced as the base display and Carrot/Fishop overlays off",
     ),
     CheckResult(
       "visualization policy documents coexistence",
@@ -329,7 +329,7 @@ def check_visual_modes() -> list[CheckResult]:
       "carrot_edges": True,
       "markers": marker_count >= 5,
     },
-    "Fusion": {
+    "Balanced": {
       "mode": 2,
       "path": polygon.shape[0] >= 20,
       "carrot_edges": True,
@@ -343,9 +343,9 @@ def check_visual_modes() -> list[CheckResult]:
     results.append(CheckResult(f"{name} visual replay contract", bool(expected["path"]), detail))
 
   results.append(CheckResult("visual base presets are mutually exclusive", len({m["mode"] for m in mode_expectations.values()}) == 3,
-                             "Sunny, Carrot, and Fusion must remain distinct base presets"))
-  results.append(CheckResult("Fusion is the default C3 base preset", mode_expectations["Fusion"]["mode"] == 2,
-                             "Fusion keeps Sunny HUD structure with Carrot road cues"))
+                             "Sunny, Carrot, and Balanced must remain distinct base presets"))
+  results.append(CheckResult("Balanced is the default C3 base preset", mode_expectations["Balanced"]["mode"] == 2,
+                             "Balanced keeps Sunny HUD structure with Carrot road cues"))
   results.append(CheckResult("Carrot preset is the dense lane/path/lead/radar preset",
                              bool(mode_expectations["Carrot"]["carrot_edges"] and mode_expectations["Carrot"]["markers"]),
                              "Carrot mode must keep the denser route ribbon and center markers"))

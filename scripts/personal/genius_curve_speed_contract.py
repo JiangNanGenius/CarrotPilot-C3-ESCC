@@ -61,10 +61,10 @@ def check_sources() -> list[str]:
   if "LongitudinalPlanSource.sccVision" not in planner or "LongitudinalPlanSource.sccMap" not in planner:
     errors.append("longitudinal planner must still publish SCC-V/SCC-M evidence")
 
-  if "Fusion keeps Sunny curve quality and Carrot navigation/phone inputs together" not in ui:
-    errors.append("Super Advanced UI must describe Fusion semantics")
+  if "Balanced keeps Sunny curve quality and Carrot navigation/phone inputs together" not in ui:
+    errors.append("Super Advanced UI must describe Balanced curve-speed semantics")
 
-  if "Off/Sunny/Carrot/Fusion selector" not in matrix:
+  if "Off/Sunny/Carrot/Balanced selector" not in matrix:
     errors.append("settings matrix must classify CurveSpeedControlMode")
 
   return errors
@@ -93,7 +93,7 @@ def check_policy_runtime() -> list[str]:
 
 
 def main() -> int:
-  parser = argparse.ArgumentParser(description="Validate Genius Pilot curve-speed ownership and Fusion semantics.")
+  parser = argparse.ArgumentParser(description="Validate Genius Pilot curve-speed ownership and Balanced semantics.")
   parser.add_argument("--self-test", action="store_true", help="run source and lightweight runtime checks")
   parser.parse_args()
 

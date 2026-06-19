@@ -481,7 +481,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CurveSpeedControlMode",
-      "notes": "Off/Sunny/Carrot/Fusion selector; owns Sunny SCC-V participation while SCC-M stays inert.",
+      "notes": "Off/Sunny/Carrot/Balanced selector; Balanced is the user-facing label for internal fusion mode and owns Sunny SCC-V participation while SCC-M stays inert.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -546,7 +546,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "AutoCurveSpeedFactor",
-      "notes": "Higher usually keeps more speed through curves.",
+      "notes": "Higher makes Carrot curve detection more sensitive, usually lowers curve target speed, and slows earlier; lower-limit clamp can make further increases ineffective.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -577,7 +577,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "AutoCurveSpeedAggressiveness",
-      "notes": "",
+      "notes": "Carrot-compatible secondary curve knob. Current active path primarily uses AutoCurveSpeedFactor; keep 100 unless a controller or Auto-Tuner recommendation uses it.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -606,9 +606,9 @@
       "current_key": "AutoNaviSpeedDecelRate",
       "default": "120",
       "forbid_tokens": [],
-      "inverse_semantics": "no",
+      "inverse_semantics": "yes",
       "key": "AutoNaviSpeedDecelRate",
-      "notes": "",
+      "notes": "Lower values slow from farther away for navigation speed events; higher values delay the slowdown.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -736,7 +736,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "TurnSpeedControlMode",
-      "notes": "Off/Carrot/Sunny/Fusion selector.",
+      "notes": "Off/Carrot/Sunny/Balanced selector.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -922,7 +922,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "TrafficStopDistanceAdjust",
-      "notes": "",
+      "notes": "Negative values stop earlier/farther before the line; positive values stop later/closer.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1449,7 +1449,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CruiseMaxVals0",
-      "notes": "",
+      "notes": "Higher allows stronger acceleration in this speed band.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1464,7 +1464,7 @@
         "CruiseMaxVals0"
       ],
       "ui_surface": "carrot",
-      "units": ""
+      "units": "0.01 m/s^2 @ 0 km/h"
     },
     {
       "api": true,
@@ -1480,7 +1480,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CruiseMaxVals1",
-      "notes": "",
+      "notes": "Higher allows stronger acceleration in this speed band.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1495,7 +1495,7 @@
         "CruiseMaxVals1"
       ],
       "ui_surface": "carrot",
-      "units": ""
+      "units": "0.01 m/s^2 @ 10 km/h"
     },
     {
       "api": true,
@@ -1511,7 +1511,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CruiseMaxVals2",
-      "notes": "",
+      "notes": "Higher allows stronger acceleration in this speed band.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1526,7 +1526,7 @@
         "CruiseMaxVals2"
       ],
       "ui_surface": "carrot",
-      "units": ""
+      "units": "0.01 m/s^2 @ 40 km/h"
     },
     {
       "api": true,
@@ -1542,7 +1542,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CruiseMaxVals3",
-      "notes": "",
+      "notes": "Higher allows stronger acceleration in this speed band.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1557,7 +1557,7 @@
         "CruiseMaxVals3"
       ],
       "ui_surface": "carrot",
-      "units": ""
+      "units": "0.01 m/s^2 @ 60 km/h"
     },
     {
       "api": true,
@@ -1573,7 +1573,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CruiseMaxVals4",
-      "notes": "",
+      "notes": "Higher allows stronger acceleration in this speed band.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1588,7 +1588,7 @@
         "CruiseMaxVals4"
       ],
       "ui_surface": "carrot",
-      "units": ""
+      "units": "0.01 m/s^2 @ 80 km/h"
     },
     {
       "api": true,
@@ -1604,7 +1604,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CruiseMaxVals5",
-      "notes": "",
+      "notes": "Higher allows stronger acceleration in this speed band.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1619,7 +1619,7 @@
         "CruiseMaxVals5"
       ],
       "ui_surface": "carrot",
-      "units": ""
+      "units": "0.01 m/s^2 @ 110 km/h"
     },
     {
       "api": true,
@@ -1635,7 +1635,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CruiseMaxVals6",
-      "notes": "",
+      "notes": "Higher allows stronger acceleration in this speed band.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1650,7 +1650,7 @@
         "CruiseMaxVals6"
       ],
       "ui_surface": "carrot",
-      "units": ""
+      "units": "0.01 m/s^2 @ 140 km/h"
     },
     {
       "api": true,
@@ -1666,7 +1666,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "LongTuningKpV",
-      "notes": "",
+      "notes": "Higher reacts harder to speed error; lower can reduce overshoot/oscillation.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1759,7 +1759,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "LongActuatorDelay",
-      "notes": "",
+      "notes": "Higher anticipates slower actuator response; too high may feel early.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1774,7 +1774,7 @@
         "LongActuatorDelay"
       ],
       "ui_surface": "carrot",
-      "units": "centiseconds"
+      "units": "0.01 s"
     },
     {
       "api": true,
@@ -1790,7 +1790,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "VEgoStopping",
-      "notes": "",
+      "notes": "Higher can smooth harsh stops; too high can enter stopping behavior early.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1805,7 +1805,7 @@
         "VEgoStopping"
       ],
       "ui_surface": "carrot",
-      "units": "km/h scale"
+      "units": "0.01 m/s"
     },
     {
       "api": true,
@@ -2038,7 +2038,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "PathOffset",
-      "notes": "0 is neutral.",
+      "notes": "0 is neutral; negative shifts left, positive shifts right.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -2070,7 +2070,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "SteerActuatorDelay",
-      "notes": "",
+      "notes": "0 uses live/default delay; higher adds custom delay compensation.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -2085,7 +2085,7 @@
         "SteerActuatorDelay"
       ],
       "ui_surface": "carrot",
-      "units": "centiseconds"
+      "units": "0.01 s"
     },
     {
       "api": true,
@@ -2383,7 +2383,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "GeniusVisualMode",
-      "notes": "Mutually exclusive base preset: Sunny minimal, Carrot dense lane/path/lead/radar, Fusion default with Sunny HUD structure and Carrot road cues.",
+      "notes": "Mutually exclusive base preset: Sunny minimal, Carrot dense lane/path/lead/radar, Balanced default with Sunny HUD structure and Carrot road cues.",
       "owner": "visualization",
       "reference_hits": {
         "ajouatom-c3-wip": true,

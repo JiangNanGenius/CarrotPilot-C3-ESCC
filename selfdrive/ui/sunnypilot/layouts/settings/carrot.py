@@ -150,6 +150,10 @@ class CarrotLayout(Widget):
     return f"{value / 100:.2f} m"
 
   @staticmethod
+  def _mps_100_label(value: int) -> str:
+    return f"{value / 100:.2f} m/s"
+
+  @staticmethod
   def _signed_distance_100_label(value: int) -> str:
     return f"{value / 100:+.2f} m"
 
@@ -163,7 +167,7 @@ class CarrotLayout(Widget):
       0: "Off",
       1: "Sunny",
       2: "Carrot",
-      3: "Fusion",
+      3: "Balanced",
     }.get(value, str(value))
 
   @staticmethod
@@ -172,7 +176,7 @@ class CarrotLayout(Widget):
       0: "Off",
       1: "Carrot",
       2: "Sunny",
-      3: "Fusion",
+      3: "Balanced",
     }.get(value, str(value))
 
   @staticmethod
@@ -271,7 +275,7 @@ class CarrotLayout(Widget):
         lambda: tr("Curve Speed Control Mode"),
         0,
         3,
-        lambda: tr("Select the curve-speed strategy: Off, Sunny, Carrot, or Fusion. Fusion keeps Sunny curve quality and Carrot navigation/phone inputs together."),
+        lambda: tr("Select the curve-speed strategy: Off, Sunny, Carrot, or Balanced. Balanced keeps Sunny curve quality and Carrot navigation/phone inputs together."),
         1,
         self._curve_mode_label,
       ),
@@ -289,7 +293,7 @@ class CarrotLayout(Widget):
         lambda: tr("Curve Speed Factor"),
         50,
         250,
-        lambda: tr("Main Carrot curve-speed scaling value. Higher values usually keep more speed through curves."),
+        lambda: tr("Main Carrot curve-speed scaling value. Higher values make curve detection more sensitive, usually lowering the curve target speed and slowing earlier. If the lower-limit speed is already reached, raising this may have no further effect."),
         5,
         self._percent_label,
       ),
@@ -298,7 +302,7 @@ class CarrotLayout(Widget):
         lambda: tr("Curve Speed Aggressiveness"),
         50,
         200,
-        lambda: tr("Adjusts how strongly curve-speed control reacts to the detected curve."),
+        lambda: tr("Secondary Carrot-compatible curve knob. Current active curve slowdown primarily uses Curve Speed Factor; keep this near 100 unless a later controller or Auto-Tuner recommendation explicitly uses it."),
         5,
         self._percent_label,
       ),
@@ -307,7 +311,7 @@ class CarrotLayout(Widget):
         lambda: tr("Navigation Decel Rate"),
         50,
         300,
-        lambda: tr("Deceleration strength for navigation speed events such as turns, speed cameras, and speed bumps."),
+        lambda: tr("Navigation-event deceleration scale. Lower values start slowing from farther away; higher values delay the slowdown and can feel later/stronger."),
         5,
         self._percent_label,
       ),
@@ -471,19 +475,19 @@ class CarrotLayout(Widget):
       self._option("TFollowGap3", lambda: tr("Follow Gap 3"), 90, 400, lambda: tr("Time gap preset 3 used by Carrot tuning."), 5, lambda v: f"{v / 100:.2f} s"),
       self._option("TFollowGap4", lambda: tr("Follow Gap 4"), 100, 450, lambda: tr("Time gap preset 4 used by Carrot tuning."), 5, lambda v: f"{v / 100:.2f} s"),
       LineSeparatorSP(40),
-      self._option("CruiseMaxVals0", lambda: tr("Cruise Accel Limit 0"), 20, 260, lambda: tr("Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."), 5),
-      self._option("CruiseMaxVals1", lambda: tr("Cruise Accel Limit 1"), 20, 260, lambda: tr("Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."), 5),
-      self._option("CruiseMaxVals2", lambda: tr("Cruise Accel Limit 2"), 20, 240, lambda: tr("Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."), 5),
-      self._option("CruiseMaxVals3", lambda: tr("Cruise Accel Limit 3"), 20, 220, lambda: tr("Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."), 5),
-      self._option("CruiseMaxVals4", lambda: tr("Cruise Accel Limit 4"), 20, 200, lambda: tr("Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."), 5),
-      self._option("CruiseMaxVals5", lambda: tr("Cruise Accel Limit 5"), 20, 180, lambda: tr("Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."), 5),
-      self._option("CruiseMaxVals6", lambda: tr("Cruise Accel Limit 6"), 20, 160, lambda: tr("Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."), 5),
+      self._option("CruiseMaxVals0", lambda: tr("Cruise Accel Limit 0 km/h"), 20, 260, lambda: tr("Maximum requested cruise acceleration near 0 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."), 5),
+      self._option("CruiseMaxVals1", lambda: tr("Cruise Accel Limit 10 km/h"), 20, 260, lambda: tr("Maximum requested cruise acceleration near 10 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."), 5),
+      self._option("CruiseMaxVals2", lambda: tr("Cruise Accel Limit 40 km/h"), 20, 240, lambda: tr("Maximum requested cruise acceleration near 40 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."), 5),
+      self._option("CruiseMaxVals3", lambda: tr("Cruise Accel Limit 60 km/h"), 20, 220, lambda: tr("Maximum requested cruise acceleration near 60 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."), 5),
+      self._option("CruiseMaxVals4", lambda: tr("Cruise Accel Limit 80 km/h"), 20, 200, lambda: tr("Maximum requested cruise acceleration near 80 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."), 5),
+      self._option("CruiseMaxVals5", lambda: tr("Cruise Accel Limit 110 km/h"), 20, 180, lambda: tr("Maximum requested cruise acceleration near 110 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."), 5),
+      self._option("CruiseMaxVals6", lambda: tr("Cruise Accel Limit 140 km/h"), 20, 160, lambda: tr("Maximum requested cruise acceleration near 140 km/h, in 0.01 m/s^2 units. Higher feels stronger; preserve known-good values unless Auto-Tuner recommends a change."), 5),
       LineSeparatorSP(40),
-      self._option("LongTuningKpV", lambda: tr("Longitudinal Kp"), 0, 300, lambda: tr("Carrot longitudinal proportional gain scaling."), 5, self._percent_label),
+      self._option("LongTuningKpV", lambda: tr("Longitudinal Kp"), 0, 300, lambda: tr("Carrot longitudinal proportional gain. Higher reacts harder to speed error; lower can reduce overshoot or oscillation."), 5, self._percent_label),
       self._option("LongTuningKiV", lambda: tr("Longitudinal Ki"), 0, 300, lambda: tr("Carrot longitudinal integral gain scaling."), 5, self._percent_label),
       self._option("LongTuningKf", lambda: tr("Longitudinal Kf"), 0, 300, lambda: tr("Carrot longitudinal feed-forward scaling."), 5, self._percent_label),
-      self._option("LongActuatorDelay", lambda: tr("Long Actuator Delay"), 0, 200, lambda: tr("Longitudinal actuator delay used by Carrot tuning."), 5, self._seconds_100_label),
-      self._option("VEgoStopping", lambda: tr("Stopping Speed Threshold"), 0, 150, lambda: tr("Low-speed threshold used for stopping behavior."), 5, self._kph_label),
+      self._option("LongActuatorDelay", lambda: tr("Long Actuator Delay"), 0, 200, lambda: tr("Longitudinal actuator delay in 0.01 s units. Higher anticipates slower actuator response; too high may feel early."), 5, self._seconds_100_label),
+      self._option("VEgoStopping", lambda: tr("Stopping Speed Threshold"), 0, 150, lambda: tr("Stopping detection threshold in 0.01 m/s units. Higher can smooth harsh stops; too high can enter stopping behavior early."), 5, self._mps_100_label),
       self._option("RadarReactionFactor", lambda: tr("Radar Reaction Factor"), 0, 300, lambda: tr("Lead-vehicle radar reaction strength. Higher values react more strongly to lead changes."), 5, self._percent_label),
       self._option("JLeadFactor3", lambda: tr("Lead Response Factor"), -200, 300, lambda: tr("Lead-vehicle response tuning factor."), 10),
       self._option("AChangeCostStarting", lambda: tr("Accel Change Cost"), 0, 100, lambda: tr("Smoothness cost for acceleration changes at the start of a maneuver."), 1),
@@ -553,7 +557,7 @@ class CarrotLayout(Widget):
         lambda: tr("Turn Speed Control Mode"),
         0,
         3,
-        lambda: tr("Select the turn-speed strategy: Off, Carrot, Sunny, or Fusion."),
+        lambda: tr("Select the turn-speed strategy: Off, Carrot, Sunny, or Balanced."),
         1,
         self._turn_mode_label,
       ),
@@ -599,7 +603,7 @@ class CarrotLayout(Widget):
         lambda: tr("Path Offset"),
         -150,
         150,
-        lambda: tr("Lane/path lateral offset used by Carrot tuning. Zero is neutral."),
+        lambda: tr("Lane/path lateral offset used by Carrot tuning. Zero is neutral; negative shifts left, positive shifts right."),
         5,
         lambda v: f"{v / 100:.2f} m",
       ),
@@ -608,7 +612,7 @@ class CarrotLayout(Widget):
         lambda: tr("Steer Actuator Delay"),
         0,
         200,
-        lambda: tr("Additional steering actuator delay target used by Auto-Tuner."),
+        lambda: tr("Additional steering actuator delay target used by Auto-Tuner. Zero uses live/default delay; higher adds custom delay compensation."),
         5,
         lambda v: f"{v / 100:.2f} s",
       ),
