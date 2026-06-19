@@ -1,5 +1,16 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 No-Car UI Replay And Camera Snapshot Evidence
+
+Added the next code-level diagnostics that can run before real road testing:
+
+- Added `scripts/personal/genius_ui_replay_check.py` as a no-car UI replay readiness wrapper. It checks the comma `tools/replay/replay --demo` path, the deterministic UI diff replay path, Genius visualization overlays, and Chinese sidebar/status text. Actually running `tools/replay` or recording UI replay videos remains explicit opt-in.
+- Added `scripts/personal/sunnypilot_c3_camera_snapshot_probe.py`, a silent explicit C3 camera snapshot probe built on upstream `system/camerad/snapshot.py`. It writes `back.jpg`, `front.jpg` when available, and `camera_snapshot_probe.json`.
+- Extended `scripts/personal/sunnypilot_c3_device_collect.py` with `--camera-snapshot` and `--camera-snapshot-timeout`. Camera snapshots are not part of default collection; they are opt-in evidence separate from the parked model/camera stream probe.
+- Wired the UI replay and camera snapshot probes into the alpha release/static gates and updated the agent guide and TODO so future no-car diagnostics remain repeatable.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.33`.
+
 ## 2026-06-20 No-Car Diagnostics Matrix And Temperature Fallback
 
 Expanded the code-level diagnostics that can run before the car is used:

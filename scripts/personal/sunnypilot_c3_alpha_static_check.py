@@ -1772,12 +1772,54 @@ def check_c3_imu_probe_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_c3_camera_snapshot_probe_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/sunnypilot_c3_camera_snapshot_probe.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_genius_offline_replay_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
       [
         sys.executable,
         "scripts/personal/genius_offline_replay_check.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
+def check_genius_ui_replay_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_ui_replay_check.py",
         "--self-test",
       ],
       cwd=ROOT,
@@ -2447,7 +2489,9 @@ def main() -> int:
   device_collect = read("scripts/personal/sunnypilot_c3_device_collect.py")
   parked_hardware_probe = read("scripts/personal/sunnypilot_c3_parked_hardware_probe.py")
   c3_imu_probe = read("scripts/personal/sunnypilot_c3_imu_probe.py")
+  c3_camera_snapshot_probe = read("scripts/personal/sunnypilot_c3_camera_snapshot_probe.py")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
+  ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
   settings_matrix_script = read("scripts/personal/genius_settings_matrix.py")
   settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
   settings_matrix_json = read("docs/personal/settings_matrix.json")
@@ -2915,7 +2959,9 @@ def main() -> int:
                           and "sunnypilot_c3_device_collect.py" in release_gate
                           and "sunnypilot_c3_parked_hardware_probe.py" in release_gate
                           and "sunnypilot_c3_imu_probe.py" in release_gate
+                          and "sunnypilot_c3_camera_snapshot_probe.py" in release_gate
                           and "genius_offline_replay_check.py" in release_gate
+                          and "genius_ui_replay_check.py" in release_gate
                           and "--fetch-references" in release_gate
                           and "--full" in release_gate
                           and "--snapshot" in release_gate,
@@ -2946,9 +2992,13 @@ def main() -> int:
                           and "sunnypilot_c3_alpha_evidence_check.py" in device_collect
                           and "sunnypilot_c3_parked_hardware_probe.py" in device_collect
                           and "sunnypilot_c3_imu_probe.py" in device_collect
+                          and "sunnypilot_c3_camera_snapshot_probe.py" in device_collect
                           and "parked_hardware_probe.json" in device_collect
                           and "c3_imu_probe.json" in device_collect
+                          and "camera_snapshot_probe.json" in device_collect
                           and "--imu-probe" in device_collect
+                          and "--camera-snapshot" in device_collect
+                          and "--camera-snapshot-timeout" in device_collect
                           and "--ui-capture" in device_collect
                           and "UI capture is passive" in device_collect
                           and "--parked-hardware-probe" in device_collect
@@ -2991,6 +3041,19 @@ def main() -> int:
   ok, detail = check_c3_imu_probe_runtime()
   failures += not require("C3 IMU probe runtime", ok,
                           detail or "C3 IMU probe self-test failed")
+  failures += not require("C3 camera snapshot probe tool exists",
+                          "Genius Pilot C3 Camera Snapshot Probe" in c3_camera_snapshot_probe
+                          and "openpilot.system.camerad.snapshot" in c3_camera_snapshot_probe
+                          and "snapshot()" in c3_camera_snapshot_probe
+                          and "jpeg_write" in c3_camera_snapshot_probe
+                          and "back.jpg" in c3_camera_snapshot_probe
+                          and "front.jpg" in c3_camera_snapshot_probe
+                          and "--require-image" in c3_camera_snapshot_probe
+                          and "silent" in c3_camera_snapshot_probe,
+                          "alpha must include an explicit, silent C3 camera snapshot probe based on upstream camerad snapshot.py")
+  ok, detail = check_c3_camera_snapshot_probe_runtime()
+  failures += not require("C3 camera snapshot probe runtime", ok,
+                          detail or "C3 camera snapshot probe self-test failed")
   failures += not require("Genius offline replay check exists",
                           "Genius Pilot Offline Replay Check" in offline_replay_check
                           and "selfdrive/test/process_replay/test_processes.py" in offline_replay_check
@@ -3003,6 +3066,21 @@ def main() -> int:
   ok, detail = check_genius_offline_replay_runtime()
   failures += not require("Genius offline replay check runtime", ok,
                           detail or "offline replay check self-test failed")
+  failures += not require("Genius UI replay check exists",
+                          "Genius Pilot UI Replay Check" in ui_replay_check
+                          and "tools/replay/replay" in ui_replay_check
+                          and "--demo" in ui_replay_check
+                          and "selfdrive/ui/tests/diff/replay.py" in ui_replay_check
+                          and "replay_script.py" in ui_replay_check
+                          and "GeniusVisualMode" in ui_replay_check
+                          and "GeniusFishopVisualOverlay" in ui_replay_check
+                          and "app_zh-CHS.po" in ui_replay_check
+                          and "--run-ui-replay" in ui_replay_check
+                          and "--run-tools-replay-demo" in ui_replay_check,
+                          "alpha must include a no-car UI replay readiness wrapper for tools/replay demo and UI diff replay")
+  ok, detail = check_genius_ui_replay_runtime()
+  failures += not require("Genius UI replay check runtime", ok,
+                          detail or "UI replay check self-test failed")
   baseline_tool = read("scripts/personal/carrot_tuning_baseline.py")
   failures += not require("Carrot tuning baseline tool exists",
                           "Genius Pilot Carrot tuning baseline" in baseline_tool
@@ -3022,6 +3100,8 @@ def main() -> int:
                           and "sunnypilot_c3_alpha_release_gate.py --full" in agents_md
                           and "sunnypilot_c3_alpha_update_audit.py --fetch --strict" in agents_md
                           and "sunnypilot_c3_device_collect.py" in agents_md
+                          and "sunnypilot_c3_camera_snapshot_probe.py" in agents_md
+                          and "genius_ui_replay_check.py" in agents_md
                           and "sunnypilot_c3_installer_audit.py" in agents_md
                           and "carrot_tuning_baseline.py" in agents_md
                           and "Kia Seltos 2023" in agents_md,
