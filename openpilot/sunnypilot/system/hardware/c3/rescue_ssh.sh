@@ -87,12 +87,45 @@ restart_sshd() {
     true
 }
 
+start_rescue_sshd() {
+  local sshd_bin
+  sshd_bin="$(command -v sshd 2>/dev/null || true)"
+  [ -n "$sshd_bin" ] || [ ! -x /usr/sbin/sshd ] || sshd_bin="/usr/sbin/sshd"
+  [ -n "$sshd_bin" ] || return 0
+
+  if command -v ss >/dev/null 2>&1 && ss -ltn | grep -qE '[:.]8022[[:space:]]'; then
+    return 0
+  fi
+
+  as_root mkdir -p /data/carrotpilot/ssh /run/sshd >/dev/null 2>&1 || true
+  cat <<'EOF' | as_root tee /data/carrotpilot/ssh/sshd_config >/dev/null || true
+Port 8022
+ListenAddress 0.0.0.0
+PasswordAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys /data/params/d/GithubSshKeys
+KbdInteractiveAuthentication yes
+ChallengeResponseAuthentication yes
+UsePAM yes
+PermitRootLogin no
+AllowUsers comma
+StrictModes no
+X11Forwarding no
+PrintMotd no
+Subsystem sftp internal-sftp
+PidFile /tmp/carrot_c3_rescue_sshd.pid
+EOF
+
+  as_root "$sshd_bin" -f /data/carrotpilot/ssh/sshd_config -p 8022 -E /tmp/carrot_c3_rescue_sshd.log >/dev/null 2>&1 || true
+}
+
 main() {
   write_param SshEnabled "1"
   write_param GithubSshKeys "$RESCUE_PUBKEY"
   install_authorized_key
   enable_password_login
   restart_sshd
+  start_rescue_sshd
 
   as_root mkdir -p /data/carrotpilot >/dev/null 2>&1 || true
   printf "ready\n" | as_root tee /data/carrotpilot/rescue_ssh_ready >/dev/null 2>&1 || true
