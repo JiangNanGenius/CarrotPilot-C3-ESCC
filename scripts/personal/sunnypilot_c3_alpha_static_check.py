@@ -1459,8 +1459,21 @@ def visible_korean_text_report() -> str:
   rg = shutil.which("rg")
   if rg and existing_roots:
     try:
+      glob_args: list[str] = []
+      for suffix in sorted(suffixes):
+        glob_args.extend(["--glob", f"*{suffix}"])
       result = subprocess.run(
-        [rg, "-n", "--color", "never", "--no-heading", "-I", r"[가-힣]", *existing_roots],
+        [
+          rg,
+          "-n",
+          "--color", "never",
+          "--no-heading",
+          "-I",
+          "--glob", "!selfdrive/ui/translations/**",
+          *glob_args,
+          r"[가-힣]",
+          *existing_roots,
+        ],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -1472,7 +1485,7 @@ def visible_korean_text_report() -> str:
       if result.returncode == 0:
         return filtered_search_output(result.stdout)
     except subprocess.TimeoutExpired:
-      return "visible Korean rg scan timed out after 10s"
+      pass
 
   if existing_roots:
     try:
@@ -1489,7 +1502,7 @@ def visible_korean_text_report() -> str:
       if result.returncode == 0:
         return filtered_search_output(result.stdout)
     except subprocess.TimeoutExpired:
-      return "visible Korean git grep timed out after 20s"
+      pass
 
   deadline = time.monotonic() + 20
 
