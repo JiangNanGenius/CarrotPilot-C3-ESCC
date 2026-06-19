@@ -117,11 +117,10 @@ class TermsPage(Widget):
     self._title = Label("Welcome to CarrotPilot-C3-ESCC", font_size=90, font_weight=FontWeight.BOLD,
                         text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
     self._desc = Label(
-      "This is a personal alpha build for C3 clone hardware and Kia Seltos SCC testing. "
-      "It is experimental driver assistance, not self-driving. Keep your hands on the wheel, watch the road, "
-      "and take over immediately whenever needed. Sunnylink, comma connect pairing, cloud uploads, and cloud backup "
-      "are disabled in this build. Test parked first, then low speed, before any normal road use.",
-      font_size=76, font_weight=FontWeight.MEDIUM, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
+      "Personal alpha for C3 clone + Kia Seltos SCC. Experimental driver assistance only. "
+      "You are responsible for driving. Hands on wheel, eyes on road, take over anytime. "
+      "Cloud services are disabled. Test parked first, then low speed.",
+      font_size=72, font_weight=FontWeight.MEDIUM, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
 
     self._decline_btn = Button("Decline", click_callback=self._decline)
     self._accept_btn = Button("Agree", button_style=ButtonStyle.PRIMARY, click_callback=self._accept)
@@ -218,12 +217,24 @@ class OnboardingWindow(Widget):
     self._decline_page = DeclinePage(back_callback=self._on_decline_back)
 
     self._accepted_terms = self._accepted_terms and ui_state.params.get("HasAcceptedTermsSP") == terms_version_sp
+    self._complete_personal_alpha_onboarding()
     if not self._accepted_terms:
       self._state = OnboardingState.TERMS
     elif not self._training_done:
       self._state = OnboardingState.ONBOARDING
     else:
       self._state = OnboardingState.ONBOARDING
+
+  def _complete_personal_alpha_onboarding(self):
+    # Personal alpha builds are installed by an experienced owner/operator. Do
+    # not block first boot on upstream onboarding touch widgets on clone C3.
+    if not self._accepted_terms:
+      ui_state.params.put("HasAcceptedTerms", terms_version)
+      ui_state.params.put("HasAcceptedTermsSP", terms_version_sp)
+      self._accepted_terms = True
+    if not self._training_done:
+      ui_state.params.put("CompletedTrainingVersion", training_version)
+      self._training_done = True
 
   @property
   def completed(self) -> bool:

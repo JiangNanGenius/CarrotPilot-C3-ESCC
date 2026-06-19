@@ -289,10 +289,10 @@ class TermsPage(Scroller):
 
     self._scroller.add_widgets([
       self._terms_header,
-      GreyBigButton("experimental\npersonal build", "For C3 clone hardware and Kia Seltos SCC testing."),
-      GreyBigButton("driver remains\nresponsible", "Hands on wheel. Watch the road. Take over immediately."),
-      GreyBigButton("local only\ncloud disabled", "No Sunnylink, comma connect pairing, cloud uploads, or cloud backup."),
-      GreyBigButton("test order", "Parked test first. Low speed test next. Normal road use only after verification."),
+      GreyBigButton("experimental\npersonal build", "C3 clone + Kia Seltos SCC."),
+      GreyBigButton("driver remains\nresponsible", "Hands on wheel. Eyes on road. Take over anytime."),
+      GreyBigButton("local only", "Cloud services are disabled."),
+      GreyBigButton("test order", "Parked first. Low speed next."),
       self._must_accept_card,
       self._accept_button,
       self._decline_button,
@@ -312,6 +312,8 @@ class OnboardingWindow(Widget):
     self._training_done: bool = ui_state.params.get("CompletedTrainingVersion") == training_version
     self._sunnylink_consent_done: bool = True
 
+    self._complete_personal_alpha_onboarding()
+
     self.set_rect(rl.Rectangle(0, 0, gui_app.width, gui_app.height))
 
     # Windows — all pushed onto nav stack, _terms is always rendered as base layer
@@ -322,6 +324,17 @@ class OnboardingWindow(Widget):
     self._training_guide.set_enabled(lambda: self.enabled)  # for nav stack
 
     self._needs_initial_push = False
+
+  def _complete_personal_alpha_onboarding(self):
+    # Personal alpha builds are installed by an experienced owner/operator. Do
+    # not block first boot on upstream onboarding touch widgets on clone C3.
+    if not self._accepted_terms:
+      ui_state.params.put("HasAcceptedTerms", terms_version)
+      ui_state.params.put("HasAcceptedTermsSP", terms_version_sp)
+      self._accepted_terms = True
+    if not self._training_done:
+      ui_state.params.put("CompletedTrainingVersion", training_version)
+      self._training_done = True
 
   def _on_uninstall(self):
     ui_state.params.put_bool("DoUninstall", True, block=True)
