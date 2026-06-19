@@ -481,7 +481,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CurveSpeedControlMode",
-      "notes": "Off/Sunny/Carrot/Fusion selector.",
+      "notes": "Off/Sunny/Carrot/Fusion selector; owns Sunny SCC-V participation while SCC-M stays inert.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,

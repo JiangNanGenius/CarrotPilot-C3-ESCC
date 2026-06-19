@@ -21,7 +21,7 @@ This matrix assigns one owner to each imported, retained, hidden, or removed set
 | SpeedLimitMode | carrot | speed_limit | SpeedLimitMode | 1 | jixiexiaoge-release-new | speed_limit+api | - | no | Speed-limit display/assist mode. |
 | SpeedLimitOffsetType | carrot | speed_limit | SpeedLimitOffsetType | 0 | jixiexiaoge-release-new | speed_limit+api | mode | no | Default no offset. |
 | SpeedLimitValueOffset | carrot | speed_limit | SpeedLimitValueOffset | 0 | jixiexiaoge-release-new | speed_limit+api | km/h or percent | no | Default zero. |
-| CurveSpeedControlMode | carrot | curve_speed | CurveSpeedControlMode | 1 | ajouatom-carrot-wip, ajouatom-c3-wip, jixiexiaoge-atune, jixiexiaoge-cp, jixiexiaoge-release-new, dhvms-carrotpilot-master | carrot+api | - | no | Off/Sunny/Carrot/Fusion selector. |
+| CurveSpeedControlMode | carrot | curve_speed | CurveSpeedControlMode | 1 | ajouatom-carrot-wip, ajouatom-c3-wip, jixiexiaoge-atune, jixiexiaoge-cp, jixiexiaoge-release-new, dhvms-carrotpilot-master | carrot+api | - | no | Off/Sunny/Carrot/Fusion selector; owns Sunny SCC-V participation while SCC-M stays inert. |
 | AutoCurveSpeedLowerLimit | carrot | curve_speed | AutoCurveSpeedLowerLimit | 30 | ajouatom-carrot-wip, ajouatom-c3-wip, jixiexiaoge-atune, jixiexiaoge-cp | carrot+api | km/h | no |  |
 | AutoCurveSpeedFactor | carrot | curve_speed | AutoCurveSpeedFactor | 120 | ajouatom-carrot-wip, ajouatom-c3-wip, jixiexiaoge-atune, jixiexiaoge-cp, dhvms-carrotpilot-master | carrot+api | percent | no | Higher usually keeps more speed through curves. |
 | AutoCurveSpeedAggressiveness | carrot | curve_speed | AutoCurveSpeedAggressiveness | 100 | ajouatom-c3-wip, jixiexiaoge-atune, jixiexiaoge-cp | carrot+api | percent | no |  |

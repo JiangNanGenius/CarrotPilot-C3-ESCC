@@ -9,6 +9,7 @@ from openpilot.selfdrive.car.cruise import V_CRUISE_UNSET
 from openpilot.sunnypilot import PARAMS_UPDATE_PERIOD
 from openpilot.sunnypilot.navd.helpers import coordinate_from_param, Coordinate
 from openpilot.sunnypilot.selfdrive.controls.lib.smart_cruise_control import MIN_V
+from openpilot.sunnypilot.selfdrive.controls.lib.smart_cruise_control.curve_speed_policy import sunny_map_speed_enabled
 
 MapState = VisionState = custom.LongitudinalPlanSP.SmartCruiseControl.MapState
 
@@ -73,7 +74,7 @@ class SmartCruiseControlMap:
   def __init__(self):
     self.params = Params()
     self.mem_params = Params("/dev/shm/params") if platform.system() != "Darwin" else self.params
-    self.enabled = self.params.get_bool("SmartCruiseControlMap")
+    self.enabled = sunny_map_speed_enabled(self.params)
     self.long_enabled = False
     self.long_override = False
     self.is_enabled = False
@@ -98,7 +99,7 @@ class SmartCruiseControlMap:
 
   def update_params(self):
     if self.frame % int(PARAMS_UPDATE_PERIOD / DT_MDL) == 0:
-      self.enabled = self.params.get_bool("SmartCruiseControlMap")
+      self.enabled = sunny_map_speed_enabled(self.params)
 
   def update_calculations(self) -> None:
     self.last_position = coordinate_from_param("LastGPSPosition", self.mem_params) or Coordinate(0.0, 0.0)
