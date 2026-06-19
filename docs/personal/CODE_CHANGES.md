@@ -2,18 +2,24 @@
 
 ## 2026-06-19 Installer Fix
 
-The first `/x` alpha installer on GitHub Pages was the old Qt-style installer. On C3 this can show the device setup download progress and then exit before the SunnyPilot installer UI appears.
+The first `/x` alpha installer on GitHub Pages was a SunnyPilot Raylib ARM64 installer patched for this repository. On the user's clone C3 it showed the setup download progress and then exited before the installer UI appeared.
 
-The published `/x` file has been replaced with a SunnyPilot Raylib ARM64 installer patched for this repository and branch:
+The likely compatibility problem is that the Raylib installer binary requires newer runtime symbols such as `GLIBC_2.38`, while the C3 setup environment can be older. The published `/x` file has therefore been replaced with a Qt-compatible ARM64 installer derived from the known-working `gitop.vip/cp` binary and patched for this repository and branch:
 
 - URL: `https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x`
 - repo: `https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git`
 - branch: `alpha-sunnypilot-c3`
-- sha256: `fa75f760437bb6cfab97c0830d6be426206dc5a9deb62b37921349c63a355343`
-- expected traits: ARM64 ELF, size about 1.3 MB, contains `Initializing raylib`
-- forbidden traits: `QProgressBar`, `sshane/openpilot-installer-generator`, SunnyPilot upstream repo/branch strings
+- sha256: `e284ab3c54c671f6409e966765f04ef9f1b90a1ea0bafa6dfd9a71c7d4189c8d`
+- expected traits: ARM64 ELF, size about 217 KB, contains `QProgressBar` and `GLIBC_2.17`
+- forbidden traits: `GLIBC_2.38`, `Initializing raylib`, old `jihulab.com/fishop/openpilot.git`, SunnyPilot upstream repo/branch strings, and old `cp` checkout/reset strings
 
-`scripts/personal/sunnypilot_c3_installer_audit.py` now checks this contract. Use it before republishing `/x`:
+`scripts/personal/build_c3_qt_compat_installer.py` rebuilds this installer from the pinned source binary:
+
+```bash
+python3 scripts/personal/build_c3_qt_compat_installer.py --output /tmp/carrot_x_qt_compat
+```
+
+`scripts/personal/sunnypilot_c3_installer_audit.py` checks the published contract. Use it before republishing `/x`:
 
 ```bash
 python3 scripts/personal/sunnypilot_c3_installer_audit.py --json
@@ -23,8 +29,10 @@ For a pinned release, pass the expected hash:
 
 ```bash
 python3 scripts/personal/sunnypilot_c3_installer_audit.py \
-  --expected-sha256 fa75f760437bb6cfab97c0830d6be426206dc5a9deb62b37921349c63a355343
+  --expected-sha256 e284ab3c54c671f6409e966765f04ef9f1b90a1ea0bafa6dfd9a71c7d4189c8d
 ```
+
+Do not switch `/x` back to a Raylib installer until the exact binary has been run on the user's C3 setup environment or the device runtime is confirmed to satisfy the required GLIBC symbols.
 
 ## Safety Boundary
 

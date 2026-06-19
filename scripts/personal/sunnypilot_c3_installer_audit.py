@@ -11,23 +11,28 @@ import urllib.request
 
 
 DEFAULT_INSTALL_URL = "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x"
-DEFAULT_MIN_SIZE_BYTES = 1_000_000
+DEFAULT_MIN_SIZE_BYTES = 180_000
 
 REQUIRED_TOKENS = (
   b"Installing CarrotPilot-C3-ESCC alpha",
   b"https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git",
   b"git checkout alpha-sunnypilot-c3",
   b"git reset --hard origin/alpha-sunnypilot-c3",
-  b"Initializing raylib",
+  b"QProgressBar",
+  b"GLIBC_2.17",
 )
 
 FORBIDDEN_TOKENS = (
-  b"QProgressBar",
+  b"GLIBC_2.38",
+  b"Initializing raylib",
   b"sshane/openpilot-installer-generator",
   b"Installing sp/staging-tici",
   b"https://github.com/sunnypilot/sunnypilot.git",
+  b"https://jihulab.com/fishop/openpilot.git",
   b"git checkout staging-tici",
   b"git reset --hard origin/staging-tici",
+  b"git checkout cp",
+  b"git reset --hard origin/cp",
 )
 
 
@@ -53,7 +58,7 @@ def audit_bytes(data: bytes, source: str, min_size: int, expected_sha256: str | 
   sha256 = hashlib.sha256(data).hexdigest()
   checks: list[dict[str, object]] = [
     check("arm64_elf", is_arm64_elf(data), "installer must be an ARM64 ELF binary"),
-    check("raylib_size", len(data) >= min_size, f"installer size {len(data)} must be at least {min_size} bytes"),
+    check("qt_compat_size", len(data) >= min_size, f"installer size {len(data)} must be at least {min_size} bytes"),
   ]
 
   for token in REQUIRED_TOKENS:
@@ -88,21 +93,21 @@ def download(url: str) -> bytes:
     return response.read()
 
 
-def sample_installer(*, old_qt: bool = False) -> bytes:
+def sample_installer(*, old_or_incompatible: bool = False) -> bytes:
   header = bytearray(64)
   header[:4] = b"\x7fELF"
   header[4] = 2
   header[5] = 1
   header[16:18] = (3).to_bytes(2, "little")
   header[18:20] = (183).to_bytes(2, "little")
-  tokens = FORBIDDEN_TOKENS if old_qt else REQUIRED_TOKENS
+  tokens = FORBIDDEN_TOKENS if old_or_incompatible else REQUIRED_TOKENS
   data = bytes(header) + (b"\0" * 256) + b"\0".join(tokens)
   return data + (b"\0" * 4096)
 
 
 def self_test() -> int:
   good = audit_bytes(sample_installer(), "self-test-good", min_size=1000)
-  bad = audit_bytes(sample_installer(old_qt=True), "self-test-old-qt", min_size=1000)
+  bad = audit_bytes(sample_installer(old_or_incompatible=True), "self-test-old-or-incompatible", min_size=1000)
   if not good["ok"]:
     print(json.dumps(good, indent=2, sort_keys=True))
     return 1
@@ -117,7 +122,7 @@ def main() -> int:
   parser.add_argument("--url", default=DEFAULT_INSTALL_URL, help="Installer URL to download when --file is not supplied.")
   parser.add_argument("--file", type=Path, help="Already downloaded installer binary to audit.")
   parser.add_argument("--expected-sha256", help="Optional exact SHA256 expected for a pinned release asset.")
-  parser.add_argument("--min-size", type=int, default=DEFAULT_MIN_SIZE_BYTES, help="Minimum expected Raylib installer size.")
+  parser.add_argument("--min-size", type=int, default=DEFAULT_MIN_SIZE_BYTES, help="Minimum expected Qt-compatible installer size.")
   parser.add_argument("--json", action="store_true", help="Print the full JSON report.")
   parser.add_argument("--self-test", action="store_true", help="Run offline positive and negative tests.")
   args = parser.parse_args()
