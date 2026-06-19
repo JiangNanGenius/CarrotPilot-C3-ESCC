@@ -166,6 +166,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Run the full local release gate after documentation is updated: `python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full`.
 - [x] Research comma/openpilot offline testing: use `selfdrive/test/process_replay` for process output regression, `tools/replay` for UI/message replay, and reserve C3 parked probes for physical hardware evidence.
 - [x] Add a Genius offline replay checklist/wrapper for Seltos/Carrot logic; readiness checks are local-only, while real process replay is opt-in when route artifacts/network budget are available.
+- [x] Run deterministic TICI UI diff replay locally through `genius_ui_replay_check.py --run-ui-replay`; it passed with the Mac native-extension shadow path and produced `selfdrive/ui/tests/diff/report/genius_tizi_ui_replay.mp4` plus the `htmlcov-tizi` report.
 - [ ] Run upstream process replay for affected non-hardware logic before promoting `/x`: controlsd/plannerd/radard/locationd/paramsd first, model replay only when camera frame inputs are available.
 - [x] Push both `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3`, then audit `/x`.
 - [ ] Sync or reinstall on the user's C3 and confirm Super Advanced opens, NNLC defaults on, Seltos 2023 appears, and new Carrot params do not show unknown-key waits.
@@ -187,7 +188,7 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Create one repeatable Genius diagnostic command path that ties together C3 snapshot collection, parked camera/model sampling, IMU sampling, UI capture, and no-cloud evidence through `sunnypilot_c3_device_collect.py`.
 - [x] Add a process-replay wrapper for non-hardware logic: `controlsd`, `plannerd`, `radard`, `locationd`, and `paramsd`; keep reference updates opt-in only.
 - [x] Add a replay/UI diagnostic path using comma's `tools/replay/replay --demo` and UI diff replay so settings, HUD, visual modes, Carrot overlays, and Chinese text can be checked without the car.
-- [x] Make the no-car UI replay wrapper self-contained for clean macOS runs by injecting the repo `PYTHONPATH` into the replay subprocess.
+- [x] Make the no-car UI replay wrapper self-contained for clean macOS runs by preserving caller `PYTHONPATH` shim precedence, appending the repo path, and creating a temporary `PARAMS_ROOT` for the replay subprocess.
 - [x] Extend the Navipilot/CPdazi live check so `/api/phone_speed_limit` and `/api/fishop_hardware` are part of the no-car read-only evidence contract, including nested no-control-output checks.
 - [x] Add a passive C3 UI/screen capture evidence path to the device tarball; it tries `screencap`, then `fbgrab`, then raw framebuffer fallback, without touching the screen or playing sound.
 - [x] Add a C3 camera snapshot evidence path using upstream `system/camerad/snapshot.py` or VisionIPC capture, separate from modeld control checks.

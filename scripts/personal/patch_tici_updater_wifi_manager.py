@@ -68,7 +68,15 @@ def check_updater() -> tuple[bool, str]:
   if embedded != SOURCE.read_bytes():
     return False, f"{MEMBER} does not match system/ui/lib/wifi_manager.py"
   text = embedded.decode("utf-8", errors="replace")
-  required = ("JEEPNEY_AVAILABLE = False", "_nmcli_fallback", "_nmcli_active_ssid", "nmcli\", \"device\", \"wifi\", \"rescan", "_update_networks")
+  required = (
+    "JEEPNEY_AVAILABLE = False",
+    "_nmcli_fallback",
+    "_run_nmcli",
+    "_nmcli_active_ssid",
+    "\"device\", \"wifi\", \"rescan\"",
+    "nmcli command unavailable",
+    "_update_networks",
+  )
   missing = [token for token in required if token not in text]
   if missing:
     return False, f"embedded Wi-Fi manager missing fallback tokens: {missing}"

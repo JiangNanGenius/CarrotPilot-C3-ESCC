@@ -580,15 +580,20 @@ class WifiManager:
     return values
 
   @classmethod
-  def _nmcli_rows(cls, args: list[str], timeout: float = 10.0) -> list[list[str]]:
+  def _run_nmcli(cls, args: list[str], timeout: float = 10.0) -> subprocess.CompletedProcess[str] | None:
     env = os.environ.copy()
     env["LC_ALL"] = "C"
-
     try:
-      proc = subprocess.run(["nmcli", "-t", *args], capture_output=True, text=True, timeout=timeout,
+      return subprocess.run(["nmcli", *args], capture_output=True, text=True, timeout=timeout,
                             check=False, env=env)
     except (FileNotFoundError, subprocess.TimeoutExpired) as e:
       cloudlog.warning(f"nmcli command unavailable: {args}: {e}")
+      return None
+
+  @classmethod
+  def _nmcli_rows(cls, args: list[str], timeout: float = 10.0) -> list[list[str]]:
+    proc = cls._run_nmcli(["-t", *args], timeout=timeout)
+    if proc is None:
       return []
 
     if proc.returncode != 0:
@@ -793,10 +798,8 @@ class WifiManager:
         if hidden:
           cmd += ["hidden", "yes"]
 
-        try:
-          proc = subprocess.run(cmd, capture_output=True, text=True, timeout=40, check=False)
-        except (FileNotFoundError, subprocess.TimeoutExpired) as e:
-          cloudlog.warning(f"Failed to connect to Wi-Fi network {ssid}: {e}")
+        proc = self._run_nmcli(cmd[1:], timeout=40)
+        if proc is None:
           self._set_connecting(None)
           self._enqueue_callbacks(self._disconnected)
           return
@@ -873,8 +876,7 @@ class WifiManager:
       if self._nmcli_fallback:
         conn_name = self._connections.get(ssid, None)
         if conn_name is not None:
-          subprocess.run(["nmcli", "connection", "delete", conn_name], capture_output=True, text=True,
-                         timeout=15, check=False)
+          self._run_nmcli(["connection", "delete", conn_name], timeout=15)
           self._connections.pop(ssid, None)
           self._init_wifi_state()
           self._update_networks()
@@ -916,7 +918,10 @@ class WifiManager:
         cmd = ["nmcli", "connection", "up", conn_name]
         if self._wifi_device:
           cmd += ["ifname", self._wifi_device]
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30, check=False)
+        proc = self._run_nmcli(cmd[1:], timeout=30)
+        if proc is None:
+          self._init_wifi_state()
+          return
         if proc.returncode == 0:
           self._wifi_state = WifiState(ssid=ssid, status=ConnectStatus.CONNECTED)
           self._update_active_connection_info()
@@ -953,8 +958,7 @@ class WifiManager:
     if self._nmcli_fallback:
       conn_name = self._connections.get(ssid, None)
       if conn_name is not None:
-        subprocess.run(["nmcli", "connection", "down", conn_name], capture_output=True, text=True,
-                       timeout=15, check=False)
+        self._run_nmcli(["connection", "down", conn_name], timeout=15)
       self._init_wifi_state()
       self._update_networks()
       return
@@ -993,8 +997,7 @@ class WifiManager:
     if self._nmcli_fallback:
       self._tethering_password = password
       conn_name = self._connections.get(self._tethering_ssid, "Hotspot")
-      subprocess.run(["nmcli", "connection", "modify", conn_name, "802-11-wireless-security.psk", password],
-                     capture_output=True, text=True, timeout=15, check=False)
+      self._run_nmcli(["connection", "modify", conn_name, "802-11-wireless-security.psk", password], timeout=15)
       return
 
     def worker():
@@ -1080,8 +1083,7 @@ class WifiManager:
           cloudlog.warning('No active WiFi connection found')
           return
         value = {MeteredType.UNKNOWN: "unknown", MeteredType.YES: "yes", MeteredType.NO: "no"}.get(metered, "unknown")
-        subprocess.run(["nmcli", "connection", "modify", conn_name, "connection.metered", value],
-                       capture_output=True, text=True, timeout=15, check=False)
+        self._run_nmcli(["connection", "modify", conn_name, "connection.metered", value], timeout=15)
         self._current_network_metered = metered
         self._enqueue_callbacks(self._networks_updated, self.networks)
         return
@@ -1118,8 +1120,7 @@ class WifiManager:
       return
 
     if self._nmcli_fallback:
-      subprocess.run(["nmcli", "device", "wifi", "rescan", "ifname", self._wifi_device],
-                     capture_output=True, text=True, timeout=10, check=False)
+      self._run_nmcli(["device", "wifi", "rescan", "ifname", self._wifi_device], timeout=10)
       return
 
     wifi_addr = DBusAddress(self._wifi_device, bus_name=NM, interface=NM_WIRELESS_IFACE)
