@@ -371,6 +371,7 @@ flowchart TD
 - [x] alpha 7705 状态广播补齐旧 CarrotMan / CP搭子发现兼容字段：`CarrotRouteActive`、`ip`、`port`、`navi_http_port`、`log_carrot`；7713 导航 HTTP 绑定成功后才广播 `navi_http_port=7713` / `naviHttpAvailable=true`。
 - [x] alpha 7705 状态广播补充 `navi_tcp_port=7712` / `naviTcpAvailable`，仅在 7712 TCP 导航输入服务绑定成功后宣称可用。
 - [x] alpha 7705 状态广播补充 `carrotManPeer` / `carrotManPeerActive` / `carrotManPeerHost` 证据，`/api/status_broadcast` 返回 `activeTargets` 和 `lastTargets`，便于停车测试确认 APP 单播发现。
+- [x] alpha 设备快照新增 Carrot Web / 7705 只读证据块：记录 `/api/status_broadcast`、`/api/health`、`carrotManPeer`、`activeTargets`、`lastTargets`、`xState=0`、`trafficState=0` 和 `controlOutput=false`；本地 Carrot Web 不可用时只记录 unavailable，不阻塞开发机快照。
 - [ ] alpha 7705 状态广播接入真正 CarrotMan / Carrot 控制运行态；在控制逻辑迁移前 `xState`、`trafficState` 必须继续保持 0。
 - [x] 迁移旧 CarrotMan 7713 导航 HTTP 兼容入口：`POST /api/navi`、`POST /api/navi/{version}` 和 `/health`，只记录 `rgdata`、`sinf`、`ssinf`、`vrtx/route`、`complexCrossroad` 证据，不发布控制。
 - [x] 迁移旧 CarrotMan 7712 TCP 导航输入兼容入口：接收行式 JSON `rgdata` / `vrtx`，只记录证据和安全导航摘要，不发布控制。
@@ -511,6 +512,7 @@ flowchart LR
 - [x] 静态检查 UDP 7705 状态广播必需字段、局域网目标、read-only 标记和运行时 payload。
 - [x] 静态检查 UDP 7705 状态广播从本地 messaging 只读缓存读取 `carState`、`selfdriveState`、`longitudinalPlanSP`、`carStateSP`，并确认 `xState` / `trafficState` 在 Carrot 控制迁移前保持惰性。
 - [x] 静态检查 UDP 7705 状态广播包含旧 CarrotMan / CP搭子发现兼容字段，并明确未迁移的 Carrot 控制态不可用；7713 导航 HTTP 只有绑定成功才广播可用。
+- [x] 静态检查 alpha 快照会读取本地 Carrot Web `/api/status_broadcast` / `/api/health`，保留 7705 目标、CarrotMan peer 和 `controlOutput=false` 证据；服务不可用时快照可继续输出 unavailable。
 - [x] 静态检查 7713 导航 HTTP 兼容入口只记录证据、更新安全导航摘要，不发布控制；设备快照包含 `CarrotNaviEvent`、`CarrotNaviDebug`、`CarrotNaviImage`。
 - [x] 静态检查 7712 TCP 导航输入兼容入口只接收行式 JSON、记录 `rgdata` / `vrtx` 证据，不发布控制。
 - [x] 静态检查 APN/N/Navipilot 导航增强证据：SDI/plus 摄像头、减速带、model speed、红灯停车/自动转弯/主动限速预览都必须作为 read-only evidence 进入 Carrot Web、7705 广播和设备快照，且 `controlOutput=false`。
