@@ -38,6 +38,11 @@ class VisualsLayout(Widget):
         tr("Draw Fishop lane, lidar lane, blindspot, and overtake suggestion evidence on top of any visual preset only while the local hardware data is fresh. This does not enable automatic overtake control."),
         None,
       ),
+      "GeniusCarrotWorldOverlay": (
+        lambda: tr("Carrot World Overlay"),
+        tr("Draw Carrot-style side-lane, blindspot, lane-change, lead, and radar evidence on top of the selected visual preset. This is display-only and does not change lane-change or control decisions."),
+        None,
+      ),
       "BlindSpot": (
         lambda: tr("Show Blind Spot Warnings"),
         tr("Enabling this will display warnings when a vehicle is detected in your " +

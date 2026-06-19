@@ -2507,6 +2507,40 @@
         "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
         "type": "BOOL"
       },
+      "current_key": "GeniusCarrotWorldOverlay",
+      "default": "0",
+      "forbid_tokens": [],
+      "inverse_semantics": "no",
+      "key": "GeniusCarrotWorldOverlay",
+      "notes": "Independent Carrot world evidence overlay: side-lane, blindspot, lane-change, lead, and radar cues. Safe subset only; ajouatom-only side radar/lane schema remains a mapped follow-up.",
+      "owner": "visualization",
+      "reference_hits": {
+        "ajouatom-c3-wip": true,
+        "ajouatom-carrot-wip": true,
+        "dhvms-carrotpilot-master": true,
+        "jixiexiaoge-atune": true,
+        "jixiexiaoge-cp": true,
+        "jixiexiaoge-release-new": false
+      },
+      "required_sources": [],
+      "source_keys": [
+        "ClusterHudRadarInfo",
+        "ShowRadarInfo",
+        "leftLaneLine",
+        "leadsLeft"
+      ],
+      "ui_surface": "visuals",
+      "units": ""
+    },
+    {
+      "api": true,
+      "category": "onroad_visual",
+      "consumer_tokens": [],
+      "current": {
+        "default": "0",
+        "raw": "PERSISTENT | BACKUP, BOOL, \"0\"",
+        "type": "BOOL"
+      },
       "current_key": "GeniusFishopVisualOverlay",
       "default": "0",
       "forbid_tokens": [],

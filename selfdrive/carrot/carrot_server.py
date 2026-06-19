@@ -106,6 +106,7 @@ PARAM_API_DEFS: dict[str, dict[str, Any]] = {
   "GeniusLaneLineStyle": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 2},
   "GeniusLeadRadarVisualMode": {"type": "int", "default": 1, "writable": True, "min": 0, "max": 2},
   "GeniusLaneChangeVisuals": {"type": "bool", "default": True, "writable": True},
+  "GeniusCarrotWorldOverlay": {"type": "bool", "default": False, "writable": True},
   "GeniusFishopVisualOverlay": {"type": "bool", "default": False, "writable": True},
   "SpeedLimitPolicy": {"type": "int", "default": 5, "writable": True, "min": 0, "max": 5},
   "SpeedLimitOffsetType": {"type": "int", "default": 0, "writable": True, "min": 0, "max": 2},

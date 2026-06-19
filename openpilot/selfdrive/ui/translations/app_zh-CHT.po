@@ -977,6 +977,12 @@ msgstr "Fishop 視覺化疊加"
 msgid "Draw Fishop lane, lidar lane, blindspot, and overtake suggestion evidence on top of any visual preset only while the local hardware data is fresh. This does not enable automatic overtake control."
 msgstr "在任意顯示預設上疊加 Fishop 車道、雷射雷達車道、盲區和超車建議證據；只有本地硬體資料新鮮時才會顯示。它不會啟用自動超車控制。"
 
+msgid "Carrot World Overlay"
+msgstr "Carrot 世界疊加層"
+
+msgid "Draw Carrot-style side-lane, blindspot, lane-change, lead, and radar evidence on top of the selected visual preset. This is display-only and does not change lane-change or control decisions."
+msgstr "在目前顯示預設上疊加 Carrot 風格的側向車道、盲區、變道、前車和雷達證據。此功能只影響顯示，不會改變變道或控制決策。"
+
 msgid "Genius Visualization Preset"
 msgstr "Genius 視覺化預設"
 

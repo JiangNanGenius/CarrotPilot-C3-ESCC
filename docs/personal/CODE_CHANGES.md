@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Carrot World Visualization Overlay
+
+Added a separate Carrot-style world evidence overlay instead of mixing every visual system into one renderer:
+
+- Added `GeniusCarrotWorldOverlay`, default off, on the Visuals page and local Carrot Web/API.
+- The overlay draws side-lane, blindspot, lane-change, lead, and radar evidence on top of Sunny, Carrot, or Fusion.
+- The base presets remain mutually exclusive: Sunny, Carrot, or Fusion. Fishop and Carrot World are independent overlays.
+- The current implementation uses only fields available in the SunnyPilot 0.11 base and does not fake ajouatom-only side radar/lane schema.
+- `scripts/personal/genius_visualization_contract.py` now checks the Carrot world overlay wiring and display-only boundary.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.12`.
+
 ## 2026-06-20 User-Facing Branding And Firehose Cloud Removal
 
 Cleaned up another user-facing SunnyPilot/cloud-upload surface:

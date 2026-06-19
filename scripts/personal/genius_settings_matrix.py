@@ -132,6 +132,7 @@ MATRIX: tuple[MatrixRow, ...] = (
   MatrixRow("GeniusLaneLineStyle", "visualization", "onroad_visual", "GeniusLaneLineStyle", "1", ("ShowLaneInfo", "LaneLineCheck"), ui_surface="visuals", api=True, notes="Lane-line style detail; may be adjusted after choosing a preset."),
   MatrixRow("GeniusLeadRadarVisualMode", "visualization", "onroad_visual", "GeniusLeadRadarVisualMode", "1", ("ShowRadarInfo", "RadarTrackId"), ui_surface="visuals", api=True, notes="Lead/ radar detail: Sunny chevron, Carrot box, or radar speed labels."),
   MatrixRow("GeniusLaneChangeVisuals", "visualization", "onroad_visual", "GeniusLaneChangeVisuals", "1", ("LaneChange", "laneChange"), ui_surface="visuals", api=True, notes="Display-only lane-change intent cues from existing onroad events."),
+  MatrixRow("GeniusCarrotWorldOverlay", "visualization", "onroad_visual", "GeniusCarrotWorldOverlay", "0", ("ClusterHudRadarInfo", "ShowRadarInfo", "leftLaneLine", "leadsLeft"), ui_surface="visuals", api=True, notes="Independent Carrot world evidence overlay: side-lane, blindspot, lane-change, lead, and radar cues. Safe subset only; ajouatom-only side radar/lane schema remains a mapped follow-up."),
   MatrixRow("GeniusFishopVisualOverlay", "visualization", "onroad_visual", "GeniusFishopVisualOverlay", "0", ("lidar_car_lblind", "FishopLidarBlindspotEnabled"), ui_surface="visuals", api=True, notes="Independent top-layer Fishop/lidar evidence overlay; never a base preset or control gate."),
 )
 

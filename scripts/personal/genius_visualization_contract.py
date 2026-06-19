@@ -10,6 +10,8 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 MODEL_RENDERER = ROOT / "selfdrive/ui/onroad/model_renderer.py"
+CARROT_WORLD_OVERLAY = ROOT / "selfdrive/ui/onroad/carrot_world_overlay.py"
+AUGMENTED_ROAD_VIEW = ROOT / "selfdrive/ui/onroad/augmented_road_view.py"
 VISUALS_LAYOUT = ROOT / "selfdrive/ui/sunnypilot/layouts/settings/visuals.py"
 TURN_SIGNAL = ROOT / "selfdrive/ui/sunnypilot/onroad/turn_signal.py"
 PARAM_KEYS = ROOT / "common/params_keys.h"
@@ -34,11 +36,14 @@ def source_section(text: str, start: str, end: str) -> str:
 
 def check_sources() -> list[CheckResult]:
   renderer = MODEL_RENDERER.read_text(encoding="utf-8")
+  carrot_world = CARROT_WORLD_OVERLAY.read_text(encoding="utf-8")
+  augmented = AUGMENTED_ROAD_VIEW.read_text(encoding="utf-8")
   visuals = VISUALS_LAYOUT.read_text(encoding="utf-8")
   turn_signal = TURN_SIGNAL.read_text(encoding="utf-8")
   params = PARAM_KEYS.read_text(encoding="utf-8")
   policy = VISUAL_POLICY.read_text(encoding="utf-8")
   path_section = source_section(renderer, "  def _draw_path(self, sm):", "  def _draw_lead_indicator(self):")
+  carrot_world_render_section = source_section(carrot_world, "  def _render(self, rect: rl.Rectangle) -> None:", "  def _draw_lane_world(self, rect: rl.Rectangle) -> None:")
 
   required_renderer = (
     "CARROT_PATH_ACTIVE_COLORS",
@@ -66,6 +71,8 @@ def check_sources() -> list[CheckResult]:
     "Genius Visualization Preset",
     "Carrot emphasizes lane, path, lead, and radar information",
     "Carrot-style lane and path cues",
+    "Carrot World Overlay",
+    "side-lane, blindspot, lane-change, lead, and radar evidence",
     "callback=self._apply_visual_preset",
     "self._params.put(\"GeniusLaneLineStyle\", 2)",
     "self._params.put(\"GeniusLeadRadarVisualMode\", 2)",
@@ -73,6 +80,7 @@ def check_sources() -> list[CheckResult]:
     "self._params.put(\"GeniusLeadRadarVisualMode\", 1)",
   )
   required_defaults = (
+    '{"GeniusCarrotWorldOverlay", {PERSISTENT | BACKUP, BOOL, "0"}}',
     '{"GeniusVisualMode", {PERSISTENT | BACKUP, INT, "2"}}',
     '{"GeniusLaneLineStyle", {PERSISTENT | BACKUP, INT, "1"}}',
     '{"GeniusLeadRadarVisualMode", {PERSISTENT | BACKUP, INT, "1"}}',
@@ -84,6 +92,7 @@ def check_sources() -> list[CheckResult]:
     "`Sunny`: minimal upstream-style HUD",
     "`Carrot`: denser Carrot-style road view",
     "`Fusion`: default C3 preset",
+    "`GeniusCarrotWorldOverlay` is independent",
     "`GeniusFishopVisualOverlay` is not a base preset",
     "Carrot Cluster / World View",
     "Visualization settings must not publish control messages",
@@ -97,6 +106,26 @@ def check_sources() -> list[CheckResult]:
     "ui_state.genius_lane_change_visuals",
     "rect.y + 120",
     "rl.draw_texture_pro",
+  )
+  required_carrot_world = (
+    "class CarrotWorldOverlay",
+    "ui_state.genius_carrot_world_overlay",
+    "EventName.preLaneChangeLeft",
+    "EventName.preLaneChangeRight",
+    "leftBlindspot",
+    "rightBlindspot",
+    "leadOne",
+    "leadTwo",
+    "_draw_lane_world",
+    "_draw_lead_world",
+    "_draw_radar_vector",
+    "draw_polygon(rect, polygon",
+  )
+  required_augmented = (
+    "from openpilot.selfdrive.ui.onroad.carrot_world_overlay import CarrotWorldOverlay",
+    "self.carrot_world_overlay = CarrotWorldOverlay()",
+    "self.carrot_world_overlay.render(self._content_rect)",
+    "self.carrot_world_overlay.set_transform(video_transform @ calib_transform)",
   )
   forbidden_path_tokens = (
     "PubMaster",
@@ -127,7 +156,7 @@ def check_sources() -> list[CheckResult]:
     CheckResult(
       "visual params default to Fusion with Fishop off",
       all(token in params for token in required_defaults),
-      "C3 defaults must keep Fusion as the base display and Fishop overlay off",
+      "C3 defaults must keep Fusion as the base display and Carrot/Fishop overlays off",
     ),
     CheckResult(
       "visualization policy documents coexistence",
@@ -145,9 +174,20 @@ def check_sources() -> list[CheckResult]:
       "lane-change display must use existing onroad events and GeniusLaneChangeVisuals",
     ),
     CheckResult(
+      "Carrot world overlay wired",
+      all(token in carrot_world for token in required_carrot_world) and all(token in augmented for token in required_augmented),
+      "Carrot world overlay must be an independent display-only layer wired into onroad view",
+    ),
+    CheckResult(
       "path renderer remains display-only",
       not any(token in path_section for token in forbidden_path_tokens),
       "path renderer section must not publish controls, write params, open sockets, or touch lane-change control",
+    ),
+    CheckResult(
+      "Carrot world overlay remains display-only",
+      not any(token in carrot_world_render_section for token in forbidden_path_tokens) and
+      "PubMaster" not in carrot_world and "Params(" not in carrot_world and ".put(" not in carrot_world,
+      "Carrot world overlay must not publish controls, write params, open sockets, or touch lane-change control",
     ),
     CheckResult(
       "lane-change renderer remains display-only",
@@ -210,6 +250,16 @@ def check_geometry() -> list[CheckResult]:
   lane_change_rect = (0.0, 120.0, 2160.0, 960.0)
   lane_change_texture_center = (lane_change_rect[0] + lane_change_rect[2] * 0.5,
                                 lane_change_rect[1] + lane_change_rect[3] * 0.5)
+  carrot_world_left = np.array([
+    (210.0, 845.0),
+    (310.0, 620.0),
+    (410.0, 390.0),
+    (515.0, 392.0),
+    (430.0, 620.0),
+    (330.0, 845.0),
+  ], dtype=np.float32)
+  carrot_world_right = carrot_world_left.copy()
+  carrot_world_right[:, 0] = C3_CONTENT[2] - carrot_world_left[:, 0]
 
   results = [
     CheckResult("synthetic path polygon nonblank", polygon.shape[0] >= 20, f"point count={polygon.shape[0]}"),
@@ -228,6 +278,10 @@ def check_geometry() -> list[CheckResult]:
     CheckResult("lead box avoids speed HUD", float(np.min(lead_rect[:, 1])) > HUD_SAFE_Y, f"lead top y={float(np.min(lead_rect[:, 1])):.1f}"),
     CheckResult("lane-change cue avoids speed HUD", lane_change_rect[1] >= 120.0 and lane_change_texture_center[1] > HUD_SAFE_Y,
                 f"lane-change center y={lane_change_texture_center[1]:.1f}"),
+    CheckResult("Carrot world side-lane overlay nonblank", rect_nonblank(carrot_world_left) and rect_nonblank(carrot_world_right),
+                "side-lane overlay should have drawable left/right bands"),
+    CheckResult("Carrot world overlay avoids speed HUD", float(np.min(carrot_world_left[:, 1])) > HUD_SAFE_Y and float(np.min(carrot_world_right[:, 1])) > HUD_SAFE_Y,
+                "Carrot world side-lane bands should stay below the upper speed/HUD band"),
   ]
   return results
 
@@ -274,6 +328,9 @@ def check_visual_modes() -> list[CheckResult]:
   results.append(CheckResult("Fishop overlay remains independent of base preset",
                              all("GeniusFishopVisualOverlay" != name for name in mode_expectations),
                              "Fishop overlay is a separate top layer checked in static UI/source tests"))
+  results.append(CheckResult("Carrot world overlay remains independent of base preset",
+                             all("GeniusCarrotWorldOverlay" != name for name in mode_expectations),
+                             "Carrot world overlay is a separate evidence layer checked in static UI/source tests"))
   return results
 
 
