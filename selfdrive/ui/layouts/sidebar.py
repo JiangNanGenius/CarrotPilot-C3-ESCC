@@ -1,4 +1,6 @@
 import pyray as rl
+import json
+import time
 from dataclasses import dataclass
 from collections.abc import Callable
 from cereal import log
@@ -16,6 +18,12 @@ METRIC_WIDTH = 240
 METRIC_MARGIN = 30
 FONT_SIZE = 35
 SETTINGS_TAP_MAX_MOVE = 56
+PHONE_INPUT_FRESH_S = 10.0
+PHONE_INPUT_STALE_S = 60.0
+NAVIGATION_INPUT_FRESH_S = 30.0
+GPS_GOOD_ACCURACY_M = 20.0
+GPS_WEAK_ACCURACY_M = 100.0
+STATUS_METRIC_Y_OFFSETS = (318, 450, 582, 714)
 
 SETTINGS_BTN = rl.Rectangle(50, 35, 200, 117)
 HOME_BTN = rl.Rectangle(60, 860, 180, 180)
@@ -51,6 +59,103 @@ NETWORK_TYPES = {
   NetworkType.cell5G: tr_noop("5G"),
 }
 
+TEMP_FALLBACK_TEXT = tr_noop("--C")
+TEMP_SCALAR_FIELDS = ("maxTempC", "memoryTempC", "dspTempC", "intakeTempC", "exhaustTempC", "gnssTempC", "bottomSocTempC")
+TEMP_LIST_FIELDS = ("cpuTempC", "gpuTempC", "pmicTempC", "modemTempC")
+
+
+def _add_temperature_value(values: list[float], value) -> None:
+  try:
+    temp = float(value)
+  except (TypeError, ValueError):
+    return
+
+  if temp > 0:
+    values.append(temp)
+
+
+def _temperature_values(device_state) -> list[float]:
+  values: list[float] = []
+  for field in TEMP_SCALAR_FIELDS:
+    _add_temperature_value(values, getattr(device_state, field, 0.0))
+
+  for field in TEMP_LIST_FIELDS:
+    for temp in getattr(device_state, field, []):
+      _add_temperature_value(values, temp)
+
+  for zone in getattr(device_state, "thermalZones", []):
+    _add_temperature_value(values, getattr(zone, "temp", 0.0))
+
+  return values
+
+
+def format_device_temperature(device_state) -> str:
+  values = _temperature_values(device_state)
+  if not values:
+    return TEMP_FALLBACK_TEXT
+  return f"{int(round(max(values)))}C"
+
+
+def _params_get(params, key: str, default=None):
+  try:
+    value = params.get(key)
+  except Exception:
+    return default
+  return default if value is None else value
+
+
+def _params_get_float(params, key: str, default: float = 0.0) -> float:
+  value = _params_get(params, key, default)
+  if isinstance(value, bytes):
+    value = value.decode("utf-8", errors="ignore")
+  try:
+    return float(value)
+  except (TypeError, ValueError):
+    return default
+
+
+def _params_get_bool(params, key: str, default: bool = False) -> bool:
+  try:
+    return params.get_bool(key)
+  except Exception:
+    value = _params_get(params, key, b"1" if default else b"0")
+    if isinstance(value, bytes):
+      value = value.decode("utf-8", errors="ignore")
+    return str(value).strip().lower() in ("1", "true", "t", "yes", "on")
+
+
+def _params_get_json(params, key: str) -> dict:
+  value = _params_get(params, key, b"{}")
+  if isinstance(value, bytes):
+    value = value.decode("utf-8", errors="ignore")
+  if isinstance(value, dict):
+    return value
+  try:
+    decoded = json.loads(value or "{}")
+  except (TypeError, ValueError):
+    return {}
+  return decoded if isinstance(decoded, dict) else {}
+
+
+def _source_short_label(source: str) -> str:
+  text = str(source or "").strip()
+  lowered = text.lower()
+  if "nav" in lowered or "7706" in lowered or "7712" in lowered or "7713" in lowered:
+    return tr_noop("NAVI")
+  if "apn" in lowered:
+    return tr_noop("APN")
+  if "sdi" in lowered:
+    return tr_noop("SDI")
+  if "carrot" in lowered:
+    return tr_noop("CARROT")
+  return tr_noop("PHONE")
+
+
+def _age_since(timestamp: float) -> float | None:
+  if timestamp <= 0.0:
+    return None
+  return max(0.0, time.time() - timestamp)
+
 
 @dataclass(slots=True)
 class MetricData:
@@ -71,9 +176,10 @@ class Sidebar(Widget, SidebarSP):
     self._net_type = NETWORK_TYPES.get(NetworkType.none)
     self._net_strength = 0
 
-    self._temp_status = MetricData(tr_noop("TEMP"), tr_noop("GOOD"), Colors.GOOD)
+    self._temp_status = MetricData(tr_noop("TEMP"), TEMP_FALLBACK_TEXT, Colors.GOOD)
     self._panda_status = MetricData(tr_noop("VEHICLE"), tr_noop("ONLINE"), Colors.GOOD)
-    self._connect_status = MetricData(tr_noop("LOCAL"), tr_noop("READY"), Colors.GOOD)
+    self._phone_status = MetricData(tr_noop("PHONE"), tr_noop("OFF"), Colors.GRAY)
+    self._gps_status = MetricData(tr_noop("GPS"), tr_noop("OFF"), Colors.GRAY)
     self._recording_audio = False
 
     self._home_img = gui_app.texture("images/button_home.png", HOME_BTN.width, HOME_BTN.height)
@@ -114,8 +220,9 @@ class Sidebar(Widget, SidebarSP):
     self._recording_audio = ui_state.recording_audio
     self._update_network_status(device_state)
     self._update_temperature_status(device_state)
-    self._update_connection_status(device_state)
     self._update_panda_status()
+    self._update_phone_status()
+    self._update_gps_status()
     SidebarSP._update_sunnylink_status(self)
 
   def _update_network_status(self, device_state):
@@ -125,22 +232,71 @@ class Sidebar(Widget, SidebarSP):
 
   def _update_temperature_status(self, device_state):
     thermal_status = device_state.thermalStatus
-    max_temp = int(round(device_state.maxTempC)) if device_state.maxTempC > 0 else 0
-    temp_text = f"{max_temp}C" if max_temp > 0 else tr_noop("GOOD")
+    temp_text = format_device_temperature(device_state)
 
     if thermal_status == ThermalStatus.ok:
       self._temp_status.update(tr_noop("TEMP"), temp_text, Colors.GOOD)
     else:
-      self._temp_status.update(tr_noop("TEMP"), temp_text if max_temp > 0 else tr_noop("HIGH"), Colors.DANGER)
-
-  def _update_connection_status(self, device_state):
-    self._connect_status.update(tr_noop("LOCAL"), tr_noop("READY"), Colors.GOOD)
+      self._temp_status.update(tr_noop("TEMP"), temp_text, Colors.DANGER)
 
   def _update_panda_status(self):
     if ui_state.panda_type == log.PandaState.PandaType.unknown:
       self._panda_status.update(tr_noop("NO"), tr_noop("PANDA"), Colors.DANGER)
     else:
       self._panda_status.update(tr_noop("VEHICLE"), tr_noop("ONLINE"), Colors.GOOD)
+
+  def _update_phone_status(self):
+    params = ui_state.params
+    if not _params_get_bool(params, "CarrotPhoneSpeedLimitEnabled", True):
+      self._phone_status.update(tr_noop("PHONE"), tr_noop("OFF"), Colors.GRAY)
+      return
+
+    speed_ms = _params_get_float(params, "CarrotPhoneSpeedLimit", 0.0)
+    phone_updated_at = _params_get_float(params, "CarrotPhoneSpeedLimitUpdatedAt", 0.0)
+    phone_age = _age_since(phone_updated_at)
+    source_raw = _params_get(params, "CarrotPhoneSpeedLimitSource", b"")
+    if isinstance(source_raw, bytes):
+      source_raw = source_raw.decode("utf-8", errors="ignore")
+
+    nav_event = _params_get_json(params, "CarrotNavigationEvent")
+    nav_age = _age_since(float(nav_event.get("updatedAt", 0.0) or 0.0))
+
+    if speed_ms > 0.0 and phone_age is not None and phone_age <= PHONE_INPUT_FRESH_S:
+      self._phone_status.update(tr_noop("PHONE"), _source_short_label(source_raw), Colors.GOOD)
+    elif nav_age is not None and nav_age <= NAVIGATION_INPUT_FRESH_S:
+      self._phone_status.update(tr_noop("PHONE"), _source_short_label(str(nav_event.get("source", ""))), Colors.GOOD)
+    elif (phone_age is not None and phone_age <= PHONE_INPUT_STALE_S) or (nav_age is not None and nav_age <= PHONE_INPUT_STALE_S):
+      self._phone_status.update(tr_noop("PHONE"), tr_noop("STALE"), Colors.WARNING)
+    else:
+      self._phone_status.update(tr_noop("PHONE"), tr_noop("OFF"), Colors.GRAY)
+
+  def _gps_message(self):
+    sm = ui_state.sm
+    for service in ("gpsLocationExternal", "gpsLocation"):
+      if sm.valid.get(service, False):
+        return sm[service]
+    return None
+
+  def _update_gps_status(self):
+    gps_data = self._gps_message()
+    if gps_data is None:
+      self._gps_status.update(tr_noop("GPS"), tr_noop("OFF"), Colors.GRAY)
+      return
+
+    if not bool(gps_data.hasFix):
+      self._gps_status.update(tr_noop("GPS"), tr_noop("NO FIX"), Colors.WARNING)
+      return
+
+    accuracy = float(gps_data.horizontalAccuracy)
+    satellites = int(gps_data.satelliteCount)
+    if accuracy > 0.0 and accuracy <= GPS_GOOD_ACCURACY_M:
+      self._gps_status.update(tr_noop("GPS"), f"{int(round(accuracy))}m", Colors.GOOD)
+    elif satellites > 0 and accuracy <= 0.0:
+      self._gps_status.update(tr_noop("GPS"), f"{satellites}SAT", Colors.GOOD)
+    elif accuracy > 0.0 and accuracy <= GPS_WEAK_ACCURACY_M:
+      self._gps_status.update(tr_noop("GPS"), tr_noop("WEAK"), Colors.WARNING)
+    else:
+      self._gps_status.update(tr_noop("GPS"), tr_noop("WEAK"), Colors.DANGER)
 
   def _open_settings_from_sidebar(self):
     if self._on_settings_click:
@@ -221,16 +377,9 @@ class Sidebar(Widget, SidebarSP):
     rl.draw_text_ex(self._font_regular, tr(self._net_type), text_pos, FONT_SIZE, 0, Colors.WHITE)
 
   def _draw_metrics(self, rect: rl.Rectangle):
-    if gui_app.sunnypilot_ui():
-      metrics, start_y, spacing = SidebarSP._draw_metrics_w_sunnylink(self, rect, self._temp_status, self._panda_status, self._connect_status)
-      for idx, metric in enumerate(metrics):
-        self._draw_metric(rect, metric, start_y + idx * spacing)
+    metrics = (self._temp_status, self._panda_status, self._phone_status, self._gps_status)
 
-      return
-
-    metrics = [(self._temp_status, 338), (self._panda_status, 496), (self._connect_status, 654)]
-
-    for metric, y_offset in metrics:
+    for metric, y_offset in zip(metrics, STATUS_METRIC_Y_OFFSETS):
       self._draw_metric(rect, metric, rect.y + y_offset)
 
   def _draw_metric(self, rect: rl.Rectangle, metric: MetricData, y: float):

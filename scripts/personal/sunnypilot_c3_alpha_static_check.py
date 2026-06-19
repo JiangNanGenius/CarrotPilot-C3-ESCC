@@ -1751,6 +1751,48 @@ def check_parked_hardware_probe_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_c3_imu_probe_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/sunnypilot_c3_imu_probe.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
+def check_genius_offline_replay_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_offline_replay_check.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_carrot_tuning_baseline_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -2404,6 +2446,8 @@ def main() -> int:
   update_audit = read("scripts/personal/sunnypilot_c3_alpha_update_audit.py")
   device_collect = read("scripts/personal/sunnypilot_c3_device_collect.py")
   parked_hardware_probe = read("scripts/personal/sunnypilot_c3_parked_hardware_probe.py")
+  c3_imu_probe = read("scripts/personal/sunnypilot_c3_imu_probe.py")
+  offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   settings_matrix_script = read("scripts/personal/genius_settings_matrix.py")
   settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
   settings_matrix_json = read("docs/personal/settings_matrix.json")
@@ -2425,6 +2469,7 @@ def main() -> int:
   versioning_md = read("docs/personal/VERSIONING.md")
   code_changes_md = read("docs/personal/CODE_CHANGES.md")
   todo_md = read("docs/personal/TODO.md")
+  sidebar_layout = read("selfdrive/ui/layouts/sidebar.py")
   home_layout = read("selfdrive/ui/layouts/home.py")
   software_layout = read("selfdrive/ui/layouts/settings/software.py")
   updated_py = read("system/updated/updated.py")
@@ -2869,6 +2914,8 @@ def main() -> int:
                           and "sunnypilot_c3_alpha_update_audit.py" in release_gate
                           and "sunnypilot_c3_device_collect.py" in release_gate
                           and "sunnypilot_c3_parked_hardware_probe.py" in release_gate
+                          and "sunnypilot_c3_imu_probe.py" in release_gate
+                          and "genius_offline_replay_check.py" in release_gate
                           and "--fetch-references" in release_gate
                           and "--full" in release_gate
                           and "--snapshot" in release_gate,
@@ -2898,7 +2945,12 @@ def main() -> int:
                           and "sunnypilot_c3_alpha_snapshot.py" in device_collect
                           and "sunnypilot_c3_alpha_evidence_check.py" in device_collect
                           and "sunnypilot_c3_parked_hardware_probe.py" in device_collect
+                          and "sunnypilot_c3_imu_probe.py" in device_collect
                           and "parked_hardware_probe.json" in device_collect
+                          and "c3_imu_probe.json" in device_collect
+                          and "--imu-probe" in device_collect
+                          and "--ui-capture" in device_collect
+                          and "UI capture is passive" in device_collect
                           and "--parked-hardware-probe" in device_collect
                           and "--skip-sound-probe" in device_collect
                           and "--with-sound-probe" in device_collect
@@ -2918,6 +2970,8 @@ def main() -> int:
                           and "cameraOdometry" in parked_hardware_probe
                           and "accelerometer" in parked_hardware_probe
                           and "gyroscope" in parked_hardware_probe
+                          and "--with-imu" in parked_hardware_probe
+                          and "if not args.with_imu" in parked_hardware_probe
                           and "--with-sound" in parked_hardware_probe
                           and "if not args.with_sound" in parked_hardware_probe
                           and "startedProcessesStopped" in parked_hardware_probe,
@@ -2925,6 +2979,30 @@ def main() -> int:
   ok, detail = check_parked_hardware_probe_runtime()
   failures += not require("C3 parked hardware probe runtime", ok,
                           detail or "parked hardware probe self-test failed")
+  failures += not require("C3 IMU probe tool exists",
+                          "Genius Pilot C3 IMU Probe" in c3_imu_probe
+                          and "system.sensord.sensord" in c3_imu_probe
+                          and "accelerometer" in c3_imu_probe
+                          and "gyroscope" in c3_imu_probe
+                          and "temperatureSensor" in c3_imu_probe
+                          and "LSM_SELF_TEST" in c3_imu_probe
+                          and "motionPresent" in c3_imu_probe,
+                          "alpha must include a silent standalone IMU probe based on sensord-style evidence")
+  ok, detail = check_c3_imu_probe_runtime()
+  failures += not require("C3 IMU probe runtime", ok,
+                          detail or "C3 IMU probe self-test failed")
+  failures += not require("Genius offline replay check exists",
+                          "Genius Pilot Offline Replay Check" in offline_replay_check
+                          and "selfdrive/test/process_replay/test_processes.py" in offline_replay_check
+                          and "tools/replay/replay" in offline_replay_check
+                          and "model_replay.py" in offline_replay_check
+                          and "FrameReader" in offline_replay_check
+                          and "--run-process-replay" in offline_replay_check
+                          and "--update-refs" in offline_replay_check,
+                          "alpha must include an offline replay readiness wrapper with opt-in reference updates")
+  ok, detail = check_genius_offline_replay_runtime()
+  failures += not require("Genius offline replay check runtime", ok,
+                          detail or "offline replay check self-test failed")
   baseline_tool = read("scripts/personal/carrot_tuning_baseline.py")
   failures += not require("Carrot tuning baseline tool exists",
                           "Genius Pilot Carrot tuning baseline" in baseline_tool
@@ -3460,6 +3538,45 @@ def main() -> int:
                           and "OPEN_TOUCH_GUARD_S = 0.6" in read("selfdrive/ui/layouts/settings/settings.py")
                           and "_press_panel" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py"),
                           "clone C3 touch handling must reject drag/scroll releases and avoid press-time sidebar navigation")
+  failures += not require("Sidebar temperature is numeric Celsius",
+                          "TEMP_FALLBACK_TEXT = tr_noop(\"--C\")" in sidebar_layout
+                          and "TEMP_SCALAR_FIELDS" in sidebar_layout
+                          and "TEMP_LIST_FIELDS" in sidebar_layout
+                          and "cpuTempC" in sidebar_layout
+                          and "gpuTempC" in sidebar_layout
+                          and "pmicTempC" in sidebar_layout
+                          and "thermalZones" in sidebar_layout
+                          and "def format_device_temperature" in sidebar_layout
+                          and "temp_text = format_device_temperature(device_state)" in sidebar_layout
+                          and 'self._temp_status = MetricData(tr_noop("TEMP"), TEMP_FALLBACK_TEXT, Colors.GOOD)' in sidebar_layout
+                          and 'tr_noop("GOOD")' not in sidebar_layout
+                          and 'tr_noop("HIGH")' not in sidebar_layout,
+                          "sidebar temperature must use numeric Celsius from any available deviceState temp source, falling back to --C instead of GOOD/HIGH text")
+  failures += not require("Sidebar shows phone and GPS local status",
+                          "STATUS_METRIC_Y_OFFSETS = (318, 450, 582, 714)" in sidebar_layout
+                          and 'self._phone_status = MetricData(tr_noop("PHONE"), tr_noop("OFF"), Colors.GRAY)' in sidebar_layout
+                          and 'self._gps_status = MetricData(tr_noop("GPS"), tr_noop("OFF"), Colors.GRAY)' in sidebar_layout
+                          and "def _update_phone_status" in sidebar_layout
+                          and "CarrotPhoneSpeedLimitUpdatedAt" in sidebar_layout
+                          and "CarrotPhoneSpeedLimitSource" in sidebar_layout
+                          and "CarrotNavigationEvent" in sidebar_layout
+                          and "PHONE_INPUT_FRESH_S" in sidebar_layout
+                          and "NAVIGATION_INPUT_FRESH_S" in sidebar_layout
+                          and "def _update_gps_status" in sidebar_layout
+                          and "gpsLocationExternal" in sidebar_layout
+                          and "gpsLocation" in sidebar_layout
+                          and "horizontalAccuracy" in sidebar_layout
+                          and "satelliteCount" in sidebar_layout
+                          and "NO FIX" in sidebar_layout
+                          and "WEAK" in sidebar_layout
+                          and "_connect_status" not in sidebar_layout
+                          and "_draw_metrics_w_sunnylink" not in sidebar_layout,
+                          "left sidebar must use four personal-build cards: temperature, vehicle, phone/Navipilot freshness, and GPS fix/accuracy")
+  for msgid in ("PHONE", "GPS", "OFF", "NAVI", "APN", "SDI", "CARROT", "STALE", "NO FIX", "WEAK"):
+    failures += not require(f"Simplified Chinese sidebar translation exists: {msgid}", po_has_translation(zh_chs_po, msgid),
+                            "new left-sidebar phone/GPS status text must stay translated in app_zh-CHS.po")
+    failures += not require(f"Traditional Chinese sidebar translation exists: {msgid}", po_has_translation(zh_cht_po, msgid),
+                            "new left-sidebar phone/GPS status text must stay translated in app_zh-CHT.po")
   failures += not require("MICI Sunnylink panel removed", "SunnylinkLayoutMici" not in mici_settings and "sunnylink_btn" not in mici_settings,
                           "MICI Sunnylink panel is still wired into settings")
   failures += not require("Onroad Uploads setting removed", "Onroad Uploads" not in device_settings,

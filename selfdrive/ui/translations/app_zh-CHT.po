@@ -436,6 +436,46 @@ msgstr "確定"
 msgid "ONLINE"
 msgstr "線上"
 
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "PHONE"
+msgstr "手機"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "GPS"
+msgstr "GPS"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "OFF"
+msgstr "關閉"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "NAVI"
+msgstr "導航"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "APN"
+msgstr "APN"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "SDI"
+msgstr "測速"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "CARROT"
+msgstr "Carrot"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "STALE"
+msgstr "過期"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "NO FIX"
+msgstr "未定位"
+
+#: openpilot/selfdrive/ui/layouts/sidebar.py
+msgid "WEAK"
+msgstr "弱"
+
 #: openpilot/selfdrive/ui/widgets/setup.py
 msgid "Open"
 msgstr "開啟"
