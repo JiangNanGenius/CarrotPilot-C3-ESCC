@@ -1055,6 +1055,189 @@ msgstr "限速偏移"
 msgid "This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, SCC-M, and Dynamic Experimental Control stay hidden and forced off; use Carrot and Speed Limit settings for staged experiments."
 msgstr "这个个人版的巡航控速逻辑以 CarrotPilot 为准。SunnyPilot 的 ICBM、SCC-V、SCC-M 和动态实验控制会隐藏并强制关闭；分阶段测试请使用 Carrot 和限速设置。"
 
+msgid "This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, and SCC-M stay hidden and forced off. Sunny DEC is available as an off-by-default advanced option in Carrot settings."
+msgstr "这个个人版的巡航控速逻辑以 CarrotPilot 为准。SunnyPilot 的 ICBM、SCC-V 和 SCC-M 会隐藏并强制关闭。Sunny DEC 作为高级纵向候选功能放在 Carrot 设置里，默认关闭。"
+
+msgid "OPEN"
+msgstr "打开"
+
+msgid "Speed Limit, Maps, and Navigation"
+msgstr "限速、地图和导航"
+
+msgid "Phone/APN/N, vehicle, and map speed-limit behavior. Map overlay stays optional and does not become speed truth by default."
+msgstr "管理手机/APN/N、车机和地图限速。地图覆盖层只是可选显示，默认不会作为限速真值。"
+
+msgid "Cruise and Longitudinal Control"
+msgstr "巡航和纵向控制"
+
+msgid "Cruise distance, stop distance, lead behavior, Sunny DEC candidate mode, and locked high-risk Carrot control outputs."
+msgstr "管理跟车、刹停、前车响应、Sunny DEC 候选模式，以及锁定的 Carrot 高风险控制项。"
+
+msgid "Auto-Tuner"
+msgstr "Auto-Tuner"
+
+msgid "Local learning, recommendation apply gates, and tuning history. Auto apply remains off by default."
+msgstr "本地学习、建议应用门禁和调参历史。自动应用默认关闭。"
+
+msgid "Steering and Path"
+msgstr "转向和路径"
+
+msgid "Path offset and steering response values used by the Carrot tuning workflow."
+msgstr "Carrot 调参流程使用的路径偏移和转向响应参数。"
+
+msgid "Fishop Hardware"
+msgstr "Fishop 硬件"
+
+msgid "Lane curve, lidar lane data, blindspot, navigation gate, and auto-overtake evidence. Control output remains locked."
+msgstr "车道曲线、激光雷达车道数据、盲区、导航门禁和自动超车证据。控制输出仍然锁定。"
+
+msgid "Local Web and Evidence"
+msgstr "本地 Web 和证据"
+
+msgid "Local Carrot Web/API, branch conflict notes, and safe testing reminders. This is local LAN, not cloud pairing."
+msgstr "本地 Carrot Web/API、分支冲突说明和安全测试提醒。这是局域网功能，不是云配对。"
+
+msgid "Sunny DEC Dynamic Experimental Control"
+msgstr "Sunny DEC 动态实验控制"
+
+msgid "Candidate advanced longitudinal mode from SunnyPilot. Default is Off. It may switch between classic longitudinal and experimental/E2E behavior, so do not combine it with unvalidated Carrot active speed, turn slowdown, or traffic-light stop outputs."
+msgstr "来自 SunnyPilot 的高级纵向候选模式，默认关闭。它可能在传统纵向和实验/E2E 行为之间切换，所以不要和未验证的 Carrot 主动控速、转弯减速或红绿灯停车输出一起使用。"
+
+msgid "Stop Distance"
+msgstr "刹停距离"
+
+msgid "Carrot stop-distance target used by the tuning workflow. Keep your known-good value until braking logs are reviewed."
+msgstr "Carrot 调参使用的刹停距离目标。刹车日志复核前，保持你当前能用的值。"
+
+msgid "Dynamic Following"
+msgstr "动态跟车"
+
+msgid "Dynamic following strength. This is a tuning target and should be changed slowly after log review."
+msgstr "动态跟车强度。这是调参目标，建议复核日志后小幅调整。"
+
+msgid "Deceleration Follow Boost"
+msgstr "减速跟车增强"
+
+msgid "Extra follow-distance behavior during deceleration. Higher values can feel more conservative."
+msgstr "减速时额外增加跟车余量。数值越高通常越保守。"
+
+msgid "Follow Gap 1"
+msgstr "跟车间距 1"
+
+msgid "Follow Gap 2"
+msgstr "跟车间距 2"
+
+msgid "Follow Gap 3"
+msgstr "跟车间距 3"
+
+msgid "Follow Gap 4"
+msgstr "跟车间距 4"
+
+msgid "Time gap preset 1 used by Carrot tuning."
+msgstr "Carrot 调参使用的跟车时间预设 1。"
+
+msgid "Time gap preset 2 used by Carrot tuning."
+msgstr "Carrot 调参使用的跟车时间预设 2。"
+
+msgid "Time gap preset 3 used by Carrot tuning."
+msgstr "Carrot 调参使用的跟车时间预设 3。"
+
+msgid "Time gap preset 4 used by Carrot tuning."
+msgstr "Carrot 调参使用的跟车时间预设 4。"
+
+msgid "Cruise Accel Limit 0"
+msgstr "巡航加速限制 0"
+
+msgid "Cruise Accel Limit 1"
+msgstr "巡航加速限制 1"
+
+msgid "Cruise Accel Limit 2"
+msgstr "巡航加速限制 2"
+
+msgid "Cruise Accel Limit 3"
+msgstr "巡航加速限制 3"
+
+msgid "Cruise Accel Limit 4"
+msgstr "巡航加速限制 4"
+
+msgid "Cruise Accel Limit 5"
+msgstr "巡航加速限制 5"
+
+msgid "Cruise Accel Limit 6"
+msgstr "巡航加速限制 6"
+
+msgid "Carrot cruise acceleration table entry. Preserve known-good values unless Auto-Tuner recommends a change."
+msgstr "Carrot 巡航加速表项目。除非 Auto-Tuner 给出建议，否则保留当前能用的值。"
+
+msgid "Lead Response Factor"
+msgstr "前车响应系数"
+
+msgid "Lead-vehicle response tuning target. Change only after comparing braking and lead-distance logs."
+msgstr "前车响应调参目标。只有比较刹车和前车距离日志后再调整。"
+
+msgid "Apply Pending Recommendation"
+msgstr "应用待处理建议"
+
+msgid "Manual apply is blocked while onroad. Review the recommendation first; this changes stored tuning values."
+msgstr "行驶中禁止手动应用。请先确认建议内容；这会修改保存的调参值。"
+
+msgid "Apply pending Auto-Tuner recommendation?"
+msgstr "应用当前 Auto-Tuner 建议？"
+
+msgid "Ignore Pending Recommendation"
+msgstr "忽略待处理建议"
+
+msgid "Clear the current recommendation without changing tuning values."
+msgstr "清除当前建议，不修改调参值。"
+
+msgid "Ignore the pending Auto-Tuner recommendation?"
+msgstr "忽略当前 Auto-Tuner 建议？"
+
+msgid "Clear Learning Data"
+msgstr "清除学习数据"
+
+msgid "Clear collected Auto-Tuner learning data and pending recommendations. Historical applied records are kept unless factory reset is used."
+msgstr "清除已收集的 Auto-Tuner 学习数据和待处理建议。除非使用恢复出厂，否则已应用历史会保留。"
+
+msgid "Clear Auto-Tuner learning data?"
+msgstr "清除 Auto-Tuner 学习数据？"
+
+msgid "Factory Reset Tuning History"
+msgstr "重置调参历史"
+
+msgid "Clear Auto-Tuner history and recommendations. This does not restore every driving parameter by itself."
+msgstr "清除 Auto-Tuner 历史和建议。它不会自动恢复所有驾驶参数。"
+
+msgid "Factory reset Auto-Tuner history?"
+msgstr "重置 Auto-Tuner 历史？"
+
+msgid "Path Offset"
+msgstr "路径偏移"
+
+msgid "Lane/path lateral offset used by Carrot tuning. Zero is neutral; keep your known-good value unless testing carefully."
+msgstr "Carrot 调参使用的车道/路径横向偏移。0 为中性；除非认真测试，否则保留当前能用的值。"
+
+msgid "Steer Actuator Delay"
+msgstr "转向执行延迟"
+
+msgid "Additional steering actuator delay target used by Auto-Tuner. Change only while parked and after reviewing logs."
+msgstr "Auto-Tuner 使用的额外转向执行延迟目标。只在停车并复核日志后调整。"
+
+msgid "Steer Ratio Rate"
+msgstr "转向比例缩放"
+
+msgid "Steering ratio scaling target. 100 is neutral."
+msgstr "转向比例缩放目标。100 为中性。"
+
+msgid "Branch Conflict Notes"
+msgstr "分支冲突说明"
+
+msgid "Sunny DEC is a candidate advanced longitudinal feature. ICBM, SCC-V, and SCC-M overlap more directly with Carrot cruise behavior and remain hidden or inert in this personal alpha."
+msgstr "Sunny DEC 是高级纵向候选功能。ICBM、SCC-V 和 SCC-M 与 Carrot 巡航逻辑重叠更直接，在这个个人 alpha 中继续隐藏或保持无效。"
+
+msgid "Conflict policy: keep Sunny DEC as an off-by-default candidate; keep ICBM, SCC-V, and SCC-M hidden or inert because they can overlap with Carrot button, curve, map, and speed-limit control paths."
+msgstr "冲突策略：Sunny DEC 作为默认关闭的候选功能保留；ICBM、SCC-V 和 SCC-M 可能与 Carrot 按键、弯道、地图和限速控制路径重叠，因此保持隐藏或无效。"
+
 msgid "Phone Speed Limit Source"
 msgstr "手机限速来源"
 

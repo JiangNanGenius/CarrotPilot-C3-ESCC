@@ -19,7 +19,6 @@ from openpilot.sunnypilot.sunnylink.statsd import STATSLOGSP
 
 PERSONAL_DISABLED_CRUISE_PARAMS = (
   "IntelligentCruiseButtonManagement",
-  "DynamicExperimentalControl",
   "SmartCruiseControlVision",
   "SmartCruiseControlMap",
 )

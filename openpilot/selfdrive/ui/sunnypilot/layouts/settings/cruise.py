@@ -24,7 +24,7 @@ ICBM_DESC = tr_noop("When enabled, Genius Pilot will attempt to manage the built
 ICMB_UNAVAILABLE = tr_noop("Intelligent Cruise Button Management is currently unavailable on this platform.")
 ICMB_UNAVAILABLE_LONG_AVAILABLE = tr_noop("Disable the Genius Pilot Longitudinal Control (alpha) toggle to allow Intelligent Cruise Button Management.")
 ICMB_UNAVAILABLE_LONG_UNAVAILABLE = tr_noop("Genius Pilot Longitudinal Control is the default longitudinal control for this platform.")
-CARROT_CRUISE_POLICY = tr_noop("This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, SCC-M, and Dynamic Experimental Control stay hidden and forced off; use Carrot and Speed Limit settings for staged experiments.")
+CARROT_CRUISE_POLICY = tr_noop("This personal build keeps cruise-speed behavior aligned with CarrotPilot. SunnyPilot ICBM, SCC-V, and SCC-M stay hidden and forced off. Sunny DEC is available as an off-by-default advanced option in Carrot settings.")
 
 ACC_ENABLED_DESCRIPTION = tr_noop("Enable custom Short & Long press increments for cruise speed increase/decrease.")
 ACC_NOLONG_DESCRIPTION = tr_noop("This feature can only be used with Genius Pilot longitudinal control enabled.")
@@ -119,10 +119,9 @@ class CruiseLayout(Widget):
       has_long = ui_state.has_longitudinal_control
       has_icbm = False
 
-      for param in ("IntelligentCruiseButtonManagement", "DynamicExperimentalControl", "SmartCruiseControlVision", "SmartCruiseControlMap"):
+      for param in ("IntelligentCruiseButtonManagement", "SmartCruiseControlVision", "SmartCruiseControlMap"):
         ui_state.params.remove(param)
       self.icbm_toggle.action_item.set_enabled(False)
-      self.dec_toggle.action_item.set_enabled(False)
       self.scc_v_toggle.action_item.set_enabled(False)
       self.scc_m_toggle.action_item.set_enabled(False)
 
@@ -135,6 +134,7 @@ class CruiseLayout(Widget):
     else:
       has_icbm = has_long = False
       self.icbm_toggle.action_item.set_enabled(False)
+      self.dec_toggle.action_item.set_enabled(False)
       self.icbm_toggle.set_description(tr(CARROT_CRUISE_POLICY))
 
     show_custom_acc_desc = False

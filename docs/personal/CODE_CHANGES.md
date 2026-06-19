@@ -120,7 +120,8 @@ The alpha line is now documented as CarrotPilot-first:
 
 - SunnyPilot 0.11 remains the architecture base for C3 compatibility, model manager, and newer runtime structure.
 - User-facing cruise and speed-control behavior should converge toward CarrotPilot's granular settings and evidence-first workflow.
-- SunnyPilot ICBM, SCC-V, SCC-M, and Dynamic Experimental Control are not personal-build features; they are hidden from the Cruise panel and old params are removed during interface setup.
+- SunnyPilot ICBM, SCC-V, and SCC-M are not personal-build features; they are hidden from the Cruise panel and old params are removed during interface setup.
+- Sunny DEC is treated differently: it can remain as an off-by-default advanced longitudinal candidate, exposed under Carrot/Genius settings with conflict warnings.
 - Carrot, Auto-Tuner, APN/N/Navipilot, Fishop hardware, and ESCC features should be migrated as explicit controls with Chinese/English descriptions, safe defaults, and per-feature validation gates.
 - High-risk output paths remain off until parked evidence, road logs, and rollback paths are proven.
 
@@ -142,7 +143,7 @@ Implementation notes added after the first device sync:
 - A direct `pip install jeepney` into `/usr/local/venv` failed because that filesystem is read-only on the C3, so dependency repair must be part of the installer/update package rather than a manual device mutation.
 - The packed TICI updater is a separate embedded Python payload and still contained the old direct `jeepney` import. Fresh release work must either install `jeepney` before that updater runs or rebuild/patch the packed updater so it has the same fallback.
 - Settings page touch handling now ignores the touch that opened the page, so the sidebar gear cannot immediately close settings.
-- SunnyPilot ICBM, SCC-V, SCC-M, and DEC are hidden and forced inert in the personal alpha. Any future speed-control work should be implemented as Carrot/Genius Pilot granular controls, not by re-enabling those SunnyPilot black-box toggles.
+- SunnyPilot ICBM, SCC-V, and SCC-M are hidden and forced inert in the personal alpha. DEC is retained only as an off-by-default candidate because it controls E2E/classic longitudinal selection rather than directly replacing Carrot curve/map speed logic.
 - The sidebar temperature label now prefers numeric `maxTempC` and only uses the color state as a warning hint.
 - A Simplified Chinese overlay was added for the high-use alpha pages, but this is the first pass; real-device wording feedback should continue to update the `.po` file and the setting descriptions.
 - After pushing commit `ec7e73dc`, the user's C3 was aligned to `alpha-sunnypilot-c3` and the working tree was clean. The Wi-Fi fallback reported connected SSID `zhao`, IP `192.168.100.174`, and 13 scanned networks after the UI-style activation path.
@@ -153,6 +154,27 @@ Open follow-up from the same bench test:
 - Replace user-facing SunnyPilot branding with Genius Pilot where it is accurate and does not conflict with upstream package names.
 - Keep the welcome/training flow, but replace the long SunnyPilot consent copy with short personal-build copy and verify that Agree advances on C3.
 - Build a real Carrot-style settings surface. The alpha must not feel like SunnyPilot with a few hidden toggles; CarrotPilot, mechanical/Auto-Tuner, ESCC, APN/N, and Fishop controls need explicit settings, descriptions, defaults, and evidence gates.
+
+## 2026-06-20 Settings Conflict Audit And Carrot Settings Split
+
+Real-device feedback confirmed that the first Carrot settings page was operational but too flat and incomplete. The Carrot/Genius page has been split into categories:
+
+- Speed Limit, Maps, and Navigation
+- Cruise and Longitudinal Control
+- Auto-Tuner
+- Steering and Path
+- Fishop Hardware
+- Local Web and Evidence
+
+The first pass exposes existing personal params instead of inventing new control behavior: phone speed source, map overlay, Carrot locked high-risk outputs, DEC candidate mode, stop/follow/braking tuning targets, cruise acceleration table entries, Auto-Tuner apply/clear/reset actions, path/steer tuning values, and Fishop lane/lidar input gates.
+
+Cross-branch setting conflict audit was added as `scripts/personal/sunnypilot_c3_settings_conflict_audit.py`. Current findings:
+
+- SunnyPilot `staging` and `release-tizi` keep `SunnylinkEnabled=1` and `OnroadUploads=1`; personal alpha keeps them inert/off.
+- ajouatom and jixiexiaoge older Carrot branches expose `EnableConnect`; personal alpha must not expose it as a cloud-connect control.
+- jixiexiaoge `release-new` has `OnroadUploads=1`; personal alpha keeps uploads off.
+- DEC exists in Sunny and current alpha with default `0`; it can be retained as a candidate advanced longitudinal mode.
+- SCC-V, SCC-M, and ICBM overlap more directly with Carrot speed, curve, map, and button behavior, so they stay hidden or inert.
 
 ## 2026-06-19 C3 Device Evidence Collector
 

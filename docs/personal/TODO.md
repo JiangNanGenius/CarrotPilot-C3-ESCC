@@ -64,8 +64,9 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Default speed offset to zero.
 - [x] Add fixed and percentage speed offset modes.
 - [x] Default `CarrotMapOverlayEnabled` to off so Mapbox/Kakao overlay does not cover the HUD.
-- [x] Hide and hard-disable SunnyPilot ICBM, SCC-V, SCC-M, and Dynamic Experimental Control in the personal alpha; cruise-speed behavior should move toward CarrotPilot logic instead of SunnyPilot black-box toggles.
-- [ ] Remove or relabel any remaining user-facing SunnyPilot cruise concepts that conflict with Carrot behavior: ICBM, SCC-V, SCC-M, DEC, map-speed assumptions, and opaque speed-control presets.
+- [x] Hide and hard-disable SunnyPilot ICBM, SCC-V, and SCC-M in the personal alpha; cruise-speed behavior should move toward CarrotPilot logic instead of SunnyPilot black-box toggles.
+- [x] Retain Sunny DEC only as an off-by-default advanced longitudinal candidate, exposed through Carrot/Genius settings with conflict warnings.
+- [ ] Remove or relabel any remaining user-facing SunnyPilot cruise concepts that conflict with Carrot behavior: ICBM, SCC-V, SCC-M, map-speed assumptions, and opaque speed-control presets.
 - [ ] Replace remaining Sunny speed-control internals with Carrot-style staged controls: display-only evidence first, then independent switches for active speed, curve/turn slowdown, traffic-light stop, and button management.
 - [ ] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, `SmartCruiseControlMap`, and `DynamicExperimentalControl` cannot affect control output after boot.
 - [ ] Validate speed source switching in display-only mode before enabling active speed assist.
@@ -76,7 +77,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep Auto-Tuner auto-apply off by default.
 - [x] Keep high-risk controls gated off by default: traffic-light stop, auto-turn speed control, active speed control, Auto-Tuner auto-apply, and fishop auto-overtake.
 - [x] Add read-only fishop lane curve, lane quality, lidar blindspot, target, dynamic risk, navigation gate, and overtake suggestion evidence.
-- [ ] Expand the Carrot settings panel to match CarrotPilot's fine-grained controls instead of SunnyPilot-style black-box pages.
+- [x] Expand the Carrot settings panel into categories: speed/maps/navigation, cruise/longitudinal, Auto-Tuner, steering/path, Fishop hardware, and local Web/evidence.
 - [ ] Map CarrotPilot settings from ajouatom, mechanical/Auto-Tuner, and ESCC forks into personal alpha params with Chinese/English descriptions, safe defaults, and per-feature evidence gates.
 - [ ] Add a Carrot cruise-control section covering button behavior, curve slowdown, traffic-light logic, speed-limit behavior, and model-speed behavior with each high-risk output disabled until validated.
 - [ ] Add a Fishop hardware section for lane curve, lidar lane data, lidar blindspot, navigation gate, and auto-overtake evidence; keep output paths disabled until logs prove safety.
@@ -122,6 +123,8 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Review CarrotPilot watched-path deltas for Carrot, speed, model, and map changes.
 - [x] Review mechanical/Auto-Tuner watched-path deltas for Auto-Tuner, APN/N, fishop hardware, and local web changes.
 - [x] Re-run static checks, compatibility audit, installer audit, and evidence checker self-tests.
+- [x] Add `scripts/personal/sunnypilot_c3_settings_conflict_audit.py` to detect cross-branch setting conflicts such as Sunnylink/OnroadUploads defaults, EnableConnect, DEC, SCC-V/SCC-M, Carrot active controls, and Fishop overtake gates.
+- [x] Add `docs/personal/SETTINGS_CONFLICTS.md` with the current retain/hide/lock policy for cross-branch settings.
 - [x] Publish alpha only after `/x` installer audit passes.
 - [ ] Keep `/i` stable until C3 parking and road evidence are clean.
 

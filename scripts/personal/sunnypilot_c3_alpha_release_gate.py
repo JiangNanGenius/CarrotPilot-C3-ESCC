@@ -66,6 +66,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     "scripts/personal/sunnypilot_c3_alpha_static_check.py",
     "scripts/personal/sunnypilot_c3_alpha_update_audit.py",
     "scripts/personal/sunnypilot_c3_device_collect.py",
+    "scripts/personal/sunnypilot_c3_settings_conflict_audit.py",
   ]
   steps: list[tuple[str, list[str], int]] = [
     ("python compile personal gates", [py(), "-m", "py_compile", *scripts], 60),
@@ -83,6 +84,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     ),
     ("alpha evidence checker self-test", [py(), "scripts/personal/sunnypilot_c3_alpha_evidence_check.py", "--self-test"], 30),
     ("alpha update audit self-test", [py(), "scripts/personal/sunnypilot_c3_alpha_update_audit.py", "--self-test"], 30),
+    ("settings conflict audit", [py(), "scripts/personal/sunnypilot_c3_settings_conflict_audit.py", "--strict"], 60),
     ("C3 device collect self-test", [py(), "scripts/personal/sunnypilot_c3_device_collect.py", "--self-test"], 30),
   ]
 
