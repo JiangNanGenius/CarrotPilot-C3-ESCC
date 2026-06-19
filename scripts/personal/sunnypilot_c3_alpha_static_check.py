@@ -63,8 +63,10 @@ def safe_read_text(path: Path, timeout_s: float = 2.0) -> str | None:
 
 def read(rel: str) -> str:
   path = ROOT / rel
-  materialize_path(path)
-  return path.read_text(encoding="utf-8")
+  text = safe_read_text(path, timeout_s=10.0)
+  if text is None:
+    raise RuntimeError(f"unable to read {rel}; file may be unavailable or timed out")
+  return text
 
 
 def read_tree(rel: str, suffixes: tuple[str, ...]) -> str:
@@ -1512,6 +1514,114 @@ def check_c3_compat_audit_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_c3_install_boot_contract() -> tuple[bool, str]:
+  launch_openpilot = read("launch_openpilot.sh")
+  c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
+  c3_env = read("sunnypilot/system/hardware/c3/launch_env.sh")
+  installer = read("selfdrive/ui/installer/installer.cc")
+  version = read("system/version.py")
+
+  required_files = (
+    "sunnypilot/system/hardware/c3/launch_chffrplus.sh",
+    "sunnypilot/system/hardware/c3/launch_env.sh",
+    "sunnypilot/system/hardware/c3/agnos.json",
+    "system/hardware/tici/agnos.py",
+    "system/hardware/tici/updater",
+  )
+  for rel in required_files:
+    if not (ROOT / rel).exists():
+      return False, f"C3 install/boot file missing: {rel}"
+
+  launch_tokens = (
+    'trap \'exec ./launch_chffrplus.sh\' ERR',
+    'C3_LAUNCH_SH="./sunnypilot/system/hardware/c3/launch_chffrplus.sh"',
+    'MODEL="$(tr -d \'\\0\' < "/sys/firmware/devicetree/base/model")"',
+    'if [ "$MODEL" = "comma tici" ]; then',
+    '[ -x "$C3_LAUNCH_SH" ] || false',
+    'exec "$C3_LAUNCH_SH"',
+    "exec ./launch_chffrplus.sh",
+  )
+  for token in launch_tokens:
+    if token not in launch_openpilot:
+      return False, f"launch_openpilot.sh missing C3 launcher token {token!r}"
+  for token in ("comma c3x", "comma c4", "mici"):
+    if token in launch_openpilot.lower():
+      return False, f"launch_openpilot.sh must not route clone C3 through {token}"
+
+  c3_launch_tokens = (
+    'source "$SP_C3_DIR/launch_env.sh"',
+    'AGNOS_PY="$DIR/system/hardware/tici/agnos.py"',
+    'MANIFEST="$SP_C3_DIR/agnos.json"',
+    "$DIR/system/hardware/tici/updater $AGNOS_PY $MANIFEST",
+    'export PYTHONPATH="$PWD"',
+    "cd $DIR/system/manager",
+    "./manager.py",
+  )
+  for token in c3_launch_tokens:
+    if token not in c3_launch:
+      return False, f"C3 launcher missing token {token!r}"
+  if 'AGNOS_VERSION="12.8"' not in c3_env or 'STAGING_ROOT="/data/safe_staging"' not in c3_env:
+    return False, "C3 launch_env must pin AGNOS_VERSION=12.8 and safe staging root"
+
+  try:
+    manifest = json.loads(read("sunnypilot/system/hardware/c3/agnos.json"))
+  except Exception as exc:
+    return False, f"C3 AGNOS manifest is not valid JSON: {exc}"
+  expected_names = ["xbl", "xbl_config", "abl", "aop", "devcfg", "boot", "system"]
+  names = [entry.get("name") for entry in manifest if isinstance(entry, dict)]
+  if names != expected_names:
+    return False, f"C3 AGNOS manifest partition order changed: {names}"
+  for entry in manifest:
+    if not isinstance(entry, dict):
+      return False, "C3 AGNOS manifest contains a non-object entry"
+    for key in ("name", "url", "hash", "hash_raw", "size", "has_ab"):
+      if key not in entry:
+        return False, f"C3 AGNOS manifest entry {entry.get('name')} missing {key}"
+    if not str(entry["url"]).startswith("https://commadist.azureedge.net/agnosupdate/"):
+      return False, f"C3 AGNOS manifest entry {entry.get('name')} has unexpected URL"
+    if not isinstance(entry.get("size"), int) or entry["size"] <= 0:
+      return False, f"C3 AGNOS manifest entry {entry.get('name')} has invalid size"
+    if entry.get("has_ab") is not True:
+      return False, f"C3 AGNOS manifest entry {entry.get('name')} must remain A/B capable"
+  system_entry = next(entry for entry in manifest if entry.get("name") == "system")
+  if system_entry.get("sparse") is not True or "alt" not in system_entry:
+    return False, "C3 AGNOS system image must keep sparse+alt metadata"
+
+  installer_tokens = (
+    "migrated_branch = BRANCH_STR",
+    "Hardware::get_device_type() == cereal::InitData::DeviceType::TICI",
+    "Hardware::get_device_type() == cereal::InitData::DeviceType::TIZI",
+    "device_type == cereal::InitData::DeviceType::TIZI",
+    "device_type == cereal::InitData::DeviceType::MICI",
+    'migrated_branch = "release-tizi"',
+    'migrated_branch = "release-tizi-staging"',
+    'migrated_branch = "release-mici"',
+    'migrated_branch = "release-mici-staging"',
+    "cachedFetch",
+    "freshClone",
+  )
+  for token in installer_tokens:
+    if token not in installer:
+      return False, f"installer.cc missing branch/device token {token!r}"
+  for token in ("alpha-sunnypilot-c3", "experimental/sunnypilot-011-c3"):
+    if token in installer:
+      return False, f"installer.cc must not hard-code alpha channel {token}"
+  if "release3" not in installer or "master-tici" not in installer:
+    return False, "installer.cc must preserve upstream binary branch migration behavior"
+
+  version_tokens = (
+    "C3_TICI_BRANCHES = ['alpha-sunnypilot-c3', 'experimental/sunnypilot-011-c3']",
+    "self.channel in C3_TICI_BRANCHES",
+    '"-c3" in self.channel',
+    'return "tici"',
+  )
+  for token in version_tokens:
+    if token not in version:
+      return False, f"system/version.py missing C3 channel gate token {token!r}"
+
+  return True, ""
+
+
 def check_alpha_evidence_checker_runtime() -> tuple[bool, str]:
   try:
     proc = subprocess.run(
@@ -2085,6 +2195,9 @@ def main() -> int:
                           and "model_runner_split_present" in c3_compat_audit
                           and "root_launcher_keeps_shutdown_policy" in c3_compat_audit,
                           "alpha must include a repeatable audit for C3 launcher, channel, installer, local network, modeld, cloud, and power compatibility")
+  ok, detail = check_c3_install_boot_contract()
+  failures += not require("C3 install/boot direct contract", ok,
+                          detail or "C3 launcher, AGNOS manifest, installer, and branch channel gate contract failed")
   ok, detail = check_c3_compat_audit_runtime()
   failures += not require("C3/TICI compatibility audit runtime", ok,
                           detail or "C3 compatibility audit failed")
