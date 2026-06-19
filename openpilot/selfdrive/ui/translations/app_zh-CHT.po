@@ -1001,6 +1001,30 @@ msgstr "前車和雷達顯示"
 msgid "Chevron uses Sunny's lead marker. Box draws a Carrot-style lead-car frame. Radar also shows speed labels for tracked leads."
 msgstr "Chevron 使用 Sunny 的前車標記。Box 繪製 Carrot 風格前車框。Radar 還會給追蹤到的前車顯示速度標籤。"
 
+msgid "Base Display Layer"
+msgstr "基礎顯示層"
+
+msgid "Only one base road renderer is active at a time."
+msgstr "同一時間只啟用一個基礎道路渲染器。"
+
+msgid "Visual Detail Controls"
+msgstr "顯示細節控制"
+
+msgid "These refine the selected preset without changing planner or lane-change behavior."
+msgstr "這些設定只細化目前預設，不改變規劃器或變道控制行為。"
+
+msgid "Evidence Overlays"
+msgstr "證據疊加層"
+
+msgid "Carrot World and Fishop are independent display-only overlays. They may be enabled together on top of any base preset when you need lane-change or hardware evidence."
+msgstr "Carrot World 和 Fishop 是獨立的顯示疊加層。需要查看變道或硬體證據時，它們可以同時疊加在任意基礎預設上。"
+
+msgid "General HUD Widgets"
+msgstr "一般 HUD 小組件"
+
+msgid "These are normal Sunny/Genius HUD widgets and do not select the base road renderer."
+msgstr "這些是一般 Sunny/Genius HUD 小組件，不負責選擇基礎道路渲染器。"
+
 msgid "Fusion"
 msgstr "融合"
 

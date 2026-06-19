@@ -100,6 +100,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add a local screenshot/replay check that verifies each visualization mode renders nonblank lanes, path, lead markers, and lane-change cues without covering the speed HUD.
 - [x] Add Simplified/Traditional Chinese translations for the new visualization controls.
 - [x] Make the visualization coexistence rule user-facing: Sunny/Carrot/Fusion are mutually exclusive base displays; Carrot World and Fishop can both be opened as evidence overlays.
+- [x] Group the Visuals settings page into base display, visual detail controls, evidence overlays, and normal HUD widgets so Carrot lane/merge visuals and Fishop/lidar overlays are not confused with each other.
 - [x] Prefer Carrot-style lane and lane-change presentation for Fusion/Carrot modes because it is clearer than Sunny's stock lane display on adjacent-lane awareness.
 - [x] Map the remaining ajouatom Carrot cluster/world view into a separate optional surface: detected vehicles, source-colored objects, raw/merged side radar points, ajouatom-only lane-line type fields, and distance/speed labels.
 - [x] Add an ajouatom cluster/world schema map that names every imported field, its fallback when missing, and whether it comes from model, radar, side radar, or Fishop.

@@ -1,5 +1,17 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Visualization Settings Layering
+
+Made the multi-visualization relationship explicit in the on-device Visuals page:
+
+- Grouped the page into base display layer, visual detail controls, evidence overlays, and normal HUD widgets.
+- The base display remains mutually exclusive: Sunny, Carrot, or Fusion.
+- Carrot World and Fishop remain independent display-only overlays and may be enabled together above any base preset.
+- Added Simplified/Traditional Chinese strings for the new grouping labels.
+- Strengthened the visualization contract and alpha static check so this layering cannot silently regress.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.21`.
+
 ## 2026-06-20 Cluster World Debug Surface
 
 Added the first complete, local-only Carrot cluster/world visualization surface:
