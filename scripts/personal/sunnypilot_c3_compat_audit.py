@@ -209,6 +209,7 @@ def local_checks() -> list[dict[str, Any]]:
   developer_layout = read("selfdrive/ui/layouts/settings/developer.py")
   mici_developer_layout = read("selfdrive/ui/mici/layouts/settings/developer.py")
   sp_settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+  mici_settings = read("selfdrive/ui/mici/layouts/settings/settings.py")
   sp_network = read("selfdrive/ui/sunnypilot/layouts/settings/network.py")
   base_software = read("selfdrive/ui/layouts/settings/software.py")
   sp_software = read("selfdrive/ui/sunnypilot/layouts/settings/software.py")
@@ -340,6 +341,13 @@ def local_checks() -> list[dict[str, Any]]:
       "cloud_and_upload_managers_not_registered",
       process_config_runtime_blocked(process_config),
       "Mr.One/Sunnylink/comma cloud, upload, statsd_sp, and backup managers must not be registered",
+    ),
+    status(
+      "mici_comma_pairing_entry_removed",
+      "PairBigButton" not in mici_settings
+      and "PairingDialog" not in mici_settings
+      and "connect.comma.ai" not in mici_settings,
+      "MICI settings must not keep comma connect pairing buttons after cloud pairing is removed",
     ),
     status(
       "mrone_private_tokens_absent_from_runtime_paths",

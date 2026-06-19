@@ -2509,6 +2509,7 @@ def main() -> int:
 
   settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
   device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
+  core_mici_settings = read("selfdrive/ui/mici/layouts/settings/settings.py")
   settings_ui_device = read("sunnypilot/sunnylink/settings_ui_src/pages/device.yaml")
   settings_ui_json = read("sunnypilot/sunnylink/settings_ui.json")
   zh_chs_po = read("selfdrive/ui/translations/app_zh-CHS.po")
@@ -2529,6 +2530,8 @@ def main() -> int:
                           "MICI Sunnylink panel is still wired into settings")
   failures += not require("Onroad Uploads setting removed", "Onroad Uploads" not in device_settings,
                           "Device settings still expose Onroad Uploads")
+  failures += not require("MICI comma pairing button removed", all(token not in core_mici_settings for token in ("PairBigButton", "PairingDialog", "connect.comma.ai")),
+                          "MICI settings must not import or render comma connect pairing after cloud pairing is removed")
   failures += not require("OnroadUploads removed from settings-ui", "OnroadUploads" not in settings_ui_device + settings_ui_json,
                           "settings-ui source or compiled JSON still exposes OnroadUploads")
   failures += not require("Sunnylink removed from settings-ui", all(key not in settings_ui_device + settings_ui_json for key in ("SunnylinkEnabled", "EnableSunnylinkUploader")),
