@@ -373,15 +373,13 @@ def read_binary_param_summaries() -> dict[str, str]:
   return values
 
 
-def parse_model_bundle(raw: str) -> dict[str, Any]:
-  if not raw or raw.startswith("<missing"):
+def summarize_model_bundle(bundle: Any, size: int = 0, digest: str = "") -> dict[str, Any]:
+  if not isinstance(bundle, dict):
     return {"present": False}
-  try:
-    bundle = json.loads(raw)
-  except json.JSONDecodeError as exc:
-    return {"present": True, "parseError": str(exc)}
   return {
     "present": True,
+    "size": size,
+    "sha256": digest,
     "ref": bundle.get("ref", ""),
     "internalName": bundle.get("internalName", ""),
     "displayName": bundle.get("displayName", ""),
@@ -389,6 +387,23 @@ def parse_model_bundle(raw: str) -> dict[str, Any]:
     "minimumSelectorVersion": bundle.get("minimumSelectorVersion", ""),
     "modelCount": len(bundle.get("models", [])) if isinstance(bundle.get("models"), list) else 0,
   }
+
+
+def read_model_bundle_summary() -> dict[str, Any]:
+  path = read_param_file("ModelManager_ActiveBundle")
+  if path is None:
+    return {"present": False}
+  data = path.read_bytes()
+  digest = hashlib.sha256(data).hexdigest()[:16]
+  if not data:
+    return {"present": False, "size": 0, "sha256": digest}
+  try:
+    bundle = json.loads(data.decode("utf-8", errors="strict"))
+  except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+    return {"present": True, "size": len(data), "sha256": digest, "parseError": str(exc)}
+  summary = summarize_model_bundle(bundle, len(data), digest)
+  summary["present"] = True
+  return summary
 
 
 def summarize_auto_tuner(safe_params: dict[str, str]) -> dict[str, Any]:
@@ -1225,7 +1240,7 @@ def build_snapshot(sample_seconds: int, fishop_jsonl: Path | None,
     "carParamsSP": car_params_sp,
     "model": {
       "runnerCache": safe_params.get("ModelRunnerTypeCache"),
-      "activeBundle": parse_model_bundle(safe_params.get("ModelManager_ActiveBundle", "")),
+      "activeBundle": read_model_bundle_summary(),
     },
     "speedLimitEvidence": summarize_speed_limit(safe_params, messaging),
     "navigationEvidence": navigation,

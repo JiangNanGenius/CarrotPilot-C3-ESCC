@@ -63,6 +63,8 @@ Balanced means Sunny model-curvature quality plus Carrot navigation/phone/lane i
 - `SpeedLimitPolicy=Phone First` chooses source order only: fresh
   APN/N/Navipilot/Carrot phone data, then vehicle/cluster data. OSM/mapd is
   opt-in through the map policies and is not used as the default speed truth.
+  Do not use Sunny map/GPS or GPS-derived vehicle speed as the default non-curve
+  cruise-speed basis on the user's Seltos path.
   `SpeedLimitMode=Assist` is still required before resolved speed limits can
   change cruise targets.
 - `CarrotAutoTurnControlEnabled` and `TurnSpeedControlMode` own ATC/turn

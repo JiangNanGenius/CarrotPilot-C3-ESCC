@@ -136,27 +136,34 @@ def remote_collect_script(args: argparse.Namespace) -> str:
   cloud_names = " ".join(q(name) for name in CLOUD_PROCESS_NAMES)
   log_paths = " ".join(q(path) for path in LOG_PATHS)
   sample_seconds = max(0, int(args.sample_seconds))
+  hardware_probe_seconds = max(1, int(args.hardware_probe_seconds))
   navipilot_flag = "--navipilot-live-check" if args.navipilot_live_check else ""
   require_cloud_flag = "--require-no-cloud-processes" if args.require_no_cloud_processes else ""
+  sound_probe_flag = "--skip-sound" if args.skip_sound_probe else ""
   snapshot_block = "true"
   if not args.skip_snapshot:
     snapshot_block = f"""
 if [ -d /data/openpilot ]; then
   cd /data/openpilot
+  OPENPILOT_PYTHON="/usr/local/venv/bin/python"
+  if [ ! -x "$OPENPILOT_PYTHON" ]; then
+    OPENPILOT_PYTHON="$(command -v python3 || command -v python)"
+  fi
   {{
     git rev-parse HEAD || true
     git branch --show-current || true
     git remote -v | sed -E 's#(https://)[^/@]+@#\\1<redacted>@#g' || true
   }} > "$OUT/openpilot_git.txt" 2>&1
+  echo "$OPENPILOT_PYTHON" > "$OUT/python_runtime.txt"
   if [ -f scripts/personal/sunnypilot_c3_alpha_snapshot.py ]; then
-    python3 scripts/personal/sunnypilot_c3_alpha_snapshot.py \\
+    PYTHONPATH=/data/openpilot "$OPENPILOT_PYTHON" scripts/personal/sunnypilot_c3_alpha_snapshot.py \\
       --sample-seconds {sample_seconds} \\
       {navipilot_flag} \\
       {require_cloud_flag} \\
       --output "$OUT/carrot_alpha_snapshot.json" \\
       --pretty > "$OUT/snapshot_stdout.txt" 2> "$OUT/snapshot_stderr.txt" || echo "$?" > "$OUT/snapshot_exit_code.txt"
     if [ -f "$OUT/carrot_alpha_snapshot.json" ] && [ -f scripts/personal/sunnypilot_c3_alpha_evidence_check.py ]; then
-      python3 scripts/personal/sunnypilot_c3_alpha_evidence_check.py "$OUT/carrot_alpha_snapshot.json" \\
+      PYTHONPATH=/data/openpilot "$OPENPILOT_PYTHON" scripts/personal/sunnypilot_c3_alpha_evidence_check.py "$OUT/carrot_alpha_snapshot.json" \\
         --phase static --phase parked --phase model > "$OUT/evidence_check_static_parked_model.txt" 2>&1 || echo "$?" > "$OUT/evidence_check_exit_code.txt"
     fi
   else
@@ -164,6 +171,28 @@ if [ -d /data/openpilot ]; then
   fi
 else
   echo "/data/openpilot missing; install likely did not complete" > "$OUT/openpilot_missing.txt"
+fi
+"""
+  hardware_probe_block = "true"
+  if args.parked_hardware_probe:
+    hardware_probe_block = f"""
+if [ -d /data/openpilot ]; then
+  cd /data/openpilot
+  OPENPILOT_PYTHON="/usr/local/venv/bin/python"
+  if [ ! -x "$OPENPILOT_PYTHON" ]; then
+    OPENPILOT_PYTHON="$(command -v python3 || command -v python)"
+  fi
+  echo "$OPENPILOT_PYTHON" > "$OUT/python_runtime.txt"
+  if [ -f scripts/personal/sunnypilot_c3_parked_hardware_probe.py ]; then
+    PYTHONPATH=/data/openpilot "$OPENPILOT_PYTHON" scripts/personal/sunnypilot_c3_parked_hardware_probe.py \\
+      --sample-seconds {hardware_probe_seconds} \\
+      --sound-seconds 1.2 \\
+      {sound_probe_flag} \\
+      --output "$OUT/parked_hardware_probe.json" \\
+      --pretty > "$OUT/parked_hardware_probe_stdout.txt" 2> "$OUT/parked_hardware_probe_stderr.txt" || echo "$?" > "$OUT/parked_hardware_probe_exit_code.txt"
+  else
+    echo "parked hardware probe script missing" > "$OUT/parked_hardware_probe_missing.txt"
+  fi
 fi
 """
 
@@ -218,6 +247,8 @@ for key in {safe_params}; do
 done
 
 {snapshot_block}
+
+{hardware_probe_block}
 
 tarball="$OUT.tar.gz"
 tar -czf "$tarball" -C "$(dirname "$OUT")" "$(basename "$OUT")" 2> "$OUT/tar_stderr.txt"
@@ -299,14 +330,23 @@ def self_test() -> int:
   class Args:
     remote_root = DEFAULT_REMOTE_ROOT
     sample_seconds = 2
+    hardware_probe_seconds = 2
     navipilot_live_check = True
     require_no_cloud_processes = True
     skip_snapshot = False
+    parked_hardware_probe = True
+    skip_sound_probe = True
 
   script = remote_collect_script(Args())
   required = (
     "sunnypilot_c3_alpha_snapshot.py",
     "sunnypilot_c3_alpha_evidence_check.py",
+    "sunnypilot_c3_parked_hardware_probe.py",
+    "parked_hardware_probe.json",
+    "--skip-sound",
+    "/usr/local/venv/bin/python",
+    "PYTHONPATH=/data/openpilot",
+    "python_runtime.txt",
     "cloud_processes_seen.txt",
     "CarrotMapOverlayEnabled",
     "ModelManager_ActiveBundle",
@@ -335,6 +375,10 @@ def main() -> int:
   parser.add_argument("--remote-root", default=DEFAULT_REMOTE_ROOT, help="remote collection root")
   parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR, help="local directory for fetched evidence bundle")
   parser.add_argument("--sample-seconds", type=int, default=10, help="messaging sample seconds for snapshot")
+  parser.add_argument("--parked-hardware-probe", action="store_true", help="run parked camera/modeld/IMU probe and include the JSON result")
+  parser.add_argument("--hardware-probe-seconds", type=int, default=12, help="seconds to sample camera/modeld/IMU during parked hardware probe")
+  parser.add_argument("--skip-sound-probe", action="store_true", default=True, help="keep parked hardware probe silent; this is the default")
+  parser.add_argument("--with-sound-probe", action="store_true", help="explicitly allow the parked hardware probe to play a short speaker test sound")
   parser.add_argument("--navipilot-live-check", action="store_true", help="run evidence-only local Navipilot live check")
   parser.add_argument("--require-no-cloud-processes", action="store_true", help="make snapshot fail if disabled cloud/upload processes are visible")
   parser.add_argument("--skip-snapshot", action="store_true", help="collect logs/processes only, useful when install did not complete")
@@ -345,6 +389,8 @@ def main() -> int:
 
   if args.self_test:
     return self_test()
+  if args.with_sound_probe:
+    args.skip_sound_probe = False
 
   report = collect(args)
   print_report(report, args.json)

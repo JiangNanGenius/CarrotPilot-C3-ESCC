@@ -13,6 +13,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add `scripts/personal/build_c3_qt_compat_installer.py` so the Qt-compatible `/x` can be rebuilt reproducibly.
 - [x] Add `scripts/personal/sunnypilot_c3_installer_audit.py` so future updates reject incompatible Raylib/new-GLIBC and stale upstream installer binaries.
 - [x] Add `scripts/personal/sunnypilot_c3_device_collect.py` to collect installer crash logs or parked/model/no-cloud evidence from the C3 over SSH.
+- [x] Add `scripts/personal/sunnypilot_c3_parked_hardware_probe.py` for parked camera/modeld/IMU validation, with cleanup after the probe and speaker checks opt-in only.
 - [x] Recover from the first `/x` boot failures: missing Python dependency, settings tap release handling, and onboarding/settings navigation blockers.
 - [x] Rebuild or patch the packed TICI updater so its embedded Wi-Fi manager includes the same `jeepney`/`nmcli` fallback as the main source tree.
 - [x] Add an installer/update audit that checks both the main source tree and the packed TICI updater for the Wi-Fi dependency contract.
@@ -36,6 +37,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Verify local LAN services after the C3 hotfix: SSH works, local Carrot Web/API health responds, Navipilot 7000/7705/7712/7713 checks pass, and no cloud services are exposed.
 - [ ] Run real device parking test on clone C3.
 - [ ] Pull a C3 evidence bundle with `sunnypilot_c3_device_collect.py` after `/x` install succeeds.
+- [ ] Run `sunnypilot_c3_device_collect.py --parked-hardware-probe` on the connected clone C3 and archive camera/modeld/IMU evidence; keep the probe silent unless the user explicitly asks for `--with-sound-probe`.
 
 ## Cloud Removal
 
@@ -59,6 +61,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Keep stock model as default.
 - [x] Restrict model download, verify, switch, and rollback to offroad.
 - [ ] Verify model list download and active bundle evidence on C3.
+- [x] Confirm parked model startup can work without a physical panda: the C3 produced `modelV2`, `drivingModelData`, and `cameraOdometry` from `modeld_tinygrad` while parked.
 
 ## Speed Limit And Maps
 
@@ -78,6 +81,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Replace remaining Sunny speed-control internals with Carrot-style staged controls: independent switches for active speed, curve/turn slowdown, traffic-light stop, ATC, and button management.
 - [x] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, and `SmartCruiseControlMap` stay hidden/inert; `DynamicExperimentalControl` remains a separate off-by-default DEC candidate only when longitudinal support is actually available.
 - [x] Make non-curve speed control Carrot/Genius-owned by default: APN/N/Navipilot/Carrot phone data first, vehicle/cluster speed second, with Sunny map/GPS speed control opt-in only through explicit map policies.
+- [x] Document the stricter cruise ownership rule: except for explicit curve-speed experiments, active speed control should stay Carrot/Genius-owned and should not fall back to Sunny map/GPS behavior.
 - [ ] Validate speed source switching before relying on active speed assist.
 
 ## Onroad Visualization
@@ -160,11 +164,18 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add and run the local Genius visualization contract check for path/lane/lead/Fishop display-only wiring.
 - [x] Add and run the local Genius settings matrix check for Carrot/Sunny/Fishop/ESCC/model/local-network/cloud/visualization ownership.
 - [x] Run the full local release gate after documentation is updated: `python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full`.
+- [x] Research comma/openpilot offline testing: use `selfdrive/test/process_replay` for process output regression, `tools/replay` for UI/message replay, and reserve C3 parked probes for physical hardware evidence.
+- [ ] Add a Genius offline replay checklist or wrapper for Seltos/Carrot logic once a suitable local route/rlog is available.
+- [ ] Run upstream process replay for affected non-hardware logic before promoting `/x`: controlsd/plannerd/radard/locationd/paramsd first, model replay only when camera frame inputs are available.
 - [x] Push both `experimental/sunnypilot-011-c3` and `alpha-sunnypilot-c3`, then audit `/x`.
 - [ ] Sync or reinstall on the user's C3 and confirm Super Advanced opens, NNLC defaults on, Seltos 2023 appears, and new Carrot params do not show unknown-key waits.
 - [ ] Run C3 parked checks with the device currently available: UI opens, Wi-Fi/network page reports connected state, local Web/API responds, no cloud processes exist, model manager opens, stock model runner starts.
 - [x] Run local Carrot Web/API checks: write and read `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, `CarrotTrafficStopEnabled`, `FishopAutoOvertakeEnabled`, `CurveSpeedControlMode`, and `NeuralNetworkLateralControl` while offroad.
 - [x] Run C3 local Carrot Web/API checks: health, params bulk, same-value param write, status broadcast, UDP status, navigation HTTP, and navigation TCP all pass with local-only/no-control evidence.
+- [x] Fix C3 evidence collection to use the openpilot venv, and summarize active model bundle JSON without truncation parse errors.
+- [x] Run the C3 parked hardware probe enough to confirm camera streams and modeld without real panda: three camera streams, `modelV2`, `drivingModelData`, and `cameraOdometry` were observed.
+- [x] Speaker output was user-confirmed good; keep future device probes silent by default and do not trigger sound unless explicitly requested.
+- [ ] Re-run IMU as a separate C3 hardware check using the upstream `system/sensord/tests/test_sensord.py` approach, because temperature alone is not enough to validate accelerometer/gyroscope.
 - [x] Run Navipilot/APN/N input replay locally and confirm phone speed, SDI, speed-bump, traffic-light, turn, and model-speed fields are parsed.
 - [x] Run Fishop sample replay locally and confirm lane curve, left/right lane, lidar blindspot, dynamic risk, navigation gate, and overtake fields render in Web/API.
 - [ ] Road testing is not required for this code/local phase; keep `/i` as rollback until later parked and real-car checks are intentionally performed.

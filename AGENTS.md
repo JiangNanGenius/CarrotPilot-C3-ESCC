@@ -25,10 +25,13 @@ Do not move `/i` or stable/latest to the alpha line until the C3 parked checks a
 - Fishop lane/lidar/blindspot/overtake inputs must remain tied to the existing safety-chain review; do not hide the settings, and do not publish direct planner/CAN outputs from the local Web bridge.
 - NNLC/NLC defaults on for supported cars through `NeuralNetworkLateralControl=1`; unsupported cars must be cleaned up by the existing Sunny support checks.
 - Product direction is CarrotPilot-first. SunnyPilot is the 0.11 architecture base, not the feature owner for cruise behavior.
+- Except for explicit curve-speed experiments, active speed/cruise target behavior should stay Carrot/Genius-owned: fresh APN/N/Navipilot/Carrot phone evidence first, then vehicle/cluster speed. Sunny map/GPS speed control is opt-in only through explicit map policies.
 - Do not expose or enable SunnyPilot ICBM, SCC-V, or SCC-M in the personal build; they overlap with Carrot button, curve, map, and speed-limit paths.
 - Sunny DEC may be retained as an off-by-default advanced longitudinal option. It must not lock out Carrot active speed, turn slowdown/ATC, or traffic-light stop settings.
 - Carrot-style settings are preferred: every control behavior should have a visible setting, a clear Chinese/English description, conservative default, owner/source note, and rollback path.
 - Onroad visualization is separate from control behavior. `GeniusVisualMode`, `GeniusLaneLineStyle`, `GeniusLeadRadarVisualMode`, `GeniusLaneChangeVisuals`, and `GeniusFishopVisualOverlay` may combine Sunny HUD, Carrot lane/lead/radar drawing, and future Fishop evidence overlays, but they must not emit planner, CAN, lane-change, or overtake control output.
+- Prefer comma's offline replay tools for code behavior checks: use `selfdrive/test/process_replay` for process output regressions and `tools/replay` for UI/message replay. C3 parked probes are for real hardware paths such as cameras, IMU, local services, and device integration.
+- Do not play device sounds during routine collection. Speaker checks are opt-in only with `--with-sound` or `--with-sound-probe`, and only after the user explicitly asks for an audible test.
 - When three reference lines disagree, build a setting matrix first: ajouatom CarrotPilot, jixiexiaoge/mechanical, and masang-feiyang/ESCC. Decide one owner per behavior and avoid unexplained compatibility aliases.
 - User-facing alpha branding should move toward Genius Pilot. Keep upstream package/module names only where renaming would create code risk.
 - Genius Pilot version numbers follow the SunnyPilot base and append the personal build suffix: `<SunnyPilot base>-gp.<YYYYMMDD>.<patch>`.
@@ -109,6 +112,27 @@ python3 scripts/personal/sunnypilot_c3_device_collect.py \
   --navipilot-live-check \
   --require-no-cloud-processes
 ```
+
+Parked hardware probe after install or model/camera/sensor/sound changes:
+
+```bash
+python3 scripts/personal/sunnypilot_c3_device_collect.py \
+  --host 192.168.100.174 \
+  --navipilot-live-check \
+  --require-no-cloud-processes \
+  --parked-hardware-probe
+```
+
+This probe is silent by default. Only add `--with-sound-probe` when the user explicitly wants an audible speaker test.
+
+Offline replay checks before or alongside C3 testing:
+
+```bash
+python3 selfdrive/test/process_replay/test_processes.py --whitelist-procs controlsd,plannerd,radard,locationd,paramsd
+tools/replay/replay --demo
+```
+
+Use process replay for logic regressions and C3 probes for physical hardware evidence. Model replay that needs camera frames should follow `selfdrive/test/process_replay/model_replay.py` or provide `FrameReader` inputs.
 
 On-device snapshot command, if already SSH'd into the C3:
 
