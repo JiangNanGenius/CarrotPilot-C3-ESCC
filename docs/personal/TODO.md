@@ -39,7 +39,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Disable manager registration for athenad, uploader, Sunnylink daemon, Sunnylink registration, statsd_sp, and backup manager.
 - [x] Keep `SunnylinkEnabled`, `EnableSunnylinkUploader`, and `OnroadUploads` ineffective as cloud-start controls.
 - [x] Remove user-facing Sunnylink and Onroad Uploads entry points from the alpha UI.
-- [ ] Confirm on device that no cloud/upload process exists after boot.
+- [x] Confirm on device that no cloud/upload process exists after boot.
 
 ## Seltos 2023 And ESCC
 
@@ -106,8 +106,9 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Display numeric device temperature in the left sidebar instead of only `GOOD`/`HIGH` when `deviceState.maxTempC` is available.
 - [x] Hide and hard-disable SunnyPilot cruise black-box toggles from the alpha Cruise panel.
 - [x] Sync the hotfix files to the user's C3 at `192.168.100.174` and restart UI for bench testing.
+- [x] Verify the Wi-Fi fallback on device: after UI-style activation it reports SSID `zhao`, IP `192.168.100.174`, and scanned networks without `jeepney`.
+- [x] Move the device from temporary synced dirty files to pushed branch commit `ec7e73dc`.
 - [ ] User visual confirmation: Network page leaves scanning state, sidebar gear opens settings consistently, temperature displays as a number, and toggles still work.
-- [ ] On the device, move from temporary synced dirty files to the pushed branch commit after the commit lands.
 - [ ] Remove the packed updater `jeepney` traceback from `/tmp/launch_log` on a clean alpha install.
 
 ## Update Checklist
