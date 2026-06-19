@@ -76,10 +76,12 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add `scripts/personal/sunnypilot_c3_alpha_release_gate.py` as a repeatable fast/full update gate.
 - [x] Add `scripts/personal/sunnypilot_c3_alpha_update_audit.py` to fetch/compare SunnyPilot, CarrotPilot, mechanical/Auto-Tuner, and ESCC reference branches.
 - [x] Fetch initial `refs/remotes/carrot-audit/*` reference baseline on 2026-06-19.
-- [ ] Run update audit with `--fetch --strict --scan-risk-tokens` before the next upstream merge.
-- [ ] Review SunnyPilot staging watched-path deltas.
-- [ ] Review CarrotPilot watched-path deltas for Carrot, speed, model, and map changes.
-- [ ] Review mechanical/Auto-Tuner watched-path deltas for Auto-Tuner, APN/N, fishop hardware, and local web changes.
-- [ ] Re-run static checks, compatibility audit, installer audit, and evidence checker self-tests.
-- [ ] Publish alpha only after `/x` installer audit passes.
+- [x] Run update audit with `--fetch --strict --scan-risk-tokens` before the next upstream merge.
+- [x] Review SunnyPilot staging watched-path deltas.
+- [x] Review CarrotPilot watched-path deltas for Carrot, speed, model, and map changes.
+- [x] Review mechanical/Auto-Tuner watched-path deltas for Auto-Tuner, APN/N, fishop hardware, and local web changes.
+- [x] Re-run static checks, compatibility audit, installer audit, and evidence checker self-tests.
+- [x] Publish alpha only after `/x` installer audit passes.
 - [ ] Keep `/i` stable until C3 parking and road evidence are clean.
+
+Last completed alpha update audit: 2026-06-19, `ok=True`, `watchPathCount=26`, `riskTokenCount=14`. Reference branches were refreshed; risk-token hits remain review evidence only and were not imported as cloud/power behavior.
