@@ -1514,6 +1514,27 @@ def check_c3_compat_audit_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_installer_audit_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/sunnypilot_c3_installer_audit.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-800:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_install_boot_contract() -> tuple[bool, str]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
@@ -1687,7 +1708,10 @@ def visible_korean_text_report() -> str:
         break
     return "; ".join(found)
 
-  rg = shutil.which("rg")
+  # On macOS/iCloud worktrees, rg can hang while materializing dataless files even
+  # when subprocess timeout is set. The safe per-file fallback below is slower but
+  # bounded and uses safe_read_text().
+  rg = None if sys.platform == "darwin" else shutil.which("rg")
   if rg and existing_roots:
     try:
       glob_args: list[str] = []
@@ -1879,6 +1903,7 @@ def main() -> int:
   fishop_sample = read("scripts/personal/fishop_hardware_sample.py")
   alpha_snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
   c3_compat_audit = read("scripts/personal/sunnypilot_c3_compat_audit.py")
+  installer_audit = read("scripts/personal/sunnypilot_c3_installer_audit.py")
   failures += not require("Auto-Tuner learner module exists", "class CarrotLearner" in carrot_learning
                           and "def apply_recommendations" in carrot_learning,
                           "CarrotLearner core module must exist in alpha")
@@ -2195,6 +2220,18 @@ def main() -> int:
                           and "model_runner_split_present" in c3_compat_audit
                           and "root_launcher_keeps_shutdown_policy" in c3_compat_audit,
                           "alpha must include a repeatable audit for C3 launcher, channel, installer, local network, modeld, cloud, and power compatibility")
+  failures += not require("alpha Pages installer audit tool exists",
+                          "CarrotPilot-C3-ESCC Installer Audit" in installer_audit
+                          and "DEFAULT_INSTALL_URL" in installer_audit
+                          and "https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/x" in installer_audit
+                          and "Initializing raylib" in installer_audit
+                          and "QProgressBar" in installer_audit
+                          and "git checkout alpha-sunnypilot-c3" in installer_audit
+                          and "is_arm64_elf" in installer_audit,
+                          "alpha must include a repeatable audit for the published /x Raylib installer")
+  ok, detail = check_installer_audit_runtime()
+  failures += not require("alpha Pages installer audit runtime", ok,
+                          detail or "installer audit self-test failed")
   ok, detail = check_c3_install_boot_contract()
   failures += not require("C3 install/boot direct contract", ok,
                           detail or "C3 launcher, AGNOS manifest, installer, and branch channel gate contract failed")
