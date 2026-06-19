@@ -1,6 +1,6 @@
 # Genius Pilot C3 Settings Conflict Notes
 
-Last checked: 2026-06-20 with `scripts/personal/sunnypilot_c3_settings_conflict_audit.py --strict` and `scripts/personal/genius_settings_matrix.py --check`.
+Last checked: 2026-06-20 with `scripts/personal/sunnypilot_c3_settings_conflict_audit.py --strict`, `scripts/personal/genius_settings_matrix.py --check`, and `scripts/personal/genius_curve_speed_contract.py --self-test`.
 
 ## Summary
 
@@ -27,6 +27,8 @@ The reference branches use several settings that look similar but control differ
 - ICBM overlaps with cruise-button management and should stay hidden/inert in this personal alpha.
 - SCC-V and SCC-M overlap with Carrot curve, map, navigation, and speed-limit behavior and should stay hidden/inert.
 - DEC is a separate Sunny longitudinal option. It must not lock or hide Carrot active speed control, ATC/auto-turn, or traffic-light stop settings.
+- `CurveSpeedControlMode` owns Sunny SCC-V participation. Sunny and Fusion modes may use SCC-V model-curvature slowdown; Off and Carrot modes do not.
+- Sunny SCC-M remains inert in all Genius Pilot modes because map target velocities are not trusted as default speed truth.
 
 ## Carrot Active Controls
 

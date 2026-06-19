@@ -6,6 +6,8 @@ See the LICENSE.md file in the root directory for more details.
 """
 import platform
 
+import pytest
+
 from cereal import custom
 from openpilot.common.params import Params
 from openpilot.common.realtime import DT_MDL
@@ -24,6 +26,7 @@ class TestSmartCruiseControlMap:
     self.scc_m = SmartCruiseControlMap()
 
   def reset_params(self):
+    self.params.put("CurveSpeedControlMode", "1", block=True)
     self.params.put_bool("SmartCruiseControlMap", True, block=True)
 
     # TODO-SP: mock data from gpsLocation
@@ -37,22 +40,27 @@ class TestSmartCruiseControlMap:
     assert self.scc_m.output_a_target == 0.
 
   def test_system_disabled(self):
-    self.params.put_bool("SmartCruiseControlMap", False, block=True)
-    self.scc_m.enabled = self.params.get_bool("SmartCruiseControlMap")
+    self.params.put("CurveSpeedControlMode", "3", block=True)
+    self.params.put_bool("SmartCruiseControlMap", True, block=True)
+    self.scc_m.enabled = False
 
     for _ in range(int(10. / DT_MDL)):
       self.scc_m.update(True, False, 0., 0., 0.)
     assert self.scc_m.state == VisionState.disabled
     assert not self.scc_m.is_active
 
+  @pytest.mark.parametrize("mode", [0, 1, 2, 3])
+  def test_sunny_map_speed_stays_disabled(self, mode):
+    self.params.put("CurveSpeedControlMode", str(mode), block=True)
+    self.params.put_bool("SmartCruiseControlMap", True, block=True)
+    for _ in range(int(10. / DT_MDL)):
+      self.scc_m.update(True, False, 0., 0., 0.)
+    assert not self.scc_m.enabled
+    assert self.scc_m.state == VisionState.disabled
+
   def test_disabled(self):
     for _ in range(int(10. / DT_MDL)):
       self.scc_m.update(False, False, 0., 0., 0.)
     assert self.scc_m.state == VisionState.disabled
-
-  def test_transition_disabled_to_enabled(self):
-    for _ in range(int(10. / DT_MDL)):
-      self.scc_m.update(True, False, 0., 0., 0.)
-    assert self.scc_m.state == VisionState.enabled
 
   # TODO-SP: mock data from modelV2 to test other states

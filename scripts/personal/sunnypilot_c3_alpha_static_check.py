@@ -1752,6 +1752,27 @@ def check_genius_settings_matrix_runtime() -> tuple[bool, str]:
     return False, str(exc)
 
 
+def check_genius_curve_speed_contract_runtime() -> tuple[bool, str]:
+  try:
+    proc = subprocess.run(
+      [
+        sys.executable,
+        "scripts/personal/genius_curve_speed_contract.py",
+        "--self-test",
+      ],
+      cwd=ROOT,
+      capture_output=True,
+      text=True,
+      check=False,
+      timeout=30,
+    )
+    if proc.returncode != 0:
+      return False, (proc.stdout + proc.stderr)[-1200:]
+    return True, ""
+  except Exception as exc:
+    return False, str(exc)
+
+
 def check_c3_install_boot_contract() -> tuple[bool, str]:
   launch_openpilot = read("launch_openpilot.sh")
   c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
@@ -2204,6 +2225,11 @@ def main() -> int:
   settings_matrix_script = read("scripts/personal/genius_settings_matrix.py")
   settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
   settings_matrix_json = read("docs/personal/settings_matrix.json")
+  curve_speed_contract = read("scripts/personal/genius_curve_speed_contract.py")
+  curve_speed_policy_md = read("docs/personal/CURVE_SPEED_POLICY.md")
+  curve_speed_policy = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py")
+  scc_vision_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/vision_controller.py")
+  scc_map_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/map_controller.py")
   agents_md = read("AGENTS.md")
   version_header = read("sunnypilot/common/version.h")
   versioning_md = read("docs/personal/VERSIONING.md")
@@ -2902,6 +2928,35 @@ def main() -> int:
                           "release gate must run the settings owner matrix")
   ok, detail = check_genius_settings_matrix_runtime()
   failures += not require("Genius settings matrix runtime", ok, detail or "Genius settings matrix failed")
+  failures += not require("Genius curve-speed policy wired",
+                          all(token in curve_speed_policy + scc_vision_controller + scc_map_controller + curve_speed_contract for token in (
+                            "CurveSpeedControlMode",
+                            "sunny_vision_curve_enabled",
+                            "carrot_curve_inputs_enabled",
+                            "sunny_map_speed_enabled",
+                            "CurveSpeedControlMode.sunny",
+                            "CurveSpeedControlMode.fusion",
+                            "return False",
+                          ))
+                          and 'get_bool("SmartCruiseControlVision")' not in scc_vision_controller
+                          and 'get_bool("SmartCruiseControlMap")' not in scc_map_controller,
+                          "CurveSpeedControlMode must own Sunny SCC-V participation; SCC-M map speed must remain inert")
+  failures += not require("Genius curve-speed release gate wired",
+                          "scripts/personal/genius_curve_speed_contract.py" in release_gate
+                          and "Genius curve-speed contract" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must run the curve-speed owner contract")
+  failures += not require("Genius curve-speed policy documented",
+                          all(token in curve_speed_policy_md for token in (
+                            "Sunny SCC-V",
+                            "Sunny SCC-M",
+                            "Carrot / Genius Inputs",
+                            "Fusion means Sunny model-curvature quality plus Carrot navigation/phone/lane inputs",
+                            "SmartCruiseControlMap remains inert",
+                          )),
+                          "curve-speed policy doc must explain Sunny/Carrot/Fusion and SCC-M boundaries")
+  ok, detail = check_genius_curve_speed_contract_runtime()
+  failures += not require("Genius curve-speed contract runtime", ok, detail or "Genius curve-speed contract failed")
   failures += not require("Cruise exposes staged Carrot longitudinal controls",
                           all(token in cruise_settings for token in (
                             "DynamicExperimentalControl",

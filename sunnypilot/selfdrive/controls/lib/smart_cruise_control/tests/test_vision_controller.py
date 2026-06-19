@@ -116,7 +116,8 @@ class TestSmartCruiseControlVision:
     self.sm = {'modelV2': mdl.modelV2, 'carState': cs.carState, 'controlsState': controls_state.controlsState}
 
   def reset_params(self):
-    self.params.put_bool("SmartCruiseControlVision", True, block=True)
+    self.params.put("CurveSpeedControlMode", "1", block=True)
+    self.params.put_bool("SmartCruiseControlVision", False, block=True)
 
   def test_initial_state(self):
     assert self.scc_v.state == VisionState.disabled
@@ -125,13 +126,20 @@ class TestSmartCruiseControlVision:
     assert self.scc_v.output_a_target == 0.
 
   def test_system_disabled(self):
-    self.params.put_bool("SmartCruiseControlVision", False, block=True)
-    self.scc_v.enabled = self.params.get_bool("SmartCruiseControlVision")
+    self.params.put("CurveSpeedControlMode", "0", block=True)
+    self.scc_v.enabled = False
 
     for _ in range(int(10. / DT_MDL)):
       self.scc_v.update(self.sm, True, False, 0., 0., 0.)
     assert self.scc_v.state == VisionState.disabled
     assert not self.scc_v.is_active
+
+  @pytest.mark.parametrize("mode, expected_enabled", [(0, False), (1, True), (2, False), (3, True)])
+  def test_curve_speed_mode_owns_sunny_vision(self, mode, expected_enabled):
+    self.params.put("CurveSpeedControlMode", str(mode), block=True)
+    self.params.put_bool("SmartCruiseControlVision", not expected_enabled, block=True)
+    self.scc_v.update(self.sm, True, False, float(MIN_V + 5.0), 0., 0.)
+    assert self.scc_v.enabled is expected_enabled
 
   def test_disabled(self):
     for _ in range(int(10. / DT_MDL)):

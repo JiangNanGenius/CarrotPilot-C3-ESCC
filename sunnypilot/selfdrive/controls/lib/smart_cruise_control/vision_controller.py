@@ -13,6 +13,7 @@ from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.car.cruise import V_CRUISE_UNSET
 from openpilot.sunnypilot import PARAMS_UPDATE_PERIOD
 from openpilot.sunnypilot.selfdrive.controls.lib.smart_cruise_control import MIN_V
+from openpilot.sunnypilot.selfdrive.controls.lib.smart_cruise_control.curve_speed_policy import sunny_vision_curve_enabled
 
 VisionState = custom.LongitudinalPlanSP.SmartCruiseControl.VisionState
 
@@ -59,7 +60,7 @@ class SmartCruiseControlVision:
     self.long_override = False
     self.is_enabled = False
     self.is_active = False
-    self.enabled = self.params.get_bool("SmartCruiseControlVision")
+    self.enabled = sunny_vision_curve_enabled(self.params)
     self.v_cruise_setpoint = 0.
 
     self.state = VisionState.disabled
@@ -77,7 +78,7 @@ class SmartCruiseControlVision:
 
   def _update_params(self) -> None:
     if self.frame % int(PARAMS_UPDATE_PERIOD / DT_MDL) == 0:
-      self.enabled = self.params.get_bool("SmartCruiseControlVision")
+      self.enabled = sunny_vision_curve_enabled(self.params)
 
   def _update_calculations(self, sm: messaging.SubMaster) -> None:
     if not self.long_enabled:

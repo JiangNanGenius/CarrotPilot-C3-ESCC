@@ -73,7 +73,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Add Carrot curve-speed tuning params: lower speed limit, curve factor, curve aggressiveness, navigation decel rate, and wet-road mode.
 - [ ] Remove or relabel any remaining user-facing SunnyPilot cruise concepts that conflict with Carrot behavior: ICBM, SCC-V, SCC-M, map-speed assumptions, and opaque speed-control presets.
 - [ ] Replace remaining Sunny speed-control internals with Carrot-style staged controls: independent switches for active speed, curve/turn slowdown, traffic-light stop, ATC, and button management.
-- [ ] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, `SmartCruiseControlMap`, and `DynamicExperimentalControl` cannot affect control output after boot.
+- [x] Audit old params so `IntelligentCruiseButtonManagement`, `SmartCruiseControlVision`, `SmartCruiseControlMap`, and `DynamicExperimentalControl` cannot affect control output after boot.
 - [ ] Validate speed source switching before relying on active speed assist.
 
 ## Onroad Visualization
@@ -124,7 +124,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] For each duplicated setting, choose exactly one owner and write the alias/removal decision; do not keep compatibility aliases unless a real on-device migration needs them.
 - [x] Audit interactions among `DynamicExperimentalControl`, `SpeedLimitMode`, `CurveSpeedControlMode`, `TurnSpeedControlMode`, `CarrotActiveSpeedControlEnabled`, `CarrotAutoTurnControlEnabled`, `CarrotTrafficStopEnabled`, and `FishopAutoOvertakeEnabled`.
 - [x] Add the settings owner matrix to the alpha release gate so future `/x` builds cannot silently reintroduce cloud, Sunny cruise, Carrot, Fishop, model, ESCC, local-network, or visualization conflicts.
-- [ ] Compare Sunny curve slowdown and Carrot curve slowdown in code and document when Fusion should use Sunny curvature, Carrot navigation turns, APN/N speed input, and lane-line curve input.
+- [x] Compare Sunny curve slowdown and Carrot curve slowdown in code and document when Fusion should use Sunny curvature, Carrot navigation turns, APN/N speed input, and lane-line curve input.
 - [ ] Find the source documentation for Carrot/CarrotPad settings and annotate confusing items, especially values where smaller/larger has inverse behavior.
 
 ## Current Code And Local Test Phase

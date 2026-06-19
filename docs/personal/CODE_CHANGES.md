@@ -1,5 +1,20 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Curve-Speed Ownership
+
+`CurveSpeedControlMode` now owns the Sunny model-curvature slowdown path:
+
+- Added `sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py`.
+- Sunny SCC-V now follows `CurveSpeedControlMode`: Off and Carrot disable it; Sunny and Fusion enable it.
+- Sunny SCC-M remains inert in every Genius Pilot mode, so map target velocities do not become default speed truth.
+- Legacy hidden `SmartCruiseControlVision` and `SmartCruiseControlMap` params no longer decide control behavior.
+- Added `docs/personal/CURVE_SPEED_POLICY.md` and `scripts/personal/genius_curve_speed_contract.py`.
+- The alpha release gate and static check now enforce the curve-speed policy.
+
+Fusion now means Sunny model-curvature quality plus Carrot navigation/phone/lane inputs, without enabling Sunny map-speed control.
+
+Genius Pilot version is bumped to `2026.002.000-gp.20260620.9`.
+
 ## 2026-06-20 Visualization Replay Contract
 
 Expanded `scripts/personal/genius_visualization_contract.py` so the local gate now checks the full display coexistence contract:
