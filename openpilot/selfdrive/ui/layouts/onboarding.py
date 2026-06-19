@@ -40,6 +40,7 @@ class TrainingGuide(Widget):
     self._completed_callback = completed_callback
 
     self._step = 0
+    self._ignore_release_after_press = False
     self._load_image_paths()
 
     # Load first image now so we show something immediately
@@ -59,7 +60,7 @@ class TrainingGuide(Widget):
     for path in self._image_paths[1:]:
       self._image_objs.append(gui_app._load_image_from_path(path))
 
-  def _handle_mouse_release(self, mouse_pos):
+  def _advance_step(self, mouse_pos) -> bool:
     if rl.check_collision_point_rec(mouse_pos, STEP_RECTS[self._step]):
       # Record DM camera?
       if self._step == DM_RECORD_STEP:
@@ -82,6 +83,17 @@ class TrainingGuide(Widget):
 
         # NOTE: this pops OnboardingWindow during real onboarding
         gui_app.pop_widget()
+      return True
+    return False
+
+  def _handle_mouse_press(self, mouse_pos):
+    self._ignore_release_after_press = self._advance_step(mouse_pos)
+
+  def _handle_mouse_release(self, mouse_pos):
+    if self._ignore_release_after_press:
+      self._ignore_release_after_press = False
+      return
+    self._advance_step(mouse_pos)
 
   def _update_state(self):
     if len(self._image_objs):
@@ -111,6 +123,7 @@ class TermsPage(Widget):
     self._on_accept = on_accept
     self._on_decline = on_decline
     self._action_fired = False
+    self._ignore_release_after_press = False
     self._decline_rect = rl.Rectangle(0, 0, 0, 0)
     self._accept_rect = rl.Rectangle(0, 0, 0, 0)
 
@@ -142,13 +155,25 @@ class TermsPage(Widget):
   def reset_action(self):
     self._action_fired = False
 
-  def _handle_mouse_release(self, mouse_pos):
+  def _activate_at(self, mouse_pos) -> bool:
     # Clone C3 touch reports can lose the child-button press state during setup.
     # Keep a parent-level hit test so the terms buttons always advance.
     if rl.check_collision_point_rec(mouse_pos, self._accept_rect):
       self._accept()
+      return True
     elif rl.check_collision_point_rec(mouse_pos, self._decline_rect):
       self._decline()
+      return True
+    return False
+
+  def _handle_mouse_press(self, mouse_pos):
+    self._ignore_release_after_press = self._activate_at(mouse_pos)
+
+  def _handle_mouse_release(self, mouse_pos):
+    if self._ignore_release_after_press:
+      self._ignore_release_after_press = False
+      return
+    self._activate_at(mouse_pos)
 
   def _render(self, _):
     welcome_x = self._rect.x + 95
@@ -208,6 +233,7 @@ class OnboardingWindow(Widget):
     super().__init__()
     self._accepted_terms: bool = ui_state.params.get("HasAcceptedTerms") == terms_version
     self._training_done: bool = ui_state.params.get("CompletedTrainingVersion") == training_version
+    self._pending_terms_accept = False
 
     self._state = OnboardingState.TERMS if not self._accepted_terms else OnboardingState.ONBOARDING
 
@@ -217,24 +243,12 @@ class OnboardingWindow(Widget):
     self._decline_page = DeclinePage(back_callback=self._on_decline_back)
 
     self._accepted_terms = self._accepted_terms and ui_state.params.get("HasAcceptedTermsSP") == terms_version_sp
-    self._complete_personal_alpha_onboarding()
     if not self._accepted_terms:
       self._state = OnboardingState.TERMS
     elif not self._training_done:
       self._state = OnboardingState.ONBOARDING
     else:
       self._state = OnboardingState.ONBOARDING
-
-  def _complete_personal_alpha_onboarding(self):
-    # Personal alpha builds are installed by an experienced owner/operator. Do
-    # not block first boot on upstream onboarding touch widgets on clone C3.
-    if not self._accepted_terms:
-      ui_state.params.put("HasAcceptedTerms", terms_version)
-      ui_state.params.put("HasAcceptedTermsSP", terms_version_sp)
-      self._accepted_terms = True
-    if not self._training_done:
-      ui_state.params.put("CompletedTrainingVersion", training_version)
-      self._training_done = True
 
   @property
   def completed(self) -> bool:
@@ -248,6 +262,12 @@ class OnboardingWindow(Widget):
     self._state = OnboardingState.TERMS
 
   def _on_terms_accepted(self):
+    self._pending_terms_accept = True
+
+  def _apply_pending_terms_accept(self):
+    if not self._pending_terms_accept:
+      return
+    self._pending_terms_accept = False
     ui_state.params.put("HasAcceptedTerms", terms_version)
     ui_state.params.put("HasAcceptedTermsSP", terms_version_sp)
     self._accepted_terms = True
@@ -261,6 +281,8 @@ class OnboardingWindow(Widget):
     self._training_done = True
 
   def _render(self, _):
+    self._apply_pending_terms_accept()
+
     if self._training_guide is None:
       self._training_guide = TrainingGuide(completed_callback=self._on_completed_training)
 
