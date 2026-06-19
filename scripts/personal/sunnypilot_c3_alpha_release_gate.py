@@ -31,6 +31,18 @@ def command_env() -> dict[str, str]:
   return env
 
 
+def output_text(*parts: object) -> str:
+  chunks: list[str] = []
+  for part in parts:
+    if part is None:
+      continue
+    if isinstance(part, bytes):
+      chunks.append(part.decode("utf-8", errors="replace"))
+    else:
+      chunks.append(str(part))
+  return "".join(chunks)
+
+
 def run_step(name: str, cmd: Sequence[str], timeout_s: int) -> StepResult:
   try:
     proc = subprocess.run(
@@ -45,7 +57,7 @@ def run_step(name: str, cmd: Sequence[str], timeout_s: int) -> StepResult:
     )
     return StepResult(name, proc.returncode == 0, cmd, proc.stdout.strip(), timeout_s)
   except subprocess.TimeoutExpired as exc:
-    output = ((exc.stdout or "") + (exc.stderr or "")).strip()
+    output = output_text(exc.stdout, exc.stderr).strip()
     return StepResult(name, False, cmd, f"timed out after {timeout_s}s\n{output}".strip(), timeout_s)
   except OSError as exc:
     return StepResult(name, False, cmd, str(exc), timeout_s)

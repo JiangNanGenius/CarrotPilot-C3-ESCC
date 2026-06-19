@@ -2493,6 +2493,9 @@ def main() -> int:
   c3_camera_snapshot_probe = read("scripts/personal/sunnypilot_c3_camera_snapshot_probe.py")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
+  nnlc_controller = read("sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
+  nnlc_tests = read("sunnypilot/selfdrive/controls/lib/nnlc/tests/test_load_model.py")
+  torque_v0 = read("sunnypilot/selfdrive/controls/lib/latcontrol_torque_v0.py")
   settings_matrix_script = read("scripts/personal/genius_settings_matrix.py")
   settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
   settings_matrix_json = read("docs/personal/settings_matrix.json")
@@ -3067,12 +3070,36 @@ def main() -> int:
                           and "tools/replay/replay" in offline_replay_check
                           and "model_replay.py" in offline_replay_check
                           and "FrameReader" in offline_replay_check
+                          and "safe_python_command" in offline_replay_check
+                          and '"--whitelist-procs", *procs' in offline_replay_check
+                          and "PYTHONPATH" in offline_replay_check
+                          and "PARAMS_ROOT" in offline_replay_check
+                          and "process_replay_import" in offline_replay_check
+                          and "classify_process_replay_result" in offline_replay_check
+                          and "crashFree" in offline_replay_check
+                          and "referenceDiffs" in offline_replay_check
+                          and "nativeExtensionBlocked" in offline_replay_check
                           and "--run-process-replay" in offline_replay_check
+                          and "--jobs" in offline_replay_check
                           and "--update-refs" in offline_replay_check,
-                          "alpha must include an offline replay readiness wrapper with opt-in reference updates")
+                          "alpha must include a runnable offline replay wrapper with safe Python path, real proc args, crash/diff/native-blocked classification, and opt-in reference updates")
   ok, detail = check_genius_offline_replay_runtime()
   failures += not require("Genius offline replay check runtime", ok,
                           detail or "offline replay check self-test failed")
+  failures += not require("NNLC missing model fallback",
+                          "bool(model_path)" in nnlc_controller
+                          and "os.path.isfile(model_path)" in nnlc_controller
+                          and "NNTorqueModel(model_path) if self.has_nn_model else None" in nnlc_controller
+                          and "missing neural network lateral model path" in nnlc_controller
+                          and "test_empty_model_path_does_not_crash" in nnlc_tests
+                          and "controller.extension.model is None" in nnlc_tests,
+                          "NNLC must not crash controlsd when NeuralNetworkLateralControl is enabled but CarParamsSP has an empty or missing model path")
+  failures += not require("Torque v0 zero delay guard",
+                          "safe_lat_delay = max(float(lat_delay), self.dt)" in torque_v0
+                          and "safe_lat_delay / self.dt" in torque_v0
+                          and "/ safe_lat_delay" in torque_v0
+                          and "safe_lat_delay * desired_lateral_jerk" in torque_v0,
+                          "legacy torque v0 controller must clamp zero/negative lat_delay before division")
   failures += not require("Genius UI replay check exists",
                           "Genius Pilot UI Replay Check" in ui_replay_check
                           and "tools/replay/replay" in ui_replay_check

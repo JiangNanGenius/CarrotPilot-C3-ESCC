@@ -46,6 +46,18 @@ def command_env() -> dict[str, str]:
   return env
 
 
+def output_text(*parts: object) -> str:
+  chunks: list[str] = []
+  for part in parts:
+    if part is None:
+      continue
+    if isinstance(part, bytes):
+      chunks.append(part.decode("utf-8", errors="replace"))
+    else:
+      chunks.append(str(part))
+  return "".join(chunks)
+
+
 def run(cmd: Sequence[str], timeout_s: int, extra_env: dict[str, str] | None = None) -> dict[str, Any]:
   env = command_env()
   if extra_env:
@@ -75,7 +87,7 @@ def run(cmd: Sequence[str], timeout_s: int, extra_env: dict[str, str] | None = N
       "timeoutS": timeout_s,
     }
   except subprocess.TimeoutExpired as exc:
-    output = ((exc.stdout or "") + (exc.stderr or "")).strip()
+    output = output_text(exc.stdout, exc.stderr).strip()
     return {
       "command": list(cmd),
       "ok": False,

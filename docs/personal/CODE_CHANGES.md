@@ -1,5 +1,44 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 Process Replay Crash Fixes
+
+Published as `2026.002.000-gp.20260620.38`.
+
+The no-car upstream process replay path is now runnable on macOS when invoked
+with the Python 3.12 replay environment and native-extension shadow path:
+
+```bash
+PYTHONPATH=/tmp/gp-replay-shadow:/tmp/cp-jeepney-hotfix \
+  /tmp/gp-replay-py312/bin/python \
+  scripts/personal/genius_offline_replay_check.py \
+  --run-process-replay --procs controlsd --cars HYUNDAI --jobs 1 --timeout 120 --json
+```
+
+That run now completes without a process crash. It still reports upstream
+reference diffs in `carControl.actuators.torque` and torque-state fields,
+which is expected for this Carrot/Genius lateral-control fork until a
+fork-owned reference baseline is generated.
+
+Fixes included:
+
+- `scripts/personal/genius_offline_replay_check.py` now preserves caller
+  `PYTHONPATH`, appends the repo path, uses Python safe-path mode when
+  available, passes upstream process lists as repeated arguments instead of
+  CSV strings, creates a temporary `PARAMS_ROOT`, and classifies replay results
+  as crash-free, reference-diff, timeout, or native-extension-blocked.
+- `sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py` now treats empty, MOCK, or
+  missing NNLC model paths as unavailable and falls back without loading
+  `NNTorqueModel`, so `NeuralNetworkLateralControl=1` cannot crash `controlsd`
+  when `CarParamsSP` lacks a model path.
+- `sunnypilot/selfdrive/controls/lib/latcontrol_torque_v0.py` now clamps
+  zero or negative `lat_delay` to `dt` before computing lateral jerk, preventing
+  a `ZeroDivisionError` during replay startup.
+- `radard` HYUNDAI process replay passes. `plannerd`, `locationd`, and
+  `paramsd` are currently blocked on macOS native-extension availability
+  (`acados_ocp_solver_pyx.so` and `rednose` `ekf_sym_pyx.so`), not on device
+  control logic. Those remain TODO items before claiming full no-car process
+  replay coverage.
+
 ## 2026-06-20 No-Car UI Replay Runtime Fix
 
 Published as `2026.002.000-gp.20260620.37`.
