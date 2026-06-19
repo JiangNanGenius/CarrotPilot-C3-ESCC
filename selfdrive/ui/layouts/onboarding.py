@@ -6,7 +6,6 @@ from enum import IntEnum
 import pyray as rl
 from openpilot.common.basedir import BASEDIR
 from openpilot.system.ui.lib.application import FontWeight, gui_app
-from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.widgets.button import Button, ButtonStyle
 from openpilot.system.ui.widgets.label import Label
@@ -111,13 +110,46 @@ class TermsPage(Widget):
     super().__init__()
     self._on_accept = on_accept
     self._on_decline = on_decline
+    self._action_fired = False
+    self._decline_rect = rl.Rectangle(0, 0, 0, 0)
+    self._accept_rect = rl.Rectangle(0, 0, 0, 0)
 
-    self._title = Label(tr("Welcome to sunnypilot"), font_size=90, font_weight=FontWeight.BOLD, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
-    self._desc = Label(tr("You must accept the Terms of Service to use sunnypilot. Read the latest terms at https://sunnypilot.ai/terms before continuing."),
-                       font_size=90, font_weight=FontWeight.MEDIUM, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
+    self._title = Label("Welcome to CarrotPilot-C3-ESCC", font_size=90, font_weight=FontWeight.BOLD,
+                        text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
+    self._desc = Label(
+      "This is a personal alpha build for C3 clone hardware and Kia Seltos SCC testing. "
+      "It is experimental driver assistance, not self-driving. Keep your hands on the wheel, watch the road, "
+      "and take over immediately whenever needed. Sunnylink, comma connect pairing, cloud uploads, and cloud backup "
+      "are disabled in this build. Test parked first, then low speed, before any normal road use.",
+      font_size=76, font_weight=FontWeight.MEDIUM, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
 
-    self._decline_btn = Button(tr("Decline"), click_callback=on_decline)
-    self._accept_btn = Button(tr("Agree"), button_style=ButtonStyle.PRIMARY, click_callback=on_accept)
+    self._decline_btn = Button("Decline", click_callback=self._decline)
+    self._accept_btn = Button("Agree", button_style=ButtonStyle.PRIMARY, click_callback=self._accept)
+
+  def _accept(self):
+    if self._action_fired:
+      return
+    self._action_fired = True
+    if self._on_accept:
+      self._on_accept()
+
+  def _decline(self):
+    if self._action_fired:
+      return
+    self._action_fired = True
+    if self._on_decline:
+      self._on_decline()
+
+  def reset_action(self):
+    self._action_fired = False
+
+  def _handle_mouse_release(self, mouse_pos):
+    # Clone C3 touch reports can lose the child-button press state during setup.
+    # Keep a parent-level hit test so the terms buttons always advance.
+    if rl.check_collision_point_rec(mouse_pos, self._accept_rect):
+      self._accept()
+    elif rl.check_collision_point_rec(mouse_pos, self._decline_rect):
+      self._decline()
 
   def _render(self, _):
     welcome_x = self._rect.x + 95
@@ -133,8 +165,10 @@ class TermsPage(Widget):
 
     btn_y = self._rect.y + self._rect.height - 160 - 45
     btn_width = (self._rect.width - 45 * 3) / 2
-    self._decline_btn.render(rl.Rectangle(self._rect.x + 45, btn_y, btn_width, 160))
-    self._accept_btn.render(rl.Rectangle(self._rect.x + 45 * 2 + btn_width, btn_y, btn_width, 160))
+    self._decline_rect = rl.Rectangle(self._rect.x + 45, btn_y, btn_width, 160)
+    self._accept_rect = rl.Rectangle(self._rect.x + 45 * 2 + btn_width, btn_y, btn_width, 160)
+    self._decline_btn.render(self._decline_rect)
+    self._accept_btn.render(self._accept_rect)
 
     if DEBUG:
       rl.draw_rectangle_lines_ex(welcome_rect, 3, rl.RED)
@@ -146,10 +180,10 @@ class TermsPage(Widget):
 class DeclinePage(Widget):
   def __init__(self, back_callback=None):
     super().__init__()
-    self._text = Label(tr("You must accept the Terms of Service in order to use sunnypilot."),
+    self._text = Label("You must accept the CarrotPilot-C3-ESCC safety terms before using this build.",
                        font_size=90, font_weight=FontWeight.MEDIUM, text_alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
-    self._back_btn = Button(tr("Back"), click_callback=back_callback)
-    self._uninstall_btn = Button(tr("Decline, uninstall sunnypilot"), button_style=ButtonStyle.DANGER,
+    self._back_btn = Button("Back", click_callback=back_callback)
+    self._uninstall_btn = Button("Decline, uninstall", button_style=ButtonStyle.DANGER,
                                  click_callback=self._on_uninstall_clicked)
 
   def _on_uninstall_clicked(self):
@@ -199,18 +233,21 @@ class OnboardingWindow(Widget):
     self._state = OnboardingState.DECLINE
 
   def _on_decline_back(self):
+    self._terms.reset_action()
     self._state = OnboardingState.TERMS
 
   def _on_terms_accepted(self):
-    ui_state.params.put("HasAcceptedTerms", terms_version, block=True)
-    ui_state.params.put("HasAcceptedTermsSP", terms_version_sp, block=True)
+    ui_state.params.put("HasAcceptedTerms", terms_version)
+    ui_state.params.put("HasAcceptedTermsSP", terms_version_sp)
+    self._accepted_terms = True
     if not self._training_done:
       self._state = OnboardingState.ONBOARDING
     else:
       gui_app.pop_widget()
 
   def _on_completed_training(self):
-    ui_state.params.put("CompletedTrainingVersion", training_version, block=True)
+    ui_state.params.put("CompletedTrainingVersion", training_version)
+    self._training_done = True
 
   def _render(self, _):
     if self._training_guide is None:
