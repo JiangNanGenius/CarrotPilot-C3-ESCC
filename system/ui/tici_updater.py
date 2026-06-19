@@ -50,6 +50,8 @@ class Updater(Widget):
     self._install_button = Button("Install", click_callback=self.install_update, button_style=ButtonStyle.PRIMARY)
     self._back_button = Button("Back", click_callback=lambda: self.set_current_screen(Screen.PROMPT))
     self._reboot_button = Button("Reboot", click_callback=lambda: HARDWARE.reboot())
+    for button in (self._wifi_button, self._install_button, self._back_button, self._reboot_button):
+      button.set_tap_release_move_px(80)
 
   def set_current_screen(self, screen: Screen):
     self.current_screen = screen

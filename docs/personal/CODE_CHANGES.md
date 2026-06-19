@@ -626,6 +626,26 @@ Open follow-up from the same bench test:
 - Keep the welcome/training flow, but replace the long SunnyPilot consent copy with short personal-build copy and verify that Agree advances on C3.
 - Build a real Carrot-style settings surface. The alpha must not feel like SunnyPilot with a few hidden toggles; CarrotPilot, mechanical/Auto-Tuner, ESCC, APN/N, and Fishop controls need explicit settings, descriptions, defaults, and evidence gates.
 
+## 2026-06-20 C3 Setup/Updater Touch Hotfix
+
+Published as `2026.002.000-gp.20260620.36`.
+
+After a reboot/reinstall attempt, the clone C3 reached the setup/update
+dependency screen but the Install/continue buttons could show a pressed state
+without advancing. SSH port 22 was reachable at `192.168.100.174`, but the
+device rejected the available public keys; Carrot Web/Navipilot ports were not
+running, which matches the device being stuck before normal openpilot services.
+
+The code fix keeps the stricter tap-release movement threshold for normal
+settings/menu controls, but adds a per-widget override for setup/update flows.
+TICI setup, TICI updater, and MICI setup/update pill buttons now allow larger
+press-to-release jitter, so clone C3 screen noise is less likely to cancel the
+Install or download/install callback after the button visibly presses.
+
+The local no-car UI replay wrapper was also adjusted to preserve caller
+`PYTHONPATH` precedence. That lets Mac replay runs put temporary native
+extension shadows before the C3/Linux extension files checked into the repo.
+
 ## 2026-06-20 Settings Conflict Audit And Carrot Settings Split
 
 Real-device feedback confirmed that the first Carrot settings page was operational but too flat and incomplete. The Carrot/Genius page has been split into categories:

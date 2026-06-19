@@ -3257,6 +3257,10 @@ def main() -> int:
   system_statsd = read("system/statsd.py")
   widget_core = read("system/ui/widgets/__init__.py")
   scroll_panel = read("system/ui/lib/scroll_panel.py")
+  tici_setup = read("system/ui/tici_setup.py")
+  tici_updater = read("system/ui/tici_updater.py")
+  mici_setup = read("system/ui/mici_setup.py")
+  mici_updater = read("system/ui/mici_updater.py")
   failures += not require("Sunnylink panel removed", "SunnylinkLayout" not in settings and "SUNNYLINK" not in settings,
                           "Sunnylink panel is still wired into settings")
   failures += not require("Carrot settings panel wired",
@@ -3618,12 +3622,20 @@ def main() -> int:
                           "Settings conflict notes must describe source policy, Assist gate, ATC gate, and traffic-stop gate")
   failures += not require("C3 touch menu requires deliberate release tap",
                           "TAP_RELEASE_MOVE_PX = 24" in widget_core
+                          and "self._tap_release_move_px = TAP_RELEASE_MOVE_PX" in widget_core
+                          and "def set_tap_release_move_px" in widget_core
                           and "__touch_cancelled" in widget_core
                           and "short_tap_release and not touch_cancelled and touch_valid" in widget_core
                           and "DRAG_THRESHOLD = 24" in scroll_panel
                           and "OPEN_TOUCH_GUARD_S = 0.6" in read("selfdrive/ui/layouts/settings/settings.py")
                           and "_press_panel" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py"),
                           "clone C3 touch handling must reject drag/scroll releases and avoid press-time sidebar navigation")
+  failures += not require("C3 setup updater install buttons tolerate touch jitter",
+                          "button.set_tap_release_move_px(80)" in tici_setup
+                          and "button.set_tap_release_move_px(80)" in tici_updater
+                          and "self.set_tap_release_move_px(80)" in mici_setup
+                          and "BigPillButton" in mici_updater,
+                          "setup/update install buttons must keep wider per-widget release tolerance while normal settings taps stay strict")
   failures += not require("Sidebar temperature is numeric Celsius",
                           "TEMP_FALLBACK_TEXT = tr_noop(\"--C\")" in sidebar_layout
                           and "TEMP_SCALAR_FIELDS" in sidebar_layout

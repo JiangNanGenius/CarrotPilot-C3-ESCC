@@ -44,6 +44,7 @@ class Widget(abc.ABC):
     self._click_delay: float | None = None  # seconds to hold is_pressed after release
     self._click_release_time: float | None = None
     self._click_callback: Callable[[], None] | None = None
+    self._tap_release_move_px = TAP_RELEASE_MOVE_PX
     self._multi_touch = False
     self.__was_awake = True
 
@@ -88,6 +89,10 @@ class Widget(abc.ABC):
   def set_touch_valid_callback(self, touch_callback: Callable[[], bool]) -> None:
     """Set a callback to determine if the widget can be clicked."""
     self._touch_valid_callback = touch_callback
+
+  def set_tap_release_move_px(self, move_px: int) -> None:
+    """Set the maximum press-to-release movement for this widget's click."""
+    self._tap_release_move_px = max(0, int(move_px))
 
   def _touch_valid(self) -> bool:
     """Check if the widget can be touched."""
@@ -154,8 +159,8 @@ class Widget(abc.ABC):
       press_pos = self.__press_pos[mouse_event.slot]
       short_tap_release = (
         press_pos is not None and
-        abs(mouse_event.pos.x - press_pos.x) <= TAP_RELEASE_MOVE_PX and
-        abs(mouse_event.pos.y - press_pos.y) <= TAP_RELEASE_MOVE_PX
+        abs(mouse_event.pos.x - press_pos.x) <= self._tap_release_move_px and
+        abs(mouse_event.pos.y - press_pos.y) <= self._tap_release_move_px
       )
       touch_cancelled = self.__touch_cancelled[mouse_event.slot]
 

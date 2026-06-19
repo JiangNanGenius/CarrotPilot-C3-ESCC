@@ -230,11 +230,12 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Hide and hard-disable SunnyPilot cruise black-box toggles from the alpha Cruise panel.
 - [x] Make the sidebar gear less sensitive: settings now opens on touch release and ignores close/sidebar touches during the first 0.6 seconds after entry.
 - [x] Make settings/menu taps less sensitive on clone C3: reject drag/scroll releases, shrink tap movement tolerance, and defer sidebar panel switching until release.
+- [x] Make setup/update/install dependency buttons more tolerant on clone C3 without loosening normal settings taps: per-widget tap-release movement is supported, and TICI/MICI setup/updater install buttons use a wider release tolerance.
 - [x] Add `Kia Seltos 2023` to the Sunny manual vehicle selector list so the existing `KIA_SELTOS_2023` profile is visible in the UI.
 - [x] Sync the hotfix files to the user's C3 at `192.168.100.174` and restart UI for bench testing.
 - [x] Verify the Wi-Fi fallback on device: after UI-style activation it reports SSID `zhao`, IP `192.168.100.174`, and scanned networks without `jeepney`.
 - [x] Move the device from temporary synced dirty files to pushed branch commit `ec7e73dc`.
-- [ ] User visual confirmation: Network page leaves scanning state, sidebar gear opens settings consistently, temperature displays as a number, and toggles still work.
+- [ ] User visual confirmation: setup/update install buttons advance reliably, Network page leaves scanning state, sidebar gear opens settings consistently, temperature displays as a number, and toggles still work.
 - [x] Remove the packed updater `jeepney` traceback from clean alpha installs by patching the updater payload before publishing.
 - [x] Add a release-gated contract so the sidebar temperature card cannot regress to translated `GOOD`/`HIGH` status text.
 - [x] Add a release-gated contract so the sidebar keeps four personal-build cards: temperature, vehicle, phone/Navipilot, and GPS.
