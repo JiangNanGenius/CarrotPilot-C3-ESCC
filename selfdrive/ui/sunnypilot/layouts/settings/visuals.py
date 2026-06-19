@@ -6,16 +6,49 @@ See the LICENSE.md file in the root directory for more details.
 """
 from openpilot.common.params import Params
 from openpilot.selfdrive.ui.ui_state import ui_state
+from openpilot.system.ui.lib.application import FontWeight
 from openpilot.system.ui.lib.multilang import tr, tr_noop
 from openpilot.system.ui.sunnypilot.widgets.list_view import toggle_item_sp, multiple_button_item_sp
+from openpilot.system.ui.sunnypilot.lib.styles import style
 from openpilot.system.ui.widgets.scroller_tici import Scroller
 from openpilot.system.ui.widgets import Widget
+from openpilot.system.ui.widgets.label import gui_label
+
+import pyray as rl
 
 CHEVRON_INFO_DESCRIPTION = {
   "enabled": tr_noop("Display useful metrics below the chevron that tracks the lead car " +
                      "only applicable to cars with Genius Pilot longitudinal control."),
   "disabled": tr_noop("This feature requires Genius Pilot longitudinal control to be available.")
 }
+
+
+class VisualSectionHeader(Widget):
+  def __init__(self, title, description=None):
+    super().__init__()
+    self._title = title
+    self._description = description
+    self._rect = rl.Rectangle(0, 0, 0, 112 if description else 72)
+
+  @staticmethod
+  def _resolve(value) -> str:
+    return value() if callable(value) else str(value)
+
+  def set_parent_rect(self, parent_rect: rl.Rectangle) -> None:
+    super().set_parent_rect(parent_rect)
+    self._rect.width = parent_rect.width
+
+  def _render(self, _) -> None:
+    content_x = self._rect.x + style.ITEM_PADDING
+    content_w = self._rect.width - style.ITEM_PADDING * 2
+    title_rect = rl.Rectangle(content_x, self._rect.y + 8, content_w, 44)
+    gui_label(title_rect, self._resolve(self._title), font_size=34, color=rl.Color(150, 205, 255, 255),
+              font_weight=FontWeight.SEMI_BOLD, alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
+
+    if self._description:
+      desc_rect = rl.Rectangle(content_x, self._rect.y + 54, content_w, 36)
+      gui_label(desc_rect, self._resolve(self._description), font_size=26, color=style.ITEM_TEXT_VALUE_COLOR,
+                alignment=rl.GuiTextAlignment.TEXT_ALIGN_LEFT)
 
 
 class VisualsLayout(Widget):
@@ -162,11 +195,25 @@ class VisualsLayout(Widget):
       inline=False
     )
 
+    overlay_params = ("GeniusCarrotWorldOverlay", "GeniusFishopVisualOverlay")
+    genius_toggle_params = ("GeniusLaneChangeVisuals", *overlay_params)
+    hud_toggles = [
+      toggle for param, toggle in self._toggles.items()
+      if param not in genius_toggle_params
+    ]
+
     items = [
+      VisualSectionHeader(lambda: tr("Base Display Layer"), lambda: tr("Only one base road renderer is active at a time.")),
       self._genius_visual_mode,
+      VisualSectionHeader(lambda: tr("Visual Detail Controls"), lambda: tr("These refine the selected preset without changing planner or lane-change behavior.")),
       self._genius_lane_line_style,
       self._genius_lead_radar_visual_mode,
-    ] + list(self._toggles.values()) + [
+      self._toggles["GeniusLaneChangeVisuals"],
+      VisualSectionHeader(lambda: tr("Evidence Overlays"), lambda: tr("Carrot World and Fishop are independent display-only overlays. They may be enabled together on top of any base preset when you need lane-change or hardware evidence.")),
+      self._toggles["GeniusCarrotWorldOverlay"],
+      self._toggles["GeniusFishopVisualOverlay"],
+      VisualSectionHeader(lambda: tr("General HUD Widgets"), lambda: tr("These are normal Sunny/Genius HUD widgets and do not select the base road renderer.")),
+    ] + hud_toggles + [
       self._chevron_info,
       self._dev_ui_info,
     ]
