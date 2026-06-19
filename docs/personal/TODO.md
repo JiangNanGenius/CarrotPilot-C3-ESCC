@@ -147,6 +147,7 @@
   - `FishopAutoOvertakeEnabled=0`
 - [ ] 迁移 fishop 自动超车 / APP 控制变道 / `OVERTAKE` 逻辑，必须接入现有安全变道链路，不允许绕过 turn signal、BSM、驾驶员确认、Seltos 2023 车型门禁。
 - [ ] 自动超车第一阶段只做提示和日志，第二阶段只允许建议变道，第三阶段才允许受控执行；每阶段单独实车证据。
+- [x] alpha 设备快照新增 fishop 自动超车分阶段证据账本：`fishopOvertakeStages` 固定第 1 步数据采集、第 2 步 Web/快照显示、第 3 步 hint-only、第 4 步现有安全变道链路建议审查、第 5 步受控执行实验；每阶段都有 requiredLog、`/x` alpha 安装入口、`/i` stable 回滚入口，且当前第 4/5 阶段保持 locked。
 - [x] 国内导航 / 高德相关输入只能作为辅助来源；在澳洲或导航精度不足时，不能作为自动超车或侧向控制的唯一依据：alpha 新增 fishop `navigation` 证据和 `navigationGate`，只有新鲜 Amap/Gaode + 中国区域 + 精度阈值内才允许进入 `ready_for_suggestion` 审查；其它地区/来源只输出 `overtakeHint`，且 `controlEligible=false`。
 - [x] alpha 设备快照和证据包新增 fishop 硬件采样：车道曲线、左右盲区、传感器在线、最近更新时间、自动超车状态。
 - [x] fishop 最新参考入口已确认，后续迁移先审这些源码点，不按整包合并：
@@ -430,6 +431,7 @@ flowchart TD
 - [x] 研究 `overtake` / `navi` 客户端的数据方向：fishop 参考里外设/APP 可把 `device=overtake/navi`、`index/cmd/arg`、`overtake` 请求发到 C3；C3 也会把 OP 状态发回该客户端端口和 UDP 7705。alpha 已在 `overtake.directionality` 标记 inbound/outbound，所有 APP/外设命令默认只记录为 `record_only`，不直接执行。
 - [ ] 自动超车第二阶段才允许把 `ready_for_suggestion` 交给现有安全变道链路判断；不得直接写转向目标、横向轨迹或绕过 planner。
 - [ ] 自动超车分阶段验证：只显示/只建议/受控执行，每阶段必须有单独日志和回滚点。
+- [x] alpha 快照已把自动超车分阶段验证做成机器可读证据：`data_only_capture`、`display_only_web_snapshot`、`hint_only_no_desire` 已实现且 `mayPublishDesire=false` / `maySendLateralCommand=false`；`suggestion_review_existing_safety_chain` 和 `controlled_execution_experiment` 仍 locked，必须另有实车证据、tag 和回滚安装器后才能推进。
 - [x] 高德 / 国内导航精度不足或地区不适配时，自动超车和侧向控制必须降级为不可用或只提示：alpha 解析 `provider/mapProvider/navProvider`、`country/region/locale`、`accuracyM/precisionM`、经纬度证据，`navigationGate` 将澳洲/Mapbox/缺失或低精度数据降级为 `hint_only`，不输出 desire、laneChange 或横控命令。
 - [x] 每次启用 fishop 硬件控制相关功能前，证据包必须证明云进程不存在、ESCC 正常、基础横控正常、传感器数据新鲜且一致；alpha 快照脚本已新增 `carParamsSP` ESCC 证据和 `fishopReleaseGate`，检查 `cloudProcessesAbsent`、`cloudParamsDisabled`、`seltosSccFingerprint`、`esccDetected`、`pandaEvidencePresent`、`fishopParsed`、`fishopSensorFresh`、`fishopOvertakeDisplayOnly`，并提供 `--require-fishop-release-gate` 失败开关。没有 C3/实车证据时门禁会显示 missing/fail，不会误判通过。
 - [x] P8 fishop 硬件增强图流：
@@ -452,7 +454,7 @@ flowchart LR
 - [ ] P8 fishop 放行顺序：
   - 第 1 步：只接收数据，证明左右不反、超时可清零、断线不会残留盲区状态；alpha 静态和样例已覆盖，仍需 C3 停车/实车日志。
   - 第 2 步：只在 Web/UI 显示，不发提示、不影响 planner；alpha Web 已显示 lane、blindspot、dynamicBlind 和 overtake suggestion 预览，快照 `fishopReleaseGate` 已能汇总放行证据，仍需设备验证。
-  - 第 3 步：只发提示，不产生 desire；alpha Web/API 已提供 `overtakeHint` 和 `navigationGate`，车机 UI 提示尚未完成。
+  - 第 3 步：只发提示，不产生 desire；alpha Web/API 已提供 `overtakeHint` 和 `navigationGate`，快照 `fishopOvertakeStages` 已记录 hint-only requiredLog 和回滚入口，车机 UI 提示尚未完成。
   - 第 4 步：只产生建议 desire，现有安全变道链路可拒绝。
   - 第 5 步：受控执行实验，必须有驾驶员确认、回滚安装器和完整证据。
 
@@ -506,6 +508,7 @@ flowchart LR
 - [x] 静态检查 fishop 自动超车不能绕过安全变道链路：当前 alpha 要求 `FishopAutoOvertakeEnabled` 不进入 control/car 输出面，`OVERTAKE` / `AUTO_OVERTAKE` 只作为 ignored evidence，fishop 解析器不得引用 desire、planner、CarControl、sendcan 或转向灯/盲区控制字段。
 - [x] 静态检查 fishop 只读层没有控制输出路径，自动超车输入只记录为 read-only 证据。
 - [x] 静态检查 fishop 自动超车导航/地区降级门：无导航上下文、澳洲/非高德来源、缺失或低精度导航都不能进入 `ready_for_suggestion`；只有新鲜 Amap/Gaode + 中国区域 + 精度阈值内才可进入建议审查，且 `controlEligible=false`、`emitsLateralCommand=false`。
+- [x] 静态检查 fishop 自动超车分阶段证据账本：快照必须输出 `fishopOvertakeStages`、第 1-5 阶段 requiredLog、`/x` alpha 安装入口、`/i` stable 回滚入口；已实现阶段必须 `controlOutput=false`、`mayPublishDesire=false`、`maySendLateralCommand=false`，第 4/5 阶段保持 locked。
 - [x] 静态检查 Carrot Web/UI 不默认加载 Mapbox/Kakao 外部地图 SDK 或 iframe 覆盖层。
 - [x] 静态检查 Carrot Web 参数接口白名单、onroad 改值保护、Offroad/fishop 高风险只读和 SpeedLimitMode assist 禁止。
 - [x] 静态检查 CP搭子 / Navipilot 参数接口兼容：`/api/params_bulk` 支持 GET/POST，响应保留 `has_params`，`ExperimentalMode`/`ExperimentalModeConfirmed` 可写，`SpeedFromPCM`、Offroad、Carrot 高风险项和 fishop 自动超车只读。
