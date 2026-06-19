@@ -64,6 +64,7 @@ parametrized_policies = parameterized.expand(
     (Policy.car_state_priority, 'carStateSP', SpeedLimitSource.car),
     (Policy.map_data_only, 'liveMapDataSP', SpeedLimitSource.map),
     (Policy.map_data_priority, 'liveMapDataSP', SpeedLimitSource.map),
+    (Policy.phone_priority, 'carStateSP', SpeedLimitSource.car),
   ],
   names=["policy", "sm_key", "function_key"]
 )

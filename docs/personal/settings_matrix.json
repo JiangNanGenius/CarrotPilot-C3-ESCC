@@ -357,7 +357,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "SpeedLimitPolicy",
-      "notes": "Phone-first resolver policy.",
+      "notes": "Phone-first resolver policy: fresh phone/APN/N/Navipilot/Carrot data, then vehicle/cluster. OSM/mapd is opt-in through map policies.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": false,
@@ -639,7 +639,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CarrotActiveSpeedControlEnabled",
-      "notes": "User-toggleable while offroad; controls active speed path gate.",
+      "notes": "User-toggleable while offroad; Carrot cruise-target gate. Speed-limit changes still require SpeedLimitMode=Assist.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -671,7 +671,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CarrotAutoTurnControlEnabled",
-      "notes": "",
+      "notes": "Separate ATC/turn slowdown gate; CarrotCruiseAtcDecel belongs to this path only.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,
@@ -1108,7 +1108,7 @@
       "forbid_tokens": [],
       "inverse_semantics": "no",
       "key": "CarrotCruiseAtcDecel",
-      "notes": "-1 means Auto.",
+      "notes": "-1 means Auto. ATC-only decel target; higher allows stronger requested turn slowdown, lower softens it.",
       "owner": "carrot",
       "reference_hits": {
         "ajouatom-c3-wip": true,

@@ -45,20 +45,17 @@ class SpeedLimitResolver:
     self.distance_solutions = {}  # Store for distance to current speed limit start for different sources
     self.source_labels = {}  # Store a human-readable source label for logging/UI evidence
 
-    self.policy = self.params.get("SpeedLimitPolicy", return_default=True)
-    self.policy = get_sanitize_int_param(
-      "SpeedLimitPolicy",
-      Policy.min().value,
-      Policy.max().value,
-      self.params
-    )
+    self.policy = self._read_policy()
     self._policy_to_sources_map = {
       Policy.car_state_only: [SpeedLimitSource.car],
       Policy.map_data_only: [SpeedLimitSource.map],
       Policy.car_state_priority: [SpeedLimitSource.car, SpeedLimitSource.map],
       Policy.map_data_priority: [SpeedLimitSource.map, SpeedLimitSource.car],
       Policy.combined: [SpeedLimitSource.car, SpeedLimitSource.map],
-      Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car, SpeedLimitSource.map],
+      # Genius Pilot default: Carrot/APN/N/Navipilot phone data first, then
+      # vehicle/cluster data. Sunny map/GPS limits stay opt-in through the
+      # explicit map policies to avoid GPS/mapd becoming the default truth.
+      Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car],
     }
     self.source = SpeedLimitSource.none
     self.source_label = ""
@@ -97,10 +94,18 @@ class SpeedLimitResolver:
 
   def update_params(self):
     if self.frame % int(PARAMS_UPDATE_PERIOD / DT_MDL) == 0:
-      self.policy = self.params.get("SpeedLimitPolicy", return_default=True)
+      self.policy = self._read_policy()
       self.is_metric = self.params.get_bool("IsMetric")
       self.offset_type = self.params.get("SpeedLimitOffsetType", return_default=True)
       self.offset_value = self.params.get("SpeedLimitValueOffset", return_default=True)
+
+  def _read_policy(self) -> Policy:
+    return get_sanitize_int_param(
+      "SpeedLimitPolicy",
+      Policy.min().value,
+      Policy.max().value,
+      self.params
+    )
 
   def _get_speed_limit_offset(self) -> float:
     if self.offset_type == OffsetType.off:
@@ -209,9 +214,16 @@ class SpeedLimitResolver:
 
   def _resolve_limit_sources(self, sm: messaging.SubMaster) -> tuple[float, float, custom.LongitudinalPlanSP.SpeedLimit.Source]:
     """Get limit solutions from each data source"""
-    self._get_from_phone_data()
-    self._get_from_car_state(sm)
-    self._get_from_map_data(sm)
+    for source in ALL_SOURCES:
+      self._reset_limit_sources(source)
+
+    sources_for_policy = self._policy_to_sources_map[self.policy]
+    if SpeedLimitSource.phone in sources_for_policy:
+      self._get_from_phone_data()
+    if SpeedLimitSource.car in sources_for_policy:
+      self._get_from_car_state(sm)
+    if SpeedLimitSource.map in sources_for_policy:
+      self._get_from_map_data(sm)
 
     source = self._get_source_solution_according_to_policy()
     speed_limit = self.limit_solutions[source] if source else 0.

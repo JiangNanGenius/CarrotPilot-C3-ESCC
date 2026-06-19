@@ -822,10 +822,12 @@ def check_route_speed_truth_contract(
       if token in text:
         return False, f"{name} contains route/map overlay token {token}"
 
-  if "Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car, SpeedLimitSource.map]" not in resolver:
-    return False, "phone_priority must stay ordered phone > car > map"
-  if "self._get_from_phone_data()" not in resolver or "self._get_from_car_state(sm)" not in resolver or "self._get_from_map_data(sm)" not in resolver:
-    return False, "resolver must collect only phone, car, and map speed-limit sources"
+  if "Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car]" not in resolver:
+    return False, "phone_priority must stay ordered phone > car without default map/GPS fallback"
+  if "if SpeedLimitSource.map in sources_for_policy:" not in resolver or "self._get_from_map_data(sm)" not in resolver:
+    return False, "resolver must collect map/GPS speed limits only when the selected policy includes map"
+  if "if SpeedLimitSource.phone in sources_for_policy:" not in resolver or "if SpeedLimitSource.car in sources_for_policy:" not in resolver:
+    return False, "resolver must collect phone and vehicle speed limits according to the selected policy"
 
   try:
     kph_start = carrot_server.index("PHONE_SPEED_LIMIT_KPH_FIELDS = (")
@@ -2238,11 +2240,19 @@ def main() -> int:
                             b"FishopLaneCurveEnabled",
                             b"NeuralNetworkLateralControl",
                             b"GeniusVisualMode",
+                            b"GeniusSpeedLimitPolicyMigrated",
                             b"GeniusLaneLineStyle",
                             b"GeniusLeadRadarVisualMode",
                             b"GeniusCarrotWorldOverlay",
                           )),
                           "common/params_pyx.so must be rebuilt when alpha params_keys.h adds local Carrot/Fishop/Genius keys")
+  params_migration = read("sunnypilot/system/params_migration.py")
+  failures += not require("SpeedLimitPolicy phone-first migration",
+                          "GeniusSpeedLimitPolicyMigrated" in params
+                          and "SPEED_LIMIT_POLICY_MIGRATION_VERSION" in params_migration
+                          and 'val == 3' in params_migration
+                          and '_params.put("SpeedLimitPolicy", 5' in params_migration,
+                          "early alpha Map First default must migrate once to Phone First without overriding later user choices")
   for key in (
     "CarrotLearningData",
     "CarrotLearningRecommend",
@@ -3315,6 +3325,11 @@ def main() -> int:
                             "Cruise Button Behavior",
                             "model-speed evidence",
                             "staged Carrot controls above",
+                            "Phone First Speed Limit",
+                            "Default source order is Phone/APN/N first, then vehicle/cluster speed",
+                            "Map/GPS limits are opt-in",
+                            "Speed Limit mode must be Assist",
+                            "Deceleration target used only by Auto Turn Control",
                           ))
                           and "return bool(ui_state.is_offroad() and has_long)" in cruise_settings
                           and all(token not in cruise_settings for token in (
@@ -3326,6 +3341,32 @@ def main() -> int:
                             "scc_m_toggle",
                           )),
                           "Cruise panel should expose daily Carrot speed, curve, traffic-light, model-speed, following, and local speed-increment controls without legacy Sunny ICBM/SCC-V/SCC-M widgets")
+  speed_limit_settings = read("selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py")
+  speed_limit_policy = read("selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py")
+  failures += not require("Speed Limit page exposes Carrot-first source policy",
+                          all(token in speed_limit_settings + speed_limit_policy for token in (
+                            "PHONE FIRST",
+                            "Default source order is Phone First",
+                            "fresh APN/N, Navipilot, or Carrot phone data",
+                            "vehicle/cluster speed limit",
+                            "OpenStreetMap/mapd is not used unless you choose a map policy",
+                            "OpenStreetMap/mapd is opt-in through the map policies",
+                            "Assist: May adjust cruise targets on supported cars. Use only after phone and vehicle sources have been verified; test map policies separately.",
+                          )),
+                          "Speed Limit settings must show Phone/APN/N/Carrot first, vehicle second, and map/GPS as opt-in")
+  settings_conflicts = read("docs/personal/SETTINGS_CONFLICTS.md")
+  failures += not require("Carrot active control conflicts documented",
+                          all(token in settings_conflicts for token in (
+                            "These controls are staged gates, not one shared switch",
+                            "SpeedLimitPolicy=Phone First",
+                            "OSM/mapd is opt-in",
+                            "SpeedLimitMode=Assist",
+                            "CarrotActiveSpeedControlEnabled",
+                            "CarrotAutoTurnControlEnabled",
+                            "`CarrotCruiseAtcDecel` only affects this path",
+                            "CarrotTrafficStopEnabled",
+                          )),
+                          "Settings conflict notes must describe source policy, Assist gate, ATC gate, and traffic-stop gate")
   failures += not require("C3 touch menu requires deliberate release tap",
                           "TAP_RELEASE_MOVE_PX = 24" in widget_core
                           and "__touch_cancelled" in widget_core
@@ -3402,9 +3443,9 @@ def main() -> int:
     "Stock is the default. Select or download custom model bundles only while offroad; failed bundles fall back to stock or the last valid model.",
     "Only available while offroad. Do not change model bundles during a drive.",
     "Information: Displays the resolved speed limit only. This is the default and does not change cruise targets.",
-    "Assist: May adjust cruise targets on supported cars. Use only after phone, car, and map sources have been verified.",
+    "Assist: May adjust cruise targets on supported cars. Use only after phone and vehicle sources have been verified; test map policies separately.",
     "None: No offset. This is the default and safest setting.",
-    "Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle, then OpenStreetMap/mapd.",
+    "Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle/cluster data. OpenStreetMap/mapd is opt-in through the map policies.",
   ):
     failures += not require(f"Simplified Chinese safety translation exists: {msgid[:40]}", po_has_translation(zh_chs_po, msgid),
                             "critical risk/default descriptions must remain translated in app_zh-CHS.po")
@@ -3659,8 +3700,9 @@ def main() -> int:
                           "speed limit policy enum must include phone_priority")
   failures += not require("phone resolver timeout", "PHONE_SPEED_LIMIT_MAX_AGE_S" in resolver and "CarrotPhoneSpeedLimitUpdatedAt" in resolver,
                           "resolver must reject stale phone speed data")
-  failures += not require("phone source priority", "Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car, SpeedLimitSource.map]" in resolver,
-                          "phone_priority must resolve phone, car, then map")
+  failures += not require("phone source priority", "Policy.phone_priority: [SpeedLimitSource.phone, SpeedLimitSource.car]" in resolver
+                          and "if SpeedLimitSource.map in sources_for_policy:" in resolver,
+                          "phone_priority must resolve phone then vehicle/cluster; map/GPS may only run for explicit map policies")
   ok, detail = check_route_speed_truth_contract(custom_capnp, resolver, common, planner, carrot_server)
   failures += not require("route/map overlay not speed truth", ok,
                           detail or "Mapbox/Kakao/Carrot route must stay display/evidence-only, not a speed-limit truth source")

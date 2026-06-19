@@ -23,7 +23,7 @@ SPEED_LIMIT_POLICY_DESCRIPTIONS = [
   tr("Car First: Use vehicle speed limit first; fall back to OpenStreetMap/mapd."),
   tr("Map First: Use OpenStreetMap/mapd first; fall back to vehicle speed limit."),
   tr("Combined: Use combined vehicle and OpenStreetMap/mapd data."),
-  tr("Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle, then OpenStreetMap/mapd.")
+  tr("Phone First: Use fresh APN/N, Navipilot, or Carrot phone data first. Stale phone data times out, then falls back to vehicle/cluster data. OpenStreetMap/mapd is opt-in through the map policies.")
 ]
 
 

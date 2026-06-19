@@ -237,7 +237,7 @@ class CarrotLayout(Widget):
       self._home_button(
         PanelType.AUTOTUNER,
         "Auto-Tuner",
-        "Local learning, recommendation apply gates, and tuning history. Auto apply remains off by default.",
+        "Local learning, recommendation apply gates, and tuning history. Recommendations name the target value and whether raising or lowering it changes acceleration, following, lead response, lane centering, or actuator delay.",
       ),
       self._home_button(
         PanelType.STEERING,
@@ -319,13 +319,13 @@ class CarrotLayout(Widget):
       self._toggle(
         "CarrotActiveSpeedControlEnabled",
         lambda: tr("Carrot Active Speed Control"),
-        lambda: tr("Allow Carrot speed-limit, navigation, and model-speed logic to adjust the cruise target."),
+        lambda: tr("Master gate for Carrot cruise-target changes. Speed-limit data still needs Speed Limit Assist; turn slowdown and red-light stop keep their own separate gates."),
         lambda: ui_state.is_offroad(),
       ),
       self._toggle(
         "CarrotAutoTurnControlEnabled",
         lambda: tr("Carrot Auto Turn Slowdown"),
-        lambda: tr("Use Carrot navigation and curve information to slow for turns and junctions."),
+        lambda: tr("Separate ATC/turn gate. It uses Turn Speed Control Mode and ATC Decel, and should be tested separately from active speed-limit assist and red-light stop."),
         lambda: ui_state.is_offroad(),
       ),
       self._toggle(
@@ -410,7 +410,7 @@ class CarrotLayout(Widget):
         lambda: tr("ATC Decel"),
         -1,
         200,
-        lambda: tr("Deceleration target used by Auto Turn Control. Auto uses the current Carrot default."),
+        lambda: tr("Deceleration target used only by Auto Turn Control. Auto uses the current Carrot default; higher allows stronger requested turn slowdown, lower softens it."),
         5,
         self._auto_percent_label,
       ),
@@ -498,32 +498,32 @@ class CarrotLayout(Widget):
       self._toggle(
         "CarrotLearningActive",
         lambda: tr("Auto-Tuner Learning"),
-        lambda: tr("Collect local driving data and prepare tuning recommendations. This does not apply changes by itself."),
+        lambda: tr("Collect local evidence for acceleration bands, following gaps, braking response, lane centering, and steering delay. This only prepares recommendations; it never changes tuning values by itself."),
         True,
       ),
       self._toggle(
         "CarrotLearningAutoApply",
         lambda: tr("Auto-Tuner Auto Apply"),
-        lambda: tr("Automatically apply Auto-Tuner recommendations while parked."),
+        lambda: tr("Automatically apply pending recommendations only while parked. The effect depends on the listed target: higher Cruise Accel is stronger, higher Follow Gap is farther, higher Lead Response is more conservative, and higher Steering Delay adds more delay compensation."),
         lambda: ui_state.is_offroad(),
       ),
       self._toggle(
         "CarrotTunerApplyLat",
         lambda: tr("Apply Lateral Recommendations"),
-        lambda: tr("Allow Auto-Tuner to apply lateral tuning recommendations when a manual or parked apply action is used."),
+        lambda: tr("Allow lateral recommendations during manual/parked apply. Path Offset: negative shifts left, positive shifts right. Steering Delay: higher adds delay compensation. Steer Ratio Rate: 100 is neutral."),
         lambda: ui_state.is_offroad(),
       ),
       self._toggle(
         "CarrotTunerApplyLong",
         lambda: tr("Apply Longitudinal Recommendations"),
-        lambda: tr("Allow Auto-Tuner to apply longitudinal tuning recommendations when a manual or parked apply action is used."),
+        lambda: tr("Allow longitudinal recommendations during manual/parked apply. Higher Cruise Accel feels stronger, higher Follow Gap leaves more room, higher Lead Response reacts earlier/stronger, and higher Stop Distance stops farther back."),
         lambda: ui_state.is_offroad(),
       ),
       LineSeparatorSP(40),
       self._tracked_item(button_item_sp(
         title=lambda: tr("Apply Pending Recommendation"),
         button_text=lambda: tr("APPLY"),
-        description=lambda: tr("Manual apply is blocked while onroad. Review the recommendation first; this changes stored tuning values."),
+        description=lambda: tr("Manual apply is blocked while onroad. If no recommendation is pending, no value changes. If pending, only the listed captured/current/recommended values are written."),
         callback=lambda: self._confirm_flag("CarrotLearningApply", tr("Apply pending Auto-Tuner recommendation?")),
         enabled=lambda: ui_state.is_offroad(),
       )),
@@ -720,7 +720,7 @@ class CarrotLayout(Widget):
 
   @staticmethod
   def _show_conflict_info():
-    gui_app.push_widget(alert_dialog(tr("Sunny DEC controls longitudinal mode selection. Carrot speed logic, ATC, red-light stop, and Fishop hardware settings are separate Genius Pilot feature paths. ICBM, SCC-V, and SCC-M are hidden here so cruise behavior stays Carrot-style.")))
+    gui_app.push_widget(alert_dialog(tr("Speed-limit source, active speed, ATC/turn slowdown, and red-light stop are staged gates, not one shared switch. Phone First chooses Carrot/APN/N/Navipilot phone data first, then vehicle/cluster data; Sunny map/GPS limits are opt-in through map policies. Speed Limit Assist decides whether that source may change cruise. Carrot Active Speed is the Carrot cruise-target gate. ATC and Traffic Light Stop can request lower targets through their own gates. Sunny DEC only selects longitudinal style; ICBM, SCC-V, and SCC-M stay hidden/inert so they do not fight Carrot control.")))
 
   def _show_descriptions(self):
     for item in self._all_items:

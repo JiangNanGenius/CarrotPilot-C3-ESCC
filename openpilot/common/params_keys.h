@@ -161,6 +161,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"GeniusLaneChangeVisuals", {PERSISTENT | BACKUP, BOOL, "1"}},
     {"GeniusLaneLineStyle", {PERSISTENT | BACKUP, INT, "1"}},
     {"GeniusLeadRadarVisualMode", {PERSISTENT | BACKUP, INT, "1"}},
+    {"GeniusSpeedLimitPolicyMigrated", {PERSISTENT | BACKUP, STRING, "0.0"}},
     {"GeniusVisualMode", {PERSISTENT | BACKUP, INT, "2"}},
     {"GreenLightAlert", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"GithubRunnerSufficientVoltage", {CLEAR_ON_MANAGER_START , BOOL}},

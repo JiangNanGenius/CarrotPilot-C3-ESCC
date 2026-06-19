@@ -63,7 +63,9 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 ## Speed Limit And Maps
 
 - [x] Add phone/APN/N/Navipilot speed source with freshness timeout.
-- [x] Default speed source order: fresh phone, car/instrument, Sunny OSM/mapd.
+- [x] Default speed source order: fresh phone/APN/N/Navipilot/Carrot data, then car/instrument; Sunny OSM/mapd is opt-in through explicit map policies.
+- [x] Migrate early alpha `SpeedLimitPolicy=3` Map First devices back to Phone First so old installs do not keep Sunny map/GPS as the default speed truth.
+- [x] Make the Speed Limit panel show Phone First priority and explain that map/GPS policies are separate opt-in choices.
 - [x] Keep route and map display from becoming speed-limit truth by default.
 - [x] Default speed offset to zero.
 - [x] Add fixed and percentage speed offset modes.
@@ -120,6 +122,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Rename the Carrot sidebar entry to `Super Advanced` while keeping the page as the Carrot/Genius advanced feature hub.
 - [x] Embed common staged Carrot longitudinal controls into the Cruise page: speed-limit entry, Sunny DEC, stop distance, dynamic following, decel follow boost, and follow-gap presets.
 - [x] Add a bilingual Carrot settings guide that documents confusing units and tuning directions for curve speed, navigation decel, cruise acceleration table, longitudinal tuning, path offset, steering delay, Auto-Tuner, and Fishop evidence.
+- [x] Expand Auto-Tuner descriptions so every recommendation target explains what higher/lower values mean: acceleration, following gap, lead response, stop distance, path offset, steering delay, and steer ratio.
 - [x] Add a release-gated contract so corrected Carrot setting descriptions and the Balanced label cannot silently regress.
 - [x] Remove the remaining hidden Sunny ICBM runtime from `selfdrived` and keep its state output inactive/none for log compatibility.
 - [x] Add Super Advanced controls for active speed, ATC/auto-turn, traffic-light stop, traffic-light detect mode, stop-distance adjustment, Carrot rain/wet mode, curve-speed strategy, curve tuning, driving mode, Eco, ATC decel, cruise decel, following, longitudinal gains, lane-line speed, and lane-line curve speed.

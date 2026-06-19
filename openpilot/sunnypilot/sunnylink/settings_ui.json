@@ -816,7 +816,7 @@
                   "key": "SpeedLimitMode",
                   "widget": "multiple_button",
                   "title": "Speed Limit Assist Mode",
-                  "description": "Information only displays the resolved speed limit. Warning adds alerts. Assist can change the cruise target on supported cars; leave Assist off until phone, car, and map sources have been verified in the real vehicle.",
+                  "description": "Information only displays the resolved speed limit. Warning adds alerts. Assist can change the cruise target on supported cars; leave Assist off until phone and vehicle sources have been verified in the real vehicle. Test map policies separately.",
                   "options": [
                     {
                       "value": 0,
@@ -883,7 +883,7 @@
                   "key": "SpeedLimitPolicy",
                   "widget": "multiple_button",
                   "title": "Speed Limit Source",
-                  "description": "Phone First uses fresh APN/N/Navipilot/Carrot phone data first; stale phone data times out, then the resolver falls back to the vehicle speed limit and then OpenStreetMap/mapd.",
+                  "description": "Phone First uses fresh APN/N/Navipilot/Carrot phone data first; stale phone data times out, then the resolver falls back to the vehicle or cluster speed limit. OpenStreetMap/mapd is opt-in through map policies and is not the default speed truth.",
                   "options": [
                     {
                       "value": 0,

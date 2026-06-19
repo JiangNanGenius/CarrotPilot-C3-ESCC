@@ -14,7 +14,7 @@ from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.common import Mode 
 from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.common import OffsetType as SpeedLimitOffsetType
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.sunnypilot.widgets import get_highlighted_description
-from openpilot.system.ui.sunnypilot.widgets.list_view import multiple_button_item_sp, option_item_sp, simple_button_item_sp, LineSeparatorSP
+from openpilot.system.ui.sunnypilot.widgets.list_view import multiple_button_item_sp, option_item_sp, button_item_sp, LineSeparatorSP
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.widgets.network import NavButton
 from openpilot.system.ui.widgets.scroller_tici import Scroller
@@ -26,7 +26,7 @@ SPEED_LIMIT_MODE_DESCRIPTIONS = [
   tr("Off: Disables speed limit display, warnings, and assist."),
   tr("Information: Displays the resolved speed limit only. This is the default and does not change cruise targets."),
   tr("Warning: Displays the limit and warns when current speed exceeds it."),
-  tr("Assist: May adjust cruise targets on supported cars. Use only after phone, car, and map sources have been verified."),
+  tr("Assist: May adjust cruise targets on supported cars. Use only after phone and vehicle sources have been verified; test map policies separately."),
 ]
 
 SPEED_LIMIT_OFFSET_DESCRIPTIONS = [
@@ -63,9 +63,10 @@ class SpeedLimitSettingsLayout(Widget):
       button_width=380,
     )
 
-    self._source_button = simple_button_item_sp(
-      button_text=lambda: tr("Customize Source"),
-      button_width=720,
+    self._source_button = button_item_sp(
+      title=lambda: tr("Speed Limit Source"),
+      button_text=lambda: tr("PHONE FIRST"),
+      description=lambda: tr("Default source order is Phone First: fresh APN/N, Navipilot, or Carrot phone data, then vehicle/cluster speed limit. OpenStreetMap/mapd is not used unless you choose a map policy."),
       callback=lambda: self._set_current_panel(PanelType.POLICY)
     )
 
@@ -172,6 +173,7 @@ class SpeedLimitSettingsLayout(Widget):
     self._current_panel = PanelType.SETTINGS
     self._scroller.show_event()
     self._speed_limit_mode.show_description(True)
+    self._source_button.show_description(True)
 
   def hide_event(self):
     self._current_panel = PanelType.SETTINGS

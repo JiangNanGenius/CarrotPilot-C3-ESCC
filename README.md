@@ -85,8 +85,8 @@ Local networking remains enabled for maintenance:
 - Seltos 2023 SCC profile and ESCC auto-detection.
 - Sunny native model manager and `modeld_tinygrad`, with stock model as the
   default.
-- Phone-first speed-limit input from APN/N/Navipilot/Carrot, then vehicle speed
-  limit, then OSM/mapd.
+- Phone-first speed-limit input from APN/N/Navipilot/Carrot, then vehicle or
+  cluster speed limit. OSM/mapd is available only when a map policy is selected.
 - Fixed and percentage speed-limit offset; default offset is zero.
 - `CarrotMapOverlayEnabled=0` by default so external map overlays do not cover
   the HUD.
