@@ -264,9 +264,9 @@ def check_offroad_wiring(report: Report) -> None:
   report.require_contains("manager checks EnableConnect", "system/manager/manager.py", 'params.get_int("EnableConnect")')
   report.require_contains("manager keeps unregistered dongle id", "system/manager/manager.py", "UNREGISTERED_DONGLE_ID")
   report.require_contains("registration returns unregistered id when Connect is disabled", "system/athena/registration.py", "return UNREGISTERED_DONGLE_ID")
-  report.require_contains("registration skips when connect disabled", "system/athena/registration.py", 'params.get_int("EnableConnect") <= 0')
+  report.require_contains("registration skips when connect disabled", "system/athena/registration.py", 'params.get_int("EnableConnect") != 1')
   report.require_contains("local updater remains available offroad", "system/manager/process_config.py", 'return not started and params.get_bool("SoftwareMenu")')
-  report.require_contains("remote connect process uses EnableConnect only", "system/manager/process_config.py", 'return params.get_int("EnableConnect") > 0')
+  report.require_contains("remote connect process is hard-disabled", "system/manager/process_config.py", 'DaemonProcess("manage_athenad", "system.athena.manage_athenad", "AthenadPid", enabled=False)')
   report.require_regex("native setting exposes AlwaysOffroad", "selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("AlwaysOffroad".*?, 0, 1, 1\)')
   report.require_regex("native setting keeps EnableConnect binary", "selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("EnableConnect".*?, 0, 1, 1\)')
 

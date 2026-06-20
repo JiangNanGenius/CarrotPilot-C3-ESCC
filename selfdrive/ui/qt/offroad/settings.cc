@@ -281,14 +281,6 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   )");
   addItem(init_layout);
 
-  pair_device = new ButtonControl(tr("Pair Device"), tr("PAIR"),
-                                  tr("Pair your device with comma connect (connect.comma.ai) and claim your comma prime offer."));
-  connect(pair_device, &ButtonControl::clicked, [=]() {
-    PairingPopup popup(this);
-    popup.exec();
-  });
-  addItem(pair_device);
-
   // offroad-only buttons
 
   auto dcamBtn = new ButtonControl(tr("Driver Camera"), tr("PREVIEW"),
@@ -349,14 +341,9 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   });
   addItem(translateBtn);
 
-  QObject::connect(uiState()->prime_state, &PrimeState::changed, [this] (PrimeState::Type type) {
-    pair_device->setVisible(type == PrimeState::PRIME_TYPE_UNPAIRED);
-  });
   QObject::connect(uiState(), &UIState::offroadTransition, [=](bool offroad) {
     for (auto btn : findChildren<ButtonControl *>()) {
-      if (btn != pair_device) {
-        btn->setEnabled(offroad);
-      }
+      btn->setEnabled(offroad);
     }
     translateBtn->setEnabled(true);
     statusCalibBtn->setEnabled(true);

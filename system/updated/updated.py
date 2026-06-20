@@ -332,7 +332,7 @@ class Updater:
       else:
         extra_text = exception
       set_offroad_alert("Offroad_UpdateFailed", True, extra_text=extra_text)
-    elif failed_count > 0:
+    elif failed_count > 0 and self.params.get_int("EnableConnect") == 1:
       if dt.days > DAYS_NO_CONNECTIVITY_MAX:
         set_offroad_alert("Offroad_ConnectivityNeeded", True)
       elif dt.days > DAYS_NO_CONNECTIVITY_PROMPT:

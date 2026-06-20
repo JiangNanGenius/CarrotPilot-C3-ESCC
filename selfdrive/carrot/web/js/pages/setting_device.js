@@ -375,7 +375,6 @@ function renderDeviceGroupItems(groupId, values) {
     html += renderDeviceActionRow(getUIText("reboot", "Reboot"), getUIText("reboot_device_desc", "Reboot device"), getUIText("reboot", "Reboot"), "btnDeviceReboot");
     html += renderDeviceActionRow(getUIText("recalibration", "ReCalibration"), "", getUIText("reset", "Reset"), "btnDeviceRecalib");
     html += renderDeviceActionRow(getUIText("power_off", "Power Off"), getUIText("power_off_desc", "Power off device"), getUIText("power_off", "Power Off"), "btnDevicePoweroff", "smallBtn btn--danger");
-    html += renderDeviceActionRow(getUIText("pair_device", "Pair Device"), getUIText("pair_device_desc", "Pair your device with comma connect (connect.comma.ai) and claim your comma prime offer."), getUIText("pair", "PAIR"), "btnDevicePair", "smallBtn", true);
     html += renderDeviceActionRow(getUIText("driver_camera", "Driver Camera"), getUIText("driver_camera_desc", "Preview the driver facing camera to ensure that driver monitoring has good visibility. (vehicle must be off)"), getUIText("preview", "PREVIEW"), "btnDeviceDriverCamera", "smallBtn", true);
     html += renderDeviceActionRow(getUIText("review_training_guide", "Review Training Guide"), getUIText("review_training_desc", "Review the rules, features, and limitations of openpilot"), getUIText("review", "Review"), "btnDeviceTraining");
     html += renderDeviceActionRow(getUIText("calibration_status", "Calibration Status"), "", getUIText("show_upper", "SHOW"), "btnDeviceCalibrationStatus");

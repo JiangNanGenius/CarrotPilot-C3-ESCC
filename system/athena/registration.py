@@ -37,7 +37,8 @@ def register(show_spinner=False) -> str | None:
   """
   params = Params()
 
-  if params.get_int("EnableConnect") <= 0:
+  if params.get_int("EnableConnect") != 1:
+    params.put("EnableConnect", "0")
     params.put("DongleId", UNREGISTERED_DONGLE_ID)
     cloudlog.warning("EnableConnect disabled: skipping online registration")
     return UNREGISTERED_DONGLE_ID

@@ -168,37 +168,24 @@ OffroadHome::OffroadHome(QWidget* parent) : QFrame(parent) {
     home_layout->setContentsMargins(0, 0, 0, 0);
     home_layout->setSpacing(30);
 
-    // left: PrimeAdWidget
-    QStackedWidget *left_widget = new QStackedWidget(this);
-    QVBoxLayout *left_prime_layout = new QVBoxLayout();
-    left_prime_layout->setContentsMargins(0, 0, 0, 0);
-    QWidget *prime_user = new PrimeUserWidget();
-    prime_user->setStyleSheet(R"(
-    border-radius: 10px;
-    background-color: #333333;
-    )");
-    left_prime_layout->addWidget(prime_user);
-    left_prime_layout->addStretch();
-    left_widget->addWidget(new LayoutWidget(left_prime_layout));
-    left_widget->addWidget(new PrimeAdWidget);
-    left_widget->setStyleSheet("border-radius: 10px;");
+    // left: ExperimentalModeButton
+    QWidget* left_widget = new QWidget(this);
+    QVBoxLayout* left_column = new QVBoxLayout(left_widget);
+    left_column->setContentsMargins(0, 0, 0, 0);
+    left_column->setSpacing(30);
 
-    connect(uiState()->prime_state, &PrimeState::changed, [left_widget]() {
-      left_widget->setCurrentIndex(uiState()->prime_state->isSubscribed() ? 0 : 1);
-    });
+    ExperimentalModeButton *experimental_mode = new ExperimentalModeButton(this);
+    QObject::connect(experimental_mode, &ExperimentalModeButton::openSettings, this, &OffroadHome::openSettings);
+    left_column->addWidget(experimental_mode, 1);
 
     home_layout->addWidget(left_widget, 1);
 
-    // right: ExperimentalModeButton, SetupWidget
+    // right: local setup widget
     QWidget* right_widget = new QWidget(this);
     QVBoxLayout* right_column = new QVBoxLayout(right_widget);
     right_column->setContentsMargins(0, 0, 0, 0);
     right_widget->setFixedWidth(750);
     right_column->setSpacing(30);
-
-    ExperimentalModeButton *experimental_mode = new ExperimentalModeButton(this);
-    QObject::connect(experimental_mode, &ExperimentalModeButton::openSettings, this, &OffroadHome::openSettings);
-    right_column->addWidget(experimental_mode, 1);
 
     SetupWidget *setup_widget = new SetupWidget;
     QObject::connect(setup_widget, &SetupWidget::openSettings, this, &OffroadHome::openSettings);

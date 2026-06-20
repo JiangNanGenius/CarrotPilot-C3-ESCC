@@ -7,6 +7,12 @@
 #include "selfdrive/ui/qt/util.h"
 
 PrimeState::PrimeState(QObject* parent) : QObject(parent) {
+  if (Params().getInt("EnableConnect") != 1) {
+    prime_type = PrimeState::PRIME_TYPE_NONE;
+    QTimer::singleShot(1, [this]() { emit changed(prime_type); });
+    return;
+  }
+
   const char *env_prime_type = std::getenv("PRIME_TYPE");
   auto type = env_prime_type ? env_prime_type : Params().get("PrimeType");
 

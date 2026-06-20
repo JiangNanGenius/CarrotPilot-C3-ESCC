@@ -76,6 +76,7 @@
 - [x] 做一次上车前静态 dry-run：确认无缺失 capnp、DBC、Params key。
 - [ ] 上车确认 ESCC 0x2AB、lead、AEB/FCW 和 SCC 状态真实正常。
 - [ ] 用 `device_snapshot.py --sample-seconds 20` 保存 ESCC 0x2AB 静态采样结果。
+- [ ] 车机设置页补 ESCC 可见入口：稳定 `/i` 线至少显示 `EnableEscc`、0x2AB/`ENHANCED_SCC` 检测状态、SCC/AEB/lead 状态和当前车型路径；新架构线显示自动识别状态和诊断，不把 ESCC 做成误导性的普通手动开关。
 
 ## P2.5: C3 克隆版 Connect / Offroad 模式
 
@@ -83,6 +84,7 @@
 - [x] 新增/保留 `EnableConnect` 参数，默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
 - [x] 设置菜单加入“强制 Offroad 模式”和“在线连接”。
 - [x] `EnableConnect=0` 时跳过在线注册。
+- [x] `/i` 稳定线同步清理在线注册残留：manager 不启动 `athenad`，原生设置页不显示 Pair Device，Carrot Web 设备页不显示配对按钮，导航设置不再提示 `connect.comma.ai`。
 - [x] `AlwaysOffroad=1` 时强制保持 offroad，不进入驾驶控制路径。
 - [x] `AlwaysOffroad=1` 时 pandad 强制 panda `NO_OUTPUT`，避免接管 harness 继电器。
 - [x] `AlwaysOffroad=1` 时本地 Web/SSH/更新仍保持可用。
@@ -126,6 +128,7 @@
   - [ ] LED / cluster HUD 实机验证和默认策略。
   - [x] Auto-Tuner / atune 第一批核心学习器。
   - [x] Auto-Tuner / atune 第二批手动确认闭环。
+  - [ ] 车机设置页补 Auto-Tuner 明确入口，不能只藏在 Web：可开关学习、查看推荐、手动应用/忽略/清空，并写清每个目标参数调大/调小的效果。
 - [ ] 每批迁移都单独提交，避免以后更新冲突时无法回滚。
 
 ## P4: fishop 非 ESCC 功能整合

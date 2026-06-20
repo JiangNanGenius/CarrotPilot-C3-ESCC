@@ -62,14 +62,9 @@ MapSettings::MapSettings(bool closeable, QWidget *parent) : QFrame(parent) {
       title->setStyleSheet("color: #FFFFFF; font-size: 54px; font-weight: 600;");
       heading->addWidget(title);
 
-      // NOO without Prime IP extraction
-      if (notPrime) {
-          Params params_memory = Params("/dev/shm/params");
-          ipAddress = QString::fromStdString(params_memory.get("NetworkAddress"));
-          subtitle = new QLabel(tr("Manage at %1").arg(ipAddress), this);
-      } else {
-        subtitle = new QLabel(tr("Manage at connect.comma.ai"), this);
-      }
+      Params params_memory = Params("/dev/shm/params");
+      ipAddress = QString::fromStdString(params_memory.get("NetworkAddress"));
+      subtitle = new QLabel(tr("Manage on local network%1").arg(ipAddress.isEmpty() ? "" : QString(" (%1)").arg(ipAddress)), this);
       subtitle->setStyleSheet("color: #A0A0A0; font-size: 40px; font-weight: 300;");
       heading->addWidget(subtitle);
     }
@@ -147,11 +142,9 @@ void MapSettings::refresh() {
   setUpdatesEnabled(true);
 
   // NOO without Prime IP update
-  if (notPrime) {
-      Params params_memory = Params("/dev/shm/params");
-      ipAddress = QString::fromStdString(params_memory.get("NetworkAddress"));
-    subtitle->setText(tr("Manage at %1").arg(ipAddress));
-  }
+  Params params_memory = Params("/dev/shm/params");
+  ipAddress = QString::fromStdString(params_memory.get("NetworkAddress"));
+  subtitle->setText(tr("Manage on local network%1").arg(ipAddress.isEmpty() ? "" : QString(" (%1)").arg(ipAddress)));
 }
 
 void MapSettings::navigateTo(const QJsonObject &place) {
