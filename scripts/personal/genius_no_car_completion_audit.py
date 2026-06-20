@@ -74,7 +74,7 @@ def read(path: str) -> str:
 
 
 def check(name: str, ok: bool, detail: str = "") -> dict[str, Any]:
-  return {"name": name, "ok": bool(ok), "detail": detail}
+  return {"name": name, "ok": bool(ok), "detail": "" if ok else detail}
 
 
 def pending_todo_items(todo_text: str) -> list[dict[str, Any]]:

@@ -41,7 +41,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [ ] Run real device parking test on clone C3.
 - [ ] Pull a C3 evidence bundle with `sunnypilot_c3_device_collect.py` after `/x` install succeeds.
 - [ ] Run `sunnypilot_c3_device_collect.py --parked-hardware-probe` on the connected clone C3 and archive camera/modeld/IMU evidence; keep the probe silent unless the user explicitly asks for `--with-sound-probe`.
-- [ ] Restore C3 SSH access after the next successful boot; current checks see the LAN name but SSH to `192.168.100.174` and USB `192.168.5.11` does not answer.
+- [ ] Restore C3 SSH access after the next successful boot; current checks show LAN SSH port 22 reachable at `192.168.100.174` but rejecting available keys/passwords, while USB `192.168.5.11` does not answer.
 
 ## Cloud Removal
 
