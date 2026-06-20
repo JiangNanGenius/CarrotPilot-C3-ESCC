@@ -120,6 +120,8 @@ private:
   ListWidget* dispToggles;
   ListWidget* startToggles;
   ListWidget* speedToggles;
+  ListWidget* esccToggles;
+  ListWidget* tunerToggles;
 
   void togglesCarrot(int widgetIndex);
   void updateButtonStyles();
