@@ -1,5 +1,20 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 No-Car Evidence Bundle Hotfix
+
+Published as `2026.002.000-gp.20260620.45`.
+
+Fixed the no-car evidence bundler added in `.44`:
+
+- The offline replay item now records
+  `genius_offline_replay_check.py --self-test` inside the evidence bundle.
+  The `--json` readiness mode can correctly return false on macOS without the
+  replay-native shadow path, so it should not make an otherwise valid release
+  archive fail.
+- The generated `.tar.gz` path now preserves the full bundle directory name,
+  including the `.44`/`.45` style version suffix, instead of letting
+  `Path.with_suffix()` truncate the name.
+
 ## 2026-06-20 No-Car Evidence Bundle
 
 Published as `2026.002.000-gp.20260620.44`.

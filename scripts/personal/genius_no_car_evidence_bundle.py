@@ -127,7 +127,7 @@ def command_specs(full_gate: bool) -> list[tuple[str, list[str], int]]:
     ("c3_touch_contract", [py(), "scripts/personal/genius_c3_touch_contract.py", "--json"], 30),
     ("super_advanced_contract", [py(), "scripts/personal/genius_super_advanced_contract.py", "--json"], 30),
     ("model_manager_contract", [replay_py(), "scripts/personal/genius_model_manager_contract.py", "--json"], 60),
-    ("offline_replay_check", [py(), "scripts/personal/genius_offline_replay_check.py", "--json"], 30),
+    ("offline_replay_check_self_test", [py(), "scripts/personal/genius_offline_replay_check.py", "--self-test"], 30),
     ("ui_replay_check", [py(), "scripts/personal/genius_ui_replay_check.py", "--json"], 30),
   ]
 
@@ -204,7 +204,7 @@ def build_bundle(output_root: Path, full_gate: bool) -> dict[str, Any]:
     summary.append(f"- `{name}`: `{'PASS' if result['ok'] else 'FAIL'}`")
   write_text(bundle_dir / "SUMMARY.md", "\n".join(summary) + "\n")
 
-  archive_path = bundle_dir.with_suffix(".tar.gz")
+  archive_path = bundle_dir.parent / f"{bundle_dir.name}.tar.gz"
   with tarfile.open(archive_path, "w:gz") as archive:
     archive.add(bundle_dir, arcname=bundle_dir.name)
   report["bundleDir"] = str(bundle_dir)
