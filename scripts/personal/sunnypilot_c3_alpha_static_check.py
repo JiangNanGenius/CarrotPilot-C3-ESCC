@@ -2523,6 +2523,7 @@ def main() -> int:
   c3_touch_contract = read("scripts/personal/genius_c3_touch_contract.py")
   no_car_evidence_bundle = read("scripts/personal/genius_no_car_evidence_bundle.py")
   no_car_completion_audit = read("scripts/personal/genius_no_car_completion_audit.py")
+  no_car_code_closeout_md = read("docs/personal/NO_CAR_CODE_CLOSEOUT.md")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
   nnlc_controller = read("sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
@@ -3799,10 +3800,21 @@ def main() -> int:
                           "release gate must self-test the no-car completion audit")
   failures += not require("Genius no-car completion audit documented",
                           "genius_no_car_completion_audit.py --json" in agents_md
-                          and "2026.002.000-gp.20260620.47" in code_changes_md
+                          and "2026.002.000-gp.20260620.48" in code_changes_md
                           and "No-Car Completion Audit" in code_changes_md
                           and "Verify no-car/code completion boundaries through `genius_no_car_completion_audit.py`" in todo_md,
                           "agent guide, code changes, and TODO must document the no-car completion audit")
+  failures += not require("Genius no-car/code closeout documented",
+                          "No-Car And Code Phase Closeout" in no_car_code_closeout_md
+                          and "This phase covers work that can be completed from the Mac workspace" in no_car_code_closeout_md
+                          and "not included" in no_car_code_closeout_md.lower()
+                          and "python3 scripts/personal/genius_no_car_completion_audit.py --json" in no_car_code_closeout_md
+                          and "python3 scripts/personal/sunnypilot_c3_alpha_release_gate.py --full" in no_car_code_closeout_md
+                          and "LAN SSH port `192.168.100.174:22` is reachable" in no_car_code_closeout_md
+                          and "USB `192.168.5.11:22` does not answer" in no_car_code_closeout_md
+                          and "Keep this silent by default" in no_car_code_closeout_md
+                          and "No-Car Code Phase Closeout" in code_changes_md,
+                          "closeout doc must state local completion boundary, proof commands, external device dependencies, and silent next C3 evidence command")
   failures += not require("Sidebar temperature is numeric Celsius",
                           "TEMP_FALLBACK_TEXT = tr_noop(\"--C\")" in sidebar_layout
                           and "TEMP_SCALAR_FIELDS" in sidebar_layout
