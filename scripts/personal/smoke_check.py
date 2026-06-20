@@ -303,6 +303,10 @@ def check_offroad_static() -> None:
       expect_not_contains(path, legacy_name, "forbidden legacy param")
 
   expect_contains("system/hardware/hardwared.py", 'params.get_bool("AlwaysOffroad")', "hardwared AlwaysOffroad")
+  expect_contains("selfdrive/ui/qt/offroad/settings.cc", 'tr("Super Advanced")', "native Super Advanced settings panel")
+  expect_contains("selfdrive/ui/qt/offroad/settings.cc", 'CValueControl("EnableEscc"', "native ESCC settings entry")
+  expect_contains("selfdrive/ui/qt/offroad/settings.cc", 'CValueControl("CarrotLearningActive"', "native Auto-Tuner learning entry")
+  expect_contains("selfdrive/ui/qt/offroad/settings.cc", 'ButtonControl(tr("Apply Current Recommendation")', "native Auto-Tuner apply button")
   expect_contains("system/hardware/hardwared.py", "should_start = not always_offroad", "hardwared offroad gate")
   expect_contains("selfdrive/pandad/panda_safety.cc", 'params_.getBool("AlwaysOffroad")', "pandad AlwaysOffroad")
   expect_contains("selfdrive/pandad/panda_safety.cc", "SafetyModel::NO_OUTPUT", "pandad no-output safety")

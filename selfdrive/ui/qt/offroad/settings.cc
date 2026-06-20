@@ -2,10 +2,14 @@
 #include <cmath>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 #include <thread> //차선캘리
 
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
 #include <QProcess>
 
 #include "common/watchdog.h"
@@ -495,7 +499,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   if(false) {
     panels.append({tr("Firehose"), new FirehosePanel(this)});
   }
-  panels.append({ tr("CarrotPilot"), new CarrotPanel(this) });
+  panels.append({ tr("Super Advanced"), new CarrotPanel(this) });
   panels.append({ tr("Developer"), new DeveloperPanel(this) });
 
   nav_btns = new QButtonGroup(this);
@@ -578,6 +582,86 @@ static QStringList get_list(const char* path) {
   return stringList;
 }
 
+static QString param_value_or_dash(const char* key) {
+  QString value = QString::fromStdString(Params().get(key));
+  return value.isEmpty() ? "-" : value;
+}
+
+static QString carrot_learning_recommendation_summary() {
+  std::string raw = Params().get("CarrotLearningRecommend");
+  if (raw.empty()) {
+    return QObject::tr("No pending recommendation");
+  }
+
+  QJsonParseError error;
+  QJsonDocument doc = QJsonDocument::fromJson(QByteArray::fromStdString(raw), &error);
+  if (error.error != QJsonParseError::NoError || !doc.isObject()) {
+    return QObject::tr("Invalid recommendation data");
+  }
+
+  QJsonObject recommendations = doc.object().value("recommendations").toObject();
+  return QObject::tr("%1 pending item(s)").arg(recommendations.size());
+}
+
+static std::pair<int, int> carrot_tuner_limits(const QString& key) {
+  if (key == "CustomSteerMax") return {0, 30000};
+  if (key == "CustomSteerDeltaUp") return {0, 50};
+  if (key == "CustomSteerDeltaDown") return {0, 50};
+  if (key == "SteerActuatorDelay") return {0, 100};
+  if (key == "LongActuatorDelay") return {0, 200};
+  if (key == "LongTuningKpV") return {0, 150};
+  if (key == "LongTuningKiV") return {0, 2000};
+  if (key == "LongTuningKf") return {0, 200};
+  if (key == "RadarReactionFactor") return {0, 200};
+  if (key == "TFollowGap1") return {70, 300};
+  if (key == "TFollowGap2") return {70, 300};
+  if (key == "TFollowGap3") return {70, 300};
+  if (key == "TFollowGap4") return {70, 300};
+  return {-100000, 100000};
+}
+
+static void clear_carrot_learning_pending(Params& params) {
+  params.remove("CarrotLearningRecommend");
+  params.remove("CarrotLearningPopupSource");
+  params.putBool("CarrotLearningPopupReady", false);
+  params.putBool("CarrotLearningApply", false);
+  params.putBool("CarrotLearningIgnore", false);
+}
+
+static int apply_carrot_learning_recommendations() {
+  Params params;
+  std::string raw = params.get("CarrotLearningRecommend");
+  if (raw.empty()) {
+    return 0;
+  }
+
+  QJsonParseError error;
+  QJsonDocument doc = QJsonDocument::fromJson(QByteArray::fromStdString(raw), &error);
+  if (error.error != QJsonParseError::NoError || !doc.isObject()) {
+    return -1;
+  }
+
+  QJsonObject recommendations = doc.object().value("recommendations").toObject();
+  int applied = 0;
+  for (auto it = recommendations.begin(); it != recommendations.end(); ++it) {
+    QJsonObject item = it.value().toObject();
+    QString category = item.value("category").toString();
+    if (category == "lat" && params.getInt("CarrotTunerApplyLat") == 0) continue;
+    if (category == "long" && params.getInt("CarrotTunerApplyLong") == 0) continue;
+    if (!item.contains("recommended")) continue;
+
+    int value = item.value("recommended").toInt();
+    auto limits = carrot_tuner_limits(it.key());
+    params.putInt(it.key().toStdString(), qBound(limits.first, value, limits.second));
+    applied++;
+  }
+
+  if (applied > 0) {
+    clear_carrot_learning_pending(params);
+  }
+  return applied;
+}
+
 CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   main_layout = new QStackedLayout(this);
   homeScreen = new QWidget(this);
@@ -586,6 +670,8 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
 
   QHBoxLayout* select_layout = new QHBoxLayout();
   select_layout->setSpacing(10);
+  QHBoxLayout* select_layout2 = new QHBoxLayout();
+  select_layout2->setSpacing(10);
 
 
   QPushButton* start_btn = new QPushButton(tr("Start"));
@@ -612,27 +698,43 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
     updateButtonStyles();
   });
 
+  QPushButton* escc_btn = new QPushButton(tr("ESCC"));
+  escc_btn->setObjectName("escc_btn");
+  QObject::connect(escc_btn, &QPushButton::clicked, this, [this]() {
+    this->currentCarrotIndex = 3;
+    this->togglesCarrot(3);
+    updateButtonStyles();
+  });
+
+  QPushButton* tuner_btn = new QPushButton(tr("ATune"));
+  tuner_btn->setObjectName("tuner_btn");
+  QObject::connect(tuner_btn, &QPushButton::clicked, this, [this]() {
+    this->currentCarrotIndex = 4;
+    this->togglesCarrot(4);
+    updateButtonStyles();
+  });
+
   QPushButton* latLong_btn = new QPushButton(tr("Tuning"));
   latLong_btn->setObjectName("latLong_btn");
   QObject::connect(latLong_btn, &QPushButton::clicked, this, [this]() {
-    this->currentCarrotIndex = 3;
-    this->togglesCarrot(3);
+    this->currentCarrotIndex = 5;
+    this->togglesCarrot(5);
     updateButtonStyles();
   });
 
   QPushButton* disp_btn = new QPushButton(tr("Disp"));
   disp_btn->setObjectName("disp_btn");
   QObject::connect(disp_btn, &QPushButton::clicked, this, [this]() {
-    this->currentCarrotIndex = 4;
-    this->togglesCarrot(4);
+    this->currentCarrotIndex = 6;
+    this->togglesCarrot(6);
     updateButtonStyles();
   });
 
   QPushButton* path_btn = new QPushButton(tr("Path"));
   path_btn->setObjectName("path_btn");
   QObject::connect(path_btn, &QPushButton::clicked, this, [this]() {
-    this->currentCarrotIndex = 5;
-    this->togglesCarrot(5);
+    this->currentCarrotIndex = 7;
+    this->togglesCarrot(7);
     updateButtonStyles();
   });
 
@@ -642,10 +744,13 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   select_layout->addWidget(start_btn);
   select_layout->addWidget(cruise_btn);
   select_layout->addWidget(speed_btn);
-  select_layout->addWidget(latLong_btn);
-  select_layout->addWidget(disp_btn);
-  select_layout->addWidget(path_btn);
+  select_layout->addWidget(escc_btn);
+  select_layout2->addWidget(tuner_btn);
+  select_layout2->addWidget(latLong_btn);
+  select_layout2->addWidget(disp_btn);
+  select_layout2->addWidget(path_btn);
   carrotLayout->addLayout(select_layout, 0);
+  carrotLayout->addLayout(select_layout2, 0);
 
   QWidget* toggles = new QWidget();
   QVBoxLayout* toggles_layout = new QVBoxLayout(toggles);
@@ -751,6 +856,58 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   pathToggles->addItem(new CValueControl("ShowPathModeLane", tr("Path Mode: LaneMode"), tr("0:Normal,1,2:Rec,3,4:^^,5,6:Rec,7,8:^^,9,10,11,12:Smooth^^"), 0, 15, 1));
   pathToggles->addItem(new CValueControl("ShowPathColorLane", tr("Path Color: LaneMode"), tr("(+10:Stroke)0:Red,1:Orange,2:Yellow,3:Green,4:Blue,5:Indigo,6:Violet,7:Brown,8:White,9:Black"), 0, 19, 1));
   pathToggles->addItem(new CValueControl("ShowPathWidth", tr("Path Width ratio(100%)"), "", 10, 200, 10));
+
+  esccToggles = new ListWidget(this);
+  esccToggles->addItem(new LabelControl(tr("Selected Car"), param_value_or_dash("CarSelected3"), tr("Manual vehicle profile stored on this device.")));
+  esccToggles->addItem(new LabelControl(tr("Detected Car"), param_value_or_dash("CarName"), tr("Vehicle name detected by the last successful startup.")));
+  esccToggles->addItem(new LabelControl(tr("ESCC 0x2AB Result"), param_value_or_dash("EnableRadarTracksResult"), tr("Runtime ESCC/radar-track detection result. Empty means no saved result yet.")));
+  esccToggles->addItem(new CValueControl("EnableEscc", tr("ESCC Hardware"), tr("Enable the Masha/Fishop ESCC hardware path. Use only with the installed ESCC harness."), 0, 1, 1));
+  esccToggles->addItem(new CValueControl("HyundaiCameraSCC", tr("HYUNDAI: CAMERA SCC"), tr("0: stock SCC path, 1: SCC CAN on camera bus, 2: sync cruise state, 3: stock longitudinal."), 0, 3, 1));
+  esccToggles->addItem(new CValueControl("CanfdHDA2", tr("CANFD: HDA2 mode"), tr("Keep this at 0 for Seltos 2023 pure CAN SCC."), 0, 2, 1));
+  esccToggles->addItem(new CValueControl("EnableRadarTracks", tr("Radar Track Mode"), tr("1: force radar tracks. -1/2: block stock HKG SCC radar use. Leave unchanged unless diagnosing ESCC."), -1, 3, 1));
+
+  tunerToggles = new ListWidget(this);
+  tunerToggles->addItem(new LabelControl(tr("Pending Recommendation"), carrot_learning_recommendation_summary(), tr("Recommendation generated by Auto-Tuner from recent drive data.")));
+  tunerToggles->addItem(new CValueControl("CarrotLearningActive", tr("Auto-Tuner Learning"), tr("Collect drive behavior and generate recommended Carrot tuning values. Default is off."), 0, 1, 1));
+  tunerToggles->addItem(new CValueControl("CarrotTunerApplyLat", tr("Apply Steering Recommendations"), tr("1: allow Auto-Tuner to apply lateral/steering recommendations."), 0, 1, 1));
+  tunerToggles->addItem(new CValueControl("CarrotTunerApplyLong", tr("Apply Cruise/Brake Recommendations"), tr("1: allow Auto-Tuner to apply longitudinal cruise, brake, gap and response recommendations."), 0, 1, 1));
+  tunerToggles->addItem(new CValueControl("CarrotLearningAutoApply", tr("Auto Apply Recommendations"), tr("1: apply future recommendations automatically. Keep off while tuning a new setup."), 0, 1, 1));
+
+  ButtonControl* applyLearningBtn = new ButtonControl(tr("Apply Current Recommendation"), tr("APPLY"), tr("Applies the pending Auto-Tuner values allowed by the steering/cruise apply switches."));
+  connect(applyLearningBtn, &ButtonControl::clicked, this, [this]() {
+    if (uiState()->engaged()) {
+      ConfirmationDialog::alert(tr("Disengage before applying Auto-Tuner values."), this);
+      return;
+    }
+
+    int applied = apply_carrot_learning_recommendations();
+    if (applied < 0) {
+      ConfirmationDialog::alert(tr("Auto-Tuner recommendation data is invalid."), this);
+    } else if (applied == 0) {
+      ConfirmationDialog::alert(tr("No pending Auto-Tuner recommendation."), this);
+    } else {
+      ConfirmationDialog::alert(tr("Applied %1 Auto-Tuner item(s).").arg(applied), this);
+    }
+  });
+  tunerToggles->addItem(applyLearningBtn);
+
+  ButtonControl* ignoreLearningBtn = new ButtonControl(tr("Ignore Current Recommendation"), tr("IGNORE"), tr("Clears the pending recommendation without changing tuning values."));
+  connect(ignoreLearningBtn, &ButtonControl::clicked, this, [this]() {
+    Params params;
+    clear_carrot_learning_pending(params);
+    ConfirmationDialog::alert(tr("Auto-Tuner recommendation ignored."), this);
+  });
+  tunerToggles->addItem(ignoreLearningBtn);
+
+  ButtonControl* clearLearningBtn = new ButtonControl(tr("Clear Learning Data"), tr("CLEAR"), tr("Clears Auto-Tuner history and pending recommendations."));
+  connect(clearLearningBtn, &ButtonControl::clicked, this, [this]() {
+    Params params;
+    params.remove("CarrotLearningHistory");
+    params.putBool("CarrotLearningClear", true);
+    clear_carrot_learning_pending(params);
+    ConfirmationDialog::alert(tr("Auto-Tuner learning data cleared."), this);
+  });
+  tunerToggles->addItem(clearLearningBtn);
 
   startToggles = new ListWidget(this);
   QString selected = QString::fromStdString(Params().get("CarSelected3"));
@@ -865,12 +1022,14 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   speedToggles->addItem(new CValueControl("AutoTurnControlTurnEnd", tr("ATC: Turn CtrlDistTime (6)"), tr("dist=speed*time"), 0, 30, 1));
   speedToggles->addItem(new CValueControl("AutoTurnMapChange", tr("ATC Auto Map Change(0)"), "", 0, 1, 1));
 
+  toggles_layout->addWidget(startToggles);
   toggles_layout->addWidget(cruiseToggles);
+  toggles_layout->addWidget(speedToggles);
+  toggles_layout->addWidget(esccToggles);
+  toggles_layout->addWidget(tunerToggles);
   toggles_layout->addWidget(latLongToggles);
   toggles_layout->addWidget(dispToggles);
   toggles_layout->addWidget(pathToggles);
-  toggles_layout->addWidget(startToggles);
-  toggles_layout->addWidget(speedToggles);
   ScrollView* toggles_view = new ScrollView(toggles, this);
   carrotLayout->addWidget(toggles_view, 1);
 
@@ -885,17 +1044,19 @@ void CarrotPanel::togglesCarrot(int widgetIndex) {
   startToggles->setVisible(widgetIndex == 0);
   cruiseToggles->setVisible(widgetIndex == 1);
   speedToggles->setVisible(widgetIndex == 2);
-  latLongToggles->setVisible(widgetIndex == 3);
-  dispToggles->setVisible(widgetIndex == 4);
-  pathToggles->setVisible(widgetIndex == 5);
+  esccToggles->setVisible(widgetIndex == 3);
+  tunerToggles->setVisible(widgetIndex == 4);
+  latLongToggles->setVisible(widgetIndex == 5);
+  dispToggles->setVisible(widgetIndex == 6);
+  pathToggles->setVisible(widgetIndex == 7);
 }
 
 void CarrotPanel::updateButtonStyles() {
   QString styleSheet = R"(
-      #start_btn, #cruise_btn, #speed_btn, #latLong_btn ,#disp_btn, #path_btn {
+      #start_btn, #cruise_btn, #speed_btn, #escc_btn, #tuner_btn, #latLong_btn ,#disp_btn, #path_btn {
         height: 120px; border-radius: 15px; background-color: #393939;
       }
-      #start_btn:pressed, #cruise_btn:pressed, #speed_btn:pressed, #latLong_btn:pressed, #disp_btn:pressed, #path_btn:pressed {
+      #start_btn:pressed, #cruise_btn:pressed, #speed_btn:pressed, #escc_btn:pressed, #tuner_btn:pressed, #latLong_btn:pressed, #disp_btn:pressed, #path_btn:pressed {
         background-color: #4a4a4a;
       }
   )";
@@ -911,12 +1072,18 @@ void CarrotPanel::updateButtonStyles() {
     styleSheet += "#speed_btn { background-color: #33ab4c; }";
     break;
   case 3:
-    styleSheet += "#latLong_btn { background-color: #33ab4c; }";
+    styleSheet += "#escc_btn { background-color: #33ab4c; }";
     break;
   case 4:
-    styleSheet += "#disp_btn { background-color: #33ab4c; }";
+    styleSheet += "#tuner_btn { background-color: #33ab4c; }";
     break;
   case 5:
+    styleSheet += "#latLong_btn { background-color: #33ab4c; }";
+    break;
+  case 6:
+    styleSheet += "#disp_btn { background-color: #33ab4c; }";
+    break;
+  case 7:
     styleSheet += "#path_btn { background-color: #33ab4c; }";
     break;
   }

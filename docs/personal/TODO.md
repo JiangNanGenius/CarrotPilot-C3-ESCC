@@ -76,7 +76,8 @@
 - [x] 做一次上车前静态 dry-run：确认无缺失 capnp、DBC、Params key。
 - [ ] 上车确认 ESCC 0x2AB、lead、AEB/FCW 和 SCC 状态真实正常。
 - [ ] 用 `device_snapshot.py --sample-seconds 20` 保存 ESCC 0x2AB 静态采样结果。
-- [ ] 车机设置页补 ESCC 可见入口：稳定 `/i` 线至少显示 `EnableEscc`、0x2AB/`ENHANCED_SCC` 检测状态、SCC/AEB/lead 状态和当前车型路径；新架构线显示自动识别状态和诊断，不把 ESCC 做成误导性的普通手动开关。
+- [x] `/i` 车机设置页补 ESCC 可见入口：`Super Advanced > ESCC` 显示当前车型、上次检测车型、0x2AB/雷达检测结果，并暴露 `EnableEscc`、Camera SCC、CANFD/HDA2、Radar Track 诊断开关。
+- [ ] 车机 ESCC 页继续补实时 SCC/AEB/lead 状态，只显示诊断状态，不把 ESCC 做成误导性的普通用户开关。
 
 ## P2.5: C3 克隆版 Connect / Offroad 模式
 
@@ -481,6 +482,7 @@ flowchart LR
 - [x] alpha 设备证据脚本新增 `autoTuner` 摘要：是否开启、是否自动应用、是否有待处理建议、推荐项数量和历史数量。
 - [x] alpha Carrot Web 已提供 Auto-Tuner 首页面板：显示 active/autoApply/applyLat/applyLong、待处理汇总、来源时间、`captured/current/recommended/applied/liveDelta/state`，并提供 offroad 手动 apply/ignore/clear 动作；server 仍硬拦截 onroad apply。
 - [x] Web/UI 明确区分“推荐值”和“已应用值”：alpha `/api/carrot_learning` 和设备快照现在输出 `capturedCurrentValue`、`currentValue`、`recommendedValue`、`appliedValue`、`liveDelta`、`applied/state` 和推荐汇总。
+- [x] `/i` 车机设置页新增 `Super Advanced > ATune`：提供 Auto-Tuner 学习开关、横向/纵向应用范围、自动应用开关、待处理建议显示、应用/忽略/清空按钮。
 
 ### P8.11: 本地化和说明
 
