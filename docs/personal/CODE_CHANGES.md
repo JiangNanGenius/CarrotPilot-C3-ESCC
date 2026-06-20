@@ -1,5 +1,46 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 No-Car Completion Audit And Packed Updater Sync
+
+Published as `2026.002.000-gp.20260620.46`.
+
+Real-device feedback showed the C3 dependency/update prompt could still show
+button press feedback without running `Install`. The source-tree
+`system/ui/tici_updater.py` had the C3 touch fallback, but the executable
+zipapp at `system/hardware/tici/updater` still carried stale embedded copies of
+the updater UI and touch core. The packed updater now synchronizes these
+main-tree files:
+
+- `system/ui/lib/wifi_manager.py`
+- `system/ui/tici_updater.py`
+- `system/ui/widgets/__init__.py`
+- `system/ui/widgets/button.py`
+- `system/ui/lib/application.py`
+
+`scripts/personal/patch_tici_updater_wifi_manager.py --check` now rejects a
+stale packed updater if any of those embedded files differ from the main tree,
+or if the dependency-button C3 touch fallback tokens disappear.
+
+Added `scripts/personal/genius_no_car_completion_audit.py` to make the
+no-car/code completion boundary machine-checkable. The audit parses
+`docs/personal/TODO.md` and fails if an unchecked item is not explicitly
+classified.
+
+Accepted pending categories are:
+
+- device install or parked C3 evidence;
+- real-car road evidence;
+- recurring release policy such as keeping `/x` short and `/i` stable;
+- docs polish that depends on real-device feedback;
+- future fixture/baseline work such as camera-frame model replay or
+  fork-owned process replay references.
+
+The audit also verifies that release-gated local evidence exists for the
+current no-car/code surface: model manager contract, Super Advanced contract,
+C3 touch fallback contract, no-car evidence bundle command, and documentation.
+This keeps physical C3 work visible while preventing local no-car/code TODOs
+from hiding among device-only items.
+
 ## 2026-06-20 No-Car Evidence Bundle Hotfix
 
 Published as `2026.002.000-gp.20260620.45`.

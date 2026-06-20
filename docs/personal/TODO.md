@@ -17,6 +17,7 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 - [x] Recover from the first `/x` boot failures: missing Python dependency, settings tap release handling, and onboarding/settings navigation blockers.
 - [x] Rebuild or patch the packed TICI updater so its embedded Wi-Fi manager includes the same `jeepney`/`nmcli` fallback as the main source tree.
 - [x] Add an installer/update audit that checks both the main source tree and the packed TICI updater for the Wi-Fi dependency contract.
+- [x] Sync the packed TICI updater's embedded dependency prompt, touch core, button core, and input loop with the main source tree so the C3 `Install`/`Reboot` buttons get the same touch fallback as normal UI.
 - [x] Keep the welcome/training flow, but replace SunnyPilot-specific legal/consent copy with Genius Pilot personal-build copy that is short enough for C3 and advances reliably.
 - [x] Rename user-facing alpha branding from SunnyPilot to Genius Pilot where accurate: welcome screen, version/about panel, settings headers, update prompts, boot/update text, and alpha evidence snapshots.
 - [x] Add a parent-level touch fallback to the TICI dependency/update prompt so `Connect to Wi-Fi`, `Install`, and failure `Reboot` can fire even when clone C3 loses the child button release event.
@@ -218,6 +219,7 @@ These checks should be run before any real road test. They are allowed while the
 - [x] Verify Carrot/Super Advanced settings locally through `genius_super_advanced_contract.py`: all migrated controls are tracked, writable/offroad boundaries are explicit, protected params are read-only, and unknown-key waits are fail-soft.
 - [x] Verify C3 setup/update/settings touch fallback locally through `genius_c3_touch_contract.py`: expanded critical hit regions, press fallback, release fallback, disabled action blocking, overlap priority, setup wiring, updater wiring, and settings entry guard all pass.
 - [x] Archive each no-car diagnostic bundle on the Mac desktop through `genius_no_car_evidence_bundle.py`: branch, commit, version, installer hash, command outputs, and no-cloud process evidence are written to `~/Desktop/CarrotPilot-C3-ESCC-device-evidence`.
+- [x] Verify no-car/code completion boundaries through `genius_no_car_completion_audit.py`: every unchecked TODO is classified as device install, real-car, recurring release policy, docs-after-feedback, or future fixture/baseline work, with no hidden local no-car/code item left unclassified.
 - [ ] Verify the same Super Advanced page on the physical C3 after SSH/UI access is restored: all migrated controls visible, writable while offroad where intended, protected params read-only, and no unknown-key waits.
 - [ ] Verify C3 UI/touch without car: settings opens reliably, Network page reports connected/scanned state, Seltos 2023 appears in the vehicle list, temperature displays numerically, and toggles retain state.
 - [ ] Run `genius_no_car_evidence_bundle.py --full-gate --json` after each pushed alpha build so every published `/x` has a matching no-car evidence archive.

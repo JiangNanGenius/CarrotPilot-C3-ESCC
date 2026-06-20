@@ -2045,14 +2045,40 @@ def check_c3_install_boot_contract() -> tuple[bool, str]:
   updater_bytes = read_bytes("system/hardware/tici/updater")
   if not updater_bytes.startswith(b"#!/usr/bin/env python3\nPK"):
     return False, "packed TICI updater must keep the python3 zipapp shebang"
-  embedded_wifi = read_zip_member("system/hardware/tici/updater", "openpilot/system/ui/lib/wifi_manager.py").decode("utf-8", errors="replace")
-  main_wifi = read("system/ui/lib/wifi_manager.py")
-  if embedded_wifi != main_wifi:
-    return False, "packed TICI updater Wi-Fi manager must match system/ui/lib/wifi_manager.py"
+  embedded_ui_members = (
+    ("openpilot/system/ui/lib/wifi_manager.py", "system/ui/lib/wifi_manager.py"),
+    ("openpilot/system/ui/tici_updater.py", "system/ui/tici_updater.py"),
+    ("openpilot/system/ui/widgets/__init__.py", "system/ui/widgets/__init__.py"),
+    ("openpilot/system/ui/widgets/button.py", "system/ui/widgets/button.py"),
+    ("openpilot/system/ui/lib/application.py", "system/ui/lib/application.py"),
+  )
+  embedded_text: dict[str, str] = {}
+  for member, rel in embedded_ui_members:
+    text = read_zip_member("system/hardware/tici/updater", member).decode("utf-8", errors="replace")
+    embedded_text[member] = text
+    if text != read(rel):
+      return False, f"packed TICI updater {member} must match {rel}"
+  embedded_wifi = embedded_text["openpilot/system/ui/lib/wifi_manager.py"]
   for token in ("JEEPNEY_AVAILABLE = False", "_nmcli_fallback", "_run_nmcli", "_nmcli_active_ssid",
                 '"device", "wifi", "rescan"', "nmcli command unavailable", "_update_networks"):
     if token not in embedded_wifi:
       return False, f"packed TICI updater Wi-Fi manager missing fallback token {token!r}"
+  embedded_updater = embedded_text["openpilot/system/ui/tici_updater.py"]
+  for token in ("CRITICAL_TAP_EXPAND_PX", "button.set_tap_release_move_px(140)", "def _activate_at",
+                "self._install_button_rect", "self._ignore_release_after_press"):
+    if token not in embedded_updater:
+      return False, f"packed TICI updater UI missing dependency-button fallback token {token!r}"
+  embedded_widget_core = embedded_text["openpilot/system/ui/widgets/__init__.py"]
+  for token in ("TAP_RELEASE_MOVE_PX = 24", "def set_tap_release_move_px", "__touch_cancelled",
+                "short_tap_release and not touch_cancelled and touch_valid"):
+    if token not in embedded_widget_core:
+      return False, f"packed TICI updater widget core missing tap-filter token {token!r}"
+  embedded_app = embedded_text["openpilot/system/ui/lib/application.py"]
+  for token in ("MAIN_THREAD_INPUT", "_last_touch_pos",
+                "C3/TICI touch releases can report an empty/cleared position",
+                "self._mouse._handle_mouse_event()"):
+    if token not in embedded_app:
+      return False, f"packed TICI updater application loop missing C3 touch token {token!r}"
 
   launch_tokens = (
     'trap \'exec ./launch_chffrplus.sh\' ERR',
@@ -2496,6 +2522,7 @@ def main() -> int:
   super_advanced_contract = read("scripts/personal/genius_super_advanced_contract.py")
   c3_touch_contract = read("scripts/personal/genius_c3_touch_contract.py")
   no_car_evidence_bundle = read("scripts/personal/genius_no_car_evidence_bundle.py")
+  no_car_completion_audit = read("scripts/personal/genius_no_car_completion_audit.py")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
   nnlc_controller = read("sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
@@ -2980,6 +3007,7 @@ def main() -> int:
                           and "genius_super_advanced_contract.py" in release_gate
                           and "genius_c3_touch_contract.py" in release_gate
                           and "genius_no_car_evidence_bundle.py" in release_gate
+                          and "genius_no_car_completion_audit.py" in release_gate
                           and "genius_offline_replay_check.py" in release_gate
                           and "genius_ui_replay_check.py" in release_gate
                           and "--fetch-references" in release_gate
@@ -3755,6 +3783,26 @@ def main() -> int:
                           and "No-Car Evidence Bundle" in code_changes_md
                           and "Archive each no-car diagnostic bundle on the Mac desktop through `genius_no_car_evidence_bundle.py`" in todo_md,
                           "agent guide, code changes, and TODO must document the no-car evidence bundle")
+  failures += not require("Genius no-car completion audit exists",
+                          "Genius Pilot No-Car Completion Audit" in no_car_completion_audit
+                          and "PENDING_CLASSIFIERS" in no_car_completion_audit
+                          and "device_install_required" in no_car_completion_audit
+                          and "real_car_required" in no_car_completion_audit
+                          and "future_fixture_or_baseline" in no_car_completion_audit
+                          and "all unchecked TODO items are classified" in no_car_completion_audit
+                          and "physical C3 items remain visibly separate" in no_car_completion_audit,
+                          "no-car completion audit must classify remaining TODOs and keep device/road work visibly separate")
+  failures += not require("Genius no-car completion audit release gate wired",
+                          "scripts/personal/genius_no_car_completion_audit.py" in release_gate
+                          and "Genius no-car completion audit" in release_gate
+                          and "--self-test" in release_gate,
+                          "release gate must self-test the no-car completion audit")
+  failures += not require("Genius no-car completion audit documented",
+                          "genius_no_car_completion_audit.py --json" in agents_md
+                          and "2026.002.000-gp.20260620.46" in code_changes_md
+                          and "No-Car Completion Audit" in code_changes_md
+                          and "Verify no-car/code completion boundaries through `genius_no_car_completion_audit.py`" in todo_md,
+                          "agent guide, code changes, and TODO must document the no-car completion audit")
   failures += not require("Sidebar temperature is numeric Celsius",
                           "TEMP_FALLBACK_TEXT = tr_noop(\"--C\")" in sidebar_layout
                           and "TEMP_SCALAR_FIELDS" in sidebar_layout

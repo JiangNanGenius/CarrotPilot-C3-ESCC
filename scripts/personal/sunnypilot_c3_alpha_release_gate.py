@@ -89,6 +89,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     "scripts/personal/genius_super_advanced_contract.py",
     "scripts/personal/genius_c3_touch_contract.py",
     "scripts/personal/genius_no_car_evidence_bundle.py",
+    "scripts/personal/genius_no_car_completion_audit.py",
     "scripts/personal/genius_offline_replay_check.py",
     "scripts/personal/genius_ui_replay_check.py",
     "scripts/personal/genius_visualization_contract.py",
@@ -106,7 +107,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
   ]
   steps: list[tuple[str, list[str], int]] = [
     ("python compile personal gates", [py(), "-m", "py_compile", *scripts], 60),
-    ("packed TICI updater Wi-Fi fallback", [py(), "scripts/personal/patch_tici_updater_wifi_manager.py", "--check"], 30),
+    ("packed TICI updater UI fallback", [py(), "scripts/personal/patch_tici_updater_wifi_manager.py", "--check"], 30),
     ("Genius visualization contract", [py(), "scripts/personal/genius_visualization_contract.py", "--self-test"], 30),
     ("installer audit self-test", [py(), "scripts/personal/sunnypilot_c3_installer_audit.py", "--self-test"], 30),
     (
@@ -140,6 +141,7 @@ def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
     ("Genius Super Advanced contract", [py(), "scripts/personal/genius_super_advanced_contract.py", "--self-test"], 30),
     ("Genius C3 touch fallback contract", [py(), "scripts/personal/genius_c3_touch_contract.py", "--self-test"], 30),
     ("Genius no-car evidence bundle", [py(), "scripts/personal/genius_no_car_evidence_bundle.py", "--self-test"], 30),
+    ("Genius no-car completion audit", [py(), "scripts/personal/genius_no_car_completion_audit.py", "--self-test"], 30),
     ("Genius offline replay check self-test", [py(), "scripts/personal/genius_offline_replay_check.py", "--self-test"], 30),
     ("Genius UI replay check self-test", [py(), "scripts/personal/genius_ui_replay_check.py", "--self-test"], 30),
   ]
