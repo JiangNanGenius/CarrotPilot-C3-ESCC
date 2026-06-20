@@ -56,7 +56,6 @@ private slots:
 
 private:
   Params params;
-  ButtonControl *pair_device;
 };
 
 class TogglesPanel : public ListWidget {

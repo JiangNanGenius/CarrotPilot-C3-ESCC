@@ -65,7 +65,6 @@ private:
   std::vector<DestinationWidget *> widgets;
 
   // FrogPilot variables
-  bool notPrime = Params().getInt("PrimeType") == 0;
   QLabel *subtitle;
   QString ipAddress;
 

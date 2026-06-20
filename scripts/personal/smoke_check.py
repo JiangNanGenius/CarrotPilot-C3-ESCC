@@ -312,7 +312,7 @@ def check_offroad_static() -> None:
   expect_contains("system/athena/registration.py", "EnableConnect", "registration EnableConnect")
   expect_contains("system/manager/process_config.py", "enable_connect", "connect process gate")
   expect_contains("system/manager/process_config.py", "return not started and params.get_bool(\"SoftwareMenu\")", "updated stays available offroad")
-  expect_contains("system/manager/process_config.py", "return params.get_int(\"EnableConnect\") > 0", "connect process uses EnableConnect")
+  expect_contains("system/manager/process_config.py", "DaemonProcess(\"manage_athenad\", \"system.athena.manage_athenad\", \"AthenadPid\", enabled=False)", "remote connect process is hard-disabled")
   expect_regex("selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("AlwaysOffroad".*?, 0, 1, 1\)', "native AlwaysOffroad setting")
   expect_regex("selfdrive/ui/qt/offroad/settings.cc", r'CValueControl\("EnableConnect".*?, 0, 1, 1\)', "native EnableConnect setting is binary")
   expect_not_contains("system/manager/manager.py", "DisableUpdates", "manager does not disable updates for offroad")

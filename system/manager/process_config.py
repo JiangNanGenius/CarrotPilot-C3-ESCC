@@ -73,7 +73,7 @@ def enable_dm(started, params, CP: car.CarParams) -> bool:
   return (started or params.get_bool("IsDriverViewEnabled")) and params.get_int("DisableDM") == 0
 
 def enable_connect(started, params, CP: car.CarParams) -> bool:
-  return params.get_int("EnableConnect") > 0
+  return params.get_int("EnableConnect") == 1
 
 def enable_xiaoge_data(started, params, CP: car.CarParams) -> bool:
   return params.get_bool("ShareData")
@@ -94,7 +94,9 @@ def enable_app_navi_status(started, params, CP: car.CarParams) -> bool:
   return params.get_bool("EnableAmapNaviStatus")
 
 procs = [
-  DaemonProcess("manage_athenad", "system.athena.manage_athenad", "AthenadPid"),
+  # Official remote Connect is disabled for this personal C3 build. Local Wi-Fi,
+  # SSH, Carrot Web, GitHub updates, and model downloads remain available.
+  DaemonProcess("manage_athenad", "system.athena.manage_athenad", "AthenadPid", enabled=False),
 
   NativeProcess("loggerd", "system/loggerd", ["./loggerd"], logging),
   NativeProcess("encoderd", "system/loggerd", ["./encoderd"], only_onroad),

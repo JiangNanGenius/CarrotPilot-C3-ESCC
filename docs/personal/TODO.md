@@ -76,6 +76,7 @@
 - [x] 做一次上车前静态 dry-run：确认无缺失 capnp、DBC、Params key。
 - [ ] 上车确认 ESCC 0x2AB、lead、AEB/FCW 和 SCC 状态真实正常。
 - [ ] 用 `device_snapshot.py --sample-seconds 20` 保存 ESCC 0x2AB 静态采样结果。
+- [ ] 车机设置页补 ESCC 可见入口：稳定 `/i` 线至少显示 `EnableEscc`、0x2AB/`ENHANCED_SCC` 检测状态、SCC/AEB/lead 状态和当前车型路径；新架构线显示自动识别状态和诊断，不把 ESCC 做成误导性的普通手动开关。
 
 ## P2.5: C3 克隆版 Connect / Offroad 模式
 
@@ -83,6 +84,7 @@
 - [x] 新增/保留 `EnableConnect` 参数，默认关闭，避免克隆 C3 连接官方注册/远程连接服务。
 - [x] 设置菜单加入“强制 Offroad 模式”和“在线连接”。
 - [x] `EnableConnect=0` 时跳过在线注册。
+- [x] `/i` 稳定线同步清理在线注册残留：manager 不启动 `athenad`，原生设置页不显示 Pair Device，Carrot Web 设备页不显示配对按钮，导航设置不再提示 `connect.comma.ai`。
 - [x] `AlwaysOffroad=1` 时强制保持 offroad，不进入驾驶控制路径。
 - [x] `AlwaysOffroad=1` 时 pandad 强制 panda `NO_OUTPUT`，避免接管 harness 继电器。
 - [x] `AlwaysOffroad=1` 时本地 Web/SSH/更新仍保持可用。
@@ -126,6 +128,7 @@
   - [ ] LED / cluster HUD 实机验证和默认策略。
   - [x] Auto-Tuner / atune 第一批核心学习器。
   - [x] Auto-Tuner / atune 第二批手动确认闭环。
+  - [ ] 车机设置页补 Auto-Tuner 明确入口，不能只藏在 Web：可开关学习、查看推荐、手动应用/忽略/清空，并写清每个目标参数调大/调小的效果。
 - [ ] 每批迁移都单独提交，避免以后更新冲突时无法回滚。
 
 ## P4: fishop 非 ESCC 功能整合
@@ -543,6 +546,10 @@ flowchart LR
 ### P8.14: C3 停车验证
 
 - [ ] `/x` 安装后 UI 可启动。
+- [ ] C3 触控体验复查：左上角齿轮进入设置不能弹出又退出，菜单按钮和开关要有防误触/去抖，滑动列表不误触开关。
+- [ ] 车机设置项完整性复查：`Super Advanced`、Cruise、限速、模型、Offroad、手机/GPS、温度数字显示、ESCC 状态、Auto-Tuner 入口都必须能从屏幕上找到。
+- [ ] 车机 UI 字体和中文显示复查：中文不能出现问号/方块/乱码，字体不应像素化；语言切换、设置说明和 Carrot 高级参数说明要完整。
+- [ ] 网络页复查：Wi-Fi 已连接时不能一直停在“正在扫描 Wi-Fi 网络”，要显示当前连接状态、IP 和刷新状态。
 - [ ] manager 可启动。
 - [ ] stock modeld 可启动。
 - [ ] models_manager 可在 offroad 拉取模型清单。
@@ -584,7 +591,7 @@ flowchart LR
 - [ ] ESCC 闭环：只接受 0x2AB 自动识别 `ENHANCED_SCC`；设备快照必须记录 0x2AB、spFlags、安全参数和无云进程证据。
 - [ ] 模型管理器闭环：证明 stock model、active bundle、runner cache、tinygrad runner、下载校验、失败回滚、`modelV2`、`drivingModelData`、`cameraOdometry` 都有停车证据。
 - [ ] 限速闭环：证明手机/APN/N/Navipilot、车机限速、OSM/mapd 三类来源能按新鲜度切换；固定偏移和百分比偏移默认都为 0；Mapbox/Kakao/route 不会默认成为限速真值。
-- [ ] Carrot Web 闭环：7000 本地 Web、7705 状态广播、7706 UDP、7712 TCP、7713 HTTP、参数白名单、Auto-Tuner、feature gate、live check 都有停车证据；所有高风险控制仍 `controlOutput=false`。
+- [ ] Carrot Web 和车机 UI 闭环：7000 本地 Web、7705 状态广播、7706 UDP、7712 TCP、7713 HTTP、参数白名单、Auto-Tuner、feature gate、live check 都有停车证据；车机设置页必须暴露 ESCC 状态、Auto-Tuner、Super Advanced、限速来源、手机/GPS 和温度数字显示；所有高风险控制仍 `controlOutput=false`，直到对应门禁放行。
 - [ ] fishop 硬件闭环：车道识线/曲线、左右车道、激光雷达左右盲区、侧向目标、传感器健康、动态盲区预览和自动超车输入先只读；证明左右方向、单位、超时、断线清零和导航地区降级都正确。
 - [ ] 自动超车闭环：阶段 1/2/3 只记录、只显示、只提示；阶段 4 才能交给现有安全变道链路做建议；阶段 5 受控执行必须另开 tag、证据包、回滚入口和驾驶员确认。
 - [ ] 本地化闭环：设置、onboarding、sidebar、Carrot Web、模型管理器、限速、Offroad、fishop、Auto-Tuner 的中文/英文说明完整；用户可见路径不直出韩文。

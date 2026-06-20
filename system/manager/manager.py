@@ -77,13 +77,22 @@ def manager_init() -> None:
   params.put_bool("IsReleaseBranch", build_metadata.release_channel)
   params.put("HardwareSerial", serial)
 
-  # set dongle id. EnableConnect controls official/remote Connect registration;
-  # AlwaysOffroad is only a local offroad/harness-relay debug mode.
-  reg_res = register(show_spinner=True)
-  if reg_res:
-    dongle_id = reg_res
+  # EnableConnect only means official/remote Connect. Local Wi-Fi, SSH, Web,
+  # GitHub updates, and Carrot services do not require online registration.
+  connect_enabled = params.get_int("EnableConnect") == 1
+  if connect_enabled:
+    reg_res = register(show_spinner=True)
+    if reg_res:
+      dongle_id = reg_res
+    else:
+      raise Exception(f"Registration failed for device {serial}")
   else:
-    raise Exception(f"Registration failed for device {serial}")
+    params.put("EnableConnect", "0")
+    dongle_id = params.get("DongleId")
+    if dongle_id in (None, UNREGISTERED_DONGLE_ID):
+      dongle_id = f"LocalDevice-{serial[-8:]}" if serial else "LocalDevice"
+      params.put("DongleId", dongle_id)
+    params.remove("Offroad_UnofficialHardware")
   os.environ['DONGLE_ID'] = dongle_id  # Needed for swaglog
   os.environ['GIT_ORIGIN'] = build_metadata.openpilot.git_normalized_origin # Needed for swaglog
   os.environ['GIT_BRANCH'] = build_metadata.channel # Needed for swaglog
@@ -136,7 +145,7 @@ def manager_thread() -> None:
   params = Params()
 
   ignore: list[str] = []
-  connect_enabled = params.get_int("EnableConnect") > 0
+  connect_enabled = params.get_int("EnableConnect") == 1
   if params.get("DongleId") in (None, UNREGISTERED_DONGLE_ID) or not connect_enabled:
     ignore += ["manage_athenad", "uploader"]
   if os.getenv("NOBOARD") is not None:
