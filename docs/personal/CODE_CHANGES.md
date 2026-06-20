@@ -1,5 +1,20 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 SSH Evidence Note
+
+Published as `2026.002.000-gp.20260620.47`.
+
+Refined the current C3 SSH TODO evidence after a fresh connectivity check:
+
+- LAN `192.168.100.174:22` is reachable, but the device rejects the available
+  public keys and password authentication is disabled.
+- USB `192.168.5.11:22` does not answer.
+
+No runtime behavior changed in this patch; it keeps the docs aligned with the
+current recovery state while the packed-updater fix remains in `.46`. The
+no-car completion audit JSON now also leaves passing check details blank so
+evidence bundles do not show stale "missing" text for successful checks.
+
 ## 2026-06-20 No-Car Completion Audit And Packed Updater Sync
 
 Published as `2026.002.000-gp.20260620.46`.

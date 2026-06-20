@@ -3799,7 +3799,7 @@ def main() -> int:
                           "release gate must self-test the no-car completion audit")
   failures += not require("Genius no-car completion audit documented",
                           "genius_no_car_completion_audit.py --json" in agents_md
-                          and "2026.002.000-gp.20260620.46" in code_changes_md
+                          and "2026.002.000-gp.20260620.47" in code_changes_md
                           and "No-Car Completion Audit" in code_changes_md
                           and "Verify no-car/code completion boundaries through `genius_no_car_completion_audit.py`" in todo_md,
                           "agent guide, code changes, and TODO must document the no-car completion audit")
