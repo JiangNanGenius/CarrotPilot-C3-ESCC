@@ -1,5 +1,21 @@
 # CarrotPilot-C3-ESCC Alpha Code Changes
 
+## 2026-06-20 No-Car Code Phase Closeout
+
+Published as `2026.002.000-gp.20260620.48`.
+
+Added `docs/personal/NO_CAR_CODE_CLOSEOUT.md` as the compact completion
+boundary for the no-car/code phase. It records:
+
+- what is included in local no-car/code completion;
+- what stays pending until a clean C3 install, restored SSH, parked C3 session,
+  or Seltos road drive;
+- the commands that prove local completion;
+- the current SSH recovery state and the next silent C3 evidence command.
+
+The static gate now checks this closeout page so the completion boundary cannot
+quietly disappear during future updates.
+
 ## 2026-06-20 SSH Evidence Note
 
 Published as `2026.002.000-gp.20260620.47`.
