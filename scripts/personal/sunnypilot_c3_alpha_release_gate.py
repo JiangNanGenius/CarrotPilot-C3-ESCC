@@ -57,6 +57,7 @@ def py() -> str:
 
 def build_steps(args: argparse.Namespace) -> list[tuple[str, list[str], int]]:
   scripts = [
+    "scripts/personal/build_c3_qt_compat_installer.py",
     "scripts/personal/sunnypilot_c3_installer_audit.py",
     "scripts/personal/sunnypilot_c3_alpha_release_gate.py",
     "scripts/personal/sunnypilot_c3_compat_audit.py",

@@ -6,9 +6,10 @@ This file tracks the personal C3 alpha line. Stable daily use stays on `/i`; the
 
 - [x] Keep `/i` as the stable `personal/c3-escc-atune` installer.
 - [x] Publish `/x` as the alpha `alpha-sunnypilot-c3` installer.
-- [x] Replace the old Qt-style `/x` binary with a SunnyPilot Raylib ARM64 installer.
+- [x] Replace the incompatible Raylib `/x` binary with a C3 Qt-compatible ARM64 installer.
 - [x] Verify the published `/x` binary contains the CarrotPilot-C3-ESCC repo and `alpha-sunnypilot-c3` branch.
-- [x] Add `scripts/personal/sunnypilot_c3_installer_audit.py` so future updates can reject old Qt installer binaries.
+- [x] Add `scripts/personal/build_c3_qt_compat_installer.py` so the Qt-compatible `/x` can be rebuilt reproducibly.
+- [x] Add `scripts/personal/sunnypilot_c3_installer_audit.py` so future updates reject incompatible Raylib/new-GLIBC and stale upstream installer binaries.
 - [x] Add `scripts/personal/sunnypilot_c3_device_collect.py` to collect installer crash logs or parked/model/no-cloud evidence from the C3 over SSH.
 - [ ] After the user retries `/x`, collect device evidence if it still exits after the download screen.
 
