@@ -78,7 +78,7 @@ def git_text(*args: str) -> str:
 
 
 def parse_version() -> dict[str, Any]:
-  version_h = read("sunnypilot/common/version.h")
+  version_h = read("openpilot/sunnypilot/common/version.h")
   version = re.search(r'SUNNYPILOT_VERSION "([^"]+)"', version_h)
   base = re.search(r'SUNNYPILOT_BASE_VERSION "([^"]+)"', version_h)
   patch_date = re.search(r'GENIUS_PILOT_PATCH_DATE "([^"]+)"', version_h)
@@ -93,8 +93,8 @@ def parse_version() -> dict[str, Any]:
 
 def cloud_process_evidence() -> dict[str, Any]:
   process_config = read("system/manager/process_config.py")
-  manager = read("system/manager/manager.py")
-  params = read("common/params_keys.h")
+  manager = read("openpilot/system/manager/manager.py")
+  params = read("openpilot/common/params_keys.h")
   process_rows = {}
   for name in DISABLED_CLOUD_PROCESSES:
     registered = bool(re.search(rf'(PythonProcess|NativeProcess)\("{re.escape(name)}"', process_config))

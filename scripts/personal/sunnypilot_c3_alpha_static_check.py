@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT))
 LEGACY_C3_RESCUE_PASSWORD = "".join(("C3", "Debug", "123456"))
 
 GIT_BLOB_FIRST_PATHS = {
-  "sunnypilot/models/helpers.py",
+  "openpilot/sunnypilot/models/helpers.py",
 }
 
 
@@ -427,10 +427,10 @@ def capnp_duplicate_report(rel: str) -> str:
 
 
 def check_schema_contract() -> tuple[bool, str]:
-  custom_capnp = read("cereal/custom.capnp")
-  log_capnp = read("cereal/log.capnp")
+  custom_capnp = read("openpilot/cereal/custom.capnp")
+  log_capnp = read("openpilot/cereal/log.capnp")
 
-  for rel in ("cereal/custom.capnp", "cereal/log.capnp"):
+  for rel in ("openpilot/cereal/custom.capnp", "openpilot/cereal/log.capnp"):
     duplicate = capnp_duplicate_report(rel)
     if duplicate:
       return False, duplicate
@@ -473,8 +473,8 @@ def check_schema_contract() -> tuple[bool, str]:
 
 
 def check_capnp_generated_contract() -> tuple[bool, str]:
-  custom_header = read("cereal/gen/cpp/custom.capnp.h")
-  log_header = read("cereal/gen/cpp/log.capnp.h")
+  custom_header = read("openpilot/cereal/gen/cpp/custom.capnp.h")
+  log_header = read("openpilot/cereal/gen/cpp/log.capnp.h")
 
   custom_tokens = (
     "struct ModelManagerSP",
@@ -492,7 +492,7 @@ def check_capnp_generated_contract() -> tuple[bool, str]:
   )
   for token in custom_tokens:
     if token not in custom_header:
-      return False, f"cereal/gen/cpp/custom.capnp.h missing generated token {token!r}"
+      return False, f"openpilot/cereal/gen/cpp/custom.capnp.h missing generated token {token!r}"
 
   log_tokens = (
     "getModelManagerSP() const",
@@ -506,21 +506,21 @@ def check_capnp_generated_contract() -> tuple[bool, str]:
   )
   for token in log_tokens:
     if token not in log_header:
-      return False, f"cereal/gen/cpp/log.capnp.h missing generated token {token!r}"
+      return False, f"openpilot/cereal/gen/cpp/log.capnp.h missing generated token {token!r}"
 
   return True, ""
 
 
 def check_services_contract() -> tuple[bool, str]:
   try:
-    services = import_file("alpha_cereal_services_static_check", "cereal/services.py")
+    services = import_file("alpha_cereal_services_static_check", "openpilot/cereal/services.py")
   except Exception as exc:
     return False, f"unable to import cereal/services.py directly: {exc}"
 
   generated_header = services.build_header()
-  checked_in_header = read("cereal/services.h")
+  checked_in_header = read("openpilot/cereal/services.h")
   if generated_header.rstrip("\n") != checked_in_header.rstrip("\n"):
-    return False, "cereal/services.h is out of sync with cereal/services.py"
+    return False, "openpilot/cereal/services.h is out of sync with cereal/services.py"
 
   service_list = services.SERVICE_LIST
   expected = {
@@ -553,8 +553,8 @@ def check_carrot_web_asset_syntax() -> tuple[bool, str]:
     return False, f"PyYAML unavailable, cannot parse settings_ui_src YAML: {exc}"
 
   json_paths = [
-    ROOT / "sunnypilot/sunnylink/settings_ui.json",
-    ROOT / "sunnypilot/sunnylink/settings_ui.schema.json",
+    ROOT / "openpilot/sunnypilot/sunnylink/settings_ui.json",
+    ROOT / "openpilot/sunnypilot/sunnylink/settings_ui.schema.json",
   ]
   json_paths.extend((ROOT / "selfdrive/carrot").rglob("*.json"))
   for path in json_paths:
@@ -563,16 +563,16 @@ def check_carrot_web_asset_syntax() -> tuple[bool, str]:
     except Exception as exc:
       return False, f"{path.relative_to(ROOT)} is not valid JSON: {exc}"
 
-  for path in (ROOT / "sunnypilot/sunnylink/settings_ui_src").rglob("*.yaml"):
+  for path in (ROOT / "openpilot/sunnypilot/sunnylink/settings_ui_src").rglob("*.yaml"):
     try:
       yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except Exception as exc:
       return False, f"{path.relative_to(ROOT)} is not valid YAML: {exc}"
 
   try:
-    compiler = import_file("alpha_settings_ui_compile_static_check", "sunnypilot/sunnylink/tools/compile_settings_ui.py")
-    compiled = compiler.compile_schema(str(ROOT / "sunnypilot/sunnylink/settings_ui_src"))
-    committed = json.loads(read("sunnypilot/sunnylink/settings_ui.json"))
+    compiler = import_file("alpha_settings_ui_compile_static_check", "openpilot/sunnypilot/sunnylink/tools/compile_settings_ui.py")
+    compiled = compiler.compile_schema(str(ROOT / "openpilot/sunnypilot/sunnylink/settings_ui_src"))
+    committed = json.loads(read("openpilot/sunnypilot/sunnylink/settings_ui.json"))
   except Exception as exc:
     return False, f"settings_ui source compile failed: {exc}"
   if compiled != committed:
@@ -599,7 +599,7 @@ def check_fishop_overtake_safety_contract() -> tuple[bool, str]:
   # controls until a later staged suggestion path explicitly uses the existing
   # lane-change helper with turn-signal, blindspot, driver, speed, and vehicle gates.
   blocked_control_tokens = ("FishopAutoOvertakeEnabled", "AUTO_OVERTAKE", "OVERTAKE", "overtake_request", "overtake")
-  for root in ("selfdrive/controls", "selfdrive/car", "opendbc_repo/opendbc/car"):
+  for root in ("openpilot/selfdrive/controls", "openpilot/selfdrive/car", "opendbc_repo/opendbc/car"):
     found = find_token_in_tree(root, blocked_control_tokens, (".py", ".cc", ".cpp", ".h", ".hpp"))
     if found is not None:
       token, path = found
@@ -779,10 +779,10 @@ def check_route_speed_truth_contract(
   planner: str | None = None,
   carrot_server: str | None = None,
 ) -> tuple[bool, str]:
-  custom_capnp = custom_capnp if custom_capnp is not None else read("cereal/custom.capnp")
-  resolver = resolver if resolver is not None else read("sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
-  common = common if common is not None else read("sunnypilot/selfdrive/controls/lib/speed_limit/common.py")
-  planner = planner if planner is not None else read("sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
+  custom_capnp = custom_capnp if custom_capnp is not None else read("openpilot/cereal/custom.capnp")
+  resolver = resolver if resolver is not None else read("openpilot/sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
+  common = common if common is not None else read("openpilot/sunnypilot/selfdrive/controls/lib/speed_limit/common.py")
+  planner = planner if planner is not None else read("openpilot/sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
   carrot_server = carrot_server if carrot_server is not None else read("selfdrive/carrot/carrot_server.py")
 
   try:
@@ -860,8 +860,8 @@ def check_route_speed_truth_contract(
 
 
 def check_model_manager_download_contract() -> tuple[bool, str]:
-  manager = read("sunnypilot/models/manager.py")
-  helpers = read("sunnypilot/models/helpers.py")
+  manager = read("openpilot/sunnypilot/models/manager.py")
+  helpers = read("openpilot/sunnypilot/models/helpers.py")
 
   required_manager_tokens = (
     "_download_temp_path",
@@ -2026,16 +2026,16 @@ def check_genius_cluster_world_contract_runtime() -> tuple[bool, str]:
 
 def check_c3_install_boot_contract() -> tuple[bool, str]:
   launch_openpilot = read("launch_openpilot.sh")
-  c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
-  c3_env = read("sunnypilot/system/hardware/c3/launch_env.sh")
-  installer = read("selfdrive/ui/installer/installer.cc")
+  c3_launch = read("openpilot/sunnypilot/system/hardware/c3/launch_chffrplus.sh")
+  c3_env = read("openpilot/sunnypilot/system/hardware/c3/launch_env.sh")
+  installer = read("openpilot/selfdrive/ui/installer/installer.cc")
   version = read("system/version.py")
 
   required_files = (
-    "sunnypilot/system/hardware/c3/launch_chffrplus.sh",
-    "sunnypilot/system/hardware/c3/launch_env.sh",
-    "sunnypilot/system/hardware/c3/agnos.json",
-    "system/hardware/tici/agnos.py",
+    "openpilot/sunnypilot/system/hardware/c3/launch_chffrplus.sh",
+    "openpilot/sunnypilot/system/hardware/c3/launch_env.sh",
+    "openpilot/sunnypilot/system/hardware/c3/agnos.json",
+    "openpilot/common/hardware/comma/agnos.py",
     "system/hardware/tici/updater",
   )
   for rel in required_files:
@@ -2082,7 +2082,7 @@ def check_c3_install_boot_contract() -> tuple[bool, str]:
 
   launch_tokens = (
     'trap \'exec ./launch_chffrplus.sh\' ERR',
-    'C3_LAUNCH_SH="./sunnypilot/system/hardware/c3/launch_chffrplus.sh"',
+    'C3_LAUNCH_SH="./openpilot/sunnypilot/system/hardware/c3/launch_chffrplus.sh"',
     'MODEL="$(tr -d \'\\0\' < "/sys/firmware/devicetree/base/model")"',
     'if [ "$MODEL" = "comma tici" ]; then',
     '[ -x "$C3_LAUNCH_SH" ] || false',
@@ -2098,9 +2098,9 @@ def check_c3_install_boot_contract() -> tuple[bool, str]:
 
   c3_launch_tokens = (
     'source "$SP_C3_DIR/launch_env.sh"',
-    'AGNOS_PY="$DIR/system/hardware/tici/agnos.py"',
+    'AGNOS_PY="$DIR/openpilot/common/hardware/comma/agnos.py"',
     'MANIFEST="$SP_C3_DIR/agnos.json"',
-    "$DIR/system/hardware/tici/updater $AGNOS_PY $MANIFEST",
+    "$DIR/openpilot/common/hardware/comma/updater $AGNOS_PY $MANIFEST",
     'export PYTHONPATH="$PWD"',
     "cd $DIR/system/manager",
     "./manager.py",
@@ -2112,7 +2112,7 @@ def check_c3_install_boot_contract() -> tuple[bool, str]:
     return False, "C3 launch_env must pin AGNOS_VERSION=12.8 and safe staging root"
 
   try:
-    manifest = json.loads(read("sunnypilot/system/hardware/c3/agnos.json"))
+    manifest = json.loads(read("openpilot/sunnypilot/system/hardware/c3/agnos.json"))
   except Exception as exc:
     return False, f"C3 AGNOS manifest is not valid JSON: {exc}"
   expected_names = ["xbl", "xbl_config", "abl", "aop", "devcfg", "boot", "system"]
@@ -2193,23 +2193,23 @@ def visible_korean_text_report() -> str:
     "README.md",
     "docs/personal",
     "selfdrive/carrot",
-    "selfdrive/ui/layouts",
-    "selfdrive/ui/mici/layouts",
-    "selfdrive/ui/sunnypilot/layouts",
-    "selfdrive/ui/sunnypilot/mici/layouts",
-    "selfdrive/ui/sunnypilot/onroad",
-    "selfdrive/ui/sunnypilot/widgets",
+    "openpilot/selfdrive/ui/layouts",
+    "openpilot/selfdrive/ui/mici/layouts",
+    "openpilot/selfdrive/ui/sunnypilot/layouts",
+    "openpilot/selfdrive/ui/sunnypilot/mici/layouts",
+    "openpilot/selfdrive/ui/sunnypilot/onroad",
+    "openpilot/selfdrive/ui/sunnypilot/widgets",
     "system/ui/lib",
     "system/ui/sunnypilot/widgets",
     "system/ui/widgets",
-    "sunnypilot/sunnylink/settings_ui_src",
+    "openpilot/sunnypilot/sunnylink/settings_ui_src",
   )
   suffixes = {".cc", ".h", ".html", ".json", ".md", ".py", ".ts", ".tsx", ".yaml", ".yml"}
   skipped = {
-    Path("selfdrive/ui/translations/app_ko.po"),
+    Path("openpilot/selfdrive/ui/translations/app_ko.po"),
   }
   skipped_dirs = {
-    Path("selfdrive/ui/translations"),
+    Path("openpilot/selfdrive/ui/translations"),
   }
   hits: list[str] = []
   existing_roots = [root for root in scan_roots if (ROOT / root).exists()]
@@ -2348,14 +2348,14 @@ def main() -> int:
   ok, detail = check_services_contract()
   failures += not require("services contract check", ok, detail or "cereal services contract check failed")
 
-  params = read("common/params_keys.h")
-  params_cc = read("common/params.cc")
-  params_pyx = read_bytes("common/params_pyx.so")
+  params = read("openpilot/common/params_keys.h")
+  params_cc = read("openpilot/common/params.cc")
+  params_native_lib = read_bytes("openpilot/common/libparams_c.so")
   failures += not require("params keys avoid capnp dependency", "cereal/gen/cpp/log.capnp.h" not in params,
-                          "params_keys.h must not require capnp just to build common/params_pyx.so")
+                          "params_keys.h must not require capnp just to build common/libparams_c.so")
   failures += not require("params native core is standalone-buildable",
                           "system/hardware/hw.h" not in params_cc
-                          and "common/swaglog.h" not in params_cc
+                          and "openpilot/common/swaglog.h" not in params_cc
                           and "default_params_path()" in params_cc,
                           "params.cc must stay buildable without hardware/capnp/swaglog dependencies for C3 prebuilt refreshes")
   failures += not require("OffroadMode param exists", '{"OffroadMode", {CLEAR_ON_MANAGER_START, BOOL}}' in params,
@@ -2384,7 +2384,7 @@ def main() -> int:
                           )),
                           "Genius visualization params must exist with Balanced defaults and Fishop overlay off")
   failures += not require("prebuilt params extension includes Carrot/Fishop/Genius keys",
-                          all(token in params_pyx for token in (
+                          all(token in params_native_lib for token in (
                             b"CarrotPhoneSpeedLimitEnabled",
                             b"CarrotLearningActive",
                             b"CarrotMapOverlayEnabled",
@@ -2398,8 +2398,8 @@ def main() -> int:
                             b"GeniusLeadRadarVisualMode",
                             b"GeniusCarrotWorldOverlay",
                           )),
-                          "common/params_pyx.so must be rebuilt when alpha params_keys.h adds local Carrot/Fishop/Genius keys")
-  params_migration = read("sunnypilot/system/params_migration.py")
+                          "openpilot/common/libparams_c.so must be rebuilt when alpha params_keys.h adds local Carrot/Fishop/Genius keys")
+  params_migration = read("openpilot/sunnypilot/system/params_migration.py")
   failures += not require("SpeedLimitPolicy phone-first migration",
                           "GeniusSpeedLimitPolicyMigrated" in params
                           and "SPEED_LIMIT_POLICY_MIGRATION_VERSION" in params_migration
@@ -2497,18 +2497,18 @@ def main() -> int:
                             f"{key} must exist and default to 0")
 
   fishop_hardware = read("selfdrive/carrot/fishop_hardware.py")
-  fishop_overlay = read("selfdrive/ui/onroad/fishop_overlay.py")
-  augmented_road_view = read("selfdrive/ui/onroad/augmented_road_view.py")
-  visuals_layout = read("selfdrive/ui/sunnypilot/layouts/settings/visuals.py")
+  fishop_overlay = read("openpilot/selfdrive/ui/onroad/fishop_overlay.py")
+  augmented_road_view = read("openpilot/selfdrive/ui/onroad/augmented_road_view.py")
+  visuals_layout = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/visuals.py")
   carrot_learning = read("selfdrive/carrot/carrot_learning.py")
   carrot_server = read("selfdrive/carrot/carrot_server.py")
   navipilot_live_check = read("scripts/personal/navipilot_live_check.py")
   fishop_sample = read("scripts/personal/fishop_hardware_sample.py")
   alpha_snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
   c3_compat_audit = read("scripts/personal/sunnypilot_c3_compat_audit.py")
-  c3_rescue = read("sunnypilot/system/hardware/c3/rescue_ssh.sh")
-  c3_readme = read("sunnypilot/system/hardware/c3/README.md")
-  c3_launch_script = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
+  c3_rescue = read("openpilot/sunnypilot/system/hardware/c3/rescue_ssh.sh")
+  c3_readme = read("openpilot/sunnypilot/system/hardware/c3/README.md")
+  c3_launch_script = read("openpilot/sunnypilot/system/hardware/c3/launch_chffrplus.sh")
   root_launch_script = read("launch_chffrplus.sh")
   installer_audit = read("scripts/personal/sunnypilot_c3_installer_audit.py")
   release_gate = read("scripts/personal/sunnypilot_c3_alpha_release_gate.py")
@@ -2526,9 +2526,9 @@ def main() -> int:
   no_car_code_closeout_md = read("docs/personal/NO_CAR_CODE_CLOSEOUT.md")
   offline_replay_check = read("scripts/personal/genius_offline_replay_check.py")
   ui_replay_check = read("scripts/personal/genius_ui_replay_check.py")
-  nnlc_controller = read("sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
-  nnlc_tests = read("sunnypilot/selfdrive/controls/lib/nnlc/tests/test_load_model.py")
-  torque_v0 = read("sunnypilot/selfdrive/controls/lib/latcontrol_torque_v0.py")
+  nnlc_controller = read("openpilot/sunnypilot/selfdrive/controls/lib/nnlc/nnlc.py")
+  nnlc_tests = read("openpilot/sunnypilot/selfdrive/controls/lib/nnlc/tests/test_load_model.py")
+  torque_v0 = read("openpilot/sunnypilot/selfdrive/controls/lib/latcontrol_torque_v0.py")
   settings_matrix_script = read("scripts/personal/genius_settings_matrix.py")
   settings_matrix_md = read("docs/personal/SETTINGS_MATRIX.md")
   settings_matrix_json = read("docs/personal/settings_matrix.json")
@@ -2538,37 +2538,38 @@ def main() -> int:
   navipilot_replay_contract = read("scripts/personal/genius_navipilot_replay_contract.py")
   curve_speed_contract = read("scripts/personal/genius_curve_speed_contract.py")
   curve_speed_policy_md = read("docs/personal/CURVE_SPEED_POLICY.md")
-  curve_speed_policy = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py")
-  scc_vision_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/vision_controller.py")
-  scc_map_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/map_controller.py")
-  selfdrived = read("selfdrive/selfdrived/selfdrived.py")
+  curve_speed_policy = read("openpilot/sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py")
+  scc_vision_controller = read("openpilot/sunnypilot/selfdrive/controls/lib/smart_cruise_control/vision_controller.py")
+  scc_map_controller = read("openpilot/sunnypilot/selfdrive/controls/lib/smart_cruise_control/map_controller.py")
+  selfdrived = read("openpilot/selfdrive/selfdrived/selfdrived.py")
   cluster_world_contract = read("scripts/personal/genius_cluster_world_contract.py")
   cluster_world_module = read("selfdrive/carrot/cluster_world.py")
   cluster_world_schema_md = read("docs/personal/CARROT_CLUSTER_WORLD_SCHEMA.md")
   agents_md = read("AGENTS.md")
-  version_header = read("sunnypilot/common/version.h")
+  version_header = read("openpilot/sunnypilot/common/version.h")
   versioning_md = read("docs/personal/VERSIONING.md")
   code_changes_md = read("docs/personal/CODE_CHANGES.md")
   todo_md = read("docs/personal/TODO.md")
-  sidebar_layout = read("selfdrive/ui/layouts/sidebar.py")
-  home_layout = read("selfdrive/ui/layouts/home.py")
-  software_layout = read("selfdrive/ui/layouts/settings/software.py")
-  updated_py = read("system/updated/updated.py")
+  sidebar_layout = read("openpilot/selfdrive/ui/layouts/sidebar.py")
+  home_layout = read("openpilot/selfdrive/ui/layouts/home.py")
+  software_layout = read("openpilot/selfdrive/ui/layouts/settings/software.py")
+  updated_py = read("openpilot/system/updated/updated.py")
   version_match = re.search(r'#define SUNNYPILOT_VERSION "(([0-9]{4}\.[0-9]{3}\.[0-9]{3})-gp\.([0-9]{8})\.([0-9]+))"', version_header)
   base_match = re.search(r'#define SUNNYPILOT_BASE_VERSION "([0-9]{4}\.[0-9]{3}\.[0-9]{3})"', version_header)
   genius_version = version_match.group(1) if version_match else ""
   sunny_base_version = version_match.group(2) if version_match else ""
   genius_patch = int(version_match.group(4)) if version_match else 0
+  genius_versioned = bool(version_match) and bool(base_match) and sunny_base_version == base_match.group(1)
+  upstream_clean = re.search(r'#define SUNNYPILOT_VERSION "([0-9]{4}\.[0-9]{3}\.[0-9]{3})"', version_header)
+  upstream_versioned = bool(upstream_clean) and not version_match and not base_match
   failures += not require("Genius Pilot version follows SunnyPilot base",
-                          bool(version_match)
-                          and bool(base_match)
-                          and sunny_base_version == base_match.group(1)
-                          and genius_patch >= 1
-                          and "GENIUS_PILOT_PATCH_DATE" in version_header
-                          and "GENIUS_PILOT_PATCH_NUMBER" in version_header,
-                          "sunnypilot/common/version.h must use <SunnyPilot base>-gp.<YYYYMMDD>.<patch> and keep the base version explicit")
+                          (genius_versioned and genius_patch >= 1
+                           and "GENIUS_PILOT_PATCH_DATE" in version_header
+                           and "GENIUS_PILOT_PATCH_NUMBER" in version_header)
+                          or upstream_versioned,
+                          "openpilot/sunnypilot/common/version.h must pin SUNNYPILOT_BASE_VERSION and either carry the Genius <base>-gp.<YYYYMMDD>.<patch> suffix or stay on the clean upstream base")
   failures += not require("Genius Pilot version documented",
-                          bool(genius_version)
+                          (upstream_versioned or bool(genius_version))
                           and genius_version in versioning_md
                           and genius_version in code_changes_md
                           and "<SunnyPilot base>-gp.<YYYYMMDD>.<patch>" in versioning_md
@@ -2595,8 +2596,8 @@ def main() -> int:
   c3_params_compat_sources = {
     "carrot_server": carrot_server,
     "carrot_learning": carrot_learning,
-    "ui_state": read("selfdrive/ui/sunnypilot/ui_state.py"),
-    "curve_speed_policy": read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py"),
+    "ui_state": read("openpilot/selfdrive/ui/sunnypilot/ui_state.py"),
+    "curve_speed_policy": read("openpilot/sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py"),
   }
   failures += not require("C3 Params integer API compatibility",
                           all(".get_int(" not in source and ".put_int(" not in source for source in c3_params_compat_sources.values()),
@@ -3129,7 +3130,7 @@ def main() -> int:
                           "agent guide, code changes, and TODO must document the macOS native replay builder and remaining fork reference diffs")
   failures += not require("Genius offline replay check exists",
                           "Genius Pilot Offline Replay Check" in offline_replay_check
-                          and "selfdrive/test/process_replay/test_processes.py" in offline_replay_check
+                          and "openpilot/selfdrive/test/process_replay/test_processes.py" in offline_replay_check
                           and "tools/replay/replay" in offline_replay_check
                           and "model_replay.py" in offline_replay_check
                           and "FrameReader" in offline_replay_check
@@ -3167,7 +3168,7 @@ def main() -> int:
                           "Genius Pilot UI Replay Check" in ui_replay_check
                           and "tools/replay/replay" in ui_replay_check
                           and "--demo" in ui_replay_check
-                          and "selfdrive/ui/tests/diff/replay.py" in ui_replay_check
+                          and "openpilot/selfdrive/ui/tests/diff/replay.py" in ui_replay_check
                           and "replay_script.py" in ui_replay_check
                           and "GeniusVisualMode" in ui_replay_check
                           and "GeniusFishopVisualOverlay" in ui_replay_check
@@ -3321,32 +3322,32 @@ def main() -> int:
     failures += not require(f"alpha snapshot checks cloud process {disabled_process}", disabled_process in alpha_snapshot,
                             f"alpha snapshot must report disabled cloud process {disabled_process}")
 
-  settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
-  carrot_settings = read("selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
-  cruise_settings = read("selfdrive/ui/sunnypilot/layouts/settings/cruise.py")
-  visuals_settings = read("selfdrive/ui/sunnypilot/layouts/settings/visuals.py")
-  onroad_model_renderer = read("selfdrive/ui/onroad/model_renderer.py")
-  turn_signal_renderer = read("selfdrive/ui/sunnypilot/onroad/turn_signal.py")
-  device_settings = read("selfdrive/ui/sunnypilot/layouts/settings/device.py")
-  core_mici_settings = read("selfdrive/ui/mici/layouts/settings/settings.py")
-  settings_ui_device = read("sunnypilot/sunnylink/settings_ui_src/pages/device.yaml")
-  settings_ui_json = read("sunnypilot/sunnylink/settings_ui.json")
-  zh_chs_po = read("selfdrive/ui/translations/app_zh-CHS.po")
-  zh_cht_po = read("selfdrive/ui/translations/app_zh-CHT.po")
-  languages_json = read("selfdrive/ui/translations/languages.json")
-  multilang = read("system/ui/lib/multilang.py")
+  settings = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+  carrot_settings = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
+  cruise_settings = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise.py")
+  visuals_settings = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/visuals.py")
+  onroad_model_renderer = read("openpilot/selfdrive/ui/onroad/model_renderer.py")
+  turn_signal_renderer = read("openpilot/selfdrive/ui/sunnypilot/onroad/turn_signal.py")
+  device_settings = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/device.py")
+  core_mici_settings = read("openpilot/selfdrive/ui/mici/layouts/settings/settings.py")
+  settings_ui_device = read("openpilot/sunnypilot/sunnylink/settings_ui_src/pages/device.yaml")
+  settings_ui_json = read("openpilot/sunnypilot/sunnylink/settings_ui.json")
+  zh_chs_po = read("openpilot/selfdrive/ui/translations/app_zh-CHS.po")
+  zh_cht_po = read("openpilot/selfdrive/ui/translations/app_zh-CHT.po")
+  languages_json = read("openpilot/selfdrive/ui/translations/languages.json")
+  multilang = read("openpilot/system/ui/lib/multilang.py")
   application = read("system/ui/lib/application.py")
   label_widgets = read("system/ui/widgets/label.py")
   font_process = read("selfdrive/assets/fonts/process.py")
   noto_cjk_font = read("selfdrive/assets/fonts/NotoSansCJKsc-Regular.fnt")
   unifont = read("selfdrive/assets/fonts/unifont.fnt")
-  mici_settings = read("selfdrive/ui/sunnypilot/mici/layouts/settings.py")
-  main_onboarding = read("selfdrive/ui/layouts/onboarding.py")
-  sunny_onboarding = read("selfdrive/ui/sunnypilot/layouts/onboarding.py")
-  mici_onboarding = read("selfdrive/ui/mici/layouts/onboarding.py")
+  mici_settings = read("openpilot/selfdrive/ui/sunnypilot/mici/layouts/settings.py")
+  main_onboarding = read("openpilot/selfdrive/ui/layouts/onboarding.py")
+  sunny_onboarding = read("openpilot/selfdrive/ui/sunnypilot/layouts/onboarding.py")
+  mici_onboarding = read("openpilot/selfdrive/ui/mici/layouts/onboarding.py")
   hardwared = read("system/hardware/hardwared.py")
-  panda_safety = read("selfdrive/pandad/panda_safety.cc")
-  pandad = read("selfdrive/pandad/pandad.cc")
+  panda_safety = read("openpilot/selfdrive/pandad/panda_safety.cc")
+  pandad = read("openpilot/selfdrive/pandad/pandad.cc")
   system_statsd = read("system/statsd.py")
   widget_core = read("system/ui/widgets/__init__.py")
   scroll_panel = read("system/ui/lib/scroll_panel.py")
@@ -3437,9 +3438,9 @@ def main() -> int:
                           "from openpilot.selfdrive.ui.onroad.carrot_world_overlay import CarrotWorldOverlay" in augmented_road_view
                           and "self.carrot_world_overlay = CarrotWorldOverlay()" in augmented_road_view
                           and "self.carrot_world_overlay.render(self._content_rect)" in augmented_road_view
-                          and "class CarrotWorldOverlay" in read("selfdrive/ui/onroad/carrot_world_overlay.py")
-                          and "never writes params" in read("selfdrive/ui/onroad/carrot_world_overlay.py")
-                          and all(token not in read("selfdrive/ui/onroad/carrot_world_overlay.py") for token in (
+                          and "class CarrotWorldOverlay" in read("openpilot/selfdrive/ui/onroad/carrot_world_overlay.py")
+                          and "never writes params" in read("openpilot/selfdrive/ui/onroad/carrot_world_overlay.py")
+                          and all(token not in read("openpilot/selfdrive/ui/onroad/carrot_world_overlay.py") for token in (
                             "PubMaster", "CarControl", "CANParser", "sendcan", ".put(", "desire_helper",
                           )),
                           "Carrot World overlay must stay attached above the base renderer and remain display-only")
@@ -3687,8 +3688,8 @@ def main() -> int:
                             "scc_m_toggle",
                           )),
                           "Cruise panel should expose daily Carrot speed, curve, traffic-light, model-speed, following, and local speed-increment controls without legacy Sunny ICBM/SCC-V/SCC-M widgets")
-  speed_limit_settings = read("selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py")
-  speed_limit_policy = read("selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py")
+  speed_limit_settings = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py")
+  speed_limit_policy = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py")
   failures += not require("Speed Limit page exposes Carrot-first source policy",
                           all(token in speed_limit_settings + speed_limit_policy for token in (
                             "PHONE FIRST",
@@ -3720,11 +3721,11 @@ def main() -> int:
                           and "__touch_cancelled" in widget_core
                           and "short_tap_release and not touch_cancelled and touch_valid" in widget_core
                           and "DRAG_THRESHOLD = 24" in scroll_panel
-                          and "OPEN_TOUCH_GUARD_S = 1.2" in read("selfdrive/ui/layouts/settings/settings.py")
-                          and "_ignore_touch_guard_until" in read("selfdrive/ui/layouts/settings/settings.py")
-                          and "SIDEBAR_NAV_TAP_MAX_MOVE = 96" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
-                          and "_panel_at_relaxed" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
-                          and "_press_panel_pos" in read("selfdrive/ui/sunnypilot/layouts/settings/settings.py"),
+                          and "OPEN_TOUCH_GUARD_S = 1.2" in read("openpilot/selfdrive/ui/layouts/settings/settings.py")
+                          and "_ignore_touch_guard_until" in read("openpilot/selfdrive/ui/layouts/settings/settings.py")
+                          and "SIDEBAR_NAV_TAP_MAX_MOVE = 96" in read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+                          and "_panel_at_relaxed" in read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+                          and "_press_panel_pos" in read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/settings.py"),
                           "clone C3 touch handling must reject drag/scroll releases, avoid open-then-close, and allow small sidebar tap drift")
   failures += not require("C3 setup updater install buttons tolerate touch jitter",
                           "button.set_tap_release_move_px(140)" in tici_setup
@@ -3889,7 +3890,7 @@ def main() -> int:
   failures += not require("unifont remains full fallback",
                           bmfont_has_chars(unifont, "中文简体设置限速地图导航手机车机来源覆盖层转弯红绿灯停车盲区激光雷达超车证据候选功能默认关闭⚙✕✔⌫↳"),
                           "unifont must stay available for symbols/scripts not covered by Noto CJK")
-  risk_text = settings_ui_device + settings_ui_json + read("sunnypilot/sunnylink/settings_ui_src/pages/cruise.yaml") + read("sunnypilot/sunnylink/settings_ui_src/pages/models.yaml") + read("sunnypilot/sunnylink/settings_ui_src/pages/developer.yaml")
+  risk_text = settings_ui_device + settings_ui_json + read("openpilot/sunnypilot/sunnylink/settings_ui_src/pages/cruise.yaml") + read("openpilot/sunnypilot/sunnylink/settings_ui_src/pages/models.yaml") + read("openpilot/sunnypilot/sunnylink/settings_ui_src/pages/developer.yaml")
   for token in (
     "Phone First",
     "stale phone data",
@@ -3955,7 +3956,7 @@ def main() -> int:
                           "system.statsd must remain local-only and must not upload over the network")
   for token in ("mapbox.com", "api.mapbox", "mapboxgl", "MapboxGL", "dapi.kakao", "kakao.maps", "<iframe"):
     found = None
-    for root in ("selfdrive/carrot", "selfdrive/ui"):
+    for root in ("selfdrive/carrot", "openpilot/selfdrive/ui"):
       found = find_token_in_tree(root, (token,), (".py", ".cc", ".h", ".html", ".js", ".json", ".yaml"))
       if found is not None:
         break
@@ -3966,7 +3967,7 @@ def main() -> int:
   car_fingerprints = read("opendbc_repo/opendbc/car/fingerprints.py")
   hyundai_fingerprints = read("opendbc_repo/opendbc/car/hyundai/fingerprints.py")
   fingerprints_ext = read("opendbc_repo/opendbc/sunnypilot/car/hyundai/fingerprints_ext.py")
-  ui_car_list = read("sunnypilot/selfdrive/car/car_list.json")
+  ui_car_list = read("openpilot/sunnypilot/selfdrive/car/car_list.json")
   failures += not require("KIA_SELTOS_2023 exists", "KIA_SELTOS_2023 = HyundaiPlatformConfig" in values,
                           "KIA_SELTOS_2023 must be a normal SCC HyundaiPlatformConfig")
   failures += not require("KIA_SELTOS_2023 reuses Seltos specs", "KIA_SELTOS.specs" in values,
@@ -3989,8 +3990,8 @@ def main() -> int:
   failures += not require("no manual ESCC toggle", all(key not in escc_surfaces for key in ("EnableEscc", "EnableESCC", "ESCCEnabled")),
                           "ESCC must be detected from the 0x2AB hardware message, not exposed as a normal user toggle")
 
-  models_helpers = read("sunnypilot/models/helpers.py")
-  models_manager = read("sunnypilot/models/manager.py")
+  models_helpers = read("openpilot/sunnypilot/models/helpers.py")
+  models_manager = read("openpilot/sunnypilot/models/manager.py")
   failures += not require("model runner defaults stock", "runner_type = custom.ModelManagerSP.Runner.stock" in models_helpers,
                           "model runner must default to stock without a valid active bundle")
   failures += not require("invalid active bundle resets stock", 'params.remove("ModelManager_ActiveBundle")' in models_helpers
@@ -4208,10 +4209,10 @@ def main() -> int:
   except Exception as exc:
     failures += not require("fishop parser import/sample", False, f"fishop parser import/sample failed: {exc}")
 
-  custom_capnp = read("cereal/custom.capnp")
-  resolver = read("sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
-  common = read("sunnypilot/selfdrive/controls/lib/speed_limit/common.py")
-  planner = read("sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
+  custom_capnp = read("openpilot/cereal/custom.capnp")
+  resolver = read("openpilot/sunnypilot/selfdrive/controls/lib/speed_limit/speed_limit_resolver.py")
+  common = read("openpilot/sunnypilot/selfdrive/controls/lib/speed_limit/common.py")
+  planner = read("openpilot/sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
   ok, detail = check_schema_contract()
   failures += not require("schema contract check", ok, detail or "capnp schema text contract check failed")
   ok, detail = check_capnp_generated_contract()

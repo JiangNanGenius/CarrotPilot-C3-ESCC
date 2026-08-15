@@ -67,8 +67,8 @@ def check(name: str, ok: bool, detail: str = "") -> dict[str, Any]:
 def source_checks() -> list[dict[str, Any]]:
   setup = read("system/ui/tici_setup.py")
   updater = read("system/ui/tici_updater.py")
-  settings = read("selfdrive/ui/layouts/settings/settings.py")
-  settings_sp = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+  settings = read("openpilot/selfdrive/ui/layouts/settings/settings.py")
+  settings_sp = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/settings.py")
 
   checks: list[dict[str, Any]] = []
   checks.append(check(

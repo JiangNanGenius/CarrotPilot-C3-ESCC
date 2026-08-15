@@ -15,8 +15,8 @@ def read(rel: str) -> str:
 def check_sources() -> list[str]:
   errors: list[str] = []
   guide = read("docs/personal/CARROT_SETTINGS_GUIDE.md")
-  carrot_ui = read("selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
-  cruise_ui = read("selfdrive/ui/sunnypilot/layouts/settings/cruise.py")
+  carrot_ui = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
+  cruise_ui = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise.py")
   matrix = read("docs/personal/SETTINGS_MATRIX.md")
 
   required_guide_tokens = (

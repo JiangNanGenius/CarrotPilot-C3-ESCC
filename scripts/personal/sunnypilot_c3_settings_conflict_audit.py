@@ -147,7 +147,7 @@ def git_grep_keys(ref: str, keys: tuple[str, ...]) -> dict[str, list[str]]:
     args.extend(["-e", key])
   proc = run_git([
     *args, ref, "--",
-    "common/params_keys.h",
+    "openpilot/common/params_keys.h",
     "selfdrive",
     "sunnypilot",
     "system",
@@ -201,7 +201,7 @@ def summarize_refs() -> tuple[dict[str, Any], list[dict[str, Any]]]:
       refs[reference.name] = {"available": False, "ref": reference.ref, "category": reference.category}
       continue
 
-    params = parse_params(git_show(reference.ref, "common/params_keys.h"))
+    params = parse_params(git_show(reference.ref, "openpilot/common/params_keys.h"))
     hits = git_grep_keys(reference.ref, PARAM_KEYS)
     selected = {key: params[key] for key in PARAM_KEYS if key in params}
     refs[reference.name] = {

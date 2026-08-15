@@ -26,7 +26,7 @@ class FakeParams:
 
 
 def import_policy():
-  path = ROOT / "sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py"
+  path = ROOT / "openpilot/sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py"
   source = path.read_text(encoding="utf-8").replace("from openpilot.common.params import Params", "class Params:\n  pass")
   module = types.ModuleType("curve_speed_policy_contract")
   exec(compile(source, str(path), "exec"), module.__dict__)
@@ -35,11 +35,11 @@ def import_policy():
 
 def check_sources() -> list[str]:
   errors: list[str] = []
-  policy = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py")
-  vision = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/vision_controller.py")
-  map_controller = read("sunnypilot/selfdrive/controls/lib/smart_cruise_control/map_controller.py")
-  planner = read("sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
-  ui = read("selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
+  policy = read("openpilot/sunnypilot/selfdrive/controls/lib/smart_cruise_control/curve_speed_policy.py")
+  vision = read("openpilot/sunnypilot/selfdrive/controls/lib/smart_cruise_control/vision_controller.py")
+  map_controller = read("openpilot/sunnypilot/selfdrive/controls/lib/smart_cruise_control/map_controller.py")
+  planner = read("openpilot/sunnypilot/selfdrive/controls/lib/longitudinal_planner.py")
+  ui = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
   matrix = read("docs/personal/SETTINGS_MATRIX.md")
 
   required_policy = (

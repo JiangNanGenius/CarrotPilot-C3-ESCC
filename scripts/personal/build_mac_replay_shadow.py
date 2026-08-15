@@ -15,8 +15,8 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SHADOW = Path(os.environ.get("GENIUS_REPLAY_SHADOW", "/tmp/gp-replay-shadow"))
 DEFAULT_EIGEN_INCLUDE = Path("/opt/homebrew/opt/eigen/include")
-LOCATIOND_GENERATED = ROOT / "selfdrive/locationd/models/generated"
-LONG_MPC_GENERATED = ROOT / "selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code"
+LOCATIOND_GENERATED = ROOT / "openpilot/selfdrive/locationd/models/generated"
+LONG_MPC_GENERATED = ROOT / "openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code"
 LONG_MPC_SOURCES = (
   "acados_ocp_solver_pyx.c",
   "acados_solver_long.c",
@@ -119,8 +119,8 @@ def compile_rednose_extension(shadow: Path, eigen_include: Path, dry_run: bool) 
 
 
 def compile_locationd_dylib(name: str, shadow: Path, eigen_include: Path, dry_run: bool) -> dict[str, Any]:
-  src = f"selfdrive/locationd/models/generated/{name}.cpp"
-  output = shadow / f"selfdrive/locationd/models/generated/lib{name}.dylib"
+  src = f"openpilot/selfdrive/locationd/models/generated/{name}.cpp"
+  output = shadow / f"openpilot/selfdrive/locationd/models/generated/lib{name}.dylib"
   cmd = [
     "clang++",
     "-std=c++17",
@@ -143,7 +143,7 @@ def compile_locationd_dylib(name: str, shadow: Path, eigen_include: Path, dry_ru
 def install_locationd_dylibs(shadow: Path) -> list[Path]:
   installed: list[Path] = []
   for name in ("car", "pose"):
-    src = shadow / f"selfdrive/locationd/models/generated/lib{name}.dylib"
+    src = shadow / f"openpilot/selfdrive/locationd/models/generated/lib{name}.dylib"
     dst = LOCATIOND_GENERATED / f"lib{name}.dylib"
     if src.exists():
       shutil.copy2(src, dst)
@@ -307,7 +307,7 @@ def main() -> int:
       shutil.copytree(ROOT / "rednose_repo/rednose", args.shadow / "rednose")
       for linux_so in (args.shadow / "rednose/helpers").glob("ekf_sym_pyx*.so"):
         linux_so.unlink()
-      (args.shadow / "selfdrive/locationd/models/generated").mkdir(parents=True, exist_ok=True)
+      (args.shadow / "openpilot/selfdrive/locationd/models/generated").mkdir(parents=True, exist_ok=True)
 
     steps = [
       ("rednose ekf_sym_pyx", compile_rednose_extension(args.shadow, args.eigen_include, args.dry_run)),

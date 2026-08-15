@@ -14,10 +14,10 @@ from typing import Any, Sequence
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PROCS = ("controlsd", "plannerd", "radard", "locationd", "paramsd")
 REQUIRED_FILES = (
-  "selfdrive/test/process_replay/README.md",
-  "selfdrive/test/process_replay/process_replay.py",
-  "selfdrive/test/process_replay/test_processes.py",
-  "selfdrive/test/process_replay/model_replay.py",
+  "openpilot/selfdrive/test/process_replay/README.md",
+  "openpilot/selfdrive/test/process_replay/process_replay.py",
+  "openpilot/selfdrive/test/process_replay/test_processes.py",
+  "openpilot/selfdrive/test/process_replay/model_replay.py",
   "tools/replay/README.md",
   "tools/replay/main.cc",
   "tools/replay/replay.cc",
@@ -105,7 +105,7 @@ def run(cmd: Sequence[str], timeout_s: int) -> dict[str, Any]:
 
 
 def process_replay_command(procs: Sequence[str], cars: Sequence[str], update_refs: bool, jobs: int | None = None) -> list[str]:
-  cmd = [*safe_python_command(), "selfdrive/test/process_replay/test_processes.py", "--whitelist-procs", *procs]
+  cmd = [*safe_python_command(), str(ROOT / "openpilot/selfdrive/test/process_replay/test_processes.py"), "--whitelist-procs", *procs]
   if cars:
     cmd.extend(["--whitelist-cars", *cars])
   if jobs is not None and jobs > 0:
@@ -147,9 +147,9 @@ def readiness_report(import_timeout_s: int) -> dict[str, Any]:
     "python_3_12_plus": sys.version_info >= (3, 12),
     "python_safe_path": sys.version_info >= (3, 11),
   }
-  process_readme = (ROOT / "selfdrive/test/process_replay/README.md").read_text(encoding="utf-8", errors="replace")
+  process_readme = (ROOT / "openpilot/selfdrive/test/process_replay/README.md").read_text(encoding="utf-8", errors="replace")
   replay_readme = (ROOT / "tools/replay/README.md").read_text(encoding="utf-8", errors="replace")
-  model_replay = (ROOT / "selfdrive/test/process_replay/model_replay.py").read_text(encoding="utf-8", errors="replace")
+  model_replay = (ROOT / "openpilot/selfdrive/test/process_replay/model_replay.py").read_text(encoding="utf-8", errors="replace")
   import_smoke = run(import_smoke_command(), max(1, import_timeout_s))
   runtime_checks["process_replay_import"] = import_smoke["ok"]
   token_checks = {
@@ -180,7 +180,7 @@ def self_test() -> int:
     "nativeExtensionBlocked",
     "safe_python_command",
     "-P",
-    "selfdrive/test/process_replay/test_processes.py",
+    "openpilot/selfdrive/test/process_replay/test_processes.py",
     "tools/replay/replay",
     "tools/replay/main.cc",
     "model_replay.py",

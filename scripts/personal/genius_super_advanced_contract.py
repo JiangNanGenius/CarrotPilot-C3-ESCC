@@ -70,9 +70,9 @@ def check(name: str, ok: bool, detail: str = "") -> dict[str, Any]:
 
 
 def build_report() -> dict[str, Any]:
-  params = read("common/params_keys.h")
-  carrot_settings = read("selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
-  settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+  params = read("openpilot/common/params_keys.h")
+  carrot_settings = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/carrot.py")
+  settings = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/settings.py")
   carrot_server = read("selfdrive/carrot/carrot_server.py")
   guide = read("docs/personal/CARROT_SETTINGS_GUIDE.md")
   conflicts = read("docs/personal/SETTINGS_CONFLICTS.md")

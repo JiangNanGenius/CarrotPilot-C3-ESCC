@@ -44,7 +44,7 @@ def make_bundle(model_bytes: bytes, metadata_bytes: bytes, runner=None):
   bundle.displayName = "Genius Test Model"
   bundle.generation = 1
   bundle.environment = "test"
-  bundle.runner = runner if runner is not None else custom.ModelManagerSP.Runner.tinygrad
+  bundle.runner = custom.ModelManagerSP._wrap_runner(runner if runner is not None else custom.ModelManagerSP.Runner.tinygrad)
   bundle.minimumSelectorVersion = REQUIRED_JSON_VERSION
   bundle.ref = "genius-test-ref"
 
@@ -94,6 +94,174 @@ class FakeParams:
     return bool(self.store.get(key))
 
 
+
+def install_fake_misc_modules() -> None:
+  for name in ("setproctitle", "requests"):
+    mod = types.ModuleType(name)
+    if name == "setproctitle":
+      mod.getproctitle = lambda: "genius-contract"
+      mod.setproctitle = lambda *args, **kwargs: None
+    else:
+      mod.Session = object
+      mod.get = lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("offline contract"))
+      exceptions_mod = types.ModuleType("requests.exceptions")
+      for exc_name in ("SSLError", "RequestException", "HTTPError", "ConnectionError", "Timeout"):
+        setattr(exceptions_mod, exc_name, RuntimeError)
+      mod.exceptions = exceptions_mod
+      sys.modules["requests.exceptions"] = exceptions_mod
+    sys.modules[name] = mod
+
+  realtime_mod = types.ModuleType("openpilot.common.realtime")
+  realtime_mod.Ratekeeper = object
+  sys.modules["openpilot.common.realtime"] = realtime_mod
+
+
+def install_fake_requests() -> None:
+  requests_mod = types.ModuleType("requests")
+  requests_mod.Session = object
+  requests_mod.get = lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("offline contract"))
+  sys.modules["requests"] = requests_mod
+
+
+def install_fake_numpy() -> None:
+  numpy_mod = types.ModuleType("numpy")
+  numpy_mod.ndarray = object
+  numpy_mod.float32 = "float32"
+  numpy_mod.nan = float("nan")
+  numpy_mod.zeros = lambda shape, dtype=None: types.SimpleNamespace(flatten=lambda: [])
+  numpy_mod.array = lambda data, dtype=None: list(data)
+  sys.modules["numpy"] = numpy_mod
+
+
+def install_fake_cereal_custom() -> None:
+  class _Runner:
+    snpe = 0
+    tinygrad = 1
+    stock = 2
+
+  class _Type:
+    supercombo = 0
+
+  class _NS:
+    def __init__(self, **kwargs):
+      for key, value in kwargs.items():
+        setattr(self, key, value)
+
+  _RUNNER_NAMES = {0: "snpe", 1: "tinygrad", 2: "stock"}
+
+  class _RunnerRef:
+    def __init__(self, raw):
+      self.raw = raw
+
+    def __int__(self):
+      return int(self.raw)
+
+    def __str__(self):
+      return _RUNNER_NAMES.get(int(self.raw), str(self.raw))
+
+  _RUNNER_BY_NAME = {v: k for k, v in _RUNNER_NAMES.items()}
+
+  def _runner_from_value(value):
+    if isinstance(value, _RunnerRef):
+      return value
+    if isinstance(value, str):
+      return _RunnerRef(_RUNNER_BY_NAME.get(value, 2))
+    return _RunnerRef(int(value) if value is not None else 2)
+
+  def _artifact_from_dict(data):
+    artifact = _Custom.ModelManagerSP.Artifact()
+    artifact.fileName = data.get("fileName", "")
+    uri = data.get("downloadUri", {})
+    artifact.downloadUri = types.SimpleNamespace(uri=uri.get("uri", ""), sha256=uri.get("sha256", ""))
+    artifact.chunks = []
+    return artifact
+
+  def _model_from_dict(data):
+    model = _Custom.ModelManagerSP.Model()
+    model.type = data.get("type")
+    model.artifact = _artifact_from_dict(data.get("artifact", {}))
+    model.metadata = _artifact_from_dict(data.get("metadata", {}))
+    return model
+
+  class _Custom:
+    class ModelManagerSP:
+      Runner = _Runner
+
+      @staticmethod
+      def _wrap_runner(value):
+        return _runner_from_value(value)
+      DownloadUri = _NS
+      Chunk = _NS
+      DownloadStatus = _NS
+      Override = _NS
+
+      class Model:
+        Type = _Type
+
+        def __init__(self):
+          self.type = None
+          self.artifact = None
+          self.metadata = None
+
+      class Artifact:
+        def __init__(self):
+          self.fileName = ""
+          self.downloadUri = types.SimpleNamespace(uri="", sha256="")
+          self.chunks = []
+
+      class ModelBundle:
+        def __init__(self, **kwargs):
+          self.index = 0
+          self.internalName = ""
+          self.displayName = ""
+          self.generation = 0
+          self.environment = ""
+          self.runner = None
+          self.minimumSelectorVersion = 0
+          self.ref = ""
+          self.models = []
+          for key, value in kwargs.items():
+            if key == "models":
+              value = [_model_from_dict(item) for item in value]
+            elif key == "runner":
+              value = _runner_from_value(value)
+            setattr(self, key, value)
+
+        def to_dict(self):
+          return {
+            "index": self.index,
+            "internalName": self.internalName,
+            "displayName": self.displayName,
+            "generation": self.generation,
+            "environment": self.environment,
+            "runner": str(self.runner) if self.runner is not None else "",
+            "minimumSelectorVersion": self.minimumSelectorVersion,
+            "ref": self.ref,
+            "models": [
+              {
+                "type": model.type,
+                "artifact": {"fileName": model.artifact.fileName, "downloadUri": {"uri": model.artifact.downloadUri.uri, "sha256": model.artifact.downloadUri.sha256}},
+                "metadata": {"fileName": model.metadata.fileName, "downloadUri": {"uri": model.metadata.downloadUri.uri, "sha256": model.metadata.downloadUri.sha256}},
+              }
+              for model in self.models
+            ],
+          }
+
+  cereal_mod = types.ModuleType("cereal")
+  cereal_mod.custom = _Custom
+  sys.modules["cereal"] = cereal_mod
+  sys.modules["cereal.custom"] = _Custom
+
+  messaging_mod = sys.modules.get("cereal.messaging")
+  openpilot_cereal_mod = types.ModuleType("openpilot.cereal")
+  openpilot_cereal_mod.custom = _Custom
+  openpilot_cereal_mod.log = types.SimpleNamespace()
+  if messaging_mod is not None:
+    openpilot_cereal_mod.messaging = messaging_mod
+  sys.modules["openpilot.cereal"] = openpilot_cereal_mod
+  sys.modules["openpilot.cereal.custom"] = _Custom
+
+
 def install_fake_params() -> None:
   params_mod = types.ModuleType("openpilot.common.params")
   params_mod.Params = FakeParams
@@ -115,6 +283,13 @@ def install_fake_hardware(model_root: Path) -> None:
   hw_mod.Paths = FakePaths
   sys.modules["openpilot.system.hardware"] = hardware_pkg
   sys.modules["openpilot.system.hardware.hw"] = hw_mod
+  common_hardware_pkg = types.ModuleType("openpilot.common.hardware")
+  common_hardware_pkg.PC = True
+  common_hardware_pkg.HARDWARE = hardware_pkg.HARDWARE
+  sys.modules["openpilot.common.hardware"] = common_hardware_pkg
+  common_hw_mod = types.ModuleType("openpilot.common.hardware.hw")
+  common_hw_mod.Paths = FakePaths
+  sys.modules["openpilot.common.hardware.hw"] = common_hw_mod
 
 
 def install_fake_swaglog() -> None:
@@ -182,6 +357,10 @@ def run_contract() -> dict[str, Any]:
     install_fake_swaglog()
     install_fake_aiohttp()
     install_fake_messaging()
+    install_fake_misc_modules()
+    install_fake_requests()
+    install_fake_numpy()
+    install_fake_cereal_custom()
 
     from cereal import custom
     from openpilot.sunnypilot.models import helpers

@@ -177,15 +177,15 @@ def read(rel: str) -> str:
 
 def current_context() -> dict[str, str]:
   return {
-    "params": read("common/params_keys.h"),
-    "carrot_ui": read("selfdrive/ui/sunnypilot/layouts/settings/carrot.py"),
-    "cruise_ui": read("selfdrive/ui/sunnypilot/layouts/settings/cruise.py"),
-    "visuals_ui": read("selfdrive/ui/sunnypilot/layouts/settings/visuals.py"),
-    "vehicle_selector": read("sunnypilot/selfdrive/car/car_list.json") + read("opendbc_repo/opendbc/car/hyundai/values.py"),
+    "params": read("openpilot/common/params_keys.h"),
+    "carrot_ui": read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/carrot.py"),
+    "cruise_ui": read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise.py"),
+    "visuals_ui": read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/visuals.py"),
+    "vehicle_selector": read("openpilot/sunnypilot/selfdrive/car/car_list.json") + read("opendbc_repo/opendbc/car/hyundai/values.py"),
     "carrot_server": read("selfdrive/carrot/carrot_server.py"),
     "process_config": read("system/manager/process_config.py"),
-    "ui_state": read("selfdrive/ui/sunnypilot/ui_state.py"),
-    "version": read("sunnypilot/common/version.h"),
+    "ui_state": read("openpilot/selfdrive/ui/sunnypilot/ui_state.py"),
+    "version": read("openpilot/sunnypilot/common/version.h"),
   }
 
 
@@ -195,15 +195,15 @@ def surface_text(row: MatrixRow, ctx: dict[str, str]) -> str:
   if row.ui_surface == "cruise" or row.ui_surface in {"carrot+cruise", "cruise+carrot"}:
     return ctx["carrot_ui"] + ctx["cruise_ui"]
   if row.ui_surface == "speed_limit":
-    return read("selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py") + read("selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py")
+    return read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_policy.py") + read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise_sub_layouts/speed_limit_settings.py")
   if row.ui_surface == "visuals":
     return ctx["visuals_ui"]
   if row.ui_surface == "vehicle_selector":
     return ctx["vehicle_selector"]
   if row.ui_surface == "models":
-    return read("selfdrive/ui/sunnypilot/layouts/settings/models.py")
+    return read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/models.py")
   if row.ui_surface == "mici_offroad":
-    return read("selfdrive/ui/sunnypilot/mici/layouts/settings.py") + read("system/hardware/hardwared.py")
+    return read("openpilot/selfdrive/ui/sunnypilot/mici/layouts/settings.py") + read("system/hardware/hardwared.py")
   return ""
 
 
@@ -229,7 +229,7 @@ def reference_token_cache() -> dict[str, set[str]]:
     args = ["grep", "-I", "-h", "-F"]
     for token in token_list:
       args.extend(["-e", token])
-    args.extend([ref.ref, "--", "common/params_keys.h", "selfdrive", "sunnypilot", "opendbc_repo"])
+    args.extend([ref.ref, "--", "openpilot/common/params_keys.h", "selfdrive", "sunnypilot", "opendbc_repo"])
     proc = run_git(args)
     found: set[str] = set()
     if proc.returncode == 0:
@@ -252,7 +252,7 @@ def reference_hits(row: MatrixRow) -> dict[str, bool]:
 
 
 def build_rows() -> list[dict[str, object]]:
-  current_params = parse_params(read("common/params_keys.h"))
+  current_params = parse_params(read("openpilot/common/params_keys.h"))
   rows: list[dict[str, object]] = []
   for row in MATRIX:
     hits = reference_hits(row)

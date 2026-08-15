@@ -18,15 +18,15 @@ REQUIRED_FILES = (
   "tools/replay/main.cc",
   "tools/replay/replay.cc",
   "tools/replay/replay.h",
-  "selfdrive/ui/tests/diff/replay.py",
-  "selfdrive/ui/tests/diff/replay_script.py",
-  "selfdrive/ui/tests/diff/diff.py",
-  "selfdrive/ui/tests/diff/diff_template.html",
-  "selfdrive/ui/onroad/model_renderer.py",
-  "selfdrive/ui/onroad/carrot_world_overlay.py",
-  "selfdrive/ui/onroad/fishop_overlay.py",
-  "selfdrive/ui/translations/app_zh-CHS.po",
-  "selfdrive/ui/translations/app_zh-CHT.po",
+  "openpilot/selfdrive/ui/tests/diff/replay.py",
+  "openpilot/selfdrive/ui/tests/diff/replay_script.py",
+  "openpilot/selfdrive/ui/tests/diff/diff.py",
+  "openpilot/selfdrive/ui/tests/diff/diff_template.html",
+  "openpilot/selfdrive/ui/onroad/model_renderer.py",
+  "openpilot/selfdrive/ui/onroad/carrot_world_overlay.py",
+  "openpilot/selfdrive/ui/onroad/fishop_overlay.py",
+  "openpilot/selfdrive/ui/translations/app_zh-CHS.po",
+  "openpilot/selfdrive/ui/translations/app_zh-CHT.po",
 )
 
 
@@ -103,7 +103,7 @@ def run(cmd: Sequence[str], timeout_s: int, extra_env: dict[str, str] | None = N
 
 
 def ui_replay_command(variant: str) -> list[str]:
-  cmd = [py(), "selfdrive/ui/tests/diff/replay.py"]
+  cmd = [py(), str(ROOT / "openpilot/selfdrive/ui/tests/diff/replay.py")]
   if variant == "tizi":
     cmd.append("--big")
   return cmd
@@ -122,14 +122,14 @@ def readiness_report() -> dict[str, Any]:
     "tools/replay/replay": (ROOT / "tools/replay/replay").exists(),
   }
   replay_readme = (ROOT / "tools/replay/README.md").read_text(encoding="utf-8", errors="replace")
-  replay_script = (ROOT / "selfdrive/ui/tests/diff/replay_script.py").read_text(encoding="utf-8", errors="replace")
-  model_renderer = (ROOT / "selfdrive/ui/onroad/model_renderer.py").read_text(encoding="utf-8", errors="replace")
-  carrot_world_overlay = (ROOT / "selfdrive/ui/onroad/carrot_world_overlay.py").read_text(encoding="utf-8", errors="replace")
-  fishop_overlay = (ROOT / "selfdrive/ui/onroad/fishop_overlay.py").read_text(encoding="utf-8", errors="replace")
-  zh_chs = (ROOT / "selfdrive/ui/translations/app_zh-CHS.po").read_text(encoding="utf-8", errors="replace")
+  replay_script = (ROOT / "openpilot/selfdrive/ui/tests/diff/replay_script.py").read_text(encoding="utf-8", errors="replace")
+  model_renderer = (ROOT / "openpilot/selfdrive/ui/onroad/model_renderer.py").read_text(encoding="utf-8", errors="replace")
+  carrot_world_overlay = (ROOT / "openpilot/selfdrive/ui/onroad/carrot_world_overlay.py").read_text(encoding="utf-8", errors="replace")
+  fishop_overlay = (ROOT / "openpilot/selfdrive/ui/onroad/fishop_overlay.py").read_text(encoding="utf-8", errors="replace")
+  zh_chs = (ROOT / "openpilot/selfdrive/ui/translations/app_zh-CHS.po").read_text(encoding="utf-8", errors="replace")
   token_checks = {
     "tools_replay_demo_command": "tools/replay/replay --demo" in replay_readme or "--demo" in replay_readme,
-    "ui_diff_replay_big_layout": "build_tizi_script" in replay_script and "--big" in (ROOT / "selfdrive/ui/tests/diff/replay.py").read_text(encoding="utf-8", errors="replace"),
+    "ui_diff_replay_big_layout": "build_tizi_script" in replay_script and "--big" in (ROOT / "openpilot/selfdrive/ui/tests/diff/replay.py").read_text(encoding="utf-8", errors="replace"),
     "settings_replay_script": "Settings - Network" in replay_script and "Settings - Software" in replay_script and "Settings - Developer" in replay_script,
     "visual_modes_rendered": "genius_visual_mode" in model_renderer and "genius_lane_line_style" in model_renderer and "genius_lead_radar_visual_mode" in model_renderer,
     "carrot_world_overlay": "CarrotWorldOverlay" in carrot_world_overlay and "never writes params" in carrot_world_overlay,
@@ -150,7 +150,7 @@ def self_test() -> int:
     "Genius Pilot UI Replay Check",
     "tools/replay/replay",
     "--demo",
-    "selfdrive/ui/tests/diff/replay.py",
+    "openpilot/selfdrive/ui/tests/diff/replay.py",
     "PYTHONPATH",
     "PARAMS_ROOT",
     "replay_script.py",

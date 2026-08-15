@@ -9,12 +9,12 @@ import numpy as np
 
 
 ROOT = Path(__file__).resolve().parents[2]
-MODEL_RENDERER = ROOT / "selfdrive/ui/onroad/model_renderer.py"
-CARROT_WORLD_OVERLAY = ROOT / "selfdrive/ui/onroad/carrot_world_overlay.py"
-AUGMENTED_ROAD_VIEW = ROOT / "selfdrive/ui/onroad/augmented_road_view.py"
-VISUALS_LAYOUT = ROOT / "selfdrive/ui/sunnypilot/layouts/settings/visuals.py"
-TURN_SIGNAL = ROOT / "selfdrive/ui/sunnypilot/onroad/turn_signal.py"
-PARAM_KEYS = ROOT / "common/params_keys.h"
+MODEL_RENDERER = ROOT / "openpilot/selfdrive/ui/onroad/model_renderer.py"
+CARROT_WORLD_OVERLAY = ROOT / "openpilot/selfdrive/ui/onroad/carrot_world_overlay.py"
+AUGMENTED_ROAD_VIEW = ROOT / "openpilot/selfdrive/ui/onroad/augmented_road_view.py"
+VISUALS_LAYOUT = ROOT / "openpilot/selfdrive/ui/sunnypilot/layouts/settings/visuals.py"
+TURN_SIGNAL = ROOT / "openpilot/selfdrive/ui/sunnypilot/onroad/turn_signal.py"
+PARAM_KEYS = ROOT / "openpilot/common/params_keys.h"
 VISUAL_POLICY = ROOT / "docs/personal/VISUALIZATION_POLICY.md"
 
 C3_CONTENT = (0.0, 0.0, 2160.0, 1080.0)

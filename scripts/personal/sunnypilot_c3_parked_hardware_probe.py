@@ -143,7 +143,7 @@ def start_manual_process(name: str, manual_processes: dict[str, subprocess.Popen
   stderr = stderr_path.open("wb")
   proc = subprocess.Popen(
     ["./modeld"],
-    cwd=str(ROOT / "sunnypilot/modeld_v2"),
+    cwd=str(ROOT / "openpilot/sunnypilot/modeld_v2"),
     env=process_env(),
     stdout=stdout,
     stderr=stderr,

@@ -14,33 +14,33 @@ ROOT = Path(__file__).resolve().parents[2]
 LEGACY_C3_RESCUE_PASSWORD = "".join(("C3", "Debug", "123456"))
 
 GIT_BLOB_FIRST_PATHS = {
-  "sunnypilot/models/helpers.py",
+  "openpilot/sunnypilot/models/helpers.py",
 }
 
 WATCHED_PATHS = (
   "launch_openpilot.sh",
   "launch_chffrplus.sh",
   "launch_env.sh",
-  "sunnypilot/system/hardware/c3",
+  "openpilot/sunnypilot/system/hardware/c3",
   "system/version.py",
   "system/hardware/__init__.py",
   "system/hardware/tici/hardware.h",
   "system/hardware/hardwared.py",
   "system/manager/process_config.py",
   "system/ui/lib/wifi_manager.py",
-  "selfdrive/ui/installer/installer.cc",
-  "selfdrive/ui/widgets/ssh_key.py",
-  "selfdrive/ui/layouts/settings/developer.py",
-  "selfdrive/ui/mici/layouts/settings/developer.py",
-  "selfdrive/ui/sunnypilot/layouts/settings/settings.py",
-  "selfdrive/ui/sunnypilot/layouts/settings/network.py",
-  "selfdrive/ui/layouts/settings/software.py",
-  "selfdrive/ui/sunnypilot/layouts/settings/software.py",
-  "selfdrive/ui/sunnypilot/layouts/settings/models.py",
-  "selfdrive/modeld",
-  "sunnypilot/modeld_v2",
-  "sunnypilot/models/manager.py",
-  "sunnypilot/models/helpers.py",
+  "openpilot/selfdrive/ui/installer/installer.cc",
+  "openpilot/selfdrive/ui/widgets/ssh_key.py",
+  "openpilot/selfdrive/ui/layouts/settings/developer.py",
+  "openpilot/selfdrive/ui/mici/layouts/settings/developer.py",
+  "openpilot/selfdrive/ui/sunnypilot/layouts/settings/settings.py",
+  "openpilot/selfdrive/ui/sunnypilot/layouts/settings/network.py",
+  "openpilot/selfdrive/ui/layouts/settings/software.py",
+  "openpilot/selfdrive/ui/sunnypilot/layouts/settings/software.py",
+  "openpilot/selfdrive/ui/sunnypilot/layouts/settings/models.py",
+  "openpilot/selfdrive/modeld",
+  "openpilot/sunnypilot/modeld_v2",
+  "openpilot/sunnypilot/models/manager.py",
+  "openpilot/sunnypilot/models/helpers.py",
 )
 
 REFERENCE_REFS = {
@@ -195,41 +195,41 @@ def token_inside_internal_block(text: str, token: str) -> bool:
 
 def local_checks() -> list[dict[str, Any]]:
   launch_openpilot = read("launch_openpilot.sh")
-  c3_launch = read("sunnypilot/system/hardware/c3/launch_chffrplus.sh")
-  c3_env = read("sunnypilot/system/hardware/c3/launch_env.sh")
-  c3_rescue = read("sunnypilot/system/hardware/c3/rescue_ssh.sh")
+  c3_launch = read("openpilot/sunnypilot/system/hardware/c3/launch_chffrplus.sh")
+  c3_env = read("openpilot/sunnypilot/system/hardware/c3/launch_env.sh")
+  c3_rescue = read("openpilot/sunnypilot/system/hardware/c3/rescue_ssh.sh")
   root_launch = read("launch_chffrplus.sh")
-  params_keys = read("common/params_keys.h")
+  params_keys = read("openpilot/common/params_keys.h")
   version = read("system/version.py")
   hardware_init = read("system/hardware/__init__.py")
   tici_hw = read("system/hardware/tici/hardware.h")
   hardwared = read("system/hardware/hardwared.py")
   process_config = read("system/manager/process_config.py")
   wifi_manager = read("system/ui/lib/wifi_manager.py")
-  installer = read("selfdrive/ui/installer/installer.cc")
-  ssh_widget = read("selfdrive/ui/widgets/ssh_key.py")
-  developer_layout = read("selfdrive/ui/layouts/settings/developer.py")
-  mici_developer_layout = read("selfdrive/ui/mici/layouts/settings/developer.py")
-  sp_settings = read("selfdrive/ui/sunnypilot/layouts/settings/settings.py")
-  mici_settings = read("selfdrive/ui/mici/layouts/settings/settings.py")
-  sp_network = read("selfdrive/ui/sunnypilot/layouts/settings/network.py")
-  base_software = read("selfdrive/ui/layouts/settings/software.py")
-  sp_software = read("selfdrive/ui/sunnypilot/layouts/settings/software.py")
-  sp_models = read("selfdrive/ui/sunnypilot/layouts/settings/models.py")
-  manager = read("sunnypilot/models/manager.py")
-  model_helpers = read("sunnypilot/models/helpers.py")
+  installer = read("openpilot/selfdrive/ui/installer/installer.cc")
+  ssh_widget = read("openpilot/selfdrive/ui/widgets/ssh_key.py")
+  developer_layout = read("openpilot/selfdrive/ui/layouts/settings/developer.py")
+  mici_developer_layout = read("openpilot/selfdrive/ui/mici/layouts/settings/developer.py")
+  sp_settings = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/settings.py")
+  mici_settings = read("openpilot/selfdrive/ui/mici/layouts/settings/settings.py")
+  sp_network = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/network.py")
+  base_software = read("openpilot/selfdrive/ui/layouts/settings/software.py")
+  sp_software = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/software.py")
+  sp_models = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/models.py")
+  manager = read("openpilot/sunnypilot/models/manager.py")
+  model_helpers = read("openpilot/sunnypilot/models/helpers.py")
 
   c3_files = (
-    "sunnypilot/system/hardware/c3/launch_chffrplus.sh",
-    "sunnypilot/system/hardware/c3/launch_env.sh",
-    "sunnypilot/system/hardware/c3/agnos.json",
+    "openpilot/sunnypilot/system/hardware/c3/launch_chffrplus.sh",
+    "openpilot/sunnypilot/system/hardware/c3/launch_env.sh",
+    "openpilot/sunnypilot/system/hardware/c3/agnos.json",
   )
 
   return [
     status(
       "c3_launcher_redirect",
       "comma tici" in launch_openpilot
-      and "sunnypilot/system/hardware/c3/launch_chffrplus.sh" in launch_openpilot
+      and "openpilot/sunnypilot/system/hardware/c3/launch_chffrplus.sh" in launch_openpilot
       and 'exec "$C3_LAUNCH_SH"' in launch_openpilot,
       "launch_openpilot.sh must send comma tici devices to the C3 launcher",
     ),
@@ -240,11 +240,11 @@ def local_checks() -> list[dict[str, Any]]:
     ),
     status(
       "c3_launcher_uses_tici_agnos_tools",
-      "system/hardware/tici/agnos.py" in c3_launch
-      and "system/hardware/tici/updater" in c3_launch
+      "openpilot/common/hardware/comma/agnos.py" in c3_launch
+      and "openpilot/common/hardware/comma/updater" in c3_launch
       and 'AGNOS_VERSION="12.8"' in c3_env
       and 'STAGING_ROOT="/data/safe_staging"' in c3_env,
-      "C3 launcher should reuse TICI AGNOS tooling and the C3 safe staging root",
+      "C3 launcher should reuse the comma AGNOS tooling and the C3 safe staging root",
     ),
     status(
       "root_launcher_keeps_shutdown_policy",
@@ -387,8 +387,10 @@ def local_checks() -> list[dict[str, Any]]:
     ),
     status(
       "local_update_and_model_ui_retained",
-      "pkill -SIGUSR1 -f system.updated.updated" in base_software + sp_software
-      and "pkill -SIGHUP -f system.updated.updated" in base_software + sp_software
+      ("pkill -SIGUSR1 -f system.updated.updated" in base_software + sp_software
+      or "pkill -SIGUSR1 -f openpilot.system.updated.updated" in base_software + sp_software)
+      and ("pkill -SIGHUP -f system.updated.updated" in base_software + sp_software
+      or "pkill -SIGHUP -f openpilot.system.updated.updated" in base_software + sp_software)
       and "ModelManager_LastSyncTime" in sp_models
       and "ModelManager_DownloadIndex" in sp_models
       and "not a cloud pairing service" in sp_models,

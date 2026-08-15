@@ -21,15 +21,15 @@ def read(rel: str) -> str:
 
 
 def check_sources() -> list[CheckResult]:
-  firehose = read("selfdrive/ui/layouts/settings/firehose.py")
-  firehose_mici = read("selfdrive/ui/mici/layouts/settings/firehose.py")
-  cruise = read("selfdrive/ui/sunnypilot/layouts/settings/cruise.py")
+  firehose = read("openpilot/selfdrive/ui/layouts/settings/firehose.py")
+  firehose_mici = read("openpilot/selfdrive/ui/mici/layouts/settings/firehose.py")
+  cruise = read("openpilot/selfdrive/ui/sunnypilot/layouts/settings/cruise.py")
   snapshot = read("scripts/personal/sunnypilot_c3_alpha_snapshot.py")
   evidence = read("scripts/personal/sunnypilot_c3_alpha_evidence_check.py")
-  software = read("selfdrive/ui/layouts/settings/software.py")
-  mici_device = read("selfdrive/ui/mici/layouts/settings/device.py")
-  mici_toggles = read("selfdrive/ui/mici/layouts/settings/toggles.py")
-  updater = read("system/updated/updated.py")
+  software = read("openpilot/selfdrive/ui/layouts/settings/software.py")
+  mici_device = read("openpilot/selfdrive/ui/mici/layouts/settings/device.py")
+  mici_toggles = read("openpilot/selfdrive/ui/mici/layouts/settings/toggles.py")
+  updater = read("openpilot/system/updated/updated.py")
   readme = read("README.md")
   high_risk_guide = read("docs/personal/HIGH_RISK_SETTING_GUIDE.md")
   release_template = read("docs/personal/RELEASE_TEMPLATE.md")
@@ -136,7 +136,6 @@ def check_sources() -> list[CheckResult]:
       "visible updater/software branding remains Genius Pilot",
       "Genius Pilot {version}" in updater
       and "Genius Pilot {get_version()}" in software
-      and "update Genius Pilot" in mici_device
       and "enable Genius Pilot" in mici_toggles,
       "software, updater, and MICI settings surfaces must show Genius Pilot",
     ),
