@@ -833,6 +833,13 @@ FW_VERSIONS = {
       b'\xf1\x00SP2 MFC  AT USA LHD 1.00 1.05 99210-Q5000 201012',
     ],
   },
+  # Placeholder for Kia Seltos 2023 (with SCC). Real fingerprint to be collected on-car;
+  # matching currently relies on fuzzy platform-code matching.
+  CAR.KIA_SELTOS_2023: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00SP2_ SCC FHCUP      1.01 1.05 99110-Q5100         ',
+    ],
+  },
   CAR.KIA_OPTIMA_G4: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JF__ SCC F-CUP      1.00 1.00 96400-D4100         ',
