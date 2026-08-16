@@ -17,15 +17,6 @@ function agnos_init {
   sudo chgrp gpu /dev/adsprpc-smd /dev/ion /dev/kgsl-3d0
   sudo chmod 660 /dev/adsprpc-smd /dev/ion /dev/kgsl-3d0
 
-  # Clone C3 guard: never auto-flash AGNOS on clone devices. The clone's AGNOS
-  # comes from the fishop/stable installer and its /VERSION will not match this
-  # repo's manifest. Flashing it here bricks the boot (stuck on comma logo).
-  # Skip the updater entirely unless explicitly armed for bench recovery.
-  if [ "${CARROT_C3_AGNOS_FLASH:-0}" != "1" ]; then
-    echo "clone C3: skip AGNOS updater (device AGNOS managed by stable installer)"
-    return 0
-  fi
-
   # Check if AGNOS update is required
   if [ $(< /VERSION) != "$AGNOS_VERSION" ]; then
     AGNOS_PY="$DIR/openpilot/common/hardware/comma/agnos.py"
