@@ -459,10 +459,46 @@ struct ModelDataV2SP @0xa1680744031fdb2d {
 struct CustomReserved10 @0xcb9fd56c7057593a {
 }
 
-struct CustomReserved11 @0xc2243c65e0340384 {
+# Carrot (Genius Pilot): nav data structs. Uses CustomReserved11/12 slots,
+# keeping the original reserved IDs.
+struct CarrotMan @0xc2243c65e0340384 {
+  activeCarrot @0 : Int32;
+  nRoadLimitSpeed @1 : Int32;
+  remote @2 : Text;
+  xSpdType @3 : Int32;
+  xSpdLimit @4 : Int32;
+  xSpdDist @5 : Int32;
+  xSpdCountDown @6 : Int32;
+  xTurnInfo @7 : Int32;
+  xDistToTurn @8 : Int32;
+  xTurnCountDown @9 : Int32;
+  atcType @10 : Text;
+  vTurnSpeed @11 : Int32;
+  szPosRoadName @12 : Text;
+  szTBTMainText @13 : Text;
+  desiredSpeed @14 : Int32;
+  desiredSource @15 : Text;
+  carrotCmdIndex @16 : Int32;
+  carrotCmd @17 : Text;
+  carrotArg @18 : Text;
+  xPosLat @19 : Float32;
+  xPosLon @20 : Float32;
+  xPosAngle @21 : Float32;
+  xPosSpeed @22 : Float32;
+  trafficState @23 : Int32;
+  nGoPosDist @24 : Int32;
+  nGoPosTime @25 : Int32;
+  szSdiDescr @26 : Text;
+  naviPaths @27 : Text;
+  leftSec @28 : Int32;
 }
 
-struct CustomReserved12 @0x9ccdc8676701b412 {
+struct AmapNavi @0x9ccdc8676701b412 {
+  leftBlind @0 :Int32;
+  rightBlind @1 :Int32;
+  lineValid @2 :Bool;
+  leftLine @3 :Int32;
+  rightLine @4 :Int32;
 }
 
 struct CustomReserved13 @0xcd96dafb67a082d0 {
