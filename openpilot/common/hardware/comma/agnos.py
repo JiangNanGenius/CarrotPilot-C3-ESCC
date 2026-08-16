@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import base64
 import hashlib
 import json
 import lzma
@@ -13,6 +14,52 @@ import requests
 SPARSE_CHUNK_FMT = struct.Struct('H2xI4x')
 
 AGNOS_MANIFEST_FILE = "openpilot/system/hardware/comma/agnos.json"
+
+# Clone C3 (model == "comma tici") must never receive the official xbl/xbl_config
+# bootloader images -- flashing them bricks the device. The clone's abl is also a
+# device-specific image (hash 32a2174b...). restore_partitions() below filters
+# the official AGNOS manifest before any flash/verify/swap:
+#   - official C3X (tizi)  -> keep partitions untouched
+#   - clone C3 (tici)      -> drop xbl/xbl_config entirely, and substitute any
+#                             partition listed in the tici-specific manifest
+#                             (currently only abl) with the clone image.
+# Boot/system/aop/devcfg keep the official 19.6 images.
+TICI_MODEL_PATH_B64 = "L3N5cy9maXJtd2FyZS9kZXZpY2V0cmVlL2Jhc2UvbW9kZWw="
+TICI_DROP_PARTITIONS = ("xbl", "xbl_config")
+
+
+def restore_partitions(partitions):
+  model_path = base64.b64decode(TICI_MODEL_PATH_B64).decode("utf-8")
+  try:
+    with open(model_path) as f:
+      model = f.read().strip("\x00").split("comma ")[-1]
+  except (FileNotFoundError, OSError):
+    # Non-AGNOS / dev machine: leave the manifest alone.
+    return partitions
+
+  if model == "tizi":
+    # Official C3X flashes everything.
+    return partitions
+
+  # Clone C3 (tici): drop bootloader partitions and substitute clone-specific images.
+  tici_manifest_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "agnos_tici.json")
+  try:
+    with open(tici_manifest_path) as f:
+      tici_partitions = json.load(f)
+  except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+    # Fail safe: without the clone manifest we cannot know which abl to use.
+    # Return only the dropped list to make sure we never flash xbl/xbl_config.
+    print(f"Warning: clone C3 detected but {tici_manifest_path} unavailable ({e}); dropping bootloader partitions only")
+    return [p for p in partitions if p.get("name") not in TICI_DROP_PARTITIONS]
+
+  tici_by_name = {p["name"]: p for p in tici_partitions if isinstance(p, dict) and "name" in p}
+  restored = []
+  for p in partitions:
+    name = p.get("name")
+    if name in TICI_DROP_PARTITIONS:
+      continue
+    restored.append(tici_by_name.get(name, p))
+  return restored
 
 
 class StreamingDecompressor:
@@ -209,6 +256,7 @@ def flash_partition(target_slot_number: int, partition: dict, cloudlog, standalo
 
 def swap(manifest_path: str, target_slot_number: int, cloudlog) -> None:
   update = json.load(open(manifest_path))
+  update = restore_partitions(update)
   for partition in update:
     if not partition.get('full_check', False):
       clear_partition_hash(target_slot_number, partition)
@@ -224,6 +272,7 @@ def swap(manifest_path: str, target_slot_number: int, cloudlog) -> None:
 
 def flash_agnos_update(manifest_path: str, target_slot_number: int, cloudlog, standalone=False) -> None:
   update = json.load(open(manifest_path))
+  update = restore_partitions(update)
 
   cloudlog.info(f"Target slot {target_slot_number}")
 
@@ -253,6 +302,7 @@ def flash_agnos_update(manifest_path: str, target_slot_number: int, cloudlog, st
 
 def verify_agnos_update(manifest_path: str, target_slot_number: int) -> bool:
   update = json.load(open(manifest_path))
+  update = restore_partitions(update)
   return all(verify_partition(target_slot_number, partition) for partition in update)
 
 
