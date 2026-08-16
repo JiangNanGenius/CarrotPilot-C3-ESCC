@@ -5,6 +5,79 @@ DIR="$( cd "$SP_C3_DIR/../../../../.." >/dev/null 2>&1 && pwd )"
 
 source "$SP_C3_DIR/launch_env.sh"
 
+# --- boot diagnostics: write each milestone so a stuck boot can be localized ---
+DBG=/data/launch_debug.log
+dbg() { echo "$(date +%H:%M:%S 2>/dev/null) $1" >> "$DBG" 2>/dev/null; }
+: > "$DBG" 2>/dev/null
+dbg "launch_chffrplus(c3) start, DIR=$DIR MODEL=$(tr -d '\0' < /sys/firmware/devicetree/base/model 2>/dev/null)"
+
+# Determine the panda MCU type (F4=DOS, H7=TRES) and set TICI_* env vars.
+# Ported from Mr.One's clone-C3 init; uses sunnypilot's bundled `panda` package.
+set_tici_hw() {
+  grep -qi "tici" /sys/firmware/devicetree/base/model 2>/dev/null || return 0
+  export TICI_HW=1
+  dbg "set_tici_hw: tici detected"
+
+  local cache="/persist/dp_dev_panda_mcu_type"
+  local attempts=15 confirm=3
+  local mcu="" count=0 last="" cur cached
+
+  cached=$(cat "$cache" 2>/dev/null)
+  case "$cached" in
+    F4|H7) mcu="$cached"; dbg "panda MCU $mcu [cached]" ;;
+  esac
+
+  if [ -z "$mcu" ]; then
+    dbg "querying panda MCU type..."
+    for attempt in $(seq 1 "$attempts"); do
+      if [ -n "$last" ]; then sleep 1; else sleep 3; fi
+      case "$(PYTHONPATH="$DIR" python3 -c "from panda.python import Panda; p = Panda(cli=False); print(p.get_mcu_type()); p.close()" 2>/dev/null)" in
+        *McuType.F4*) cur="F4" ;;
+        *McuType.H7*) cur="H7" ;;
+        *)            cur="" ;;
+      esac
+      if [ -n "$cur" ] && [ "$cur" = "$last" ]; then count=$((count + 1)); else count=1; last="$cur"; fi
+      if [ -n "$cur" ] && [ "$count" -ge "$confirm" ]; then mcu="$cur"; break; fi
+      dbg "panda MCU read='${cur:-UNKNOWN}' ($count/$confirm, attempt $attempt/$attempts)"
+    done
+
+    if [ -z "$mcu" ]; then
+      # Do NOT hard-exit on a clone: unknown MCU must not brick the boot.
+      dbg "panda MCU UNKNOWN after $attempts attempts, continuing without TICI_DOS/TRES"
+      return 0
+    fi
+
+    if sudo mount -o remount,rw /persist 2>/dev/null; then
+      echo "$mcu" | sudo tee "$cache" >/dev/null 2>&1
+      sudo mount -o remount,ro /persist 2>/dev/null
+    fi
+  fi
+
+  if [ "$mcu" = "F4" ]; then
+    dbg "TICI (DOS/F4) detected"
+    mount_nvme
+    export TICI_DOS=1
+  else
+    dbg "TICI (TRES/H7) detected"
+    export TICI_TRES=1
+  fi
+}
+
+mount_nvme() {
+  for i in $(seq 1 10); do
+    [ -b /dev/nvme0n1p1 ] && break
+    sleep 1
+  done
+  [ -b /dev/nvme0n1p1 ] || return 0
+  if ! mountpoint -q /data/media/0/realdata; then
+    mount /dev/nvme0n1p1 /data/media/0/realdata 2>/dev/null
+  fi
+  if mountpoint -q /data/media/0/realdata; then
+    chown comma:comma /data/media/0/realdata 2>/dev/null
+    chmod 755 /data/media/0/realdata 2>/dev/null
+  fi
+}
+
 function agnos_init {
   # TODO: move this to agnos
   sudo rm -f /data/etc/NetworkManager/system-connections/*.nmmeta
@@ -85,7 +158,10 @@ function launch {
 
   # hardware specific init
   if [ -f /AGNOS ]; then
+    dbg "AGNOS present, running set_tici_hw + agnos_init"
+    set_tici_hw
     agnos_init
+    dbg "hw init done"
   fi
 
   # write tmux scrollback to a file
@@ -94,9 +170,12 @@ function launch {
   # start manager
   cd $DIR/system/manager
   if [ ! -f $DIR/prebuilt ]; then
+    dbg "no prebuilt, running build.py"
     ./build.py
   fi
+  dbg "starting manager.py"
   ./manager.py
+  dbg "manager.py exited code=$?"
 
   # if broken, keep on screen error
   while true; do sleep 1; done
