@@ -8,7 +8,11 @@ import uuid
 import socket
 import logging
 import traceback
-import numpy as np
+try:
+  import numpy as np
+  _NP_BOOL = np.bool_
+except ImportError:  # clone C3 minimal python env may lack numpy
+  _NP_BOOL = ()
 from threading import local
 from collections import OrderedDict
 from contextlib import contextmanager
@@ -16,7 +20,7 @@ from contextlib import contextmanager
 LOG_TIMESTAMPS = "LOG_TIMESTAMPS" in os.environ
 
 def json_handler(obj):
-  if isinstance(obj, np.bool_):
+  if _NP_BOOL and isinstance(obj, _NP_BOOL):
     return bool(obj)
   # if isinstance(obj, (datetime.date, datetime.time)):
   #   return obj.isoformat()
