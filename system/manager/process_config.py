@@ -104,6 +104,32 @@ def is_stock_model(started, params, CP: car.CarParams) -> bool:
 def mapd_ready(started: bool, params: Params, CP: car.CarParams) -> bool:
   return bool(os.path.exists(Paths.mapd_root()))
 
+# --- carrot (Genius Pilot) gates. Param keys may not be registered in
+# params_keys.h on this base, so fall back to safe defaults on any error.
+def enable_cluster_hud(started, params, CP: car.CarParams) -> bool:
+  try:
+    return params.get_int("ClusterHud") in (1, 2)
+  except Exception:
+    return False
+
+def enable_app_navi_status(started, params, CP: car.CarParams) -> bool:
+  try:
+    return params.get_bool("EnableAmapNaviStatus")
+  except Exception:
+    return False
+
+def enable_xiaoge_data(started, params, CP: car.CarParams) -> bool:
+  try:
+    return params.get_bool("ShareData")
+  except Exception:
+    return False
+
+def enable_cweb_push(started, params, CP: car.CarParams) -> bool:
+  try:
+    return params.get_bool("CarrotWebPush")
+  except Exception:
+    return False
+
 def uploader_ready(started: bool, params: Params, CP: car.CarParams) -> bool:
   if not params.get_bool("OnroadUploads"):
     return only_offroad(started, params, CP)
@@ -192,6 +218,16 @@ procs += [
 
   # locationd
   NativeProcess("locationd_llk", "sunnypilot/selfdrive/locationd", ["./locationd"], only_onroad),
+]
+
+# carrot (Genius Pilot)
+procs += [
+  PythonProcess("carrot_man", "selfdrive.carrot.carrot_man", always_run, restart_if_crash=True),
+  PythonProcess("carrot_server", "selfdrive.carrot.carrot_server", always_run, restart_if_crash=True),
+  PythonProcess("carrot_cluster", "selfdrive.carrot.cluster_autorun", enable_cluster_hud),
+  PythonProcess("cweb_push", "selfdrive.carrot.cweb_push", enable_cweb_push, enabled=not PC),
+  PythonProcess("app_navi_status", "selfdrive.carrot.app_navi_status", enable_app_navi_status),
+  PythonProcess("xiaoge_data", "selfdrive.carrot.xiaoge_data", enable_xiaoge_data),
 ]
 
 if os.path.exists("./github_runner.sh"):
