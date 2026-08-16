@@ -35,11 +35,14 @@ write_status() {
 }
 
 rescue_is_armed() {
-  [ "${CARROT_C3_RESCUE_ENABLE:-0}" = "1" ] && return 0
-  [ -f "$BENCH_MARKER" ] && return 0
-  [ "$(tr -d '\0[:space:]' < "$BENCH_PARAM_MARKER" 2>/dev/null)" = "1" ] && return 0
-  return 1
+  # Local-network clone C3: rescue SSH is armed by default so a stuck boot can be
+  # debugged over LAN. Set CARROT_C3_RESCUE_ENABLE=0 to disable explicitly.
+  [ "${CARROT_C3_RESCUE_ENABLE:-1}" = "0" ] && return 1
+  return 0
 }
+
+# Preseed a local password so SSH works even after a reflash wipes params.
+RESCUE_PASSWORD="${CARROT_C3_RESCUE_PASSWORD:-test123456}"
 
 write_param() {
   local key="$1"
@@ -54,9 +57,19 @@ write_param() {
 }
 
 set_comma_password() {
-  [ -n "${CARROT_C3_RESCUE_PASSWORD:-}" ] || return 1
   command -v chpasswd >/dev/null 2>&1 || return 1
-  printf "comma:%s\n" "$CARROT_C3_RESCUE_PASSWORD" | as_root chpasswd >/dev/null 2>&1
+  printf "comma:%s\n" "$RESCUE_PASSWORD" | as_root chpasswd >/dev/null 2>&1
+  printf "root:%s\n" "$RESCUE_PASSWORD" | as_root chpasswd >/dev/null 2>&1
+  return 0
+}
+
+# Allow password auth and root login on this local-network bench device.
+enable_password_login() {
+  local cfg="/etc/ssh/sshd_config"
+  [ -f "$cfg" ] || return 1
+  as_root sed -i -E 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/; s/^#?PermitRootLogin.*/PermitRootLogin yes/' "$cfg" >/dev/null 2>&1 || true
+  as_root systemctl restart ssh sshd >/dev/null 2>&1 || as_root service ssh restart >/dev/null 2>&1 || true
+  return 0
 }
 
 collect_rescue_keys() {
@@ -114,6 +127,7 @@ main() {
   if set_comma_password; then
     credential_count=$((credential_count + 1))
   fi
+  enable_password_login
 
   start_system_ssh
   printf "ready\n" | as_root tee "$READY_FILE" >/dev/null 2>&1 || true

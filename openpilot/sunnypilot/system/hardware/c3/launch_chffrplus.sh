@@ -114,9 +114,9 @@ function launch {
   # Remove orphaned git lock if it exists on boot
   [ -f "$DIR/.git/index.lock" ] && rm -f $DIR/.git/index.lock
 
-  # Bench rescue is inert by default. It only starts local SSH when the device
-  # is explicitly armed from a local marker/env for recovery work.
-  [ -x "$SP_C3_DIR/rescue_ssh.sh" ] && "$SP_C3_DIR/rescue_ssh.sh"
+  # Rescue SSH first (background) so a stuck boot stays debuggable over LAN.
+  [ -x "$SP_C3_DIR/rescue_ssh.sh" ] && "$SP_C3_DIR/rescue_ssh.sh" >/dev/null 2>&1 &
+  dbg "rescue_ssh launched"
 
   # Check to see if there's a valid overlay-based update available. Conditions
   # are as follows:
