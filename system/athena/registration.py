@@ -29,7 +29,7 @@ def register(show_spinner=False) -> str | None:
 
   # Read the local key pair (pure local filesystem access, non-network). The
   # result is optional and does not affect local DongleId derivation.
-  jwt_algo, private_key, public_key = get_key_pair()
+  _ = get_key_pair()
 
   if dongle_id is None:
     serial = HARDWARE.get_serial()
