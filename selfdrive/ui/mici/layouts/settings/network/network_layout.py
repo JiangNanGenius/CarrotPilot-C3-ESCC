@@ -95,9 +95,9 @@ class NetworkLayoutMici(NavScroller):
   def _update_state(self):
     super()._update_state()
 
-    # Always show GSM settings and enable IPv4 forwarding
+    # Always show GSM settings; keep IPv4 forwarding off (default) to avoid
+    # unintended network changes on SIM-less devices.
     show_cell_settings = True
-    self._wifi_manager.set_ipv4_forward(show_cell_settings)
     self._roaming_btn.set_visible(show_cell_settings)
     self._apn_btn.set_visible(show_cell_settings)
     self._cellular_metered_btn.set_visible(show_cell_settings)
