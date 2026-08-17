@@ -8,7 +8,6 @@ from typing import Any
 REPO_DIR = "/data/openpilot"
 GIT_STATUS_TTL = 600.0
 GIT_STATUS_POLL_INTERVAL = 60.0
-FETCH_TIMEOUT = 25.0
 GIT_TIMEOUT = 8.0
 
 _cache: dict[str, Any] | None = None
@@ -109,12 +108,6 @@ async def _read_status() -> dict[str, Any]:
   remote_branch = tracking["remote_branch"]
   upstream = tracking["upstream"]
 
-  fetch_rc = 0
-  fetch_out = ""
-  if remote and remote_branch:
-    refspec = f"+refs/heads/{remote_branch}:refs/remotes/{remote}/{remote_branch}"
-    fetch_rc, fetch_out = await _git(["fetch", "--quiet", remote, refspec], timeout=FETCH_TIMEOUT)
-
   if not upstream:
     return {
       "available": False,
@@ -127,7 +120,6 @@ async def _read_status() -> dict[str, Any]:
       "remote_branch": remote_branch,
       "checked_at": int(_now()),
       "error": "no upstream branch",
-      "fetch_error": fetch_out if fetch_rc != 0 else "",
     }
 
   rc, counts = await _git(["rev-list", "--left-right", "--count", f"HEAD...{upstream}"])
@@ -139,8 +131,8 @@ async def _read_status() -> dict[str, Any]:
   behind = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 0
 
   return {
-    "available": fetch_rc == 0,
-    "state": "ok" if fetch_rc == 0 else "fetch_error",
+    "available": True,
+    "state": "ok",
     "behind": behind,
     "ahead": ahead,
     "branch": branch,
@@ -148,7 +140,7 @@ async def _read_status() -> dict[str, Any]:
     "remote": remote,
     "remote_branch": remote_branch,
     "checked_at": int(_now()),
-    "error": fetch_out if fetch_rc != 0 else "",
+    "error": "",
   }
 
 

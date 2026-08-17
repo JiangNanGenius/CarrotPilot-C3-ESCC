@@ -39,7 +39,6 @@ ICON_SIZE = 70
 OP.PanelType = IntEnum(
   "PanelType",
   [es.name for es in OP.PanelType] + [
-    "SUNNYLINK",
     "MODELS",
     "STEERING",
     "CRUISE",
