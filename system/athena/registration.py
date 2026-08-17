@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
-import time
-import json
-import jwt
 from pathlib import Path
 
-from datetime import datetime, timedelta, UTC
-from openpilot.common.api import api_get, get_key_pair
+from openpilot.common.api import get_key_pair
 from openpilot.common.params import Params
-from openpilot.common.spinner import Spinner
-from openpilot.selfdrive.selfdrived.alertmanager import set_offroad_alert
-from openpilot.system.hardware import HARDWARE, PC
+from openpilot.system.hardware import HARDWARE
 from openpilot.system.hardware.hw import Paths
-from openpilot.common.swaglog import cloudlog
 
 
 UNREGISTERED_DONGLE_ID = "UnregisteredDevice"
@@ -23,13 +16,9 @@ def is_registered_device() -> bool:
 
 def register(show_spinner=False) -> str | None:
   """
-  All devices built since March 2024 come with all
-  info stored in /persist/. This is kept around
-  only for devices built before then.
-
-  With a backend update to take serial number instead
-  of dongle ID to some endpoints, this can be removed
-  entirely.
+  Offline device registration. Generates a stable local DongleId and never
+  contacts any remote backend. Always returns a non-empty identifier so that
+  callers (e.g. the manager) never fail on registration.
   """
   params = Params()
   dongle_id: str | None = params.get("DongleId")
@@ -38,71 +27,16 @@ def register(show_spinner=False) -> str | None:
     with open(Paths.persist_root()+"/comma/dongle_id") as f:
       dongle_id = f.read().strip()
 
-  # Create registration token, in the future, this key will make JWTs directly
+  # Read the local key pair (pure local filesystem access, non-network). The
+  # result is optional and does not affect local DongleId derivation.
   jwt_algo, private_key, public_key = get_key_pair()
 
-  if not public_key:
-    dongle_id = UNREGISTERED_DONGLE_ID
-    cloudlog.warning("missing public key")
-  elif dongle_id is None:
-    if show_spinner:
-      spinner = Spinner()
-      spinner.update("registering device")
-
-    # Block until we get the imei
+  if dongle_id is None:
     serial = HARDWARE.get_serial()
-    start_time = time.monotonic()
-    imei1='865420071781912'
-    imei2='865420071781904'
-    while imei1 is None and imei2 is None:
-      try:
-        imei1, imei2 = HARDWARE.get_imei(0), HARDWARE.get_imei(1)
-      except Exception:
-        cloudlog.exception("Error getting imei, trying again...")
-        time.sleep(1)
-
-      if time.monotonic() - start_time > 60 and show_spinner:
-        spinner.update(f"registering device - serial: {serial}, IMEI: ({imei1}, {imei2})")
-
-    backoff = 0
-    start_time = time.monotonic()
-    while True:
-      try:
-        register_token = jwt.encode({'register': True, 'exp': datetime.now(UTC).replace(tzinfo=None) + timedelta(hours=1)}, private_key, algorithm=jwt_algo)
-        cloudlog.info("getting pilotauth")
-        resp = api_get("v2/pilotauth/", method='POST', timeout=15,
-                       imei=imei1, imei2=imei2, serial=serial)
-
-        # ========== 【唯一修改处】==========
-        if resp.status_code in (402, 403):
-          cloudlog.info(f"Unable to register device, got {resp.status_code}, retrying...")
-          dongle_id = UNREGISTERED_DONGLE_ID
-          if show_spinner:
-            spinner.update(f"registering device - serial: {serial}, contact MR.ONE")
-          time.sleep(2)  # 避免请求过快
-          continue  # 继续下一次注册尝试
-        # =====================================
-
-        else:
-          dongleauth = json.loads(resp.text)
-          dongle_id = dongleauth["dongle_id"]
-        break
-
-      except Exception:
-        cloudlog.exception("failed to authenticate")
-        backoff = min(backoff + 1, 15)
-        time.sleep(backoff)
-
-      if time.monotonic() - start_time > 60 and show_spinner:
-        spinner.update(f"registering device - serial: {serial}, IMEI: ({imei1}, {imei2})")
-        return UNREGISTERED_DONGLE_ID  # hotfix to prevent an infinite wait for registration
-
-    if show_spinner:
-      spinner.close()
+    dongle_id = f"local-{serial}"  # stable, never "UnregisteredDevice"
 
   if dongle_id:
     params.put("DongleId", dongle_id)
-    #set_offroad_alert("Offroad_UnregisteredHardware", (dongle_id == UNREGISTERED_DONGLE_ID) and not PC)
   return dongle_id
 
 
