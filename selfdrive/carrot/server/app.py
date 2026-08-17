@@ -21,10 +21,6 @@ from ..realtime.transports import CameraWsHub, RawWsHub
 from . import features
 from .config import WEB_DIR
 from .live_runtime.broker import RealtimeBroker
-from .services.auto_update import auto_update_loop
-from .services.git_status import git_status_loop
-from .services.heartbeat import heartbeat_loop
-from .services.params import HAS_PARAMS
 
 VISION_DIAG_UPLOAD_MAX_BYTES = 16 * 1024 * 1024
 
@@ -81,12 +77,7 @@ async def on_startup(app: web.Application) -> None:
   app["realtime_broker_poll_lock"] = asyncio.Lock()
   app["realtime_camera_hub"] = CameraWsHub(messaging)
   app["realtime_raw_hub"] = RawWsHub(messaging)
-  if HAS_PARAMS:
-    app["hb_task"] = asyncio.create_task(heartbeat_loop(app))
-  app["git_status_task"] = asyncio.create_task(git_status_loop())
-  app["auto_update_task"] = asyncio.create_task(auto_update_loop())
   asyncio.create_task(_malloc_trim_loop())
-
 
 async def on_cleanup(app: web.Application) -> None:
   realtime_camera_hub = app.get("realtime_camera_hub")
@@ -102,36 +93,6 @@ async def on_cleanup(app: web.Application) -> None:
       await realtime_raw_hub.stop_all()
     except Exception:
       traceback.print_exc()
-
-  t = app.get("hb_task")
-  if t:
-    t.cancel()
-    try:
-      await t
-    except asyncio.CancelledError:
-      pass
-    except Exception:
-      pass
-
-  git_status_task = app.get("git_status_task")
-  if git_status_task:
-    git_status_task.cancel()
-    try:
-      await git_status_task
-    except asyncio.CancelledError:
-      pass
-    except Exception:
-      pass
-
-  auto_update_task = app.get("auto_update_task")
-  if auto_update_task:
-    auto_update_task.cancel()
-    try:
-      await auto_update_task
-    except asyncio.CancelledError:
-      pass
-    except Exception:
-      pass
 
   sess = app.get("http")
   if sess:

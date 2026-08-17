@@ -15,7 +15,6 @@ from typing import Any
 
 from aiohttp import ClientSession, ClientTimeout, FormData
 
-from ..config import VISION_DIAG_DEFAULT_DISCORD_KEY, VISION_DIAG_DEFAULT_DISCORD_WEBHOOK
 from .params import HAS_PARAMS, Params
 from .vision_test import LOG_PATH as VISION_TEST_LOG_PATH
 from .vision_test import get_status as get_vision_test_status
@@ -139,27 +138,6 @@ def _diagnostic_metadata(params: Any | None = None) -> dict[str, str]:
     "commit": _git_text(["rev-parse", "--short", "HEAD"]),
     "commitDate": _git_text(["show", "-s", "--date=format:%Y-%m-%d %H:%M:%S", "--format=%cd", "HEAD"]),
   }
-
-
-def vision_diag_discord_webhook_url(params: Any | None = None) -> str:
-  for key in ("CARROT_VISION_DIAG_DISCORD_WEBHOOK_URL", "CARROT_DISCORD_WEBHOOK_URL", "DISCORD_WEBHOOK_URL"):
-    value = os.environ.get(key, "").strip()
-    if value:
-      return value
-  for key in (
-    "CarrotVisionDiagDiscordWebhookUrl",
-    "CarrotVisionDiagDiscordWebhookURL",
-    "CarrotDiscordWebhookUrl",
-    "CarrotDiscordWebhookURL",
-    "DiscordWebhookUrl",
-    "DiscordWebhookURL",
-  ):
-    value = _param_text(params, key, "")
-    if value:
-      return value
-  if os.environ.get("CARROT_VISION_DIAG_DISCORD_WEBHOOK_DISABLE", "").strip().lower() in {"1", "true", "yes", "on"}:
-    return ""
-  return _decode_obfuscated(VISION_DIAG_DEFAULT_DISCORD_WEBHOOK, VISION_DIAG_DEFAULT_DISCORD_KEY)
 
 
 def record_stream_proxy_event(event: dict[str, Any]) -> None:
@@ -352,143 +330,6 @@ def _console_upload_filename(filename: str | None, diag_filename: str) -> str:
   if diag_filename.endswith(".txt"):
     return f"{diag_filename[:-4]}_console.txt"
   return f"{diag_filename}_console.txt"
-
-
-def _discord_upload_content(
-  snapshot: dict[str, Any],
-  meta: dict[str, str],
-  filename: str,
-  text_bytes: int,
-  console_filename: str = "",
-  console_bytes: int = 0,
-) -> str:
-  status = snapshot.get("vision_test", {}).get("status", {}) if isinstance(snapshot, dict) else {}
-  ports = snapshot.get("ports", {}) if isinstance(snapshot, dict) else {}
-  vipc = snapshot.get("vipc", {}) if isinstance(snapshot, dict) else {}
-  stream_history = snapshot.get("stream_proxy_history", []) if isinstance(snapshot, dict) else []
-  commit = str(meta.get("commit") or "").strip()
-  commit_date = meta.get("commitDate") or "unknown"
-  commit_text = (
-    f"[{commit}](https://github.com/ajouatom/openpilot/commit/{commit})"
-    if commit and commit != "unknown"
-    else "unknown"
-  )
-  uploaded_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-  car_name = meta.get("carName") or "none"
-  dongle_id = meta.get("dongleId") or "unknown"
-  upload_path = f"vision_diag/{car_name} {dongle_id}/".strip()
-  lines = [
-    "# Carrot Vision Diagnostic",
-    "### Upload",
-    f"- Time: {uploaded_at}",
-    f"- Path: {upload_path}",
-    "### Device",
-    f"- Car name: {car_name}",
-    f"- DongleId: {dongle_id}",
-    f"- Serial: {meta.get('serial') or 'unknown'}",
-    f"- Branch: {meta.get('branch') or 'unknown'}",
-    f"- Commit: {commit_text} ({commit_date})",
-    "### Result",
-    f"- Vision test: {status.get('status') or 'unknown'}",
-    f"- VIPC streams: {','.join(map(str, vipc.get('camerad_streams') or [])) or 'none'}",
-    f"- WebRTC port 5001: {'open' if ports.get('webrtcd_5001_open') else 'closed'}",
-    f"- Stream requests: {len(stream_history) if isinstance(stream_history, list) else 0}",
-    f"- File: {filename} ({text_bytes} bytes)",
-  ]
-  if console_filename:
-    lines.append(f"- Console: {console_filename} ({console_bytes} bytes)")
-  return "\n".join(lines)[:1900]
-
-
-async def upload_diagnostic_bundle_to_discord(
-  *,
-  bundle_text: str,
-  filename: str | None = None,
-  console_text: str = "",
-  console_filename: str | None = None,
-  source: str = "web",
-) -> dict[str, Any]:
-  params = Params() if HAS_PARAMS else None
-  url = vision_diag_discord_webhook_url(params)
-  if not url:
-    return {"configured": False, "ok": False, "skipped": True}
-  if not url.startswith(("http://", "https://")):
-    return {"configured": True, "ok": False, "error": "invalid webhook url"}
-
-  snapshot = await asyncio.to_thread(get_server_diagnostic_snapshot)
-  meta = _diagnostic_metadata(params)
-  upload_snapshot_title = "COMMA SERVER SNAPSHOT AT DISCORD UPLOAD"
-  upload_text = _limit_upload_text("\n".join([
-    str(bundle_text or ""),
-    "",
-    f"# ===== {upload_snapshot_title} =====",
-    json.dumps(snapshot, ensure_ascii=False, indent=2),
-    f"# ===== END {upload_snapshot_title} =====",
-  ]))
-  upload_name = _upload_filename(filename)
-  upload_bytes = upload_text.encode("utf-8", errors="replace")
-  console_upload_name = ""
-  console_upload_bytes = b""
-  if str(console_text or "").strip():
-    console_upload_name = _console_upload_filename(console_filename, upload_name)
-    console_upload_text = _limit_upload_text(str(console_text or ""))
-    console_upload_bytes = console_upload_text.encode("utf-8", errors="replace")
-  payload = {
-    "username": "Carrot Vision",
-    "content": _discord_upload_content(
-      snapshot,
-      meta,
-      upload_name,
-      len(upload_bytes),
-      console_upload_name,
-      len(console_upload_bytes),
-    ),
-    "allowed_mentions": {"parse": []},
-    "flags": 4,
-  }
-
-  form = FormData()
-  form.add_field("payload_json", json.dumps(payload, ensure_ascii=False), content_type="application/json")
-  form.add_field("files[0]", upload_bytes, filename=upload_name, content_type="text/plain; charset=utf-8")
-  if console_upload_bytes:
-    form.add_field("files[1]", console_upload_bytes, filename=console_upload_name, content_type="text/plain; charset=utf-8")
-
-  try:
-    timeout = ClientTimeout(total=20)
-    async with ClientSession(timeout=timeout) as session:
-      async with session.post(url, data=form) as resp:
-        text = await resp.text()
-        if 200 <= resp.status < 300:
-          return {
-            "configured": True,
-            "ok": True,
-            "status": resp.status,
-            "filename": upload_name,
-            "bytes": len(upload_bytes),
-            "console_filename": console_upload_name or None,
-            "console_bytes": len(console_upload_bytes) if console_upload_bytes else 0,
-            "source": source,
-          }
-        return {
-          "configured": True,
-          "ok": False,
-          "status": resp.status,
-          "filename": upload_name,
-          "bytes": len(upload_bytes),
-          "console_filename": console_upload_name or None,
-          "console_bytes": len(console_upload_bytes) if console_upload_bytes else 0,
-          "error": text[:1000],
-        }
-  except Exception as exc:
-    return {
-      "configured": True,
-      "ok": False,
-      "filename": upload_name,
-      "bytes": len(upload_bytes),
-      "console_filename": console_upload_name or None,
-      "console_bytes": len(console_upload_bytes) if console_upload_bytes else 0,
-      "error": str(exc),
-    }
 
 
 def _socket_snapshot(processes: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:

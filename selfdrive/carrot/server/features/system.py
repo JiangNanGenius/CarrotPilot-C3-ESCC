@@ -122,10 +122,6 @@ def _reject_if_engaged(request: web.Request) -> web.Response | None:
   return web.json_response({"ok": False, "error": "Disengage first"}, status=409)
 
 
-async def api_heartbeat_status(request: web.Request) -> web.Response:
-  return web.json_response({"ok": True, "hb": request.app.get("hb_last")})
-
-
 async def api_live_runtime(request: web.Request) -> web.Response:
   broker: RealtimeBroker | None = request.app.get("realtime_broker")
   broker_error = request.app.get("realtime_broker_error")
@@ -329,7 +325,6 @@ async def api_set_default(request: web.Request) -> web.Response:
 
 
 def register(app: web.Application) -> None:
-  app.router.add_get("/api/heartbeat_status", api_heartbeat_status)
   app.router.add_get("/api/live_runtime", api_live_runtime)
   app.router.add_get("/api/device_network", api_device_network)
   app.router.add_get("/api/calibration_status", api_calibration_status)

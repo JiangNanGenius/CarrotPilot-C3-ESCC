@@ -17,14 +17,7 @@ from typing import Any, Dict, List, Optional
 from aiohttp import web
 import asyncio
 
-from ftplib import FTP
 from cereal import log
-import urllib.request
-import urllib.error
-import ssl
-import requests
-import psutil
-import ipaddress
 import cereal.messaging as messaging
 from openpilot.common.realtime import Ratekeeper, set_core_affinity
 from openpilot.common.params import Params, ParamKeyType
@@ -43,7 +36,6 @@ try:
 except ImportError:
   SHAPELY_AVAILABLE = False
 
-NetworkType = log.DeviceState.NetworkType
 NAVI_HTTP_PORT = 7713
 NAVI_HTTP_MAX_BODY_SIZE = 16 * 1024 * 1024
 NAVI_EVENT_TYPES = ("complexCrossroad", "rgdata", "vrtx", "ssinf", "sinf", "route")
@@ -665,123 +657,6 @@ class CarrotMan:
         print(f"Network error, retrying...: {e}")
         time.sleep(2)
 
-  def make_tmux_data(self):
-    try:
-      subprocess.run("rm /data/media/tmux.log; tmux capture-pane -pq -S-1000 > /data/media/tmux.log", shell=True, capture_output=True, text=False)
-      subprocess.run("/data/openpilot/selfdrive/apilot.py", shell=True, capture_output=True, text=False)
-    except Exception as e:
-      print(f"TMUX creation error: {e}")
-      return
-
-  def send_tmux(self, ftp_password, tmux_why, send_settings=False):
-    ftp_server = "shind0.synology.me"
-    ftp_port = 8021
-    ftp_username = "carrotpilot"
-    ftp = FTP()
-    ftp.connect(ftp_server, ftp_port)
-    ftp.login(ftp_username, ftp_password)
-    car_selected = Params().get("CarName")
-    if car_selected is None:
-      car_selected = "none"
-    else:
-      car_selected = car_selected
-
-    git_branch = Params().get("GitBranch").replace("/", "__")
-    try:
-      ftp.mkd(git_branch)
-    except Exception as e:
-      print(f"Directory creation failed: {e}")
-    ftp.cwd(git_branch)
-
-    directory = car_selected + " " + Params().get("DongleId")
-    current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
-    filename = tmux_why + "-" + current_time + "-" + git_branch + ".txt"
-
-    try:
-      ftp.mkd(directory)
-    except Exception as e:
-      print(f"Directory creation failed: {e}")
-    ftp.cwd(directory)
-
-    try:
-      with open("/data/media/tmux.log", "rb") as file:
-        ftp.storbinary(f'STOR {filename}', file)
-    except Exception as e:
-      print(f"ftp sending error...: {e}")
-
-    if send_settings:
-      self.save_toggle_values()
-      try:
-        #with open("/data/backup_params.json", "rb") as file:
-        with open("/data/toggle_values.json", "rb") as file:
-          ftp.storbinary(f'STOR toggles-{current_time}.json', file)
-      except Exception as e:
-        print(f"ftp params sending error...: {e}")
-
-    ftp.quit()
-
-  def send_tmux_http(self, tmux_why, send_settings=False):
-    def get_private_ip_by_iface(name="wlan0"):
-      addrs = psutil.net_if_addrs().get(name, [])
-
-      for addr in addrs:
-          if addr.family == socket.AF_INET:
-              try:
-                  ip_obj = ipaddress.ip_address(addr.address)
-                  if ip_obj.is_private:
-                      return addr.address
-              except ValueError:
-                  continue
-      return None
-
-    def _pstr(key):
-      v = Params().get(key) or ""
-      return v.decode("utf-8", errors="ignore") if isinstance(v, bytes) else v
-
-    url = "https://tmux.carrotpilot.app/upload"
-
-    payload = {
-      "car_name"          : _pstr("CarName"),
-      "git_branch"        : _pstr("GitBranch"),
-      "github_id"         : _pstr("GithubUsername"),
-      "git_remote"        : _pstr("GitRemote"),
-      "git_commit"        : _pstr("GitCommit"),
-      "git_commit_date"   : _pstr("GitCommitDate"),
-      "dongle_id"         : _pstr("DongleId"),
-      "device_serial"     : _pstr("HardwareSerial"),
-      "local_ip"          : get_private_ip_by_iface("wlan0"),
-    }
-
-    files = [
-        ("files[0]", ("tmux.log", open("/data/media/tmux.log", "rb"), "text/plain")),
-    ]
-
-    if send_settings:
-      #self.save_toggle_values()
-      files.append(("files[1]",("toggle_values.json",open("/data/toggle_values.json", "rb"),"application/json")))
-
-    params = {}
-    headers = {}
-
-    try:
-      response = requests.post(
-          url,
-          params=params,
-          headers=headers,
-          data=payload,
-          files=files,
-          timeout=10,
-      )
-      print(response.status_code, response.text)
-      return response
-    finally:
-      for _, fileinfo in files:
-        fileobj = fileinfo[1]
-        try:
-          fileobj.close()
-        except Exception:
-          pass
-
   def carrot_panda_debug(self):
     #time.sleep(2)
     while True:
@@ -863,7 +738,6 @@ class CarrotMan:
 
     socket, poller = setup_socket()
     isOnroadCount = 0
-    is_tmux_sent = False
 
     print("#########carrot_cmd_zmq: thread started...")
     while True:
@@ -879,26 +753,8 @@ class CarrotMan:
 
         if json_obj is None:
           isOnroadCount = isOnroadCount + 1 if self.params.get_bool("IsOnroad") else 0
-          if isOnroadCount == 0:
-            is_tmux_sent = False
           if AUTO_ONROAD_DIAGNOSTICS and isOnroadCount == 1:
             self.show_panda_debug = True
-
-          network_type = self.sm['deviceState'].networkType # if not force_wifi else NetworkType.wifi
-          networkConnected = False if network_type == NetworkType.none else True
-
-          if AUTO_ONROAD_DIAGNOSTICS and isOnroadCount == 500:
-            self.make_tmux_data()
-          if AUTO_ONROAD_DIAGNOSTICS and isOnroadCount > 500 and not is_tmux_sent and networkConnected:
-            self.send_tmux("Ekdrmsvkdlffjt7710", "onroad", send_settings = True)
-            self.send_tmux_http("onroad", send_settings = True)
-            is_tmux_sent = True
-          carrot_exception = self.params.get("CarrotException")
-          if carrot_exception in ["exception", "log", "tmux_send"] and networkConnected:
-            self.params.put("CarrotException", "")
-            self.make_tmux_data()
-            self.send_tmux("Ekdrmsvkdlffjt7710", carrot_exception)
-            self.send_tmux_http(carrot_exception, send_settings = False)
         elif 'echo_cmd' in json_obj:
           try:
             result = subprocess.run(json_obj['echo_cmd'], shell=True, capture_output=True, text=False)
@@ -914,12 +770,6 @@ class CarrotMan:
           except Exception as e:
             echo = json.dumps({"echo_cmd": json_obj['echo_cmd'], "exitStatus": exitStatus, "result": "", "error": f"exception error: {str(e)}"})
           #print(echo)
-          socket.send(echo.encode())
-        elif 'tmux_send' in json_obj:
-          self.make_tmux_data()
-          self.send_tmux(json_obj['tmux_send'], "tmux_send")
-          self.send_tmux_http("tmux_send")
-          echo = json.dumps({"tmux_send": json_obj['tmux_send'], "result": "success"})
           socket.send(echo.encode())
       except Exception as e:
         print(f"carrot_cmd_zmq error: {e}")
