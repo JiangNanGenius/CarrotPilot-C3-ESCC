@@ -101,7 +101,7 @@ class FontWeight(StrEnum):
   MEDIUM = "Inter-Medium.fnt"
   BOLD = "Inter-Bold.fnt"
   SEMI_BOLD = "Inter-SemiBold.fnt"
-  UNIFONT = "unifont.fnt"
+  UNIFONT = "NotoSansSC-Regular.fnt"  # CJK fallback (Noto Sans SC, replaces pixel unifont)
   AUDIOWIDE = "Audiowide-Regular.fnt"
 
   # Small UI fonts
