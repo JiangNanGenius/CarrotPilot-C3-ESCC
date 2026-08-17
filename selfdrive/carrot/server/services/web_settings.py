@@ -14,7 +14,7 @@ DEFAULT_WEB_SETTINGS: Dict[str, Any] = {
   "web_language": "",
   "vision_fullscreen_default": True,
   "kmap_enabled": False,
-  "kmap_url": "https://jominki354.github.io/kmap/",
+  "kmap_url": "",
   "kmap_overlay_heading_up": True,
   "kmap_overlay_curvature_color": False,
   "kmap_map_type": "roadmap",

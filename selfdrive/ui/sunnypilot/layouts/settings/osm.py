@@ -7,7 +7,6 @@ See the LICENSE.md file in the root directory for more details.
 import datetime
 import os
 import platform
-import requests
 import shutil
 import threading
 from pathlib import Path
@@ -131,13 +130,8 @@ class OSMLayout(Widget):
       self._update_db()
 
   def _do_select_region(self, region_type, btn):
-    base_url = "https://raw.githubusercontent.com/pfeiferj/openpilot-mapd/main/"
-    url = base_url + ("nation_bounding_boxes.json" if region_type == "Country" else "us_states_bounding_boxes.json")
-    try:
-      data = requests.get(url, timeout=10).json()
-      locations = sorted([TreeNode(ref=k, data={'display_name': v['full_name']}) for k, v in data.items()], key=lambda n: n.data['display_name'])
-    except Exception:
-      locations = []
+    # Offline: region bounding-box list is not fetched from a remote repo.
+    locations = []
 
     if region_type == "State":
       locations.insert(0, TreeNode(ref="All", data={'display_name': tr("All states (~6.0 GB)")}))

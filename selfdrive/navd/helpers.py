@@ -1,4 +1,4 @@
-"""Minimal navd helpers for mr-one (which has no navd; mapd replaces it).
+"""Minimal navd helpers (this base has no navd; mapd replaces it).
 
 Only the Coordinate class is provided - it is all that selfdrive/carrot uses.
 """

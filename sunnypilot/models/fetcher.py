@@ -15,6 +15,8 @@ from openpilot.sunnypilot.models.helpers import is_bundle_version_compatible
 
 from cereal import custom
 
+OFFLINE = True
+
 
 class ModelParser:
   """Handles parsing of model data into cereal objects"""
@@ -127,6 +129,10 @@ class ModelFetcher:
     """Fetches fresh model data from remote and updates cache.
     Returns None on transport errors. Raises on 404 and other fatal HTTP errors.
     """
+    if OFFLINE:
+      cloudlog.info("offline: skipping remote model fetch")
+      return None
+
     try:
       response = requests.get(self.MODEL_URL, timeout=10)
 

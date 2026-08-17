@@ -19,6 +19,8 @@ from cereal import messaging, custom
 from openpilot.sunnypilot.models.fetcher import ModelFetcher
 from openpilot.sunnypilot.models.helpers import verify_file, get_active_bundle
 
+OFFLINE = True
+
 
 class ModelManagerSP:
   """Manages model downloads and status reporting"""
@@ -50,6 +52,10 @@ class ModelManagerSP:
 
   async def _download_file(self, url: str, path: str, model) -> None:
     """Downloads a file with progress tracking"""
+    if OFFLINE:
+      cloudlog.info(f"offline: skipping model download for {model.fileName} (cached)")
+      return
+
     self._download_start_times[model.fileName] = time.monotonic()
 
     async with aiohttp.ClientSession() as session:
