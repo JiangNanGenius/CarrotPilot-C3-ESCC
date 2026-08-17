@@ -17,7 +17,7 @@ from .services import build_service_list
 from .snapshot import build_live_payload, empty_live_payload
 
 try:
-  from openpilot.common.params import Params  # type: ignore
+  from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params  # type: ignore
 except Exception:
   Params = None
 

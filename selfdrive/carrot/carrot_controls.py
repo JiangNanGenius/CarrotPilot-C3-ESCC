@@ -1,5 +1,5 @@
 from openpilot.common.realtime import DT_CTRL
-from openpilot.common.params import Params
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
 class CarrotControls:
   def __init__(self, CP):

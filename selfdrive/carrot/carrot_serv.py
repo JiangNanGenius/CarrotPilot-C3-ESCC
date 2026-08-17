@@ -13,7 +13,7 @@ from datetime import datetime
 from cereal import log
 import cereal.messaging as messaging
 from openpilot.common.realtime import Ratekeeper
-from openpilot.common.params import Params
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 from openpilot.common.filter_simple import MyMovingAverage
 from openpilot.system.hardware import PC, TICI
 from openpilot.selfdrive.navd.helpers import Coordinate

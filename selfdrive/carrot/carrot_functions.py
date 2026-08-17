@@ -2,7 +2,7 @@ import time
 from enum import Enum
 
 from cereal import car, log
-from openpilot.common.params import Params
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 import numpy as np
 from openpilot.common.realtime import DT_MDL
 from openpilot.common.conversions import Conversions as CV

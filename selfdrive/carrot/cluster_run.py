@@ -49,7 +49,7 @@ def _parse_realtime_cores(text: str) -> list[int]:
 
 def _read_int_param(param_name: str, default: int) -> int:
     try:
-        from openpilot.common.params import Params
+        from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
         return int(Params().get_int(param_name))
     except Exception:

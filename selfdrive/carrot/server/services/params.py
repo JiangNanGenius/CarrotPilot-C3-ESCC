@@ -23,7 +23,7 @@ Params = None
 ParamKeyType = None
 
 try:
-  from openpilot.common.params import Params as _Params
+  from openpilot.selfdrive.carrot.carrot_params import CarrotParams as _Params
   Params = _Params
   HAS_PARAMS = True
 except Exception:

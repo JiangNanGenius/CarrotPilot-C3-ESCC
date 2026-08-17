@@ -1,7 +1,7 @@
 import json
 import time
 
-from openpilot.common.params import Params
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
 
 DT = 0.1

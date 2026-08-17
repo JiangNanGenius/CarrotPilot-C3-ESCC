@@ -38,7 +38,7 @@ _PROCESS_SPECS = {
 
 
 def _params():
-  from openpilot.common.params import Params
+  from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
   return Params()
 
 

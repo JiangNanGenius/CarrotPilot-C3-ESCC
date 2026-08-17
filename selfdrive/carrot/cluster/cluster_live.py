@@ -136,7 +136,7 @@ class OpenpilotLiveSource:
         self.profile_enabled = False
         self._profile_samples: list[tuple[str, float]] = []
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self.params = Params()
             self.params_memory = Params("/dev/shm/params")

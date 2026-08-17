@@ -164,7 +164,7 @@ class ClusterThemeParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -183,7 +183,7 @@ class ClusterLiveFpsParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -202,7 +202,7 @@ class ClusterHudBrightnessParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -221,7 +221,7 @@ class ClusterScreenModeParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -240,7 +240,7 @@ class ClusterCameraViewModeParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -259,7 +259,7 @@ class ClusterRadarInfoParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -283,7 +283,7 @@ class ClusterRadarDisplayParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -307,7 +307,7 @@ class ClusterRadarSourceColorParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -331,7 +331,7 @@ class ClusterHudModeParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -350,7 +350,7 @@ class ClusterHudOutputGateParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -377,7 +377,7 @@ class ClusterHudEncoderParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -396,7 +396,7 @@ class ClusterHudCoreModeParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:
@@ -415,7 +415,7 @@ class ClusterHudPriorityParamReader:
     def __init__(self) -> None:
         self._params = None
         try:
-            from openpilot.common.params import Params
+            from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
             self._params = Params()
         except Exception:

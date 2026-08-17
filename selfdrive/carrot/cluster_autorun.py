@@ -10,7 +10,7 @@ import time
 import traceback
 from pathlib import Path
 
-from openpilot.common.params import Params
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams as Params
 
 
 CARROT_DIR = Path(__file__).resolve().parent
