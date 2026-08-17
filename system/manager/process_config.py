@@ -11,7 +11,6 @@ from openpilot.system.hardware.hw import Paths
 from openpilot.sunnypilot.mapd.mapd_manager import MAPD_PATH
 
 from openpilot.sunnypilot.models.helpers import get_active_model_runner
-from openpilot.sunnypilot.sunnylink.utils import sunnylink_need_register, sunnylink_ready, use_sunnylink_uploader
 
 WEBCAM = os.getenv("USE_WEBCAM") is not None
 
@@ -71,28 +70,6 @@ def use_github_runner(started, params, CP: car.CarParams) -> bool:
 def use_copyparty(started, params, CP: car.CarParams) -> bool:
   return bool(params.get_bool("EnableCopyparty"))
 
-# Genius Pilot offline mode: disable sunnylink cloud & comma athena.
-# Keep the structure intact; gate everything off here.
-GENESIS_OFFLINE = True
-
-def sunnylink_ready_shim(started, params, CP: car.CarParams) -> bool:
-  """Shim for sunnylink_ready to match the process manager signature."""
-  if GENESIS_OFFLINE:
-    return False
-  return sunnylink_ready(params)
-
-def sunnylink_need_register_shim(started, params, CP: car.CarParams) -> bool:
-  """Shim for sunnylink_need_register to match the process manager signature."""
-  if GENESIS_OFFLINE:
-    return False
-  return sunnylink_need_register(params)
-
-def use_sunnylink_uploader_shim(started, params, CP: car.CarParams) -> bool:
-  """Shim for use_sunnylink_uploader to match the process manager signature."""
-  if GENESIS_OFFLINE:
-    return False
-  return use_sunnylink_uploader(params)
-
 def is_tinygrad_model(started, params, CP: car.CarParams) -> bool:
   """Check if the active model runner is SNPE."""
   return bool(get_active_model_runner(params, not started) == custom.ModelManagerSP.Runner.tinygrad)
@@ -143,7 +120,7 @@ def and_(*fns):
   return lambda *args: operator.and_(*(fn(*args) for fn in fns))
 
 procs = [
-  DaemonProcess("manage_athenad", "system.athena.manage_athenad", "AthenadPid", enabled=not GENESIS_OFFLINE),
+  DaemonProcess("manage_athenad", "system.athena.manage_athenad", "AthenadPid", enabled=False),
 
   #NativeProcess("loggerd", "system/loggerd", ["./loggerd"], logging),
   NativeProcess("encoderd", "system/loggerd", ["./encoderd"], only_onroad),
@@ -185,8 +162,8 @@ procs = [
   PythonProcess("radard", "selfdrive.controls.radard", only_onroad),
   PythonProcess("hardwared", "system.hardware.hardwared", always_run),
   PythonProcess("tombstoned", "system.tombstoned", always_run, enabled=not PC),
-  PythonProcess("updated", "system.updated.updated", only_offroad, enabled=not PC),
-  PythonProcess("uploader", "system.loggerd.uploader", uploader_ready),
+  PythonProcess("updated", "system.updated.updated", only_offroad, enabled=False),
+  PythonProcess("uploader", "system.loggerd.uploader", uploader_ready, enabled=False),
   PythonProcess("statsd", "system.statsd", always_run),
   PythonProcess("beep", "selfdrive.selfdrived.beep", always_run),
   PythonProcess("feedbackd", "selfdrive.ui.feedback.feedbackd", only_onroad),
@@ -196,11 +173,6 @@ procs = [
   PythonProcess("webrtcd", "system.webrtc.webrtcd", notcar),
   PythonProcess("webjoystick", "tools.bodyteleop.web", notcar),
   PythonProcess("joystick", "tools.joystick.joystick_control", and_(joystick, iscar)),
-
-  # sunnylink <3 (disabled in Genius Pilot offline mode via GENESIS_OFFLINE shims)
-  DaemonProcess("manage_sunnylinkd", "sunnypilot.sunnylink.athena.manage_sunnylinkd", "SunnylinkdPid", enabled=not GENESIS_OFFLINE),
-  PythonProcess("sunnylink_registration_manager", "sunnypilot.sunnylink.registration_manager", sunnylink_need_register_shim),
-  PythonProcess("statsd_sp", "sunnypilot.sunnylink.statsd", and_(always_run, sunnylink_ready_shim)),
 ]
 
 # sunnypilot
@@ -208,9 +180,6 @@ procs += [
   # Models
   PythonProcess("models_manager", "sunnypilot.models.manager", only_offroad),
   NativeProcess("modeld_tinygrad", "sunnypilot/modeld_v2", ["./modeld"], and_(only_onroad, is_tinygrad_model)),
-
-  # Backup
-  PythonProcess("backup_manager", "sunnypilot.sunnylink.backups.manager", and_(only_offroad, sunnylink_ready_shim)),
 
   # mapd
   NativeProcess("mapd", Paths.mapd_root(), ["bash", "-c", f"{MAPD_PATH} > /dev/null 2>&1"], mapd_ready),
@@ -225,16 +194,13 @@ procs += [
   PythonProcess("carrot_man", "selfdrive.carrot.carrot_man", always_run, restart_if_crash=True),
   PythonProcess("carrot_server", "selfdrive.carrot.carrot_server", always_run, restart_if_crash=True),
   PythonProcess("carrot_cluster", "selfdrive.carrot.cluster_autorun", enable_cluster_hud),
-  PythonProcess("cweb_push", "selfdrive.carrot.cweb_push", enable_cweb_push, enabled=not PC),
+  PythonProcess("cweb_push", "selfdrive.carrot.cweb_push", enable_cweb_push, enabled=False),
   PythonProcess("app_navi_status", "selfdrive.carrot.app_navi_status", enable_app_navi_status),
   PythonProcess("xiaoge_data", "selfdrive.carrot.xiaoge_data", enable_xiaoge_data),
 ]
 
 if os.path.exists("./github_runner.sh"):
   procs += [NativeProcess("github_runner_start", "system/manager", ["./github_runner.sh", "start"], and_(only_offroad, use_github_runner), sigkill=False)]
-
-if os.path.exists("../../sunnypilot/sunnylink/uploader.py"):
-  procs += [PythonProcess("sunnylink_uploader", "sunnypilot.sunnylink.uploader", use_sunnylink_uploader_shim)]
 
 if os.path.exists("../../third_party/copyparty/copyparty-sfx.py"):
   sunnypilot_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
