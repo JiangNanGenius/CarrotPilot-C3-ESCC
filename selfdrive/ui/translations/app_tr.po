@@ -20,14 +20,6 @@ msgstr " Cihazınız {:.1f}° {} ve {:.1f}° {} yönünde konumlandırılmış."
 msgid "--"
 msgstr "--"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "1 year of drive storage"
-msgstr "1 yıl sürüş depolaması"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "24/7 LTE connectivity"
-msgstr "7/24 LTE bağlantısı"
-
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "2G"
 msgstr "2G"
@@ -97,14 +89,6 @@ msgstr "Kaldırmak istediğinizden emin misiniz?"
 msgid "Back"
 msgstr "Geri"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Become a comma prime member at connect.comma.ai"
-msgstr "connect.comma.ai adresinde comma prime üyesi olun"
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Bookmark connect.comma.ai to your home screen to use it like an app"
-msgstr "connect.comma.ai'yi ana ekranınıza ekleyerek bir uygulama gibi kullanın"
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "CHANGE"
 msgstr "DEĞİŞTİR"
@@ -148,10 +132,6 @@ msgstr ""
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Choose your sponsorship tier and confirm your support"
 msgstr ""
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Click \"add new device\" and scan the QR code on the right"
-msgstr "\"yeni cihaz ekle\"ye tıklayın ve sağdaki QR kodunu tarayın"
 
 #: openpilot/selfdrive/ui/widgets/offroad_alerts.py
 msgid "Close"
@@ -314,18 +294,6 @@ msgstr "Bu araçta boylamsal kontrol için stok ACC kullanıldığından şu and
 msgid "FORGETTING..."
 msgstr "UNUTULUYOR..."
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Finish Setup"
-msgstr "Kurulumu Bitir"
-
-#: openpilot/selfdrive/ui/layouts/settings/settings.py
-msgid "Firehose"
-msgstr "Yoğun veri akışı"
-
-#: openpilot/selfdrive/ui/layouts/settings/firehose.py
-msgid "Firehose Mode"
-msgstr "Firehose Modu"
-
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Follow the prompts to complete the pairing process"
 msgstr ""
@@ -341,10 +309,6 @@ msgstr "\"{}\" Wi‑Fi ağı unutulsun mu?"
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "GOOD"
 msgstr "İYİ"
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Go to https://connect.comma.ai on your phone"
-msgstr "Telefonunuzda https://connect.comma.ai adresine gidin"
 
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "HIGH"
@@ -398,10 +362,6 @@ msgstr "Boylamsal Manevra Modu"
 msgid "MAX"
 msgstr "MAKS"
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Maximize your training data uploads to improve openpilot's driving models."
-msgstr "openpilot'un sürüş modellerini iyileştirmek için eğitim veri yüklemelerinizi en üst düzeye çıkarın."
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "N/A"
 msgstr "Yok"
@@ -436,10 +396,6 @@ msgstr "OK"
 msgid "ONLINE"
 msgstr "ÇEVRİMİÇİ"
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Open"
-msgstr "Aç"
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "PAIR"
 msgstr "EŞLE"
@@ -452,34 +408,13 @@ msgstr "PANDA"
 msgid "PREVIEW"
 msgstr "ÖNİZLEME"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "PRIME FEATURES:"
-msgstr "PRIME ÖZELLİKLERİ:"
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Pair Device"
 msgstr "Cihazı Eşle"
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Pair device"
-msgstr "Cihazı eşle"
-
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Pair your GitHub account"
 msgstr ""
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Pair your device to your comma account"
-msgstr "Cihazınızı comma hesabınızla eşleştirin"
-
-#: openpilot/selfdrive/ui/layouts/settings/device.py
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Pair your device with comma connect (connect.comma.ai) and claim your comma prime offer."
-msgstr "Cihazınızı comma connect (connect.comma.ai) ile eşleştirin ve comma prime teklifinizi alın."
-
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Please connect to Wi-Fi to complete initial pairing"
-msgstr "İlk eşleştirmeyi tamamlamak için lütfen Wi‑Fi'a bağlanın"
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Power Off"
@@ -496,10 +431,6 @@ msgstr "Ölçülü bir hücresel bağlantıdayken büyük veri yüklemelerini en
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Preview the driver facing camera to ensure that driver monitoring has good visibility. (vehicle must be off)"
 msgstr "Sürücü izleme görünürlüğünün iyi olduğundan emin olmak için sürücüye bakan kamerayı önizleyin. (araç kapalı olmalıdır)"
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "QR Code Error"
-msgstr "QR Kod Hatası"
 
 #: openpilot/selfdrive/ui/widgets/ssh_key.py
 msgid "REMOVE"
@@ -548,14 +479,6 @@ msgstr "Mevzuat"
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Relaxed"
 msgstr "Rahat"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Remote access"
-msgstr "Uzaktan erişim"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Remote snapshots"
-msgstr "Uzaktan anlık görüntüler"
 
 #: openpilot/selfdrive/ui/widgets/ssh_key.py
 msgid "Request timed out"
@@ -677,10 +600,6 @@ msgstr "Bilinmiyor"
 msgid "Updates are only downloaded while the car is off."
 msgstr "Güncellemeler yalnızca araç kapalıyken indirilir."
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Upgrade Now"
-msgstr "Şimdi Yükselt"
-
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Upload data from the driver facing camera and help improve the driver monitoring algorithm."
 msgstr "Sürücüye bakan kameradan veri yükleyin ve sürücü izleme algoritmasını geliştirmeye yardımcı olun."
@@ -736,10 +655,6 @@ msgstr "kamera başlatılıyor"
 #: openpilot/selfdrive/ui/layouts/settings/software.py
 msgid "checking..."
 msgstr "kontrol ediliyor..."
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "comma prime"
-msgstr "comma prime"
 
 #: system/ui/widgets/network.py
 msgid "default"
@@ -856,18 +771,3 @@ msgid "{} minute ago"
 msgid_plural "{} minutes ago"
 msgstr[0] "{} dakika önce"
 msgstr[1] "{} dakika önce"
-
-#: openpilot/selfdrive/ui/layouts/settings/firehose.py
-msgid "{} segment of your driving is in the training dataset so far."
-msgid_plural "{} segments of your driving is in the training dataset so far."
-msgstr[0] "{} segment sürüşünüz eğitim veri setinde."
-msgstr[1] "{} segment sürüşünüz eğitim veri setinde."
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "✓ SUBSCRIBED"
-msgstr "✓ ABONE"
-
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "🔥 Firehose Mode 🔥"
-msgstr "🔥 Firehose Modu 🔥"
-

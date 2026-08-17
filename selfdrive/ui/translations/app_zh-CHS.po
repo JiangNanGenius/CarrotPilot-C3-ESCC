@@ -20,14 +20,6 @@ msgstr " 您的设备朝向 {:.1f}° {} 与 {:.1f}° {}。"
 msgid "--"
 msgstr "--"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "1 year of drive storage"
-msgstr "1 年行驶数据存储"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "24/7 LTE connectivity"
-msgstr "全天候 LTE 连接"
-
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "2G"
 msgstr "2G"
@@ -97,14 +89,6 @@ msgstr "确定要卸载吗？"
 msgid "Back"
 msgstr "返回"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Become a comma prime member at connect.comma.ai"
-msgstr "前往 connect.comma.ai 成为 comma prime 会员"
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Bookmark connect.comma.ai to your home screen to use it like an app"
-msgstr "将 connect.comma.ai 添加到主屏幕，像应用一样使用"
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "CHANGE"
 msgstr "更改"
@@ -148,10 +132,6 @@ msgstr ""
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Choose your sponsorship tier and confirm your support"
 msgstr ""
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Click \"add new device\" and scan the QR code on the right"
-msgstr "点击“添加新设备”，扫描右侧二维码"
 
 #: openpilot/selfdrive/ui/widgets/offroad_alerts.py
 msgid "Close"
@@ -314,18 +294,6 @@ msgstr "此车型当前无法使用实验模式，因为纵向控制使用的是
 msgid "FORGETTING..."
 msgstr "正在遗忘..."
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Finish Setup"
-msgstr "完成设置"
-
-#: openpilot/selfdrive/ui/layouts/settings/settings.py
-msgid "Firehose"
-msgstr "数据洪流"
-
-#: openpilot/selfdrive/ui/layouts/settings/firehose.py
-msgid "Firehose Mode"
-msgstr "Firehose 模式"
-
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Follow the prompts to complete the pairing process"
 msgstr ""
@@ -341,10 +309,6 @@ msgstr "要忘记 Wi‑Fi 网络“{}”吗？"
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "GOOD"
 msgstr "良好"
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Go to https://connect.comma.ai on your phone"
-msgstr "在手机上前往 https://connect.comma.ai"
 
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "HIGH"
@@ -398,10 +362,6 @@ msgstr "纵向操作模式"
 msgid "MAX"
 msgstr "最大"
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Maximize your training data uploads to improve openpilot's driving models."
-msgstr "最大化上传训练数据，以改进 openpilot 的驾驶模型。"
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "N/A"
 msgstr "无"
@@ -436,10 +396,6 @@ msgstr "确定"
 msgid "ONLINE"
 msgstr "在线"
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Open"
-msgstr "打开"
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "PAIR"
 msgstr "配对"
@@ -452,34 +408,13 @@ msgstr "PANDA"
 msgid "PREVIEW"
 msgstr "预览"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "PRIME FEATURES:"
-msgstr "PRIME 功能："
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Pair Device"
-msgstr "配对设备"
-
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Pair device"
 msgstr "配对设备"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Pair your GitHub account"
 msgstr ""
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Pair your device to your comma account"
-msgstr "将设备配对到您的 comma 账号"
-
-#: openpilot/selfdrive/ui/layouts/settings/device.py
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Pair your device with comma connect (connect.comma.ai) and claim your comma prime offer."
-msgstr "将设备与 comma connect（connect.comma.ai）配对，领取您的 comma prime 优惠。"
-
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Please connect to Wi-Fi to complete initial pairing"
-msgstr "请连接 Wi‑Fi 以完成初始配对"
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Power Off"
@@ -496,10 +431,6 @@ msgstr "在计量制蜂窝网络时避免大量上传"
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Preview the driver facing camera to ensure that driver monitoring has good visibility. (vehicle must be off)"
 msgstr "预览车内摄像头以确保驾驶员监控视野良好。（车辆必须熄火）"
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "QR Code Error"
-msgstr "二维码错误"
 
 #: openpilot/selfdrive/ui/widgets/ssh_key.py
 msgid "REMOVE"
@@ -548,14 +479,6 @@ msgstr "法规"
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Relaxed"
 msgstr "从容"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Remote access"
-msgstr "远程访问"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Remote snapshots"
-msgstr "远程快照"
 
 #: openpilot/selfdrive/ui/widgets/ssh_key.py
 msgid "Request timed out"
@@ -677,10 +600,6 @@ msgstr "未知"
 msgid "Updates are only downloaded while the car is off."
 msgstr "仅在车辆熄火时下载更新。"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Upgrade Now"
-msgstr "立即升级"
-
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Upload data from the driver facing camera and help improve the driver monitoring algorithm."
 msgstr "上传车内摄像头数据，帮助改进驾驶员监控算法。"
@@ -736,10 +655,6 @@ msgstr "相机启动中"
 #: openpilot/selfdrive/ui/layouts/settings/software.py
 msgid "checking..."
 msgstr "检查中..."
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "comma prime"
-msgstr "comma prime"
 
 #: system/ui/widgets/network.py
 msgid "default"
@@ -856,18 +771,3 @@ msgid "{} minute ago"
 msgid_plural "{} minutes ago"
 msgstr[0] "{} 分钟前"
 msgstr[1] "{} 分钟前"
-
-#: openpilot/selfdrive/ui/layouts/settings/firehose.py
-msgid "{} segment of your driving is in the training dataset so far."
-msgid_plural "{} segments of your driving is in the training dataset so far."
-msgstr[0] "目前已有 {} 个您的驾驶片段被纳入训练数据集。"
-msgstr[1] "目前已有 {} 个您的驾驶片段被纳入训练数据集。"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "✓ SUBSCRIBED"
-msgstr "✓ 已订阅"
-
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "🔥 Firehose Mode 🔥"
-msgstr "🔥 Firehose 模式 🔥"
-

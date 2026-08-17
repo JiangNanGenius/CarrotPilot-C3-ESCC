@@ -8,7 +8,6 @@ from cereal import messaging, car, log
 from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.params import Params
 from openpilot.common.swaglog import cloudlog
-from openpilot.selfdrive.ui.lib.prime_state import PrimeState
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.hardware import HARDWARE, PC
 
@@ -63,8 +62,6 @@ class UIState(UIStateSP):
       ] + self.sm_services_ext
     )
 
-    self.prime_state = PrimeState()
-
     # UI Status tracking
     self.status: UIStatus = UIStatus.DISENGAGED
     self.started_frame: int = 0
@@ -109,7 +106,6 @@ class UIState(UIStateSP):
     return not self.started
 
   def update(self) -> None:
-    self.prime_state.start()  # start thread after manager forks ui
     self.sm.update(0)
     self._update_state()
     self._update_status()

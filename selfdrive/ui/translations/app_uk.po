@@ -20,14 +20,6 @@ msgstr " Ваш пристрій нахилено на {:.1f}° {} та {:.1f}°
 msgid "--"
 msgstr "--"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "1 year of drive storage"
-msgstr "1 рік зберігання поїздок"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "24/7 LTE connectivity"
-msgstr "Підключення LTE 24/7"
-
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "2G"
 msgstr "2G"
@@ -97,14 +89,6 @@ msgstr "Ви впевнені, що хочете видалити?"
 msgid "Back"
 msgstr "Назад"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Become a comma prime member at connect.comma.ai"
-msgstr "Станьте членом comma prime на connect.comma.ai"
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Bookmark connect.comma.ai to your home screen to use it like an app"
-msgstr "Додайте connect.comma.ai до головного екрану, щоб використовувати його як додаток."
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "CHANGE"
 msgstr "ЗМІНИТИ"
@@ -148,10 +132,6 @@ msgstr ""
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Choose your sponsorship tier and confirm your support"
 msgstr ""
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Click \"add new device\" and scan the QR code on the right"
-msgstr "Натисніть «додати новий пристрій» і відскануйте QR-код праворуч."
 
 #: openpilot/selfdrive/ui/widgets/offroad_alerts.py
 msgid "Close"
@@ -314,18 +294,6 @@ msgstr "Експериментальний режим наразі недост�
 msgid "FORGETTING..."
 msgstr "ЗАБУВАЮ..."
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Finish Setup"
-msgstr "Завершити налаштування"
-
-#: openpilot/selfdrive/ui/layouts/settings/settings.py
-msgid "Firehose"
-msgstr "Злива"
-
-#: openpilot/selfdrive/ui/layouts/settings/firehose.py
-msgid "Firehose Mode"
-msgstr "Режим зливи"
-
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Follow the prompts to complete the pairing process"
 msgstr ""
@@ -341,10 +309,6 @@ msgstr "Забути мережу Wi-Fi \"{}\"?"
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "GOOD"
 msgstr "ДОБРА"
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Go to https://connect.comma.ai on your phone"
-msgstr "Перейдіть на сайт https://connect.comma.ai на своєму телефоні."
 
 #: openpilot/selfdrive/ui/layouts/sidebar.py
 msgid "HIGH"
@@ -398,10 +362,6 @@ msgstr "Режим поздовжнього маневрування"
 msgid "MAX"
 msgstr "МАКС"
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Maximize your training data uploads to improve openpilot's driving models."
-msgstr "Максимізуйте завантаження навчальних даних, щоб поліпшити моделі openpilot."
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "N/A"
 msgstr "Н/Д"
@@ -436,10 +396,6 @@ msgstr "OK"
 msgid "ONLINE"
 msgstr "ОНЛАЙН"
 
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Open"
-msgstr "ВІДКРИТИ"
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "PAIR"
 msgstr "ПІДКЛЮЧИТИ"
@@ -452,34 +408,13 @@ msgstr "PANDA"
 msgid "PREVIEW"
 msgstr "ПОКАЖИ"
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "PRIME FEATURES:"
-msgstr "XАРАКТЕРИСТИКИ PRIME:"
-
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Pair Device"
-msgstr "Підключити пристрій"
-
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Pair device"
 msgstr "Підключити пристрій"
 
 #: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
 msgid "Pair your GitHub account"
 msgstr ""
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "Pair your device to your comma account"
-msgstr "Підключіть свій пристрій до обліковки comma connect"
-
-#: openpilot/selfdrive/ui/layouts/settings/device.py
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Pair your device with comma connect (connect.comma.ai) and claim your comma prime offer."
-msgstr "Підключіть свій пристрій до comma connect (connect.comma.ai) і отримайте свою пропозицію comma prime."
-
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "Please connect to Wi-Fi to complete initial pairing"
-msgstr "Будь ласка, підключіться до Wi-Fi, щоб завершити початкове сполучення."
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Power Off"
@@ -496,10 +431,6 @@ msgstr "Запобігати великим завантаженням дани�
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Preview the driver facing camera to ensure that driver monitoring has good visibility. (vehicle must be off)"
 msgstr "Попередньо перегляньте камеру, спрямовану на водія, щоб переконатися, що система моніторингу водія має добру видимість. (автомобіль повинен бути вимкнений)"
-
-#: openpilot/selfdrive/ui/widgets/pairing_dialog.py
-msgid "QR Code Error"
-msgstr "Помилка QR-коду"
 
 #: openpilot/selfdrive/ui/widgets/ssh_key.py
 msgid "REMOVE"
@@ -548,14 +479,6 @@ msgstr "Нормативні документи"
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Relaxed"
 msgstr "Спокійний"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Remote access"
-msgstr "Віддалений доступ"
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Remote snapshots"
-msgstr "Віддалені знімки"
 
 #: openpilot/selfdrive/ui/widgets/ssh_key.py
 msgid "Request timed out"
@@ -677,10 +600,6 @@ msgstr "Невідомо"
 msgid "Updates are only downloaded while the car is off."
 msgstr "Оновлення завантажуються лише тоді, коли автомобіль вимкнено."
 
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "Upgrade Now"
-msgstr "Оновити зараз"
-
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
 msgid "Upload data from the driver facing camera and help improve the driver monitoring algorithm."
 msgstr "Завантажуйте дані з камери, спрямованої на водія, та допоможіть покращити алгоритм моніторингу водія."
@@ -736,10 +655,6 @@ msgstr "запуск камери"
 #: openpilot/selfdrive/ui/layouts/settings/software.py
 msgid "checking..."
 msgstr "перевіряю..."
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "comma prime"
-msgstr "comma prime"
 
 #: system/ui/widgets/network.py
 msgid "default"
@@ -860,19 +775,3 @@ msgid_plural "{} minutes ago"
 msgstr[0] "{} хвилина тому"
 msgstr[1] "{} хвилини тому"
 msgstr[2] "{} хвилин тому"
-
-#: openpilot/selfdrive/ui/layouts/settings/firehose.py
-msgid "{} segment of your driving is in the training dataset so far."
-msgid_plural "{} segments of your driving is in the training dataset so far."
-msgstr[0] "{} сегмент вашого водіння на даний момент містяться в тренувальному наборі даних."
-msgstr[1] "{} сегменти вашого водіння на даний момент містяться в тренувальному наборі даних."
-msgstr[2] "{} сегментів вашого водіння на даний момент містяться в тренувальному наборі даних."
-
-#: openpilot/selfdrive/ui/widgets/prime.py
-msgid "✓ SUBSCRIBED"
-msgstr "✓ ПІДПИСАНО"
-
-#: openpilot/selfdrive/ui/widgets/setup.py
-msgid "🔥 Firehose Mode 🔥"
-msgstr "🌧️ Режим зливи 🌧️"
-

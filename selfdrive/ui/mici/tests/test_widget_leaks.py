@@ -9,14 +9,12 @@ from openpilot.system.ui.widgets import Widget
 # mici dialogs
 from openpilot.selfdrive.ui.mici.layouts.onboarding import TrainingGuide as MiciTrainingGuide, OnboardingWindow as MiciOnboardingWindow
 from openpilot.selfdrive.ui.mici.onroad.driver_camera_dialog import DriverCameraDialog as MiciDriverCameraDialog
-from openpilot.selfdrive.ui.mici.widgets.pairing_dialog import PairingDialog as MiciPairingDialog
 from openpilot.selfdrive.ui.mici.widgets.dialog import BigDialog, BigConfirmationDialog, BigInputDialog
 from openpilot.selfdrive.ui.mici.layouts.settings.device import MiciFccModal
 
 # tici dialogs
 from openpilot.selfdrive.ui.onroad.driver_camera_dialog import DriverCameraDialog as TiciDriverCameraDialog
 from openpilot.selfdrive.ui.layouts.onboarding import OnboardingWindow as TiciOnboardingWindow
-from openpilot.selfdrive.ui.widgets.pairing_dialog import PairingDialog as TiciPairingDialog
 from openpilot.system.ui.widgets.confirm_dialog import ConfirmDialog
 from openpilot.system.ui.widgets.option_dialog import MultiOptionDialog
 from openpilot.system.ui.widgets.html_render import HtmlModal
@@ -68,7 +66,7 @@ def test_dialogs_do_not_leak():
 
   for ctor in (
     # mici
-    MiciDriverCameraDialog, MiciPairingDialog,
+    MiciDriverCameraDialog,
     lambda: MiciTrainingGuide(lambda: None),
     lambda: MiciOnboardingWindow(lambda: None),
     lambda: BigDialog("test", "test"),
@@ -76,7 +74,7 @@ def test_dialogs_do_not_leak():
     lambda: BigInputDialog("test"),
     lambda: MiciFccModal(text="test"),
     # tici
-    TiciDriverCameraDialog, TiciOnboardingWindow, TiciPairingDialog, Keyboard,
+    TiciDriverCameraDialog, TiciOnboardingWindow, Keyboard,
     lambda: ConfirmDialog("test", "ok"),
     lambda: MultiOptionDialog("test", ["a", "b"]),
     lambda: HtmlModal(text="test"),
