@@ -200,6 +200,21 @@
     ],
     "package": "Driver Confidence Package 2"
   },
+  "CUPRA Ateca 2018-23": {
+    "platform": "SEAT_ATECA_MK1",
+    "make": "CUPRA",
+    "brand": "volkswagen",
+    "model": "Ateca",
+    "year": [
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
   "Cadillac Escalade 2017": {
     "platform": "CADILLAC_ESCALADE",
     "make": "Cadillac",
@@ -464,29 +479,6 @@
       "2025"
     ],
     "package": "Adaptive Cruise Control (ACC)"
-  },
-  "comma body": {
-    "platform": "COMMA_BODY",
-    "make": "comma",
-    "brand": "body",
-    "model": "body",
-    "year": [],
-    "package": "All"
-  },
-  "CUPRA Ateca 2018-23": {
-    "platform": "SEAT_ATECA_MK1",
-    "make": "CUPRA",
-    "brand": "volkswagen",
-    "model": "Ateca",
-    "year": [
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022",
-      "2023"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
   "Dodge Durango 2020-21": {
     "platform": "DODGE_DURANGO",
@@ -800,6 +792,27 @@
     ],
     "package": "Adaptive Cruise Control with Lane Centering"
   },
+  "GMC Acadia 2018": {
+    "platform": "GMC_ACADIA",
+    "make": "GMC",
+    "brand": "gm",
+    "model": "Acadia",
+    "year": [
+      "2018"
+    ],
+    "package": "Adaptive Cruise Control (ACC)"
+  },
+  "GMC Sierra 1500 2020-21": {
+    "platform": "CHEVROLET_SILVERADO",
+    "make": "GMC",
+    "brand": "gm",
+    "model": "Sierra 1500",
+    "year": [
+      "2020",
+      "2021"
+    ],
+    "package": "Driver Alert Package II"
+  },
   "Genesis G70 2018": {
     "platform": "GENESIS_G70",
     "make": "Genesis",
@@ -952,27 +965,6 @@
     ],
     "package": "All"
   },
-  "GMC Acadia 2018": {
-    "platform": "GMC_ACADIA",
-    "make": "GMC",
-    "brand": "gm",
-    "model": "Acadia",
-    "year": [
-      "2018"
-    ],
-    "package": "Adaptive Cruise Control (ACC)"
-  },
-  "GMC Sierra 1500 2020-21": {
-    "platform": "CHEVROLET_SILVERADO",
-    "make": "GMC",
-    "brand": "gm",
-    "model": "Sierra 1500",
-    "year": [
-      "2020",
-      "2021"
-    ],
-    "package": "Driver Alert Package II"
-  },
   "Honda Accord 2018-22": {
     "platform": "HONDA_ACCORD",
     "make": "Honda",
@@ -1022,6 +1014,73 @@
       "2023",
       "2024",
       "2025"
+    ],
+    "package": "All"
+  },
+  "Honda CR-V 2015-16": {
+    "platform": "HONDA_CRV",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "CR-V",
+    "year": [
+      "2015",
+      "2016"
+    ],
+    "package": "Touring Trim"
+  },
+  "Honda CR-V 2017-22": {
+    "platform": "HONDA_CRV_5G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "CR-V",
+    "year": [
+      "2017",
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022"
+    ],
+    "package": "Honda Sensing"
+  },
+  "Honda CR-V 2023-26": {
+    "platform": "HONDA_CRV_6G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "CR-V",
+    "year": [
+      "2023",
+      "2024",
+      "2025",
+      "2026"
+    ],
+    "package": "All"
+  },
+  "Honda CR-V Hybrid 2017-22": {
+    "platform": "HONDA_CRV_HYBRID",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "CR-V Hybrid",
+    "year": [
+      "2017",
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022"
+    ],
+    "package": "Honda Sensing"
+  },
+  "Honda CR-V Hybrid 2023-26": {
+    "platform": "HONDA_CRV_6G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "CR-V Hybrid",
+    "year": [
+      "2023",
+      "2024",
+      "2025",
+      "2026"
     ],
     "package": "All"
   },
@@ -1150,83 +1209,6 @@
       "2021"
     ],
     "package": "Honda Sensing"
-  },
-  "Honda CR-V 2015-16": {
-    "platform": "HONDA_CRV",
-    "make": "Honda",
-    "brand": "honda",
-    "model": "CR-V",
-    "year": [
-      "2015",
-      "2016"
-    ],
-    "package": "Touring Trim"
-  },
-  "Honda CR-V 2017-22": {
-    "platform": "HONDA_CRV_5G",
-    "make": "Honda",
-    "brand": "honda",
-    "model": "CR-V",
-    "year": [
-      "2017",
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022"
-    ],
-    "package": "Honda Sensing"
-  },
-  "Honda CR-V 2023-26": {
-    "platform": "HONDA_CRV_6G",
-    "make": "Honda",
-    "brand": "honda",
-    "model": "CR-V",
-    "year": [
-      "2023",
-      "2024",
-      "2025",
-      "2026"
-    ],
-    "package": "All"
-  },
-  "Honda CR-V Hybrid 2017-22": {
-    "platform": "HONDA_CRV_HYBRID",
-    "make": "Honda",
-    "brand": "honda",
-    "model": "CR-V Hybrid",
-    "year": [
-      "2017",
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022"
-    ],
-    "package": "Honda Sensing"
-  },
-  "Honda CR-V Hybrid 2023-26": {
-    "platform": "HONDA_CRV_6G",
-    "make": "Honda",
-    "brand": "honda",
-    "model": "CR-V Hybrid",
-    "year": [
-      "2023",
-      "2024",
-      "2025",
-      "2026"
-    ],
-    "package": "All"
-  },
-  "Honda e 2020": {
-    "platform": "HONDA_E",
-    "make": "Honda",
-    "brand": "honda",
-    "model": "e",
-    "year": [
-      "2020"
-    ],
-    "package": "All"
   },
   "Honda Fit 2018-20": {
     "platform": "HONDA_FIT",
@@ -1428,6 +1410,16 @@
     ],
     "package": "Honda Sensing"
   },
+  "Honda e 2020": {
+    "platform": "HONDA_E",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "e",
+    "year": [
+      "2020"
+    ],
+    "package": "All"
+  },
   "Hyundai Azera 2022": {
     "platform": "HYUNDAI_AZERA_6TH_GEN",
     "make": "Hyundai",
@@ -1544,18 +1536,6 @@
     "year": [
       "2015",
       "2016"
-    ],
-    "package": "Smart Cruise Control (SCC)"
-  },
-  "Hyundai i30 2017-19": {
-    "platform": "HYUNDAI_ELANTRA_GT_I30",
-    "make": "Hyundai",
-    "brand": "hyundai",
-    "model": "i30",
-    "year": [
-      "2017",
-      "2018",
-      "2019"
     ],
     "package": "Smart Cruise Control (SCC)"
   },
@@ -1957,6 +1937,18 @@
     ],
     "package": "Smart Cruise Control (SCC)"
   },
+  "Hyundai i30 2017-19": {
+    "platform": "HYUNDAI_ELANTRA_GT_I30",
+    "make": "Hyundai",
+    "brand": "hyundai",
+    "model": "i30",
+    "year": [
+      "2017",
+      "2018",
+      "2019"
+    ],
+    "package": "Smart Cruise Control (SCC)"
+  },
   "Jeep Grand Cherokee 2016-18": {
     "platform": "JEEP_GRAND_CHEROKEE",
     "make": "Jeep",
@@ -2322,6 +2314,16 @@
     "model": "Seltos",
     "year": [
       "2021"
+    ],
+    "package": "Smart Cruise Control (SCC)"
+  },
+  "Kia Seltos 2023": {
+    "platform": "KIA_SELTOS_2023",
+    "make": "Kia",
+    "brand": "hyundai",
+    "model": "Seltos",
+    "year": [
+      "2023"
     ],
     "package": "Smart Cruise Control (SCC)"
   },
@@ -2733,20 +2735,6 @@
     ],
     "package": "Co-Pilot360 Plus"
   },
-  "MAN eTGE 2020-24": {
-    "platform": "VOLKSWAGEN_CRAFTER_MK2",
-    "make": "MAN",
-    "brand": "volkswagen",
-    "model": "eTGE",
-    "year": [
-      "2020",
-      "2021",
-      "2022",
-      "2023",
-      "2024"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
   "MAN TGE 2017-24": {
     "platform": "VOLKSWAGEN_CRAFTER_MK2",
     "make": "MAN",
@@ -2756,6 +2744,20 @@
       "2017",
       "2018",
       "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "MAN eTGE 2020-24": {
+    "platform": "VOLKSWAGEN_CRAFTER_MK2",
+    "make": "MAN",
+    "brand": "volkswagen",
+    "model": "eTGE",
+    "year": [
       "2020",
       "2021",
       "2022",
@@ -3150,125 +3152,6 @@
       "2021"
     ],
     "package": "EyeSight Driver Assistance"
-  },
-  "Škoda Fabia 2022-23": {
-    "platform": "SKODA_FABIA_MK4",
-    "make": "Škoda",
-    "brand": "volkswagen",
-    "model": "Fabia",
-    "year": [
-      "2022",
-      "2023"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Škoda Kamiq 2021-23": {
-    "platform": "SKODA_KAMIQ_MK1",
-    "make": "Škoda",
-    "brand": "volkswagen",
-    "model": "Kamiq",
-    "year": [
-      "2021",
-      "2022",
-      "2023"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Škoda Karoq 2019-23": {
-    "platform": "SKODA_KAROQ_MK1",
-    "make": "Škoda",
-    "brand": "volkswagen",
-    "model": "Karoq",
-    "year": [
-      "2019",
-      "2020",
-      "2021",
-      "2022",
-      "2023"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Škoda Kodiaq 2017-23": {
-    "platform": "SKODA_KODIAQ_MK1",
-    "make": "Škoda",
-    "brand": "volkswagen",
-    "model": "Kodiaq",
-    "year": [
-      "2017",
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022",
-      "2023"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Škoda Octavia 2015-19": {
-    "platform": "SKODA_OCTAVIA_MK3",
-    "make": "Škoda",
-    "brand": "volkswagen",
-    "model": "Octavia",
-    "year": [
-      "2015",
-      "2016",
-      "2017",
-      "2018",
-      "2019"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Škoda Octavia RS 2016": {
-    "platform": "SKODA_OCTAVIA_MK3",
-    "make": "Škoda",
-    "brand": "volkswagen",
-    "model": "Octavia RS",
-    "year": [
-      "2016"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Škoda Octavia Scout 2017-19": {
-    "platform": "SKODA_OCTAVIA_MK3",
-    "make": "Škoda",
-    "brand": "volkswagen",
-    "model": "Octavia Scout",
-    "year": [
-      "2017",
-      "2018",
-      "2019"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Škoda Scala 2020-23": {
-    "platform": "SKODA_KAMIQ_MK1",
-    "make": "Škoda",
-    "brand": "volkswagen",
-    "model": "Scala",
-    "year": [
-      "2020",
-      "2021",
-      "2022",
-      "2023"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Škoda Superb 2015-22": {
-    "platform": "SKODA_SUPERB_MK3",
-    "make": "Škoda",
-    "brand": "volkswagen",
-    "model": "Superb",
-    "year": [
-      "2015",
-      "2016",
-      "2017",
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
   "Tesla Model 3 (with HW3) 2019-23": {
     "platform": "TESLA_MODEL_3",
@@ -3899,19 +3782,6 @@
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
-  "Volkswagen Arteon eHybrid 2020-23": {
-    "platform": "VOLKSWAGEN_ARTEON_MK1",
-    "make": "Volkswagen",
-    "brand": "volkswagen",
-    "model": "Arteon eHybrid",
-    "year": [
-      "2020",
-      "2021",
-      "2022",
-      "2023"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
   "Volkswagen Arteon R 2020-23": {
     "platform": "VOLKSWAGEN_ARTEON_MK1",
     "make": "Volkswagen",
@@ -3930,6 +3800,19 @@
     "make": "Volkswagen",
     "brand": "volkswagen",
     "model": "Arteon Shooting Brake",
+    "year": [
+      "2020",
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Volkswagen Arteon eHybrid 2020-23": {
+    "platform": "VOLKSWAGEN_ARTEON_MK1",
+    "make": "Volkswagen",
+    "brand": "volkswagen",
+    "model": "Arteon eHybrid",
     "year": [
       "2020",
       "2021",
@@ -3959,6 +3842,20 @@
     "brand": "volkswagen",
     "model": "Atlas Cross Sport",
     "year": [
+      "2020",
+      "2021",
+      "2022"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Volkswagen CC 2018-22": {
+    "platform": "VOLKSWAGEN_ARTEON_MK1",
+    "make": "Volkswagen",
+    "brand": "volkswagen",
+    "model": "CC",
+    "year": [
+      "2018",
+      "2019",
       "2020",
       "2021",
       "2022"
@@ -4007,20 +3904,6 @@
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
-  "Volkswagen CC 2018-22": {
-    "platform": "VOLKSWAGEN_ARTEON_MK1",
-    "make": "Volkswagen",
-    "brand": "volkswagen",
-    "model": "CC",
-    "year": [
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
   "Volkswagen Crafter 2017-24": {
     "platform": "VOLKSWAGEN_CRAFTER_MK2",
     "make": "Volkswagen",
@@ -4035,38 +3918,6 @@
       "2022",
       "2023",
       "2024"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Volkswagen e-Crafter 2018-24": {
-    "platform": "VOLKSWAGEN_CRAFTER_MK2",
-    "make": "Volkswagen",
-    "brand": "volkswagen",
-    "model": "e-Crafter",
-    "year": [
-      "2018",
-      "2019",
-      "2020",
-      "2021",
-      "2022",
-      "2023",
-      "2024"
-    ],
-    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
-  },
-  "Volkswagen e-Golf 2014-20": {
-    "platform": "VOLKSWAGEN_GOLF_MK7",
-    "make": "Volkswagen",
-    "brand": "volkswagen",
-    "model": "e-Golf",
-    "year": [
-      "2014",
-      "2015",
-      "2016",
-      "2017",
-      "2018",
-      "2019",
-      "2020"
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
@@ -4453,6 +4304,165 @@
       "2021",
       "2022",
       "2023"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Volkswagen e-Crafter 2018-24": {
+    "platform": "VOLKSWAGEN_CRAFTER_MK2",
+    "make": "Volkswagen",
+    "brand": "volkswagen",
+    "model": "e-Crafter",
+    "year": [
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Volkswagen e-Golf 2014-20": {
+    "platform": "VOLKSWAGEN_GOLF_MK7",
+    "make": "Volkswagen",
+    "brand": "volkswagen",
+    "model": "e-Golf",
+    "year": [
+      "2014",
+      "2015",
+      "2016",
+      "2017",
+      "2018",
+      "2019",
+      "2020"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "comma body": {
+    "platform": "COMMA_BODY",
+    "make": "comma",
+    "brand": "body",
+    "model": "body",
+    "year": [],
+    "package": "All"
+  },
+  "Škoda Fabia 2022-23": {
+    "platform": "SKODA_FABIA_MK4",
+    "make": "Škoda",
+    "brand": "volkswagen",
+    "model": "Fabia",
+    "year": [
+      "2022",
+      "2023"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Škoda Kamiq 2021-23": {
+    "platform": "SKODA_KAMIQ_MK1",
+    "make": "Škoda",
+    "brand": "volkswagen",
+    "model": "Kamiq",
+    "year": [
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Škoda Karoq 2019-23": {
+    "platform": "SKODA_KAROQ_MK1",
+    "make": "Škoda",
+    "brand": "volkswagen",
+    "model": "Karoq",
+    "year": [
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Škoda Kodiaq 2017-23": {
+    "platform": "SKODA_KODIAQ_MK1",
+    "make": "Škoda",
+    "brand": "volkswagen",
+    "model": "Kodiaq",
+    "year": [
+      "2017",
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Škoda Octavia 2015-19": {
+    "platform": "SKODA_OCTAVIA_MK3",
+    "make": "Škoda",
+    "brand": "volkswagen",
+    "model": "Octavia",
+    "year": [
+      "2015",
+      "2016",
+      "2017",
+      "2018",
+      "2019"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Škoda Octavia RS 2016": {
+    "platform": "SKODA_OCTAVIA_MK3",
+    "make": "Škoda",
+    "brand": "volkswagen",
+    "model": "Octavia RS",
+    "year": [
+      "2016"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Škoda Octavia Scout 2017-19": {
+    "platform": "SKODA_OCTAVIA_MK3",
+    "make": "Škoda",
+    "brand": "volkswagen",
+    "model": "Octavia Scout",
+    "year": [
+      "2017",
+      "2018",
+      "2019"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Škoda Scala 2020-23": {
+    "platform": "SKODA_KAMIQ_MK1",
+    "make": "Škoda",
+    "brand": "volkswagen",
+    "model": "Scala",
+    "year": [
+      "2020",
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Škoda Superb 2015-22": {
+    "platform": "SKODA_SUPERB_MK3",
+    "make": "Škoda",
+    "brand": "volkswagen",
+    "model": "Superb",
+    "year": [
+      "2015",
+      "2016",
+      "2017",
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022"
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   }
