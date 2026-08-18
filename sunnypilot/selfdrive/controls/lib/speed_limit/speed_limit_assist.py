@@ -61,7 +61,10 @@ class SpeedLimitAssist:
     self.pre_active_timer = 0
     self.is_metric = self.params.get_bool("IsMetric")
     set_speed_limit_assist_availability(self.CP, self.CP_SP, self.params)
-    self.enabled = self.params.get("SpeedLimitMode", return_default=True) == Mode.assist
+    # SLA assist is disabled: carrot speed limit takes over (camera/CAN + map +
+    # nav-app). The resolver still runs and its speed_limit is consumed by
+    # CarrotSpeedLimit in the longitudinal planner, so we hard-disable assist.
+    self.enabled = False
     self.long_enabled = False
     self.long_enabled_prev = False
     self.is_enabled = False

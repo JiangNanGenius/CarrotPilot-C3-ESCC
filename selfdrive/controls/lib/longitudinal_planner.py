@@ -16,6 +16,7 @@ from openpilot.selfdrive.car.cruise import V_CRUISE_MAX, V_CRUISE_UNSET
 from openpilot.common.swaglog import cloudlog
 
 from openpilot.sunnypilot.selfdrive.controls.lib.longitudinal_planner import LongitudinalPlannerSP
+from openpilot.selfdrive.carrot.carrot_speed_limit import CarrotSpeedLimit
 
 A_CRUISE_MAX_VALS = [1.6, 1.2, 0.8, 0.6]
 A_CRUISE_MAX_BP = [0., 10.0, 25., 40.]
@@ -65,6 +66,8 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.v_desired_trajectory = np.zeros(CONTROL_N)
     self.a_desired_trajectory = np.zeros(CONTROL_N)
     self.j_desired_trajectory = np.zeros(CONTROL_N)
+
+    self.carrot_speed_limit = CarrotSpeedLimit()
 
   @staticmethod
   def parse_model(model_msg):
@@ -132,6 +135,10 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
 
     # Get new v_cruise and a_desired from Smart Cruise Control and Speed Limit Assist
     v_cruise, self.a_desired = LongitudinalPlannerSP.update_targets(self, sm, self.v_desired_filter.x, self.a_desired, v_cruise)
+
+    # Carrot speed limit: camera/CAN + map limit (sunny resolver) + carrot nav-app limit.
+    # Only lowers v_cruise; braking stays solely with e2e/MPC.
+    v_cruise = self.carrot_speed_limit.update(sm, v_cruise, self.resolver.speed_limit)
 
     if force_slow_decel:
       v_cruise = 0.0
