@@ -61,7 +61,7 @@ class TrainingGuidePreDMTutorial(NavScroller):
       GreyBigButton("driver monitoring\ncheck", "scroll to continue",
                     gui_app.texture("icons_mici/setup/green_dm.png", 64, 64)),
       GreyBigButton("", "Next, we'll check if comma four can detect the driver properly."),
-      GreyBigButton("", "sunnypilot uses the cabin camera to check if the driver is distracted."),
+      GreyBigButton("", "GeniusPilot uses the cabin camera to check if the driver is distracted."),
       GreyBigButton("", "If it does not have a clear view of the driver, unplug and remount before continuing."),
       continue_button,
     ])

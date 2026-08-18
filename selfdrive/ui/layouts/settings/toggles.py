@@ -160,7 +160,7 @@ class TogglesLayout(Widget):
     ui_state.update_params()
 
     e2e_description = tr(
-      "sunnypilot defaults to driving in chill mode. Experimental mode enables alpha-level features that aren't ready for chill mode. " +
+      "GeniusPilot defaults to driving in chill mode. Experimental mode enables alpha-level features that aren't ready for chill mode. " +
       "Experimental features are listed below:<br>" +
       "<h4>End-to-End Longitudinal Control</h4><br>" +
       "Let the driving model control the gas and brakes. sunnypilot will drive as it thinks a human would, including stopping for red lights and stop signs. " +
@@ -185,7 +185,7 @@ class TogglesLayout(Widget):
 
         unavailable = tr("Experimental mode is currently unavailable on this car since the car's stock ACC is used for longitudinal control.")
 
-        long_desc = unavailable + " " + tr("sunnypilot longitudinal control may come in a future update.")
+        long_desc = unavailable + " " + tr("GeniusPilot longitudinal control may come in a future update.")
         if ui_state.CP.alphaLongitudinalAvailable:
           if self._is_release:
             long_desc = unavailable + " " + tr("An alpha version of sunnypilot longitudinal control can be tested, along with " +

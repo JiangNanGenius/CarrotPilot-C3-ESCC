@@ -23,7 +23,7 @@ if gui_app.sunnypilot_ui():
 # Description constants
 DESCRIPTIONS = {
   'driver_camera': tr_noop("Preview the driver facing camera to ensure that driver monitoring has good visibility. (vehicle must be off)"),
-  'reset_calibration': tr_noop("sunnypilot requires the device to be mounted within 4° left or right and within 5° up or 9° down."),
+  'reset_calibration': tr_noop("GeniusPilot requires the device to be mounted within 4° left or right and within 5° up or 9° down."),
   'review_guide': tr_noop("Review the rules, features, and limitations of sunnypilot"),
 }
 
@@ -149,7 +149,7 @@ class DeviceLayout(Widget):
         cloudlog.exception("invalid LiveTorqueParameters")
 
     desc += "<br><br>"
-    desc += tr("sunnypilot is continuously calibrating, resetting is rarely required. " +
+    desc += tr("GeniusPilot is continuously calibrating, resetting is rarely required. " +
                "Resetting calibration will restart sunnypilot if the car is powered on.")
 
     self._reset_calib_btn.set_description(desc)

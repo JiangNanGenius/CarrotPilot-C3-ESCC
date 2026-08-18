@@ -126,10 +126,10 @@ msgid "Change Language"
 msgstr "Cambiar idioma"
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
-msgid "Changing this setting will restart sunnypilot if the car is powered on."
+msgid "Changing this setting will restart GeniusPilot if the car is powered on."
 msgstr ""
 
-#: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
+#: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
 msgid "Choose your sponsorship tier and confirm your support"
 msgstr ""
 
@@ -150,7 +150,7 @@ msgid "Decline"
 msgstr "Rechazar"
 
 #: openpilot/selfdrive/ui/layouts/onboarding.py
-msgid "Decline, uninstall sunnypilot"
+msgid "Decline, uninstall GeniusPilot"
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/settings.py
@@ -213,8 +213,8 @@ msgstr "ETH"
 msgid "EXPERIMENTAL MODE ON"
 msgstr "MODO EXPERIMENTAL ACTIVADO"
 
-#: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
-msgid "Early Access: Become a sunnypilot Sponsor"
+#: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
+msgid "Early Access: Become a GeniusPilot Sponsor"
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/developer.py
@@ -243,15 +243,15 @@ msgid "Enable Tethering"
 msgstr "Activar anclaje"
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
-msgid "Enable driver monitoring even when sunnypilot is not engaged."
+msgid "Enable driver monitoring even when GeniusPilot is not engaged."
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
-msgid "Enable sunnypilot"
+msgid "Enable GeniusPilot"
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
-msgid "Enable the sunnypilot longitudinal control (alpha) toggle to allow Experimental mode."
+msgid "Enable the GeniusPilot longitudinal control (alpha) toggle to allow Experimental mode."
 msgstr ""
 
 #: system/ui/widgets/network.py
@@ -270,7 +270,7 @@ msgstr "Ingrese una nueva contraseña de anclaje a red"
 msgid "Enter password"
 msgstr "Introduce la contraseña"
 
-#: system/ui/sunnypilot/widgets/tree_dialog.py
+#: system/ui/GeniusPilot/widgets/tree_dialog.py
 msgid "Enter search query"
 msgstr ""
 
@@ -294,7 +294,7 @@ msgstr "El modo experimental no está disponible actualmente en este coche, ya q
 msgid "FORGETTING..."
 msgstr "OLVIDAR..."
 
-#: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
+#: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
 msgid "Follow the prompts to complete the pairing process"
 msgstr ""
 
@@ -326,16 +326,16 @@ msgstr "INSTALAR"
 msgid "IP Address"
 msgstr "Dirección IP"
 
-#: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
-msgid "If sponsorship status was not updated, please contact a moderator on the community forum at https://community.sunnypilot.ai"
+#: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
+msgid "If sponsorship status was not updated, please contact a moderator on the community forum at https://community.GeniusPilot.ai"
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/software.py
 msgid "Install Update"
 msgstr "Instalar actualización"
 
-#: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
-msgid "Join our Community Forum at https://community.sunnypilot.ai and reach out to a moderator if you have issues"
+#: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
+msgid "Join our Community Forum at https://community.GeniusPilot.ai and reach out to a moderator if you have issues"
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/developer.py
@@ -412,7 +412,7 @@ msgstr "VISTA PREVIA"
 msgid "Pair Device"
 msgstr "Emparejar dispositivo"
 
-#: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
+#: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
 msgid "Pair your GitHub account"
 msgstr ""
 
@@ -444,7 +444,7 @@ msgstr "RESTABLECER"
 msgid "REVIEW"
 msgstr "REVISAR"
 
-#: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
+#: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
 msgid "Re-enter the \"sunnylink\" panel to verify sponsorship status"
 msgstr ""
 
@@ -497,7 +497,7 @@ msgid "Review Training Guide"
 msgstr "Revisar guía de entrenamiento"
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
-msgid "Review the rules, features, and limitations of sunnypilot"
+msgid "Review the rules, features, and limitations of GeniusPilot"
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/software.py
@@ -508,11 +508,11 @@ msgstr "SELECCIONAR"
 msgid "SSH Keys"
 msgstr "Claves SSH"
 
-#: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
+#: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
 msgid "Scan the QR code to login to your GitHub account"
 msgstr ""
 
-#: system/ui/sunnypilot/widgets/sunnylink_pairing_dialog.py
+#: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
 msgid "Scan the QR code to visit sunnyhaibin's GitHub Sponsors page"
 msgstr ""
 
@@ -520,7 +520,7 @@ msgstr ""
 msgid "Scanning Wi-Fi networks..."
 msgstr "Escaneando redes Wi-Fi..."
 
-#: system/ui/sunnypilot/widgets/tree_dialog.py
+#: system/ui/GeniusPilot/widgets/tree_dialog.py
 msgid "Search"
 msgstr ""
 
@@ -621,11 +621,11 @@ msgid "Waiting to start"
 msgstr "Esperando para iniciar"
 
 #: openpilot/selfdrive/ui/layouts/onboarding.py
-msgid "Welcome to sunnypilot"
+msgid "Welcome to GeniusPilot"
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
-msgid "When enabled, pressing the accelerator pedal will disengage sunnypilot."
+msgid "When enabled, pressing the accelerator pedal will disengage GeniusPilot."
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/sidebar.py
@@ -641,11 +641,11 @@ msgid "Wrong password"
 msgstr "Contraseña incorrecta"
 
 #: openpilot/selfdrive/ui/layouts/onboarding.py
-msgid "You must accept the Terms of Service in order to use sunnypilot."
+msgid "You must accept the Terms of Service in order to use GeniusPilot."
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/onboarding.py
-msgid "You must accept the Terms of Service to use sunnypilot. Read the latest terms at https://sunnypilot.ai/terms before continuing."
+msgid "You must accept the Terms of Service to use GeniusPilot. Read the latest terms at https://GeniusPilot.ai/terms before continuing."
 msgstr ""
 
 #: openpilot/selfdrive/ui/onroad/driver_camera_dialog.py
@@ -713,19 +713,19 @@ msgid "right"
 msgstr "derecha"
 
 #: openpilot/selfdrive/ui/layouts/settings/developer.py
-msgid "sunnypilot Longitudinal Control (Alpha)"
+msgid "GeniusPilot Longitudinal Control (Alpha)"
 msgstr ""
 
 #: openpilot/selfdrive/ui/onroad/alert_renderer.py
-msgid "sunnypilot Unavailable"
+msgid "GeniusPilot Unavailable"
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/toggles.py
-msgid "sunnypilot longitudinal control may come in a future update."
+msgid "GeniusPilot longitudinal control may come in a future update."
 msgstr ""
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
-msgid "sunnypilot requires the device to be mounted within 4° left or right and within 5° up or 9° down."
+msgid "GeniusPilot requires the device to be mounted within 4° left or right and within 5° up or 9° down."
 msgstr ""
 
 #: system/ui/widgets/network.py

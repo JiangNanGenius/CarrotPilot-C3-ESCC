@@ -79,7 +79,7 @@ class DeveloperLayout(Widget):
     )
 
     self._alpha_long_toggle = toggle_item(
-      lambda: tr("sunnypilot Longitudinal Control (Alpha)"),
+      lambda: tr("GeniusPilot Longitudinal Control (Alpha)"),
       description=lambda: tr(DESCRIPTIONS["alpha_longitudinal"]),
       initial_state=self._params.get_bool("AlphaLongitudinalEnabled"),
       callback=self._on_alpha_long_enabled,

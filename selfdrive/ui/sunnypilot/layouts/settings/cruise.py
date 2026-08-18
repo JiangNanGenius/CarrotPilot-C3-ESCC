@@ -23,7 +23,7 @@ ICBM_DESC = tr_noop("When enabled, sunnypilot will attempt to manage the built-i
                     "by emulating button presses for limited longitudinal control.")
 ICMB_UNAVAILABLE = tr_noop("Intelligent Cruise Button Management is currently unavailable on this platform.")
 ICMB_UNAVAILABLE_LONG_AVAILABLE = tr_noop("Disable the sunnypilot Longitudinal Control (alpha) toggle to allow Intelligent Cruise Button Management.")
-ICMB_UNAVAILABLE_LONG_UNAVAILABLE = tr_noop("sunnypilot Longitudinal Control is the default longitudinal control for this platform.")
+ICMB_UNAVAILABLE_LONG_UNAVAILABLE = tr_noop("GeniusPilot Longitudinal Control is the default longitudinal control for this platform.")
 
 ACC_ENABLED_DESCRIPTION = tr_noop("Enable custom Short & Long press increments for cruise speed increase/decrease.")
 ACC_NOLONG_DESCRIPTION = tr_noop("This feature can only be used with sunnypilot longitudinal control enabled.")
