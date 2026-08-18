@@ -1,4 +1,4 @@
-#include "opendbc/safety/sunnypilot/safety_mads.h"
+#include "opendbc/safety/geniuspilot/safety_mads.h"
 #include "opendbc/safety/safety_declarations.h"
 
 // ISO 11270

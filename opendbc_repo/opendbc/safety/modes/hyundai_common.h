@@ -189,7 +189,7 @@ void hyundai_common_reset_acc_main_on_mismatches(void) {
   acc_main_on_prev = acc_main_on;
 }
 
-// exit lateral controls allowed if sunnypilot and panda main cruise states are desynced
+// exit lateral controls allowed if geniuspilot and panda main cruise states are desynced
 void hyundai_common_acc_main_on_sync(void) {
   if (acc_main_on && !acc_main_on_tx) {
     acc_main_on_mismatches += 1U;

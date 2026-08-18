@@ -18,7 +18,7 @@ from opendbc.car.values import PLATFORMS
 from opendbc.can import CANParser
 from opendbc.car.carlog import carlog
 
-from opendbc.sunnypilot.car.interfaces import CarInterfaceBaseSP
+from opendbc.geniuspilot.car.interfaces import CarInterfaceBaseSP
 
 GearShifter = structs.CarState.GearShifter
 ButtonType = structs.CarState.ButtonEvent.Type

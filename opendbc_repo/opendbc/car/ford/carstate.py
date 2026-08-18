@@ -5,7 +5,7 @@ from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, CarControllerParams, FordFlags
 from opendbc.car.interfaces import CarStateBase
 
-from opendbc.sunnypilot.car.ford.mads import MadsCarState
+from opendbc.geniuspilot.car.ford.mads import MadsCarState
 
 ButtonType = structs.CarState.ButtonEvent.Type
 GearShifter = structs.CarState.GearShifter

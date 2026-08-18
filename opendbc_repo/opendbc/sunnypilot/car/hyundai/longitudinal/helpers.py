@@ -1,7 +1,7 @@
 """
-Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
+Copyright (c) 2021-, Haibin Wen, geniuspilot, and a number of other contributors.
 
-This file is part of sunnypilot and is licensed under the MIT License.
+This file is part of geniuspilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
 
@@ -9,7 +9,7 @@ import numpy as np
 
 from opendbc.car import structs, DT_CTRL, rate_limit
 from opendbc.car.hyundai.values import HyundaiFlags
-from opendbc.sunnypilot.car.hyundai.longitudinal.config import CarTuningConfig, TUNING_CONFIGS, CAR_SPECIFIC_CONFIGS
+from opendbc.geniuspilot.car.hyundai.longitudinal.config import CarTuningConfig, TUNING_CONFIGS, CAR_SPECIFIC_CONFIGS
 
 JERK_THRESHOLD = 0.1
 JERK_STEP = 0.1

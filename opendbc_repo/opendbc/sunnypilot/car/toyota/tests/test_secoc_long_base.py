@@ -5,7 +5,7 @@ from opendbc.car import structs
 from opendbc.car.toyota.carstate import CarState
 from opendbc.car.toyota.values import ToyotaFlags
 from opendbc.safety.tests.common import CANPackerPanda
-from opendbc.sunnypilot.car.toyota.secoc_long import SecOCLong
+from opendbc.geniuspilot.car.toyota.secoc_long import SecOCLong
 
 
 @pytest.fixture

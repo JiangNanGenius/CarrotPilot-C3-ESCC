@@ -8,7 +8,7 @@ from openpilot.system.ui.lib.text_measure import measure_text_cached
 from openpilot.system.ui.text import wrap_text
 from openpilot.system.ui.widgets import Widget
 
-from openpilot.system.ui.sunnypilot.lib.application import gui_app_sp
+from openpilot.system.ui.geniuspilot.lib.application import gui_app_sp
 
 # Constants
 PROGRESS_BAR_WIDTH = 1000

@@ -1,9 +1,9 @@
 import pytest
 from hypothesis import given, strategies as st, settings, HealthCheck
-from opendbc.sunnypilot.car.hyundai.escc import EnhancedSmartCruiseControl, ESCC_MSG
+from opendbc.geniuspilot.car.hyundai.escc import EnhancedSmartCruiseControl, ESCC_MSG
 from opendbc.car.hyundai.carstate import CarState
 from opendbc.car import structs
-from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+from opendbc.geniuspilot.car.hyundai.values import HyundaiFlagsSP
 
 
 @pytest.fixture

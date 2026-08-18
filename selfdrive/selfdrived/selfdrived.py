@@ -24,10 +24,10 @@ from openpilot.selfdrive.selfdrived.alertmanager import AlertManager, set_offroa
 from openpilot.system.hardware import HARDWARE
 from openpilot.system.version import get_build_metadata
 
-from openpilot.sunnypilot.mads.mads import ModularAssistiveDrivingSystem
-from openpilot.sunnypilot.selfdrive.car.car_specific import CarSpecificEventsSP
-from openpilot.sunnypilot.selfdrive.car.cruise_helpers import CruiseHelper
-from openpilot.sunnypilot.selfdrive.selfdrived.events import EventsSP
+from openpilot.geniuspilot.mads.mads import ModularAssistiveDrivingSystem
+from openpilot.geniuspilot.selfdrive.car.car_specific import CarSpecificEventsSP
+from openpilot.geniuspilot.selfdrive.car.cruise_helpers import CruiseHelper
+from openpilot.geniuspilot.selfdrive.selfdrived.events import EventsSP
 
 REPLAY = "REPLAY" in os.environ
 SIMULATION = "SIMULATION" in os.environ

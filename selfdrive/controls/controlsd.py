@@ -21,9 +21,9 @@ from openpilot.selfdrive.controls.lib.latcontrol_torque import LatControlTorque
 from openpilot.selfdrive.controls.lib.longcontrol import LongControl
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
 
-from openpilot.sunnypilot.livedelay.helpers import get_lat_delay
-from openpilot.sunnypilot.modeld.modeld_base import ModelStateBase
-from openpilot.sunnypilot.selfdrive.controls.controlsd_ext import ControlsExt
+from openpilot.geniuspilot.livedelay.helpers import get_lat_delay
+from openpilot.geniuspilot.modeld.modeld_base import ModelStateBase
+from openpilot.geniuspilot.selfdrive.controls.controlsd_ext import ControlsExt
 
 State = log.SelfdriveState.OpenpilotState
 LaneChangeState = log.LaneChangeState
@@ -39,7 +39,7 @@ class Controls(ControlsExt, ModelStateBase):
     self.CP = messaging.log_from_bytes(self.params.get("CarParams", block=True), car.CarParams)
     cloudlog.info("controlsd got CarParams")
 
-    # Initialize sunnypilot controlsd extension and base model state
+    # Initialize geniuspilot controlsd extension and base model state
     ControlsExt.__init__(self, self.CP, self.params)
     ModelStateBase.__init__(self)
 

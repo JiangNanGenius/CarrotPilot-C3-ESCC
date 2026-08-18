@@ -6,7 +6,7 @@ from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.docs import get_all_footnotes, get_params_for_docs
 from opendbc.car.values import PLATFORMS
 
-CAR_LIST_JSON_OUT = os.path.join(BASEDIR, "../", "sunnypilot", "car", "car_list.json")
+CAR_LIST_JSON_OUT = os.path.join(BASEDIR, "../", "geniuspilot", "car", "car_list.json")
 
 
 def get_car_list() -> dict[str, dict[str, list[str] | str]]:

@@ -3,7 +3,7 @@ from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.nissan.carcontroller import CarController
 from opendbc.car.nissan.carstate import CarState
 from opendbc.car.nissan.values import CAR, NissanSafetyFlags
-from opendbc.sunnypilot.car.nissan.values import NissanSafetyFlagsSP
+from opendbc.geniuspilot.car.nissan.values import NissanSafetyFlagsSP
 
 
 class CarInterface(CarInterfaceBase):

@@ -1,5 +1,5 @@
 from opendbc.car.structs import CarParams
-from opendbc.sunnypilot.car.toyota.secoc_long import SecOCLong
+from opendbc.geniuspilot.car.toyota.secoc_long import SecOCLong
 
 SteerControlType = CarParams.SteerControlType
 

@@ -146,7 +146,7 @@ if __name__ == "__main__":
   parser.add_argument("--mode", type=int, help="Override the safety mode from the log")
   parser.add_argument("--param", type=int, help="Override the safety param from the log")
   parser.add_argument("--alternative-experience", type=int, help="Override the alternative experience from the log")
-  parser.add_argument("--param-sp", type=int, help="Override the sunnypilot safety param from the log")
+  parser.add_argument("--param-sp", type=int, help="Override the geniuspilot safety param from the log")
   args = parser.parse_args()
 
   lr = LogReader(args.route_or_segment_name[0])

@@ -8,10 +8,10 @@ from openpilot.system.hardware import PC, TICI
 from openpilot.system.manager.process import PythonProcess, NativeProcess, DaemonProcess
 from openpilot.system.hardware.hw import Paths
 
-from openpilot.sunnypilot.mapd.mapd_manager import MAPD_PATH
+from openpilot.geniuspilot.mapd.mapd_manager import MAPD_PATH
 
-from sunnypilot.models.helpers import get_active_model_runner
-from sunnypilot.sunnylink.utils import sunnylink_need_register, sunnylink_ready, use_sunnylink_uploader
+from geniuspilot.models.helpers import get_active_model_runner
+from geniuspilot.sunnylink.utils import sunnylink_need_register, sunnylink_ready, use_sunnylink_uploader
 
 WEBCAM = os.getenv("USE_WEBCAM") is not None
 
@@ -156,37 +156,37 @@ procs = [
   PythonProcess("joystick", "tools.joystick.joystick_control", and_(joystick, iscar)),
 
   # sunnylink <3
-  DaemonProcess("manage_sunnylinkd", "sunnypilot.sunnylink.athena.manage_sunnylinkd", "SunnylinkdPid"),
-  PythonProcess("sunnylink_registration_manager", "sunnypilot.sunnylink.registration_manager", sunnylink_need_register_shim),
+  DaemonProcess("manage_sunnylinkd", "geniuspilot.sunnylink.athena.manage_sunnylinkd", "SunnylinkdPid"),
+  PythonProcess("sunnylink_registration_manager", "geniuspilot.sunnylink.registration_manager", sunnylink_need_register_shim),
 ]
 
-# sunnypilot
+# geniuspilot
 procs += [
   # Models
-  PythonProcess("models_manager", "sunnypilot.models.manager", only_offroad),
-  NativeProcess("modeld_snpe", "sunnypilot/modeld", ["./modeld"], and_(only_onroad, is_snpe_model)),
-  NativeProcess("modeld_tinygrad", "sunnypilot/modeld_v2", ["./modeld"], and_(only_onroad, is_tinygrad_model)),
+  PythonProcess("models_manager", "geniuspilot.models.manager", only_offroad),
+  NativeProcess("modeld_snpe", "geniuspilot/modeld", ["./modeld"], and_(only_onroad, is_snpe_model)),
+  NativeProcess("modeld_tinygrad", "geniuspilot/modeld_v2", ["./modeld"], and_(only_onroad, is_tinygrad_model)),
 
   # Backup
-  PythonProcess("backup_manager", "sunnypilot.sunnylink.backups.manager", and_(only_offroad, sunnylink_ready_shim)),
+  PythonProcess("backup_manager", "geniuspilot.sunnylink.backups.manager", and_(only_offroad, sunnylink_ready_shim)),
 
   # mapd
   NativeProcess("mapd", Paths.mapd_root(), ["bash", "-c", f"{MAPD_PATH} > /dev/null 2>&1"], mapd_ready),
-  PythonProcess("mapd_manager", "sunnypilot.mapd.mapd_manager", always_run),
+  PythonProcess("mapd_manager", "geniuspilot.mapd.mapd_manager", always_run),
 ]
 
 if os.path.exists("./github_runner.sh"):
   procs += [NativeProcess("github_runner_start", "system/manager", ["./github_runner.sh", "start"], and_(only_offroad, use_github_runner), sigkill=False)]
 
-if os.path.exists("../../sunnypilot/sunnylink/uploader.py"):
-  procs += [PythonProcess("sunnylink_uploader", "sunnypilot.sunnylink.uploader", use_sunnylink_uploader_shim)]
+if os.path.exists("../../geniuspilot/sunnylink/uploader.py"):
+  procs += [PythonProcess("sunnylink_uploader", "geniuspilot.sunnylink.uploader", use_sunnylink_uploader_shim)]
 
 if os.path.exists("../../third_party/copyparty/copyparty-sfx.py"):
   sunnypilot_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
   copyparty_args = [f"-v{Paths.crash_log_root()}:/swaglogs:r"]
   copyparty_args += [f"-v{Paths.log_root()}:/routes:r"]
   copyparty_args += [f"-v{Paths.model_root()}:/models:rw"]
-  copyparty_args += [f"-v{sunnypilot_root}:/sunnypilot:rw"]
+  copyparty_args += [f"-v{sunnypilot_root}:/geniuspilot:rw"]
   copyparty_args += ["-p8080"]
   copyparty_args += ["-z"]
   copyparty_args += ["-q"]

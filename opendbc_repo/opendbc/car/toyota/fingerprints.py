@@ -2,8 +2,8 @@
 from opendbc.car.structs import CarParams
 from opendbc.car.toyota.values import CAR
 
-from opendbc.sunnypilot.car.fw_versions_ext import merge_fw_versions
-from opendbc.sunnypilot.car.toyota.fingerprints_ext import FW_VERSIONS_EXT
+from opendbc.geniuspilot.car.fw_versions_ext import merge_fw_versions
+from opendbc.geniuspilot.car.toyota.fingerprints_ext import FW_VERSIONS_EXT
 
 Ecu = CarParams.Ecu
 

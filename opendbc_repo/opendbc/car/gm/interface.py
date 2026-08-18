@@ -10,7 +10,7 @@ from opendbc.car.gm.radar_interface import RadarInterface, RADAR_HEADER_MSG, CAM
 from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, ALT_ACCS, CanBus, GMSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, LateralAccelFromTorqueCallbackType
 
-from opendbc.sunnypilot.car.gm.interface_ext import CarInterfaceExt
+from opendbc.geniuspilot.car.gm.interface_ext import CarInterfaceExt
 
 TransmissionType = structs.CarParams.TransmissionType
 NetworkLocation = structs.CarParams.NetworkLocation

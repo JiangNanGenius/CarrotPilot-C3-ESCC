@@ -8,7 +8,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
-from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+from opendbc.geniuspilot.car.hyundai.values import HyundaiFlagsSP
 
 Ecu = CarParams.Ecu
 

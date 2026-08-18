@@ -78,7 +78,7 @@ _services: dict[str, tuple] = {
   "bookmarkButton": (True, 0., 1),
   "audioFeedback": (True, 0., 1),
 
-  # sunnypilot
+  # geniuspilot
   "modelManagerSP": (False, 1., 1),
   "backupManagerSP": (False, 1., 1),
   "selfdriveStateSP": (True, 100., 10),

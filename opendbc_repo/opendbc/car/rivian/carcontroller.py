@@ -6,7 +6,7 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudinal, create_wheel_touch, create_adas_status
 from opendbc.car.rivian.values import CarControllerParams
 
-from opendbc.sunnypilot.car.rivian.mads import MadsCarController
+from opendbc.geniuspilot.car.rivian.mads import MadsCarController
 
 
 class CarController(CarControllerBase, MadsCarController):

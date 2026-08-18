@@ -1,7 +1,7 @@
 """
-Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
+Copyright (c) 2021-, Haibin Wen, geniuspilot, and a number of other contributors.
 
-This file is part of sunnypilot and is licensed under the MIT License.
+This file is part of geniuspilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
 
@@ -9,8 +9,8 @@ import unittest
 import numpy as np
 from unittest.mock import Mock
 
-from opendbc.sunnypilot.car.hyundai.longitudinal.controller import LongitudinalController, LongitudinalState
-from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+from opendbc.geniuspilot.car.hyundai.longitudinal.controller import LongitudinalController, LongitudinalState
+from opendbc.geniuspilot.car.hyundai.values import HyundaiFlagsSP
 from opendbc.car import DT_CTRL, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.hyundai.values import HyundaiFlags

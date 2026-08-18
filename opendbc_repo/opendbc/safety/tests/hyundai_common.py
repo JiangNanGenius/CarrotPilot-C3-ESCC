@@ -1,6 +1,6 @@
 import unittest
 
-from opendbc.sunnypilot.car.hyundai.values import HyundaiSafetyFlagsSP
+from opendbc.geniuspilot.car.hyundai.values import HyundaiSafetyFlagsSP
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import make_msg

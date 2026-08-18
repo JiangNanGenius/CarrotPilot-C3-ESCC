@@ -1,7 +1,7 @@
 """
-Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
+Copyright (c) 2021-, Haibin Wen, geniuspilot, and a number of other contributors.
 
-This file is part of sunnypilot and is licensed under the MIT License.
+This file is part of geniuspilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
 
@@ -18,7 +18,7 @@ class HyundaiSafetyFlagsSP:
 
 class HyundaiFlagsSP(IntFlag):
   """
-    Flags for Hyundai specific quirks within sunnypilot.
+    Flags for Hyundai specific quirks within geniuspilot.
   """
   ENHANCED_SCC = 1
   HAS_LFA_BUTTON = 2  # Deprecated in favor of HyundaiFlags.HAS_LDA_BUTTON

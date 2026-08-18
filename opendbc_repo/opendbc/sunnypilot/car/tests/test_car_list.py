@@ -1,6 +1,6 @@
 import json
 
-from opendbc.sunnypilot.car.platform_list import get_car_list, CAR_LIST_JSON_OUT
+from opendbc.geniuspilot.car.platform_list import get_car_list, CAR_LIST_JSON_OUT
 
 
 class TestCarList:
@@ -9,4 +9,4 @@ class TestCarList:
     with open(CAR_LIST_JSON_OUT) as f:
       current_car_list = f.read()
 
-    assert generated_car_list == current_car_list, "Run opendbc/sunnypilot/car/platform_list.py to update the car list"
+    assert generated_car_list == current_car_list, "Run opendbc/geniuspilot/car/platform_list.py to update the car list"

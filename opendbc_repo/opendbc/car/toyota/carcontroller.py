@@ -14,7 +14,7 @@ from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, T
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can import CANPacker
 
-from opendbc.sunnypilot.car.toyota.secoc_long import SecOCLongCarController
+from opendbc.geniuspilot.car.toyota.secoc_long import SecOCLongCarController
 
 Ecu = structs.CarParams.Ecu
 LongCtrlState = structs.CarControl.Actuators.LongControlState

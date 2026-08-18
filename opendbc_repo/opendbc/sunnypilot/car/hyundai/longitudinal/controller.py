@@ -1,7 +1,7 @@
 """
-Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
+Copyright (c) 2021-, Haibin Wen, geniuspilot, and a number of other contributors.
 
-This file is part of sunnypilot and is licensed under the MIT License.
+This file is part of geniuspilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
 
@@ -11,8 +11,8 @@ from dataclasses import dataclass
 from opendbc.car import structs, DT_CTRL
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.hyundai.values import CarControllerParams
-from opendbc.sunnypilot.car.hyundai.longitudinal.helpers import get_car_config, jerk_limited_integrator, ramp_update
-from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+from opendbc.geniuspilot.car.hyundai.longitudinal.helpers import get_car_config, jerk_limited_integrator, ramp_update
+from opendbc.geniuspilot.car.hyundai.values import HyundaiFlagsSP
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 

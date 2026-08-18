@@ -4,7 +4,7 @@ from opendbc.car.rivian.carcontroller import CarController
 from opendbc.car.rivian.carstate import CarState
 from opendbc.car.rivian.radar_interface import RadarInterface
 from opendbc.car.rivian.values import RivianSafetyFlags
-from opendbc.sunnypilot.car.rivian.values import RivianFlagsSP
+from opendbc.geniuspilot.car.rivian.values import RivianFlagsSP
 
 
 class CarInterface(CarInterfaceBase):

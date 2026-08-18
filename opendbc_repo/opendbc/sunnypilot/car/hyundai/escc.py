@@ -1,6 +1,6 @@
 from opendbc.car import structs
 
-from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+from opendbc.geniuspilot.car.hyundai.values import HyundaiFlagsSP
 
 ESCC_MSG = 0x2AB
 

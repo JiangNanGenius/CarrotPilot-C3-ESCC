@@ -6,7 +6,7 @@ import unittest
 import itertools
 
 from opendbc.car.toyota.values import ToyotaSafetyFlags
-from opendbc.sunnypilot.car.toyota.values import ToyotaSafetyFlagsSP
+from opendbc.geniuspilot.car.toyota.values import ToyotaSafetyFlagsSP
 from opendbc.car.structs import CarParams
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py

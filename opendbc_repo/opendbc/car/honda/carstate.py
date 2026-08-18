@@ -10,7 +10,7 @@ from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HON
                                                  HondaFlags, CruiseButtons, CruiseSettings, GearShifter
 from opendbc.car.interfaces import CarStateBase
 
-from opendbc.sunnypilot.car.honda.carstate_ext import CarStateExt
+from opendbc.geniuspilot.car.honda.carstate_ext import CarStateExt
 
 TransmissionType = structs.CarParams.TransmissionType
 ButtonType = structs.CarState.ButtonEvent.Type

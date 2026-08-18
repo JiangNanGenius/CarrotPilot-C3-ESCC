@@ -13,7 +13,7 @@ from openpilot.selfdrive.controls.lib.latcontrol_torque import LatControlTorque
 from openpilot.selfdrive.controls.lib.latcontrol_angle import LatControlAngle
 from openpilot.selfdrive.locationd.helpers import Pose
 from openpilot.common.mock.generators import generate_livePose
-from openpilot.sunnypilot.selfdrive.car import interfaces as sunnypilot_interfaces
+from openpilot.geniuspilot.selfdrive.car import interfaces as sunnypilot_interfaces
 
 
 class TestLatControl:

@@ -1,7 +1,7 @@
 """
-Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
+Copyright (c) 2021-, Haibin Wen, geniuspilot, and a number of other contributors.
 
-This file is part of sunnypilot and is licensed under the MIT License.
+This file is part of geniuspilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
 
@@ -10,7 +10,7 @@ from enum import StrEnum
 from opendbc.car import Bus, structs
 from opendbc.can.parser import CANParser
 from opendbc.car.hyundai.values import HyundaiFlags
-from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+from opendbc.geniuspilot.car.hyundai.values import HyundaiFlagsSP
 
 
 class CarStateExt:

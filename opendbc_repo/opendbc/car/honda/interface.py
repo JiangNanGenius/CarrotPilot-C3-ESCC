@@ -11,7 +11,7 @@ from opendbc.car.honda.carstate import CarState
 from opendbc.car.honda.radar_interface import RadarInterface
 from opendbc.car.interfaces import CarInterfaceBase
 
-from opendbc.sunnypilot.car.honda.values_ext import HondaFlagsSP, HondaSafetyFlagsSP
+from opendbc.geniuspilot.car.honda.values_ext import HondaFlagsSP, HondaSafetyFlagsSP
 
 TransmissionType = structs.CarParams.TransmissionType
 

@@ -1,7 +1,7 @@
 from openpilot.system.ui.lib.application import GuiApplication
 from importlib.resources import as_file, files
 
-ASSETS_DIR_SP = files("openpilot.sunnypilot.selfdrive").joinpath("assets")
+ASSETS_DIR_SP = files("openpilot.geniuspilot.selfdrive").joinpath("assets")
 
 class GuiApplicationSP(GuiApplication):
 

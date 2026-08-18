@@ -2,7 +2,7 @@
 import unittest
 
 from opendbc.car.nissan.values import NissanSafetyFlags
-from opendbc.sunnypilot.car.nissan.values import NissanSafetyFlagsSP
+from opendbc.geniuspilot.car.nissan.values import NissanSafetyFlagsSP
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
