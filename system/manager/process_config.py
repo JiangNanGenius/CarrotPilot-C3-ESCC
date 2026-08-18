@@ -197,6 +197,9 @@ procs += [
   PythonProcess("cweb_push", "selfdrive.carrot.cweb_push", enable_cweb_push, enabled=False),
   PythonProcess("app_navi_status", "selfdrive.carrot.app_navi_status", enable_app_navi_status),
   PythonProcess("xiaoge_data", "selfdrive.carrot.xiaoge_data", enable_xiaoge_data),
+
+  # 离线行车采集器：记录指纹/刹车/雷达/报警到 /data/offline_log（地库无信号离线分析用）
+  PythonProcess("offline_drive_recorder", "scripts.offline_drive_recorder", always_run, restart_if_crash=True),
 ]
 
 if os.path.exists("./github_runner.sh"):
