@@ -10,7 +10,9 @@ import os
 import stat
 import time
 import traceback
+import requests
 from pathlib import Path
+from urllib.request import urlopen
 
 from cereal import messaging
 from openpilot.common.params import Params
@@ -21,6 +23,7 @@ from openpilot.sunnypilot.mapd import MAPD_PATH, MAPD_BIN_DIR
 import openpilot.system.sentry as sentry
 
 VERSION = "v1.12.0"
+URL = f"https://github.com/pfeiferj/openpilot-mapd/releases/download/{VERSION}/mapd"
 OFFLINE = False
 
 
@@ -67,14 +70,44 @@ class MapdInstallManager:
     os.chmod(file_path, current_permissions | stat.S_IEXEC)
 
   def _download_file(self, num_retries=5) -> None:
-    # Offline: mapd binary download is disabled.
-    logging.error("Offline: mapd binary download disabled")
+    temp_file = Path(MAPD_PATH + ".tmp")
+    download_timeout = 60
+    for cnt in range(num_retries):
+      try:
+        response = requests.get(URL, stream=True, timeout=download_timeout)
+        response.raise_for_status()
+        self._safe_write_and_set_executable(temp_file, response.content)
+        # No exceptions encountered. Safe to replace original file.
+        temp_file.replace(MAPD_PATH)
+        return
+      except requests.exceptions.ReadTimeout:
+        self._spinner.update(f"ReadTimeout caught. Timeout is [{download_timeout}]. Retrying download... [{cnt}]")
+        time.sleep(0.5)
+      except requests.exceptions.RequestException as e:
+        self._spinner.update(f"RequestException caught: {e}. Retrying download... [{cnt}]")
+        time.sleep(0.5)
+
+    # Delete temp file if the process was not successful.
+    if temp_file.exists():
+      temp_file.unlink()
+    logging.error("Failed to download file after all retries")
 
   def get_installed_version(self) -> str:
     return str(self._params.get("MapdVersion") or "")
 
   def wait_for_internet_connection(self, return_on_failure: bool = False) -> bool:
-    # Offline: no network connectivity probe.
+    max_retries = 10
+    for retries in range(max_retries + 1):
+      self._spinner.update(f"Waiting for internet connection... [{retries}/{max_retries}]")
+      time.sleep(2)
+      try:
+        _ = urlopen('https://sentry.io', timeout=10)
+        return True
+      except Exception as e:
+        print(f'Wait for internet failed: {e}')
+        if return_on_failure and retries == max_retries:
+          return False
+
     return False
 
   def non_prebuilt_install(self) -> None:

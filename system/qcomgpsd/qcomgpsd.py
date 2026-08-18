@@ -6,6 +6,7 @@ import itertools
 import math
 import time
 import shutil
+import requests
 from serial import Serial
 import datetime
 from multiprocessing import Process, Event
@@ -31,7 +32,7 @@ from openpilot.system.qcomgpsd.structs import (dict_unpacker, position_report, r
 DEBUG = int(os.getenv("DEBUG", "0"))==1
 ASSIST_DATA_FILE = '/tmp/xtra3grc.bin'
 ASSIST_DATA_FILE_DOWNLOAD = ASSIST_DATA_FILE + '.download'
-OFFLINE = False
+ASSISTANCE_URL = 'http://xtrapath3.izatcloud.net/xtra3grc.bin'
 
 LOG_TYPES = [
   LOG_GNSS_GPS_MEASUREMENT_REPORT,
@@ -112,8 +113,21 @@ def gps_enabled() -> bool:
   return "QGPS: 1" in at_cmd("AT+QGPS?")
 
 def download_assistance():
-  # Offline: GPS assistance (AGNSS) download is disabled.
-  return
+  try:
+    response = requests.get(ASSISTANCE_URL, timeout=5, stream=True)
+
+    with open(ASSIST_DATA_FILE_DOWNLOAD, 'wb') as fp:
+      for chunk in response.iter_content(chunk_size=8192):
+        fp.write(chunk)
+        if fp.tell() > 1e5:
+          cloudlog.error("Qcom assistance data larger than expected")
+          return
+
+    os.rename(ASSIST_DATA_FILE_DOWNLOAD, ASSIST_DATA_FILE)
+
+  except requests.exceptions.RequestException:
+    cloudlog.exception("Failed to download assistance file")
+    return
 
 def downloader_loop(event):
   if os.path.exists(ASSIST_DATA_FILE):
