@@ -15,7 +15,7 @@ from openpilot.sunnypilot.models.helpers import is_bundle_version_compatible
 
 from cereal import custom
 
-OFFLINE = True
+OFFLINE = False
 
 
 class ModelParser:

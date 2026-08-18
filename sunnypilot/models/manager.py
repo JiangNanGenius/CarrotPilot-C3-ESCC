@@ -19,7 +19,7 @@ from cereal import messaging, custom
 from openpilot.sunnypilot.models.fetcher import ModelFetcher
 from openpilot.sunnypilot.models.helpers import verify_file, get_active_bundle
 
-OFFLINE = True
+OFFLINE = False
 
 
 class ModelManagerSP:

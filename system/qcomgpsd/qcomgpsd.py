@@ -31,7 +31,7 @@ from openpilot.system.qcomgpsd.structs import (dict_unpacker, position_report, r
 DEBUG = int(os.getenv("DEBUG", "0"))==1
 ASSIST_DATA_FILE = '/tmp/xtra3grc.bin'
 ASSIST_DATA_FILE_DOWNLOAD = ASSIST_DATA_FILE + '.download'
-OFFLINE = True
+OFFLINE = False
 
 LOG_TYPES = [
   LOG_GNSS_GPS_MEASUREMENT_REPORT,

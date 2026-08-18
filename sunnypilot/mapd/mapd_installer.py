@@ -21,7 +21,7 @@ from openpilot.sunnypilot.mapd import MAPD_PATH, MAPD_BIN_DIR
 import openpilot.system.sentry as sentry
 
 VERSION = "v1.12.0"
-OFFLINE = True
+OFFLINE = False
 
 
 def update_installed_version(version: str, params: Params = None) -> None:
