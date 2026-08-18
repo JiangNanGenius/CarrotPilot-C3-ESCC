@@ -833,11 +833,20 @@ FW_VERSIONS = {
       b'\xf1\x00SP2 MFC  AT USA LHD 1.00 1.05 99210-Q5000 201012',
     ],
   },
-  # Placeholder for Kia Seltos 2023 (with SCC). Real fingerprint to be collected on-car;
-  # matching currently relies on fuzzy platform-code matching.
+  # Kia Seltos 2023 (with SCC). Real on-car fingerprint collected from VIN KNAER817SP7491682.
+  # Part numbers end in Q5500/Q5990 (vs 2021's Q5100/Q5200); MFC is AUS RHD.
   CAR.KIA_SELTOS_2023: {
     (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00SP2_ SCC FHCUP      1.01 1.05 99110-Q5100         ',
+      b'\xf1\x00SP2_ SCC F-CUP      1.00 1.01 99110-Q5500         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00SP2 MFC  AT AUS RHD 1.00 1.02 99210-Q5500 230210',
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00SP2 MDPS C 1.00 1.01 56300Q5990          ',
+    ],
+    (Ecu.combinationMeter, 0x7c6, None): [
+      b'\xf1\x001.3',
     ],
   },
   CAR.KIA_OPTIMA_G4: {
