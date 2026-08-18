@@ -924,151 +924,151 @@ msgid "Refresh Model List"
 msgstr "刷新模型列表"
 
 msgid "REFRESH"
-msgstr ""
+msgstr "刷新"
 
 msgid "Fetching Latest Models"
-msgstr ""
+msgstr "正在获取最新模型"
 
 msgid "Clear Model Cache"
-msgstr ""
+msgstr "清除模型缓存"
 
 msgid "CLEAR"
-msgstr ""
+msgstr "清除"
 
 msgid "Cancel Download"
-msgstr ""
+msgstr "取消下载"
 
 msgid "Adjust Lane Turn Speed"
-msgstr ""
+msgstr "调整车道转弯速度"
 
 msgid "Set the maximum speed for lane turn desires. Default is 19 mph."
-msgstr ""
+msgstr "设置车道转弯的最大速度。默认 19 mph。"
 
 msgid "Use Lane Turn Desires"
-msgstr ""
+msgstr "使用车道转弯意图"
 
 msgid "Adjust Software Delay"
-msgstr ""
+msgstr "调整软件延迟"
 
 msgid "Live Learning Steer Delay"
-msgstr ""
+msgstr "实时学习转向延迟"
 
 msgid "Live Steer Delay:"
-msgstr ""
+msgstr "实时转向延迟："
 
 msgid "Actuator Delay:"
-msgstr ""
+msgstr "执行器延迟："
 
 msgid "Software Delay:"
-msgstr ""
+msgstr "软件延迟："
 
 msgid "Total Delay:"
-msgstr ""
+msgstr "总延迟："
 
 msgid "Clear Cache"
-msgstr ""
+msgstr "清除缓存"
 
 msgid "from cache"
-msgstr ""
+msgstr "来自缓存"
 
 msgid "ready"
-msgstr ""
+msgstr "就绪"
 
 msgid "Default Model"
-msgstr ""
+msgstr "默认模型"
 
 msgid "Select a Model"
-msgstr ""
+msgstr "选择模型"
 
 msgid "Only available when vehicle is off, or always offroad mode is on"
-msgstr ""
+msgstr "仅在车辆熄火或始终越野模式开启时可用"
 
 msgid "Select vehicle to force fingerprint manually."
-msgstr ""
+msgstr "选择车辆以强制手动识别指纹。"
 
 msgid "Colors represent vehicle fingerprint status:"
-msgstr ""
+msgstr "颜色代表车辆指纹状态："
 
 msgid "Fingerprinted automatically"
-msgstr ""
+msgstr "已自动识别指纹"
 
 msgid "Manually selected fingerprint"
-msgstr ""
+msgstr "已手动选择指纹"
 
 msgid "Not fingerprinted or manually selected"
-msgstr ""
+msgstr "未识别指纹或未手动选择"
 
 msgid "Vehicle"
 msgstr "车辆"
 
 msgid "This setting will take effect immediately."
-msgstr ""
+msgstr "此设置将立即生效。"
 
 msgid "This setting will take effect once the device enters offroad state."
-msgstr ""
+msgstr "此设置将在设备进入越野状态后生效。"
 
 msgid "Confirm"
 msgstr "确认"
 
 msgid "Select a vehicle"
-msgstr ""
+msgstr "选择车辆"
 
 msgid "Search your vehicle"
-msgstr ""
+msgstr "搜索您的车辆"
 
 msgid "Enter model year (e.g., 2021) and model (Toyota Corolla):"
-msgstr ""
+msgstr "输入车型年份（如 2021）和型号（丰田卡罗拉）："
 
 msgid "Unrecognized Vehicle"
-msgstr ""
+msgstr "未识别的车辆"
 
 msgid "No vehicle selected"
-msgstr ""
+msgstr "未选择车辆"
 
 msgid "Enforce Factory Longitudinal Control"
-msgstr ""
+msgstr "强制原厂纵向控制"
 
 msgid "Stop and Go Hack (Alpha)"
-msgstr ""
+msgstr "走走停停破解（Alpha）"
 
 msgid "Cooperative Steering (Beta)"
-msgstr ""
+msgstr "协同转向（Beta）"
 
 msgid "recommend disabling this feature if you experience these."
-msgstr ""
+msgstr "如遇到这些问题，建议禁用此功能。"
 
 msgid "Stop and Go (Beta)"
-msgstr ""
+msgstr "走走停停（Beta）"
 
 msgid "Stop and Go for Manual Parking Brake (Beta)"
-msgstr ""
+msgstr "手动驻车制动走走停停（Beta）"
 
 msgid "This feature is currently not available on this platform."
-msgstr ""
+msgstr "此功能当前在此平台不可用。"
 
 msgid "Off"
 msgstr "关"
 
 msgid "Dynamic"
-msgstr ""
+msgstr "动态"
 
 msgid "Predictive"
-msgstr ""
+msgstr "预测"
 
 msgid "Custom Longitudinal Tuning"
-msgstr ""
+msgstr "自定义纵向调节"
 
 msgid "Your vehicle will use the Default longitudinal tuning."
-msgstr ""
+msgstr "您的车辆将使用默认纵向调节。"
 
 msgid "Your vehicle will use the Dynamic longitudinal tuning."
-msgstr ""
+msgstr "您的车辆将使用动态纵向调节。"
 
 msgid "Your vehicle will use the Predictive longitudinal tuning."
-msgstr ""
+msgstr "您的车辆将使用预测纵向调节。"
 
 msgid "This feature is unavailable while the car is onroad."
-msgstr ""
+msgstr "车辆行驶时此功能不可用。"
 
 msgid "Enable Always Offroad"
 msgstr "启用始终越野"
@@ -1098,91 +1098,91 @@ msgid "Onroad Uploads"
 msgstr "行车上传"
 
 msgid "Reset Settings"
-msgstr ""
+msgstr "重置设置"
 
 msgid "Default: Device will boot/wake-up normally & will be ready to engage."
-msgstr ""
+msgstr "默认：设备将正常启动/唤醒并准备就绪。"
 
 msgid "Offroad: Device will be in Always Offroad mode after boot/wake-up."
-msgstr ""
+msgstr "越野：设备启动/唤醒后将进入始终越野模式。"
 
 msgid "Controls state of the device after boot/sleep."
-msgstr ""
+msgstr "控制设备启动/休眠后的状态。"
 
 msgid "The reset cannot be undone. You have been warned."
-msgstr ""
+msgstr "重置无法撤销。您已被警告。"
 
 msgid "Disengage to Enter Always Offroad Mode"
-msgstr ""
+msgstr "退出以进入始终越野模式"
 
 msgid "Are you sure you want to exit Always Offroad mode?"
-msgstr ""
+msgstr "您确定要退出始终越野模式吗？"
 
 msgid "Are you sure you want to enter Always Offroad mode?"
-msgstr ""
+msgstr "您确定要进入始终越野模式吗？"
 
 msgid "Always On"
-msgstr ""
+msgstr "始终开启"
 
 msgid "m"
-msgstr ""
+msgstr "米"
 
 msgid "h"
-msgstr ""
+msgstr "小时"
 
 msgid " (Default)"
-msgstr ""
+msgstr "（默认）"
 
 msgid "Exit Always Offroad"
-msgstr ""
+msgstr "退出始终越野"
 
 msgid "Mapd Version"
-msgstr ""
+msgstr "Mapd 版本"
 
 msgid "Downloaded Maps"
-msgstr ""
+msgstr "已下载地图"
 
 msgid "DELETE"
-msgstr ""
+msgstr "删除"
 
 msgid "Downloading Map"
-msgstr ""
+msgstr "正在下载地图"
 
 msgid "Database Update"
-msgstr ""
+msgstr "数据库更新"
 
 msgid "Country"
-msgstr ""
+msgstr "国家"
 
 msgid "State"
-msgstr ""
+msgstr "州/省"
 
 msgid "Yes, delete all maps"
-msgstr ""
+msgstr "是的，删除所有地图"
 
 msgid "Start Download"
-msgstr ""
+msgstr "开始下载"
 
 msgid "FETCHING..."
-msgstr ""
+msgstr "获取中..."
 
 msgid "All states (~6.0 GB)"
-msgstr ""
+msgstr "所有州（约 6.0 GB）"
 
 msgid "Error: Invalid download. Retry."
-msgstr ""
+msgstr "错误：下载无效。重试。"
 
 msgid "Downloading Maps..."
-msgstr ""
+msgstr "正在下载地图..."
 
 msgid "Last checked {}"
-msgstr ""
+msgstr "上次检查 {}"
 
 msgid "This platform supports limited MADS settings."
-msgstr ""
+msgstr "此平台支持有限的 MADS 设置。"
 
 msgid "This platform supports all MADS settings."
-msgstr ""
+msgstr "此平台支持所有 MADS 设置。"
 
 msgid "Modular Assistive Driving System (MADS)"
 msgstr "模块化辅助驾驶系统（MADS）"
@@ -1200,193 +1200,193 @@ msgid "Minimum Speed to Pause Lateral Control"
 msgstr "暂停横向控制的最小速度"
 
 msgid "Post-Blinker Delay"
-msgstr ""
+msgstr "转向灯后延迟"
 
 msgid "Delay before lateral control resumes after the turn signal ends."
-msgstr ""
+msgstr "转向灯结束后横向控制恢复前的延迟。"
 
 msgid "Enforce Torque Lateral Control"
-msgstr ""
+msgstr "强制扭矩横向控制"
 
 msgid "Enable this to enforce sunnypilot to steer with Torque lateral control."
-msgstr ""
+msgstr "启用此功能以强制 GeniusPilot 使用扭矩横向控制。"
 
 msgid "Customize Torque Params"
-msgstr ""
+msgstr "自定义扭矩参数"
 
 msgid "Neural Network Lateral Control (NNLC)"
-msgstr ""
+msgstr "神经网络横向控制（NNLC）"
 
 msgid "Onroad Brightness"
-msgstr ""
+msgstr "行车亮度"
 
 msgid "Onroad Brightness Delay"
-msgstr ""
+msgstr "行车亮度延迟"
 
 msgid "Interactivity Timeout"
-msgstr ""
+msgstr "交互超时"
 
 msgid "Auto (Default)"
-msgstr ""
+msgstr "自动（默认）"
 
 msgid "Auto (Dark)"
-msgstr ""
+msgstr "自动（深色）"
 
 msgid "Screen Off"
-msgstr ""
+msgstr "屏幕关闭"
 
 msgid "Auto Lane Change by Blinker"
-msgstr ""
+msgstr "转向灯自动变道"
 
 msgid "Nudge"
-msgstr ""
+msgstr "轻推"
 
 msgid "Nudgeless"
-msgstr ""
+msgstr "无轻推"
 
 msgid "s"
-msgstr ""
+msgstr "秒"
 
 msgid "Auto Lane Change: Delay with Blind Spot"
-msgstr ""
+msgstr "自动变道：盲区延迟"
 
 msgid "Remain Active"
-msgstr ""
+msgstr "保持激活"
 
 msgid "Remain Active: ALC will remain active when the brake pedal is pressed."
-msgstr ""
+msgstr "保持激活：踩刹车时 ALC 将保持激活。"
 
 msgid "Pause"
-msgstr ""
+msgstr "暂停"
 
 msgid "Pause: ALC will pause when the brake pedal is pressed."
-msgstr ""
+msgstr "暂停：踩刹车时 ALC 将暂停。"
 
 msgid "Disengage"
-msgstr ""
+msgstr "退出"
 
 msgid "Disengage: ALC will disengage when the brake pedal is pressed."
-msgstr ""
+msgstr "退出：踩刹车时 ALC 将退出。"
 
 msgid "Engage lateral and longitudinal control with cruise control engagement."
-msgstr ""
+msgstr "巡航控制启用时同时启用横向和纵向控制。"
 
 msgid "This platform only supports Disengage mode due to vehicle limitations."
-msgstr ""
+msgstr "由于车辆限制，此平台仅支持退出模式。"
 
 msgid "Toggle with Main Cruise"
-msgstr ""
+msgstr "随主巡航切换"
 
 msgid "Unified Engagement Mode (UEM)"
-msgstr ""
+msgstr "统一启用模式（UEM）"
 
 msgid "Steering Mode on Brake Pedal"
-msgstr ""
+msgstr "刹车踏板转向模式"
 
 msgid "Torque Control Tune Version"
-msgstr ""
+msgstr "扭矩控制调节版本"
 
 msgid "Self-Tune"
-msgstr ""
+msgstr "自调节"
 
 msgid "Less Restrict Settings for Self-Tune (Beta)"
-msgstr ""
+msgstr "自调节的宽松限制设置（Beta）"
 
 msgid "Enable Custom Tuning"
-msgstr ""
+msgstr "启用自定义调节"
 
 msgid "Manual Real-Time Tuning"
-msgstr ""
+msgstr "手动实时调节"
 
 msgid "Lateral Acceleration Factor"
-msgstr ""
+msgstr "横向加速度因子"
 
 msgid "Friction"
-msgstr ""
+msgstr "摩擦"
 
 msgid "Real-Time & Offline"
-msgstr ""
+msgstr "实时和离线"
 
 msgid "Offline Only"
-msgstr ""
+msgstr "仅离线"
 
 msgid "Select Torque Control Tune Version"
-msgstr ""
+msgstr "选择扭矩控制调节版本"
 
 msgid "Info"
-msgstr ""
+msgstr "信息"
 
 msgid "Warning"
-msgstr ""
+msgstr "警告"
 
 msgid "Assist"
-msgstr ""
+msgstr "辅助"
 
 msgid "None"
-msgstr ""
+msgstr "无"
 
 msgid "Fixed"
-msgstr ""
+msgstr "固定"
 
 msgid "%"
-msgstr ""
+msgstr "%"
 
 msgid "Off: Disables the Speed Limit functions."
-msgstr ""
+msgstr "关闭：禁用限速功能。"
 
 msgid "Information: Displays the current road's speed limit."
-msgstr ""
+msgstr "信息：显示当前道路的限速。"
 
 msgid "None: No Offset"
-msgstr ""
+msgstr "无：无偏移"
 
 msgid "Fixed: Adds a fixed offset [Speed Limit + Offset]"
-msgstr ""
+msgstr "固定：添加固定偏移 [限速 + 偏移]"
 
 msgid "Percent: Adds a percent offset [Speed Limit + (Offset % Speed Limit)]"
-msgstr ""
+msgstr "百分比：添加百分比偏移 [限速 + (偏移 % 限速)]"
 
 msgid "Customize Source"
-msgstr ""
+msgstr "自定义来源"
 
 msgid "Speed Limit Offset"
-msgstr ""
+msgstr "限速偏移"
 
 msgid "Car Only"
-msgstr ""
+msgstr "仅车辆"
 
 msgid "Map Only"
-msgstr ""
+msgstr "仅地图"
 
 msgid "Car First"
-msgstr ""
+msgstr "车辆优先"
 
 msgid "Map First"
-msgstr ""
+msgstr "地图优先"
 
 msgid "Combined"
-msgstr ""
+msgstr "组合"
 
 msgid "Car Only: Use Speed Limit data only from Car"
-msgstr ""
+msgstr "仅车辆：仅使用车辆的限速数据"
 
 msgid "Map Only: Use Speed Limit data only from OpenStreetMaps"
-msgstr ""
+msgstr "仅地图：仅使用 OpenStreetMap 的限速数据"
 
 msgid "Combined: Use combined Speed Limit data from Car & OpenStreetMaps"
-msgstr ""
+msgstr "组合：使用车辆和 OpenStreetMap 的组合限速数据"
 
 msgid "Speed Limit Source"
-msgstr ""
+msgstr "限速来源"
 
 msgid "Scan"
-msgstr ""
+msgstr "扫描"
 
 msgid "Scanning..."
-msgstr ""
+msgstr "扫描中..."
 
 msgid "Models"
-msgstr ""
+msgstr "模型"
 
 msgid "Steering"
 msgstr "转向"
@@ -1395,7 +1395,7 @@ msgid "Cruise"
 msgstr "巡航"
 
 msgid "Visuals"
-msgstr ""
+msgstr "视觉"
 
 msgid "Display"
 msgstr "显示"
@@ -1407,52 +1407,52 @@ msgid "Carrot"
 msgstr "Carrot"
 
 msgid "This feature requires sunnypilot longitudinal control to be available."
-msgstr ""
+msgstr "此功能需要 GeniusPilot 纵向控制可用。"
 
 msgid "Show Blind Spot Warnings"
-msgstr ""
+msgstr "显示盲区警告"
 
 msgid "Steering Arc"
-msgstr ""
+msgstr "转向弧线"
 
 msgid "Enable Tesla Rainbow Mode"
-msgstr ""
+msgstr "启用特斯拉彩虹模式"
 
 msgid "Enable Standstill Timer"
-msgstr ""
+msgstr "启用静止计时器"
 
 msgid "Show a timer on the HUD when the car is at a standstill."
-msgstr ""
+msgstr "车辆静止时在 HUD 上显示计时器。"
 
 msgid "Display Road Name"
-msgstr ""
+msgstr "显示道路名称"
 
 msgid "Green Traffic Light Alert (Beta)"
-msgstr ""
+msgstr "绿灯提醒（Beta）"
 
 msgid "Lead Departure Alert (Beta)"
-msgstr ""
+msgstr "前车起步提醒（Beta）"
 
 msgid "Speedometer: Always Display True Speed"
-msgstr ""
+msgstr "速度表：始终显示真实速度"
 
 msgid "Speedometer: Hide from Onroad Screen"
-msgstr ""
+msgstr "速度表：从行车屏幕隐藏"
 
 msgid "When enabled, the speedometer on the onroad screen is not displayed."
-msgstr ""
+msgstr "启用后，行车屏幕上不显示速度表。"
 
 msgid "Display Turn Signals"
-msgstr ""
+msgstr "显示转向灯"
 
 msgid "When enabled, visual turn indicators are drawn on the HUD."
-msgstr ""
+msgstr "启用后，HUD 上绘制视觉转向指示。"
 
 msgid "Real-time Acceleration Bar"
-msgstr ""
+msgstr "实时加速度条"
 
 msgid "Display Metrics Below Chevron"
-msgstr ""
+msgstr "在人字形下方显示指标"
 
 msgid "Distance"
 msgstr "距离"
@@ -1464,46 +1464,46 @@ msgid "Time"
 msgstr "时间"
 
 msgid "All"
-msgstr ""
+msgstr "全部"
 
 msgid "Developer UI"
-msgstr ""
+msgstr "开发者界面"
 
 msgid "Display real-time parameters and metrics from various sources."
-msgstr ""
+msgstr "显示来自各种来源的实时参数和指标。"
 
 msgid "Bottom"
-msgstr ""
+msgstr "底部"
 
 msgid "Right"
-msgstr ""
+msgstr "右侧"
 
 msgid "Right & Bottom"
-msgstr ""
+msgstr "右侧和底部"
 
 msgid "Show Advanced Controls"
-msgstr ""
+msgstr "显示高级控制"
 
 msgid "GitHub Runner Service"
-msgstr ""
+msgstr "GitHub Runner 服务"
 
 msgid "Enables or disables the GitHub runner service."
-msgstr ""
+msgstr "启用或禁用 GitHub Runner 服务。"
 
 msgid "copyparty Service"
-msgstr ""
+msgstr "copyparty 服务"
 
 msgid "Quickboot Mode"
-msgstr ""
+msgstr "快速启动模式"
 
 msgid "Error Log"
-msgstr ""
+msgstr "错误日志"
 
 msgid "View the error log for sunnypilot crashes."
-msgstr ""
+msgstr "查看 GeniusPilot 崩溃的错误日志。"
 
 msgid "Would you like to delete this log?"
-msgstr ""
+msgstr "您要删除此日志吗？"
 
 msgid "Yes"
 msgstr "是"
@@ -1512,13 +1512,13 @@ msgid "No"
 msgstr "否"
 
 msgid "Disable Updates"
-msgstr ""
+msgstr "禁用更新"
 
 msgid "System reboot required for changes to take effect. Reboot now?"
-msgstr ""
+msgstr "更改需要重启系统才能生效。现在重启？"
 
 msgid "Please connect to Wi-Fi to update."
-msgstr ""
+msgstr "请连接 Wi-Fi 以更新。"
 
 msgid "no alerts"
-msgstr ""
+msgstr "无警报"
