@@ -21,7 +21,7 @@ from openpilot.system.ui.widgets import Widget, DialogResult
 from openpilot.system.ui.widgets.network import NavButton
 from openpilot.system.ui.widgets.scroller_tici import Scroller
 
-TORQUE_VERSIONS_PATH = os.path.join(BASEDIR, "GeniusPilot", "selfdrive", "controls", "lib", "latcontrol_torque_versions.json")
+TORQUE_VERSIONS_PATH = os.path.join(BASEDIR, "sunnypilot", "selfdrive", "controls", "lib", "latcontrol_torque_versions.json")
 
 
 class TorqueSettingsLayout(Widget):
