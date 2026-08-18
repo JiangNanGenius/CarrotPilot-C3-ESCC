@@ -53,15 +53,6 @@ def _initialize_neural_network_lateral_control(CP: structs.CarParams, CP_SP: str
   return enabled
 
 
-def _initialize_intelligent_cruise_button_management(CP: structs.CarParams, CP_SP: structs.CarParamsSP, params: Params = None) -> None:
-  if params is None:
-    params = Params()
-
-  icbm_enabled = params.get_bool("IntelligentCruiseButtonManagement")
-  if icbm_enabled and CP_SP.intelligentCruiseButtonManagementAvailable and not CP.openpilotLongitudinalControl:
-    CP_SP.pcmCruiseSpeed = False
-
-
 def _initialize_torque_lateral_control(CI: CarInterfaceBase, CP: structs.CarParams, enforce_torque: bool, nnlc_enabled: bool) -> None:
   if nnlc_enabled or enforce_torque:
     CI.configure_torque_tune(CP.carFingerprint, CP.lateralTuning)
@@ -75,10 +66,6 @@ def _cleanup_unsupported_params(CP: structs.CarParams, CP_SP: structs.CarParamsS
     cloudlog.warning("SteerControlType is angle, cleaning up params")
     params.remove("NeuralNetworkLateralControl")
     params.remove("EnforceTorqueControl")
-
-  if not CP_SP.intelligentCruiseButtonManagementAvailable or CP.openpilotLongitudinalControl:
-    cloudlog.warning("ICBM not available or openpilot Longitudinal Control enabled, cleaning up params")
-    params.remove("IntelligentCruiseButtonManagement")
 
   if not CP.openpilotLongitudinalControl and CP_SP.pcmCruiseSpeed:
     cloudlog.warning("openpilot Longitudinal Control and ICBM not available, cleaning up params")

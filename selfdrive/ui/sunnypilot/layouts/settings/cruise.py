@@ -42,11 +42,6 @@ class CruiseLayout(Widget):
 
   def _initialize_items(self):
 
-    self.icbm_toggle = toggle_item_sp(
-      title=tr("Intelligent Cruise Button Management (ICBM) (Alpha)"),
-      description="",
-      param="IntelligentCruiseButtonManagement")
-
     self.scc_v_toggle = toggle_item_sp(
       title=tr("Smart Cruise Control - Vision"),
       description=tr("Use vision path predictions to estimate the appropriate speed to drive through turns ahead."),
@@ -88,7 +83,6 @@ class CruiseLayout(Widget):
       param="DynamicExperimentalControl")
 
     items = [
-      self.icbm_toggle,
       self.dec_toggle,
       self.scc_v_toggle,
       self.scc_m_toggle,
@@ -108,7 +102,6 @@ class CruiseLayout(Widget):
   def show_event(self):
     self._set_current_panel(PanelType.CRUISE)
     self._scroller.show_event()
-    self.icbm_toggle.show_description(True)
     self.custom_acc_toggle.show_description(True)
 
   def _set_current_panel(self, panel: PanelType):
@@ -120,30 +113,10 @@ class CruiseLayout(Widget):
     super()._update_state()
 
     if ui_state.CP is not None and ui_state.CP_SP is not None:
-      has_icbm = ui_state.has_icbm
       has_long = ui_state.has_longitudinal_control
 
-      if ui_state.CP_SP.intelligentCruiseButtonManagementAvailable and not has_long:
-        self.icbm_toggle.action_item.set_enabled(ui_state.is_offroad())
-        self.icbm_toggle.set_description(tr(ICBM_DESC))
-      else:
-        ui_state.params.remove("IntelligentCruiseButtonManagement")
-        self.icbm_toggle.action_item.set_enabled(False)
-
-        long_desc = ICMB_UNAVAILABLE
-        if has_long:
-          if ui_state.CP.alphaLongitudinalAvailable:
-            long_desc += " " + ICMB_UNAVAILABLE_LONG_AVAILABLE
-          else:
-            long_desc += " " + ICMB_UNAVAILABLE_LONG_UNAVAILABLE
-
-        new_desc = "<b>" + tr(long_desc) + "</b>\n\n" + tr(ICBM_DESC)
-        if self.icbm_toggle.description != new_desc:
-          self.icbm_toggle.set_description(new_desc)
-          self.icbm_toggle.show_description(True)
-
-      if has_long or has_icbm:
-        self.custom_acc_toggle.action_item.set_enabled(((has_long and not ui_state.CP.pcmCruise) or has_icbm) and ui_state.is_offroad())
+      if has_long:
+        self.custom_acc_toggle.action_item.set_enabled((not ui_state.CP.pcmCruise) and ui_state.is_offroad())
         self.dec_toggle.action_item.set_enabled(has_long)
         self.scc_v_toggle.action_item.set_enabled(True)
         self.scc_m_toggle.action_item.set_enabled(True)
@@ -158,9 +131,7 @@ class CruiseLayout(Widget):
         self.scc_m_toggle.action_item.set_enabled(False)
 
     else:
-      has_icbm = has_long = False
-      self.icbm_toggle.action_item.set_enabled(False)
-      self.icbm_toggle.set_description(tr(ONROAD_ONLY_DESCRIPTION))
+      has_long = False
 
     show_custom_acc_desc = False
 
@@ -168,7 +139,7 @@ class CruiseLayout(Widget):
       new_custom_acc_desc = tr(ONROAD_ONLY_DESCRIPTION)
       show_custom_acc_desc = True
     else:
-      if has_long or has_icbm:
+      if has_long:
         if has_long and ui_state.CP.pcmCruise:
           new_custom_acc_desc = tr(ACC_PCMCRUISE_DISABLED_DESCRIPTION)
           show_custom_acc_desc = True
