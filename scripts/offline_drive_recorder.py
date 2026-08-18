@@ -42,18 +42,14 @@ def main():
 
   sm = messaging.SubMaster([
     "carParams", "carState", "selfdriveState", "onroadEvents", "radarState",
-  ], poll="carState")
-
-  from openpilot.common.params import Params
-  params = Params()
+  ], poll=None)  # 非阻塞轮询：offroad 时 carState 不发布也不退出
 
   prev_brake = False
   prev_fp = None
   brake_toggle_count = 0
-  last_fp_write = 0
 
   while True:
-    sm.update(100)
+    sm.update(0)  # 立即返回，offroad 时安全空转
     now = time.time()
 
     # ---- 指纹（carParams 一更新就记）----
@@ -149,9 +145,17 @@ def main():
           "modelProb": round(float(l.modelProb), 3),
         })
 
+    # 非阻塞轮询要加 sleep，避免空转占满 CPU
+    time.sleep(0.05)  # 20Hz
+
 
 if __name__ == "__main__":
   try:
     main()
   except KeyboardInterrupt:
     print("[offline_drive_recorder] 停止")
+  except Exception as e:
+    import traceback
+    with open(os.path.join(OUT_DIR, "recorder_crash.log"), "a") as f:
+      f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {traceback.format_exc()}\n")
+    raise
