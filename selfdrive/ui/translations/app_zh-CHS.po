@@ -446,7 +446,7 @@ msgstr "查看"
 
 #: system/ui/GeniusPilot/widgets/sunnylink_pairing_dialog.py
 msgid "Re-enter the \"sunnylink\" panel to verify sponsorship status"
-msgstr ""
+msgstr "重新进入 "sunnylink" 面板以验证赞助状态"
 
 #: openpilot/selfdrive/ui/layouts/settings/device.py
 msgid "Reboot"
@@ -777,3 +777,56 @@ msgstr[1] "{} 分钟前"
 # Font baking charset (auto-generated, do not translate)
 msgid "__FONT_BAKE_CHARSET__"
 msgstr "一三上下不与且两个中丰临为主义之也习事二于五亚些享亮人仅仍从代令以仪件价优会传估但位低住体何余作你使例侧便保信修倒值偏停偿像允先克免入全公共关其兼内册再写冲决况净准减出击分切划列则初删判别到制刹前剩力功加务动助包化匹区单南卡卫即卸厂压原参双反发取变叠口只可右号合同名后向吗否含启告员命和响哪器四回因围固国图在地场址块型基堵境增处备复外多大天太失头好如始子字存学它安完官定实家容密察寸对导将小少就尾局屏展巡工左差已布带帧帮常幅幕干平并广序应度延建开异式张弯弱强当录形影径待得微心必忘快忽态急性恢息您惯意感慢成或户所手才执扩扫扭找把抖折报拒拟拥拨择持指按挡振换据排接控推描提插搜搭摄摇摩摸撞操擦支收改效敏数整文斜断新方旁无日早时明星是显晚普景暂曲更最有服朝期未末本机权杆束条来松板极果某柔查标校样核根格档检模横橙次欢止正此步段比求没油法注活流浅测济消深添清温游源滑漫激火灯灰灵点热然照熄片版状率环现理生用田电画界留略白百的益监盖盘目盲直相看着瞬知矩短码础硬确碰示禁离秒积移程稳空窗窝立端第等策算管箭类系紧紫累繁红约级纯纵线练细终经结绘给络绝统继绪续绿编缘缩网置考者背胎能脱自至航良色节若英范荐菜蓝蔽藏虑虚蜂行衔补表装要覆观规视览觉角解触言警计认让训议记许设证识诊试该详语误说请读调负败资起超越距跟路踏踩车轨转轮软轻载较辅辆辑输边达过迎运近返还这进远连迟迹退送适选通速逻道遗避部配醒里重野量钟钥钮错键长门闭问间阻附际降限除险隆随隐隔雷需静非靠面音页项顺须顿预频题颜额风馈首驶驻驾验高麦黄黑默"
+
+# Auto-added missing entries
+
+msgid "Early Access: Become a sunnypilot Sponsor"
+msgstr "抢先体验：成为 GeniusPilot 赞助者"
+
+msgid "If sponsorship status was not updated, please contact a moderator on the community forum at https://community.sunnypilot.ai"
+msgstr "如果赞助状态未更新，请联系社区论坛管理员：https://community.sunnypilot.ai"
+
+msgid "Join our Community Forum at https://community.sunnypilot.ai and reach out to a moderator if you have issues"
+msgstr "加入我们的社区论坛 https://community.sunnypilot.ai，如有问题请联系管理员"
+
+msgid "Welcome to sunnypilot"
+msgstr "欢迎使用 GeniusPilot"
+
+msgid "You must accept the Terms of Service to use sunnypilot. Read the latest terms at https://sunnypilot.ai/terms before continuing."
+msgstr "您必须接受服务条款才能使用 GeniusPilot。继续前请阅读最新条款：https://sunnypilot.ai/terms"
+
+msgid "You must accept the Terms of Service in order to use sunnypilot."
+msgstr "您必须接受服务条款才能使用 GeniusPilot。"
+
+msgid "Decline, uninstall sunnypilot"
+msgstr "拒绝并卸载 GeniusPilot"
+
+msgid "sunnypilot requires the device to be mounted within 4° left or right and within 5° up or 9° down."
+msgstr "GeniusPilot 要求设备安装角度在左右 4°、上 5°、下 9° 以内。"
+
+msgid "Review the rules, features, and limitations of sunnypilot"
+msgstr "查看 GeniusPilot 的规则、功能和限制"
+
+msgid "sunnypilot Longitudinal Control (Alpha)"
+msgstr "GeniusPilot 纵向控制（Alpha）"
+
+msgid "When enabled, pressing the accelerator pedal will disengage sunnypilot."
+msgstr "启用后，踩油门踏板将退出 GeniusPilot。"
+
+msgid "Enable driver monitoring even when sunnypilot is not engaged."
+msgstr "即使 GeniusPilot 未启用，也开启驾驶员监控。"
+
+msgid "Changing this setting will restart sunnypilot if the car is powered on."
+msgstr "如果车辆已启动，更改此设置将重启 GeniusPilot。"
+
+msgid "Enable sunnypilot"
+msgstr "启用 GeniusPilot"
+
+msgid "sunnypilot longitudinal control may come in a future update."
+msgstr "GeniusPilot 纵向控制可能在未来更新中提供。"
+
+msgid "Enable the sunnypilot longitudinal control (alpha) toggle to allow Experimental mode."
+msgstr "启用 GeniusPilot 纵向控制（Alpha）开关以允许实验模式。"
+
+msgid "sunnypilot Unavailable"
+msgstr "GeniusPilot 不可用"
