@@ -2498,6 +2498,38 @@
       "cdescr": "导航测速摄像头、区间测速、流动测速和原车摄像头限速目标速度的百分比比例。100 表示不加百分比偏移，105 表示 +5%，95 表示 -5%；之后还会叠加“测速限速固定偏移”。"
     },
     {
+      "group": "SPEED",
+      "name": "CarrotSpeedLimitEnable",
+      "title": "Carrot Speed Limit(1)",
+      "descr": "Combine camera/CAN + map + nav-app speed limits and apply automatically (no button confirm).",
+      "egroup": "SPEED",
+      "etitle": "Carrot Speed Limit(1)",
+      "edescr": "Combine camera/CAN + map + nav-app speed limits and apply automatically (no button confirm).",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "unit": 1,
+      "cgroup": "速度控制",
+      "ctitle": "Carrot 限速(1)",
+      "cdescr": "合并摄像头/车辆CAN + 地图 + 导航App 三路限速，自动应用（无需按键确认）。"
+    },
+    {
+      "group": "SPEED",
+      "name": "CarrotTrafficStopEnable",
+      "title": "Carrot Traffic Light Stop(0)",
+      "descr": "Early deceleration when nav-app reports a red light ahead. Default off (high risk).",
+      "egroup": "SPEED",
+      "etitle": "Carrot Traffic Light Stop(0)",
+      "edescr": "Early deceleration when nav-app reports a red light ahead. Default off (high risk).",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "unit": 1,
+      "cgroup": "速度控制",
+      "ctitle": "Carrot 红绿灯停车(0)",
+      "cdescr": "导航App报告前方红灯时提前减速。默认关闭（高风险）。"
+    },
+    {
       "group": "DISPLAY",
       "egroup": "DISPLAY",
       "cgroup": "显示",

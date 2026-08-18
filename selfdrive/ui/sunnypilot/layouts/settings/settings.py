@@ -10,6 +10,7 @@ from enum import IntEnum
 import pyray as rl
 from openpilot.selfdrive.ui.layouts.settings import settings as OP
 from openpilot.selfdrive.ui.layouts.settings.toggles import TogglesLayout
+from openpilot.selfdrive.ui.sunnypilot.layouts.settings.carrot import CarrotLayout
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.cruise import CruiseLayout
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.developer import DeveloperLayoutSP
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.device import DeviceLayoutSP
@@ -45,6 +46,7 @@ OP.PanelType = IntEnum(
     "OSM",
     "NAVIGATION",
     "VEHICLE",
+    "CARROT",
   ],
   start=0,
 )
@@ -116,6 +118,7 @@ class SettingsLayoutSP(OP.SettingsLayout):
       OP.PanelType.OSM: PanelInfo(tr_noop("OSM"), OSMLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
       # OP.PanelType.NAVIGATION: PanelInfo(tr_noop("Navigation"), NavigationLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
       OP.PanelType.VEHICLE: PanelInfo(tr_noop("Vehicle"), VehicleLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_vehicle.png"),
+      OP.PanelType.CARROT: PanelInfo(tr_noop("Carrot"), CarrotLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
       OP.PanelType.DEVELOPER: PanelInfo(tr_noop("Developer"), DeveloperLayoutSP(), icon="icons/shell.png"),
     }
 

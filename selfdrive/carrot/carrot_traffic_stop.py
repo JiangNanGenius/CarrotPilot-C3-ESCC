@@ -15,20 +15,13 @@ Design rules (same as CarrotSpeedLimit):
   * Disabled by default (high risk); gray-rollout via CarrotTrafficStopEnable.
 """
 
-from openpilot.common.params import Params
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams
 
 
 class CarrotTrafficStop:
   def __init__(self):
-    self.params = Params()
-    self.enabled = self._read_enabled()
-
-  def _read_enabled(self) -> bool:
-    try:
-      return self.params.get_bool("CarrotTrafficStopEnable")
-    except Exception:
-      # Key not registered in prebuilt params_pyx.so yet -> default OFF.
-      return False
+    self.params = CarrotParams()
+    self.enabled = self.params.get_bool("CarrotTrafficStopEnable")
 
   def update(self, sm, v_cruise_ms: float) -> float:
     if not self.enabled:

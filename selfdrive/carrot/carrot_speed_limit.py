@@ -10,14 +10,12 @@ It NEVER outputs brakes/acceleration — braking stays solely with sunny's
 e2e ``modelV2.shouldStop`` / MPC, so there is no double-trigger. It only
 lowers ``v_cruise`` and the MPC naturally plans the deceleration.
 
-This is the ONLY carrot code allowed inside the longitudinal planner
-mainline. It uses the native ``Params`` and only touches the
-``CarrotSpeedLimitEnable`` key. The key is registered in params_keys.h, but
-the prebuilt ``params_pyx.so`` may not have been rebuilt with it yet, so the
-enable flag is read defensively: on ``UnknownKeyName`` we default to ON.
+The enable flag is read via CarrotParams (file-backed, bypasses the C++
+check_key registry) so the settings menu can toggle it without rebuilding
+the prebuilt params_pyx.so.
 """
 
-from openpilot.common.params import Params
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams
 from openpilot.common.constants import CV
 
 # Sanity bounds for the carrot nav-app speed limit (km/h).
@@ -27,15 +25,8 @@ _MAX_NAV_SPEED_KPH = 150.0
 
 class CarrotSpeedLimit:
   def __init__(self):
-    self.params = Params()
-    self.enabled = self._read_enabled()
-
-  def _read_enabled(self) -> bool:
-    try:
-      return self.params.get_bool("CarrotSpeedLimitEnable")
-    except Exception:
-      # params_pyx.so not yet rebuilt with the new key -> default ON.
-      return True
+    self.params = CarrotParams()
+    self.enabled = self.params.get_bool("CarrotSpeedLimitEnable")
 
   def update(self, sm, v_cruise_ms: float, resolver_speed_limit_ms: float) -> float:
     if not self.enabled:
