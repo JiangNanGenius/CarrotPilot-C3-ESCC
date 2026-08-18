@@ -25,6 +25,7 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
     {"CarParamsPersistent", {PERSISTENT, BYTES}},
     {"CarParamsPrevRoute", {PERSISTENT, BYTES}},
     {"CarrotSpeedLimitEnable", {PERSISTENT | BACKUP, BOOL, "1"}},
+    {"CarrotTrafficStopEnable", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"CompletedTrainingVersion", {PERSISTENT, STRING, "0"}},
     {"ControlsReady", {CLEAR_ON_MANAGER_START | CLEAR_ON_ONROAD_TRANSITION, BOOL}},
     {"CurrentBootlog", {PERSISTENT, STRING}},
