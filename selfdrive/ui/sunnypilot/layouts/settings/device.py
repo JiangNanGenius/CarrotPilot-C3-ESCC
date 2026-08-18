@@ -113,8 +113,6 @@ class DeviceLayoutSP(DeviceLayout):
       LineSeparator(),
       text_item(lambda: tr("Serial"), self._params.get("HardwareSerial") or (lambda: tr("N/A"))),
       LineSeparator(),
-      self._pair_device_btn,
-      LineSeparator(),
       self._reset_calib_btn,
       LineSeparator(),
       button_item_sp(lambda: tr("Change Language"), lambda: tr("CHANGE"), callback=self._show_language_dialog),
