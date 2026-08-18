@@ -108,3 +108,10 @@ class CarrotLayout(Widget):
       ),
     ]
     return items
+
+  def _render(self, rect):
+    self._scroller.render(rect)
+
+  def show_event(self):
+    self._scroller.show_event()
+
