@@ -66,7 +66,7 @@ class CarrotLayout(Widget):
       # -- Speed limit (wired in stage 2) ---------------------------
       self._toggle(
         "CarrotSpeedLimitEnable",
-        "Carrot 限速",
+        "限速控制",
         "合并摄像头/车辆CAN + 地图 + 导航App 三路限速，自动应用（无需按键确认）。",
       ),
       self._selector(
@@ -103,8 +103,8 @@ class CarrotLayout(Widget):
       # -- Traffic-light stop (wired in stage 3, default off) --------
       self._toggle(
         "CarrotTrafficStopEnable",
-        "Carrot 红绿灯停车",
-        "导航App 报告前方红灯时提前减速（默认关闭，高风险）。",
+        "红绿灯停车",
+        "模型预测前方红灯时提前减速（视觉版，默认关闭，高风险）。",
       ),
     ]
     return items

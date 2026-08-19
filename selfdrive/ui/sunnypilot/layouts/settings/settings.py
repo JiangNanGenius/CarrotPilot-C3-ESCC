@@ -118,7 +118,7 @@ class SettingsLayoutSP(OP.SettingsLayout):
       OP.PanelType.OSM: PanelInfo(tr_noop("OSM"), OSMLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
       # OP.PanelType.NAVIGATION: PanelInfo(tr_noop("Navigation"), NavigationLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
       OP.PanelType.VEHICLE: PanelInfo(tr_noop("Vehicle"), VehicleLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_vehicle.png"),
-      OP.PanelType.CARROT: PanelInfo(tr_noop("Carrot"), CarrotLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
+      OP.PanelType.CARROT: PanelInfo(tr_noop("驾驶辅助"), CarrotLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
       OP.PanelType.DEVELOPER: PanelInfo(tr_noop("Developer"), DeveloperLayoutSP(), icon="icons/shell.png"),
     }
 

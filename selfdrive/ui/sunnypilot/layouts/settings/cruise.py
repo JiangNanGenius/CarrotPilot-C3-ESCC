@@ -35,7 +35,7 @@ class CruiseLayout(Widget):
   def _initialize_items(self):
     # Carrot 功能（二级菜单）
     self.carrot_button = simple_button_item_sp(
-      button_text=lambda: tr("Carrot 设置"),
+      button_text=lambda: tr("驾驶辅助设置"),
       button_width=800,
       callback=lambda: self._set_current_panel(PanelType.CARROT)
     )
