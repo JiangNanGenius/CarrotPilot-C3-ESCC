@@ -192,10 +192,16 @@ class HomeLayout(Widget):
     y += line_height + 10
 
     # 系统信息
+    temp_text = "N/A"
+    if ui_state.sm.alive['deviceState']:
+      cpu_temp = ui_state.sm['deviceState'].cpuTempC
+      if cpu_temp:
+        temp_text = f"{cpu_temp[0]:.0f}°C"
+
     info_items = [
       ("版本", self._version_text),
       ("状态", "待机" if not ui_state.started else "行车"),
-      ("温度", f"{ui_state.sm['deviceState'].cpuTempC:.0f}°C" if ui_state.sm.alive['deviceState'] else "N/A"),
+      ("温度", temp_text),
     ]
 
     for label, value in info_items:
