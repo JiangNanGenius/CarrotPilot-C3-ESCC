@@ -47,4 +47,13 @@ class CarrotSpeedLimit:
     except Exception:
       pass
 
+    # 3. OSM 独立源（不依赖导航 App）
+    try:
+      if sm.alive['liveMapDataSP']:
+        osm_limit_ms = float(sm['liveMapDataSP'].speedLimit)
+        if osm_limit_ms > 0:
+          result = min(result, osm_limit_ms)
+    except Exception:
+      pass
+
     return result
