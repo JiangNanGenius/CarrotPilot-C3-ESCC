@@ -91,6 +91,7 @@ def process_hud_alert(hud_alert):
   return alert_fcw, alert_steer_required
 
 
+class CarController(CarControllerBase, MadsCarController, GasInterceptorCarController):
   def __init__(self, dbc_names, CP, CP_SP):
     CarControllerBase.__init__(self, dbc_names, CP, CP_SP)
     MadsCarController.__init__(self)
