@@ -358,16 +358,17 @@ class CarrotPlanner:
     model_v = self.vFilter.process(v[-1])
     startSign = model_v > 5.0 or model_v > (v[0] + 2)
 
+    # 优化 845 算力：降低阈值，减少误判
     if v_ego_kph < 1.0:
-      stopSign = model_x < 20.0 and model_v < 10.0
+      stopSign = model_x < 25.0 and model_v < 12.0  # 放宽阈值（20→25，10→12）
     elif v_ego_kph < 82.0:
-      stopSign = (model_x < d_rel - 3.0 and
-                  model_x < np.interp(v[0] * 3.6, [60, 80], [120.0, 150]) and
-                  ((model_v < 3.0) or (model_v < v[0] * 0.7)) and
-                  abs(y[-1]) < 5.0)
-      # 정상주행중 감속하는 경우(카메라 감속등), 오감지가 많음. 
+      stopSign = (model_x < d_rel - 2.0 and  # 放宽阈值（3.0→2.0）
+                  model_x < np.interp(v[0] * 3.6, [60, 80], [130.0, 160]) and  # 放宽阈值（120→130，150→160）
+                  ((model_v < 4.0) or (model_v < v[0] * 0.75)) and  # 放宽阈值（3.0→4.0，0.7→0.75）
+                  abs(y[-1]) < 6.0)  # 放宽阈值（5.0→6.0）
+      # 정상주행중 감속하는 경우(카메라 감속등), 오감지가 많음.
       # 회생감속시:v_cruise=0에는 신호호감지하도록함.
-      if v_cruise != 0 and (self.xState == XState.e2eCruise and a_ego < -1.0):
+      if v_cruise != 0 and (self.xState == XState.e2eCruise and a_ego < -0.8):  # 放宽阈值（-1.0→-0.8）
         stopSign = False
     else:
       stopSign = False
