@@ -193,20 +193,25 @@ class HomeLayout(Widget):
 
     # 系统信息
     temp_text = "N/A"
+    gpu_temp_text = "N/A"
     if ui_state.sm.alive['deviceState']:
       cpu_temp = ui_state.sm['deviceState'].cpuTempC
       if cpu_temp:
-        temp_text = f"{cpu_temp[0]:.0f}°C"
+        temp_text = f"{cpu_temp[0]:.1f}°C"
+      gpu_temp = ui_state.sm['deviceState'].gpuTempC
+      if gpu_temp:
+        gpu_temp_text = f"{gpu_temp[0]:.1f}°C"
 
     info_items = [
       ("版本", self._version_text),
       ("状态", "待机" if not ui_state.started else "行车"),
-      ("温度", temp_text),
+      ("CPU 温度", temp_text),
+      ("GPU 温度", gpu_temp_text),
     ]
 
     for label, value in info_items:
-      rl.draw_text_ex(font, f"{label}:", rl.Vector2(int(x), int(y)), 24, 0, rl.LIGHTGRAY)
-      rl.draw_text_ex(font, str(value), rl.Vector2(int(x + 120), int(y)), 24, 0, rl.WHITE)
+      rl.draw_text_ex(font, f"{label}:", rl.Vector2(int(x), int(y)), 28, 0, rl.LIGHTGRAY)
+      rl.draw_text_ex(font, str(value), rl.Vector2(int(x + 140), int(y)), 28, 0, rl.WHITE)
       y += line_height
 
   def _render_update_view(self):
