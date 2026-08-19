@@ -117,9 +117,11 @@ def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
 
-def create_lfahda_cluster(packer, CAN, enabled, lfa_icon):
+def create_lfahda_cluster(packer, CAN, enabled, lfa_icon, carrot_active=False):
+  # Carrot 激活时强制显示 HDA 图标
+  hda_icon = 1 if (enabled or carrot_active) else 0
   values = {
-    "HDA_ICON": 1 if enabled else 0,
+    "HDA_ICON": hda_icon,
     "LFA_ICON": lfa_icon,
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
