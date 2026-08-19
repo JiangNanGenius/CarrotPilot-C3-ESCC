@@ -118,7 +118,7 @@ class SettingsLayoutSP(OP.SettingsLayout):
       OP.PanelType.OSM: PanelInfo(tr_noop("OSM"), OSMLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
       # OP.PanelType.NAVIGATION: PanelInfo(tr_noop("Navigation"), NavigationLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
       OP.PanelType.VEHICLE: PanelInfo(tr_noop("Vehicle"), VehicleLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_vehicle.png"),
-      OP.PanelType.CARROT: PanelInfo(tr_noop("驾驶辅助"), CarrotLayout(), icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),
+      OP.PanelType.CARROT: PanelInfo(tr_noop("驾驶辅助"), None, icon="../../sunnypilot/selfdrive/assets/offroad/icon_map.png"),  # 懒加载
       OP.PanelType.DEVELOPER: PanelInfo(tr_noop("Developer"), DeveloperLayoutSP(), icon="icons/shell.png"),
     }
 
@@ -192,5 +192,8 @@ class SettingsLayoutSP(OP.SettingsLayout):
 
   def show_event(self):
     super().show_event()
+    # 懒加载 CarrotLayout（第一次访问时创建）
+    if self._current_panel == OP.PanelType.CARROT and self._panels[OP.PanelType.CARROT].instance is None:
+      self._panels[OP.PanelType.CARROT].instance = CarrotLayout()
     self._panels[self._current_panel].instance.show_event()
     self._sidebar_scroller.show_event()
