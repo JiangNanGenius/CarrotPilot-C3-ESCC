@@ -54,25 +54,11 @@ class CruiseLayout(Widget):
     )
 
   def _initialize_items(self):
-    # Carrot 功能（直接显示，不用二级菜单）
+    # Carrot 功能（只保留 SunnyPilot 没有的增量项）
+    # 限速偏移/安全系数用 SunnyPilot 原生的 Speed Limit 设置（Speed Limit 按钮里），不重复
     self.carrot_speed_limit = self._carrot_toggle(
-      "CarrotSpeedLimitEnable", "限速控制",
-      "合并摄像头/车辆CAN + 地图 + 导航App 三路限速，自动应用（无需按键确认）。")
-
-    self.carrot_road_offset = self._carrot_selector(
-      "AutoRoadSpeedLimitOffset", "道路限速偏移",
-      ["-1", "0", "+5", "+10", "+20"], [-1, 0, 5, 10, 20],
-      description="道路限速的固定偏移（-1 表示不启用）。")
-
-    self.carrot_navi_offset = self._carrot_selector(
-      "AutoNaviSpeedLimitOffset", "导航限速偏移",
-      ["-20", "-10", "0", "+10", "+20"], [-20, -10, 0, 10, 20],
-      description="导航测速限速的固定偏移（km/h）。")
-
-    self.carrot_safety_factor = self._carrot_selector(
-      "AutoNaviSpeedSafetyFactor", "限速安全系数",
-      ["80%", "90%", "100%", "110%", "120%"], [80, 90, 100, 110, 120],
-      description="限速值的百分比系数（低于 100% 更保守）。")
+      "CarrotSpeedLimitEnable", "导航限速源",
+      "额外合并导航App的限速到巡航速度（摄像头/地图限速及偏移用下方 Speed Limit 原生设置）。")
 
     self.carrot_traffic_stop = self._carrot_toggle(
       "CarrotTrafficStopEnable", "红绿灯停车",
@@ -121,9 +107,6 @@ class CruiseLayout(Widget):
 
     items = [
       self.carrot_speed_limit,
-      self.carrot_road_offset,
-      self.carrot_navi_offset,
-      self.carrot_safety_factor,
       self.carrot_traffic_stop,
       self.dec_toggle,
       self.scc_v_toggle,
