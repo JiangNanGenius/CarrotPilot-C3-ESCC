@@ -176,7 +176,31 @@ class HomeLayout(Widget):
     gui_label(version_rect, self._version_text, 48, rl.WHITE, alignment=rl.GuiTextAlignment.TEXT_ALIGN_RIGHT)
 
   def _render_home_content(self):
+    self._render_left_column()
     self._render_right_column()
+
+  def _render_left_column(self):
+    """Render left column with device status and system info."""
+    font = gui_app.font(FontWeight.MEDIUM)
+    x = self.left_column_rect.x
+    y = self.left_column_rect.y
+    line_height = 40
+
+    # 设备状态
+    rl.draw_text_ex(font, "设备状态", rl.Vector2(int(x), int(y)), 32, 0, rl.WHITE)
+    y += line_height + 10
+
+    # 系统信息
+    info_items = [
+      ("版本", self._version_text),
+      ("状态", "待机" if not ui_state.started else "行车"),
+      ("温度", f"{ui_state.sm['deviceState'].cpuTempC:.0f}°C" if ui_state.sm.alive['deviceState'] else "N/A"),
+    ]
+
+    for label, value in info_items:
+      rl.draw_text_ex(font, f"{label}:", rl.Vector2(int(x), int(y)), 24, 0, rl.LIGHTGRAY)
+      rl.draw_text_ex(font, str(value), rl.Vector2(int(x + 120), int(y)), 24, 0, rl.WHITE)
+      y += line_height
 
   def _render_update_view(self):
     self.update_alert.render(self.content_rect)
