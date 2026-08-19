@@ -64,6 +64,37 @@ class CruiseLayout(Widget):
       "CarrotTrafficStopEnable", "红绿灯停车",
       "模型预测前方红灯时提前减速（视觉版，默认关闭，高风险）。")
 
+    # Carrot 纵向设定（只保留必要的：跟车距离/停车距离/前加加速度）
+    self.carrot_tfollow_gap1 = self._carrot_selector(
+      "TFollowGap1", "跟车距离 1 档",
+      ["0.8s", "1.0s", "1.2s", "1.5s"], [80, 100, 120, 150],
+      description="1 档跟车距离（默认 1.2s）。")
+
+    self.carrot_tfollow_gap2 = self._carrot_selector(
+      "TFollowGap2", "跟车距离 2 档",
+      ["1.0s", "1.2s", "1.5s", "1.8s"], [100, 120, 150, 180],
+      description="2 档跟车距离（默认 1.5s）。")
+
+    self.carrot_tfollow_gap3 = self._carrot_selector(
+      "TFollowGap3", "跟车距离 3 档",
+      ["1.2s", "1.5s", "1.8s", "2.2s"], [120, 150, 180, 220],
+      description="3 档跟车距离（默认 1.8s）。")
+
+    self.carrot_tfollow_gap4 = self._carrot_selector(
+      "TFollowGap4", "跟车距离 4 档",
+      ["1.5s", "1.8s", "2.2s", "2.5s"], [150, 180, 220, 250],
+      description="4 档跟车距离（默认 2.2s）。")
+
+    self.carrot_stop_distance = self._carrot_selector(
+      "StopDistanceCarrot", "停车距离",
+      ["3m", "4m", "5m", "6m", "8m"], [300, 400, 500, 600, 800],
+      description="红绿灯停车距离（默认 6m）。")
+
+    self.carrot_jlead_factor = self._carrot_selector(
+      "JLeadFactor3", "前加加速度平滑",
+      ["0.5", "1.0", "1.5", "2.0", "3.0"], [50, 100, 150, 200, 300],
+      description="前加加速度平滑因子（默认 1.0）。")
+
     # SunnyPilot 原生功能
     self.scc_v_toggle = toggle_item_sp(
       title=tr("Smart Cruise Control - Vision"),
@@ -108,6 +139,12 @@ class CruiseLayout(Widget):
     items = [
       self.carrot_speed_limit,
       self.carrot_traffic_stop,
+      self.carrot_tfollow_gap1,
+      self.carrot_tfollow_gap2,
+      self.carrot_tfollow_gap3,
+      self.carrot_tfollow_gap4,
+      self.carrot_stop_distance,
+      self.carrot_jlead_factor,
       self.dec_toggle,
       self.scc_v_toggle,
       self.scc_m_toggle,
