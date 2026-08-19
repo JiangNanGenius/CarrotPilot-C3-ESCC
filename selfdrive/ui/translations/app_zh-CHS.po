@@ -865,13 +865,13 @@ msgid "models"
 msgstr "模型"
 
 msgid "slide to exit always offroad"
-msgstr "滑动退出始终越野"
+msgstr "滑动退出始终待机"
 
 msgid "disengage to enable always offroad"
-msgstr "退出以启用始终越野"
+msgstr "退出以启用始终待机"
 
 msgid "slide to force offroad"
-msgstr "滑动强制越野"
+msgstr "滑动强制待机"
 
 msgid "Start the vehicle to check vehicle compatibility."
 msgstr "启动车辆以检查车辆兼容性。"
@@ -979,7 +979,7 @@ msgid "Select a Model"
 msgstr "选择模型"
 
 msgid "Only available when vehicle is off, or always offroad mode is on"
-msgstr "仅在车辆熄火或始终越野模式开启时可用"
+msgstr "仅在车辆熄火或始终待机模式开启时可用"
 
 msgid "Select vehicle to force fingerprint manually."
 msgstr "选择车辆以强制手动识别指纹。"
@@ -1003,7 +1003,7 @@ msgid "This setting will take effect immediately."
 msgstr "此设置将立即生效。"
 
 msgid "This setting will take effect once the device enters offroad state."
-msgstr "此设置将在设备进入越野状态后生效。"
+msgstr "此设置将在设备进入待机状态后生效。"
 
 msgid "Confirm"
 msgstr "确认"
@@ -1069,10 +1069,10 @@ msgid "This feature is unavailable while the car is onroad."
 msgstr "车辆行驶时此功能不可用。"
 
 msgid "Enable Always Offroad"
-msgstr "启用始终越野"
+msgstr "启用始终待机"
 
 msgid "Max Time Offroad"
-msgstr "最大越野时间"
+msgstr "最大待机时间"
 
 msgid "Wake Up Behavior"
 msgstr "唤醒行为"
@@ -1081,7 +1081,7 @@ msgid "Default"
 msgstr "默认"
 
 msgid "Offroad"
-msgstr "越野"
+msgstr "待机"
 
 msgid "Quiet Mode"
 msgstr "静音模式"
@@ -1102,7 +1102,7 @@ msgid "Default: Device will boot/wake-up normally & will be ready to engage."
 msgstr "默认：设备将正常启动/唤醒并准备就绪。"
 
 msgid "Offroad: Device will be in Always Offroad mode after boot/wake-up."
-msgstr "越野：设备启动/唤醒后将进入始终越野模式。"
+msgstr "待机：设备启动/唤醒后将进入始终待机模式。"
 
 msgid "Controls state of the device after boot/sleep."
 msgstr "控制设备启动/休眠后的状态。"
@@ -1111,13 +1111,13 @@ msgid "The reset cannot be undone. You have been warned."
 msgstr "重置无法撤销。您已被警告。"
 
 msgid "Disengage to Enter Always Offroad Mode"
-msgstr "退出以进入始终越野模式"
+msgstr "退出以进入始终待机模式"
 
 msgid "Are you sure you want to exit Always Offroad mode?"
-msgstr "您确定要退出始终越野模式吗？"
+msgstr "您确定要退出始终待机模式吗？"
 
 msgid "Are you sure you want to enter Always Offroad mode?"
-msgstr "您确定要进入始终越野模式吗？"
+msgstr "您确定要进入始终待机模式吗？"
 
 msgid "Always On"
 msgstr "始终开启"
@@ -1132,7 +1132,7 @@ msgid " (Default)"
 msgstr "（默认）"
 
 msgid "Exit Always Offroad"
-msgstr "退出始终越野"
+msgstr "退出始终待机"
 
 msgid "Mapd Version"
 msgstr "Mapd 版本"
