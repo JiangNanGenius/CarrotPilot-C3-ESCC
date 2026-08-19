@@ -3,6 +3,7 @@ import pyray as rl
 from collections.abc import Callable
 from enum import IntEnum
 from openpilot.common.params import Params
+from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.selfdrive.ui.widgets.offroad_alerts import UpdateAlert, OffroadAlert
 from openpilot.selfdrive.ui.widgets.exp_mode_button import ExperimentalModeButton
 from openpilot.system.ui.lib.text_measure import measure_text_cached
