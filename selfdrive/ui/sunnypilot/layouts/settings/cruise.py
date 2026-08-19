@@ -17,17 +17,9 @@ from openpilot.system.ui.widgets.scroller_tici import Scroller
 class PanelType(IntEnum):
   CRUISE = 0
   SLA = 1
+  CARROT = 2
 
 
-ICBM_DESC = tr_noop("When enabled, sunnypilot will attempt to manage the built-in cruise control buttons " +
-                    "by emulating button presses for limited longitudinal control.")
-ICMB_UNAVAILABLE = tr_noop("Intelligent Cruise Button Management is currently unavailable on this platform.")
-ICMB_UNAVAILABLE_LONG_AVAILABLE = tr_noop("Disable the sunnypilot Longitudinal Control (alpha) toggle to allow Intelligent Cruise Button Management.")
-ICMB_UNAVAILABLE_LONG_UNAVAILABLE = tr_noop("GeniusPilot Longitudinal Control is the default longitudinal control for this platform.")
-
-ACC_ENABLED_DESCRIPTION = tr_noop("Enable custom Short & Long press increments for cruise speed increase/decrease.")
-ACC_NOLONG_DESCRIPTION = tr_noop("This feature can only be used with sunnypilot longitudinal control enabled.")
-ACC_PCMCRUISE_DISABLED_DESCRIPTION = tr_noop("This feature is not supported on this platform due to vehicle limitations.")
 ONROAD_ONLY_DESCRIPTION = tr_noop("Start the vehicle to check vehicle compatibility.")
 
 
@@ -41,7 +33,14 @@ class CruiseLayout(Widget):
     self._scroller = Scroller(items, line_separator=True, spacing=0)
 
   def _initialize_items(self):
+    # Carrot 功能（二级菜单）
+    self.carrot_button = simple_button_item_sp(
+      button_text=lambda: tr("Carrot 设置"),
+      button_width=800,
+      callback=lambda: self._set_current_panel(PanelType.CARROT)
+    )
 
+    # SunnyPilot 原生功能
     self.scc_v_toggle = toggle_item_sp(
       title=tr("Smart Cruise Control - Vision"),
       description=tr("Use vision path predictions to estimate the appropriate speed to drive through turns ahead."),
@@ -83,6 +82,7 @@ class CruiseLayout(Widget):
       param="DynamicExperimentalControl")
 
     items = [
+      self.carrot_button,
       self.dec_toggle,
       self.scc_v_toggle,
       self.scc_m_toggle,
@@ -96,8 +96,16 @@ class CruiseLayout(Widget):
   def _render(self, rect):
     if self._current_panel == PanelType.SLA:
       self._speed_limit_layout.render(rect)
+    elif self._current_panel == PanelType.CARROT:
+      # Carrot 二级菜单（暂时用文本表示，后续可扩展）
+      self._render_carrot_panel(rect)
     else:
       self._scroller.render(rect)
+
+  def _render_carrot_panel(self, rect):
+    """Render Carrot settings panel (placeholder)."""
+    # TODO: 实现 Carrot 设置的完整 UI
+    pass
 
   def show_event(self):
     self._set_current_panel(PanelType.CRUISE)
@@ -141,12 +149,12 @@ class CruiseLayout(Widget):
     else:
       if has_long:
         if has_long and ui_state.CP.pcmCruise:
-          new_custom_acc_desc = tr(ACC_PCMCRUISE_DISABLED_DESCRIPTION)
+          new_custom_acc_desc = tr("This feature is not supported on this platform due to vehicle limitations.")
           show_custom_acc_desc = True
         else:
-          new_custom_acc_desc = tr(ACC_ENABLED_DESCRIPTION)
+          new_custom_acc_desc = tr("Enable custom Short & Long press increments for cruise speed increase/decrease.")
       else:
-        new_custom_acc_desc = tr(ACC_NOLONG_DESCRIPTION)
+        new_custom_acc_desc = tr("This feature can only be used with sunnypilot longitudinal control enabled.")
         show_custom_acc_desc = True
         self.custom_acc_toggle.action_item.set_state(False)
 
