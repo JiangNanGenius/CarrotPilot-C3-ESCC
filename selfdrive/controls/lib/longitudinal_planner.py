@@ -18,6 +18,7 @@ from openpilot.common.swaglog import cloudlog
 from openpilot.sunnypilot.selfdrive.controls.lib.longitudinal_planner import LongitudinalPlannerSP
 from openpilot.selfdrive.carrot.carrot_speed_limit import CarrotSpeedLimit
 from openpilot.selfdrive.carrot.carrot_traffic_stop import CarrotTrafficStop
+from openpilot.selfdrive.carrot.carrot_functions import CarrotPlanner
 
 A_CRUISE_MAX_VALS = [1.6, 1.2, 0.8, 0.6]
 A_CRUISE_MAX_BP = [0., 10.0, 25., 40.]
@@ -70,6 +71,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
 
     self.carrot_speed_limit = CarrotSpeedLimit()
     self.carrot_traffic_stop = CarrotTrafficStop()
+    self.carrot_planner = CarrotPlanner()
 
   @staticmethod
   def parse_model(model_msg):
@@ -145,6 +147,11 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # Carrot traffic-light stop (nav-app red light): early deceleration hint.
     # Only lowers v_cruise; shouldStop stays solely with e2e.
     v_cruise = self.carrot_traffic_stop.update(sm, v_cruise)
+
+    # Carrot planner: follow/accel/driving mode logic.
+    # Only adjusts v_cruise; MPC handles actual accel/braking.
+    v_cruise_kph_carrot = self.carrot_planner.update(sm, v_cruise * CV.MS_TO_KPH, mode="combined")
+    v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
 
     if force_slow_decel:
       v_cruise = 0.0
