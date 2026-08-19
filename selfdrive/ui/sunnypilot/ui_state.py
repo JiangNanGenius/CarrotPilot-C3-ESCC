@@ -119,7 +119,6 @@ class UIStateSP:
     CP_SP_bytes = self.params.get("CarParamsSPPersistent")
     if CP_SP_bytes is not None:
       self.CP_SP = messaging.log_from_bytes(CP_SP_bytes, custom.CarParamsSP)
-      self.has_icbm = self.CP_SP.intelligentCruiseButtonManagementAvailable and self.params.get_bool("IntelligentCruiseButtonManagement")
 
     self._enforce_constraints()
     self.active_bundle = self.params.get("ModelManager_ActiveBundle")
@@ -178,17 +177,8 @@ class UIStateSP:
       self.params.remove("ExperimentalMode")
       self.params.remove("DynamicExperimentalControl")
 
-    # ICBM: clear if not available or if full longitudinal control is active
-    if self.CP_SP is not None:
-      if not self.CP_SP.intelligentCruiseButtonManagementAvailable or has_long:
-        self.params.remove("IntelligentCruiseButtonManagement")
-        self.has_icbm = False
-    else:
-      self.params.remove("IntelligentCruiseButtonManagement")
-      self.has_icbm = False
-
-    # Cruise features requiring longitudinal or ICBM
-    if not (has_long or self.has_icbm):
+    # Cruise features requiring longitudinal
+    if not has_long:
       self.params.remove("CustomAccIncrementsEnabled")
       self.params.remove("SmartCruiseControlVision")
       self.params.remove("SmartCruiseControlMap")
