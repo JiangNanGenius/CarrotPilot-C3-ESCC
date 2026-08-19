@@ -45,6 +45,8 @@ class HudRendererSP(HudRenderer):
     self.speed_conv: float = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
     self.radar_available: bool = False
     self.lead_detected: bool = False
+    self.max_speed_limit: float = 130.0  # 最高速度设定（km/h）
+    self.traffic_light_state: str = "off"  # 红绿灯状态
 
   def _update_state(self) -> None:
     if ui_state.sm.recv_frame["carState"] < ui_state.started_frame:
@@ -136,6 +138,19 @@ class HudRendererSP(HudRenderer):
       set_speed_color,
     )
 
+    # 最高速度设定（在 set_speed 下方）
+    max_speed_text = f"上限 {round(self.max_speed_limit)}" if hasattr(self, 'max_speed_limit') else ""
+    if max_speed_text:
+      max_speed_width = measure_text_cached(self._font_semi_bold, max_speed_text, 24).x
+      rl.draw_text_ex(
+        self._font_semi_bold,
+        max_speed_text,
+        rl.Vector2(x + (set_speed_width - max_speed_width) / 2, y + 120),
+        24,
+        0,
+        COLORS.GREY,
+      )
+
   def _draw_current_speed(self, rect: rl.Rectangle) -> None:
     self.speed_renderer.render(rect)
 
@@ -158,6 +173,44 @@ class HudRendererSP(HudRenderer):
 
     # 雷达工作状态指示器（右上角）
     self._draw_radar_status(rect)
+
+    # 红绿灯状态提示（右下角）
+    self._draw_traffic_light_status(rect)
+
+  def _draw_traffic_light_status(self, rect: rl.Rectangle) -> None:
+    """Draw traffic light status indicator (bottom-right corner)."""
+    if self.traffic_light_state == "off":
+      return
+
+    x = rect.x + rect.width - 80
+    y = rect.y + rect.height - 80
+    radius = 25
+
+    # 背景圆圈
+    bg_color = rl.Color(0, 0, 0, 180)
+    rl.draw_circle(int(x), int(y), radius + 5, bg_color)
+
+    # 红绿灯颜色
+    if self.traffic_light_state == "red":
+      color = rl.RED
+    elif self.traffic_light_state == "green":
+      color = rl.GREEN
+    else:
+      color = rl.GRAY
+
+    rl.draw_circle(int(x), int(y), radius, color)
+
+    # 文字
+    text = "停" if self.traffic_light_state == "red" else "行"
+    text_width = measure_text_cached(self._font_bold, text, 20).x
+    rl.draw_text_ex(
+      self._font_bold,
+      text,
+      rl.Vector2(x - text_width / 2, y - 10),
+      20,
+      0,
+      rl.WHITE,
+    )
 
   def _draw_radar_status(self, rect: rl.Rectangle) -> None:
     """Draw radar status indicator (top-right corner)."""
