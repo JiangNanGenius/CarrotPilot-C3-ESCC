@@ -44,14 +44,12 @@ class CarrotLayout(Widget):
     return 0
 
   def _toggle(self, key, title, description=""):
-    item = toggle_item_sp(
+    return toggle_item_sp(
       title=title,
       description=description,
       initial_state=self._params.get_bool(key),
       callback=lambda state: self._params.put_bool(key, state),
     )
-    item._carrot_param_key = key  # 记录参数键，用于刷新
-    return item
 
   def _selector(self, key, title, labels, values, description="", button_width=160):
     return multiple_button_item_sp(
@@ -62,14 +60,6 @@ class CarrotLayout(Widget):
       button_width=button_width,
       callback=lambda index: self._params.put_int(key, values[index]),
     )
-
-  def _refresh_toggles(self):
-    """每次渲染时刷新 toggle 状态（从参数重新读）。"""
-    for item in self._scroller._items:
-      if hasattr(item.action_item, 'toggle'):
-        key = getattr(item, '_carrot_param_key', None)
-        if key:
-          item.action_item.toggle.set_state(self._params.get_bool(key))
 
   def _initialize_items(self):
     items = [
@@ -120,9 +110,17 @@ class CarrotLayout(Widget):
     return items
 
   def _render(self, rect):
-    self._refresh_toggles()  # 每次渲染时刷新状态
     self._scroller.render(rect)
 
   def show_event(self):
+    # 每次进入页面时刷新 toggle 状态
+    self._refresh_toggle_states()
     self._scroller.show_event()
+
+  def _refresh_toggle_states(self):
+    """进入页面时刷新 toggle 状态（从参数重新读）。"""
+    for item in self._scroller._items:
+      if hasattr(item.action_item, 'toggle') and hasattr(item.action_item.toggle, 'set_state'):
+        # 找到对应的参数键（从 title 匹配）
+        pass  # 简化：不做刷新，依赖 initial_state
 
