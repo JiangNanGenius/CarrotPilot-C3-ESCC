@@ -10,7 +10,6 @@ from cereal import car, custom
 from opendbc.car import structs
 from openpilot.common.constants import CV
 from openpilot.common.params import Params
-from openpilot.sunnypilot.selfdrive.car.intelligent_cruise_button_management.helpers import get_minimum_set_speed
 from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.speed_limit_assist import ACTIVE_STATES as SLA_ACTIVE_STATES
 from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.helpers import compare_cluster_target
 
@@ -89,7 +88,7 @@ class VCruiseHelperSP:
       self.v_cruise_min = V_CRUISE_MIN
       return
 
-    self.v_cruise_min = get_minimum_set_speed(is_metric)
+    self.v_cruise_min = 30 if is_metric else 20
 
   def update_enabled_state(self, CS: car.CarState, enabled: bool) -> bool:
     # special enabled state for non pcmCruiseSpeed, unchanged for non pcmCruise
