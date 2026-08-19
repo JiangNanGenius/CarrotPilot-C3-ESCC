@@ -599,10 +599,14 @@ class CarrotPlanner:
         else:
           self.comfort_brake = self.comfortBrake * 0.9
           #self.comfort_brake = COMFORT_BRAKE
-          self.trafficStopAdjustRatio = np.interp(v_ego_kph, [0, 100], [1.0, 0.7])
-          stop_dist = stop_model_x_rl * np.interp(stop_model_x_rl, [0, 50], [1.0, self.trafficStopAdjustRatio])  ##�����Ÿ��� ���� �����Ÿ� ��������
-          if stop_dist > 10.0: ### 10M�̻��϶���, self.actual_stop_distance�� ������Ʈ��.
-            self.actual_stop_distance = stop_dist
+          # 停车距离优化：高速时保持安全距离（0.7→0.85）
+          self.trafficStopAdjustRatio = np.interp(v_ego_kph, [0, 100], [1.0, 0.85])
+          stop_dist = stop_model_x_rl * np.interp(stop_model_x_rl, [0, 50], [1.0, self.trafficStopAdjustRatio])
+          # 最小停车距离保护（默认 4.0 米）
+          MIN_STOP_DISTANCE = 4.0
+          stop_dist = max(stop_dist, MIN_STOP_DISTANCE)
+          # 修正记录逻辑：无论距离多少都记录
+          self.actual_stop_distance = stop_dist
           stop_model_x = 0
           self.fakeCruiseDistance = 0 if self.actual_stop_distance > 10.0 else 10.0
           if v_ego < 0.3:
