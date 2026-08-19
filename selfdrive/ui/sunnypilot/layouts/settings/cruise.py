@@ -6,10 +6,11 @@ See the LICENSE.md file in the root directory for more details.
 """
 from enum import IntEnum
 
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.cruise_sub_layouts.speed_limit_settings import SpeedLimitSettingsLayout
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.system.ui.lib.multilang import tr, tr_noop
-from openpilot.system.ui.sunnypilot.widgets.list_view import toggle_item_sp, option_item_sp, simple_button_item_sp
+from openpilot.system.ui.sunnypilot.widgets.list_view import toggle_item_sp, option_item_sp, simple_button_item_sp, multiple_button_item_sp
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.widgets.scroller_tici import Scroller
 
@@ -28,17 +29,54 @@ class CruiseLayout(Widget):
     super().__init__()
     self._current_panel = PanelType.CRUISE
     self._speed_limit_layout = SpeedLimitSettingsLayout(lambda: self._set_current_panel(PanelType.CRUISE))
+    self._carrot_params = CarrotParams()
 
     items = self._initialize_items()
     self._scroller = Scroller(items, line_separator=True, spacing=0)
 
-  def _initialize_items(self):
-    # Carrot 功能（二级菜单）
-    self.carrot_button = simple_button_item_sp(
-      button_text=lambda: tr("驾驶辅助设置"),
-      button_width=800,
-      callback=lambda: self._set_current_panel(PanelType.CARROT)
+  def _carrot_toggle(self, key, title, description=""):
+    return toggle_item_sp(
+      title=title,
+      description=description,
+      initial_state=self._carrot_params.get_bool(key),
+      callback=lambda state: self._carrot_params.put_bool(key, state),
     )
+
+  def _carrot_selector(self, key, title, labels, values, description=""):
+    current = self._carrot_params.get_int(key)
+    idx = values.index(current) if current in values else 0
+    return multiple_button_item_sp(
+      title=title,
+      description=description,
+      buttons=labels,
+      selected_index=idx,
+      callback=lambda i: self._carrot_params.put_int(key, values[i]),
+    )
+
+  def _initialize_items(self):
+    # Carrot 功能（直接显示，不用二级菜单）
+    self.carrot_speed_limit = self._carrot_toggle(
+      "CarrotSpeedLimitEnable", "限速控制",
+      "合并摄像头/车辆CAN + 地图 + 导航App 三路限速，自动应用（无需按键确认）。")
+
+    self.carrot_road_offset = self._carrot_selector(
+      "AutoRoadSpeedLimitOffset", "道路限速偏移",
+      ["-1", "0", "+5", "+10", "+20"], [-1, 0, 5, 10, 20],
+      description="道路限速的固定偏移（-1 表示不启用）。")
+
+    self.carrot_navi_offset = self._carrot_selector(
+      "AutoNaviSpeedLimitOffset", "导航限速偏移",
+      ["-20", "-10", "0", "+10", "+20"], [-20, -10, 0, 10, 20],
+      description="导航测速限速的固定偏移（km/h）。")
+
+    self.carrot_safety_factor = self._carrot_selector(
+      "AutoNaviSpeedSafetyFactor", "限速安全系数",
+      ["80%", "90%", "100%", "110%", "120%"], [80, 90, 100, 110, 120],
+      description="限速值的百分比系数（低于 100% 更保守）。")
+
+    self.carrot_traffic_stop = self._carrot_toggle(
+      "CarrotTrafficStopEnable", "红绿灯停车",
+      "模型预测前方红灯时提前减速（视觉版，默认关闭，高风险）。")
 
     # SunnyPilot 原生功能
     self.scc_v_toggle = toggle_item_sp(
@@ -82,7 +120,11 @@ class CruiseLayout(Widget):
       param="DynamicExperimentalControl")
 
     items = [
-      self.carrot_button,
+      self.carrot_speed_limit,
+      self.carrot_road_offset,
+      self.carrot_navi_offset,
+      self.carrot_safety_factor,
+      self.carrot_traffic_stop,
       self.dec_toggle,
       self.scc_v_toggle,
       self.scc_m_toggle,
@@ -96,16 +138,8 @@ class CruiseLayout(Widget):
   def _render(self, rect):
     if self._current_panel == PanelType.SLA:
       self._speed_limit_layout.render(rect)
-    elif self._current_panel == PanelType.CARROT:
-      # Carrot 二级菜单（暂时用文本表示，后续可扩展）
-      self._render_carrot_panel(rect)
     else:
       self._scroller.render(rect)
-
-  def _render_carrot_panel(self, rect):
-    """Render Carrot settings panel (placeholder)."""
-    # TODO: 实现 Carrot 设置的完整 UI
-    pass
 
   def show_event(self):
     self._set_current_panel(PanelType.CRUISE)
