@@ -539,7 +539,7 @@ class CarrotPlanner:
     v = model.velocity.x
 
     self.fakeCruiseDistance = 0.0
-    lead_detected = radarstate.leadOne.status # & radarstate.leadOne.radar
+    lead_detected = radarstate.leadOne.status & radarstate.leadOne.radar
 
     self.xStop = self.update_stop_dist(x[31])
     stop_model_x_raw = self.xStop
