@@ -6,6 +6,7 @@ See the LICENSE.md file in the root directory for more details.
 """
 import pyray as rl
 
+from cereal import car
 from openpilot.common.constants import CV
 from openpilot.selfdrive.ui.mici.onroad.torque_bar import TorqueBar
 from openpilot.selfdrive.ui.sunnypilot.onroad.developer_ui import DeveloperUiRenderer, DeveloperUiState, get_bottom_dev_ui_offset
@@ -47,6 +48,7 @@ class HudRendererSP(HudRenderer):
     self.lead_detected: bool = False
     self.max_speed_limit: float = 130.0  # 最高速度设定（km/h）
     self.traffic_light_state: str = "off"  # 红绿灯状态
+    self.gear_shifter: str = "unknown"  # 当前档位
 
   def _update_state(self) -> None:
     if ui_state.sm.recv_frame["carState"] < ui_state.started_frame:
@@ -56,6 +58,27 @@ class HudRendererSP(HudRenderer):
       self.pcm_cruise_speed = ui_state.CP_SP.pcmCruiseSpeed
     self.speed_conv = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
     self.speed_cluster = ui_state.sm['carState'].cruiseState.speedCluster * self.speed_conv
+
+    # 当前档位
+    gear = ui_state.sm['carState'].gearShifter
+    if gear == car.CarState.GearShifter.park:
+      self.gear_shifter = "P"
+    elif gear == car.CarState.GearShifter.reverse:
+      self.gear_shifter = "R"
+    elif gear == car.CarState.GearShifter.neutral:
+      self.gear_shifter = "N"
+    elif gear == car.CarState.GearShifter.drive:
+      self.gear_shifter = "D"
+    elif gear == car.CarState.GearShifter.sport:
+      self.gear_shifter = "S"
+    elif gear == car.CarState.GearShifter.manumatic:
+      self.gear_shifter = "M"
+    elif gear == car.CarState.GearShifter.low:
+      self.gear_shifter = "L"
+    elif gear == car.CarState.GearShifter.eco:
+      self.gear_shifter = "E"
+    else:
+      self.gear_shifter = "?"
 
     # 雷达工作状态
     if ui_state.sm.alive['radarState']:
@@ -176,6 +199,32 @@ class HudRendererSP(HudRenderer):
 
     # 红绿灯状态提示（右下角）
     self._draw_traffic_light_status(rect)
+
+    # 当前档位显示（左上角）
+    self._draw_gear_shifter(rect)
+
+  def _draw_gear_shifter(self, rect: rl.Rectangle) -> None:
+    """Draw current gear shifter (top-left corner)."""
+    x = rect.x + 20
+    y = rect.y + 20
+    w = 60
+    h = 40
+
+    # 背景
+    bg_color = rl.Color(0, 0, 0, 180)
+    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.3, 8, bg_color)
+
+    # 档位文字
+    text_color = rl.WHITE if self.gear_shifter in ("D", "S", "M") else rl.YELLOW
+    text_width = measure_text_cached(self._font_bold, self.gear_shifter, 28).x
+    rl.draw_text_ex(
+      self._font_bold,
+      self.gear_shifter,
+      rl.Vector2(x + (w - text_width) / 2, y + 8),
+      28,
+      0,
+      text_color,
+    )
 
   def _draw_traffic_light_status(self, rect: rl.Rectangle) -> None:
     """Draw traffic light status indicator (bottom-right corner)."""
