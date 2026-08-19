@@ -66,6 +66,14 @@ class SmartCruiseControlVision:
     self.current_lat_acc = 0.
     self.max_pred_lat_acc = 0.
 
+    # 可调阈值（从参数读取，默认硬编码值）
+    self._entering_pred_lat_acc_th = self.params.get_float("SCCVisionEnteringTh") or _ENTERING_PRED_LAT_ACC_TH
+    self._abort_entering_pred_lat_acc_th = self.params.get_float("SCCVisionAbortTh") or _ABORT_ENTERING_PRED_LAT_ACC_TH
+    self._turning_lat_acc_th = self.params.get_float("SCCVisionTurningTh") or _TURNING_LAT_ACC_TH
+    self._leaving_lat_acc_th = self.params.get_float("SCCVisionLeavingTh") or _LEAVING_LAT_ACC_TH
+    self._finish_lat_acc_th = self.params.get_float("SCCVisionFinishTh") or _FINISH_LAT_ACC_TH
+    self._a_lat_reg_max = self.params.get_float("SCCVisionMaxLatAcc") or _A_LAT_REG_MAX
+
   def get_a_target_from_control(self) -> float:
     return self.a_target
 
@@ -97,7 +105,7 @@ class SmartCruiseControlVision:
       max_curve = self.max_pred_lat_acc / (v_ego**2)
 
       # Get the target velocity for the maximum curve
-      self.v_target = (_A_LAT_REG_MAX / max_curve) ** 0.5
+      self.v_target = (self._a_lat_reg_max / max_curve) ** 0.5
 
   def _update_state_machine(self) -> tuple[bool, bool]:
     # ENABLED, ENTERING, TURNING, LEAVING, OVERRIDING
@@ -115,7 +123,7 @@ class SmartCruiseControlVision:
           if self.v_ego <= MIN_V:
             pass
           # If significant lateral acceleration is predicted ahead, then move to Entering turn state.
-          elif self.max_pred_lat_acc >= _ENTERING_PRED_LAT_ACC_TH:
+          elif self.max_pred_lat_acc >= self._entering_pred_lat_acc_th:
             self.state = VisionState.entering
 
         # OVERRIDING
@@ -126,25 +134,25 @@ class SmartCruiseControlVision:
         # ENTERING
         elif self.state == VisionState.entering:
           # Transition to Turning if current lateral acceleration is over the threshold.
-          if self.current_lat_acc >= _TURNING_LAT_ACC_TH:
+          if self.current_lat_acc >= self._turning_lat_acc_th:
             self.state = VisionState.turning
           # Abort if the predicted lateral acceleration drops
-          elif self.max_pred_lat_acc < _ABORT_ENTERING_PRED_LAT_ACC_TH:
+          elif self.max_pred_lat_acc < self._abort_entering_pred_lat_acc_th:
             self.state = VisionState.enabled
 
         # TURNING
         elif self.state == VisionState.turning:
           # Transition to Leaving if current lateral acceleration drops below a threshold.
-          if self.current_lat_acc <= _LEAVING_LAT_ACC_TH:
+          if self.current_lat_acc <= self._leaving_lat_acc_th:
             self.state = VisionState.leaving
 
         # LEAVING
         elif self.state == VisionState.leaving:
           # Transition back to Turning if current lateral acceleration goes back over the threshold.
-          if self.current_lat_acc >= _TURNING_LAT_ACC_TH:
+          if self.current_lat_acc >= self._turning_lat_acc_th:
             self.state = VisionState.turning
           # Finish if current lateral acceleration goes below a threshold.
-          elif self.current_lat_acc < _FINISH_LAT_ACC_TH:
+          elif self.current_lat_acc < self._finish_lat_acc_th:
             self.state = VisionState.enabled
 
     # DISABLED
