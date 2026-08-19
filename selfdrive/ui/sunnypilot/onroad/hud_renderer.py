@@ -43,6 +43,8 @@ class HudRendererSP(HudRenderer):
     self.icbm_active_counter: int = 0
     self.speed_cluster: float = 0.0
     self.speed_conv: float = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
+    self.radar_available: bool = False
+    self.lead_detected: bool = False
 
   def _update_state(self) -> None:
     if ui_state.sm.recv_frame["carState"] < ui_state.started_frame:
@@ -52,6 +54,15 @@ class HudRendererSP(HudRenderer):
       self.pcm_cruise_speed = ui_state.CP_SP.pcmCruiseSpeed
     self.speed_conv = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
     self.speed_cluster = ui_state.sm['carState'].cruiseState.speedCluster * self.speed_conv
+
+    # 雷达工作状态
+    if ui_state.sm.alive['radarState']:
+      lead_one = ui_state.sm['radarState'].leadOne
+      self.radar_available = lead_one.radar
+      self.lead_detected = lead_one.status
+    else:
+      self.radar_available = False
+      self.lead_detected = False
 
     super()._update_state()
     self.road_name_renderer.update()
@@ -144,3 +155,31 @@ class HudRendererSP(HudRenderer):
     self.turn_signal_controller.render(rect)
     self.circular_alerts_renderer.render(rect)
     self.rocket_fuel.render(rect, ui_state.sm)
+
+    # 雷达工作状态指示器（右上角）
+    self._draw_radar_status(rect)
+
+  def _draw_radar_status(self, rect: rl.Rectangle) -> None:
+    """Draw radar status indicator (top-right corner)."""
+    x = rect.x + rect.width - 120
+    y = rect.y + 20
+    w = 100
+    h = 30
+
+    # 背景
+    bg_color = rl.Color(0, 0, 0, 180)
+    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.3, 8, bg_color)
+
+    # 雷达图标（简单表示）
+    radar_color = rl.GREEN if self.radar_available else rl.RED
+    rl.draw_circle(int(x + 15), int(y + h // 2), 8, radar_color)
+
+    # 文字
+    text = "Radar" if self.radar_available else "No Radar"
+    text_color = rl.WHITE if self.radar_available else rl.RED
+    rl.draw_text(text, int(x + 30), int(y + 8), 16, text_color)
+
+    # lead 状态
+    if self.lead_detected:
+      lead_text = "Lead"
+      rl.draw_text(lead_text, int(x + 30), int(y + 22), 12, rl.GREEN)
