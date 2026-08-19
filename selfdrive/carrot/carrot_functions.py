@@ -75,6 +75,7 @@ class CarrotPlanner:
     self.xState = XState.cruise
     self.xStop = 0.0
     self.actual_stop_distance = 0.0
+    self.v_ego_kph = 0.0  # 当前车速（km/h）
     #self.debugLongText = ""
     self.stopping_count = 0
     self.traffic_starting_count = 0
@@ -321,10 +322,12 @@ class CarrotPlanner:
     elif lead.status and self.dynamicTFollow > 0.0:
       # lead.jLead < 0 : 앞차가 감속 방향으로 변함 -> 차간거리 증가
       # lead.jLead > 0 : 앞차가 가속 방향으로 변함 -> 차간거리 감소
-      t_follow += np.interp(lead.jLead, [-3.0, -0.5, 0.5, 2.0], [1.0, 0.0, 0.0, -1.0]) * self.dynamicTFollow
+      # 起步优化：更快减少 t_follow（快速跟上）
+      t_follow += np.interp(lead.jLead, [-3.0, -0.5, 0.5, 2.0], [1.0, 0.0, 0.0, -2.0]) * self.dynamicTFollow
 
       # 앞차가 풀어주는 상황에서는 jerk factor 약간 낮춰서 더 민첩하게
-      if lead.jLead > 0.2:
+      # 起步优化：起步时（v_ego < 5 km/h）不降低 jerk_factor
+      if lead.jLead > 0.2 and self.v_ego_kph >= 5.0:
         self.jerk_factor_apply = self.jerk_factor * 0.5
 
       t_follow = np.clip(t_follow, 0.3, 2.0)
@@ -336,7 +339,11 @@ class CarrotPlanner:
     # t_follow가 급격히 증가하면 목표거리도 급격히 증가하여 강한 감속을 유도할 수 있으므로
     # 증가 방향만 천천히 반영
     if t_follow > self.t_follow_last:
-      t_follow = min(t_follow, self.t_follow_last + 0.1 * DT_MDL)
+      # 起步优化：起步时（v_ego < 5 km/h）放宽限制
+      if self.v_ego_kph < 5.0:
+        t_follow = min(t_follow, self.t_follow_last + 0.3 * DT_MDL)
+      else:
+        t_follow = min(t_follow, self.t_follow_last + 0.1 * DT_MDL)
 
     self.t_follow_last = float(t_follow)
     return float(t_follow + adjust_t_follow)
@@ -509,6 +516,7 @@ class CarrotPlanner:
     v_ego = carstate.vEgo
     a_ego = carstate.aEgo
     v_ego_kph = v_ego * CV.MS_TO_KPH
+    self.v_ego_kph = v_ego_kph  # 更新类属性（跟车起步优化用）
     v_ego_cluster = carstate.vEgoCluster
     v_ego_cluster_kph = v_ego_cluster * CV.MS_TO_KPH
 
