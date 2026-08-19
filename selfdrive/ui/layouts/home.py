@@ -185,28 +185,53 @@ class HomeLayout(Widget):
     font = gui_app.font(FontWeight.MEDIUM)
     x = self.left_column_rect.x
     y = self.left_column_rect.y
-    line_height = 40
+    line_height = 50
 
     # 设备状态
-    rl.draw_text_ex(font, "设备状态", rl.Vector2(int(x), int(y)), 32, 0, rl.WHITE)
-    y += line_height + 10
+    rl.draw_text_ex(font, "设备状态", rl.Vector2(int(x), int(y)), 40, 0, rl.WHITE)
+    y += line_height + 15
 
     # 系统信息
     temp_text = "N/A"
+    gpu_temp_text = "N/A"
+    mem_text = "N/A"
+    cpu_text = "N/A"
+    storage_text = "N/A"
+    fan_text = "N/A"
+
     if ui_state.sm.alive['deviceState']:
-      cpu_temp = ui_state.sm['deviceState'].cpuTempC
-      if cpu_temp:
-        temp_text = f"{cpu_temp[0]:.0f}°C"
+      ds = ui_state.sm['deviceState']
+      # CPU 温度
+      if ds.cpuTempC:
+        temp_text = f"{ds.cpuTempC[0]:.1f}°C"
+      # GPU 温度
+      if ds.gpuTempC:
+        gpu_temp_text = f"{ds.gpuTempC[0]:.1f}°C"
+      # 内存使用
+      mem_text = f"{ds.memoryUsagePercent}%"
+      # CPU 使用（取第一个核心）
+      if ds.cpuUsagePercent:
+        cpu_text = f"{ds.cpuUsagePercent[0]}%"
+      # 存储空间
+      storage_text = f"{ds.freeSpacePercent:.0f}%"
+      # 风扇转速
+      if ds.fanSpeedRpm:
+        fan_text = f"{ds.fanSpeedRpm} RPM"
 
     info_items = [
       ("版本", self._version_text),
       ("状态", "待机" if not ui_state.started else "行车"),
-      ("温度", temp_text),
+      ("CPU 温度", temp_text),
+      ("GPU 温度", gpu_temp_text),
+      ("CPU 使用", cpu_text),
+      ("内存使用", mem_text),
+      ("存储空间", storage_text),
+      ("风扇转速", fan_text),
     ]
 
     for label, value in info_items:
-      rl.draw_text_ex(font, f"{label}:", rl.Vector2(int(x), int(y)), 24, 0, rl.LIGHTGRAY)
-      rl.draw_text_ex(font, str(value), rl.Vector2(int(x + 120), int(y)), 24, 0, rl.WHITE)
+      rl.draw_text_ex(font, f"{label}:", rl.Vector2(int(x), int(y)), 32, 0, rl.LIGHTGRAY)
+      rl.draw_text_ex(font, str(value), rl.Vector2(int(x + 180), int(y)), 32, 0, rl.WHITE)
       y += line_height
 
   def _render_update_view(self):
