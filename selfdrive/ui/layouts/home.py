@@ -183,35 +183,54 @@ class HomeLayout(Widget):
   def _render_left_column(self):
     """Render left column with device status and system info."""
     font = gui_app.font(FontWeight.MEDIUM)
+    font_bold = gui_app.font(FontWeight.SEMI_BOLD)
     x = self.left_column_rect.x
     y = self.left_column_rect.y
-    line_height = 40
+    line_height = 55
 
-    # 设备状态
-    rl.draw_text_ex(font, "设备状态", rl.Vector2(int(x), int(y)), 32, 0, rl.WHITE)
-    y += line_height + 10
+    # 标题
+    rl.draw_text_ex(font_bold, "设备状态", rl.Vector2(int(x), int(y)), 44, 0, rl.WHITE)
+    y += line_height + 20
 
     # 系统信息
     temp_text = "N/A"
     gpu_temp_text = "N/A"
-    if ui_state.sm.alive['deviceState']:
-      cpu_temp = ui_state.sm['deviceState'].cpuTempC
-      if cpu_temp:
-        temp_text = f"{cpu_temp[0]:.1f}°C"
-      gpu_temp = ui_state.sm['deviceState'].gpuTempC
-      if gpu_temp:
-        gpu_temp_text = f"{gpu_temp[0]:.1f}°C"
+    cpu_text = "N/A"
+    mem_text = "N/A"
+    storage_text = "N/A"
+    fan_text = "N/A"
 
+    if ui_state.sm.alive['deviceState']:
+      ds = ui_state.sm['deviceState']
+      if ds.cpuTempC:
+        temp_text = f"{ds.cpuTempC[0]:.1f}°C"
+      if ds.gpuTempC:
+        gpu_temp_text = f"{ds.gpuTempC[0]:.1f}°C"
+      if ds.cpuUsagePercent:
+        cpu_text = f"{ds.cpuUsagePercent[0]}%"
+      mem_text = f"{ds.memoryUsagePercent}%"
+      storage_text = f"{ds.freeSpacePercent:.0f}%"
+      if ds.fanSpeedPercentDesired:
+        fan_text = f"{ds.fanSpeedPercentDesired}%"
+
+    # 用卡片式布局（每项一行，标签和值分开对齐）
     info_items = [
       ("版本", self._version_text),
       ("状态", "待机" if not ui_state.started else "行车"),
       ("CPU 温度", temp_text),
       ("GPU 温度", gpu_temp_text),
+      ("CPU 使用", cpu_text),
+      ("内存使用", mem_text),
+      ("存储空间", storage_text),
+      ("风扇转速", fan_text),
     ]
 
     for label, value in info_items:
-      rl.draw_text_ex(font, f"{label}:", rl.Vector2(int(x), int(y)), 28, 0, rl.LIGHTGRAY)
-      rl.draw_text_ex(font, str(value), rl.Vector2(int(x + 140), int(y)), 28, 0, rl.WHITE)
+      # 标签（灰色，小字）
+      rl.draw_text_ex(font, f"{label}", rl.Vector2(int(x), int(y)), 32, 0, rl.LIGHTGRAY)
+      # 值（白色，大字，右对齐）
+      value_width = measure_text_cached(font_bold, str(value), 36).x
+      rl.draw_text_ex(font_bold, str(value), rl.Vector2(int(x + self.left_column_rect.width - value_width - 20), int(y)), 36, 0, rl.WHITE)
       y += line_height
 
   def _render_update_view(self):
