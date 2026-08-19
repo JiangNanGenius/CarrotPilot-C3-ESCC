@@ -215,8 +215,8 @@ class HomeLayout(Widget):
       # 存储空间
       storage_text = f"{ds.freeSpacePercent:.0f}%"
       # 风扇转速
-      if ds.fanSpeedRpm:
-        fan_text = f"{ds.fanSpeedRpm} RPM"
+      if ds.fanSpeedPercentDesired:
+        fan_text = f"{ds.fanSpeedPercentDesired}%"
 
     info_items = [
       ("版本", self._version_text),
