@@ -140,6 +140,11 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # Get new v_cruise and a_desired from Smart Cruise Control and Speed Limit Assist
     v_cruise, self.a_desired = LongitudinalPlannerSP.update_targets(self, sm, self.v_desired_filter.x, self.a_desired, v_cruise)
 
+    # Carrot planner: follow/accel/driving mode logic (生成基础巡航速度).
+    # Only adjusts v_cruise; MPC handles actual accel/braking.
+    v_cruise_kph_carrot = self.carrot_planner.update(sm, v_cruise * CV.MS_TO_KPH, mode="combined")
+    v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
+
     # Carrot speed limit: camera/CAN + map limit (sunny resolver) + carrot nav-app limit.
     # Only lowers v_cruise; braking stays solely with e2e/MPC.
     v_cruise = self.carrot_speed_limit.update(sm, v_cruise, self.resolver.speed_limit)
@@ -147,11 +152,6 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # Carrot traffic-light stop (nav-app red light): early deceleration hint.
     # Only lowers v_cruise; shouldStop stays solely with e2e.
     v_cruise = self.carrot_traffic_stop.update(sm, v_cruise)
-
-    # Carrot planner: follow/accel/driving mode logic.
-    # Only adjusts v_cruise; MPC handles actual accel/braking.
-    v_cruise_kph_carrot = self.carrot_planner.update(sm, v_cruise * CV.MS_TO_KPH, mode="combined")
-    v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
 
     if force_slow_decel:
       v_cruise = 0.0

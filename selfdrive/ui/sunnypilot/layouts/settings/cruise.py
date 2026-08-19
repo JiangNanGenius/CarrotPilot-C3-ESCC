@@ -45,12 +45,17 @@ class CruiseLayout(Widget):
   def _carrot_selector(self, key, title, labels, values, description=""):
     current = self._carrot_params.get_int(key)
     idx = values.index(current) if current in values else 0
+
+    def _on_select(i):
+      if 0 <= i < len(values):
+        self._carrot_params.put_int(key, values[i])
+
     return multiple_button_item_sp(
       title=title,
       description=description,
       buttons=labels,
       selected_index=idx,
-      callback=lambda i: self._carrot_params.put_int(key, values[i]),
+      callback=_on_select,
     )
 
   def _initialize_items(self):
