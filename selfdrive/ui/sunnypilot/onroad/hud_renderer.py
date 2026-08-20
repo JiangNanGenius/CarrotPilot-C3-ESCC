@@ -114,8 +114,9 @@ class HudRendererSP(HudRenderer):
     self._get_icbm_status()
 
     set_speed_width = UI_CONFIG.set_speed_width_metric if ui_state.is_metric else UI_CONFIG.set_speed_width_imperial
-    x = rect.x + 60 + (UI_CONFIG.set_speed_width_imperial - set_speed_width) // 2
-    y = rect.y + 45
+    # 移到右上角，避免与左上角档位重叠
+    x = rect.x + rect.width - set_speed_width - 20
+    y = rect.y + 20
 
     set_speed_rect = rl.Rectangle(x, y, set_speed_width, UI_CONFIG.set_speed_height)
     rl.draw_rectangle_rounded(set_speed_rect, 0.35, 10, COLORS.BLACK_TRANSLUCENT)
@@ -203,7 +204,7 @@ class HudRendererSP(HudRenderer):
     # 当前档位显示（左上角）
     self._draw_gear_shifter(rect)
 
-    # 系统输出的实际定速值（左上角，档位下方）
+    # 系统输出的实际定速值（右上角，避免与档位重叠）
     self._draw_set_speed(rect)
 
   def _draw_gear_shifter(self, rect: rl.Rectangle) -> None:
