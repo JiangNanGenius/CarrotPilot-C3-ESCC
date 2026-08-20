@@ -126,7 +126,7 @@ class Sidebar(Widget, SidebarSP):
   def _update_temperature_status(self, device_state):
     thermal_status = device_state.thermalStatus
 
-    if thermal_status == ThermalStatus.ok:
+    if thermal_status == ThermalStatus.green:
       self._temp_status.update(tr_noop("TEMP"), tr_noop("GOOD"), Colors.GOOD)
     else:
       self._temp_status.update(tr_noop("TEMP"), tr_noop("HIGH"), Colors.DANGER)
