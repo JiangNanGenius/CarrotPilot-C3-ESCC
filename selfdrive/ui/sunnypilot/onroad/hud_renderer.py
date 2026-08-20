@@ -273,7 +273,7 @@ class HudRendererSP(HudRenderer):
     if self.traffic_light_state == "off":
       return
 
-    w = 250
+    w = 270
     h = 116
     x = rect.x + rect.width - w - 30
     y = rect.y + rect.height - h - 200
@@ -308,10 +308,10 @@ class HudRendererSP(HudRenderer):
     status_text = "STOP" if self.traffic_light_state == "red" else "GO"
     rl.draw_text_ex(self._font_bold, status_text, rl.Vector2(x + 100, y + 25), 32, 0, rl.WHITE)
     if self.traffic_light_state == "red" and 0 < self.traffic_stop_distance < 300:
-      distance_text = f"{self.traffic_stop_distance:.0f} m TO LINE"
+      distance_text = f"LINE {self.traffic_stop_distance:.0f} m"
     else:
-      distance_text = "PLAN UPDATED"
-    rl.draw_text_ex(self._font_medium, distance_text, rl.Vector2(x + 100, y + 68), 22, 0, COLORS.GREY)
+      distance_text = "PLAN READY"
+    rl.draw_text_ex(self._font_semi_bold, distance_text, rl.Vector2(x + 100, y + 65), 26, 0, rl.Color(225, 225, 225, 255))
 
   def _draw_radar_status(self, rect: rl.Rectangle) -> None:
     """Draw radar status indicator (top-right corner)."""
@@ -333,4 +333,4 @@ class HudRendererSP(HudRenderer):
     # Lead source is useful without redefining radar health.
     if self.lead_detected:
       lead_text = "LEAD: RADAR" if self.lead_from_radar else "LEAD: VISION"
-      rl.draw_text_ex(self._font_medium, lead_text, rl.Vector2(x + 44, y + 33), 17, 0, COLORS.ENGAGED)
+      rl.draw_text_ex(self._font_medium, lead_text, rl.Vector2(x + 44, y + 31), 19, 0, COLORS.ENGAGED)
