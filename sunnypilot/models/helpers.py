@@ -17,7 +17,7 @@ from openpilot.system.hardware.hw import Paths
 from pathlib import Path
 
 # see the README.md for more details on the model selector versioning
-CURRENT_SELECTOR_VERSION = 15
+CURRENT_SELECTOR_VERSION = 17
 REQUIRED_MIN_SELECTOR_VERSION = 14
 
 
