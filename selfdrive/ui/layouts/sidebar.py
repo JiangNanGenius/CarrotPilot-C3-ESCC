@@ -115,7 +115,8 @@ class Sidebar(Widget, SidebarSP):
     self._update_temperature_status(device_state)
     self._update_connection_status(device_state)
     self._update_panda_status()
-    SidebarSP._update_sunnylink_status(self)
+    # sunnylink 依赖缺失，跳过
+    # SidebarSP._update_sunnylink_status(self)
 
   def _update_network_status(self, device_state):
     self._net_type = NETWORK_TYPES.get(device_state.networkType.raw, tr_noop("Unknown"))
