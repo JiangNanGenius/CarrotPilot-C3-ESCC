@@ -10,8 +10,8 @@ from openpilot.system.loggerd.config import get_available_bytes, get_available_p
 from openpilot.system.loggerd.uploader import listdir_by_creation
 from openpilot.system.loggerd.xattr_cache import getxattr
 
-MIN_BYTES = int(5 * 1024 * 1024 * 1024 * 0.7)  # 3.5GB（下调 30%）
-MIN_PERCENT = 7
+MIN_BYTES = 5 * 1024 * 1024 * 1024
+MIN_PERCENT = 10
 
 DELETE_LAST = ['boot', 'crash']
 
