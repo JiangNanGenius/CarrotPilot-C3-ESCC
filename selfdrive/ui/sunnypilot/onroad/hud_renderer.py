@@ -203,12 +203,15 @@ class HudRendererSP(HudRenderer):
     # 当前档位显示（左上角）
     self._draw_gear_shifter(rect)
 
+    # 系统输出的实际定速值（左上角，档位下方）
+    self._draw_set_speed(rect)
+
   def _draw_gear_shifter(self, rect: rl.Rectangle) -> None:
     """Draw current gear shifter (top-left corner)."""
     x = rect.x + 20
     y = rect.y + 20
-    w = 60
-    h = 40
+    w = 80
+    h = 60
 
     # 背景
     bg_color = rl.Color(0, 0, 0, 180)
@@ -216,12 +219,12 @@ class HudRendererSP(HudRenderer):
 
     # 档位文字
     text_color = rl.WHITE if self.gear_shifter in ("D", "S", "M") else rl.YELLOW
-    text_width = measure_text_cached(self._font_bold, self.gear_shifter, 28).x
+    text_width = measure_text_cached(self._font_bold, self.gear_shifter, 40).x
     rl.draw_text_ex(
       self._font_bold,
       self.gear_shifter,
-      rl.Vector2(x + (w - text_width) / 2, y + 8),
-      28,
+      rl.Vector2(x + (w - text_width) / 2, y + 10),
+      40,
       0,
       text_color,
     )
@@ -231,13 +234,13 @@ class HudRendererSP(HudRenderer):
     if self.traffic_light_state == "off":
       return
 
-    x = rect.x + rect.width - 80
-    y = rect.y + rect.height - 80
-    radius = 25
+    x = rect.x + rect.width - 120
+    y = rect.y + rect.height - 120
+    radius = 40
 
     # 背景圆圈
     bg_color = rl.Color(0, 0, 0, 180)
-    rl.draw_circle(int(x), int(y), radius + 5, bg_color)
+    rl.draw_circle(int(x), int(y), radius + 8, bg_color)
 
     # 红绿灯颜色
     if self.traffic_light_state == "red":
@@ -251,12 +254,12 @@ class HudRendererSP(HudRenderer):
 
     # 文字
     text = "停" if self.traffic_light_state == "red" else "行"
-    text_width = measure_text_cached(self._font_bold, text, 20).x
+    text_width = measure_text_cached(self._font_bold, text, 32).x
     rl.draw_text_ex(
       self._font_bold,
       text,
-      rl.Vector2(x - text_width / 2, y - 10),
-      20,
+      rl.Vector2(x - text_width / 2, y - 16),
+      32,
       0,
       rl.WHITE,
     )
