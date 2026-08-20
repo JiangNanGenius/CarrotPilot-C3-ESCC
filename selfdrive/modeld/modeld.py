@@ -249,7 +249,10 @@ def main(demo=False):
   if not USBGPU:
     # USB GPU currently saturates a core so can't do this yet,
     # also need to move the aux USB interrupts for good timings
-    config_realtime_process(7, 54)
+    # comma 3 has 4 cores, use core 3 (0-indexed: 0-3)
+    import os
+    cpu_count = os.cpu_count() or 4
+    config_realtime_process(min(3, cpu_count - 1), 54)
 
   st = time.monotonic()
   cloudlog.warning("loading model")
