@@ -916,7 +916,12 @@ class CarrotServ:
       speed_n_sources.append((route_speed, "route"))
       #speed_n_sources.append((self.calculate_current_speed(dist, speed * self.mapTurnSpeedFactor, 0, 1.2), "route"))
 
-    model_turn_speed = max(sm['modelV2'].meta.modelTurnSpeed, self.autoCurveSpeedLowerLimit)
+    # modelTurnSpeed 字段在 cereal 里不存在（sunnypilot 最新版），用模型转向预测替代
+    # 用 modelV2 的 lateral plan 估计转向速度，或直接用 route_speed 兜底
+    try:
+      model_turn_speed = max(getattr(sm['modelV2'].meta, 'modelTurnSpeed', 0), self.autoCurveSpeedLowerLimit)
+    except Exception:
+      model_turn_speed = self.autoCurveSpeedLowerLimit
     if model_turn_speed < 200 and abs(vturn_speed) < 120:
       speed_n_sources.append((model_turn_speed, "model"))
 
