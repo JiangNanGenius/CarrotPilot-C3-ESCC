@@ -203,10 +203,10 @@ class Sidebar(Widget, SidebarSP):
 
   def _draw_metrics(self, rect: rl.Rectangle):
     if gui_app.sunnypilot_ui():
-      metrics, start_y, spacing = SidebarSP._draw_metrics_w_sunnylink(self, rect, self._temp_status, self._panda_status, self._connect_status)
-      for idx, metric in enumerate(metrics):
-        self._draw_metric(rect, metric, start_y + idx * spacing)
-
+      # sunnylink 依赖缺失，用默认布局
+      metrics = [(self._temp_status, 338), (self._panda_status, 496), (self._connect_status, 654)]
+      for metric, y_offset in metrics:
+        self._draw_metric(rect, metric, rect.y + y_offset)
       return
 
     metrics = [(self._temp_status, 338), (self._panda_status, 496), (self._connect_status, 654)]
