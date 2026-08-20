@@ -88,7 +88,7 @@ class HudRendererSP(HudRenderer):
     if ui_state.sm.updated['radarState'] and ui_state.sm.valid['radarState']:
       radar_state = ui_state.sm['radarState']
       lead_one = ui_state.sm['radarState'].leadOne
-      self.radar_available = len(radar_state.radarErrors) == 0
+      self.radar_available = not any(radar_state.radarErrors.to_dict().values())
       self.lead_detected = lead_one.status
       self.lead_from_radar = lead_one.radar
     elif not ui_state.sm.alive['radarState']:

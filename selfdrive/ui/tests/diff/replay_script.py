@@ -182,11 +182,13 @@ def send_onroad(pm: PubMaster) -> None:
   car_control.carControl.enabled = True
 
   radar = messaging.new_message('radarState')
+  radar.valid = True
   radar.radarState.leadOne.status = True
   radar.radarState.leadOne.radar = True
   radar.radarState.leadOne.dRel = 34.0
 
   long_plan = messaging.new_message('longitudinalPlan')
+  long_plan.valid = True
   long_plan.longitudinalPlan.trafficState = 1
   long_plan.longitudinalPlan.trafficStopDistance = 42.0
   long_plan.longitudinalPlan.cruiseTargetSpeed = 82.0
