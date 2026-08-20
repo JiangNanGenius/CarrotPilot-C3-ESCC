@@ -1,3 +1,4 @@
+import io
 import math
 import os
 from pathlib import Path
@@ -35,3 +36,44 @@ def read_file_chunked(path):
   if os.path.isfile(path):
     return Path(path).read_bytes()
   raise FileNotFoundError(path)
+
+
+class ChunkStream(io.RawIOBase):
+  """Stream that transparently reads across chunk files (from sunnypilot)."""
+  def __init__(self, paths):
+    self._paths = iter(paths)
+    self._f = None
+
+  def readable(self):
+    return True
+
+  def readinto(self, b):
+    n = 0
+    view = memoryview(b)
+    while n < len(b):
+      if self._f is None:
+        p = next(self._paths, None)
+        if p is None:
+          break
+        self._f = open(p, 'rb')
+      count = self._f.readinto(view[n:])
+      if not count:
+        self._f.close()
+        self._f = None
+        continue
+      n += count
+    return n
+
+
+def open_file_chunked(path):
+  """Open a (possibly chunked) file as a buffered binary stream."""
+  manifest_path = get_manifest_path(path)
+  if os.path.isfile(manifest_path):
+    num_chunks = int(Path(manifest_path).read_text().strip())
+    paths = [get_chunk_name(path, i, num_chunks) for i in range(num_chunks)]
+  elif os.path.isfile(path):
+    paths = [path]
+  else:
+    raise FileNotFoundError(path)
+  return io.BufferedReader(ChunkStream(paths))
+
