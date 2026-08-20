@@ -71,6 +71,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.a_cruise = init_a
     self.output_a_target = init_a
     self.output_should_stop = False
+    self.cruise_target_speed = 0.0
 
     self.v_desired_trajectory = np.zeros(CONTROL_N)
     self.a_desired_trajectory = np.zeros(CONTROL_N)
@@ -129,6 +130,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
     v_cruise = self.carrot_speed_limit.update(sm, v_cruise, self.resolver.speed_limit)
     v_cruise = self.carrot_traffic_stop.update(sm, v_cruise)
+    self.cruise_target_speed = max(0.0, v_cruise * CV.MS_TO_KPH)
 
     self.mpc.set_weights(prev_accel_constraint, personality=sm['selfdriveState'].personality)
     self.mpc.set_cur_state(self.v_desired_filter.x, self.output_a_target)
@@ -193,6 +195,9 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     longitudinalPlan.shouldStop = bool(self.output_should_stop)
     longitudinalPlan.allowBrake = True
     longitudinalPlan.allowThrottle = bool(self.allow_throttle)
+    longitudinalPlan.trafficState = int(self.carrot_planner.trafficState.value)
+    longitudinalPlan.trafficStopDistance = float(max(0.0, self.carrot_planner.stop_dist))
+    longitudinalPlan.cruiseTargetSpeed = float(self.cruise_target_speed)
 
     pm.send('longitudinalPlan', plan_send)
 

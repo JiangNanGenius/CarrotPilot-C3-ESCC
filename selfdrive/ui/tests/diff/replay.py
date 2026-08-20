@@ -67,7 +67,10 @@ def run_replay(variant: LayoutVariant) -> None:
   # and after 30s of real wall-clock time the settings panel would close automatically.
   device.set_override_interactive_timeout(99999)
 
-  pm = PubMaster(["deviceState", "pandaStates", "driverStateV2", "selfdriveState"])
+  pm = PubMaster([
+    "deviceState", "pandaStates", "driverStateV2", "selfdriveState",
+    "carState", "controlsState", "carControl", "radarState", "longitudinalPlan",
+  ])
   script = build_script(pm, main_layout, variant)
   script_index = 0
 

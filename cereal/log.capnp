@@ -1154,6 +1154,9 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   shouldStop @37: Bool;
   allowThrottle @38: Bool;
   allowBrake @39: Bool;
+  trafficState @40 :Int8;          # 0 off, 1 red/stop, 2 green/go
+  trafficStopDistance @41 :Float32; # meters, visual traffic-stop planner
+  cruiseTargetSpeed @42 :Float32;   # final planner cruise target, km/h
 
 
   solverExecutionTime @35 :Float32;

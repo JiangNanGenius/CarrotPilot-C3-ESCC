@@ -167,8 +167,37 @@ def send_onroad(pm: PubMaster) -> None:
   ps.pandaStates[0].pandaType = log.PandaState.PandaType.dos
   ps.pandaStates[0].ignitionLine = True
 
+  cs = messaging.new_message('carState')
+  cs.carState.vEgo = 22.2
+  cs.carState.vEgoCluster = 22.2
+  cs.carState.vCruise = 100.0
+  cs.carState.vCruiseCluster = 100.0
+  cs.carState.cruiseState.speedCluster = 27.8
+  cs.carState.gearShifter = car.CarState.GearShifter.drive
+
+  controls = messaging.new_message('controlsState')
+  controls.controlsState.deprecated.vCruise = 100.0
+
+  car_control = messaging.new_message('carControl')
+  car_control.carControl.enabled = True
+
+  radar = messaging.new_message('radarState')
+  radar.radarState.leadOne.status = True
+  radar.radarState.leadOne.radar = True
+  radar.radarState.leadOne.dRel = 34.0
+
+  long_plan = messaging.new_message('longitudinalPlan')
+  long_plan.longitudinalPlan.trafficState = 1
+  long_plan.longitudinalPlan.trafficStopDistance = 42.0
+  long_plan.longitudinalPlan.cruiseTargetSpeed = 82.0
+
   pm.send('deviceState', ds)
   pm.send('pandaStates', ps)
+  pm.send('carState', cs)
+  pm.send('controlsState', controls)
+  pm.send('carControl', car_control)
+  pm.send('radarState', radar)
+  pm.send('longitudinalPlan', long_plan)
 
 
 def make_network_state_setup(pm: PubMaster, network_type) -> Callable:

@@ -18,7 +18,7 @@ from openpilot.selfdrive.ui.sunnypilot.onroad.turn_signal import TurnSignalContr
 from openpilot.selfdrive.ui.sunnypilot.onroad.circular_alerts import CircularAlertsRenderer
 from openpilot.selfdrive.ui.sunnypilot.onroad.speed_renderer import SpeedRenderer
 from openpilot.selfdrive.ui.ui_state import ui_state, UIStatus
-from openpilot.selfdrive.ui.onroad.hud_renderer import HudRenderer, UI_CONFIG, FONT_SIZES, COLORS, CRUISE_DISABLED_CHAR
+from openpilot.selfdrive.ui.onroad.hud_renderer import HudRenderer, UI_CONFIG, COLORS, CRUISE_DISABLED_CHAR
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.text_measure import measure_text_cached
@@ -46,8 +46,11 @@ class HudRendererSP(HudRenderer):
     self.speed_conv: float = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
     self.radar_available: bool = False
     self.lead_detected: bool = False
-    self.max_speed_limit: float = 130.0  # 最高速度设定（km/h）
-    self.traffic_light_state: str = "off"  # 红绿灯状态
+    self.lead_from_radar: bool = False
+    self.cruise_target_speed: float = 0.0
+    self.traffic_stop_distance: float = 0.0
+    self.traffic_light_state: str = "off"
+    self._traffic_light_hold_frames: int = 0
     self.gear_shifter: str = "unknown"  # 当前档位
 
   def _update_state(self) -> None:
@@ -80,14 +83,46 @@ class HudRendererSP(HudRenderer):
     else:
       self.gear_shifter = "?"
 
-    # 雷达工作状态
-    if ui_state.sm.alive['radarState']:
+    # Radar health is independent of whether a lead is currently present.
+    if ui_state.sm.alive['radarState'] and ui_state.sm.valid['radarState']:
+      radar_state = ui_state.sm['radarState']
       lead_one = ui_state.sm['radarState'].leadOne
-      self.radar_available = lead_one.radar
+      self.radar_available = len(radar_state.radarErrors) == 0
       self.lead_detected = lead_one.status
+      self.lead_from_radar = lead_one.radar
     else:
       self.radar_available = False
       self.lead_detected = False
+      self.lead_from_radar = False
+
+    # Visual traffic-light stopping and the final planner target are published
+    # by longitudinal_planner. Keep the green state briefly so it is readable.
+    if ui_state.sm.alive['longitudinalPlan'] and ui_state.sm.valid['longitudinalPlan']:
+      long_plan = ui_state.sm['longitudinalPlan']
+      self.cruise_target_speed = long_plan.cruiseTargetSpeed
+      if not ui_state.is_metric:
+        self.cruise_target_speed *= CV.KPH_TO_MPH
+      self.traffic_stop_distance = max(0.0, long_plan.trafficStopDistance)
+
+      traffic_state = int(long_plan.trafficState)
+      if traffic_state == 1:
+        self.traffic_light_state = "red"
+        self._traffic_light_hold_frames = max(1, int(0.5 * gui_app.target_fps))
+      elif traffic_state == 2:
+        self.traffic_light_state = "green"
+        self._traffic_light_hold_frames = max(1, int(2.0 * gui_app.target_fps))
+      elif self._traffic_light_hold_frames > 0:
+        self._traffic_light_hold_frames -= 1
+      else:
+        self.traffic_light_state = "off"
+        self.traffic_stop_distance = 0.0
+    else:
+      self.cruise_target_speed = 0.0
+      if self._traffic_light_hold_frames > 0:
+        self._traffic_light_hold_frames -= 1
+      else:
+        self.traffic_light_state = "off"
+        self.traffic_stop_distance = 0.0
 
     super()._update_state()
     self.road_name_renderer.update()
@@ -113,14 +148,13 @@ class HudRendererSP(HudRenderer):
     long_override = ui_state.sm['carControl'].cruiseControl.override
     self._get_icbm_status()
 
-    set_speed_width = UI_CONFIG.set_speed_width_metric if ui_state.is_metric else UI_CONFIG.set_speed_width_imperial
-    # 移到右上角，避免与左上角档位重叠
-    x = rect.x + rect.width - set_speed_width - 20
-    y = rect.y + 20
+    panel_width = 330
+    panel_height = 224
+    x = rect.x + 30
+    y = rect.y + 30
 
-    set_speed_rect = rl.Rectangle(x, y, set_speed_width, UI_CONFIG.set_speed_height)
-    rl.draw_rectangle_rounded(set_speed_rect, 0.35, 10, COLORS.BLACK_TRANSLUCENT)
-    rl.draw_rectangle_rounded_lines_ex(set_speed_rect, 0.35, 10, 6, COLORS.BORDER_TRANSLUCENT)
+    panel_rect = rl.Rectangle(x, y, panel_width, panel_height)
+    rl.draw_rectangle_rounded(panel_rect, 0.16, 12, rl.Color(0, 0, 0, 190))
 
     max_color = COLORS.GREY
     set_speed_color = COLORS.DARK_GREY
@@ -137,49 +171,60 @@ class HudRendererSP(HudRenderer):
         elif ui_state.status == UIStatus.OVERRIDE:
           max_color = COLORS.OVERRIDE
 
-    max_str_size = 60 if self.show_icbm_status else 40
-    max_str_y = 15 if self.show_icbm_status else 27
-
-    max_text = str(round(self.speed_cluster)) if self.show_icbm_status else tr("MAX")
-    max_text_width = measure_text_cached(self._font_semi_bold, max_text, max_str_size).x
+    title = "巡航设定"
     rl.draw_text_ex(
       self._font_semi_bold,
-      max_text,
-      rl.Vector2(x + (set_speed_width - max_text_width) / 2, y + max_str_y),
-      max_str_size,
+      title,
+      rl.Vector2(x + 24, y + 15),
+      30,
       0,
       max_color,
     )
 
+    self._draw_gear_shifter(rl.Rectangle(x + panel_width - 82, y + 14, 58, 50))
+
     set_speed_text = CRUISE_DISABLED_CHAR if not self.is_cruise_set else str(round(self.set_speed))
-    speed_text_width = measure_text_cached(self._font_bold, set_speed_text, FONT_SIZES.set_speed).x
     rl.draw_text_ex(
       self._font_bold,
       set_speed_text,
-      rl.Vector2(x + (set_speed_width - speed_text_width) / 2, y + 77),
-      FONT_SIZES.set_speed,
+      rl.Vector2(x + 22, y + 54),
+      92,
       0,
       set_speed_color,
     )
 
-    # 最高速度设定（在 set_speed 下方）
-    max_speed_text = f"上限 {round(self.max_speed_limit)}" if hasattr(self, 'max_speed_limit') else ""
-    if max_speed_text:
-      max_speed_width = measure_text_cached(self._font_semi_bold, max_speed_text, 24).x
-      rl.draw_text_ex(
-        self._font_semi_bold,
-        max_speed_text,
-        rl.Vector2(x + (set_speed_width - max_speed_width) / 2, y + 120),
-        24,
-        0,
-        COLORS.GREY,
-      )
+    unit = tr("km/h") if ui_state.is_metric else tr("mph")
+    rl.draw_text_ex(self._font_medium, unit, rl.Vector2(x + 174, y + 103), 25, 0, COLORS.GREY)
+
+    divider_y = y + 156
+    rl.draw_line_ex(rl.Vector2(x + 22, divider_y), rl.Vector2(x + panel_width - 22, divider_y), 2, rl.Color(255, 255, 255, 38))
+
+    stock_text = "–" if self.speed_cluster <= 0 else str(round(self.speed_cluster))
+    target_text = "–" if self.cruise_target_speed <= 0 else str(round(self.cruise_target_speed))
+    self._draw_cruise_metric(x + 24, y + 169, "原车", stock_text, COLORS.WHITE)
+    self._draw_cruise_metric(x + 176, y + 169, "目标", target_text,
+                             COLORS.ENGAGED if self.cruise_target_speed > 0 else COLORS.DARK_GREY)
+
+  def _draw_cruise_metric(self, x: float, y: float, label: str, value: str, color: rl.Color) -> None:
+    rl.draw_text_ex(self._font_medium, label, rl.Vector2(x, y + 7), 24, 0, COLORS.GREY)
+    rl.draw_text_ex(self._font_bold, value, rl.Vector2(x + 66, y), 38, 0, color)
 
   def _draw_current_speed(self, rect: rl.Rectangle) -> None:
     self.speed_renderer.render(rect)
 
   def _render(self, rect: rl.Rectangle) -> None:
-    super()._render(rect)
+    # Render the base HUD explicitly so the overridden cruise panel is drawn
+    # exactly once and the top-right experiment button keeps its own space.
+    rl.draw_rectangle_gradient_v(
+      int(rect.x), int(rect.y), int(rect.width), UI_CONFIG.header_height,
+      COLORS.HEADER_GRADIENT_START, COLORS.HEADER_GRADIENT_END,
+    )
+    if self.is_cruise_available:
+      self._draw_set_speed(rect)
+    self._draw_current_speed(rect)
+    button_x = rect.x + rect.width - UI_CONFIG.border_size - UI_CONFIG.button_size
+    button_y = rect.y + UI_CONFIG.border_size
+    self._exp_button.render(rl.Rectangle(button_x, button_y, UI_CONFIG.button_size, UI_CONFIG.button_size))
 
     if ui_state.torque_bar:
       torque_rect = rect
@@ -201,31 +246,22 @@ class HudRendererSP(HudRenderer):
     # 红绿灯状态提示（右下角）
     self._draw_traffic_light_status(rect)
 
-    # 当前档位显示（左上角）
-    self._draw_gear_shifter(rect)
-
-    # 系统输出的实际定速值（右上角，避免与档位重叠）
-    self._draw_set_speed(rect)
-
   def _draw_gear_shifter(self, rect: rl.Rectangle) -> None:
-    """Draw current gear shifter (top-left corner)."""
-    x = rect.x + 20
-    y = rect.y + 20
-    w = 80
-    h = 60
+    """Draw the gear badge inside the cruise panel."""
+    x, y, w, h = rect.x, rect.y, rect.width, rect.height
 
     # 背景
     bg_color = rl.Color(0, 0, 0, 180)
-    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.3, 8, bg_color)
+    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.26, 8, bg_color)
 
     # 档位文字
     text_color = rl.WHITE if self.gear_shifter in ("D", "S", "M") else rl.YELLOW
-    text_width = measure_text_cached(self._font_bold, self.gear_shifter, 40).x
+    text_width = measure_text_cached(self._font_bold, self.gear_shifter, 34).x
     rl.draw_text_ex(
       self._font_bold,
       self.gear_shifter,
-      rl.Vector2(x + (w - text_width) / 2, y + 10),
-      40,
+      rl.Vector2(x + (w - text_width) / 2, y + 7),
+      34,
       0,
       text_color,
     )
@@ -235,13 +271,15 @@ class HudRendererSP(HudRenderer):
     if self.traffic_light_state == "off":
       return
 
-    x = rect.x + rect.width - 120
-    y = rect.y + rect.height - 120
-    radius = 40
+    w = 250
+    h = 116
+    x = rect.x + rect.width - w - 30
+    y = rect.y + rect.height - h - 200
+    center_x = x + 54
+    center_y = y + h / 2
 
-    # 背景圆圈
-    bg_color = rl.Color(0, 0, 0, 180)
-    rl.draw_circle(int(x), int(y), radius + 8, bg_color)
+    bg_color = rl.Color(0, 0, 0, 200)
+    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.18, 12, bg_color)
 
     # 红绿灯颜色
     if self.traffic_light_state == "red":
@@ -251,41 +289,50 @@ class HudRendererSP(HudRenderer):
     else:
       color = rl.GRAY
 
-    rl.draw_circle(int(x), int(y), radius, color)
+    rl.draw_circle(int(center_x), int(center_y), 31, color)
+    rl.draw_circle_lines(int(center_x), int(center_y), 34, rl.Color(255, 255, 255, 90))
 
     # 文字
     text = "停" if self.traffic_light_state == "red" else "行"
-    text_width = measure_text_cached(self._font_bold, text, 32).x
+    text_width = measure_text_cached(self._font_bold, text, 30).x
     rl.draw_text_ex(
       self._font_bold,
       text,
-      rl.Vector2(x - text_width / 2, y - 16),
-      32,
+      rl.Vector2(center_x - text_width / 2, center_y - 15),
+      30,
       0,
       rl.WHITE,
     )
 
+    status_text = "红灯停车" if self.traffic_light_state == "red" else "绿灯放行"
+    rl.draw_text_ex(self._font_bold, status_text, rl.Vector2(x + 100, y + 25), 32, 0, rl.WHITE)
+    if self.traffic_light_state == "red" and 0 < self.traffic_stop_distance < 300:
+      distance_text = f"距停车点 {self.traffic_stop_distance:.0f} m"
+    else:
+      distance_text = "停车规划已更新"
+    rl.draw_text_ex(self._font_medium, distance_text, rl.Vector2(x + 100, y + 68), 22, 0, COLORS.GREY)
+
   def _draw_radar_status(self, rect: rl.Rectangle) -> None:
     """Draw radar status indicator (top-right corner)."""
-    x = rect.x + rect.width - 120
-    y = rect.y + 20
-    w = 100
-    h = 30
+    w = 186
+    h = 58
+    x = rect.x + rect.width - UI_CONFIG.border_size - UI_CONFIG.button_size - w - 18
+    y = rect.y + 42
 
     # 背景
     bg_color = rl.Color(0, 0, 0, 180)
-    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.3, 8, bg_color)
+    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.22, 8, bg_color)
 
     # 雷达图标（简单表示）
     radar_color = rl.GREEN if self.radar_available else rl.RED
-    rl.draw_circle(int(x + 15), int(y + h // 2), 8, radar_color)
+    rl.draw_circle(int(x + 24), int(y + h // 2), 9, radar_color)
 
     # 文字
-    text = "Radar" if self.radar_available else "No Radar"
+    text = "雷达正常" if self.radar_available else "雷达异常"
     text_color = rl.WHITE if self.radar_available else rl.RED
-    rl.draw_text(text, int(x + 30), int(y + 8), 16, text_color)
+    rl.draw_text_ex(self._font_semi_bold, text, rl.Vector2(x + 44, y + 8), 23, 0, text_color)
 
-    # lead 状态
+    # Lead source is useful without redefining radar health.
     if self.lead_detected:
-      lead_text = "Lead"
-      rl.draw_text(lead_text, int(x + 30), int(y + 22), 12, rl.GREEN)
+      lead_text = "雷达目标" if self.lead_from_radar else "视觉目标"
+      rl.draw_text_ex(self._font_medium, lead_text, rl.Vector2(x + 44, y + 33), 17, 0, COLORS.ENGAGED)

@@ -75,6 +75,7 @@ class CarrotPlanner:
     self.xState = XState.cruise
     self.xStop = 0.0
     self.actual_stop_distance = 0.0
+    self.stop_dist = 0.0
     self.v_ego_kph = 0.0  # 当前车速（km/h）
     #self.debugLongText = ""
     self.stopping_count = 0
