@@ -2499,6 +2499,22 @@
     },
     {
       "group": "SPEED",
+      "name": "LongitudinalSpeedReference",
+      "title": "Longitudinal speed reference(0:wheel,1:cluster)",
+      "descr": "Choose wheel speed or vehicle instrument speed as the cruise target reference. GPS is not used.",
+      "egroup": "SPEED",
+      "etitle": "Longitudinal speed reference(0:wheel,1:cluster)",
+      "edescr": "Choose wheel speed or vehicle instrument speed as the cruise target reference. GPS is not used.",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "unit": 1,
+      "cgroup": "速度控制",
+      "ctitle": "实际速度基准",
+      "cdescr": "0 使用车辆轮速；1 校正纵向目标，使车辆仪表显示贴合设定速度。不使用 GPS。"
+    },
+    {
+      "group": "SPEED",
       "name": "CarrotSpeedLimitEnable",
       "title": "Carrot Speed Limit(1)",
       "descr": "Combine camera/CAN + map + nav-app speed limits and apply automatically (no button confirm).",

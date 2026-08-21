@@ -12,6 +12,7 @@ from openpilot.selfdrive.controls.lib.longcontrol import LongCtrlState
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc, LongitudinalPlanSource
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
 from openpilot.selfdrive.controls.lib.drive_helpers import CONTROL_N, get_accel_from_plan, should_stop
+from openpilot.selfdrive.controls.lib.speed_reference import SpeedReference
 from openpilot.selfdrive.car.cruise import V_CRUISE_MAX, V_CRUISE_UNSET
 from openpilot.common.swaglog import cloudlog
 
@@ -80,6 +81,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.carrot_speed_limit = CarrotSpeedLimit()
     self.carrot_traffic_stop = CarrotTrafficStop()
     self.carrot_planner = CarrotPlanner()
+    self.speed_reference = SpeedReference()
 
   def update(self, sm):
     LongitudinalPlannerSP.update(self, sm)
@@ -134,6 +136,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     if not self.sla.enabled:
       v_cruise = self.carrot_speed_limit.update(sm, v_cruise, self.resolver.speed_limit)
     v_cruise = self.carrot_traffic_stop.update(sm, v_cruise)
+    v_cruise = self.speed_reference.update(v_cruise, v_ego, sm['carState'].vEgoCluster, sm['carState'].aEgo)
     self.cruise_target_speed = max(0.0, v_cruise * CV.MS_TO_KPH)
 
     self.mpc.set_weights(prev_accel_constraint, personality=sm['selfdriveState'].personality)

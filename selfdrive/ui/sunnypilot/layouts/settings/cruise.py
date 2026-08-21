@@ -61,6 +61,11 @@ class CruiseLayout(Widget):
   def _initialize_items(self):
     # Carrot 功能（只保留 SunnyPilot 没有的增量项）
     # 限速偏移/安全系数用 SunnyPilot 原生的 Speed Limit 设置（Speed Limit 按钮里），不重复
+    self.speed_reference = self._carrot_selector(
+      "LongitudinalSpeedReference", "实际速度基准",
+      ["轮速", "仪表"], [0, 1],
+      description="仪表模式会校正实际纵向目标，使车辆仪表显示贴合设定速度；不使用 GPS。")
+
     self.carrot_speed_limit = self._carrot_toggle(
       "CarrotSpeedLimitEnable", "导航限速源",
       "额外合并导航App的限速到巡航速度（摄像头/地图限速及偏移用下方 Speed Limit 原生设置）。")
@@ -142,6 +147,7 @@ class CruiseLayout(Widget):
       param="DynamicExperimentalControl")
 
     items = [
+      self.speed_reference,
       self.carrot_speed_limit,
       self.carrot_traffic_stop,
       self.carrot_tfollow_gap1,
