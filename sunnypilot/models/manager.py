@@ -197,6 +197,8 @@ class ModelManagerSP:
 
   async def _process_model(self, model, destination_path: str) -> None:
     """Processes a single model download including verification"""
+    if model.metadata.fileName:
+      await self._process_artifact(model.metadata, destination_path)
     await self._process_artifact(model.artifact, destination_path)
 
   def _report_status(self) -> None:
@@ -221,16 +223,16 @@ class ModelManagerSP:
     try:
       seen_artifacts: set[str] = set()
       for model in self.selected_bundle.models:
-        artifact = model.artifact
-        if not artifact.fileName:
-          continue
-        if artifact.fileName in seen_artifacts:
-          artifact.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.cached
-          artifact.downloadProgress.progress = 100
-          artifact.downloadProgress.eta = 0
-        else:
-          seen_artifacts.add(artifact.fileName)
-          await self._process_artifact(artifact, destination_path)
+        for artifact in (model.metadata, model.artifact):
+          if not artifact.fileName:
+            continue
+          if artifact.fileName in seen_artifacts:
+            artifact.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.cached
+            artifact.downloadProgress.progress = 100
+            artifact.downloadProgress.eta = 0
+          else:
+            seen_artifacts.add(artifact.fileName)
+            await self._process_artifact(artifact, destination_path)
 
       self.active_bundle = self.selected_bundle
       self.active_bundle.status = custom.ModelManagerSP.DownloadStatus.downloaded
@@ -291,6 +293,8 @@ class ModelManagerSP:
       for model in self.active_bundle.models:
         if hasattr(model, 'artifact') and model.artifact.fileName:
           active_files.append(model.artifact.fileName)
+        if hasattr(model, 'metadata') and model.metadata.fileName:
+          active_files.append(model.metadata.fileName)
 
     # Remove all files except active ones (including their chunk files)
     model_dir = Paths.model_root()

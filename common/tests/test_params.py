@@ -83,6 +83,23 @@ class TestParams:
     self.params.put("IsMetric", False)
     assert not self.params.get_bool("IsMetric")
 
+  def test_numeric_helpers_registered_keys(self):
+    self.params.put_int("LongitudinalPersonality", 2)
+    self.params.put_float("LagdToggleDelay", 0.35)
+
+    assert self.params.get_int("LongitudinalPersonality") == 2
+    assert self.params.get_float("LagdToggleDelay") == pytest.approx(0.35)
+
+  def test_numeric_helpers_carrot_keys(self):
+    try:
+      os.unlink(self.params.get_param_path("TFollowGap1"))
+    except FileNotFoundError:
+      pass
+    assert self.params.get_int("TFollowGap1") == 110
+
+    self.params.put_float("SCCVisionEnteringTh", 1.45)
+    assert self.params.get_float("SCCVisionEnteringTh") == pytest.approx(1.45)
+
   def test_put_non_blocking_with_get_block(self):
     q = Params()
     def _delayed_writer():

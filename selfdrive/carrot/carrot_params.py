@@ -98,9 +98,9 @@ class CarrotParams:
   files under ``/dev/shm/params/d`` (the same layout used for ``params_memory``).
   """
 
-  def __init__(self, d: str = ""):
+  def __init__(self, d: str = "", *, param_dir: Optional[str] = None):
     self._settings = _load_settings()
-    self._param_dir = self._resolve_dir(d)
+    self._param_dir = param_dir if param_dir is not None else self._resolve_dir(d)
     # Lock file lives one level up from the params dir, matching C++ Params'
     # ``FileLock(params_path + "/.lock")`` (common/params.cc:155).
     self._lock_path = os.path.join(os.path.dirname(self._param_dir), ".lock")

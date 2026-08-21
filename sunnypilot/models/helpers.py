@@ -17,8 +17,11 @@ from openpilot.common.swaglog import cloudlog
 from openpilot.sunnypilot.models.constants import Meta, MetaSimPose, MetaTombRaider
 from openpilot.system.hardware.hw import Paths
 
-# SET ME TO THE EXACT JSON VERSION WE SET IN SUNNYPILOT_MODELS REPO
-REQUIRED_JSON_VERSION = 17
+# This legacy C3 model runner supports the v16 catalog format. The v20 catalog
+# requires the newer combined-model Tinygrad runtime, which is not present in
+# this fork; accepting it makes modeld crash before calibration can start.
+CURRENT_SELECTOR_VERSION = 15
+REQUIRED_MIN_SELECTOR_VERSION = 14
 
 CUSTOM_MODEL_PATH = Paths.model_root()
 METADATA_PATH = Path(__file__).parent / '../models/supercombo_metadata.pkl'
@@ -46,19 +49,15 @@ def _verify_file(file_path: str, expected_hash: str) -> bool:
 
 
 def is_bundle_version_compatible(bundle: dict) -> bool:
-  """
-  The bundle parsed from the json specifies a `minimum_selector_version`, which defines the minimum selector version
-  required to load the model. This function ensures that:
-    the bundle MUST match the `REQUIRED_JSON_VERSION` set here in helpers.
-  """
-  return bundle.get("minimumSelectorVersion", 0) == REQUIRED_JSON_VERSION
+  minimum_version = bundle.get("minimumSelectorVersion", 0)
+  return bool(REQUIRED_MIN_SELECTOR_VERSION <= minimum_version <= CURRENT_SELECTOR_VERSION)
 
 
 def _bundle_artifacts(bundle: custom.ModelManagerSP.ModelBundle) -> list[tuple[str, str]]:
   artifacts = []
   from openpilot.common.file_chunker import get_chunk_name
   for model in getattr(bundle, 'models', []) or []:
-    for artifact in (getattr(model, 'artifact', None),):
+    for artifact in (getattr(model, 'metadata', None), getattr(model, 'artifact', None)):
       if artifact and getattr(artifact, 'fileName', None):
         if len(artifact.chunks) > 0:
           for i, chunk in enumerate(artifact.chunks):
@@ -212,4 +211,3 @@ def plan_x_idxs_helper(constants, plan, model_output) -> list[float]:
       next_x_val - current_x_val) > 1e-9 else float('nan')
     LINE_T_IDXS[xidx] = p * constants.T_IDXS[tidx + 1] + (1 - p) * constants.T_IDXS[tidx]
   return LINE_T_IDXS
-

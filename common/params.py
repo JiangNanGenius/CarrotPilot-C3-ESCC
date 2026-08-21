@@ -7,6 +7,11 @@ from openpilot.common.params_pyx import Params, ParamKeyFlag, ParamKeyType, Unkn
 # 线程文件描述符，导致 pandad 和其他进程永久阻塞。只有显式 block=False
 # 的调用才走非阻塞路径。
 class ParamsExt(Params):
+  def _carrot_params(self):
+    """Return the file-backed store for numeric keys outside the C++ registry."""
+    from openpilot.selfdrive.carrot.carrot_params import CarrotParams
+    return CarrotParams(param_dir=super().get_param_path())
+
   def put(self, key, dat, block=True):
     """Write a parameter, synchronously unless block=False is explicit."""
     if block:
@@ -19,6 +24,51 @@ class ParamsExt(Params):
       super().put_bool(key, val)
     else:
       super().put_bool_nonblocking(key, val)
+
+  def get_int(self, key, default=0, block=False):
+    try:
+      value = super().get(key, block=block, return_default=True)
+    except UnknownKeyName:
+      return self._carrot_params().get_int(key, default)
+
+    if value is None:
+      return default
+    try:
+      return int(value)
+    except (TypeError, ValueError):
+      try:
+        return int(float(value))
+      except (TypeError, ValueError):
+        return default
+
+  def put_int(self, key, val, block=True):
+    try:
+      self.check_key(key)
+    except UnknownKeyName:
+      self._carrot_params().put_int(key, val)
+      return
+    self.put(key, int(val), block=block)
+
+  def get_float(self, key, default=0.0, block=False):
+    try:
+      value = super().get(key, block=block, return_default=True)
+    except UnknownKeyName:
+      return self._carrot_params().get_float(key, default)
+
+    if value is None:
+      return default
+    try:
+      return float(value)
+    except (TypeError, ValueError):
+      return default
+
+  def put_float(self, key, val, block=True):
+    try:
+      self.check_key(key)
+    except UnknownKeyName:
+      self._carrot_params().put_float(key, val)
+      return
+    self.put(key, float(val), block=block)
 
 # 用扩展类替换原始类
 Params = ParamsExt

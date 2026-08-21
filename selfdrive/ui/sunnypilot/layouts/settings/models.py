@@ -133,7 +133,8 @@ class ModelsLayout(Widget):
               custom.ModelManagerSP.Model.Type.vision: self.vision_label,
               custom.ModelManagerSP.Model.Type.policy: self.policy_label,
               custom.ModelManagerSP.Model.Type.offPolicy: self.off_policy_label,
-              custom.ModelManagerSP.Model.Type.onPolicy: self.on_policy_label}
+              custom.ModelManagerSP.Model.Type.onPolicy: self.on_policy_label,
+              custom.ModelManagerSP.Model.Type.chunked: self.supercombo_label}
     for label in labels.values():
       label.set_visible(False)
     self.cancel_download_item.set_visible(False)

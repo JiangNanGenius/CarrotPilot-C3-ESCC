@@ -23,7 +23,7 @@ class ModelData:
     self.metadata = model.metadata
     self.input_shapes: ShapeDict = {}
     self.output_slices: SliceDict = {}
-    if self.metadata:
+    if self.metadata.fileName:
       self._load_metadata()
 
   def _load_metadata(self) -> None:

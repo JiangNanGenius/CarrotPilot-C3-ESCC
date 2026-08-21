@@ -67,6 +67,8 @@ class ModelParser:
 
     model.type = model_data.get("type")
     model.artifact = ModelParser._parse_artifact(model_data.get("artifact", {}))
+    if metadata := model_data.get("metadata"):
+      model.metadata = ModelParser._parse_artifact(metadata)
     return model
 
   @staticmethod
@@ -142,7 +144,7 @@ class ModelCache:
 
 class ModelFetcher:
   """Handles fetching and caching of model data from remote source"""
-  MODEL_URL = "https://raw.githubusercontent.com/sunnypilot/sunnypilot-models/refs/heads/gh-pages/docs/driving_models_v20.json"
+  MODEL_URL = "https://raw.githubusercontent.com/sunnypilot/sunnypilot-models/refs/heads/gh-pages/docs/driving_models_v16.json"
 
   def __init__(self, params: Params):
     self.params = params
@@ -190,7 +192,10 @@ class ModelFetcher:
 
     if cached_data and not is_expired:
       cloudlog.debug("Using valid cached models data")
-      return self.model_parser.parse_models(cached_data)
+      cached_bundles = self.model_parser.parse_models(cached_data)
+      if cached_bundles:
+        return cached_bundles
+      cloudlog.warning("Cached model catalog is incompatible; fetching a compatible catalog")
 
     fetched_bundles = self._fetch_and_cache_models()
     if fetched_bundles is not None:

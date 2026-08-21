@@ -98,7 +98,7 @@ def main():
 
     # ---- 踩刹车时的 alert 事件（onroadEvents）----
     if sm.updated["onroadEvents"]:
-      for ev in sm["onroadEvents"].onroadEvents:
+      for ev in sm["onroadEvents"]:
         name = str(ev.name)
         # 只记 pedal/brake/巡航退出相关
         if any(k in name.lower() for k in ["pedal", "brake", "disable", "noentry", "override"]):
