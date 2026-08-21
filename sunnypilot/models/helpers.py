@@ -5,6 +5,8 @@ This file is part of sunnypilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
 
+from __future__ import annotations
+
 import hashlib
 import os
 import pickle
@@ -25,7 +27,7 @@ REQUIRED_MIN_SELECTOR_VERSION = 17
 CUSTOM_MODEL_PATH = Paths.model_root()
 METADATA_PATH = Path(__file__).parent / '../models/supercombo_metadata.pkl'
 ModelManager = custom.ModelManagerSP
-_LAST_VALIDATED_RAW = None
+_LAST_VALIDATED_KEY = None
 
 
 def _compute_hash(file_path: str) -> str | None:
@@ -60,7 +62,7 @@ def _bundle_artifacts(bundle: custom.ModelManagerSP.ModelBundle) -> list[tuple[s
       if artifact and getattr(artifact, 'fileName', None):
         if len(artifact.chunks) > 0:
           for i, chunk in enumerate(artifact.chunks):
-            chunk_name = get_chunk_name(artifact.fileName, i, len(artifact.chunks))
+            chunk_name = getattr(chunk, 'fileName', None) or get_chunk_name(artifact.fileName, i, len(artifact.chunks))
             if getattr(chunk, 'sha256', None):
               artifacts.append((chunk_name, chunk.sha256))
         else:
@@ -72,9 +74,38 @@ def _bundle_artifacts(bundle: custom.ModelManagerSP.ModelBundle) -> list[tuple[s
 
 
 def _bundle_is_valid_locally(bundle: custom.ModelManagerSP.ModelBundle) -> bool:
+  artifacts = _bundle_artifacts(bundle)
+  if not artifacts:
+    return False
   model_root = Paths.model_root()
   return all(_verify_file(os.path.join(model_root, file_name), expected_hash)
-             for file_name, expected_hash in _bundle_artifacts(bundle))
+             for file_name, expected_hash in artifacts)
+
+
+def _bundle_signature(bundle: custom.ModelManagerSP.ModelBundle | None):
+  if bundle is None:
+    return None
+  runner = getattr(bundle, 'runner', None)
+  return (
+    getattr(bundle, 'ref', None), getattr(bundle, 'internalName', None),
+    getattr(bundle, 'generation', None), getattr(bundle, 'minimumSelectorVersion', None),
+    getattr(runner, 'raw', runner), getattr(bundle, 'is20hz', None), tuple(_bundle_artifacts(bundle)),
+  )
+
+
+def _local_artifact_signature(bundle: custom.ModelManagerSP.ModelBundle | None):
+  if bundle is None:
+    return None
+  model_root = Paths.model_root()
+  signature = []
+  for file_name, _ in _bundle_artifacts(bundle):
+    path = os.path.join(model_root, file_name)
+    try:
+      stat = os.stat(path)
+      signature.append((file_name, stat.st_size, stat.st_mtime_ns))
+    except FileNotFoundError:
+      signature.append((file_name, None, None))
+  return tuple(signature)
 
 
 def _bundle_needs_reset(active_bundle: custom.ModelManagerSP.ModelBundle, available_bundles: list[custom.ModelManagerSP.ModelBundle] | None) -> bool:
@@ -96,39 +127,39 @@ def _bundle_needs_reset(active_bundle: custom.ModelManagerSP.ModelBundle, availa
       return True
     if active_bundle.minimumSelectorVersion != matching_bundle.minimumSelectorVersion:
       return True
-
-    active_runner = getattr(active_bundle, 'runner', None)
-    matching_runner = getattr(matching_bundle, 'runner', None)
-    if active_runner is not None and matching_runner is not None:
-      if getattr(active_runner, 'raw', active_runner) != getattr(matching_runner, 'raw', matching_runner):
-        return True
-    if set(_bundle_artifacts(active_bundle)) != set(_bundle_artifacts(matching_bundle)):
+    if _bundle_signature(active_bundle) != _bundle_signature(matching_bundle):
       return True
 
   return not _bundle_is_valid_locally(active_bundle)
 
 
 def validate_active_bundle(params: Params, available_bundles: list[custom.ModelManagerSP.ModelBundle] | None = None) -> None:
-  global _LAST_VALIDATED_RAW
+  global _LAST_VALIDATED_KEY
 
   raw_bundle = params.get("ModelManager_ActiveBundle")
   if not raw_bundle:
     return
 
-  if raw_bundle == _LAST_VALIDATED_RAW:
+  active_bundle = get_active_bundle(params, raw_bundle_dict=raw_bundle)
+  matching_bundle = None
+  if active_bundle is not None and available_bundles is not None:
+    matching_bundle = next((bundle for bundle in available_bundles
+                            if (active_bundle.ref and bundle.ref == active_bundle.ref)
+                            or (not active_bundle.ref and bundle.internalName == active_bundle.internalName)), None)
+  validation_key = (repr(raw_bundle), _bundle_signature(matching_bundle), _local_artifact_signature(active_bundle))
+  if validation_key == _LAST_VALIDATED_KEY:
     return
 
-  active_bundle = get_active_bundle(params, raw_bundle_dict=raw_bundle)
   if active_bundle is None or _bundle_needs_reset(active_bundle, available_bundles):
     cloudlog.warning("Active model bundle invalid; resetting to default")
     params.remove("ModelManager_ActiveBundle")
     params.put("ModelRunnerTypeCache", int(custom.ModelManagerSP.Runner.stock), block=True)
-    _LAST_VALIDATED_RAW = None
+    _LAST_VALIDATED_KEY = None
   else:
-    _LAST_VALIDATED_RAW = raw_bundle
+    _LAST_VALIDATED_KEY = validation_key
 
 
-def get_active_bundle(params: Params | None = None, raw_bundle_dict: dict | bytes | None = None) -> "custom.ModelManagerSP.ModelBundle | None":
+def get_active_bundle(params: Params | None = None, raw_bundle_dict: dict | bytes | None = None) -> custom.ModelManagerSP.ModelBundle | None:
   params = params or Params()
   try:
     active_bundle_dict = raw_bundle_dict if raw_bundle_dict is not None else (params.get("ModelManager_ActiveBundle") or {})
@@ -156,8 +187,8 @@ def get_active_model_runner(params: Params | None = None, force_check: bool = Fa
 
 def _get_model():
   if bundle := get_active_bundle():
-    drive_model = next(model for model in bundle.models if model.type == ModelManager.Model.Type.supercombo)
-    return drive_model
+    return next((model for model in bundle.models
+                 if model.type in (ModelManager.Model.Type.supercombo, ModelManager.Model.Type.chunked)), None)
   return None
 
 

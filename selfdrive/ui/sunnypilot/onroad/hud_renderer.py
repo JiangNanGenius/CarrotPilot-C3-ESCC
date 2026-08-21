@@ -16,6 +16,10 @@ from openpilot.selfdrive.ui.sunnypilot.onroad.speed_limit import SpeedLimitRende
 from openpilot.selfdrive.ui.sunnypilot.onroad.smart_cruise_control import SmartCruiseControlRenderer
 from openpilot.selfdrive.ui.sunnypilot.onroad.turn_signal import TurnSignalController
 from openpilot.selfdrive.ui.sunnypilot.onroad.circular_alerts import CircularAlertsRenderer
+from openpilot.selfdrive.ui.sunnypilot.onroad.hud_layout import (
+  CRUISE_PANEL_HEIGHT, CRUISE_PANEL_WIDTH, LEFT_MARGIN, TOP_MARGIN,
+  TRAFFIC_CARD_BOTTOM_MARGIN, TRAFFIC_CARD_HEIGHT, TRAFFIC_CARD_WIDTH,
+)
 from openpilot.selfdrive.ui.sunnypilot.onroad.speed_renderer import SpeedRenderer
 from openpilot.selfdrive.ui.ui_state import ui_state, UIStatus
 from openpilot.selfdrive.ui.onroad.hud_renderer import HudRenderer, UI_CONFIG, COLORS, CRUISE_DISABLED_CHAR
@@ -149,12 +153,10 @@ class HudRendererSP(HudRenderer):
     long_override = ui_state.sm['carControl'].cruiseControl.override
     self._get_icbm_status()
 
-    # Keep the factory speed-limit sign's reserved lane clear. The extra OEM
-    # and planner targets are stacked instead of widening this primary card.
-    panel_width = 200
-    panel_height = 272
-    x = rect.x + 30
-    y = rect.y + 30
+    panel_width = CRUISE_PANEL_WIDTH
+    panel_height = CRUISE_PANEL_HEIGHT
+    x = rect.x + LEFT_MARGIN
+    y = rect.y + TOP_MARGIN
 
     panel_rect = rl.Rectangle(x, y, panel_width, panel_height)
     rl.draw_rectangle_rounded(panel_rect, 0.16, 12, rl.Color(0, 0, 0, 190))
@@ -178,40 +180,46 @@ class HudRendererSP(HudRenderer):
     rl.draw_text_ex(
       self._font_semi_bold,
       title,
-      rl.Vector2(x + 24, y + 15),
-      30,
+      rl.Vector2(x + 22, y + 17),
+      32,
       0,
       max_color,
     )
 
-    self._draw_gear_shifter(rl.Rectangle(x + panel_width - 68, y + 12, 48, 44))
+    self._draw_gear_shifter(rl.Rectangle(x + panel_width - 70, y + 13, 50, 48))
 
     set_speed_text = CRUISE_DISABLED_CHAR if not self.is_cruise_set else str(round(self.set_speed))
+    set_speed_size = 96 if len(set_speed_text) >= 3 else 108
+    set_speed_width = measure_text_cached(self._font_bold, set_speed_text, set_speed_size).x
     rl.draw_text_ex(
       self._font_bold,
       set_speed_text,
-      rl.Vector2(x + 20, y + 53),
-      88,
+      rl.Vector2(x + (panel_width - set_speed_width) / 2, y + 58),
+      set_speed_size,
       0,
       set_speed_color,
     )
 
     unit = tr("km/h") if ui_state.is_metric else tr("mph")
-    rl.draw_text_ex(self._font_medium, unit, rl.Vector2(x + 123, y + 105), 23, 0, COLORS.GREY)
+    unit_width = measure_text_cached(self._font_medium, unit, 25).x
+    rl.draw_text_ex(self._font_medium, unit, rl.Vector2(x + (panel_width - unit_width) / 2, y + 158), 25, 0, COLORS.GREY)
 
-    divider_y = y + 151
+    divider_y = y + 198
     rl.draw_line_ex(rl.Vector2(x + 22, divider_y), rl.Vector2(x + panel_width - 22, divider_y), 2, rl.Color(255, 255, 255, 38))
 
     stock_text = "–" if self.speed_cluster <= 0 else str(round(self.speed_cluster))
     target_text = "–" if self.cruise_target_speed <= 0 else str(round(self.cruise_target_speed))
-    self._draw_cruise_metric(x + 20, y + 166, "OEM", stock_text, COLORS.WHITE)
-    self._draw_cruise_metric(x + 20, y + 215, "PLAN", target_text,
+    metric_width = (panel_width - 54) / 2
+    self._draw_cruise_metric(x + 20, y + 210, metric_width, "OEM", stock_text, COLORS.WHITE)
+    self._draw_cruise_metric(x + 34 + metric_width, y + 210, metric_width, "PLAN", target_text,
                              COLORS.ENGAGED if self.cruise_target_speed > 0 else COLORS.DARK_GREY)
 
-  def _draw_cruise_metric(self, x: float, y: float, label: str, value: str, color: rl.Color) -> None:
-    rl.draw_text_ex(self._font_semi_bold, label, rl.Vector2(x, y + 9), 21, 0, COLORS.GREY)
-    value_width = measure_text_cached(self._font_bold, value, 36).x
-    rl.draw_text_ex(self._font_bold, value, rl.Vector2(x + 158 - value_width, y), 36, 0, color)
+  def _draw_cruise_metric(self, x: float, y: float, width: float, label: str, value: str, color: rl.Color) -> None:
+    label_width = measure_text_cached(self._font_semi_bold, label, 23).x
+    rl.draw_text_ex(self._font_semi_bold, label, rl.Vector2(x + (width - label_width) / 2, y), 23, 0, COLORS.GREY)
+    value_size = 42 if len(value) >= 3 else 48
+    value_width = measure_text_cached(self._font_bold, value, value_size).x
+    rl.draw_text_ex(self._font_bold, value, rl.Vector2(x + (width - value_width) / 2, y + 29), value_size, 0, color)
 
   def _draw_current_speed(self, rect: rl.Rectangle) -> None:
     self.speed_renderer.render(rect)
@@ -269,19 +277,20 @@ class HudRendererSP(HudRenderer):
     )
 
   def _draw_traffic_light_status(self, rect: rl.Rectangle) -> None:
-    """Draw traffic light status indicator (bottom-right corner)."""
+    """Draw the active traffic-control decision near the driver's sightline."""
     if self.traffic_light_state == "off":
       return
 
-    w = 270
-    h = 116
-    x = rect.x + rect.width - w - 30
-    y = rect.y + rect.height - h - 200
-    center_x = x + 54
+    w = TRAFFIC_CARD_WIDTH
+    h = TRAFFIC_CARD_HEIGHT
+    x = rect.x + (rect.width - w) / 2
+    y = rect.y + rect.height - h - TRAFFIC_CARD_BOTTOM_MARGIN
+    center_x = x + 82
     center_y = y + h / 2
 
     bg_color = rl.Color(0, 0, 0, 200)
-    rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.18, 12, bg_color)
+    card_rect = rl.Rectangle(x, y, w, h)
+    rl.draw_rectangle_rounded(card_rect, 0.14, 12, bg_color)
 
     if self.traffic_light_state == "red":
       color = rl.RED
@@ -290,11 +299,13 @@ class HudRendererSP(HudRenderer):
     else:
       color = rl.GRAY
 
-    rl.draw_circle(int(center_x), int(center_y), 31, color)
-    rl.draw_circle_lines(int(center_x), int(center_y), 34, rl.Color(255, 255, 255, 90))
+    rl.draw_rectangle_rounded_lines_ex(card_rect, 0.14, 12, 3, rl.color_alpha(color, 0.72))
+    rl.draw_circle(int(center_x), int(center_y), 47, rl.Color(10, 10, 10, 255))
+    rl.draw_circle(int(center_x), int(center_y), 40, color)
+    rl.draw_circle_lines(int(center_x), int(center_y), 48, rl.Color(255, 255, 255, 105))
 
     symbol = "!" if self.traffic_light_state == "red" else "GO"
-    symbol_size = 30 if self.traffic_light_state == "red" else 20
+    symbol_size = 42 if self.traffic_light_state == "red" else 27
     text_width = measure_text_cached(self._font_bold, symbol, symbol_size).x
     rl.draw_text_ex(
       self._font_bold,
@@ -306,12 +317,12 @@ class HudRendererSP(HudRenderer):
     )
 
     status_text = "STOP" if self.traffic_light_state == "red" else "GO"
-    rl.draw_text_ex(self._font_bold, status_text, rl.Vector2(x + 100, y + 25), 32, 0, rl.WHITE)
+    rl.draw_text_ex(self._font_bold, status_text, rl.Vector2(x + 154, y + 22), 54, 0, rl.WHITE)
     if self.traffic_light_state == "red" and 0 < self.traffic_stop_distance < 300:
-      distance_text = f"LINE {self.traffic_stop_distance:.0f} m"
+      distance_text = f"STOP LINE  {self.traffic_stop_distance:.0f} m"
     else:
-      distance_text = "PLAN READY"
-    rl.draw_text_ex(self._font_semi_bold, distance_text, rl.Vector2(x + 100, y + 65), 26, 0, rl.Color(225, 225, 225, 255))
+      distance_text = "PATH CLEAR"
+    rl.draw_text_ex(self._font_semi_bold, distance_text, rl.Vector2(x + 156, y + 91), 32, 0, rl.Color(238, 238, 238, 255))
 
   def _draw_radar_status(self, rect: rl.Rectangle) -> None:
     """Draw radar status indicator (top-right corner)."""

@@ -71,7 +71,7 @@ def use_copyparty(started, params, CP: car.CarParams) -> bool:
   return bool(params.get_bool("EnableCopyparty"))
 
 def is_tinygrad_model(started, params, CP: car.CarParams) -> bool:
-  """Check if the active model runner is SNPE."""
+  """Check if the active model uses the v20 Tinygrad runtime."""
   return bool(get_active_model_runner(params, not started) == custom.ModelManagerSP.Runner.tinygrad)
 
 def is_stock_model(started, params, CP: car.CarParams) -> bool:

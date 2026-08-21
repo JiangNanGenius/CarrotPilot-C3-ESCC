@@ -118,6 +118,7 @@ class ModelsLayoutMici(NavScroller):
 
   def _select_default(self):
     ui_state.params.remove("ModelManager_ActiveBundle")
+    ui_state.params.put("ModelRunnerTypeCache", int(custom.ModelManagerSP.Runner.stock), block=True)
     self._reset_main_view()
 
   def _select_folder(self, folder_name):
@@ -196,4 +197,3 @@ class ModelsLayoutMici(NavScroller):
       self.current_model_info.info_header.set_text(tr("progress") + self._download_progress)
       self.current_model_info.info_header._shimmer = True
       self.current_model_info.info_text.set_text(f"{progress/count:.2f}%")
-

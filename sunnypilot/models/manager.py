@@ -66,12 +66,12 @@ class ModelManagerSP:
     """Downloads a file with progress tracking"""
     self._download_start_times[model.fileName] = time.monotonic()
 
-    with requests.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT) as response:  # noqa: ASYNC210
+    with requests.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT) as response:
       response.raise_for_status()
       total_size = int(response.headers.get("content-length", 0))
       bytes_downloaded = 0
 
-      with open(path, 'wb') as f:  # noqa: ASYNC230
+      with open(path, 'wb') as f:
         for chunk in response.iter_content(chunk_size=self._chunk_size):  # type: bytes
           f.write(chunk)
           bytes_downloaded += len(chunk)
@@ -110,7 +110,7 @@ class ModelManagerSP:
         with session.get(chunk_url, stream=True, timeout=DOWNLOAD_TIMEOUT) as response:
           response.raise_for_status()
           chunk_size = int(response.headers.get("content-length", 0))
-          with open(chunk_path, 'wb') as f:  # noqa: ASYNC230
+          with open(chunk_path, 'wb') as f:
             for data in response.iter_content(chunk_size=self._chunk_size):
               f.write(data)
               chunk_downloaded += len(data)
@@ -124,9 +124,9 @@ class ModelManagerSP:
               self._sync_artifact_progress(artifact)
               self._report_status()
 
-    with open(manifest_path, 'w') as f:  # noqa: ASYNC230
+    with open(manifest_path, 'w') as f:
       f.write(str(num_chunks))
-    if os.path.isfile(base_path):  # noqa: ASYNC240
+    if os.path.isfile(base_path):
       os.remove(base_path)
     del self._download_start_times[artifact.fileName]
 
@@ -184,7 +184,7 @@ class ModelManagerSP:
     except Exception as e:
       cloudlog.error(f"Error downloading {filename}: {str(e)}")
       for f in [full_path] + [p for p in (os.path.join(destination_path, f) for f in os.listdir(destination_path)) if filename in p]:
-        if os.path.isfile(f):  # noqa: ASYNC240
+        if os.path.isfile(f):
           os.remove(f)
       artifact.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.failed
       artifact.downloadProgress.eta = 0
@@ -220,6 +220,17 @@ class ModelManagerSP:
     self.selected_bundle.status = custom.ModelManagerSP.DownloadStatus.downloading
     os.makedirs(destination_path, exist_ok=True)
 
+    # Publish an observable 0% state before DNS/TLS or the first response body.
+    # Without this, a slow or offline connection looks like the button did
+    # nothing until the first 128 KB arrives.
+    for model in self.selected_bundle.models:
+      for artifact in (model.metadata, model.artifact):
+        if artifact.fileName:
+          artifact.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.downloading
+          artifact.downloadProgress.progress = 0
+          artifact.downloadProgress.eta = 0
+    self._report_status()
+
     try:
       seen_artifacts: set[str] = set()
       for model in self.selected_bundle.models:
@@ -237,6 +248,7 @@ class ModelManagerSP:
       self.active_bundle = self.selected_bundle
       self.active_bundle.status = custom.ModelManagerSP.DownloadStatus.downloaded
       self.params.put("ModelManager_ActiveBundle", self.active_bundle.to_dict(), block=True)
+      self.params.put("ModelRunnerTypeCache", int(self.active_bundle.runner.raw), block=True)
       self.selected_bundle = None
 
     except Exception:

@@ -191,6 +191,7 @@ class ModelsLayout(Widget):
     selected_ref = self.model_dialog.selection_ref
     if selected_ref == "Default":
       ui_state.params.remove("ModelManager_ActiveBundle")
+      ui_state.params.put("ModelRunnerTypeCache", int(custom.ModelManagerSP.Runner.stock), block=True)
       self._show_reset_params_dialog()
     elif selected_bundle := next((bundle for bundle in self.model_manager.availableBundles if bundle.ref == selected_ref), None):
       ui_state.params.put("ModelManager_DownloadIndex", selected_bundle.index)

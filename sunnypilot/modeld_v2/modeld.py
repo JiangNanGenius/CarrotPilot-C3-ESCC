@@ -78,7 +78,8 @@ class ModelState(ModelStateBase):
 
   def __init__(self, cam_w: int, cam_h: int):
     ModelStateBase.__init__(self)
-    model_bundle = get_active_bundle()
+    override_path = os.environ.get('COMBINED_MODEL_PKL')
+    model_bundle = None if override_path and _combined_model_exists(override_path) else get_active_bundle()
     self.generation = model_bundle.generation if model_bundle is not None else None
     overrides = {override.key: override.value for override in model_bundle.overrides} if model_bundle else {}
 
@@ -144,7 +145,7 @@ class ModelState(ModelStateBase):
     self._road_key = next(key for key in self._vision_input_names if 'big' not in key)
     self._wide_key = next(key for key in self._vision_input_names if 'big' in key)
 
-    is_20hz = bundle.is20hz if bundle else self._combined_model_type in ('split', 'multi_policy')
+    is_20hz = bundle.is20hz if bundle else frame_skip > 1
     if is_20hz:
       from openpilot.sunnypilot.models.split_model_constants import SplitModelConstants
       self.constants = SplitModelConstants()
@@ -347,6 +348,7 @@ def main(demo=False):
   prev_action = log.ModelDataV2.Action()
 
   DH = DesireHelper()
+  meta_constants = load_meta_constants()
 
   while True:
     # Keep receiving frames until we are at least 1 frame ahead of previous extra frame
@@ -450,7 +452,7 @@ def main(demo=False):
       prev_action = action
       fill_model_msg(drivingdata_send, modelv2_send, model_output, action,
                      publish_state, meta_main.frame_id, meta_extra.frame_id, frame_id,
-                     frame_drop_ratio, meta_main.timestamp_eof, model_execution_time, live_calib_seen, load_meta_constants())
+                     frame_drop_ratio, meta_main.timestamp_eof, model_execution_time, live_calib_seen, meta_constants)
 
       desire_state = modelv2_send.modelV2.meta.desireState
       l_lane_change_prob = desire_state[log.Desire.laneChangeLeft]
