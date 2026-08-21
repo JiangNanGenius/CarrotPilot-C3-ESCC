@@ -248,7 +248,19 @@ class Updater:
   @property
   def update_available(self) -> bool:
     if os.path.isdir(OVERLAY_MERGED) and len(self.branches) > 0:
-      hash_mismatch = self.get_commit_hash(OVERLAY_MERGED) != self.branches[self.target_branch]
+      remote_commit = self.branches[self.target_branch]
+      if remote_commit is None:
+        return False
+
+      # The staging overlay can legitimately lag behind the running checkout.
+      # Once the device is already on the target remote commit, do not offer
+      # the stale overlay as a new download (or a downgrade).
+      base_is_current = (self.get_branch(BASEDIR) == self.target_branch and
+                         self.get_commit_hash(BASEDIR) == remote_commit)
+      if base_is_current:
+        return False
+
+      hash_mismatch = self.get_commit_hash(OVERLAY_MERGED) != remote_commit
       branch_mismatch = self.get_branch(OVERLAY_MERGED) != self.target_branch
       return hash_mismatch or branch_mismatch
     return False
@@ -305,9 +317,14 @@ class Updater:
       return f"{version} / {branch} / {commit} / {commit_date}"
     self.params.put("UpdaterCurrentDescription", get_description(BASEDIR))
     self.params.put("UpdaterCurrentReleaseNotes", parse_release_notes(BASEDIR))
-    self.params.put("UpdaterNewDescription", get_description(FINALIZED))
-    self.params.put("UpdaterNewReleaseNotes", parse_release_notes(FINALIZED))
-    self.params.put_bool("UpdateAvailable", self.update_ready)
+    update_ready = self.update_ready
+    if update_ready:
+      self.params.put("UpdaterNewDescription", get_description(FINALIZED))
+      self.params.put("UpdaterNewReleaseNotes", parse_release_notes(FINALIZED))
+    else:
+      self.params.remove("UpdaterNewDescription")
+      self.params.remove("UpdaterNewReleaseNotes")
+    self.params.put_bool("UpdateAvailable", update_ready)
 
     # Handle user prompt
     for alert in ("Offroad_UpdateFailed", "Offroad_ConnectivityNeeded", "Offroad_ConnectivityNeededPrompt"):
@@ -350,8 +367,8 @@ class Updater:
       if x is not None and x.group('branch_name') not in excluded_branches:
         self.branches[x.group('branch_name')] = x.group('commit_sha')
 
-    cur_branch = self.get_branch(OVERLAY_MERGED)
-    cur_commit = self.get_commit_hash(OVERLAY_MERGED)
+    cur_branch = self.get_branch(BASEDIR)
+    cur_commit = self.get_commit_hash(BASEDIR)
     new_branch = self.target_branch
     new_commit = self.branches[new_branch]
     if (cur_branch, cur_commit) != (new_branch, new_commit):
