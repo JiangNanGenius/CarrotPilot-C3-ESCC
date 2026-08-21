@@ -14,12 +14,12 @@ from openpilot.system.ui.widgets.html_render import HtmlRenderer, ElementType
 ITEM_BASE_WIDTH = 600
 ITEM_BASE_HEIGHT = 170
 ITEM_PADDING = 20
-ITEM_TEXT_FONT_SIZE = 50
+ITEM_TEXT_FONT_SIZE = 56
 ITEM_TEXT_COLOR = rl.WHITE
 ITEM_TEXT_VALUE_COLOR = rl.Color(170, 170, 170, 255)
-ITEM_DESC_TEXT_COLOR = rl.Color(128, 128, 128, 255)
-ITEM_DESC_FONT_SIZE = 40
-ITEM_DESC_V_OFFSET = 140
+ITEM_DESC_TEXT_COLOR = rl.Color(165, 165, 165, 255)
+ITEM_DESC_FONT_SIZE = 42
+ITEM_DESC_V_OFFSET = 145
 RIGHT_ITEM_PADDING = 20
 ICON_SIZE = 80
 BUTTON_WIDTH = 250
@@ -363,6 +363,11 @@ class ListItem(Widget):
       item_y = self._rect.y + (ITEM_BASE_HEIGHT - text_size.y) // 2
       rl.draw_text_ex(self._font, self.title, rl.Vector2(text_x, item_y), ITEM_TEXT_FONT_SIZE, 0, ITEM_TEXT_COLOR)
 
+      right_limit = self._rect.x + self._rect.width - ITEM_PADDING
+      if self.action_item:
+        right_limit = self.get_right_item_rect(self._rect).x - ITEM_PADDING
+      self._draw_description_affordance(text_x + text_size.x, item_y, right_limit)
+
     # Draw description if visible
     if self.description_visible:
       content_width = int(self._rect.width - ITEM_PADDING * 2)
@@ -383,6 +388,30 @@ class ListItem(Widget):
         # Right item was clicked/activated
         if self.callback:
           self.callback()
+
+  def _draw_description_affordance(self, title_end_x: float, title_y: float, right_limit: float) -> None:
+    """Draw a discoverable help/fold indicator beside titles with descriptions."""
+    if not self.description:
+      return
+
+    radius = 18
+    center_x = title_end_x + 34
+    center_y = title_y + ITEM_TEXT_FONT_SIZE * 0.43
+    chevron_x = center_x + 34
+    if chevron_x + 18 > right_limit:
+      return
+
+    accent = rl.Color(48, 133, 214, 255) if self.description_visible else rl.Color(126, 126, 126, 255)
+    rl.draw_circle_lines(int(center_x), int(center_y), radius, accent)
+    question_size = 28
+    question_width = measure_text_cached(self._font, "?", question_size).x
+    rl.draw_text_ex(self._font, "?", rl.Vector2(center_x - question_width / 2, center_y - 15), question_size, 0, accent)
+
+    direction = -1 if self.description_visible else 1
+    rl.draw_line_ex(rl.Vector2(chevron_x - 8, center_y - direction * 4),
+                    rl.Vector2(chevron_x, center_y + direction * 4), 3, accent)
+    rl.draw_line_ex(rl.Vector2(chevron_x, center_y + direction * 4),
+                    rl.Vector2(chevron_x + 8, center_y - direction * 4), 3, accent)
 
   def set_icon(self, icon: str | None):
     self.icon = icon

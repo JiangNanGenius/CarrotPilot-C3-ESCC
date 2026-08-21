@@ -75,7 +75,7 @@ class TorqueSettingsLayout(Widget):
     self._torque_lat_accel_factor = option_item_sp(
       title=lambda: tr("Lateral Acceleration Factor"),
       param="TorqueParamsOverrideLatAccelFactor",
-      description="",
+      description=lambda: tr("Scales the steering torque requested for a given lateral acceleration. Change only with measured tuning data."),
       min_value=1,
       max_value=500,
       value_change_step=1,
@@ -86,7 +86,7 @@ class TorqueSettingsLayout(Widget):
     self._torque_friction = option_item_sp(
       title=lambda: tr("Friction"),
       param="TorqueParamsOverrideFriction",
-      description="",
+      description=lambda: tr("Compensates for steering-system friction near center. Too high can cause frequent small corrections."),
       min_value=1,
       max_value=100,
       value_change_step=1,

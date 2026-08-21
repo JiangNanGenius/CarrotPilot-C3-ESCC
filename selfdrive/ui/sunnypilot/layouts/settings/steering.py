@@ -69,7 +69,7 @@ class SteeringLayout(Widget):
       min_value=0,
       max_value=255,
       value_change_step=5,
-      description="",
+      description=lambda: tr("Below this speed, using a turn signal pauses automatic steering so you can turn manually."),
       label_callback=lambda speed: f'{speed} {"km/h" if ui_state.is_metric else "mph"}',
     )
     self._blinker_reengage_delay = option_item_sp(
@@ -94,7 +94,7 @@ class SteeringLayout(Widget):
     self._nnlc_toggle = toggle_item_sp(
       param="NeuralNetworkLateralControl",
       title=lambda: tr("Neural Network Lateral Control (NNLC)"),
-      description=""
+      description=lambda: tr("Use the neural-network steering controller when the selected vehicle supports it. Leave off if steering behavior is uncertain.")
     )
 
     items = [

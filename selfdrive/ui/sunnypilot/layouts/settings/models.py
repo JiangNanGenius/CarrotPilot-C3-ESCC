@@ -90,7 +90,11 @@ class ModelsLayout(Widget):
                                         tr("Adjust the software delay when Live Learning Steer Delay is toggled off. The default software delay value is 0.2"),
                                         1, None, True, "", style.BUTTON_ACTION_WIDTH, None, True, lambda v: f"{v / 100:.2f}s")
 
-    self.lagd_toggle = toggle_item_sp(tr("Live Learning Steer Delay"), "", param="LagdToggle")
+    self.lagd_toggle = toggle_item_sp(
+      tr("Live Learning Steer Delay"),
+      tr("Learn the vehicle's steering response delay while driving. When disabled, the fixed software delay below is used."),
+      param="LagdToggle",
+    )
 
     self.items = [self.current_model_item, self.cancel_download_item, self.supercombo_label, self.vision_label,
                   self.policy_label, self.off_policy_label, self.on_policy_label, self.refresh_item, self.clear_cache_item, self.lane_turn_desire_toggle,

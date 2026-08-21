@@ -68,11 +68,11 @@ class CruiseLayout(Widget):
 
     self.carrot_speed_limit = self._carrot_toggle(
       "CarrotSpeedLimitEnable", "导航限速源",
-      "额外合并导航App的限速到巡航速度（摄像头/地图限速及偏移用下方 Speed Limit 原生设置）。")
+      "把导航 App 提供的限速也加入巡航上限。关闭后只使用下方 Speed Limit 中选择的车辆、地图或视觉限速源。")
 
     self.carrot_traffic_stop = self._carrot_toggle(
       "CarrotTrafficStopEnable", "红绿灯停车",
-      "模型预测前方红灯时提前减速（视觉版，默认关闭，高风险）。")
+      "视觉模型判断前方需要停车时提前减速。仍需驾驶员观察信号灯并随时接管；识别不确定时不要依赖此功能。")
 
     # Carrot 纵向设定（只保留必要的：跟车距离/停车距离/前加加速度）
     self.carrot_tfollow_gap1 = self._carrot_selector(
@@ -103,7 +103,7 @@ class CruiseLayout(Widget):
     self.carrot_jlead_factor = self._carrot_selector(
       "JLeadFactor3", "前加加速度平滑",
       ["0.5", "1.0", "1.5", "2.0", "3.0"], [50, 100, 150, 200, 300],
-      description="前加加速度平滑因子（默认 1.0）。")
+      description="控制前车加减速变化传给本车的平滑程度。数值越大反应越直接，过大可能产生顿挫；默认 1.0。")
 
     # SunnyPilot 原生功能
     self.scc_v_toggle = toggle_item_sp(
@@ -118,7 +118,7 @@ class CruiseLayout(Widget):
 
     self.custom_acc_toggle = toggle_item_sp(
       title=tr("Custom ACC Speed Increments"),
-      description="",
+      description=tr("Choose how much the cruise set speed changes for short and long button presses."),
       param="CustomAccIncrementsEnabled",
       callback=self._on_custom_acc_toggle)
 
@@ -126,6 +126,7 @@ class CruiseLayout(Widget):
       title=tr("Short Press Increment"),
       param="CustomAccShortPressIncrement",
       min_value=1, max_value=10, value_change_step=1,
+      description=tr("Cruise-speed change for each short press of the steering-wheel +/- button."),
       inline=True)
 
     self.custom_acc_long_increment = option_item_sp(
@@ -133,6 +134,7 @@ class CruiseLayout(Widget):
       param="CustomAccLongPressIncrement",
       value_map={1: 1, 2: 5, 3: 10},
       min_value=1, max_value=3, value_change_step=1,
+      description=tr("Cruise-speed change while holding the steering-wheel +/- button."),
       inline=True)
 
     self.sla_settings_button = simple_button_item_sp(

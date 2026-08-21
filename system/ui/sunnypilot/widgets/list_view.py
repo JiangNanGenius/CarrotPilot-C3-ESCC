@@ -171,7 +171,7 @@ class MultipleButtonActionSP(MultipleButtonAction):
       button_x = rect.x + i * self.button_width
 
       text = _resolve_value(_text, "")
-      text_size = measure_text_cached(self._font, text, 40)
+      text_size = measure_text_cached(self._font, text, 46)
       text_x = button_x + (self.button_width - text_size.x) / 2
       text_y = button_y + (style.BUTTON_HEIGHT - text_size.y) / 2
 
@@ -179,7 +179,7 @@ class MultipleButtonActionSP(MultipleButtonAction):
       is_button_enabled = self.enabled and (self.enabled_buttons is None or i in self.enabled_buttons)
       current_text_color = text_color if is_button_enabled else style.MBC_DISABLED
 
-      rl.draw_text_ex(self._font, text, rl.Vector2(text_x, text_y), 40, 0, current_text_color)
+      rl.draw_text_ex(self._font, text, rl.Vector2(text_x, text_y), 46, 0, current_text_color)
 
   def _handle_mouse_release(self, mouse_pos: MousePos):
     # Override parent method to check individual button enabled state
@@ -307,6 +307,8 @@ class ListItemSP(ListItem):
         self._text_size = measure_text_cached(self._font, self.title, style.ITEM_TEXT_FONT_SIZE)
         item_y = self._rect.y + (style.ITEM_BASE_HEIGHT - self._text_size.y) // 2
         rl.draw_text_ex(self._font, self.title, rl.Vector2(text_x, item_y), style.ITEM_TEXT_FONT_SIZE, 0, self.title_color)
+        self._draw_description_affordance(text_x + self._text_size.x, item_y,
+                                          self._rect.x + self._rect.width - style.ITEM_PADDING)
 
       value_text = self.right_value
       if value_text:
@@ -332,6 +334,10 @@ class ListItemSP(ListItem):
         self._text_size = measure_text_cached(self._font, self.title, style.ITEM_TEXT_FONT_SIZE)
         item_y = self._rect.y + (style.ITEM_BASE_HEIGHT - self._text_size.y) // 2 if self.inline else self._rect.y + style.ITEM_PADDING * 1.5
         rl.draw_text_ex(self._font, self.title, rl.Vector2(text_x, item_y), style.ITEM_TEXT_FONT_SIZE, 0, self.title_color)
+        right_limit = self._rect.x + self._rect.width - style.ITEM_PADDING
+        if self.inline and self.action_item:
+          right_limit = self.get_right_item_rect(self._rect).x - style.ITEM_PADDING
+        self._draw_description_affordance(text_x + self._text_size.x, item_y, right_limit)
 
       # Draw right item if present
       if self.action_item:

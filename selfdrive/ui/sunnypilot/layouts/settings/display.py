@@ -30,7 +30,7 @@ class DisplayLayout(Widget):
     self._onroad_brightness = option_item_sp(
       param="OnroadScreenOffBrightness",
       title=lambda: tr("Onroad Brightness"),
-      description="",
+      description=lambda: tr("Choose automatic brightness, a darker automatic mode, screen off, or a fixed brightness while driving."),
       min_value=0,
       max_value=22,
       value_change_step=1,
@@ -40,7 +40,7 @@ class DisplayLayout(Widget):
     self._onroad_brightness_timer = option_item_sp(
       param="OnroadScreenOffTimer",
       title=lambda: tr("Onroad Brightness Delay"),
-      description="",
+      description=lambda: tr("How long to wait before applying the selected fixed brightness or turning the screen off."),
       min_value=0,
       max_value=15,
       value_change_step=1,

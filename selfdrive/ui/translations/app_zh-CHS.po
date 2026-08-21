@@ -1515,6 +1515,51 @@ msgstr "禁用更新"
 msgid "System reboot required for changes to take effect. Reboot now?"
 msgstr "更改需要重启系统才能生效。现在重启？"
 
+msgid "Choose how much the cruise set speed changes for short and long button presses."
+msgstr "设置短按或长按方向盘巡航按键时，设定速度每次改变多少。"
+
+msgid "Use vision path predictions to estimate the appropriate speed to drive through turns ahead."
+msgstr "使用视觉路径预测提前识别弯道，并估算合适的通过速度。"
+
+msgid "Use map data to estimate the appropriate speed to drive through turns ahead."
+msgstr "使用地图数据提前识别弯道，并估算合适的通过速度。"
+
+msgid "Cruise-speed change for each short press of the steering-wheel +/- button."
+msgstr "每次短按方向盘巡航加减键时的速度变化量。"
+
+msgid "Cruise-speed change while holding the steering-wheel +/- button."
+msgstr "长按方向盘巡航加减键时的速度变化量。"
+
+msgid "Below this speed, using a turn signal pauses automatic steering so you can turn manually."
+msgstr "低于此速度时，打转向灯会暂停自动转向，便于驾驶员手动转弯。"
+
+msgid "Pause lateral control with blinker when traveling below the desired speed selected."
+msgstr "低于设定速度时，打转向灯会暂停横向控制。"
+
+msgid "Use the neural-network steering controller when the selected vehicle supports it. Leave off if steering behavior is uncertain."
+msgstr "车型支持时使用神经网络转向控制器；如果转向表现不确定，请保持关闭。"
+
+msgid "Scales the steering torque requested for a given lateral acceleration. Change only with measured tuning data."
+msgstr "缩放指定横向加速度所需的转向力矩。只有掌握实测调校数据时才修改。"
+
+msgid "Compensates for steering-system friction near center. Too high can cause frequent small corrections."
+msgstr "补偿方向盘中位附近的转向摩擦；过高会造成频繁的小幅修正。"
+
+msgid "Choose automatic brightness, a darker automatic mode, screen off, or a fixed brightness while driving."
+msgstr "选择行车时的自动亮度、偏暗自动模式、熄屏或固定亮度。"
+
+msgid "How long to wait before applying the selected fixed brightness or turning the screen off."
+msgstr "应用固定亮度或关闭屏幕前等待的时间。"
+
+msgid "Learn the vehicle's steering response delay while driving. When disabled, the fixed software delay below is used."
+msgstr "行车时学习车辆的转向响应延迟；关闭后使用下方的固定软件延迟。"
+
+msgid "Enable this for the car to learn and adapt its steering response time. Disable to use a fixed steering response time. Keeping this on provides the stock openpilot experience."
+msgstr "开启后车辆会实时学习并适应转向响应时间；关闭后使用固定响应时间。保持开启即为原版 openpilot 的工作方式。"
+
+msgid "CURVE"
+msgstr "弯道"
+
 msgid "Please connect to Wi-Fi to update."
 msgstr "请连接 Wi-Fi 以更新。"
 

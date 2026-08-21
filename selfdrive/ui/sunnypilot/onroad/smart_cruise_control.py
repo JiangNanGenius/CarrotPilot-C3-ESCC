@@ -9,16 +9,21 @@ import pyray as rl
 from openpilot.selfdrive.ui.onroad.hud_renderer import COLORS
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.system.ui.lib.application import gui_app, FontWeight
+from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.text_measure import measure_text_cached
 from openpilot.system.ui.sunnypilot.lib.utils import AlertFadeAnimator
 from openpilot.system.ui.widgets import Widget
 
 
 class SmartCruiseControlRenderer(Widget):
+  _VISION_PREVIEW_ENTER = 1.0
+  _VISION_PREVIEW_EXIT = 0.85
+
   def __init__(self):
     super().__init__()
     self.vision_enabled = False
     self.vision_active = False
+    self.vision_approaching = False
     self.map_enabled = False
     self.map_active = False
     self.long_override = False
@@ -37,6 +42,13 @@ class SmartCruiseControlRenderer(Widget):
 
       self.vision_enabled = vision.enabled
       self.vision_active = vision.active
+      predicted_lat_accel = vision.maxPredictedLateralAccel
+      if self.vision_active or not self.vision_enabled:
+        self.vision_approaching = False
+      elif self.vision_approaching:
+        self.vision_approaching = predicted_lat_accel >= self._VISION_PREVIEW_EXIT
+      else:
+        self.vision_approaching = predicted_lat_accel >= self._VISION_PREVIEW_ENTER
       self.map_enabled = map_.enabled
       self.map_active = map_.active
 
@@ -46,11 +58,11 @@ class SmartCruiseControlRenderer(Widget):
     self._vision_fade.update(self.vision_active)
     self._map_fade.update(self.map_active)
 
-  def _draw_icon(self, rect_center_x, rect_height, x_offset, y_offset, name, alpha=1.0):
+  def _draw_icon(self, rect_center_x, rect_height, x_offset, y_offset, name, alpha=1.0, approaching=False):
     text = name
-    font_size = 36
-    padding_v = 5
-    box_width = 160
+    font_size = 44
+    padding_v = 8
+    box_width = 210
 
     sz = measure_text_cached(self.font, text, font_size)
     box_height = int(sz.y + padding_v * 2)
@@ -58,6 +70,8 @@ class SmartCruiseControlRenderer(Widget):
     if self.long_override:
       color = COLORS.OVERRIDE
       box_color = rl.Color(color.r, color.g, color.b, int(alpha * 255))
+    elif approaching:
+      box_color = rl.Color(255, 190, 32, int(alpha * 255))
     else:
       box_color = rl.Color(0, 255, 0, int(alpha * 255))
 
@@ -98,7 +112,9 @@ class SmartCruiseControlRenderer(Widget):
 
     if self.vision_enabled:
       alpha = self._vision_fade.alpha if self.vision_active else 1.0
-      self._draw_icon(rect.x + rect.width / 2, rect.height, x_offset, y_scc_v, "SCC-V", alpha)
+      label = tr("CURVE") if self.vision_approaching else "SCC-V"
+      self._draw_icon(rect.x + rect.width / 2, rect.height, x_offset, y_scc_v, label, alpha,
+                      approaching=self.vision_approaching)
 
     if self.map_enabled:
       alpha = self._map_fade.alpha if self.map_active else 1.0
