@@ -128,7 +128,11 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # and is picked by the min(candidates) selection below. MPC handles actual accel/braking.
     v_cruise_kph_carrot = self.carrot_planner.update(sm, v_cruise * CV.MS_TO_KPH, mode="combined")
     v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
-    v_cruise = self.carrot_speed_limit.update(sm, v_cruise, self.resolver.speed_limit)
+    # The two limit-control modes are mutually exclusive. Sunny assist keeps
+    # the original cluster-set-speed state machine; Carrot direct mode clamps
+    # the planner only when that instrument-based assist is not selected.
+    if not self.sla.enabled:
+      v_cruise = self.carrot_speed_limit.update(sm, v_cruise, self.resolver.speed_limit)
     v_cruise = self.carrot_traffic_stop.update(sm, v_cruise)
     self.cruise_target_speed = max(0.0, v_cruise * CV.MS_TO_KPH)
 

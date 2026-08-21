@@ -18,6 +18,8 @@ check_key registry) so they work without rebuilding params_pyx.so.
 """
 
 from openpilot.selfdrive.carrot.carrot_params import CarrotParams
+from openpilot.common.params import Params
+from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.common import Mode as SpeedLimitMode
 from openpilot.system.ui.sunnypilot.widgets.list_view import (
   LineSeparatorSP,
   multiple_button_item_sp,
@@ -31,6 +33,7 @@ class CarrotLayout(Widget):
   def __init__(self):
     super().__init__()
     self._params = CarrotParams()
+    self._native_params = Params()
 
     items = self._initialize_items()
     self._scroller = Scroller(items, line_separator=False, spacing=0)
@@ -61,13 +64,34 @@ class CarrotLayout(Widget):
       callback=lambda index: self._params.put_int(key, values[index]),
     )
 
+  def _speed_limit_mode_index(self):
+    if self._params.get_bool("CarrotSpeedLimitEnable"):
+      return 1
+    if self._native_params.get("SpeedLimitMode", return_default=True) == SpeedLimitMode.assist:
+      return 0
+    return 2
+
+  def _set_speed_limit_mode(self, index):
+    if index == 0:  # Original sunnypilot cluster-set-speed behavior
+      self._params.put_bool("CarrotSpeedLimitEnable", False)
+      self._native_params.put("SpeedLimitMode", int(SpeedLimitMode.assist))
+    elif index == 1:  # Direct planner clamp
+      self._native_params.put("SpeedLimitMode", int(SpeedLimitMode.warning))
+      self._params.put_bool("CarrotSpeedLimitEnable", True)
+    else:
+      self._params.put_bool("CarrotSpeedLimitEnable", False)
+      self._native_params.put("SpeedLimitMode", int(SpeedLimitMode.off))
+
   def _initialize_items(self):
     items = [
       # -- Speed limit (wired in stage 2) ---------------------------
-      self._toggle(
-        "CarrotSpeedLimitEnable",
-        "限速控制",
-        "合并摄像头/车辆CAN + 地图 + 导航App 三路限速，自动应用（无需按键确认）。",
+      multiple_button_item_sp(
+        title="限速执行基准",
+        description="仪表：Sunny 原生巡航仪表逻辑；规划：Carrot 直接限制规划速度。两者互斥，不使用 GPS 速度。",
+        buttons=["仪表", "规划", "关闭"],
+        selected_index=self._speed_limit_mode_index(),
+        button_width=220,
+        callback=self._set_speed_limit_mode,
       ),
       self._selector(
         "AutoRoadSpeedLimitOffset", "道路限速偏移",
@@ -123,4 +147,3 @@ class CarrotLayout(Widget):
       if hasattr(item.action_item, 'toggle') and hasattr(item.action_item.toggle, 'set_state'):
         # 找到对应的参数键（从 title 匹配）
         pass  # 简化：不做刷新，依赖 initial_state
-

@@ -61,10 +61,10 @@ class SpeedLimitAssist:
     self.pre_active_timer = 0
     self.is_metric = self.params.get_bool("IsMetric")
     set_speed_limit_assist_availability(self.CP, self.CP_SP, self.params)
-    # SLA assist is disabled: carrot speed limit takes over (camera/CAN + map +
-    # nav-app). The resolver still runs and its speed_limit is consumed by
-    # CarrotSpeedLimit in the longitudinal planner, so we hard-disable assist.
-    self.enabled = False
+    # Keep sunnypilot's native cluster-set-speed state machine available. The
+    # direct Carrot planner limiter is a separate, user-selectable mode and
+    # must not silently disable the original instrument-based behavior.
+    self.enabled = self.params.get("SpeedLimitMode", return_default=True) == Mode.assist
     self.long_enabled = False
     self.long_enabled_prev = False
     self.is_enabled = False
