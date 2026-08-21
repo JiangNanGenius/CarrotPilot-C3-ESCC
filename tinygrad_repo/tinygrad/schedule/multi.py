@@ -1,112 +1,35 @@
-from typing import cast
-import functools, itertools
-from tinygrad.helpers import all_same, all_int, prod, DEBUG, RING, ALL2ALL, VIZ, getenv
-from tinygrad.uop.ops import Ops, UOp, sint, PatternMatcher, UPat, GroupOp, graph_rewrite_map, graph_rewrite
+from tinygrad.helpers import all_same, prod, getenv, ALLREDUCE_CAST
+from tinygrad.uop.ops import Ops, UOp, PatternMatcher, UPat, GroupOp, AxisType, graph_rewrite, broadcast_axes, _broadcast_shape, sint_to_uop
+from tinygrad.uop.ops import sint, ssimplify
 from tinygrad.dtype import dtypes
-from tinygrad.device import Device
-
-# *** allreduce implementation ***
-def handle_allreduce_multirank(buf:UOp, red:UOp) -> UOp|None:
-  if not isinstance(buf.device, tuple): return None
-
-  # Group buffers
-  groups: dict[int|None, list[UOp]] = {}
-  for i,dev in enumerate(buf.device):
-    groups.setdefault(Device[dev].group_id, []).append(buf.mselect(i))
-
-  # Put reduce leader of each group first
-  reduce_leaders = set(getenv("REDUCE_LEADERS", "").split(","))
-  groups = {gid: sorted(bufs, key=lambda x: (x.device not in reduce_leaders, x.device)) for gid,bufs in groups.items()}
-
-  # Skip if only one group or if every group has only one buffer
-  if len(groups) <= 1 or not any(len(g) > 1 for g in groups.values()): return None
-
-  # Reduce inside each group
-  inner = [UOp(Ops.MSTACK, buf.dtype, tuple(bufs)).allreduce(red.arg, (cast(str, bufs[0].device),)).mselect(0) for bufs in groups.values()]
-
-  # Allreduce across groups
-  outer = UOp(Ops.MSTACK, buf.dtype, tuple(inner)).allreduce(red.arg, tuple(buf.device for buf in inner))
-
-  # Broadcast back to all devices in the group
-  gid2bid = {Device[device].group_id: i for i,device in enumerate(outer.device)}
-  return outer.mselect(gid2bid[Device[red.device].group_id]).copy_to_device(red.device) if not isinstance(red.device, tuple) else \
-         UOp(Ops.MSTACK, buf.dtype, tuple(outer.mselect(gid2bid[Device[device].group_id]).copy_to_device(device) for device in red.device))
-
-def handle_allreduce(buf:UOp, red:UOp) -> UOp|None:
-  if not isinstance(buf.device, tuple): return None
-  assert all_int(buf.shape), f"does not support symbolic shape {buf.shape}"
-  n_lbs, shape, numel = len(buf.device), buf.shape, prod(buf.shape)
-
-  # ring allreduce doesn't provide a benefit with only 2 nodes or where number of elements is less than 256k (empirically)
-  # fallback to naive allreduce to save on kernel dispatch, chunking and reassembling chunks.
-  use_all2all = (ALL2ALL >= 2 or (n_lbs > 2 and numel > getenv("RING_ALLREDUCE_THRESHOLD", 256_000) and ALL2ALL >= 1))
-  use_ring = not use_all2all and (RING >= 2 or (n_lbs > 2 and numel > getenv("RING_ALLREDUCE_THRESHOLD", 256_000) and RING >= 1))
-  if DEBUG >= 2: print(f"{'ALL2ALL' if use_all2all else 'RING' if use_ring else 'NAIVE'} ALLREDUCE {n_lbs}x{numel} | {buf.dtype}")
-
-  # contiguous before we copy it
-  buf = buf.contiguous()
-
-  # naive: copy to all devices. if you shrink later, that'll be handled
-  if not use_ring and not use_all2all:
-    return functools.reduce(lambda x,y: x.alu(red.arg, y), [UOp(Ops.COPY, buf.dtype, (buf.mselect(i), red.src[1])) for i in range(n_lbs)])
-
-  # chunk data into n_lbs pieces
-  factor = next((f for f in [32, 16, 8, 4, 2] if numel % f == 0), 1)
-  base, left = (numel // factor) // n_lbs, (numel // factor) % n_lbs
-  chunks = list(itertools.pairwise(itertools.accumulate([(base + 1) * factor] * left + [base * factor] * (n_lbs - left), initial=0)))
-
-  # reduce-scatter
-  reduced_chunks = []
-  for i,(s,e) in enumerate(chunks):
-    if use_all2all:
-      chunks_on_i = [buf.mselect(j).reshape((numel,)).shrink(((s,e),)).copy_to_device(buf.device[i]) for j in range(n_lbs)]
-      reduced_chunks.append(functools.reduce(lambda x,y: x.alu(red.arg, y), chunks_on_i))
-    else:
-      chunk, reduced = buf.reshape((numel,)).shrink(((s,e),)), buf.reshape((numel,)).shrink(((s,e),))
-      for step in range(n_lbs-1):
-        src, dest = (i+step)%n_lbs, (i+step+1)%n_lbs
-        cp = reduced.copy_to_device(buf.device[dest], src if isinstance(reduced.device, tuple) else None)
-        reduced = cp.alu(red.arg, chunk.copy_to_device(buf.device[dest], dest))
-      reduced_chunks.append(reduced)
-
-  # allgather
-  copied_chunks = []
-  for i,rc in enumerate(reduced_chunks):
-    if isinstance(red.src[1].arg, str): copied_chunks.append(rc.copy_to_device(red.src[1].arg))
-    elif use_all2all: copied_chunks.append(UOp(Ops.MSTACK, buf.dtype, tuple(rc.copy_to_device(buf.device[j]) for j in range(n_lbs))))
-    else:
-      this_chunk: list[UOp|None] = [None] * n_lbs
-      this_chunk[(i+n_lbs-1)%n_lbs] = rc
-      for step in range(n_lbs-1):
-        this_chunk[(i+step)%n_lbs] = rc = rc.copy_to_device(buf.device[(i+step)%n_lbs])
-      copied_chunks.append(UOp(Ops.MSTACK, buf.dtype, tuple(cast(list[UOp], this_chunk))))
-
-  # reassemble
-  return UOp.sum(*[c.pad(((s,numel-e),)) for (s,e),c in zip(chunks, copied_chunks)]).reshape(shape)
+from tinygrad.schedule.allreduce import handle_allreduce
 
 # ***** multi rewrite MSELECT/MSTACK *****
 
+def _apply_shrink(marg, s:UOp, i:int) -> UOp:
+  new_arg = [tuple([x.substitute({drng[0]:drng[0].const_like(i)}) if isinstance(x, UOp) and
+                    (drng:=[r for r in x.ranges if r.arg[-1] is AxisType.DEVICE]) else x for x in ss]) for ss in marg]
+  return s._mop(Ops.SHRINK, tuple(new_arg))
+
 def mstack_early_shrink(ms:UOp, shrink:UOp):
   ret:list[UOp] = []
-  def apply_shrink(s:UOp, i:int) -> UOp:
-    new_arg = [tuple([x.substitute({dvar[0]:dvar[0].const_like(i)}) if isinstance(x, UOp) and
-                      (dvar:=[v for v in x.vars() if v.op is Ops.DEFINE_VAR and v.arg[0]=='_device_num']) else x for x in ss]) for ss in shrink.marg]
-    return s.shrink(tuple(new_arg))
   for i, x in enumerate(ms.src):
     if x.op is Ops.COPY:
-      ret.append(apply_shrink(x.src[0], i).copy_to_device(x.device))
+      ret.append(_apply_shrink(shrink.marg, x.src[0], i).copy_to_device(x.device))
     else:
-      ret.append(apply_shrink(x, i).contiguous())
+      ret.append(_apply_shrink(shrink.marg, x, i).contiguous())
   return ms.replace(src=tuple(ret))
 
+def lower_broadcast_copy(c:UOp, x:UOp):
+  if not (isinstance(c.device, tuple) and isinstance(x.device, str)): return None
+  if (sx:=x.simplify()).device is None and sx.base.op is Ops.CONST: return UOp(Ops.MSTACK, src=(sx,)*len(c.device))
+  return UOp(Ops.MSTACK, src=tuple(x.copy_to_device(d) for d in c.device))
+
 replace_allreduce = PatternMatcher([
-  (UPat(Ops.ALLREDUCE, src=(UPat.var("buf"), UPat()), name="red"), handle_allreduce_multirank),
-  (UPat(Ops.ALLREDUCE, src=(UPat.var("buf"), UPat()), name="red"), handle_allreduce),
   # BROADCAST: explicitly expand broadcast copies and combine with MSTACK
-  (UPat(Ops.COPY, name="c", src=(UPat(GroupOp.All-{Ops.CONST}, name="x"), UPat(Ops.DEVICE))), lambda c,x:
-    UOp(Ops.MSTACK, c.dtype, tuple(x.copy_to_device(d) for d in c.device)) if isinstance(c.device, tuple) and isinstance(x.device, str) else None),
+  (UPat(Ops.COPY, name="c", src=(UPat(GroupOp.All-{Ops.CONST}, name="x"),)), lower_broadcast_copy),
   # COPY_TO_ONE: if copying from multidevice to one, MSELECT the first (TODO: a little from each?)
-  (UPat(Ops.COPY, name="c", src=(UPat(GroupOp.All-{Ops.CONST}, name="x"), UPat(Ops.DEVICE))), lambda c,x:
+  (UPat(Ops.COPY, name="c", src=(UPat(GroupOp.All-{Ops.CONST}, name="x"),)), lambda c,x:
     x.mselect(0).copy_to_device(c.device) if isinstance(c.device, str) and isinstance(x.device, tuple) else None),
   # MSELECT on MSTACK is replaced with nothing
   (UPat(Ops.MSELECT, src=(UPat(Ops.MSTACK, name="mstack"),), name="ms"), lambda mstack, ms: mstack.src[ms.arg]),
@@ -117,116 +40,280 @@ replace_allreduce = PatternMatcher([
    lambda s,v,ms: v.replace(src=(s.mselect(ms.arg),)+v.src[1:])),
 ])
 
+_early_allreduce = PatternMatcher([
+  (UPat(Ops.ALLREDUCE, src=(UPat.var("buf"),), name="red"), handle_allreduce),
+])
+if not getenv("LATE_ALLREDUCE", 1): replace_allreduce = _early_allreduce + replace_allreduce
+
 # ***** multi functions *****
 
+def shard_srcs(msrcs:tuple[UOp, ...], axis:int) -> list[UOp]:
+  # normalize srcs to local shards on axis
+  devices = [x.device for x in msrcs if x.device is not None]
+  assert all_same(devices), f"all buffers must have the same device {devices}"
+  # without devices the sharding range comes from the UNSHARD itself (e.g. a LOCAL thread range);
+  # device shards range over the devices instead
+  if len(devices): sharding_rng = UOp.range(len(devices[0]), -1, AxisType.DEVICE)
+  else:
+    sharding_rng = next((m.src[1] for m in msrcs if m.op is Ops.UNSHARD), None)
+    assert sharding_rng is not None, "shard_srcs requires a device or a sharding range"
+
+  out_shape = _broadcast_shape(*[x.shape for x in msrcs])
+  srcs:list[UOp] = []
+  for mlb in msrcs:
+    src_axis = axis - (len(out_shape)-len(mlb.shape))
+    if mlb.axis == src_axis:
+      # same axis, just copy through
+      srcs.append(mlb.src[0])
+    else:
+      # otherwise every shard gets the full copy, sharded iff this src has the axis (broadcast srcs stay whole)
+      full = mlb if mlb.axis is None else copy_multi(mlb, mlb.device)
+      srcs.append(full if axis in broadcast_axes(mlb.shape, out_shape) else full._shard(src_axis, sharding_rng))
+  return srcs
+
+def shard_subview(full:UOp, multi:UOp) -> UOp:
+  """the sub-view of an unsharded full-shape value (shape == multi.shape) that belongs to this shard:
+  _shard along every sharded axis (contiguous blocks, like the device path)."""
+  assert tuple(full.shape) == tuple(multi.shape), f"shard sub-view shape mismatch {full.shape} != {multi.shape}"
+  # an EXPAND of a scalar over the full shape is the same broadcast on every shard: re-expand over the shard shape
+  if full.op is Ops.EXPAND and full.src[0].shape == (): return full.src[0].expand(multi.src[0].shape)
+  for ax, rng in multi.sharding: full = full._shard(ax, rng)
+  return full
+
 def alu_multi(root:UOp):
-  msrcs = root.src
-  assert all_same([x.device for x in msrcs]), f"all buffers must have the same device {[x.device for x in msrcs]}"
+  multis = [m for m in root.src if m.op is Ops.UNSHARD]
+  if not multis: return None
+  sharding = multis[0].sharding
+  target = multis[0]
+  def can_handle(m:UOp) -> bool:
+    # same sharding (peel the UNSHARD), or a whole unsharded value of the full tile shape (takes its per-shard
+    # sub-view), or a broadcast scalar
+    if m.sharding: return m.sharding == sharding
+    return m.shape == () or tuple(m.shape) == tuple(target.shape)
+  if all(can_handle(m) for m in root.src):
+    # every src either has the target sharding or is whole on every shard: run the alu per-shard
+    srcs = [m.src[0] if m.op is Ops.UNSHARD else m if m.shape == () else shard_subview(m, target) for m in root.src]
+    return srcs[0].alu(root.op, *srcs[1:]).unshard(target.arg, target.src[1:])
+  # resharding: single-axis fallback via shard_srcs
   axis = root.axis
   assert axis is not None
-
-  srcs = []
-  for mlb in msrcs:
-    if mlb.axis == axis:
-      # same axis, just copy through
-      assert mlb.op is Ops.MULTI
-      srcs.append(mlb.src[0])
-    elif mlb.axis is None:
-      # no axis, shard it
-      assert mlb.op is not Ops.MULTI
-      srcs.append(mlb._shard(axis))
-    else:
-      # axis mismatch, unshard it, send it to all devices, and shard it correctly
-      assert mlb.op is Ops.MULTI
-      srcs.append(mlb.src[0]._unshard(mlb.axis).allreduce(Ops.ADD, mlb.device)._shard(axis))
-  return srcs[0].alu(root.op, *srcs[1:]).multi(axis)
+  srcs = shard_srcs(root.src, axis)
+  return srcs[0].alu(root.op, *srcs[1:]).unshard(axis, next(m.src[1] for m in root.src if m.op is Ops.UNSHARD))
 
 def reduce_multi(root:UOp, multi:UOp):
-  op, axis = root.arg
-  if multi.axis is not None and multi.axis in axis:
-    # all-reduce on sharded axes
-    return multi.src[0].r(op, axis).allreduce(op, multi.device)
-  # reduce on non sharded axes, piecewise is fine. if axis is None this is also correct
-  return multi.src[0].r(op, axis).multi(axis=multi.axis)
-
-def _shape_to_single_shard(axis, shape:tuple[sint, ...], lb:UOp) -> tuple[sint, ...]:
-  return tuple(lb.shape[axis] if a == axis else s for a,s in enumerate(shape))
+  op, num_axes = root.arg
+  sharding = multi.sharding
+  reduced = [(ax, rng) for ax, rng in sharding if ax < num_axes]
+  remaining = [(ax, rng) for ax, rng in sharding if ax >= num_axes]
+  local = multi.src[0]._rop(op, tuple(range(num_axes)))
+  if reduced:
+    assert not remaining, f"partial allreduce not supported for multi-axis sharding {sharding}"
+    # all sharded axes are reduced: full allreduce
+    if ALLREDUCE_CAST and multi.src[0].op is Ops.CAST and multi.src[0].src[0].dtype in (dtypes.bfloat16, dtypes.half):
+      orig_dtype = multi.src[0].src[0].dtype
+      return local.cast(orig_dtype).allreduce(op, multi.device).cast(local.dtype)
+    return local.allreduce(op, multi.device)
+  # no sharded axes reduced: piecewise, keep all remaining sharding
+  new_axes = tuple(ax - num_axes for ax, _ in remaining)
+  new_rngs = tuple(rng for _, rng in remaining)
+  return local.unshard(new_axes, new_rngs)
 
 def reshape_multi(root:UOp, multi:UOp):
-  arg = root.marg
-  if (new_axis:=root.axis) is None: return multi.src[0].reshape(arg).multi(new_axis)
-  assert prod(multi.shape) == prod(arg), "reshape must maintain prod(shape)"
-  assert prod(multi.src[0].shape[multi.axis:])%prod(arg[new_axis+1:]) == 0, f"reshape cannot move items between shards {multi.shape} -> {arg=}"
-  new_shape_axis = prod(multi.src[0].shape[multi.axis:]) // prod(arg[new_axis+1:])
-  return multi.src[0].reshape(tuple(s if a!=new_axis else new_shape_axis for a,s in enumerate(arg))).multi(new_axis)
+  if prod(multi.shape) != prod(new_shape:=root.marg): raise RuntimeError("reshape must maintain prod(shape)")
+  # map every sharded axis through the reshape: the axis boundary must survive intact and stay divisible by its shard count
+  arg_acc:list[sint] = [1]
+  for s in new_shape: arg_acc.append(ssimplify(arg_acc[-1]*s))
+  new_shardings = []
+  for ax, rng in multi.sharding:
+    count = int(rng.vmax)+1
+    target = ssimplify(prod(multi.shape[:ax]))
+    if target not in arg_acc: raise RuntimeError(f"reshape {multi.shape} -> {new_shape} moved items between shards")
+    new_ax = len(arg_acc) - arg_acc[::-1].index(target) - 1
+    if new_shape[new_ax] % count != 0: raise RuntimeError(f"reshape {multi.shape} -> {new_shape} moved items between shards")
+    new_shardings.append((new_ax, rng))
+  new_axs = {a for a, _ in new_shardings}
+  new_shape = tuple(s//(int(rng.vmax)+1) if a in new_axs else s for a,s in enumerate(new_shape))
+  return multi.src[0].reshape(new_shape).unshard(tuple(a for a,_ in new_shardings), tuple(r for _,r in new_shardings))
 
 def expand_multi(root:UOp, multi:UOp):
-  # NOTE: this assert isn't needed, sharded axis can have dim 1
-  assert multi.axis is None or root.marg[multi.axis] == multi.shape[multi.axis], f"expand not supported on sharded axis {root.marg=}"
-  return multi.src[0].expand(_shape_to_single_shard(multi.axis, root.marg, multi.src[0])).multi(multi.axis)
+  shift = len(root.marg)
+  return multi.src[0]._mop(Ops.EXPAND, arg=root.marg) \
+    .unshard(tuple(ax+shift for ax,_ in multi.sharding), tuple(r for _,r in multi.sharding))
 
 def pad_multi(root:UOp, multi:UOp):
-  assert multi.axis is None or root.marg[multi.axis] == (0,0), f"padding not supported for {root.marg=}"
-  return multi.src[0].pad(root.marg).multi(multi.axis)
+  for ax, _ in multi.sharding:
+    assert root.marg[ax] == (0, multi.shape[ax]), f"padding not supported for {root.marg=}"
+  counts = {a for a,_ in multi.sharding}
+  local_pad = tuple((0, multi.src[0].shape[a]) if a in counts else s for a,s in enumerate(root.marg))
+  return multi.src[0]._mop(Ops.PAD, local_pad).unshard(multi.arg, multi.src[1:])
 
 def permute_multi(root:UOp, multi:UOp):
   # all permutes supported!
-  return multi.src[0].permute(root.marg).multi(root.axis)
+  return multi.src[0].permute(root.marg) \
+    .unshard(tuple(root.marg.index(ax) for ax,_ in multi.sharding), tuple(r for _,r in multi.sharding))
 
 def shrink_multi(root:UOp, multi:UOp):
-  assert multi.axis is None or root.marg[multi.axis] == (0, multi.shape[multi.axis]) or root.marg[multi.axis] in multi.bounds, \
-    f"shrinking not supported for {root.marg=}"
-  if multi.axis is not None and root.marg[multi.axis] in multi.bounds and root.marg[multi.axis] != (0, multi.shape[multi.axis]):
-    assert all(root.marg[i] == (0, s) or i == multi.axis for i,s in enumerate(multi.shape)), \
-      "cannot shrink sharded and non-sharded axis at the same time"
-    # NOTE: shrink on the shard axis is only allowed when result is a single partition, denoted by the new real
-    # we just copy it to all the devices, no real. this will be optimized out later
-    return multi.src[0].copy_to_device(multi.device, arg=multi.bounds.index(root.marg[multi.axis]))
-  return multi.src[0].shrink(tuple((0, multi.src[0].shape[multi.axis]) if a == multi.axis else s for a,s in enumerate(root.marg))).multi(multi.axis)
+  # resolve each sharded axis independently: a shrink to exactly this range's own shard resolves the UNSHARD along
+  # that axis (e.g. a fragment indexed by its LOCAL thread range becomes that thread's REG shard, no copy needed)
+  local_marg = list(root.marg)
+  remaining = list(multi.sharding)
+  for ax, rng in multi.sharding:
+    shard_sz = multi.src[0].shape[ax]
+    s, l = root.marg[ax]  # SHRINK marg is (start, length)
+    if sint_to_uop(l).ssimplify() == shard_sz and (sint_to_uop(s)-rng*shard_sz).ssimplify() == 0:
+      local_marg[ax] = (0, shard_sz)
+      remaining.remove((ax, rng))
+      continue
+    part_bounds = tuple((i*shard_sz, shard_sz) for i in range(int(rng.vmax)+1))
+    if (s, l) == (0, multi.shape[ax]): local_marg[ax] = (0, shard_sz)  # full axis stays sharded, shrink the other axes locally
+    else:
+      # NOTE: otherwise a shrink on the shard axis is only allowed on the legacy device path, selecting a single
+      # partition (which is copied to all the devices and optimized out later)
+      if len(multi.sharding) != 1 or not isinstance(multi.device, tuple) or (s, l) not in part_bounds:
+        raise RuntimeError(f"shrinking not supported for {root.marg=}")
+      non_shard_shrink = tuple((0, shard_sz) if i == ax else t for i, t in enumerate(root.marg))
+      return multi.src[0].copy_to_device(multi.device, arg=part_bounds.index((s, l)))._mop(Ops.SHRINK, non_shard_shrink)
+  val = multi.src[0]._mop(Ops.SHRINK, tuple(local_marg))
+  return val if not remaining else val.unshard(tuple(a for a,_ in remaining), tuple(r for _,r in remaining))
 
 def flip_multi(root:UOp, multi:UOp):
-  assert multi.axis is None or not root.marg[multi.axis], "flipping not supported on sharded axis"
-  return multi.src[0].flip([i for i,x in enumerate(root.marg) if x]).multi(multi.axis)
+  for ax, _ in multi.sharding:
+    if root.marg[ax]: raise RuntimeError(f"flipping not supported on sharded axis {ax}")
+  return multi.src[0].flip([i for i,x in enumerate(root.marg) if x]).unshard(multi.arg, multi.src[1:])
 
-# from multiple devices -> one
-def copy_multi(multi:UOp, device:UOp):
-  assert multi.axis is not None, "all multi ops have axis"
-  return multi.src[0]._unshard(multi.axis).allreduce(Ops.ADD, device)
+def stack_multi(root:UOp):
+  # STACK adds a leading axis: srcs are sharded one axis below the output
+  multis = [m for m in root.src if m.op is Ops.UNSHARD]
+  if not multis: return None
+  sharding = multis[0].sharding
+  if all(m.sharding == sharding for m in multis):
+    srcs = [m.src[0] if m.op is Ops.UNSHARD else m for m in root.src]
+    new_sharding = tuple((ax+1, rng) for ax, rng in sharding)
+    return UOp(Ops.STACK, src=tuple(srcs)).unshard(tuple(a for a,_ in new_sharding), tuple(r for _,r in new_sharding))
+  # resharding: single-axis fallback
+  axis = root.axis
+  assert axis is not None
+  return UOp(Ops.STACK, src=tuple(shard_srcs(root.src, axis-1))).unshard(axis, next(m.src[1] for m in root.src if m.op is Ops.UNSHARD))
 
-def assign_multi(dest:UOp, src:UOp):
-  if dest.axis != src.axis: raise RuntimeError(f"axis must match in assign {dest.axis} != {src.axis}")
-  return dest.src[0].assign(src.src[0]).multi(src.axis)
+def index_multi(root:UOp, multi:UOp):
+  # INDEX on UNSHARD: resolve each sharded axis into this range's own shard.
+  # Two ownership patterns are supported:
+  #   contiguous: idx = rng*shard_sz + local   (thread rng owns [rng*shard_sz, ...))
+  #   strided:    idx = rng + ir*shard_sz      (thread rng owns {rng, rng+shard_sz, ...})
+  idxs = list(root.src[1:])
+  for ax, rng in multi.sharding:
+    shard_sz = multi.src[0].shape[ax]
+    local = (idxs[ax] - rng*shard_sz).simplify()
+    if local.vmin >= 0 and local.vmax < shard_sz:
+      idxs[ax] = local
+      continue
+    # strided ownership: idx ≡ rng (mod shard_sz), intra-shard position is (idx - rng) // shard_sz
+    diff = (idxs[ax] - rng).simplify()
+    if (mod:=(diff % shard_sz).simplify()).op is Ops.CONST and mod.val == 0:
+      local = (diff // shard_sz).simplify()
+      if local.vmin >= 0 and local.vmax < shard_sz:
+        idxs[ax] = local
+        continue
+    raise RuntimeError(f"index_multi: cannot shard index {idxs[ax]} for UNSHARD axis {ax} with shard size {shard_sz}")
+  return multi.src[0].index(*idxs)
+
+def _shard_idx(rng:UOp, dev_idx:int) -> int:
+  drngs = [r for r in rng.ranges if r.arg[-1] is AxisType.DEVICE]
+  return 0 if not drngs else int(rng.substitute({drngs[0]: drngs[0].const_like(dev_idx)}).ssimplify())
+
+def copy_multi(multi:UOp, device:str | tuple[str, ...]):
+  sharding = multi.sharding
+  if isinstance(device, str):
+    # reconstruct by concatenating along each axis from last to first
+    piece_info: list[tuple[tuple, UOp]] = []
+    for i in range(len(multi.device)):
+      idxs = tuple(_shard_idx(r, i) for _, r in sharding)
+      piece_info.append((idxs, multi.src[0].mselect(i).copy_to_device(device)))
+    for j in range(len(sharding) - 1, -1, -1):
+      ax, rng = sharding[j]
+      groups: dict[tuple, list[tuple[int, UOp]]] = {}
+      for idxs, p in piece_info:
+        key = idxs[:j] + idxs[j+1:]
+        groups.setdefault(key, []).append((idxs[j], p))
+      piece_info = []
+      for key in sorted(groups):
+        grp = sorted(groups[key], key=lambda x: x[0])
+        piece_info.append((key, grp[0][1].cat(*[x[1] for x in grp[1:]], dim=ax)))
+    return piece_info[0][1]
+  # multi-device target: unshard all axes and allreduce
+  val = multi.src[0]
+  for ax, rng in sharding:
+    bsz = val.shape[ax]
+    val = val.pad(tuple((0,0) if a != ax else (bsz*rng, bsz*int(rng.vmax) - bsz*rng) for a in range(len(val.shape))))
+  return val.allreduce(Ops.ADD, device)
+
+def store_after_multi(dest:UOp, src:UOp): return dest.after(dest.store(src.src[0])).unshard(src.arg, src.src[1:])
+
+def store_value_multi(dest:UOp, multi:UOp):
+  # storing a sharded value into an unsharded dest: every shard stores into its own sub-view of the dest
+  return shard_subview(dest, multi).store(multi.src[0])
+
+def store_dest_multi(root:UOp, multi:UOp):
+  # STORE with a sharded dest: every shard stores into its own shard of the dest.
+  # the value is handled like in alu_multi: UNSHARD srcs peel, full-shape values take their per-shard sub-view
+  # (scalars arrive EXPANDed to the full shape by UOp.store's const_like, so they sub-view like everything else)
+  srcs = [multi.src[0]] + [x.src[0] if x.op is Ops.UNSHARD else shard_subview(x, multi) if tuple(x.shape) == tuple(multi.shape) else x
+                           for x in root.src[1:]]
+  return UOp(root.op, root.dtype, tuple(srcs), root.arg)
 
 def passthrough_multi(root:UOp, multi:UOp):
-  return UOp(root.op, root.dtype, (multi.src[0],)+tuple(x.src[0] if x.op is Ops.MULTI else x for x in root.src[1:]), root.arg).multi(multi.axis)
+  new_src = (multi.src[0],)+tuple(x.src[0] if x.op is Ops.UNSHARD else x for x in root.src[1:])
+  return UOp(root.op, root.dtype, src=new_src, arg=root.arg).unshard(multi.arg, multi.src[1:])
 
-# NOTE: this is the same pattern as Ops.UNROLL
+def rewrite_into_function(call:UOp):
+  if call.arg.precompile: return None
+  new_body = graph_rewrite(call.src[0], multi_pm, name="subcall")
+  new_args = tuple(a.src[0] if a.op is Ops.UNSHARD else a for a in call.src[1:])
+  # after multi resolution, TUPLE elements may be UNSHARD — strip UNSHARD from body, create per-shard FUNCTION, wrap each GETTUPLE in its own UNSHARD
+  assert new_body.op is Ops.TUPLE
+  if any(s.op is Ops.UNSHARD for s in new_body.src):
+    shard_call = call.replace(src=(UOp.maketuple(*[s.src[0] if s.op is Ops.UNSHARD else s for s in new_body.src]),)+new_args)
+    return UOp.maketuple(*[shard_call.gettuple(i).unshard(s.arg, s.src[1:]) if s.op is Ops.UNSHARD else shard_call.gettuple(i)
+                           for i, s in enumerate(new_body.src)])
+  return call.replace(src=(new_body,)+new_args)
+
+def param_to_multi(p:UOp):
+  if p.axis is None: return None
+  return UOp.param(p.arg.slot, p.dtype, p.shard_shape, p.device, p.arg.vmin_vmax, p.arg.multiple_of, p.arg.name, p.arg.addrspace).unshard(p.axis)
+
+# NOTE: this is the same pattern as unrolled ranges
 multi_pm = PatternMatcher([
-  (UPat(GroupOp.ALU, name="root", custom_early_reject=set([Ops.MULTI])), alu_multi),
-  (UPat(Ops.REDUCE_AXIS, src=(UPat(Ops.MULTI, name="multi"), ), name="root"), reduce_multi),
-  (UPat(Ops.RESHAPE, src=(UPat(Ops.MULTI, name="multi"), UPat()), name="root"), reshape_multi),
-  (UPat(Ops.EXPAND, src=(UPat(Ops.MULTI, name="multi"), UPat()), name="root"), expand_multi),
-  (UPat(Ops.PAD, src=(UPat(Ops.MULTI, name="multi"), UPat(), UPat()), name="root"), pad_multi),
-  (UPat(Ops.SHRINK, src=(UPat(Ops.MULTI, name="multi"), UPat(), UPat()), name="root"), shrink_multi),
-  (UPat(Ops.PERMUTE, src=(UPat(Ops.MULTI, name="multi"), ), name="root"), permute_multi),
-  (UPat(Ops.FLIP, src=(UPat(Ops.MULTI, name="multi"), ), name="root"), flip_multi),
-  (UPat(Ops.ASSIGN, src=(UPat(Ops.MULTI, name="dest"), UPat(Ops.MULTI, name="src"))), assign_multi),
-  (UPat(Ops.COPY, src=(UPat(Ops.MULTI, name="multi"), UPat(Ops.DEVICE, name="device"))), copy_multi),
-  (UPat(Ops.ALLREDUCE, src=(UPat(Ops.MULTI, name="multi"), UPat(Ops.DEVICE, name="device")), name="red"),
-    lambda multi,device,red: multi.src[0].allreduce(red.arg, device).multi(axis=multi.axis)),
-  (UPat(Ops.CALL, src=(UPat(Ops.MULTI, name="multi"), ), name="root", allow_any_len=True), passthrough_multi),
-  # we just remove the MULTI from CALLs with dtypes.void and assume they are handled by the user for custom kernels
-  (UPat(Ops.CALL, dtype=dtypes.void, name="root", custom_early_reject=set([Ops.MULTI])), lambda root:
-    UOp(root.op, root.dtype, tuple(x.src[0] if x.op is Ops.MULTI else x for x in root.src), root.arg)),
-  (UPat((Ops.CAST, Ops.BITCAST, Ops.CONTIGUOUS, Ops.DETACH, Ops.CONTIGUOUS_BACKWARD),
-        src=(UPat(Ops.MULTI, name="multi"), ), name="root"), passthrough_multi),
-  # after CALL
-  (UPat(Ops.AFTER, src=(UPat(Ops.MULTI, name="multi"), UPat(Ops.CALL)), name="a"),
-    lambda multi,a: a.replace(src=(multi.src[0],)+a.src[1:]).multi(multi.axis)),
-])+replace_allreduce
+  (UPat(Ops.PARAM, name="p"), param_to_multi),
+  (UPat(GroupOp.ALU, name="root", custom_early_reject=set([Ops.UNSHARD])), alu_multi),
+  (UPat(Ops.REDUCE, src=(UPat(Ops.UNSHARD, name="multi"), ), name="root"), reduce_multi),
+  (UPat(Ops.RESHAPE, src=(UPat(Ops.UNSHARD, name="multi"), UPat()), name="root"), reshape_multi),
+  (UPat(Ops.EXPAND, src=(UPat(Ops.UNSHARD, name="multi"), UPat()), name="root"), expand_multi),
+  (UPat(Ops.PAD, src=(UPat(Ops.UNSHARD, name="multi"), UPat(), UPat()), name="root"), pad_multi),
+  (UPat(Ops.SHRINK, src=(UPat(Ops.UNSHARD, name="multi"), UPat(), UPat()), name="root"), shrink_multi),
+  (UPat(Ops.PERMUTE, src=(UPat(Ops.UNSHARD, name="multi"), ), name="root"), permute_multi),
+  (UPat(Ops.FLIP, src=(UPat(Ops.UNSHARD, name="multi"), ), name="root"), flip_multi),
+  (UPat(Ops.STACK, name="root", custom_early_reject=set([Ops.UNSHARD])), stack_multi),
+  (UPat(Ops.INDEX, src=(UPat(Ops.UNSHARD, name="multi"),), name="root", allow_any_len=True), index_multi),
+  (UPat(Ops.AFTER, src=(UPat(Ops.UNSHARD), UPat(Ops.STORE, src=(UPat(Ops.UNSHARD, name="dest"), UPat(Ops.UNSHARD, name="src"))))), store_after_multi),
+  (UPat(Ops.COPY, src=(UPat(Ops.UNSHARD, name="multi"),), name="copy"), lambda multi,copy: copy_multi(multi, copy.arg)),
+  (UPat(Ops.ALLREDUCE, src=(UPat(Ops.UNSHARD, name="multi"),), name="red"),
+    lambda multi,red: multi.src[0].allreduce(*red.arg).unshard(multi.arg, multi.src[1:])),
 
-def get_multi_map(big_sink:UOp) -> dict[UOp, UOp]:
-  if VIZ: graph_rewrite(big_sink, PatternMatcher([]), name="View Multi AST")
-  ret = graph_rewrite_map(big_sink, multi_pm, name="multi_pm")
-  if VIZ: graph_rewrite(ret[big_sink], PatternMatcher([]), name="View Post Multi AST")
-  return ret
+  # resolve TUPLE+GETTUPLE (needed in multi)
+  (UPat(Ops.GETTUPLE, src=(UPat(Ops.TUPLE, name="t"),), name="g"), lambda g,t: t.src[g.arg]),
+  # GETTUPLE on UNSHARD: passthrough UNSHARD (e.g. when FUNCTION was replaced by UNSHARD(GETTUPLE(...)))
+  (UPat(Ops.GETTUPLE, src=(UPat(Ops.UNSHARD, name="multi"),), name="g"),
+    lambda g, multi: multi.src[0].gettuple(g.arg).unshard(multi.arg, multi.src[1:]) if multi.src[0].op in {Ops.FUNCTION, Ops.TUPLE} else multi),
+  # rewrite into FUNCTION calls explicitly for UNSHARD (value-producing)
+  (UPat(Ops.FUNCTION, name="call"), rewrite_into_function),
+  (UPat((Ops.CALL, Ops.FUNCTION, Ops.AFTER), src=(UPat(Ops.UNSHARD, name="multi"), ), name="root", allow_any_len=True), passthrough_multi),
+  # just strip the UNSHARD from non-value-producing CALLs (custom kernels, etc.) — FUNCTION is handled by rewrite_into_function
+  (UPat(Ops.CALL, dtype=dtypes.void, name="root", custom_early_reject=set([Ops.UNSHARD])), lambda root:
+    UOp(root.op, root.dtype, tuple(x.src[0] if x.op is Ops.UNSHARD else x for x in root.src), root.arg)),
+  (UPat((Ops.CAST, Ops.BITCAST, Ops.CONTIGUOUS, Ops.DETACH, Ops.CONTIGUOUS_BACKWARD),
+        src=(UPat(Ops.UNSHARD, name="multi"), ), name="root"), passthrough_multi),
+  # STORE of a sharded value into an unsharded dest (e.g. a fragment into a full output tile)
+  (UPat(Ops.STORE, src=(UPat.var("dest"), UPat(Ops.UNSHARD, name="multi"))), store_value_multi),
+  # STORE into a sharded dest (e.g. the fragment init): every shard stores into its own shard
+  (UPat(Ops.STORE, src=(UPat(Ops.UNSHARD, name="multi"), ), name="root", allow_any_len=True), store_dest_multi),
+])+replace_allreduce

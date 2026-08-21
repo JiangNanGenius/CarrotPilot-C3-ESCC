@@ -25,7 +25,7 @@ class TestStunning(unittest.TestCase):
     nv = a[12].cat(a[76]).tolist()
 
     vi = Variable('i', 0, a.shape[0]-1)
-    with self.assertRaisesRegex(AssertionError, "bind mismatch on"):
+    with self.assertRaisesRegex(RuntimeError, "bind mismatch on"):
       wv = a[vi.bind(12)].cat(a[vi.bind(76)]).tolist()
       self.assertListEqual(nv, wv)
 
@@ -41,7 +41,7 @@ class TestStunning(unittest.TestCase):
     X_samp, Y_samp = X_train[samples], Y_train[samples]
     vi = Variable('i', 0, samples.shape[0]-1)
     with Context(SPLIT_REDUCEOP=0):
-      with Tensor.train():
+      with Context(TRAINING=1):
         losses = []
         for i in range(samples.shape[0]):
           vib = vi.bind(i)

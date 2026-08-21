@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
-from tinygrad import Tensor, Variable
+from tinygrad import Device, Tensor, Variable, TinyJit, dtypes
+from tinygrad.helpers import CHECK_OOB
 
 class TestTensorVariable(unittest.TestCase):
   def test_add_tvar(self):
@@ -8,9 +9,64 @@ class TestTensorVariable(unittest.TestCase):
     ret = (Tensor(vv) + 3).item()
     assert ret == 4
 
+  def test_variable_mul_tensor(self):
+    vv = Variable("a", 1, 10).bind(2)
+    t = Tensor.ones(3, dtype=dtypes.int8)
+    self.assertListEqual((t * vv).tolist(), [2, 2, 2])
+    # TODO: fix
+    try:
+      self.assertListEqual((vv * t).tolist(), [2, 2, 2])
+    except RuntimeError: pass
+
+  @unittest.skipUnless(dtypes.long in Device[Device.DEFAULT].renderer.supported_dtypes(), "requires long support")
+  def test_large_range_variable(self):
+    self.assertEqual(Tensor(Variable("b", 0, 2**40, dtype=dtypes.long).bind(2**35)).clone(Device.DEFAULT).item(), 2**35)
+
+  @unittest.skipUnless(dtypes.long in Device[Device.DEFAULT].renderer.supported_dtypes(), "requires long support")
+  def test_large_range_variable_jit(self):
+    @TinyJit
+    def f(a,b): return (Tensor(a+b).clone(Device.DEFAULT) * 2).realize()
+    for i in range(3):
+      a = Variable("a", 0, 2**10, dtype=dtypes.int).bind(i)
+      b = Variable("b", 0, 2**40, dtype=dtypes.long).bind(2**35)
+      self.assertEqual(f(a,b).item(), (2**35 + i) * 2)
+
+  def test_variable_defers_like_a_literal(self):
+    vv = Variable("a", 1, 10).bind(2)
+    self.assertEqual(Tensor(vv).dtype, dtypes.weakint)
+    self.assertEqual((Tensor(vv) + Tensor([1], dtype=dtypes.int8)).dtype, dtypes.int8)  # takes the concrete side, no widening
+    self.assertEqual(Tensor(vv).item(), 2)                                              # a read commits at default_int
+
+  def test_variable_tensor_dtype_arg(self):
+    vv = Variable("a", 1, 10).bind(2)
+    t = Tensor(vv, dtype=dtypes.float32)
+    self.assertEqual(t.dtype, dtypes.float32)
+    self.assertEqual(t.item(), 2.0)
+
+  def test_unbound_variable_tensor(self):
+    # an unbound variable schedules fine, but can't execute
+    with self.assertRaisesRegex(RuntimeError, "unbound"): Tensor(Variable("u", 1, 10)).item()
+    with self.assertRaisesRegex(RuntimeError, "unbound"): (Tensor(Variable("u", 1, 10)) + 1).item()
+    # bound variables in an expression are fine
+    self.assertEqual(Tensor(Variable("u", 1, 10).bind(2) + 1).item(), 3)
+
+  def test_shrink_beyond_buffer_variable(self):
+    # TODO: shrink by a variable whose vmax exceeds the dim should fail at build, today only CHECK_OOB=1 rejects it
+    t = Tensor.ones(3).contiguous()[:Variable("a", 1, 10).bind(5)]
+    if CHECK_OOB: self.assertRaises(RuntimeError, t.sum().item)
+    else: t.sum().item()  # silent OOB: reads 2 elements past the buffer, result depends on the allocator
+
+  def test_symbolic_shape_mul_variable_tensor(self):
+    # NOTE: the buffer dim must cover the variable's vmax
+    vv = Variable("a", 1, 10).bind(2)
+    self.assertEqual((Tensor.ones(10).contiguous()[:vv] * Tensor(vv)).sum().item(), 4.0)
+    # a vmin=0 symbolic dim broadcasts too
+    v0 = Variable("z", 0, 10).bind(2)
+    self.assertEqual((Tensor.ones(10).contiguous()[:v0] * Tensor(v0)).sum().item(), 4.0)
+
   def test_inner_tvar_node(self):
     vv = Variable("w", 0, 10).bind(2)
-    ret = Tensor.from_uop(vv * 4).item()
+    ret = Tensor(vv * 4).item()
     assert ret == 8
 
   def test_inner_tvar_mul(self):
@@ -136,6 +192,30 @@ class TestTensorVariable(unittest.TestCase):
     with self.assertRaises(AssertionError):
       t.chunk(2, dim=0)  # can't split along symbolic dim
 
+  def test_symbolic_var_sum(self, var_name="u"):
+    t = Variable("t", 1, 10).bind(4)
+    v = Variable(var_name, 1, 5).bind(1)
+    mask = (Tensor.full((1, 1, t, v+t), 1) + 1).contiguous()
+    mask.shrink(((0, 1), (0, 1), (0, 4), (0, 4))).numpy()
+  def test_symbolic_var_sum_alt_name(self): self.test_symbolic_var_sum("s")
+
+  def test_symbolic_triu(self):
+    t = Variable("t", 1, 10).bind(4)
+    for start_pos in (0, 1, 3):
+      var_start_pos = Variable("start_pos", 0, 5).bind(start_pos)
+      mask = Tensor.full((1, 1, t, var_start_pos+t), float("-inf")).triu(var_start_pos+1)
+      out = mask.shrink(((0, 1), (0, 1), (0, 4), (0, start_pos+4))).numpy()
+      expected = np.triu(np.full((1, 1, 4, start_pos+4), float("-inf")), k=start_pos+1)
+      np.testing.assert_equal(out, expected)
+
+  def test_symbolic_tril(self):
+    t = Variable("t", 1, 10).bind(4)
+    for start_pos in (0, 1, 3):
+      var_start_pos = Variable("start_pos", 0, 5).bind(start_pos)
+      mask = Tensor.full((1, 1, t, var_start_pos+t), float("-inf")).tril(var_start_pos+1)
+      out = mask.shrink(((0, 1), (0, 1), (0, 4), (0, start_pos+4))).numpy()
+      expected = np.tril(np.full((1, 1, 4, start_pos+4), float("-inf")), k=start_pos+1)
+      np.testing.assert_equal(out, expected)
 
 if __name__ == '__main__':
   unittest.main()

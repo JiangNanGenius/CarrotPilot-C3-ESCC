@@ -92,7 +92,7 @@ class TestKernelOpts(unittest.TestCase):
     a = Tensor.rand(8, N, 8, N)
     r = a.sum(axis=(1,3))
     helper_linearizer_opt(r, [
-      # openCL / CL=1 is 256 max threads
+      # openCL / DEV=CL is 256 max threads
       [Opt(OptOps.GROUPTOP, 0, 2)], [Opt(OptOps.GROUPTOP, 0, 32)],
       [Opt(OptOps.GROUPTOP, 1, 2)], [Opt(OptOps.GROUPTOP, 1, 32)], # Checking how it works with 1 grouped_reduce.
       [Opt(OptOps.GROUPTOP, 0, 2), Opt(OptOps.GROUPTOP, 1, 2)],
@@ -224,7 +224,6 @@ class TestKernelOpts(unittest.TestCase):
       [Opt(OptOps.PADTO, 0, 32), Opt(OptOps.UPCAST, 0, 8),],
     ])
 
-    # can pad sum reduce axis if there's no unsafe ops prior to sum
     for axis in (0, 1):
       helper_linearizer_opt(a.sum(), [[Opt(OptOps.PADTO, axis, 32)],])
       helper_linearizer_opt(a.sum(0), [[Opt(OptOps.PADTO, axis, 32)],])
@@ -240,22 +239,16 @@ class TestKernelOpts(unittest.TestCase):
     helper_linearizer_opt(a.sum().exp(), [[Opt(OptOps.PADTO, 0, 32)],])
     helper_linearizer_opt(a.sum(0).exp(), [[Opt(OptOps.PADTO, 1, 32)],])
 
-  def test_padto_sum_not_ok(self):
+  def test_padto_sum(self):
     N = 18
     # NOTE: this setup prevents 17 * 17 contiguous merged into one dimension
     a = Tensor.rand(N, N).shrink(((0, 17), (0, 17))).exp()
-    # exp is not safe to pad
-    with self.assertRaises(KernelOptError):
-      helper_linearizer_opt(a.exp().sum(), [[Opt(OptOps.PADTO, 0, 32)],])
-    with self.assertRaises(KernelOptError):
-      helper_linearizer_opt(a.exp().sum(0), [[Opt(OptOps.PADTO, 1, 32)],])
+    helper_linearizer_opt(a.exp().sum(), [[Opt(OptOps.PADTO, 0, 32)],])
+    helper_linearizer_opt(a.exp().sum(0), [[Opt(OptOps.PADTO, 1, 32)],])
 
     b = a < 1
-    # lt is not safe to pad
-    with self.assertRaises(KernelOptError):
-      helper_linearizer_opt(b.sum(), [[Opt(OptOps.PADTO, 0, 32)],])
-    with self.assertRaises(KernelOptError):
-      helper_linearizer_opt(b.sum(0), [[Opt(OptOps.PADTO, 1, 32)],])
+    helper_linearizer_opt(b.sum(), [[Opt(OptOps.PADTO, 0, 32)],])
+    helper_linearizer_opt(b.sum(0), [[Opt(OptOps.PADTO, 1, 32)],])
 
   def test_padto_max(self):
     N = 18
@@ -271,16 +264,13 @@ class TestKernelOpts(unittest.TestCase):
       [Opt(OptOps.PADTO, 0, 32), Opt(OptOps.UPCAST, 0, 8),],
     ])
 
-    # cannot pad max kernel on reduce
-    with self.assertRaises(KernelOptError):
-      helper_linearizer_opt(a.max(), [[Opt(OptOps.PADTO, 0, 32)],])
-    with self.assertRaises(KernelOptError):
-      helper_linearizer_opt(a.max(0), [[Opt(OptOps.PADTO, 1, 32)],])
+    helper_linearizer_opt(a.max(), [[Opt(OptOps.PADTO, 0, 32)],])
+    helper_linearizer_opt(a.max(0), [[Opt(OptOps.PADTO, 1, 32)],])
 
   def test_padto_where(self):
     Tensor.manual_seed(0)
     N = 17
-    a = (Tensor.randn(N, N).realize().max(axis=0, keepdim=True) > 1).where(1, 0)
+    a = (Tensor.randn(N, N).realize().max(axis=0, keepdim=True) > 1).where(1, 0).int()
     helper_linearizer_opt(a.max(0), [
       [Opt(OptOps.PADTO, 0, 32)],
       [Opt(OptOps.PADTO, 0, 32), Opt(OptOps.UPCAST, 0, 8),],
@@ -290,8 +280,8 @@ class TestKernelOpts(unittest.TestCase):
     Tensor.manual_seed(0)
     N = 17
     r = Tensor.randn(N, N).realize().max(axis=0, keepdim=True) > 1
-    a0 = r.where(1, 0)
-    a1 = r.where(2, 0)
+    a0 = r.where(1, 0).int()
+    a1 = r.where(2, 0).int()
     helper_linearizer_opt([a0.max(0), a1.max(0)], [
       [Opt(OptOps.PADTO, 0, 32)],
       [Opt(OptOps.PADTO, 0, 32), Opt(OptOps.UPCAST, 0, 8),],
@@ -323,7 +313,7 @@ class TestKernelOpts(unittest.TestCase):
   @unittest.skipUnless(Device[Device.DEFAULT].renderer.has_shared, "test requires shared")
   @unittest.skipUnless(Device[Device.DEFAULT].renderer.supports_float4, "test requires float4")
   def test_arange_opts(self):
-    a = Tensor.arange(128)
+    a = Tensor.arange(128).clone()
     # NOTE: arange no longer has reduce ops available for opt
     helper_linearizer_opt(a, [
       #[Opt(OptOps.GROUP, 0, 32)],

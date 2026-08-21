@@ -1,7 +1,7 @@
 import unittest
-from tinygrad import Tensor, nn, Device
+from tinygrad import Tensor, nn, Device, dtypes, Variable
 from tinygrad.helpers import Context, GlobalCounters, getenv, PCONTIG, DEBUG
-from tinygrad.uop.ops import graph_rewrite, PatternMatcher, UPat, Ops
+from tinygrad.uop.ops import graph_rewrite, PatternMatcher, UPat, Ops, UOp
 from tinygrad.codegen.opt import OptOps, Opt
 from tinygrad.renderer.ptx import PTXRenderer
 from tinygrad.renderer.nir import NIRRenderer
@@ -66,6 +66,18 @@ class TestRangeifyAssign(unittest.TestCase):
     self.assertListEqual(lst2, B.permute(1, 0).tolist())
 
 class TestRangeifyEdgeCase(unittest.TestCase):
+  def test_variable_stack_data(self):
+    # a bound-Variable STACK used as data gets ranges from its graph position
+    v = Variable("v", 0, 10).bind(3)
+    t = Tensor(UOp.stack(v, v+1).cast(dtypes.int)) + Tensor.arange(2)
+    self.assertListEqual(t.tolist(), [3, 5])
+
+  def test_variable_data_and_shape(self):
+    # the same Variable has a data edge through CAST and a structural edge through SHRINK
+    v = Variable("shared_v", 1, 10).bind(3)
+    t = Tensor.ones(10)[:v] * Tensor(v.cast(dtypes.float))
+    self.assertEqual(t.sum().item(), 9)
+
   def test_matmul_relu_cat(self):
     a = Tensor.ones(100, 512).contiguous().realize()
     c = Tensor.ones(1, 512).contiguous().realize()
@@ -109,9 +121,9 @@ def fa():
 def fa_bw():
   Tensor.manual_seed(1337)
   with Context(DEBUG=0):
-    q,k,v = [Tensor.rand(BS, HEADS, SEQLEN, EMB).contiguous().realize().requires_grad_() for _ in range(3)]
+    q,k,v = [Tensor.rand(BS, HEADS, SEQLEN, EMB).contiguous().realize() for _ in range(3)]
     attn_output = nn.Linear(HEADS*EMB, HEADS*EMB, bias=False)
-    attn_output.weight.requires_grad_().realize()
+    attn_output.weight.realize()
     target = Tensor.rand(BS, SEQLEN, HEADS*EMB).contiguous().realize()
 
   GlobalCounters.reset()

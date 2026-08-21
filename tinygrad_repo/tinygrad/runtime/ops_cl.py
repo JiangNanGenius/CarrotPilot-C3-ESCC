@@ -1,12 +1,11 @@
 from __future__ import annotations
 from typing import cast
-import ctypes, functools, hashlib
+import ctypes, hashlib
 from tinygrad.runtime.autogen import opencl as cl
 from tinygrad.runtime.support import c
-from tinygrad.helpers import to_char_p_p, from_mv, OSX, DEBUG, mv_address, suppress_finalizing
-from tinygrad.renderer.cstyle import OpenCLRenderer, IntelRenderer
-from tinygrad.device import BufferSpec, LRUAllocator, Compiled, Compiler, CompileError, CompilerSet
-from tinygrad.dtype import ImageDType
+from tinygrad.helpers import to_char_p_p, from_mv, OSX, DEBUG, mv_address, suppress_finalizing, unwrap, round_up, is_image_shape
+from tinygrad.renderer.cstyle import OpenCLRenderer
+from tinygrad.device import BufferSpec, LRUAllocator, Compiled, Compiler, CompileError, TinyELF, Program
 
 CC_CB = c.CFUNCTYPE[None, [c.POINTER[ctypes.c_char], c.POINTER[None], cl.size_t, c.POINTER[None]]]
 BP_CB = c.CFUNCTYPE[None, [cl.cl_program, c.POINTER[None]]]
@@ -37,15 +36,15 @@ class CLCompiler(Compiler):
     check(cl.clReleaseProgram(program))
     return bytes(binary)
 
-class CLProgram:
-  def __init__(self, device:CLDevice, name:str, lib:bytes, buf_dtypes=[], **kwargs):
-    self.dev, self.name, self.lib, self.buf_dtypes = device, name, device.cl_compiler.compile_cached(lib.decode()), buf_dtypes
+class CLProgram(Program['CLDevice']):
+  def __init__(self, device:CLDevice, obj:TinyELF):
+    self.dev, self.lib, self.signature = device, device.cl_compiler.compile_cached(obj.lib.decode()), obj.signature
     self.program = checked(cl.clCreateProgramWithBinary(device.context, 1, device.device_id, (ctypes.c_size_t * 1)(len(self.lib)),
                                                         to_char_p_p([self.lib], ctypes.c_ubyte), binary_status := ctypes.c_int32(),
                                                         errcode_ret := ctypes.c_int32()), errcode_ret)
     check(binary_status.value)
     check(cl.clBuildProgram(self.program, 1, device.device_id, None, BP_CB(), None)) # NOTE: OSX requires this
-    self.kernel = checked(cl.clCreateKernel(self.program, name.encode(), status := ctypes.c_int32()), status)
+    self.kernel = checked(cl.clCreateKernel(self.program, obj.name.encode(), status := ctypes.c_int32()), status)
 
   def __del__(self):
     try: check(cl.clReleaseKernel(self.kernel))
@@ -53,15 +52,17 @@ class CLProgram:
     try: check(cl.clReleaseProgram(self.program))
     except (TypeError, AttributeError): pass
 
-  def __call__(self, *bufs:tuple[cl.cl_mem, BufferSpec], global_size:tuple[int,int,int]=(1,1,1), local_size:tuple[int,int,int]|None=None,
-               vals:tuple[int, ...]=(), wait=False) -> float|None:
-    for i,(b,_) in enumerate(bufs):
-      if isinstance(dt:=self.buf_dtypes[i], ImageDType):
+  def __call__(self, *bufs:cl.cl_mem, global_size:tuple[int,int,int]=(1,1,1), local_size:tuple[int,int,int]|None=None, vals:tuple[int, ...]=(),
+               wait=False, **kw) -> float|None:
+    for i, (_, slot, dt, shape) in enumerate(self.signature):
+      b = bufs[slot] if slot < len(bufs) else getattr(ctypes, f"c_int{dt.bitsize}")(vals[slot-len(bufs)])
+      if is_image_shape(shape):
+        pitch = (round_up(shape[1], 256) if OSX else shape[1]) * 4 * dt.itemsize
         fmt = cl.cl_image_format(cl.CL_RGBA, {2:cl.CL_HALF_FLOAT, 4:cl.CL_FLOAT}[dt.itemsize])
-        desc = cl.cl_image_desc(cl.CL_MEM_OBJECT_IMAGE2D, dt.shape[1], dt.shape[0], image_row_pitch=dt.pitch, buffer=b)
-        b = checked(cl.clCreateImage(self.dev.context, cl.CL_MEM_READ_WRITE, fmt, desc, None, status:=ctypes.c_int32()), status)
-      check(cl.clSetKernelArg(self.kernel, i, ctypes.sizeof(b), ctypes.byref(b)))
-    for i,v in enumerate(vals,start=len(bufs)): check(cl.clSetKernelArg(self.kernel, i, 4, ctypes.byref(ctypes.c_int32(v))))
+        desc = cl.cl_image_desc(cl.CL_MEM_OBJECT_IMAGE2D, shape[1], shape[0], image_row_pitch=pitch, buffer=b)
+        img = checked(cl.clCreateImage(self.dev.context, cl.CL_MEM_READ_WRITE, fmt, desc, None, status:=ctypes.c_int32()), status)
+        check(cl.clSetKernelArg(self.kernel, i, ctypes.sizeof(img), ctypes.byref(img)))
+      else: check(cl.clSetKernelArg(self.kernel, i, ctypes.sizeof(b), ctypes.byref(b)))
     if local_size is not None: global_size = cast(tuple[int,int,int], tuple(int(g*l) for g,l in zip(global_size, local_size)))
     event = cl.cl_event() if wait else None
     check(cl.clEnqueueNDRangeKernel(self.dev.queue, self.kernel, len(global_size), None, (ctypes.c_size_t * len(global_size))(*global_size),
@@ -75,26 +76,16 @@ class CLProgram:
     return None
 
 class CLAllocator(LRUAllocator['CLDevice']):
-  def _alloc(self, size:int, options:BufferSpec) -> tuple[cl.cl_mem, BufferSpec]:
-    # Recalculate real size for texture
-    if options.image is not None: size = options.image.pitch * options.image.shape[0]
-    return (checked(cl.clCreateBuffer(self.dev.context, cl.CL_MEM_READ_WRITE, size, None, status := ctypes.c_int32()), status), options)
+  def _alloc(self, size:int, options:BufferSpec) -> cl.cl_mem:
+    return checked(cl.clCreateBuffer(self.dev.context, cl.CL_MEM_READ_WRITE, size, None, status := ctypes.c_int32()), status)
   @suppress_finalizing
-  def _free(self, opaque:tuple[cl.cl_mem, BufferSpec], options:BufferSpec): check(cl.clReleaseMemObject(opaque[0]))
-  def _copyin(self, dest:tuple[cl.cl_mem, BufferSpec], src:memoryview):
+  def _free(self, opaque:cl.cl_mem, options:BufferSpec): check(cl.clReleaseMemObject(opaque))
+  def _copyin(self, dest:cl.cl_mem, src:memoryview):
     if mv_address(src) % 16: src = memoryview(bytearray(src))
-    if (img:=dest[1].image):
-      stride = img.shape[1]*img.itemsize*4
-      for i in range(img.shape[0]):
-        check(cl.clEnqueueWriteBuffer(self.dev.queue, dest[0], False, i*img.pitch, stride, mv_address(src)+(i*stride), 0, None, None))
-    else: check(cl.clEnqueueWriteBuffer(self.dev.queue, dest[0], False, 0, len(src)*src.itemsize, from_mv(src), 0, None, None))
+    check(cl.clEnqueueWriteBuffer(self.dev.queue, dest, False, 0, len(src)*src.itemsize, from_mv(src), 0, None, None))
     self.dev.pending_copyin.append(src)    # NOTE: these can't be freed until the GPU actually executes this command
-  def _copyout(self, dest:memoryview, src:tuple[cl.cl_mem, BufferSpec]):
-    if (img:=src[1].image):
-      stride = img.shape[1]*img.itemsize*4
-      for i in range(img.shape[0]):
-        check(cl.clEnqueueReadBuffer(self.dev.queue, src[0], False, i*img.pitch, stride, mv_address(dest)+(i*stride), 0, None, None))
-    else: check(cl.clEnqueueReadBuffer(self.dev.queue, src[0], False, 0, len(dest)*dest.itemsize, from_mv(dest), 0, None, None))
+  def _copyout(self, dest:memoryview, src:cl.cl_mem):
+    check(cl.clEnqueueReadBuffer(self.dev.queue, src, False, 0, len(dest)*dest.itemsize, from_mv(dest), 0, None, None))
     self.dev.synchronize()
 
 class CLDevice(Compiled):
@@ -119,14 +110,20 @@ class CLDevice(Compiled):
     self.context = checked(cl.clCreateContext(None, 1, self.device_id, CC_CB(), None, status := ctypes.c_int32()), status)
     self.queue = checked(cl.clCreateCommandQueue(self.context, self.device_id, cl.CL_QUEUE_PROFILING_ENABLE, status), status)
     self.pending_copyin: list[memoryview] = []
-    self.device_exts = (cl.clGetDeviceInfo(self.device_id, cl.CL_DEVICE_EXTENSIONS, 4096,
-                                           ctypes.byref(buf := ctypes.create_string_buffer(4096)),
-                                           ctypes.byref(total := ctypes.c_size_t())),
-                                           ctypes.string_at(buf, size=total.value).decode())[1]
+    check(cl.clGetDeviceInfo(self.device_id, cl.CL_DEVICE_EXTENSIONS, 0, None, ctypes.byref(exts_len:=ctypes.c_size_t())))
+    self.device_exts = (cl.clGetDeviceInfo(self.device_id, cl.CL_DEVICE_EXTENSIONS, exts_len.value,
+                                           ctypes.byref(buf := ctypes.create_string_buffer(exts_len.value)), None),
+                                           ctypes.string_at(buf).decode().split())[1]
 
-    renderer = IntelRenderer if "cl_intel_subgroup_matrix_multiply_accumulate" in self.device_exts else OpenCLRenderer
     self.cl_compiler = CLCompiler(self, f"{hashlib.md5(self.device_name.encode() + self.driver_version.encode()).hexdigest()}")
-    super().__init__(device, CLAllocator(self), CompilerSet([(renderer, None)]), functools.partial(CLProgram, self))
+
+    arch = ",".join(self.device_exts)
+    if "cl_khr_image2d_from_buffer" in self.device_exts:
+      check(cl.clGetDeviceInfo(self.device_id, cl.CL_DEVICE_IMAGE_PITCH_ALIGNMENT, 4, ctypes.byref(ipa := ctypes.c_uint32()), None))
+      arch += f",IMAGE_PITCH_ALIGNMENT={ipa.value}"
+    super().__init__(device, CLAllocator(self), [OpenCLRenderer], CLProgram, arch=arch)
+
+  def count(self) -> int: return len(unwrap(self.device_ids))
 
   def synchronize(self):
     check(cl.clFinish(self.queue))

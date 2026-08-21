@@ -1,11 +1,11 @@
 import unittest
 from tinygrad.helpers import DEBUG, Context
 from tinygrad.dtype import dtypes
-from tinygrad.uop.ops import UPat, track_rewrites, GroupOp, Ops
+from tinygrad.uop.ops import UPat, rewrite_group, GroupOp, Ops
 from tinygrad.uop.upat import _get_code, upat_compile
 import dis
 
-@track_rewrites()
+@rewrite_group()
 def do_compile(up):
   print("\n***** COMPILE", up)
   match_code = _get_code(up, False)
@@ -41,7 +41,7 @@ class TestUPatCompile(unittest.TestCase):
     do_compile(up)
 
   def test_const_folding(self):
-    up = UPat(GroupOp.ALU-{Ops.THREEFRY}, name="a", src=UPat((Ops.VCONST, Ops.CONST)))
+    up = UPat(GroupOp.ALU-{Ops.THREEFRY}, name="a", src=UPat((Ops.CONST, Ops.STACK)))
     do_compile(up)
 
   @unittest.skip("fix this")

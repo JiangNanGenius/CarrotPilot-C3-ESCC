@@ -1,11 +1,20 @@
 import unittest
-from tinygrad import Tensor, Variable, GlobalCounters
+from tinygrad import Tensor, Variable, GlobalCounters, Context
 from tinygrad.uop.ops import sym_infer
 from tinygrad.dtype import dtypes
 from examples.gpt2 import Attention
 import numpy as np
 
 class TestSymbolicOps(unittest.TestCase):
+  def test_negative_slice(self):
+    a = Tensor.rand(3, 10, 4)
+    for i in range(3, 10):
+      vi = Variable("i", 1, 10).bind(i)
+      # negative int bounds against a symbolic dim must resolve against the size, like slice.indices
+      np.testing.assert_allclose(a[:, :vi][:, -3:-1].numpy(), a[:, :i][:, -3:-1].numpy(), atol=1e-6, rtol=1e-6)
+      np.testing.assert_allclose(a[:, :vi][:, -1:].numpy(), a[:, :i][:, -1:].numpy(), atol=1e-6, rtol=1e-6)
+      np.testing.assert_allclose(a[:, :vi][:, -1].numpy(), a[:, :i][:, -1].numpy(), atol=1e-6, rtol=1e-6)
+
   def test_plus1(self):
     def f(a): return (a+1).realize()
     a = Tensor.rand(3, 10)
@@ -63,11 +72,63 @@ class TestSymbolicOps(unittest.TestCase):
     self.test_attention(imin=4, imax=5, use_symbolic=True)
 
   def test_attention_training(self):
-    with Tensor.train():
+    with Context(TRAINING=1):
       self.test_attention(dropout_p=0.0)
       with self.assertRaises(ValueError):
         # symbolic shape dropout is not supported
         self.test_attention(dropout_p=0.5)
+
+  def test_sdpa_symbolic_seq_len(self):
+    # symbolic seq_len on all of q/k/v (dim -2 after transpose)
+    q = Tensor.rand(2, 10, 4, 8)
+    k = Tensor.rand(2, 10, 4, 8)
+    v = Tensor.rand(2, 10, 4, 8)
+    for i in range(1, 5):
+      vi = Variable("i", 1, 10).bind(i)
+      Tensor.realize(q, k, v)
+      symbolic = q[:, :vi].transpose(1, 2).scaled_dot_product_attention(
+        k[:, :vi].transpose(1, 2), v[:, :vi].transpose(1, 2)).realize()[:2, :4, :i, :8].numpy()
+      expected = q[:, :i].transpose(1, 2).scaled_dot_product_attention(
+        k[:, :i].transpose(1, 2), v[:, :i].transpose(1, 2)).realize().numpy()
+      np.testing.assert_allclose(symbolic, expected, atol=1e-6, rtol=1e-6)
+
+  def test_sdpa_symbolic_seq_len_query_only(self):
+    # symbolic seq_len on query only (dim -2 after transpose)
+    q = Tensor.rand(2, 10, 4, 8)
+    k = Tensor.rand(2, 5, 4, 8)
+    v = Tensor.rand(2, 5, 4, 8)
+    for i in range(1, 5):
+      vi = Variable("i", 1, 10).bind(i)
+      Tensor.realize(q, k, v)
+      symbolic = q[:, :vi].transpose(1, 2).scaled_dot_product_attention(
+        k.transpose(1, 2), v.transpose(1, 2)).realize()[:2, :4, :i, :8].numpy()
+      expected = q[:, :i].transpose(1, 2).scaled_dot_product_attention(
+        k.transpose(1, 2), v.transpose(1, 2)).realize().numpy()
+      np.testing.assert_allclose(symbolic, expected, atol=1e-6, rtol=1e-6)
+
+  def test_sdpa_symbolic_batch(self):
+    # symbolic batch dim (dim 0)
+    q = Tensor.rand(10, 4, 3, 8)
+    k = Tensor.rand(10, 4, 3, 8)
+    v = Tensor.rand(10, 4, 3, 8)
+    for i in range(1, 5):
+      vi = Variable("i", 1, 10).bind(i)
+      Tensor.realize(q, k, v)
+      symbolic = q[:vi].scaled_dot_product_attention(k[:vi], v[:vi]).realize()[:i, :4, :3, :8].numpy()
+      expected = q[:i].scaled_dot_product_attention(k[:i], v[:i]).realize().numpy()
+      np.testing.assert_allclose(symbolic, expected, atol=1e-6, rtol=1e-6)
+
+  def test_sdpa_symbolic_heads(self):
+    # symbolic heads dim (dim -3)
+    q = Tensor.rand(2, 10, 3, 8)
+    k = Tensor.rand(2, 10, 3, 8)
+    v = Tensor.rand(2, 10, 3, 8)
+    for i in range(1, 5):
+      vi = Variable("i", 1, 10).bind(i)
+      Tensor.realize(q, k, v)
+      symbolic = q[:, :vi].scaled_dot_product_attention(k[:, :vi], v[:, :vi]).realize()[:2, :i, :3, :8].numpy()
+      expected = q[:, :i].scaled_dot_product_attention(k[:, :i], v[:, :i]).realize().numpy()
+      np.testing.assert_allclose(symbolic, expected, atol=1e-6, rtol=1e-6)
 
   def test_attention_pos_0_sz_0(self):
     Attention(128, 8)(Tensor.ones(1, 0, 128), Variable("start_pos", 0, 128).bind(0), None)

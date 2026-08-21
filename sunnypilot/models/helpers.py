@@ -17,11 +17,10 @@ from openpilot.common.swaglog import cloudlog
 from openpilot.sunnypilot.models.constants import Meta, MetaSimPose, MetaTombRaider
 from openpilot.system.hardware.hw import Paths
 
-# This legacy C3 model runner supports the v16 catalog format. The v20 catalog
-# requires the newer combined-model Tinygrad runtime, which is not present in
-# this fork; accepting it makes modeld crash before calibration can start.
-CURRENT_SELECTOR_VERSION = 15
-REQUIRED_MIN_SELECTOR_VERSION = 14
+# Selector v17 uses the v20 combined-model bundle format. The runtime loads the
+# model metadata, camera warps, and policy JIT from the same chunked artifact.
+CURRENT_SELECTOR_VERSION = 17
+REQUIRED_MIN_SELECTOR_VERSION = 17
 
 CUSTOM_MODEL_PATH = Paths.model_root()
 METADATA_PATH = Path(__file__).parent / '../models/supercombo_metadata.pkl'

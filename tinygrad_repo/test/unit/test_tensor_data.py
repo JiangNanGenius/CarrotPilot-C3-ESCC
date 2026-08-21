@@ -1,5 +1,6 @@
 import unittest, struct
 from tinygrad import Tensor, dtypes
+from tinygrad.uop.ops import UOp
 
 # format types: https://docs.python.org/3/library/struct.html
 
@@ -64,6 +65,10 @@ class TestTensorData(unittest.TestCase):
     assert dat.tolist() == 3
     assert dat.shape == ()
 
+  def test_const_dtype_for_uop(self):
+    self.assertEqual(Tensor.const(UOp.const(1.0).cast(dtypes.float32), dtypes.int8).dtype, dtypes.int8)
+    self.assertEqual(Tensor.const(UOp.variable("x", 1, 10).bind(5), dtypes.int32).item(), 5)
+
   def test_data_float32(self):
     a = Tensor([[1,2.5],[3,4]], dtype=dtypes.float32)
     dat = a.data()
@@ -77,6 +82,11 @@ class TestTensorData(unittest.TestCase):
     assert dat.format == "e"
     assert dat.shape == (2,2)
     # NOTE: python can't deref float16
+
+  def test_tolist_empty_shapes(self):
+    for shape, expected in (((0,), []), ((2, 0), [[], []]), ((0, 2), []),
+                            ((2, 0, 3), [[], []]), ((2, 3, 0), [[[], [], []], [[], [], []]])):
+      self.assertEqual(Tensor.ones(*shape).tolist(), expected)
 
 if __name__ == '__main__':
   unittest.main()

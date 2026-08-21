@@ -29,7 +29,7 @@ def test_recovery_power_scaling():
 
   def mock_accel(plan_vel, plan_accel, t_idxs, action_t=0.0):
     recorded_vel.append(plan_vel.copy())
-    return 0.0, False
+    return 0.0
 
   def mock_curvature(output, plan, vego, lat_action_t, mlsim):
     recorded_curv_plans.append(plan.copy())
