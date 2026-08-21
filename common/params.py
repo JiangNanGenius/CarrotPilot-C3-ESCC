@@ -1,4 +1,4 @@
-from openpilot.common.params_pyx import Params, ParamKeyFlag, ParamKeyType, UnknownKeyName
+from openpilot.common.params_pyx import Params, ParamKeyFlag, ParamKeyType, UnknownKeyName  # noqa: F401
 
 # 扩展 Params 类，加 block 参数（兼容 sunnypilot 最新版）。
 #
@@ -10,7 +10,7 @@ class ParamsExt(Params):
   def _carrot_params(self):
     """Return the file-backed store for numeric keys outside the C++ registry."""
     from openpilot.selfdrive.carrot.carrot_params import CarrotParams
-    return CarrotParams(param_dir=super().get_param_path())
+    return CarrotParams()
 
   def put(self, key, dat, block=True):
     """Write a parameter, synchronously unless block=False is explicit."""

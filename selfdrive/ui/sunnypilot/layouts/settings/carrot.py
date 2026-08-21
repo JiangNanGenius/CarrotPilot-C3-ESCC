@@ -65,10 +65,10 @@ class CarrotLayout(Widget):
     )
 
   def _speed_limit_mode_index(self):
-    if self._params.get_bool("CarrotSpeedLimitEnable"):
-      return 1
     if self._native_params.get("SpeedLimitMode", return_default=True) == SpeedLimitMode.assist:
       return 0
+    if self._params.get_bool("CarrotSpeedLimitEnable"):
+      return 1
     return 2
 
   def _set_speed_limit_mode(self, index):

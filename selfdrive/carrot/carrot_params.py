@@ -1,9 +1,9 @@
 """Carrot parameter store (offline, file-backed, no C++ Params dependency).
 
 A lightweight, dependency-free drop-in replacement for
-``openpilot.common.params.Params`` that reads and writes parameter files
-directly under the params directory (default ``/data/params/d``), bypassing the
-C++ ``check_key`` registry.
+``openpilot.common.params.Params`` that reads and writes parameter files in a
+separate persistent namespace (default ``/data/params/d_carrot``), bypassing
+the C++ ``check_key`` registry.
 
 This lets Carrot's Auto-Tuner / Web7000 / navigation / cluster parameters work
 even though those keys are not registered in ``common/params_keys.h`` (which
@@ -15,8 +15,8 @@ jeepney/bootloop incident):
     ``PARAMS_ROOT`` + ``OPENPILOT_PREFIX`` env vars (matching ``Params`` C++
     semantics in ``common/params.cc`` / ``system/hardware/hw.h``), so we never
     trigger ``mkdir/symlink/rename`` races against ``paramsd``.
-  * ``_write_raw`` takes ``fcntl.flock`` on ``{root}/.lock`` (same lock file the
-    C++ ``Params`` uses), so concurrent writes can't corrupt a param.
+  * ``_write_raw`` takes ``fcntl.flock`` on ``{root}/.carrot.lock``. Carrot
+    settings no longer share files or a lock with the C++ ``Params`` store.
   * ``carrot_settings.json`` is loaded once and cached via ``lru_cache``.
   * All access is wrapped in try/except so a transient fs error can never crash
     the hosting Carrot process.
@@ -31,7 +31,7 @@ import json
 import os
 import fcntl
 from functools import lru_cache
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Device params root + prefix, matching the C++ Params implementation:
 #   Path::params()  -> PARAMS_ROOT or "/data/params"  (system/hardware/hw.h:32-33)
@@ -39,7 +39,7 @@ from typing import Any, Dict, List, Optional
 def _default_param_dir() -> str:
   root = os.environ.get("PARAMS_ROOT", "/data/params")
   prefix = os.environ.get("OPENPILOT_PREFIX", "d")
-  return os.path.join(root, prefix)
+  return os.path.join(root, f"{prefix}_carrot")
 
 # Path to carrot's parameter metadata (title/min/max/default per key).
 _SETTINGS_PATH = os.path.abspath(
@@ -55,11 +55,11 @@ except Exception:  # pragma: no cover - the enum is optional
 
 
 @lru_cache(maxsize=1)
-def _load_settings() -> Dict[str, Dict[str, Any]]:
+def _load_settings() -> dict[str, dict[str, Any]]:
   """Load ``carrot_settings.json`` into a ``{name: setting}`` map (cached)."""
-  settings: Dict[str, Dict[str, Any]] = {}
+  settings: dict[str, dict[str, Any]] = {}
   try:
-    with open(_SETTINGS_PATH, "r", encoding="utf-8") as f:
+    with open(_SETTINGS_PATH, encoding="utf-8") as f:
       data = json.load(f)
   except Exception:
     return settings
@@ -71,7 +71,7 @@ def _load_settings() -> Dict[str, Dict[str, Any]]:
   return settings
 
 
-def _infer_type(item: Optional[Dict[str, Any]]) -> str:
+def _infer_type(item: Optional[dict[str, Any]]) -> str:
   """Infer one of ``bool``/``int``/``float``/``string`` from a setting entry."""
   if not item:
     return "string"
@@ -94,23 +94,22 @@ class CarrotParams:
   """File-backed parameter store that bypasses the Params key registry.
 
   Instances mirror the ``Params`` constructor: ``CarrotParams()`` uses the
-  default params directory and ``CarrotParams("/dev/shm/params")`` reads/writes
-  files under ``/dev/shm/params/d`` (the same layout used for ``params_memory``).
+  persistent Carrot namespace and ``CarrotParams("/dev/shm/params")`` reads/
+  writes files under ``/dev/shm/params/d_carrot``.
   """
 
   def __init__(self, d: str = "", *, param_dir: Optional[str] = None):
     self._settings = _load_settings()
     self._param_dir = param_dir if param_dir is not None else self._resolve_dir(d)
-    # Lock file lives one level up from the params dir, matching C++ Params'
-    # ``FileLock(params_path + "/.lock")`` (common/params.cc:155).
-    self._lock_path = os.path.join(os.path.dirname(self._param_dir), ".lock")
+    # Carrot settings are outside the C++ registry and use their own lock.
+    self._lock_path = os.path.join(os.path.dirname(self._param_dir), ".carrot.lock")
 
   @staticmethod
   def _resolve_dir(d: str) -> str:
     if d:
-      return os.path.join(d, "d")
-    # Derive from env vars only — never construct a C++ Params (that would
-    # trigger mkdir/symlink/rename races against paramsd and risk a crash).
+      prefix = os.environ.get("OPENPILOT_PREFIX", "d")
+      return os.path.join(d, f"{prefix}_carrot")
+    # Derive from env vars only; never construct a C++ Params object.
     return _default_param_dir()
 
   def _path(self, key: str) -> str:
@@ -303,7 +302,7 @@ class CarrotParams:
 
   def all_keys(self, flag=None):
     """List all parameter files currently present in the params directory."""
-    keys: List[str] = []
+    keys: list[str] = []
     try:
       for name in os.listdir(self._param_dir):
         if name.startswith(".") or name.endswith(".tmp"):
