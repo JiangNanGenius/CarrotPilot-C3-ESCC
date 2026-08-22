@@ -24,6 +24,24 @@ def set_time(new_time):
     cloudlog.exception("timed.failed_setting_time")
 
 
+def restore_time_from_durable_state(params: Params) -> None:
+  """Keep rebooted offline devices from falling behind their last known UTC."""
+  candidates = []
+  for key in ("LastUpdateTime", "UpdaterLastFetchTime"):
+    try:
+      value = params.get(key)
+      if isinstance(value, datetime.datetime):
+        candidates.append(value.replace(tzinfo=None))
+    except Exception:
+      cloudlog.exception(f"timed.failed_reading_{key}")
+
+  if candidates:
+    newest_known_time = max(candidates)
+    if newest_known_time > datetime.datetime.now() + datetime.timedelta(seconds=10):
+      cloudlog.warning(f"Restoring time from durable state: {newest_known_time}")
+      set_time(newest_known_time)
+
+
 def main() -> NoReturn:
   """
     timed has two responsibilities:
@@ -34,6 +52,7 @@ def main() -> NoReturn:
   """
 
   params = Params()
+  restore_time_from_durable_state(params)
   gps_location_service = get_gps_location_service(params)
 
   pm = messaging.PubMaster(['clocks'])

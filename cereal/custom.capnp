@@ -119,6 +119,18 @@ struct ModelManagerSP @0xaedffd8f31e7b55d {
   activeBundle @0 :ModelBundle;
   selectedBundle @1 :ModelBundle;
   availableBundles @2 :List(ModelBundle);
+  downloadSummary @3 :DownloadSummary;
+
+  struct DownloadSummary {
+    status @0 :DownloadStatus;
+    bundleName @1 :Text;
+    currentFile @2 :Text;
+    progress @3 :Float32;
+    eta @4 :UInt32;
+    completedFiles @5 :UInt16;
+    totalFiles @6 :UInt16;
+    error @7 :Text;
+  }
 
   struct DownloadUri {
     uri @0 :Text;
@@ -131,6 +143,7 @@ struct ModelManagerSP @0xaedffd8f31e7b55d {
     downloaded @2;
     cached @3;
     failed @4;
+    cancelled @5;
   }
 
   struct DownloadProgress {

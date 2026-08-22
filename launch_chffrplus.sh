@@ -72,8 +72,15 @@ function launch {
   #    that completed successfully and synced to disk.
 
   if [ -f "${DIR}/.overlay_init" ]; then
-    find ${DIR}/.git -newer ${DIR}/.overlay_init | grep -q '.' 2> /dev/null
-    if [ $? -eq 0 ]; then
+    # A deployment can change tracked files without touching .git (for
+    # example, rsyncing a tested repair onto a device). Treat any worktree
+    # change as local development so a stale finalized overlay cannot silently
+    # replace it on the next reboot.
+    git -C "${DIR}" status --porcelain --untracked-files=normal | grep -q '.' 2> /dev/null
+    worktree_modified=$?
+    find "${DIR}/.git" -newer "${DIR}/.overlay_init" | grep -q '.' 2> /dev/null
+    git_metadata_modified=$?
+    if [ ${worktree_modified} -eq 0 ] || [ ${git_metadata_modified} -eq 0 ]; then
       echo "${DIR} has been modified, skipping overlay update installation"
     else
       if [ -f "${STAGING_ROOT}/finalized/.overlay_consistent" ]; then

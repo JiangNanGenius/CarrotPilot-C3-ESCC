@@ -124,7 +124,7 @@ def build_project(project_name, project, extra_flags):
 
   # Sign main
   sign_py = File(f"{panda_root}/crypto/sign.py").srcnode().relpath
-  env.Command(f"obj/{project_name}.bin.signed", main_bin, f"SETLEN=1 {sign_py} $SOURCE $TARGET {cert_fn}")
+  env.Command(f"obj/{project_name}.bin.signed", main_bin, f"SETLEN=1 python3 {sign_py} $SOURCE $TARGET {cert_fn}")
 
 
 base_project_f4 = {

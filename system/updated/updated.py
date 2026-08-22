@@ -37,6 +37,10 @@ ROUTES_NO_CONNECTIVITY_MAX = 84
 HOURS_NO_CONNECTIVITY_PROMPT = 23
 ROUTES_NO_CONNECTIVITY_PROMPT = 80
 
+OWNED_REMOTE_URL = "https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
+OWNED_BRANCH = "genius/c3"
+SUNNYPILOT_REMOTE_RE = re.compile(r"^(?:https://github\.com/|git@github\.com:)(?:sunnypilot|sunnypilot-dev)/", re.IGNORECASE)
+
 
 class UserRequest:
   NONE = 0
@@ -115,6 +119,20 @@ def setup_git_options(cwd: str) -> None:
   ]
   for option, value in git_cfg:
     run(["git", "config", option, value], cwd)
+
+
+def ensure_owned_remote(cwd: str) -> str:
+  """Migrate the known SunnyPilot upstream, but fail closed for unknown remotes."""
+  current = run(["git", "remote", "get-url", "origin"], cwd).strip()
+  normalized = current.removesuffix("/").removesuffix(".git")
+  owned = OWNED_REMOTE_URL.removesuffix(".git")
+  if normalized == owned:
+    return OWNED_REMOTE_URL
+  if SUNNYPILOT_REMOTE_RE.match(current):
+    run(["git", "remote", "set-url", "origin", OWNED_REMOTE_URL], cwd)
+    cloudlog.warning("migrated updater origin from SunnyPilot to owned remote")
+    return OWNED_REMOTE_URL
+  raise RuntimeError(f"refusing updates from unowned origin: {current}")
 
 
 def dismount_overlay() -> None:
@@ -229,11 +247,7 @@ class Updater:
 
   @property
   def target_branch(self) -> str:
-    b: str | None = self.params.get("UpdaterTargetBranch")
-    if b is None:
-      b = self.get_branch(BASEDIR)
-    b = SP_BRANCH_MIGRATIONS.get((HARDWARE.get_device_type(), b), b)
-    return b
+    return OWNED_BRANCH
 
   @property
   def update_ready(self) -> bool:
@@ -348,6 +362,8 @@ class Updater:
 
   def check_for_update(self) -> None:
     cloudlog.info("checking for updates")
+
+    ensure_owned_remote(OVERLAY_MERGED)
 
     excluded_branches = ('release2', 'release2-staging')
 

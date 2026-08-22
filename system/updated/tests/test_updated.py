@@ -30,35 +30,28 @@ def test_stale_overlay_is_not_an_update_when_running_checkout_matches_remote(moc
     params.remove("UpdaterTargetBranch")
 
 
-@pytest.mark.parametrize(("device_type", "branch", "expected"), [
-  ("tizi", "release3", "release-tizi"),
-  ("tizi", "release3-staging", "release-tizi-staging"),
-  ("mici", "release3", "release-mici"),
-  ("mici", "release3-staging", "release-mici-staging"),
-])
-def test_target_branch_migration_from_current_branch(mocker, device_type, branch, expected):
+@pytest.mark.parametrize("branch", ["release3", "release3-staging", "master", "genius/c3"])
+def test_target_branch_is_owned(branch):
   params = Params()
   params.remove("UpdaterTargetBranch")
-
-  mocker.patch("openpilot.system.updated.updated.HARDWARE.get_device_type", return_value=device_type)
-  mocker.patch.object(Updater, "get_branch", return_value=branch)
-
-  assert Updater().target_branch == expected
-
-
-@pytest.mark.parametrize(("device_type", "branch", "expected"), [
-  ("tizi", "release3", "release-tizi"),
-  ("tizi", "release3-staging", "release-tizi-staging"),
-  ("mici", "release3", "release-mici"),
-  ("mici", "release3-staging", "release-mici-staging"),
-])
-def test_target_branch_migration_from_param(mocker, device_type, branch, expected):
-  params = Params()
   params.put("UpdaterTargetBranch", branch)
-
-  mocker.patch("openpilot.system.updated.updated.HARDWARE.get_device_type", return_value=device_type)
-
   try:
-    assert Updater().target_branch == expected
+    assert Updater().target_branch == updated.OWNED_BRANCH
   finally:
     params.remove("UpdaterTargetBranch")
+
+
+def test_known_sunnypilot_origin_is_migrated(mocker):
+  commands = []
+  mocker.patch.object(updated, "run", side_effect=lambda cmd, cwd=None: (
+    commands.append((cmd, cwd)) or "https://github.com/sunnypilot/sunnypilot.git\n"
+  ) if cmd[:4] == ["git", "remote", "get-url", "origin"] else commands.append((cmd, cwd)) or "")
+
+  assert updated.ensure_owned_remote("/tmp/repo") == updated.OWNED_REMOTE_URL
+  assert (["git", "remote", "set-url", "origin", updated.OWNED_REMOTE_URL], "/tmp/repo") in commands
+
+
+def test_unknown_origin_fails_closed(mocker):
+  mocker.patch.object(updated, "run", return_value="https://example.com/other/repo.git\n")
+  with pytest.raises(RuntimeError, match="unowned origin"):
+    updated.ensure_owned_remote("/tmp/repo")

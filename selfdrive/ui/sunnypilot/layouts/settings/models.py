@@ -55,6 +55,8 @@ class ModelsLayout(Widget):
       callback=self._handle_current_model_clicked
     )
 
+    self.bundle_download_label = progress_item(tr("Model Download"))
+
     self.supercombo_label = progress_item(tr("Driving Model"))
     self.vision_label = progress_item(tr("Vision Model"))
     self.policy_label = progress_item(tr("Policy Model"))
@@ -96,7 +98,7 @@ class ModelsLayout(Widget):
       param="LagdToggle",
     )
 
-    self.items = [self.current_model_item, self.cancel_download_item, self.supercombo_label, self.vision_label,
+    self.items = [self.current_model_item, self.bundle_download_label, self.cancel_download_item, self.supercombo_label, self.vision_label,
                   self.policy_label, self.off_policy_label, self.on_policy_label, self.refresh_item, self.clear_cache_item, self.lane_turn_desire_toggle,
                   self.lane_turn_value_control, self.lagd_toggle, self.delay_control]
 
@@ -141,16 +143,38 @@ class ModelsLayout(Widget):
               custom.ModelManagerSP.Model.Type.chunked: self.supercombo_label}
     for label in labels.values():
       label.set_visible(False)
+    self.bundle_download_label.set_visible(False)
     self.cancel_download_item.set_visible(False)
 
     if not self.model_manager or (not self.model_manager.selectedBundle and not self.model_manager.activeBundle):
       return
 
+    terminal = (custom.ModelManagerSP.DownloadStatus.failed, custom.ModelManagerSP.DownloadStatus.cancelled)
     bundle = self.model_manager.selectedBundle if self._is_downloading() or (
-      self.model_manager.selectedBundle and self.model_manager.selectedBundle.status == custom.ModelManagerSP.DownloadStatus.failed
+      self.model_manager.selectedBundle and self.model_manager.selectedBundle.status in terminal
     ) else self.model_manager.activeBundle
     if not bundle:
       return
+
+    summary = self.model_manager.downloadSummary
+    if summary.bundleName:
+      self.bundle_download_label.set_visible(True)
+      show = summary.status == custom.ModelManagerSP.DownloadStatus.downloading
+      if summary.error:
+        if summary.status == custom.ModelManagerSP.DownloadStatus.cancelled:
+          text = f"{tr('download cancelled')} - {summary.bundleName}"
+          color = rl.GRAY
+        else:
+          text = f"{tr('download failed')} - {summary.bundleName}"
+          color = rl.RED
+      elif show:
+        eta = f" · {summary.eta}s" if summary.eta else ""
+        text = f"{int(summary.progress)}% · {summary.completedFiles}/{summary.totalFiles}{eta} - {summary.bundleName}"
+        color = rl.WHITE
+      else:
+        text = f"100% - {summary.bundleName}"
+        color = ON_COLOR
+      self.bundle_download_label.action_item.update(summary.progress, text, show, color)
 
     self.download_status = bundle.status
     status_changed = self.prev_download_status != self.download_status
@@ -177,6 +201,8 @@ class ModelsLayout(Widget):
           text, color = f"{bundle.displayName} - {status_text if status_changed else tr('ready')}", ON_COLOR
         elif p.status == custom.ModelManagerSP.DownloadStatus.failed:
           text, color = f"download failed - {bundle.displayName}", rl.RED
+        elif p.status == custom.ModelManagerSP.DownloadStatus.cancelled:
+          text, color = f"download cancelled - {bundle.displayName}", rl.GRAY
         label.action_item.update(p.progress, text, show, color)
 
   @staticmethod

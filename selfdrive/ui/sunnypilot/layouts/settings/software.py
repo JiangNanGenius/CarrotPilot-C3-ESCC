@@ -51,6 +51,13 @@ class SoftwareLayoutSP(SoftwareLayout):
     gui_app.push_widget(dialog)
 
   def _on_select_branch(self):
+    # This fork deliberately owns one deployment branch. SunnyPilot remains a
+    # read-only upstream and must never become a selectable device source.
+    ui_state.params.put("UpdaterTargetBranch", "genius/c3")
+    self._branch_btn.action_item.set_value("genius/c3")
+    return
+
+  def _unused_upstream_branch_picker(self):
     current_git_branch = ui_state.params.get("GitBranch") or ""
     branches_str = ui_state.params.get("UpdaterAvailableBranches") or ""
     branches = [b for b in branches_str.split(",") if b]

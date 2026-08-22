@@ -13,8 +13,16 @@
 const bool PANDAD_MAXOUT = getenv("PANDAD_MAXOUT") != nullptr;
 
 Panda::Panda(std::string serial) {
-  handle = std::make_unique<PandaSpiHandle>(serial);
-  LOGW("connected to %s over SPI", serial.c_str());
+  // C3 internal Panda is USB even though newer upstream hardware is SPI-only.
+  // Keep SPI as a fallback so this checkout remains usable on both layouts.
+  try {
+    handle = std::make_unique<PandaUsbHandle>(serial);
+    LOGW("connected to %s over USB", serial.c_str());
+  } catch (const std::exception &usb_error) {
+    LOGW("USB Panda connection failed (%s), trying SPI", usb_error.what());
+    handle = std::make_unique<PandaSpiHandle>(serial);
+    LOGW("connected to %s over SPI", serial.c_str());
+  }
 
   hw_type = get_hw_type();
   can_reset_communications();
@@ -33,7 +41,7 @@ std::string Panda::hw_serial() {
 }
 
 std::vector<std::string> Panda::list() {
-  return PandaSpiHandle::list();
+  return PandaUsbHandle::list();
 }
 
 void Panda::set_safety_model(cereal::CarParams::SafetyModel safety_model, uint16_t safety_param) {

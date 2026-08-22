@@ -1,6 +1,28 @@
 import io
+import json
 import pickle
 import struct
+from pathlib import Path
+
+
+MODELS_DIR = Path(__file__).resolve().parent / "models"
+TG_INPUT_DEVICES_PATH = MODELS_DIR / "tg_input_devices.json"
+
+
+def get_tg_input_devices(process_name: str, usbgpu: bool = False):
+  with open(TG_INPUT_DEVICES_PATH) as f:
+    return json.load(f)[process_name]["usbgpu" if usbgpu else "default"]
+
+
+def modeld_pkl_path(usbgpu: bool = False):
+  prefix = "big_" if usbgpu else ""
+  return MODELS_DIR / f"{prefix}driving_tinygrad.pkl"
+
+
+def usbgpu_present() -> bool:
+  # C3 has no Chestnut USB-GPU path. Keeping this explicit prevents current
+  # upstream build descriptors from probing C4-only hardware modules.
+  return False
 
 
 def load_oob(file_obj):

@@ -23,6 +23,10 @@ from openpilot.sunnypilot.models.helpers import get_active_bundle, validate_acti
 DOWNLOAD_TIMEOUT = (30, 30)
 
 
+class DownloadCancelled(Exception):
+  pass
+
+
 class ModelManagerSP:
   """Manages model downloads and status reporting"""
 
@@ -35,6 +39,20 @@ class ModelManagerSP:
     self.active_bundle: custom.ModelManagerSP.ModelBundle = get_active_bundle(self.params)
     self._chunk_size = 128 * 1000  # 128 KB chunks
     self._download_start_times: dict[str, float] = {}  # Track start time per model
+    self._current_file = ""
+    self._download_error = ""
+
+  @staticmethod
+  def _unique_artifacts(bundle):
+    artifacts = []
+    seen: set[str] = set()
+    if bundle:
+      for model in bundle.models:
+        for artifact in (model.metadata, model.artifact):
+          if artifact.fileName and artifact.fileName not in seen:
+            artifacts.append(artifact)
+            seen.add(artifact.fileName)
+    return artifacts
 
   def _sync_artifact_progress(self, source_artifact) -> None:
     """Mirror download progress to all artifacts sharing the same filename in the selected bundle."""
@@ -77,7 +95,7 @@ class ModelManagerSP:
           bytes_downloaded += len(chunk)
 
           if self.params.get("ModelManager_DownloadIndex") is None:
-            raise Exception("Download cancelled")
+            raise DownloadCancelled("Download cancelled")
 
           if total_size > 0:
             progress = (bytes_downloaded / total_size) * 100
@@ -115,7 +133,7 @@ class ModelManagerSP:
               f.write(data)
               chunk_downloaded += len(data)
               if self.params.get("ModelManager_DownloadIndex") is None:
-                raise Exception("Download cancelled")
+                raise DownloadCancelled("Download cancelled")
               intra = chunk_downloaded / max(chunk_size, 1)
               progress = min(99.0, ((i + intra) / num_chunks) * 100)
               artifact.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.downloading
@@ -138,6 +156,8 @@ class ModelManagerSP:
     expected_hash = artifact.downloadUri.sha256
     filename = artifact.fileName
     full_path = os.path.join(destination_path, filename)
+    self._current_file = filename
+    self._download_error = ""
 
     try:
       is_cached = False
@@ -183,14 +203,18 @@ class ModelManagerSP:
 
     except Exception as e:
       cloudlog.error(f"Error downloading {filename}: {str(e)}")
+      self._download_error = str(e)
       for f in [full_path] + [p for p in (os.path.join(destination_path, f) for f in os.listdir(destination_path)) if filename in p]:
         if os.path.isfile(f):
           os.remove(f)
-      artifact.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.failed
+      cancelled = isinstance(e, DownloadCancelled)
+      artifact.downloadProgress.status = (custom.ModelManagerSP.DownloadStatus.cancelled if cancelled
+                                          else custom.ModelManagerSP.DownloadStatus.failed)
       artifact.downloadProgress.eta = 0
       self._sync_artifact_progress(artifact)
       if self.selected_bundle:
-        self.selected_bundle.status = custom.ModelManagerSP.DownloadStatus.failed
+        self.selected_bundle.status = (custom.ModelManagerSP.DownloadStatus.cancelled if cancelled
+                                       else custom.ModelManagerSP.DownloadStatus.failed)
       self._report_status()
       self._download_start_times.pop(artifact.fileName, None)
       raise
@@ -212,12 +236,36 @@ class ModelManagerSP:
       model_manager_state.activeBundle = self.active_bundle
 
     model_manager_state.availableBundles = self.available_models
+    summary = model_manager_state.downloadSummary
+    bundle = self.selected_bundle
+    if bundle:
+      artifacts = self._unique_artifacts(bundle)
+      completed_statuses = (custom.ModelManagerSP.DownloadStatus.downloaded,
+                            custom.ModelManagerSP.DownloadStatus.cached)
+      summary.status = bundle.status
+      summary.bundleName = bundle.displayName
+      summary.currentFile = self._current_file
+      summary.progress = sum(float(a.downloadProgress.progress) for a in artifacts) / max(len(artifacts), 1)
+      summary.eta = max((int(a.downloadProgress.eta) for a in artifacts), default=0)
+      summary.completedFiles = sum(a.downloadProgress.status in completed_statuses for a in artifacts)
+      summary.totalFiles = len(artifacts)
+      summary.error = self._download_error
+    elif self.active_bundle:
+      artifacts = self._unique_artifacts(self.active_bundle)
+      summary.status = custom.ModelManagerSP.DownloadStatus.downloaded
+      summary.bundleName = self.active_bundle.displayName
+      summary.progress = 100
+      summary.completedFiles = len(artifacts)
+      summary.totalFiles = len(artifacts)
+      summary.error = self._download_error
     self.pm.send('modelManagerSP', msg)
 
   async def _download_bundle(self, model_bundle: custom.ModelManagerSP.ModelBundle, destination_path: str) -> None:
     """Downloads all models in a bundle"""
     self.selected_bundle = model_bundle
     self.selected_bundle.status = custom.ModelManagerSP.DownloadStatus.downloading
+    self._current_file = ""
+    self._download_error = ""
     os.makedirs(destination_path, exist_ok=True)
 
     # Publish an observable 0% state before DNS/TLS or the first response body.
@@ -251,6 +299,10 @@ class ModelManagerSP:
       self.params.put("ModelRunnerTypeCache", int(self.active_bundle.runner.raw), block=True)
       self.selected_bundle = None
 
+    except DownloadCancelled:
+      if self.selected_bundle is not None:
+        self.selected_bundle.status = custom.ModelManagerSP.DownloadStatus.cancelled
+      raise
     except Exception:
       if self.selected_bundle is not None:
         self.selected_bundle.status = custom.ModelManagerSP.DownloadStatus.failed
@@ -281,7 +333,9 @@ class ModelManagerSP:
               cloudlog.exception(e)
             finally:
               self.params.remove("ModelManager_DownloadIndex")
-              self.selected_bundle = None
+              terminal = (custom.ModelManagerSP.DownloadStatus.failed, custom.ModelManagerSP.DownloadStatus.cancelled)
+              if self.selected_bundle is not None and self.selected_bundle.status not in terminal:
+                self.selected_bundle = None
 
         if self.params.get("ModelManager_ClearCache"):
           self.clear_model_cache()

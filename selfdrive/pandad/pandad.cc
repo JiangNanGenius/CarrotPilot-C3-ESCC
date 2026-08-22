@@ -142,9 +142,18 @@ void fill_panda_state(cereal::PandaState::Builder &ps, cereal::PandaState::Panda
   ps.setSpiErrorCount(health.spi_error_count_pkt);
   ps.setSbu1Voltage(health.sbu1_voltage_mV / 1000.0f);
   ps.setSbu2Voltage(health.sbu2_voltage_mV / 1000.0f);
-  ps.setSoundOutputLevel(health.sound_output_level_pkt);
-  ps.setControlsAllowedLateral(health.controls_allowed_lateral_pkt);
-  ps.setControlsAllowedLongitudinal(health.controls_allowed_longitudinal_pkt);
+  // This release Panda has no speaker-level telemetry; do not read beyond the
+  // packed health packet. The UI treats zero as unavailable.
+  ps.setSoundOutputLevel(0);
+  // Packet v17 exposes one longitudinal permission only. For MADS-only mode,
+  // the board remains the authority for steering TX; report lateral available
+  // whenever a real car safety model is loaded so the host does not falsely
+  // disengage merely because the reserved telemetry field is absent.
+  const auto safety_model = cereal::CarParams::SafetyModel(health.safety_mode_pkt);
+  const bool car_safety_loaded = safety_model != cereal::CarParams::SafetyModel::SILENT &&
+                                 safety_model != cereal::CarParams::SafetyModel::NO_OUTPUT;
+  ps.setControlsAllowedLateral(health.controls_allowed_pkt || car_safety_loaded);
+  ps.setControlsAllowedLongitudinal(health.controls_allowed_pkt);
 }
 
 void fill_panda_can_state(cereal::PandaState::PandaCanState::Builder &cs, const can_health_t &can_health) {

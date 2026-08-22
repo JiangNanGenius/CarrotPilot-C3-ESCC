@@ -6,17 +6,23 @@ import time
 import signal
 import subprocess
 
-from panda import Panda, PandaDFU, PandaProtocolMismatch, FW_PATH
+from panda import Panda, PandaDFU, PandaProtocolMismatch
 from openpilot.common.basedir import BASEDIR
 from openpilot.common.params import Params
 from openpilot.system.hardware import HARDWARE
 from openpilot.common.swaglog import cloudlog
 
 
+def get_firmware_path(panda: Panda) -> str:
+  return os.path.join(BASEDIR, "panda", "board", "obj", panda.get_mcu_type().config.app_fn)
+
+
 def get_expected_signature(panda: Panda) -> bytes:
   try:
-    fn = os.path.join(FW_PATH, panda.get_mcu_type().config.app_fn)
-    return Panda.get_signature_from_firmware(fn)
+    # Always use the firmware produced by this checkout. Importing FW_PATH can
+    # resolve to a stale installed panda package when manager starts pandad from
+    # another working directory.
+    return Panda.get_signature_from_firmware(get_firmware_path(panda))
   except Exception:
     cloudlog.exception("Error computing expected signature")
     return b""
@@ -36,9 +42,18 @@ def flash_panda(panda_serial: str) -> Panda:
   panda_signature = b"" if panda.bootstub else panda.get_signature()
   cloudlog.warning(f"Panda {panda_serial} connected, version: {panda_version}, signature {panda_signature.hex()[:16]}, expected {fw_signature.hex()[:16]}")
 
-  if panda.bootstub or panda_signature != fw_signature:
+  packet_versions = (0, 0, 0) if panda.bootstub else panda.get_packets_versions()
+  expected_packet_versions = (Panda.HEALTH_PACKET_VERSION, Panda.CAN_PACKET_VERSION, Panda.CAN_HEALTH_PACKET_VERSION)
+  protocol_mismatch = packet_versions != expected_packet_versions
+  if protocol_mismatch:
+    cloudlog.warning(f"Panda packet versions out of date: {packet_versions}, expected {expected_packet_versions}")
+
+  if panda.bootstub or panda_signature != fw_signature or protocol_mismatch:
     cloudlog.info("Panda firmware out of date, update required")
-    panda.flash()
+    # Panda.flash() defaults to panda.FW_PATH, which may refer to an installed
+    # package. Pass the checkout-local image explicitly to avoid declaring a
+    # stale image "already up to date".
+    panda.flash(get_firmware_path(panda))
     cloudlog.info("Done flashing")
 
   if panda.bootstub:

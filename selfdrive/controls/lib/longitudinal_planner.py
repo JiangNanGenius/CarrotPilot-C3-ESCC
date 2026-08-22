@@ -109,7 +109,11 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     throttle_prob = throttle_probs[1] if len(throttle_probs) > 1 else 1.0
     self.allow_throttle = throttle_prob > ALLOW_THROTTLE_THRESHOLD or v_ego <= MIN_ALLOW_THROTTLE_SPEED
 
-    steer_angle_without_offset = sm['carState'].steeringAngleDeg - sm['vehicleParameters'].angleOffsetDeg
+    # This branch still publishes the legacy liveParameters service. The
+    # vehicleParameters migration was only partially ported and caused
+    # plannerd to crash on every model update because that service does not
+    # exist in this tree.
+    steer_angle_without_offset = sm['carState'].steeringAngleDeg - sm['liveParameters'].angleOffsetDeg
 
     if reset_state:
       self.v_desired_filter.x = v_ego

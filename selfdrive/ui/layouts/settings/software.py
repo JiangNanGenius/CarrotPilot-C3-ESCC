@@ -16,6 +16,7 @@ if gui_app.sunnypilot_ui():
 
 # TODO: remove this. updater fails to respond on startup if time is not correct
 UPDATED_TIMEOUT = 10  # seconds to wait for updated to respond
+OWNED_UPDATE_SOURCE = "github.com/JiangNanGenius/CarrotPilot-C3-ESCC · genius/c3"
 
 # Mapping updater internal states to translated display strings
 STATE_TO_DISPLAY_TEXT = {
@@ -57,6 +58,8 @@ class SoftwareLayout(Widget):
 
     self._onroad_label = ListItem(lambda: tr("Updates are only downloaded while the car is off."))
     self._version_item = text_item(lambda: tr("Current Version"), ui_state.params.get("UpdaterCurrentDescription") or "")
+    self._update_source_item = text_item(lambda: tr("Update Source"), OWNED_UPDATE_SOURCE)
+    self._update_source_item.set_description("Only the owned GeniusPilot repository and genius/c3 branch are accepted. SunnyPilot is read-only upstream.")
     self._download_btn = button_item(lambda: tr("Download"), lambda: tr("CHECK"), callback=self._on_download_update)
 
     # Install button is initially hidden
@@ -75,6 +78,7 @@ class SoftwareLayout(Widget):
     self._scroller = Scroller([
       self._onroad_label,
       self._version_item,
+      self._update_source_item,
       self._download_btn,
       self._install_btn,
       self._branch_btn,
@@ -97,6 +101,7 @@ class SoftwareLayout(Widget):
     current_release_notes = (ui_state.params.get("UpdaterCurrentReleaseNotes") or b"").decode("utf-8", "replace")
     self._version_item.action_item.set_text(current_desc)
     self._version_item.set_description(current_release_notes)
+    self._update_source_item.action_item.set_text(OWNED_UPDATE_SOURCE)
 
     # Update download button visibility and state
     self._download_btn.set_visible(ui_state.is_offroad())
@@ -139,6 +144,7 @@ class SoftwareLayout(Widget):
     # Update target branch button value
     current_branch = ui_state.params.get("UpdaterTargetBranch") or ""
     self._branch_btn.action_item.set_value(current_branch)
+    self._branch_btn.action_item.set_enabled(False)
 
     # Update install button
     self._install_btn.set_visible(ui_state.is_offroad() and update_available)

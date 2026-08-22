@@ -30,17 +30,20 @@ class CruiseLayout(Widget):
     self._current_panel = PanelType.CRUISE
     self._speed_limit_layout = SpeedLimitSettingsLayout(lambda: self._set_current_panel(PanelType.CRUISE))
     self._carrot_params = CarrotParams()
+    self._carrot_controls = []
 
     items = self._initialize_items()
     self._scroller = Scroller(items, line_separator=True, spacing=0)
 
   def _carrot_toggle(self, key, title, description=""):
-    return toggle_item_sp(
+    item = toggle_item_sp(
       title=title,
       description=description,
       initial_state=self._carrot_params.get_bool(key),
       callback=lambda state: self._carrot_params.put_bool(key, state),
     )
+    self._carrot_controls.append((item, key, None))
+    return item
 
   def _carrot_selector(self, key, title, labels, values, description=""):
     current = self._carrot_params.get_int(key)
@@ -50,13 +53,24 @@ class CruiseLayout(Widget):
       if 0 <= i < len(values):
         self._carrot_params.put_int(key, values[i])
 
-    return multiple_button_item_sp(
+    item = multiple_button_item_sp(
       title=title,
       description=description,
       buttons=labels,
       selected_index=idx,
       callback=_on_select,
     )
+    self._carrot_controls.append((item, key, values))
+    return item
+
+  def _refresh_carrot_controls(self):
+    """Re-read the durable Carrot store whenever the panel is opened."""
+    for item, key, values in self._carrot_controls:
+      if values is None:
+        item.action_item.set_state(self._carrot_params.get_bool(key))
+      else:
+        value = self._carrot_params.get_int(key)
+        item.action_item.set_selected_button(values.index(value) if value in values else 0)
 
   def _initialize_items(self):
     # Carrot 功能（只保留 SunnyPilot 没有的增量项）
@@ -77,33 +91,33 @@ class CruiseLayout(Widget):
     # Carrot 纵向设定（只保留必要的：跟车距离/停车距离/前加加速度）
     self.carrot_tfollow_gap1 = self._carrot_selector(
       "TFollowGap1", "跟车距离 1 档",
-      ["0.8s", "1.0s", "1.2s", "1.5s"], [80, 100, 120, 150],
-      description="1 档跟车距离（默认 1.2s）。")
+      ["0.8s", "1.1s", "1.4s", "1.7s"], [80, 110, 140, 170],
+      description="1 档跟车时间。数值越大，留给前车的距离越远；默认 1.1 秒。")
 
     self.carrot_tfollow_gap2 = self._carrot_selector(
       "TFollowGap2", "跟车距离 2 档",
       ["1.0s", "1.2s", "1.5s", "1.8s"], [100, 120, 150, 180],
-      description="2 档跟车距离（默认 1.5s）。")
+      description="2 档跟车时间。数值越大，留给前车的距离越远；默认 1.2 秒。")
 
     self.carrot_tfollow_gap3 = self._carrot_selector(
       "TFollowGap3", "跟车距离 3 档",
-      ["1.2s", "1.5s", "1.8s", "2.2s"], [120, 150, 180, 220],
-      description="3 档跟车距离（默认 1.8s）。")
+      ["1.2s", "1.4s", "1.7s", "2.0s"], [120, 140, 170, 200],
+      description="3 档跟车时间。数值越大，留给前车的距离越远；默认 1.4 秒。")
 
     self.carrot_tfollow_gap4 = self._carrot_selector(
       "TFollowGap4", "跟车距离 4 档",
-      ["1.5s", "1.8s", "2.2s", "2.5s"], [150, 180, 220, 250],
-      description="4 档跟车距离（默认 2.2s）。")
+      ["1.4s", "1.6s", "2.0s", "2.4s"], [140, 160, 200, 240],
+      description="4 档跟车时间。数值越大，留给前车的距离越远；默认 1.6 秒。")
 
     self.carrot_stop_distance = self._carrot_selector(
       "StopDistanceCarrot", "停车距离",
-      ["3m", "4m", "5m", "6m", "8m"], [300, 400, 500, 600, 800],
-      description="红绿灯停车距离（默认 6m）。")
+      ["3m", "4m", "6m", "8m", "10m"], [300, 400, 600, 800, 1000],
+      description="车辆最终停在前车或模型停点之前的目标余量；默认 6 米。识别结果不可靠时仍需驾驶员制动。")
 
     self.carrot_jlead_factor = self._carrot_selector(
       "JLeadFactor3", "前加加速度平滑",
-      ["0.5", "1.0", "1.5", "2.0", "3.0"], [50, 100, 150, 200, 300],
-      description="控制前车加减速变化传给本车的平滑程度。数值越大反应越直接，过大可能产生顿挫；默认 1.0。")
+      ["0", "0.5", "1.0", "2.0", "3.0"], [0, 50, 100, 200, 300],
+      description="控制前车加减速变化传给本车的程度。0 最平滑；数值越大反应越直接，也更容易顿挫。默认 0。")
 
     # SunnyPilot 原生功能
     self.scc_v_toggle = toggle_item_sp(
@@ -176,6 +190,7 @@ class CruiseLayout(Widget):
 
   def show_event(self):
     self._set_current_panel(PanelType.CRUISE)
+    self._refresh_carrot_controls()
     self._scroller.show_event()
     self.custom_acc_toggle.show_description(True)
 
