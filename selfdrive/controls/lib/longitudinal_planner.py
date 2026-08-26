@@ -81,6 +81,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.carrot_speed_limit = CarrotSpeedLimit()
     self.carrot_traffic_stop = CarrotTrafficStop()
     self.carrot_planner = CarrotPlanner()
+    self.carrot_planner_faulted = False
     self.speed_reference = SpeedReference()
 
   def update(self, sm):
@@ -129,11 +130,19 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # Get new v_cruise and a_target from Smart Cruise Control and Speed Limit Assist
     v_cruise, self.output_a_target = LongitudinalPlannerSP.update_targets(self, sm, self.v_desired_filter.x, self.output_a_target, v_cruise)
 
-    # Carrot longitudinal: follow/accel/driving mode + speed limit + traffic stop.
-    # Only lowers/adjusts v_cruise; the resulting a_cruise flows through get_cruise_accel
-    # and is picked by the min(candidates) selection below. MPC handles actual accel/braking.
-    v_cruise_kph_carrot = self.carrot_planner.update(sm, v_cruise * CV.MS_TO_KPH, mode="combined")
-    v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
+    # Carrot visual traffic-stop state and eco target. Dedicated helpers below
+    # own speed-limit selection and nav-app red-light handling; MPC continues
+    # to own the actual acceleration/braking output.
+    if not self.carrot_planner_faulted:
+      try:
+        v_cruise_kph_carrot = self.carrot_planner.update(sm, v_cruise * CV.MS_TO_KPH, mode="combined")
+        v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
+      except Exception:
+        # Carrot visual stopping is an optional extension. A migration or
+        # malformed setting must not take down plannerd and all longitudinal
+        # control; disable it for this drive and retain the Sunny/MPC target.
+        self.carrot_planner_faulted = True
+        cloudlog.exception("CarrotPlanner update failed; disabling it for this drive")
     # The two limit-control modes are mutually exclusive. Sunny assist keeps
     # the original cluster-set-speed state machine; Carrot direct mode clamps
     # the planner only when that instrument-based assist is not selected.
@@ -198,7 +207,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     longitudinalPlan.accels = self.a_desired_trajectory.tolist()
     longitudinalPlan.jerks = self.j_desired_trajectory.tolist()
 
-    longitudinalPlan.hasLead = sm['radarState'].leadOne.present
+    longitudinalPlan.hasLead = sm['radarState'].leadOne.status
     longitudinalPlan.longitudinalPlanSource = self.mpc.source
     longitudinalPlan.fcw = self.fcw
 

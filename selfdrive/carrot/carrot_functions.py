@@ -94,7 +94,7 @@ class CarrotPlanner:
 
     self.soft_hold_active = 0
     self.events = Events()
-    self.myDrivingMode = DrivingMode(self.params.get_int("MyDrivingMode"))
+    self.myDrivingMode = self._read_driving_mode()
     self.myDrivingMode_last = self.myDrivingMode
     self.myDrivingMode_disable_auto = False
     self.myEcoModeFactor = 0.9
@@ -149,11 +149,17 @@ class CarrotPlanner:
     self.last_event_time = 0.0
     self.learner = CarrotLearner() if CarrotLearner is not None else None
 
+  def _read_driving_mode(self):
+    try:
+      return DrivingMode(self.params.get_int("MyDrivingMode"))
+    except (TypeError, ValueError):
+      return DrivingMode.Normal
+
   def _params_update(self):
     self.frame += 1
     self.params_count += 1
     if self.params_count % 10 == 0:
-      myDrivingMode = DrivingMode(self.params.get_int("MyDrivingMode"))
+      myDrivingMode = self._read_driving_mode()
       if myDrivingMode != self.myDrivingMode_last:
         self.myDrivingMode_disable_auto = True
       self.myDrivingMode_last = myDrivingMode
@@ -319,16 +325,16 @@ class CarrotPlanner:
       t_follow *= dynamicTFollowLC
       self.jerk_factor_apply = self.jerk_factor * dynamicTFollowLC
 
-    # 일반 lead follow: lead.jLead 기반 동적 조절
+    # The current RadarState schema has no jLead field. Keep the legacy
+    # dynamic-follow shape neutral until a bounded jerk estimator is added.
     elif lead.status and self.dynamicTFollow > 0.0:
-      # lead.jLead < 0 : 앞차가 감속 방향으로 변함 -> 차간거리 증가
-      # lead.jLead > 0 : 앞차가 가속 방향으로 변함 -> 차간거리 감소
+      lead_jerk = 0.0
       # 起步优化：更快减少 t_follow（快速跟上）
-      t_follow += np.interp(lead.jLead, [-3.0, -0.5, 0.5, 2.0], [1.0, 0.0, 0.0, -2.0]) * self.dynamicTFollow
+      t_follow += np.interp(lead_jerk, [-3.0, -0.5, 0.5, 2.0], [1.0, 0.0, 0.0, -2.0]) * self.dynamicTFollow
 
       # 앞차가 풀어주는 상황에서는 jerk factor 약간 낮춰서 더 민첩하게
       # 起步优化：起步时（v_ego < 5 km/h）不降低 jerk_factor
-      if lead.jLead > 0.2 and self.v_ego_kph >= 5.0:
+      if lead_jerk > 0.2 and self.v_ego_kph >= 5.0:
         self.jerk_factor_apply = self.jerk_factor * 0.5
 
       t_follow = np.clip(t_follow, 0.3, 2.0)
@@ -428,7 +434,9 @@ class CarrotPlanner:
       atc_active = self.activeCarrot > 1 and 0 < self.xDistToTurn < 100
       self.atcType = carrot_man.atcType
 
-      v_cruise_kph = min(v_cruise_kph, carrot_man.desiredSpeed)
+      # desiredSpeed is applied by CarrotSpeedLimit after the Sunny/Carrot
+      # mode selector. Applying it here as well made the selector ineffective
+      # and could clamp cruise even when direct Carrot limiting was disabled.
 
     return v_cruise_kph, atc_active
 
@@ -491,7 +499,8 @@ class CarrotPlanner:
         lead_drel=lead.dRel if lead_status else 0.0,
         lead_v_kph=lead.vLead * CV.MS_TO_KPH if lead_status else 0.0,
         a_ego=a_ego,
-        lead_jlead=lead.jLead if lead_status else 0.0,
+        # RadarState.LeadData in this tree does not publish jerk.
+        lead_jlead=0.0,
         v_cruise_kph=v_cruise_kph,
         gas_val=getattr(carstate, "gas", 0.0),
         brake_val=getattr(carstate, "brake", 0.0),
@@ -505,13 +514,15 @@ class CarrotPlanner:
 
     self.events = Events()
     carstate = sm['carState']
-    vCluRatio = carstate.vCluRatio
     #controlsState = sm['controlsState']
     radarstate = sm['radarState']
     model = sm['modelV2']
 
-    #self.soft_hold_active = sm['carControl'].hudControl.softHoldActive # carrot 1
-    self.soft_hold_active = sm['carState'].softHoldActive # carrot 2
+    # softHoldActive belonged to the source fork's extended CarState schema.
+    # brakeHoldActive is the closest schema-backed signal in this tree; do
+    # not substitute standstill, which would classify every stopped car as a
+    # Carrot soft-hold and interfere with the traffic-stop state machine.
+    self.soft_hold_active = int(carstate.brakeHoldActive)
 
     self.comfort_brake = self.comfortBrake
 
@@ -541,8 +552,6 @@ class CarrotPlanner:
     self.atc_active = atc_active
 
     v_cruise = v_cruise_kph * CV.KPH_TO_MS
-    if vCluRatio > 0.5:
-      v_cruise *= vCluRatio
 
     x = model.position.x
     y = model.position.y
@@ -690,7 +699,11 @@ class CarrotPlanner:
     #return v_cruise, stop_dist, mode
     self._update_learning(sm, carstate, leadOne, v_ego_kph, a_ego, v_cruise_kph)
 
-    return v_cruise_kph
+    # Return the state-machine output, not its input. The old port returned
+    # v_cruise_kph here, silently discarding visual red-light deceleration.
+    # Instrument-speed conversion is applied once by SpeedReference after
+    # this method, so it must not also be duplicated here.
+    return self.v_cruise * CV.MS_TO_KPH
 
 class DrivingModeDetector:
     def __init__(self):
@@ -713,7 +726,7 @@ class DrivingModeDetector:
       distance = 200
       if leadOne.status:
         lead_speed = leadOne.vLead * CV.MS_TO_KPH
-        lead_accel = leadOne.aLead
+        lead_accel = leadOne.aLeadK
         distance = leadOne.dRel
 
       # ---- 진입 조건(OR로 묶기) ----
