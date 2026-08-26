@@ -17,11 +17,20 @@ Design rules (same as CarrotSpeedLimit):
 
 from openpilot.selfdrive.carrot.carrot_params import CarrotParams
 
+_PARAM_REFRESH_FRAMES = 100
+
 
 class CarrotTrafficStop:
   def __init__(self):
     self.params = CarrotParams()
     self.enabled = self.params.get_bool("CarrotTrafficStopEnable")
+    self.frame = 0
+
+  def refresh_enabled(self) -> bool:
+    if self.frame % _PARAM_REFRESH_FRAMES == 0:
+      self.enabled = self.params.get_bool("CarrotTrafficStopEnable")
+    self.frame += 1
+    return self.enabled
 
   def update(self, sm, v_cruise_ms: float) -> float:
     if not self.enabled:

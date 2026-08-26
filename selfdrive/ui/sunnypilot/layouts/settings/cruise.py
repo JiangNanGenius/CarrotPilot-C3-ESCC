@@ -86,38 +86,7 @@ class CruiseLayout(Widget):
 
     self.carrot_traffic_stop = self._carrot_toggle(
       "CarrotTrafficStopEnable", "红绿灯停车",
-      "视觉模型判断前方需要停车时提前减速。仍需驾驶员观察信号灯并随时接管；识别不确定时不要依赖此功能。")
-
-    # Carrot 纵向设定（只保留必要的：跟车距离/停车距离/前加加速度）
-    self.carrot_tfollow_gap1 = self._carrot_selector(
-      "TFollowGap1", "跟车距离 1 档",
-      ["0.8s", "1.1s", "1.4s", "1.7s"], [80, 110, 140, 170],
-      description="1 档跟车时间。数值越大，留给前车的距离越远；默认 1.1 秒。")
-
-    self.carrot_tfollow_gap2 = self._carrot_selector(
-      "TFollowGap2", "跟车距离 2 档",
-      ["1.0s", "1.2s", "1.5s", "1.8s"], [100, 120, 150, 180],
-      description="2 档跟车时间。数值越大，留给前车的距离越远；默认 1.2 秒。")
-
-    self.carrot_tfollow_gap3 = self._carrot_selector(
-      "TFollowGap3", "跟车距离 3 档",
-      ["1.2s", "1.4s", "1.7s", "2.0s"], [120, 140, 170, 200],
-      description="3 档跟车时间。数值越大，留给前车的距离越远；默认 1.4 秒。")
-
-    self.carrot_tfollow_gap4 = self._carrot_selector(
-      "TFollowGap4", "跟车距离 4 档",
-      ["1.4s", "1.6s", "2.0s", "2.4s"], [140, 160, 200, 240],
-      description="4 档跟车时间。数值越大，留给前车的距离越远；默认 1.6 秒。")
-
-    self.carrot_stop_distance = self._carrot_selector(
-      "StopDistanceCarrot", "停车距离",
-      ["3m", "4m", "6m", "8m", "10m"], [300, 400, 600, 800, 1000],
-      description="车辆最终停在前车或模型停点之前的目标余量；默认 6 米。识别结果不可靠时仍需驾驶员制动。")
-
-    self.carrot_jlead_factor = self._carrot_selector(
-      "JLeadFactor3", "前加加速度平滑",
-      ["0", "0.5", "1.0", "2.0", "3.0"], [0, 50, 100, 200, 300],
-      description="控制前车加减速变化传给本车的程度。0 最平滑；数值越大反应越直接，也更容易顿挫。默认 0。")
+      "同时启用视觉模型停车和导航 App 红灯提前减速。关闭后两条 Carrot 红绿灯控制链都不介入；仍需随时观察并接管。")
 
     # SunnyPilot 原生功能
     self.scc_v_toggle = toggle_item_sp(
@@ -166,12 +135,6 @@ class CruiseLayout(Widget):
       self.speed_reference,
       self.carrot_speed_limit,
       self.carrot_traffic_stop,
-      self.carrot_tfollow_gap1,
-      self.carrot_tfollow_gap2,
-      self.carrot_tfollow_gap3,
-      self.carrot_tfollow_gap4,
-      self.carrot_stop_distance,
-      self.carrot_jlead_factor,
       self.dec_toggle,
       self.scc_v_toggle,
       self.scc_m_toggle,

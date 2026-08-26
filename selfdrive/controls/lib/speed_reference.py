@@ -1,5 +1,7 @@
 """Convert cruise targets to the driver's selected vehicle-speed reference."""
 
+from __future__ import annotations
+
 from openpilot.selfdrive.carrot.carrot_params import CarrotParams
 
 
@@ -58,4 +60,3 @@ class SpeedReference:
     if self.reference != INSTRUMENT_SPEED or target_speed <= 0:
       return target_speed
     return min(target_speed, target_speed * self.ratio)
-

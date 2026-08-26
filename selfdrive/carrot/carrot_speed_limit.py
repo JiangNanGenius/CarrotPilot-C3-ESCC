@@ -21,14 +21,22 @@ from openpilot.common.constants import CV
 # Sanity bounds for the carrot nav-app speed limit (km/h).
 _MIN_NAV_SPEED_KPH = 10.0
 _MAX_NAV_SPEED_KPH = 150.0
+_PARAM_REFRESH_FRAMES = 100
 
 
 class CarrotSpeedLimit:
   def __init__(self):
     self.params = CarrotParams()
     self.enabled = self.params.get_bool("CarrotSpeedLimitEnable")
+    self.frame = 0
+
+  def _refresh_enabled(self) -> None:
+    if self.frame % _PARAM_REFRESH_FRAMES == 0:
+      self.enabled = self.params.get_bool("CarrotSpeedLimitEnable")
+    self.frame += 1
 
   def update(self, sm, v_cruise_ms: float, resolver_speed_limit_ms: float) -> float:
+    self._refresh_enabled()
     if not self.enabled:
       return v_cruise_ms
 

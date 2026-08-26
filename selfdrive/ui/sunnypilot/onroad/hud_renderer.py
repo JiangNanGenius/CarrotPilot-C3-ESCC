@@ -7,6 +7,7 @@ See the LICENSE.md file in the root directory for more details.
 import pyray as rl
 
 from cereal import car
+from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 from openpilot.common.constants import CV
 from openpilot.selfdrive.ui.mici.onroad.torque_bar import TorqueBar
 from openpilot.selfdrive.ui.sunnypilot.onroad.developer_ui import DeveloperUiRenderer, DeveloperUiState, get_bottom_dev_ui_offset
@@ -46,6 +47,7 @@ class HudRendererSP(HudRenderer):
     self.speed_cluster: float = 0.0
     self.speed_conv: float = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
     self.radar_available: bool = False
+    self.escc_enabled: bool = False
     self.lead_detected: bool = False
     self.lead_from_radar: bool = False
     self.cruise_target_speed: float = 0.0
@@ -61,6 +63,10 @@ class HudRendererSP(HudRenderer):
 
     if ui_state.CP_SP is not None:
       self.pcm_cruise_speed = ui_state.CP_SP.pcmCruiseSpeed
+      self.escc_enabled = bool(
+        ui_state.CP is not None and ui_state.CP.brand == "hyundai" and
+        ui_state.CP_SP.flags & HyundaiFlagsSP.ENHANCED_SCC
+      )
     self.speed_conv = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
     self.speed_cluster = ui_state.sm['carState'].cruiseState.speedCluster * self.speed_conv
 
@@ -390,7 +396,7 @@ class HudRendererSP(HudRenderer):
     radar_color = rl.GREEN if self.radar_available else rl.RED
     rl.draw_circle(int(x + 24), int(y + h // 2), 9, radar_color)
 
-    text = "RADAR"
+    text = "ESCC" if self.escc_enabled else "RADAR"
     text_color = rl.WHITE if self.radar_available else rl.RED
     rl.draw_text_ex(self._font_semi_bold, text, rl.Vector2(x + 44, y + 8), 23, 0, text_color)
 

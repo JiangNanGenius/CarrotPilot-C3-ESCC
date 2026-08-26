@@ -38,11 +38,6 @@ carrotRawCapnpGlobal.CarrotRawCapnp = (() => {
         vCruiseCluster: { kind: "float32", offset: 19 },  // @54 32-bit slot 19
         steeringAngleDeg: { kind: "float32", offset: 4 }, // @7  32-bit slot 4
         brakeHoldActive: { kind: "bool", offset: 356 },   // @38 bool bit 356
-        softHoldActive: { kind: "int16", offset: 42 },    // @60 int16 slot 42
-        carrotCruise: { kind: "int16", offset: 60 },      // @73 int16 slot 60
-        gearStep: { kind: "int16", offset: 45 },          // @66 int16 slot 45
-        useLaneLineSpeed: { kind: "float32", offset: 25 },// @68 32-bit slot 25
-        brakeLights: { kind: "bool", offset: 68 },        // @19 bool bit 68
         gearShifter: { kind: "enum", offset: 5, values: HUD_GEAR_NAMES }, // @14 enum16 slot 5
       },
     },
@@ -50,7 +45,6 @@ carrotRawCapnpGlobal.CarrotRawCapnp = (() => {
       fields: {
         // capnp slot offsets (not ordinals) — verified via slot allocation algorithm
         vCruiseCluster: { kind: "float32", offset: 46 },  // @63 — may be fork-repurposed field
-        activeLaneLine: { kind: "bool", offset: 716 },    // @67 bool bit 716
         curvature: { kind: "float32", offset: 34 },       // @37 32-bit slot 34
         desiredCurvature: { kind: "float32", offset: 44 },// @61 32-bit slot 44
       },
@@ -101,9 +95,6 @@ carrotRawCapnpGlobal.CarrotRawCapnp = (() => {
         accels: { kind: "list<float32>", offset: 3 },
         speeds: { kind: "list<float32>", offset: 4 },
         jerks: { kind: "list<float32>", offset: 5 },
-        tFollow: { kind: "float32", offset: 26 },
-        desiredDistance: { kind: "float32", offset: 27 },
-        myDrivingMode: { kind: "int32", offset: 28 },
       },
     },
   };
@@ -151,8 +142,6 @@ carrotRawCapnpGlobal.CarrotRawCapnp = (() => {
       modelProb: { kind: "float32", offset: 12 },  // @13 32-bit slot 12
       radar: { kind: "bool", offset: 322 },        // @14 bool bit 322 (byte 40 bit 2)
       radarTrackId: { kind: "int32", offset: 13, xorDefault: -1 }, // @15 32-bit slot 13
-      jLead: { kind: "float32", offset: 14 },      // @16 32-bit slot 14
-      score: { kind: "float32", offset: 15 },      // @17 32-bit slot 15
     },
   };
 
@@ -160,12 +149,6 @@ carrotRawCapnpGlobal.CarrotRawCapnp = (() => {
     fields: {
       laneChangeState: { kind: "enum", offset: 9 },
       laneChangeDirection: { kind: "enum", offset: 10 },
-      laneWidthLeft: { kind: "float32", offset: 6 },
-      laneWidthRight: { kind: "float32", offset: 7 },
-      distanceToRoadEdgeLeft: { kind: "float32", offset: 8 },
-      distanceToRoadEdgeRight: { kind: "float32", offset: 9 },
-      laneChangeProb: { kind: "float32", offset: 10 },
-      modelTurnSpeed: { kind: "float32", offset: 11 },
     },
   };
 
@@ -205,9 +188,6 @@ carrotRawCapnpGlobal.CarrotRawCapnp = (() => {
     lateralPlan: {
       fields: {
         useLaneLines: { kind: "bool", offset: 166 }, // @29 bool bit 166 (capnp slot, not ordinal)
-        latDebugText: { kind: "text", offset: 9 },
-        position: { kind: "struct", offset: 10, schema: XYZT_SCHEMA },
-        distances: { kind: "list<float32>", offset: 11 },
       },
     },
     radarState: {
@@ -216,8 +196,6 @@ carrotRawCapnpGlobal.CarrotRawCapnp = (() => {
         // lead slots, so these offsets follow the pointer-section layout.
         leadOne: { kind: "struct", offset: 1, schema: RADAR_LEAD_SCHEMA },
         leadTwo: { kind: "struct", offset: 2, schema: RADAR_LEAD_SCHEMA },
-        leadRight: { kind: "struct", offset: 5, schema: RADAR_LEAD_SCHEMA },
-        leadLeft: { kind: "struct", offset: 9, schema: RADAR_LEAD_SCHEMA },
       },
     },
     carControl: {

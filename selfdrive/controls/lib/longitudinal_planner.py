@@ -133,9 +133,12 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # Carrot visual traffic-stop state and eco target. Dedicated helpers below
     # own speed-limit selection and nav-app red-light handling; MPC continues
     # to own the actual acceleration/braking output.
+    traffic_stop_enabled = self.carrot_traffic_stop.refresh_enabled()
     if not self.carrot_planner_faulted:
       try:
-        v_cruise_kph_carrot = self.carrot_planner.update(sm, v_cruise * CV.MS_TO_KPH, mode="combined")
+        v_cruise_kph_carrot = self.carrot_planner.update(
+          sm, v_cruise * CV.MS_TO_KPH, mode="combined", traffic_stop_enabled=traffic_stop_enabled,
+        )
         v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
       except Exception:
         # Carrot visual stopping is an optional extension. A migration or

@@ -323,15 +323,9 @@ def _build_car_state(service: Any, previous: dict[str, Any] | None = None) -> di
   p["vEgoCluster"] = safe_float(safe_get(service, "vEgoCluster"))
   p["vCruiseCluster"] = safe_float(safe_get(service, "vCruiseCluster"))
   p["steeringAngleDeg"] = safe_float(safe_get(service, "steeringAngleDeg"))
-  p["useLaneLineSpeed"] = safe_int(safe_get(service, "useLaneLineSpeed"))
-  p["leftLaneLine"] = safe_int(safe_get(service, "leftLaneLine"))
-  p["rightLaneLine"] = safe_int(safe_get(service, "rightLaneLine"))
   p["gearShifter"] = safe_text(safe_get(service, "gearShifter"))
-  p["gearStep"] = safe_int(safe_get(service, "gearStep"))
   p["brakeHoldActive"] = safe_bool(safe_get(service, "brakeHoldActive"))
-  p["softHoldActive"] = safe_int(safe_get(service, "softHoldActive"))
-  p["carrotCruise"] = safe_int(safe_get(service, "carrotCruise"))
-  p["brakeLights"] = safe_bool(safe_get(service, "brakeLights"))
+  p["brakeLights"] = safe_bool(safe_get(service, "brakePressed"))
   p["leftBlindspot"] = safe_bool(safe_get(service, "leftBlindspot"))
   p["rightBlindspot"] = safe_bool(safe_get(service, "rightBlindspot"))
   p["standstill"] = safe_bool(safe_get(service, "standstill"))
@@ -344,7 +338,6 @@ def _build_controls_state(service: Any, previous: dict[str, Any] | None = None) 
   p["experimentalMode"] = safe_bool(safe_get(service, "experimentalMode"))
   p["vCruise"] = safe_float(safe_get(service, "vCruise"))
   p["vCruiseCluster"] = safe_float(safe_get(service, "vCruiseCluster"))
-  p["activeLaneLine"] = safe_bool(safe_get(service, "activeLaneLine"))
   p["curvature"] = safe_float(safe_get(service, "curvature"))
   p["desiredCurvature"] = safe_float(safe_get(service, "desiredCurvature"))
   torque_state = safe_get(safe_get(service, "lateralControlState"), "torqueState")
@@ -356,15 +349,14 @@ def _build_controls_state(service: Any, previous: dict[str, Any] | None = None) 
 
 def _build_longitudinal_plan(service: Any, previous: dict[str, Any] | None = None) -> dict[str, Any]:
   p = previous if isinstance(previous, dict) else {}
-  p["personality"] = safe_text(safe_get(service, "personality"))
-  p["myDrivingMode"] = safe_int(safe_get(service, "myDrivingMode"))
+  p["trafficState"] = safe_int(safe_get(service, "trafficState"))
+  p["trafficStopDistance"] = safe_float(safe_get(service, "trafficStopDistance"))
+  p["cruiseTargetSpeed"] = safe_float(safe_get(service, "cruiseTargetSpeed"))
+  p["shouldStop"] = safe_bool(safe_get(service, "shouldStop"))
+  p["aTarget"] = safe_float(safe_get(service, "aTarget"))
   _fill_list(_ensure_list(p, "accels"), safe_get(service, "accels"), limit=33)
   _fill_list(_ensure_list(p, "speeds"), safe_get(service, "speeds"), limit=33)
   _fill_list(_ensure_list(p, "jerks"), safe_get(service, "jerks"), limit=33)
-  p["tFollow"] = safe_float(safe_get(service, "tFollow"))
-  p["desiredDistance"] = safe_float(safe_get(service, "desiredDistance"))
-  p["xState"] = safe_enum_int(safe_get(service, "xState"))
-  p["trafficState"] = safe_enum_int(safe_get(service, "trafficState"))
   p["longitudinalPlanSource"] = safe_enum_int(safe_get(service, "longitudinalPlanSource"))
   return p
 
@@ -423,11 +415,6 @@ def _build_radar_state(service: Any, previous: dict[str, Any] | None = None) -> 
   p = previous if isinstance(previous, dict) else {}
   p["leadOne"] = _radar_lead(safe_get(service, "leadOne"))
   p["leadTwo"] = _radar_lead(safe_get(service, "leadTwo"))
-  p["leadLeft"] = _radar_lead(safe_get(service, "leadLeft"))
-  p["leadRight"] = _radar_lead(safe_get(service, "leadRight"))
-  _sync_radar_payloads(_ensure_list(p, "leadsLeft"), safe_get(service, "leadsLeft"), limit=6)
-  _sync_radar_payloads(_ensure_list(p, "leadsCenter"), safe_get(service, "leadsCenter"), limit=6)
-  _sync_radar_payloads(_ensure_list(p, "leadsRight"), safe_get(service, "leadsRight"), limit=6)
   return p
 
 
@@ -445,11 +432,9 @@ def _radar_lead(lead: Any) -> dict[str, Any] | None:
     "aLead": safe_float(safe_get(lead, "aLead")),
     "aLeadK": safe_float(safe_get(lead, "aLeadK")),
     "modelProb": safe_float(safe_get(lead, "modelProb")),
-    "score": safe_float(safe_get(lead, "score")),
     "radar": safe_bool(safe_get(lead, "radar")),
     "radarTrackId": safe_int(safe_get(lead, "radarTrackId")),
     "fcw": safe_bool(safe_get(lead, "fcw")),
-    "jLead": safe_float(safe_get(lead, "jLead")),
   }
 
 
@@ -507,14 +492,13 @@ def _build_gps(service: Any, previous: dict[str, Any] | None = None) -> dict[str
 
 def _build_lateral_plan(service: Any, previous: dict[str, Any] | None = None) -> dict[str, Any]:
   p = previous if isinstance(previous, dict) else {}
-  p["pathMode"] = safe_text(safe_get(service, "pathMode"))
-  p["useLaneLineSpeed"] = safe_float(safe_get(service, "useLaneLineSpeed"))
   p["laneChangeState"] = safe_enum_int(safe_get(service, "laneChangeState"))
   p["laneChangeDirection"] = safe_enum_int(safe_get(service, "laneChangeDirection"))
-  p["latDebugText"] = safe_text(safe_get(service, "latDebugText"))
   p["useLaneLines"] = safe_bool(safe_get(service, "useLaneLines"))
-  _update_xyz_payload(_ensure_dict(p, "position"), safe_get(service, "position"))
-  _fill_list(_ensure_list(p, "distances"), safe_get(service, "distances"), limit=33)
+  _fill_list(_ensure_list(p, "dPathPoints"), safe_get(service, "dPathPoints"), limit=33)
+  _fill_list(_ensure_list(p, "psis"), safe_get(service, "psis"), limit=33)
+  _fill_list(_ensure_list(p, "curvatures"), safe_get(service, "curvatures"), limit=33)
+  _fill_list(_ensure_list(p, "curvatureRates"), safe_get(service, "curvatureRates"), limit=33)
   return p
 
 

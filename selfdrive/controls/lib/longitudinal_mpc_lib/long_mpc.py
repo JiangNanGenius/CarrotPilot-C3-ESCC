@@ -286,7 +286,10 @@ class LongitudinalMpc:
 
   def process_lead(self, lead):
     v_ego = self.x0[1]
-    if lead is not None and lead.present:
+    # This branch still uses the pre-2026.003 RadarState schema, where lead
+    # presence is named ``status``. The newer longitudinal core was ported
+    # without the matching cereal rename to ``present``.
+    if lead is not None and lead.status:
       x_lead = lead.dRel
       v_lead = lead.vLead
       a_lead = lead.aLeadK
