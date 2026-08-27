@@ -23,6 +23,10 @@ _LEAD_ACCEL_TAU = 1.5
 # radar tracks
 SPEED, ACCEL = 0, 1     # Kalman filter states enum
 
+
+def radar_inputs_valid(sm: messaging.SubMaster) -> bool:
+  return sm.all_alive() and sm.all_valid()
+
 # stationary qualification parameters
 V_EGO_STATIONARY = 4.   # no stationary object flag below this speed
 
@@ -244,7 +248,11 @@ class RadarD:
       self.tracks[ids].update(rpt[0], rpt[1], rpt[2], v_lead, rpt[3])
 
     # *** publish radarState ***
-    self.radar_state_valid = sm.all_checks()
+    # Radar output is clocked by modelV2 and every input still has strict
+    # freshness and publisher-validity checks. Do not invalidate an otherwise
+    # healthy radar stream solely because a vehicle-specific radar cadence is
+    # outside the generic service frequency window.
+    self.radar_state_valid = radar_inputs_valid(sm)
     self.radar_state = log.RadarState.new_message()
     self.radar_state.mdMonoTime = sm.logMonoTime['modelV2']
     self.radar_state.radarErrors = rr.errors
