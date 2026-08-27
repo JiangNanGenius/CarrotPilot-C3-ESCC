@@ -46,6 +46,18 @@ YAW_LIMITS = np.array([-0.06912048084718224, 0.06912048084718235])
 DEBUG = os.getenv("DEBUG") is not None
 
 
+def calibration_inputs_valid(sm: messaging.SubMaster) -> bool:
+  """Check input freshness and validity without propagating frequency jitter.
+
+  Average-frequency health is monitored independently by the onroad safety
+  processes. Using it as the envelope validity here can poison
+  liveCalibration after scheduling jitter even while calibration continues to
+  learn normally.
+  """
+  services = ['cameraOdometry', 'carState']
+  return sm.all_alive(services) and sm.all_valid(services)
+
+
 def is_calibration_valid(rpy: np.ndarray) -> bool:
   return (PITCH_LIMITS[0] < rpy[1] < PITCH_LIMITS[1]) and (YAW_LIMITS[0] < rpy[2] < YAW_LIMITS[1])
 
@@ -288,7 +300,7 @@ def main() -> NoReturn:
 
     # 4Hz driven by cameraOdometry
     if sm.frame % 5 == 0:
-      calibrator.send_data(pm, sm.all_checks())
+      calibrator.send_data(pm, calibration_inputs_valid(sm))
 
 
 if __name__ == "__main__":

@@ -608,7 +608,11 @@ class SelfdriveD(CruiseHelper):
 
 
 def main():
-  config_realtime_process(4, Priority.CTRL_HIGH)
+  # card and controlsd already consume most of core 4's realtime budget on
+  # tici. Keep selfdrived on the lightly loaded camera core; camerad retains
+  # the higher FIFO priority, while the event loop gets enough headroom for
+  # its 100 Hz deadline.
+  config_realtime_process(6, Priority.CTRL_HIGH)
   s = SelfdriveD()
   s.run()
 
