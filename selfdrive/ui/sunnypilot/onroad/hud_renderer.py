@@ -330,24 +330,6 @@ class HudRendererSP(HudRenderer):
     # Radar status (top-right)
     self._draw_radar_status(rect)
 
-    self._draw_curve_control_status(rect)
-
-  def _draw_curve_control_status(self, rect: rl.Rectangle) -> None:
-    scc = self.smart_cruise_control_renderer
-    labels = []
-    if scc.vision_enabled:
-      labels.append("弯道视觉" if (scc.vision_active or scc.vision_approaching) else "视觉待命")
-    if scc.map_enabled:
-      labels.append("弯道地图" if scc.map_active else "地图待命")
-    if not labels:
-      return
-    x = rect.x + LEFT_MARGIN
-    y = rect.y + TOP_MARGIN + CRUISE_PANEL_HEIGHT + 12
-    text = "  ·  ".join(labels)
-    color = COLORS.OVERRIDE if scc.long_override else (COLORS.ENGAGED if (scc.vision_active or scc.map_active) else COLORS.GREY)
-    rl.draw_rectangle_rounded(rl.Rectangle(x, y, CRUISE_PANEL_WIDTH, 54), 0.22, 8, rl.Color(0, 0, 0, 190))
-    tw = measure_text_cached(self._font_semi_bold, text, 25).x
-    rl.draw_text_ex(self._font_semi_bold, text, rl.Vector2(x + (CRUISE_PANEL_WIDTH - tw) / 2, y + 12), 25, 0, color)
 
   def _draw_gear_shifter(self, rect: rl.Rectangle) -> None:
     """Draw the gear badge inside the cruise panel."""
