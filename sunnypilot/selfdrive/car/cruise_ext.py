@@ -10,6 +10,7 @@ from cereal import car, custom
 from opendbc.car import structs
 from openpilot.common.constants import CV
 from openpilot.common.params import Params
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams
 from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.speed_limit_assist import ACTIVE_STATES as SLA_ACTIVE_STATES
 from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.helpers import compare_cluster_target
 
@@ -23,6 +24,21 @@ CRUISE_BUTTON_TIMER = {ButtonType.decelCruise: 0, ButtonType.accelCruise: 0,
 V_CRUISE_MIN = 8
 V_CRUISE_MAX = 145
 V_CRUISE_UNSET = 255
+AUTO_SPEED_RAISE_INTERVAL_FRAMES = 100
+
+
+def auto_speed_limit_raise(current_kph: float, road_limit_kph: float, ratio: float,
+                           lead_status: bool, lead_distance_m: float, lead_speed_kph: float) -> float:
+  """Return one conservative 5 km/h upward step, matching Carrot's lead-gated behavior."""
+  ceiling_kph = min(V_CRUISE_MAX, road_limit_kph * ratio)
+  lead_is_pulling_away = lead_status and 0.0 < lead_distance_m < 60.0 and lead_speed_kph + 5.0 > current_kph
+  if ratio <= 0.0 or road_limit_kph <= 0.0 or not lead_is_pulling_away or current_kph >= ceiling_kph:
+    return current_kph
+  return float(min(current_kph + 5.0, ceiling_kph))
+
+
+def owns_cruise_set_speed(pcm_cruise: bool, pcm_cruise_speed: bool) -> bool:
+  return not pcm_cruise or not pcm_cruise_speed
 
 
 def update_manual_button_timers(CS: car.CarState, button_timers: dict[car.CarState.ButtonEvent.Type, int]) -> None:
@@ -44,6 +60,7 @@ class VCruiseHelperSP:
     self.v_cruise_kph = V_CRUISE_UNSET
     self.v_cruise_cluster_kph = V_CRUISE_UNSET
     self.params = Params()
+    self.carrot_params = CarrotParams()
     self.v_cruise_min = 0
     self.enabled_prev = False
 
@@ -62,11 +79,54 @@ class VCruiseHelperSP:
     self.prev_speed_limit_final_last_kph = 0.
     self.req_plus = False
     self.req_minus = False
+    self.auto_speed_limit_ratio = 0.0
+    self.auto_speed_raise_frames = 0
+    self.auto_speed_raise_paused = False
+    self.auto_speed_enabled_prev = False
 
   def read_custom_set_speed_params(self) -> None:
     self.custom_acc_enabled = self.params.get_bool("CustomAccIncrementsEnabled")
     self.short_increment = self.params.get("CustomAccShortPressIncrement", return_default=True)
     self.long_increment = self.params.get("CustomAccLongPressIncrement", return_default=True)
+    self.auto_speed_limit_ratio = max(0.0, self.carrot_params.get_float("AutoSpeedUptoRoadSpeedLimit") * 0.01)
+
+  def update_auto_speed_limit_raise(self, CS: car.CarState, radar_state, enabled: bool) -> None:
+    """Optionally raise the driver's maximum toward the road limit.
+
+    This never lowers the set speed and never changes the planner's final
+    target directly. A manual minus/set press pauses it until a plus/resume
+    press or a fresh engagement.
+    """
+    for be in CS.buttonEvents:
+      if not be.pressed and be.type in (ButtonType.decelCruise, ButtonType.setCruise):
+        self.auto_speed_raise_paused = True
+      elif not be.pressed and be.type in (ButtonType.accelCruise, ButtonType.resumeCruise):
+        self.auto_speed_raise_paused = False
+
+    if enabled and not self.auto_speed_enabled_prev:
+      self.auto_speed_raise_paused = False
+    self.auto_speed_enabled_prev = enabled
+
+    lead = radar_state.leadOne
+    owns_set_speed = owns_cruise_set_speed(self.CP.pcmCruise, self.CP_SP.pcmCruiseSpeed)
+    eligible = (enabled and owns_set_speed and self.auto_speed_limit_ratio > 0.0 and
+                self.has_speed_limit and not self.auto_speed_raise_paused and not CS.brakePressed and
+                not CS.gasPressed and CS.vEgo > 5.0 and lead.status)
+    if not eligible:
+      self.auto_speed_raise_frames = 0
+      return
+
+    self.auto_speed_raise_frames += 1
+    if self.auto_speed_raise_frames < AUTO_SPEED_RAISE_INTERVAL_FRAMES:
+      return
+    self.auto_speed_raise_frames = 0
+
+    raised_kph = auto_speed_limit_raise(self.v_cruise_kph, self.speed_limit_final_last_kph,
+                                        self.auto_speed_limit_ratio, lead.status, lead.dRel,
+                                        lead.vLeadK * CV.MS_TO_KPH)
+    if raised_kph > self.v_cruise_kph:
+      self.v_cruise_kph = raised_kph
+      self.v_cruise_cluster_kph = raised_kph
 
   def update_v_cruise_delta(self, long_press: bool, v_cruise_delta: float) -> tuple[bool, float]:
     if not self.custom_acc_enabled:

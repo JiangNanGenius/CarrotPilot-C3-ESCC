@@ -27,6 +27,8 @@ def setup_state():
   params.put("HasAcceptedTerms", terms_version)
   params.put("CompletedTrainingVersion", training_version)
   params.put("DongleId", "test123456789")
+  params.put_bool("IsMetric", True)
+  params.put("LanguageSetting", "zh-CHS")
   # Combined description for layouts that still use it (BIG home, settings/software)
   params.put("UpdaterCurrentDescription", "0.10.1 / test-branch / abc1234 / Nov 30")
   params.put("UpdaterCurrentReleaseNotes", parse_release_notes(BASEDIR))
@@ -70,6 +72,7 @@ def run_replay(variant: LayoutVariant) -> None:
   pm = PubMaster([
     "deviceState", "pandaStates", "driverStateV2", "selfdriveState",
     "carState", "controlsState", "carControl", "radarState", "longitudinalPlan",
+    "longitudinalPlanSP",
   ])
   script = build_script(pm, main_layout, variant)
   script_index = 0

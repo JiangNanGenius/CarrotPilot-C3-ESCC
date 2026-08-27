@@ -29,6 +29,12 @@ LaneChangeDirection = log.LaneChangeDirection
 ACTUATOR_FIELDS = tuple(car.CarControl.Actuators.schema.fields.keys())
 
 
+def planner_hud_set_speed(v_cruise_cluster_kph: float, cruise_target_kph: float) -> float:
+  """Return the final planner cruise ceiling for the vehicle HUD, in m/s."""
+  target_kph = cruise_target_kph if math.isfinite(cruise_target_kph) and cruise_target_kph > 0.0 else v_cruise_cluster_kph
+  return float(max(0.0, target_kph) * CV.KPH_TO_MS)
+
+
 class Controls(ControlsExt):
   def __init__(self) -> None:
     self.params = Params()
@@ -175,7 +181,10 @@ class Controls(ControlsExt):
     CC.cruiseControl.resume = CC.enabled and CS.cruiseState.standstill and not self.sm['longitudinalPlan'].shouldStop
 
     hudControl = CC.hudControl
-    hudControl.setSpeed = float(CS.vCruiseCluster * CV.KPH_TO_MS)
+    # Keep the cluster synchronized with the target the longitudinal planner is
+    # actually enforcing. The driver's configured maximum remains in
+    # carState.vCruiseCluster and is shown separately by the onroad UI.
+    hudControl.setSpeed = planner_hud_set_speed(CS.vCruiseCluster, self.sm['longitudinalPlan'].cruiseTargetSpeed)
     hudControl.speedVisible = CC.enabled
     hudControl.lanesVisible = CC.enabled
     hudControl.leadVisible = self.sm['longitudinalPlan'].hasLead

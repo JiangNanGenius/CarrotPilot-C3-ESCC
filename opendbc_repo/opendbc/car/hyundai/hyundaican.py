@@ -124,8 +124,14 @@ def create_clu11(packer, frame, clu11, button, CP):
   return packer.make_can_msg("CLU11", bus, values)
 
 
-def create_lfahda_mfc(packer, enabled, lfa_icon):
+def create_lfahda_mfc(packer, enabled, lfa_icon, planned_target_speed):
   values = {
+    "HDA_USM": 2,
+    "HDA_Icon_State": 2 if enabled else 0,
+    # HDA_VSetReq follows the same final planner ceiling as SCC11.VSetDis. This
+    # lets the cluster show temporary curve/speed-limit reductions, while the
+    # driver's configured maximum remains independently available in carState.
+    "HDA_VSetReq": int(round(max(0, min(planned_target_speed, 255)))) if enabled else 0,
     "LFA_Icon_State": lfa_icon,
   }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)

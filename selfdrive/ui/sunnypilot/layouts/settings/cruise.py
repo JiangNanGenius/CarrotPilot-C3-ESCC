@@ -88,6 +88,15 @@ class CruiseLayout(Widget):
       "CarrotTrafficStopEnable", "红绿灯停车",
       "同时启用视觉模型停车和导航 App 红灯提前减速。关闭后两条 Carrot 红绿灯控制链都不介入；仍需随时观察并接管。")
 
+    self.auto_speed_limit_raise = self._carrot_selector(
+      "AutoSpeedUptoRoadSpeedLimit", "按限速自动提高最高定速",
+      ["关闭", "100%", "110%", "120%"], [0, 100, 110, 120],
+      description="前车在 60 米内且车流速度更高时，逐步提高最高定速；绝不超过道路限速 × 所选比例。按减速键会暂停，按加速/恢复键才重新允许。")
+
+    self.brake_auto_resume = self._carrot_toggle(
+      "BrakeCruiseAutoResume", "刹车接管后自动恢复",
+      "默认关闭。仅在原本已巡航、松开刹车满 1 秒、车辆仍在行驶且没有故障或禁止启用条件时恢复一次；油门、取消键、停车或状态异常都会撤销恢复。")
+
     # SunnyPilot 原生功能
     self.scc_v_toggle = toggle_item_sp(
       title=tr("Smart Cruise Control - Vision"),
@@ -135,6 +144,8 @@ class CruiseLayout(Widget):
       self.speed_reference,
       self.carrot_speed_limit,
       self.carrot_traffic_stop,
+      self.auto_speed_limit_raise,
+      self.brake_auto_resume,
       self.dec_toggle,
       self.scc_v_toggle,
       self.scc_m_toggle,

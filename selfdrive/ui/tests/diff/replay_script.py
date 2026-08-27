@@ -4,10 +4,13 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import math
+import os
 
-from cereal import car, log, messaging
+from cereal import car, custom, log, messaging
 from cereal.messaging import PubMaster
+from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 from openpilot.common.basedir import BASEDIR
+from openpilot.common.constants import CV
 from openpilot.common.params import Params
 from openpilot.selfdrive.selfdrived.alertmanager import set_offroad_alert
 from openpilot.selfdrive.ui.tests.diff.replay import FPS, LayoutVariant
@@ -156,6 +159,21 @@ def setup_developer_params() -> None:
   Params().put("CarParamsPersistent", CP.to_bytes())
 
 
+def setup_onroad_params() -> None:
+  from openpilot.selfdrive.ui.ui_state import ui_state
+
+  cp = car.CarParams()
+  cp.brand = "hyundai"
+  cp.openpilotLongitudinalControl = True
+  cp_sp = custom.CarParamsSP()
+  cp_sp.flags = int(HyundaiFlagsSP.ENHANCED_SCC)
+
+  params = Params()
+  params.put("CarParamsPersistent", cp.to_bytes())
+  params.put("CarParamsSPPersistent", cp_sp.to_bytes())
+  ui_state.update_params()
+
+
 # --- Send functions ---
 
 def send_onroad(pm: PubMaster) -> None:
@@ -170,16 +188,23 @@ def send_onroad(pm: PubMaster) -> None:
   cs = messaging.new_message('carState')
   cs.carState.vEgo = 22.2
   cs.carState.vEgoCluster = 22.2
-  cs.carState.vCruise = 100.0
-  cs.carState.vCruiseCluster = 100.0
-  cs.carState.cruiseState.speedCluster = 27.8
+  cs.carState.vCruise = 40.0
+  cs.carState.vCruiseCluster = 40.0
+  cs.carState.cruiseState.speedCluster = 40.0 * CV.KPH_TO_MS
   cs.carState.gearShifter = car.CarState.GearShifter.drive
 
   controls = messaging.new_message('controlsState')
-  controls.controlsState.deprecated.vCruise = 100.0
+  controls.controlsState.deprecated.vCruise = 40.0
 
   car_control = messaging.new_message('carControl')
   car_control.carControl.enabled = True
+  car_control.carControl.latActive = True
+  car_control.carControl.longActive = True
+
+  selfdrive = messaging.new_message('selfdriveState')
+  selfdrive.selfdriveState.enabled = True
+  selfdrive.selfdriveState.active = True
+  selfdrive.selfdriveState.state = log.SelfdriveState.OpenpilotState.enabled
 
   radar = messaging.new_message('radarState')
   radar.valid = True
@@ -189,17 +214,37 @@ def send_onroad(pm: PubMaster) -> None:
 
   long_plan = messaging.new_message('longitudinalPlan')
   long_plan.valid = True
-  long_plan.longitudinalPlan.trafficState = 1
-  long_plan.longitudinalPlan.trafficStopDistance = 42.0
-  long_plan.longitudinalPlan.cruiseTargetSpeed = 82.0
+  long_plan.longitudinalPlan.trafficState = 0
+  long_plan.longitudinalPlan.trafficStopDistance = 0.0
+  long_plan.longitudinalPlan.cruiseTargetSpeed = 32.0
+  long_plan.longitudinalPlan.longitudinalPlanSource = log.LongitudinalPlan.LongitudinalPlanSource.cruise
+
+  long_plan_sp = messaging.new_message('longitudinalPlanSP')
+  resolver = long_plan_sp.longitudinalPlanSP.speedLimit.resolver
+  resolver.speedLimit = 40.0 * CV.KPH_TO_MS
+  resolver.speedLimitLast = 40.0 * CV.KPH_TO_MS
+  resolver.speedLimitFinalLast = 40.0 * CV.KPH_TO_MS
+  resolver.speedLimitValid = True
+  resolver.speedLimitLastValid = True
+  resolver.source = custom.LongitudinalPlanSP.SpeedLimit.Source.car
+  assist = long_plan_sp.longitudinalPlanSP.speedLimit.assist
+  assist.enabled = True
+  assist.active = False
+  assist.state = custom.LongitudinalPlanSP.SpeedLimit.AssistState.inactive
+  vision = long_plan_sp.longitudinalPlanSP.smartCruiseControl.vision
+  vision.enabled = True
+  vision.active = True
+  vision.vTarget = 32.0 * CV.KPH_TO_MS
 
   pm.send('deviceState', ds)
   pm.send('pandaStates', ps)
   pm.send('carState', cs)
   pm.send('controlsState', controls)
   pm.send('carControl', car_control)
+  pm.send('selfdriveState', selfdrive)
   pm.send('radarState', radar)
   pm.send('longitudinalPlan', long_plan)
+  pm.send('longitudinalPlanSP', long_plan_sp)
 
 
 def make_network_state_setup(pm: PubMaster, network_type) -> Callable:
@@ -389,6 +434,7 @@ def build_mici_script(pm: PubMaster, main_layout, script: Script) -> None:
   swipe_down()  # back to home
 
   # === Onroad ===
+  script.setup(setup_onroad_params, wait_after=0)
   script.set_send(lambda: send_onroad(pm))
   swipe_left(width, wait_after=WAIT_SHORT)  # onroad screen
   test_onroad_alerts(script, pm)
@@ -523,6 +569,12 @@ def build_script(pm: PubMaster, main_layout, variant: LayoutVariant) -> list[Scr
   print(f"Building {variant} replay script...")
 
   script = Script(FPS)
+  if os.getenv("HUD_ACCEPTANCE_ONLY") == "1":
+    script.setup(setup_onroad_params, wait_after=0)
+    script.set_send(lambda: send_onroad(pm), wait_after=2 * FPS)
+    script.end()
+    return script.entries
+
   builder = build_tizi_script if variant == 'tizi' else build_mici_script
   builder(pm, main_layout, script)
 

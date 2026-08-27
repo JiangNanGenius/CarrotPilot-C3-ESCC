@@ -6,14 +6,14 @@ See the LICENSE.md file in the root directory for more details.
 """
 import pyray as rl
 
-from cereal import car
+from cereal import car, log
 from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 from openpilot.common.constants import CV
 from openpilot.selfdrive.ui.mici.onroad.torque_bar import TorqueBar
 from openpilot.selfdrive.ui.sunnypilot.onroad.developer_ui import DeveloperUiRenderer, DeveloperUiState, get_bottom_dev_ui_offset
 from openpilot.selfdrive.ui.sunnypilot.onroad.road_name import RoadNameRenderer
 from openpilot.selfdrive.ui.sunnypilot.onroad.rocket_fuel import RocketFuel
-from openpilot.selfdrive.ui.sunnypilot.onroad.speed_limit import SpeedLimitRenderer
+from openpilot.selfdrive.ui.sunnypilot.onroad.speed_limit import SpeedLimitRenderer, SpeedLimitSource
 from openpilot.selfdrive.ui.sunnypilot.onroad.smart_cruise_control import SmartCruiseControlRenderer
 from openpilot.selfdrive.ui.sunnypilot.onroad.turn_signal import TurnSignalController
 from openpilot.selfdrive.ui.sunnypilot.onroad.circular_alerts import CircularAlertsRenderer
@@ -26,6 +26,26 @@ from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.text_measure import measure_text_cached
 
 SLA_ACTIVE_COLOR = rl.Color(0x91, 0x9b, 0x95, 0xff)
+LongitudinalPlanSource = log.LongitudinalPlan.LongitudinalPlanSource
+
+
+def cruise_source_label(plan_alive: bool, plan_source, traffic_state: str, speed_limit_active: bool,
+                        speed_limit_source, vision_active: bool, map_active: bool) -> str:
+  if not plan_alive:
+    return "不可用"
+  if traffic_state == "red":
+    return "红灯停车"
+  if speed_limit_active:
+    return "车辆限速" if speed_limit_source == SpeedLimitSource.car else "地图限速"
+  if vision_active:
+    return "视觉弯道"
+  if map_active:
+    return "地图弯道"
+  if plan_source in (LongitudinalPlanSource.lead0, LongitudinalPlanSource.lead1, LongitudinalPlanSource.lead2):
+    return "前车跟随"
+  if plan_source == LongitudinalPlanSource.e2e:
+    return "模型规划"
+  return "驾驶设定"
 
 
 class HudRendererSP(HudRenderer):
@@ -51,6 +71,7 @@ class HudRendererSP(HudRenderer):
     self.lead_detected: bool = False
     self.lead_from_radar: bool = False
     self.cruise_target_speed: float = 0.0
+    self.longitudinal_plan_source = LongitudinalPlanSource.cruise
     self.traffic_stop_distance: float = 0.0
     self.traffic_light_state: str = "off"
     self._traffic_light_hold_frames: int = 0
@@ -110,6 +131,7 @@ class HudRendererSP(HudRenderer):
       self.longitudinal_plan_alive = True
       long_plan = ui_state.sm['longitudinalPlan']
       self.cruise_target_speed = long_plan.cruiseTargetSpeed
+      self.longitudinal_plan_source = long_plan.longitudinalPlanSource
       if not ui_state.is_metric:
         self.cruise_target_speed *= CV.KPH_TO_MPH
       self.traffic_stop_distance = max(0.0, long_plan.trafficStopDistance)
@@ -182,7 +204,7 @@ class HudRendererSP(HudRenderer):
         elif ui_state.status == UIStatus.OVERRIDE:
           max_color = COLORS.OVERRIDE
 
-    title = "巡航"
+    title = "当前目标"
     rl.draw_text_ex(
       self._font_semi_bold,
       title,
@@ -194,16 +216,16 @@ class HudRendererSP(HudRenderer):
 
     self._draw_gear_shifter(rl.Rectangle(x + panel_width - 70, y + 13, 50, 48))
 
-    set_speed_text = CRUISE_DISABLED_CHAR if not self.is_cruise_set else str(round(self.set_speed))
-    set_speed_size = 108 if len(set_speed_text) >= 3 else 124
-    set_speed_width = measure_text_cached(self._font_bold, set_speed_text, set_speed_size).x
+    target_text = "–" if not self.longitudinal_plan_alive or self.cruise_target_speed <= 0 else str(round(self.cruise_target_speed))
+    target_size = 108 if len(target_text) >= 3 else 124
+    target_width = measure_text_cached(self._font_bold, target_text, target_size).x
     rl.draw_text_ex(
       self._font_bold,
-      set_speed_text,
-      rl.Vector2(x + (panel_width - set_speed_width) / 2, y + 48),
-      set_speed_size,
+      target_text,
+      rl.Vector2(x + (panel_width - target_width) / 2, y + 48),
+      target_size,
       0,
-      set_speed_color,
+      set_speed_color if self.longitudinal_plan_alive else COLORS.DARK_GREY,
     )
 
     unit = tr("km/h") if ui_state.is_metric else tr("mph")
@@ -213,21 +235,31 @@ class HudRendererSP(HudRenderer):
     divider_y = y + 208
     rl.draw_line_ex(rl.Vector2(x + 22, divider_y), rl.Vector2(x + panel_width - 22, divider_y), 2, rl.Color(255, 255, 255, 38))
 
-    stock_text = "–" if self.speed_cluster <= 0 else str(round(self.speed_cluster))
-    target_text = "–" if self.cruise_target_speed <= 0 else str(round(self.cruise_target_speed))
+    max_speed_text = CRUISE_DISABLED_CHAR if not self.is_cruise_set else str(round(self.set_speed))
+    speed_limit_active = long_plan_sp.speedLimit.assist.active
+    source_text = cruise_source_label(
+      self.longitudinal_plan_alive,
+      self.longitudinal_plan_source,
+      self.traffic_light_state,
+      speed_limit_active,
+      self.speed_limit_renderer.speed_limit_source,
+      self.smart_cruise_control_renderer.vision_active,
+      self.smart_cruise_control_renderer.map_active,
+    )
     metric_width = (panel_width - 58) / 2
-    self._draw_cruise_metric(x + 20, y + 222, metric_width, "仪表设定", stock_text, COLORS.WHITE)
-    self._draw_cruise_metric(x + 38 + metric_width, y + 222, metric_width, "规划目标", target_text,
-                             COLORS.ENGAGED if self.cruise_target_speed > 0 else COLORS.DARK_GREY)
+    self._draw_cruise_metric(x + 20, y + 222, metric_width, "最高定速", max_speed_text, COLORS.WHITE)
+    self._draw_cruise_metric(x + 38 + metric_width, y + 222, metric_width, "定速依据", source_text,
+                             COLORS.ENGAGED if self.longitudinal_plan_alive else COLORS.DARK_GREY, text_value=True)
 
     rl.draw_line_ex(rl.Vector2(x + 22, y + 326), rl.Vector2(x + panel_width - 22, y + 326), 2, rl.Color(255, 255, 255, 38))
     self._draw_integrated_speed_limit(x + 20, y + 342, 168, 150)
     self._draw_integrated_traffic(x + 208, y + 342, 172, 150)
 
-  def _draw_cruise_metric(self, x: float, y: float, width: float, label: str, value: str, color: rl.Color) -> None:
+  def _draw_cruise_metric(self, x: float, y: float, width: float, label: str, value: str, color: rl.Color,
+                          text_value: bool = False) -> None:
     label_width = measure_text_cached(self._font_semi_bold, label, 29).x
     rl.draw_text_ex(self._font_semi_bold, label, rl.Vector2(x + (width - label_width) / 2, y), 29, 0, COLORS.GREY)
-    value_size = 54 if len(value) >= 3 else 62
+    value_size = (32 if len(value) >= 4 else 37) if text_value else (54 if len(value) >= 3 else 62)
     value_width = measure_text_cached(self._font_bold, value, value_size).x
     rl.draw_text_ex(self._font_bold, value, rl.Vector2(x + (width - value_width) / 2, y + 35), value_size, 0, color)
 
@@ -393,14 +425,16 @@ class HudRendererSP(HudRenderer):
     bg_color = rl.Color(0, 0, 0, 180)
     rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.22, 8, bg_color)
 
-    radar_color = rl.GREEN if self.radar_available else rl.RED
+    radar_color = COLORS.ENGAGED if self.radar_available else rl.RED
     rl.draw_circle(int(x + 24), int(y + h // 2), 9, radar_color)
 
     text = "ESCC" if self.escc_enabled else "RADAR"
-    text_color = rl.WHITE if self.radar_available else rl.RED
+    text_color = radar_color
     rl.draw_text_ex(self._font_semi_bold, text, rl.Vector2(x + 44, y + 8), 23, 0, text_color)
 
-    # Lead source is useful without redefining radar health.
-    if self.lead_detected:
-      lead_text = "LEAD: RADAR" if self.lead_from_radar else "LEAD: VISION"
-      rl.draw_text_ex(self._font_medium, lead_text, rl.Vector2(x + 44, y + 31), 19, 0, COLORS.ENGAGED)
+    if self.radar_available:
+      detail = "正常 · 雷达前车" if self.lead_detected and self.lead_from_radar else \
+               "正常 · 视觉前车" if self.lead_detected else "工作正常"
+    else:
+      detail = "状态异常"
+    rl.draw_text_ex(self._font_medium, detail, rl.Vector2(x + 44, y + 31), 19, 0, radar_color)

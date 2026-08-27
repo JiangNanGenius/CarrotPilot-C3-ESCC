@@ -18,6 +18,7 @@ from openpilot.selfdrive.car.car_specific import CarSpecificEvents
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
 from openpilot.selfdrive.selfdrived.events import Events, ET
 from openpilot.selfdrive.selfdrived.helpers import ExcessiveActuationCheck
+from openpilot.selfdrive.selfdrived.brake_auto_resume import BrakeAutoResume
 from openpilot.selfdrive.selfdrived.state import StateMachine
 from openpilot.selfdrive.selfdrived.alertmanager import AlertManager, set_offroad_alert
 
@@ -29,6 +30,7 @@ from openpilot.sunnypilot import get_sanitize_int_param
 from openpilot.sunnypilot.selfdrive.car.car_specific import CarSpecificEventsSP
 from openpilot.sunnypilot.selfdrive.car.cruise_helpers import CruiseHelper
 from openpilot.sunnypilot.selfdrive.selfdrived.events import EventsSP
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams
 
 REPLAY = "REPLAY" in os.environ
 SIMULATION = "SIMULATION" in os.environ
@@ -140,6 +142,9 @@ class SelfdriveD(CruiseHelper):
     )
     self.recalibrating_seen = False
     self.state_machine = StateMachine()
+    self.brake_auto_resume = BrakeAutoResume()
+    self.carrot_params = CarrotParams()
+    self.brake_auto_resume_enabled = False
     self.rk = Ratekeeper(100, print_delay_threshold=None)
 
     self.ignored_processes = {'mapd', }
@@ -237,6 +242,10 @@ class SelfdriveD(CruiseHelper):
         (CS.brakePressed and (not self.CS_prev.brakePressed or not CS.standstill)) or \
         (CS.regenBraking and (not self.CS_prev.regenBraking or not CS.standstill)):
         self.events.add(EventName.pedalPressed)
+
+      if self.CP.openpilotLongitudinalControl and self.brake_auto_resume.update(
+          self.brake_auto_resume_enabled, self.enabled, CS, self.CS_prev, self.events):
+        self.events.add(EventName.buttonEnable)
 
     # Create events for temperature, disk space, and memory
     if self.sm['deviceState'].thermalStatus >= ThermalStatus.red:
@@ -590,6 +599,7 @@ class SelfdriveD(CruiseHelper):
       self.disengage_on_accelerator = self.params.get_bool("DisengageOnAccelerator")
       self.experimental_mode = self.params.get_bool("ExperimentalMode") and self.CP.openpilotLongitudinalControl
       self.personality = self.params.get("LongitudinalPersonality", return_default=True)
+      self.brake_auto_resume_enabled = self.carrot_params.get_bool("BrakeCruiseAutoResume")
 
       self.mads.read_params()
       time.sleep(0.1)

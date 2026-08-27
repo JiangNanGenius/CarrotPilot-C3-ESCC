@@ -1059,6 +1059,22 @@
     },
     {
       "group": "AUTOCRUISE",
+      "name": "BrakeCruiseAutoResume",
+      "title": "Resume cruise after brake takeover",
+      "descr": "One-shot guarded cruise resume after releasing the brake. Disabled by default.",
+      "egroup": "AUTOCRUISE",
+      "etitle": "Resume cruise after brake takeover",
+      "edescr": "One-shot guarded cruise resume after releasing the brake. Disabled by default.",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "unit": 1,
+      "cgroup": "自动巡航",
+      "ctitle": "刹车接管后自动恢复",
+      "cdescr": "松开刹车后，在车辆仍行驶、巡航可用且无故障时仅恢复一次；默认关闭。"
+    },
+    {
+      "group": "AUTOCRUISE",
       "name": "AutoCruiseControl",
       "title": "Auto Cruise control(HKG only)",
       "descr": "1:Softhold + Auto Cruise, 2:if softhold error",
