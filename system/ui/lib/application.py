@@ -117,6 +117,26 @@ def font_fallback(font: rl.Font) -> rl.Font:
   return font
 
 
+def text_requires_unifont(text: str) -> bool:
+  """Detect scripts not covered by the compact Inter bitmap fonts."""
+  script_ranges = (
+    (0x0E00, 0x0E7F),  # Thai
+    (0x1100, 0x11FF),  # Hangul Jamo
+    (0x3000, 0x30FF),  # CJK punctuation, Hiragana, Katakana
+    (0x3400, 0x9FFF),  # CJK ideographs
+    (0xAC00, 0xD7AF),  # Hangul syllables
+    (0xF900, 0xFAFF),  # CJK compatibility ideographs
+  )
+  return any(start <= ord(char) <= end for char in text for start, end in script_ranges)
+
+
+def font_fallback_for_text(font: rl.Font, text: str) -> rl.Font:
+  """Choose CJK fallback from either UI language or the actual text."""
+  if multilang.requires_unifont() or text_requires_unifont(text):
+    return gui_app.font(FontWeight.UNIFONT)
+  return font
+
+
 class MousePos(NamedTuple):
   x: float
   y: float
@@ -710,7 +730,7 @@ class GuiApplication(GuiApplicationExt):
       rl._orig_draw_text_ex = rl.draw_text_ex
 
     def _draw_text_ex_scaled(font, text, position, font_size, spacing, tint):
-      font = font_fallback(font)
+      font = font_fallback_for_text(font, text)
       return rl._orig_draw_text_ex(font, text, position, font_size * FONT_SCALE, spacing, tint)
 
     rl.draw_text_ex = _draw_text_ex_scaled

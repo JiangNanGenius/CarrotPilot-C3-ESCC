@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import argparse
 import json
 
 import pyray as rl
@@ -34,6 +35,20 @@ COMMON_CHINESE = (
 UNIFONT_LANGUAGES = {"th", "zh-CHT", "zh-CHS", "ko", "ja"}
 
 
+def _gb2312_level1_chars() -> set[str]:
+  """Return GB2312's 3,755 first-level commonly used Han characters."""
+  chars: set[str] = set()
+  for high_byte in range(0xB0, 0xD8):
+    for low_byte in range(0xA1, 0xFF):
+      try:
+        char = bytes((high_byte, low_byte)).decode("gb2312")
+      except UnicodeDecodeError:
+        continue
+      if len(char) == 1:
+        chars.add(char)
+  return chars
+
+
 def _languages():
   if not LANGUAGES_FILE.exists():
     return {}
@@ -43,7 +58,9 @@ def _languages():
 
 def _char_sets():
   base = set(map(chr, range(32, 127))) | set(EXTRA_CHARS)
-  unifont = set(base) | set(COMMON_CHINESE)  # 加常用中文字符
+  # Include the standardized GB2312 level-1 common set so user-provided text
+  # such as Wi-Fi SSIDs, road names and device names does not render as boxes.
+  unifont = set(base) | set(COMMON_CHINESE) | _gb2312_level1_chars()
 
   for language, code in _languages().items():
     unifont.update(language)
@@ -111,8 +128,11 @@ def _process_font(font_path: Path, codepoints: tuple[int, ...]):
 
   font_size = {
     "unifont.otf": 16,  # unifont is only 16x8 or 16x16 pixels per glyph
-    "NotoSansSC-Regular.otf": 64,  # CJK fallback, larger size for crisp glyphs
+    # 36 px stays crisp for the HUD/settings CJK roles while keeping the 3,755
+    # common-character atlas within the C3's texture-memory budget.
+    "NotoSansSC-Regular.otf": 36,
   }.get(font_path.name, 200)
+  glyph_padding = 2 if font_path.name == "NotoSansSC-Regular.otf" else GLYPH_PADDING
 
   data = font_path.read_bytes()
   file_buf = rl.ffi.new("unsigned char[]", data)
@@ -123,7 +143,7 @@ def _process_font(font_path: Path, codepoints: tuple[int, ...]):
     raise RuntimeError("raylib failed to load font data")
 
   rects_ptr = rl.ffi.new("Rectangle **")
-  image = rl.gen_image_font_atlas(glyphs, rects_ptr, len(codepoints), font_size, GLYPH_PADDING, 0)
+  image = rl.gen_image_font_atlas(glyphs, rects_ptr, len(codepoints), font_size, glyph_padding, 0)
   if image.width == 0 or image.height == 0:
     raise RuntimeError("raylib returned an empty atlas")
 
@@ -138,9 +158,15 @@ def _process_font(font_path: Path, codepoints: tuple[int, ...]):
   _write_bmfont(FONT_DIR / f"{font_path.stem}.fnt", font_size, font_path.stem, atlas_name, line_height, base, (image.width, image.height), entries)
 
 
-def main():
+def main(font_names: tuple[str, ...] = ()):
   base_cp, unifont_cp = _char_sets()
   fonts = sorted(FONT_DIR.glob("*.ttf")) + sorted(FONT_DIR.glob("*.otf"))
+  if font_names:
+    requested = set(font_names)
+    fonts = [font for font in fonts if font.name in requested]
+    missing = requested - {font.name for font in fonts}
+    if missing:
+      raise FileNotFoundError(f"Unknown font(s): {', '.join(sorted(missing))}")
   for font in fonts:
     if "emoji" in font.name.lower():
       continue
@@ -150,4 +176,7 @@ def main():
 
 
 if __name__ == "__main__":
-  raise SystemExit(main())
+  parser = argparse.ArgumentParser()
+  parser.add_argument("fonts", nargs="*", help="Optional font filenames to rebuild")
+  args = parser.parse_args()
+  raise SystemExit(main(tuple(args.fonts)))

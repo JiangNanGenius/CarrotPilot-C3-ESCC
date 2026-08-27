@@ -28,7 +28,9 @@ def setup_state():
   params.put("CompletedTrainingVersion", training_version)
   params.put("DongleId", "test123456789")
   params.put_bool("IsMetric", True)
-  params.put("LanguageSetting", "zh-CHS")
+  # Keep the UI language English to exercise content-driven CJK fallback for
+  # GeniusPilot's fixed Chinese driver labels.
+  params.put("LanguageSetting", "en")
   # Combined description for layouts that still use it (BIG home, settings/software)
   params.put("UpdaterCurrentDescription", "0.10.1 / test-branch / abc1234 / Nov 30")
   params.put("UpdaterCurrentReleaseNotes", parse_release_notes(BASEDIR))
