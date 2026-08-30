@@ -6,6 +6,7 @@ from openpilot.system.ui.lib.application import gui_app
 from openpilot.selfdrive.ui.layouts.settings.common import restart_needed_callback
 from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.selfdrive.ui.widgets.ssh_key import SshKeyFetcher
+from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 
 
 class DeveloperLayoutMici(NavScroller):
@@ -123,9 +124,11 @@ class DeveloperLayoutMici(NavScroller):
     # CP gating
     if ui_state.CP is not None:
       alpha_avail = ui_state.CP.alphaLongitudinalAvailable
-      if not alpha_avail or ui_state.is_release:
+      escc_auto_long = bool(ui_state.CP_SP is not None and ui_state.CP_SP.flags & HyundaiFlagsSP.ENHANCED_SCC)
+      if not alpha_avail or ui_state.is_release or escc_auto_long:
         self._alpha_long_toggle.set_visible(False)
-        ui_state.params.remove("AlphaLongitudinalEnabled")
+        if not alpha_avail or escc_auto_long:
+          ui_state.params.remove("AlphaLongitudinalEnabled")
       else:
         self._alpha_long_toggle.set_visible(True)
 

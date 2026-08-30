@@ -180,6 +180,21 @@ class CarInterface(CarInterfaceBase):
       ret.safetyParam |= HyundaiSafetyFlagsSP.ESCC
       stock_cp.radarUnavailable = False
 
+      # ESCC is a positive hardware signal, not a user preference. The stock
+      # CarParams longitudinal decision is made before the sunnypilot-specific
+      # fingerprint pass, so promote compatible classic-CAN ESCC platforms to
+      # openpilot longitudinal here and keep the Panda safety configuration in
+      # sync. NON_SCC and unvalidated/dashcam-only platforms remain fail-safe.
+      escc_longitudinal_available = (
+        stock_cp.alphaLongitudinalAvailable and
+        not stock_cp.dashcamOnly and
+        not (ret.flags & HyundaiFlagsSP.NON_SCC)
+      )
+      if escc_longitudinal_available:
+        stock_cp.openpilotLongitudinalControl = True
+        stock_cp.pcmCruise = False
+        stock_cp.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.LONG.value
+
     if stock_cp.flags & HyundaiFlags.HAS_LDA_BUTTON:
       ret.safetyParam |= HyundaiSafetyFlagsSP.HAS_LDA_BUTTON
 

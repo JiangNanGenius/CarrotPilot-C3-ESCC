@@ -1,34 +1,26 @@
-from openpilot.selfdrive.locationd.calibrationd import calibration_inputs_valid
+from openpilot.selfdrive.locationd.calibrationd import CAR_STATE_MAX_AGE_NS, calibration_inputs_valid
 
 
 class FakeSubMaster:
-  def __init__(self, *, alive=True, valid=True, freq_ok=True):
-    self.alive = alive
-    self.valid = valid
-    self.freq_ok = freq_ok
-
-  def all_alive(self, services):
-    assert services == ['cameraOdometry', 'carState']
-    return self.alive
+  def __init__(self, *, camera_updated=True, valid=True, car_state_age_ns=0):
+    camera_time = 10_000_000_000
+    self.updated = {'cameraOdometry': camera_updated}
+    self.valid = {'cameraOdometry': valid, 'carState': valid}
+    self.logMonoTime = {
+      'cameraOdometry': camera_time,
+      'carState': camera_time - car_state_age_ns,
+    }
 
   def all_valid(self, services):
     assert services == ['cameraOdometry', 'carState']
-    return self.valid
-
-  def all_freq_ok(self, services):
-    assert services == ['cameraOdometry', 'carState']
-    return self.freq_ok
-
-  def all_checks(self, services):
-    return self.all_alive(services) and self.all_valid(services) and self.all_freq_ok(services)
+    return all(self.valid[s] for s in services)
 
 
-def test_publish_valid_does_not_inherit_frequency_jitter():
-  sm = FakeSubMaster(alive=True, valid=True, freq_ok=False)
-  assert not sm.all_checks(['cameraOdometry', 'carState'])
-  assert calibration_inputs_valid(sm)
+def test_publish_valid_for_observed_car_state_jitter():
+  assert calibration_inputs_valid(FakeSubMaster(car_state_age_ns=int(0.151 * 1e9)))
 
 
-def test_publish_invalid_for_missing_or_invalid_inputs():
-  assert not calibration_inputs_valid(FakeSubMaster(alive=False, valid=True))
-  assert not calibration_inputs_valid(FakeSubMaster(alive=True, valid=False))
+def test_publish_invalid_for_stale_or_invalid_inputs():
+  assert not calibration_inputs_valid(FakeSubMaster(car_state_age_ns=CAR_STATE_MAX_AGE_NS + 1))
+  assert not calibration_inputs_valid(FakeSubMaster(valid=False))
+  assert not calibration_inputs_valid(FakeSubMaster(camera_updated=False))

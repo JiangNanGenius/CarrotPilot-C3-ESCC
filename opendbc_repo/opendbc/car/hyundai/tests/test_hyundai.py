@@ -14,6 +14,8 @@ from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR
                                          HyundaiFlags, get_platform_codes, HyundaiSafetyFlags, \
                                          NON_SCC_CAR
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
+from opendbc.sunnypilot.car.hyundai.escc import ESCC_MSG
+from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP, HyundaiSafetyFlagsSP
 
 Ecu = CarParams.Ecu
 
@@ -45,6 +47,39 @@ CANFD_EXPECTED_ECUS = {Ecu.fwdCamera, Ecu.fwdRadar}
 
 
 class TestHyundaiFingerprint(unittest.TestCase):
+  def test_escc_auto_enables_longitudinal(self):
+    fingerprint = gen_empty_fingerprint()
+    fingerprint[0][ESCC_MSG] = 8
+
+    CP = CarInterface.get_params(CAR.KIA_SELTOS_2023, fingerprint, [], False, False, False)
+    assert not CP.openpilotLongitudinalControl
+
+    CP_SP = CarInterface.get_params_sp(CP, CAR.KIA_SELTOS_2023, fingerprint, [], False, False, False)
+    assert CP_SP.flags & HyundaiFlagsSP.ENHANCED_SCC
+    assert CP_SP.safetyParam & HyundaiSafetyFlagsSP.ESCC
+    assert CP.openpilotLongitudinalControl
+    assert not CP.pcmCruise
+    assert not CP.radarUnavailable
+    assert CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.LONG
+
+  def test_escc_auto_longitudinal_is_strictly_hardware_gated(self):
+    fingerprint = gen_empty_fingerprint()
+    CP = CarInterface.get_params(CAR.KIA_SELTOS_2023, fingerprint, [], False, False, False)
+    CP_SP = CarInterface.get_params_sp(CP, CAR.KIA_SELTOS_2023, fingerprint, [], False, False, False)
+    assert not CP_SP.flags & HyundaiFlagsSP.ENHANCED_SCC
+    assert not CP.openpilotLongitudinalControl
+
+    fingerprint[0][ESCC_MSG] = 8
+    CP = CarInterface.get_params(CAR.KIA_SELTOS_2023_NON_SCC, fingerprint, [], False, False, False)
+    CP_SP = CarInterface.get_params_sp(CP, CAR.KIA_SELTOS_2023_NON_SCC, fingerprint, [], False, False, False)
+    assert CP_SP.flags & HyundaiFlagsSP.NON_SCC
+    assert not CP.openpilotLongitudinalControl
+
+    CP = CarInterface.get_params(CAR.KIA_EV6, fingerprint, [], False, False, False)
+    CP_SP = CarInterface.get_params_sp(CP, CAR.KIA_EV6, fingerprint, [], False, False, False)
+    assert not CP_SP.flags & HyundaiFlagsSP.ENHANCED_SCC
+    assert not CP.openpilotLongitudinalControl
+
   def test_feature_detection(self):
     # LKA steering
     for lka_steering in (True, False):

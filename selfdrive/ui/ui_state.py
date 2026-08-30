@@ -180,10 +180,10 @@ class UIState(UIStateSP):
     CP_bytes = self.params.get("CarParamsPersistent")
     if CP_bytes is not None:
       self.CP = messaging.log_from_bytes(CP_bytes, car.CarParams)
-      if self.CP.alphaLongitudinalAvailable:
-        self.has_longitudinal_control = self.params.get_bool("AlphaLongitudinalEnabled")
-      else:
-        self.has_longitudinal_control = self.CP.openpilotLongitudinalControl
+      # CarParams is authoritative after vehicle-specific hardware detection.
+      # In particular, classic-CAN ESCC is detected after the generic alpha
+      # toggle is read and can safely promote the platform to longitudinal.
+      self.has_longitudinal_control = self.CP.openpilotLongitudinalControl
     UIStateSP.update_params(self)
     self._param_update_time = time.monotonic()
 

@@ -8,6 +8,7 @@ from openpilot.system.ui.widgets.confirm_dialog import ConfirmDialog
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.lib.multilang import tr, tr_noop
 from openpilot.system.ui.widgets import DialogResult
+from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 
 if gui_app.sunnypilot_ui():
   from openpilot.system.ui.sunnypilot.widgets.list_view import toggle_item_sp as toggle_item
@@ -127,9 +128,11 @@ class DeveloperLayout(Widget):
     # CP gating
     if ui_state.CP is not None:
       alpha_avail = ui_state.CP.alphaLongitudinalAvailable
-      if not alpha_avail or self._is_release:
+      escc_auto_long = bool(ui_state.CP_SP is not None and ui_state.CP_SP.flags & HyundaiFlagsSP.ENHANCED_SCC)
+      if not alpha_avail or self._is_release or escc_auto_long:
         self._alpha_long_toggle.set_visible(False)
-        self._params.remove("AlphaLongitudinalEnabled")
+        if not alpha_avail or escc_auto_long:
+          self._params.remove("AlphaLongitudinalEnabled")
       else:
         self._alpha_long_toggle.set_visible(True)
 

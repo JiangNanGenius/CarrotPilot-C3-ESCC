@@ -44,18 +44,22 @@ else:
   PITCH_LIMITS = np.array([-0.09074112085129739, 0.17])
 YAW_LIMITS = np.array([-0.06912048084718224, 0.06912048084718235])
 DEBUG = os.getenv("DEBUG") is not None
+CAR_STATE_MAX_AGE_NS = int(0.25 * 1e9)
 
 
 def calibration_inputs_valid(sm: messaging.SubMaster) -> bool:
-  """Check input freshness and validity without propagating frequency jitter.
+  """Check publisher validity and source timestamps without receiver jitter.
 
-  Average-frequency health is monitored independently by the onroad safety
-  processes. Using it as the envelope validity here can poison
-  liveCalibration after scheduling jitter even while calibration continues to
-  learn normally.
+  calibrationd is clocked by cameraOdometry. Receiver-side ``alive`` state is
+  based on when calibrationd happened to be scheduled and used to invalidate a
+  healthy 100 Hz carState stream after a single 100 ms scheduling pause.
   """
-  services = ['cameraOdometry', 'carState']
-  return sm.all_alive(services) and sm.all_valid(services)
+  if not sm.updated['cameraOdometry'] or not sm.all_valid(['cameraOdometry', 'carState']):
+    return False
+
+  camera_time = sm.logMonoTime['cameraOdometry']
+  car_state_time = sm.logMonoTime['carState']
+  return camera_time > 0 and car_state_time > 0 and abs(camera_time - car_state_time) <= CAR_STATE_MAX_AGE_NS
 
 
 def is_calibration_valid(rpy: np.ndarray) -> bool:
@@ -281,26 +285,31 @@ def main() -> NoReturn:
 
   calibrator = Calibrator(param_put=True)
   calibrator.not_car = CP.notCar
+  odom_count = 0
 
   while 1:
     timeout = 0 if sm.frame == -1 else 100
     sm.update(timeout)
 
     if sm.updated['cameraOdometry']:
-      calibrator.handle_v_ego(sm['carState'].vEgo)
-      new_rpy = calibrator.handle_cam_odom(sm['cameraOdometry'].trans,
-                                           sm['cameraOdometry'].rot,
-                                           sm['cameraOdometry'].wideFromDeviceEuler,
-                                           sm['cameraOdometry'].transStd,
-                                           sm['cameraOdometry'].roadTransformTrans,
-                                           sm['cameraOdometry'].roadTransformTransStd)
+      odom_count += 1
+      inputs_valid = calibration_inputs_valid(sm)
+      if inputs_valid:
+        calibrator.handle_v_ego(sm['carState'].vEgo)
+        new_rpy = calibrator.handle_cam_odom(sm['cameraOdometry'].trans,
+                                             sm['cameraOdometry'].rot,
+                                             sm['cameraOdometry'].wideFromDeviceEuler,
+                                             sm['cameraOdometry'].transStd,
+                                             sm['cameraOdometry'].roadTransformTrans,
+                                             sm['cameraOdometry'].roadTransformTransStd)
 
-      if DEBUG and new_rpy is not None:
-        print('got new rpy', new_rpy)
+        if DEBUG and new_rpy is not None:
+          print('got new rpy', new_rpy)
 
-    # 4Hz driven by cameraOdometry
-    if sm.frame % 5 == 0:
-      calibrator.send_data(pm, calibration_inputs_valid(sm))
+      # Publish at 4 Hz, counted only from actual 20 Hz cameraOdometry frames.
+      # Timeouts must never create invalid liveCalibration packets.
+      if odom_count % 5 == 0:
+        calibrator.send_data(pm, inputs_valid)
 
 
 if __name__ == "__main__":

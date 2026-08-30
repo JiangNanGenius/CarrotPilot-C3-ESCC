@@ -1922,22 +1922,6 @@
       "cdescr": "现代/起亚 SCC 接线模式。Seltos 2023 纯 CAN 默认保持 0；只有确认接线和车型路径后再改。1: 纵控车辆，2: 巡航状态同步(CAN-FD)，3: 原厂巡航(CANFD 纵向线束)。"
     },
     {
-      "group": "RADAR",
-      "name": "EnableEscc",
-      "title": "HYUNDAI: ESCC",
-      "descr": "For classic CAN Hyundai/Kia vehicles with ESCC hardware installed. Uses ESCC message 0x2AB for lead and AEB status.",
-      "egroup": "RADAR",
-      "etitle": "HYUNDAI: ESCC",
-      "edescr": "For classic CAN Hyundai/Kia vehicles with ESCC hardware installed. Uses ESCC message 0x2AB for lead and AEB status.",
-      "min": 0,
-      "max": 1,
-      "default": 0,
-      "unit": 1,
-      "cgroup": "雷达设置",
-      "ctitle": "启用 ESCC 硬件",
-      "cdescr": "仅用于已安装 ESCC 模块的纯 CAN 现代/起亚车辆。开启后读取 0x2AB 的前车和 AEB 状态；未检测到 ESCC 消息时不会启用。"
-    },
-    {
       "group": "START",
       "name": "IsLdwsCar",
       "title": "HYUNDAI: LDWS ONLY CAR(0)",
