@@ -19,21 +19,20 @@ from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 
 # Default lead acceleration decay set to 50% at 1s
 _LEAD_ACCEL_TAU = 1.5
-RADAR_INPUT_MAX_AGE_NS = int(0.25 * 1e9)
 
 # radar tracks
 SPEED, ACCEL = 0, 1     # Kalman filter states enum
 
 
 def radar_inputs_valid(sm: messaging.SubMaster) -> bool:
-  services = ['modelV2', 'carState', 'liveTracks']
-  if not sm.updated['modelV2'] or not sm.all_valid(services):
-    return False
-
-  model_time = sm.logMonoTime['modelV2']
-  return model_time > 0 and all(
-    sm.logMonoTime[service] > 0 and abs(model_time - sm.logMonoTime[service]) <= RADAR_INPUT_MAX_AGE_NS
-    for service in ('carState', 'liveTracks')
+  # modelV2 clocks this process. liveTracks remains fail-closed on a genuine
+  # radar/CAN publisher timeout, while the faster non-polled carState stream is
+  # checked for publisher validity without inheriting receiver scheduling
+  # jitter from its generic 100 ms alive threshold.
+  return (
+    sm.updated['modelV2'] and sm.valid['modelV2'] and
+    sm.valid['carState'] and
+    sm.alive['liveTracks'] and sm.valid['liveTracks']
   )
 
 # stationary qualification parameters

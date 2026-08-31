@@ -1,30 +1,22 @@
-from openpilot.selfdrive.locationd.locationd import CALIBRATION_MAX_AGE_NS, CAR_STATE_MAX_AGE_NS, location_inputs_valid
+from openpilot.selfdrive.locationd.locationd import location_inputs_valid
 
 
 class FakeSubMaster:
-  def __init__(self, *, camera_updated=True, valid=True, car_state_age_ns=0, calibration_age_ns=0):
-    camera_time = 10_000_000_000
+  def __init__(self, *, camera_updated=True, camera_valid=True, calibration_alive=True, calibration_valid=True):
     self.updated = {'cameraOdometry': camera_updated}
-    self.valid = {s: valid for s in ('cameraOdometry', 'carState', 'liveCalibration')}
-    self.logMonoTime = {
-      'cameraOdometry': camera_time,
-      'carState': camera_time - car_state_age_ns,
-      'liveCalibration': camera_time - calibration_age_ns,
+    self.valid = {
+      'cameraOdometry': camera_valid,
+      'liveCalibration': calibration_valid,
     }
-
-  def all_valid(self, services):
-    return all(self.valid[s] for s in services)
+    self.alive = {'liveCalibration': calibration_alive}
 
 
-def test_location_inputs_accept_observed_scheduling_jitter():
-  assert location_inputs_valid(FakeSubMaster(
-    car_state_age_ns=int(0.151 * 1e9),
-    calibration_age_ns=int(0.5 * 1e9),
-  ))
+def test_location_inputs_do_not_depend_on_noncritical_car_state():
+  assert location_inputs_valid(FakeSubMaster())
 
 
 def test_location_inputs_reject_stale_or_invalid_publishers():
-  assert not location_inputs_valid(FakeSubMaster(car_state_age_ns=CAR_STATE_MAX_AGE_NS + 1))
-  assert not location_inputs_valid(FakeSubMaster(calibration_age_ns=CALIBRATION_MAX_AGE_NS + 1))
-  assert not location_inputs_valid(FakeSubMaster(valid=False))
+  assert not location_inputs_valid(FakeSubMaster(camera_valid=False))
+  assert not location_inputs_valid(FakeSubMaster(calibration_alive=False))
+  assert not location_inputs_valid(FakeSubMaster(calibration_valid=False))
   assert not location_inputs_valid(FakeSubMaster(camera_updated=False))

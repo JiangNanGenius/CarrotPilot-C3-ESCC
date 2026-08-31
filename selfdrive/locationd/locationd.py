@@ -31,23 +31,13 @@ POSENET_STD_HIST_HALF = 20
 CAM_ODO_POSE_DELAY = 0.1 # dependent on the vision model context frames and temporal frequency (current model is 5 fps with 2 context frames)
 CAM_ODO_ROT_STD_MULT = 10
 CAM_ODO_TRANS_STD_MULT = 4
-CAR_STATE_MAX_AGE_NS = int(0.25 * 1e9)
-CALIBRATION_MAX_AGE_NS = int(0.75 * 1e9)
 
 
 def location_inputs_valid(sm: messaging.SubMaster) -> bool:
-  """Validate pose inputs from publisher timestamps, not consumer scheduling."""
-  services = ['carState', 'liveCalibration', 'cameraOdometry']
-  if not sm.updated['cameraOdometry'] or not sm.all_valid(services):
-    return False
-
-  camera_time = sm.logMonoTime['cameraOdometry']
-  car_state_time = sm.logMonoTime['carState']
-  calibration_time = sm.logMonoTime['liveCalibration']
+  """Validate filter-critical inputs without coupling pose to carState jitter."""
   return (
-    camera_time > 0 and car_state_time > 0 and calibration_time > 0 and
-    abs(camera_time - car_state_time) <= CAR_STATE_MAX_AGE_NS and
-    abs(camera_time - calibration_time) <= CALIBRATION_MAX_AGE_NS
+    sm.updated['cameraOdometry'] and sm.valid['cameraOdometry'] and
+    sm.alive['liveCalibration'] and sm.valid['liveCalibration']
   )
 
 

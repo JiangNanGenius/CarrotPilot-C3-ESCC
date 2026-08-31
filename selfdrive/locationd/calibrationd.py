@@ -44,22 +44,17 @@ else:
   PITCH_LIMITS = np.array([-0.09074112085129739, 0.17])
 YAW_LIMITS = np.array([-0.06912048084718224, 0.06912048084718235])
 DEBUG = os.getenv("DEBUG") is not None
-CAR_STATE_MAX_AGE_NS = int(0.25 * 1e9)
 
 
 def calibration_inputs_valid(sm: messaging.SubMaster) -> bool:
-  """Check publisher validity and source timestamps without receiver jitter.
+  """Keep calibration validity tied to its clocking camera stream.
 
-  calibrationd is clocked by cameraOdometry. Receiver-side ``alive`` state is
-  based on when calibrationd happened to be scheduled and used to invalidate a
-  healthy 100 Hz carState stream after a single 100 ms scheduling pause.
+  carState only supplies the speed used to decide whether to learn a new
+  calibration sample. It is not part of the calibration itself and must not
+  invalidate an already calibrated device when the non-polled subscriber is
+  briefly behind.
   """
-  if not sm.updated['cameraOdometry'] or not sm.all_valid(['cameraOdometry', 'carState']):
-    return False
-
-  camera_time = sm.logMonoTime['cameraOdometry']
-  car_state_time = sm.logMonoTime['carState']
-  return camera_time > 0 and car_state_time > 0 and abs(camera_time - car_state_time) <= CAR_STATE_MAX_AGE_NS
+  return sm.updated['cameraOdometry'] and sm.valid['cameraOdometry']
 
 
 def is_calibration_valid(rpy: np.ndarray) -> bool:
@@ -295,7 +290,8 @@ def main() -> NoReturn:
       odom_count += 1
       inputs_valid = calibration_inputs_valid(sm)
       if inputs_valid:
-        calibrator.handle_v_ego(sm['carState'].vEgo)
+        if sm.seen['carState'] and sm.valid['carState']:
+          calibrator.handle_v_ego(sm['carState'].vEgo)
         new_rpy = calibrator.handle_cam_odom(sm['cameraOdometry'].trans,
                                              sm['cameraOdometry'].rot,
                                              sm['cameraOdometry'].wideFromDeviceEuler,
