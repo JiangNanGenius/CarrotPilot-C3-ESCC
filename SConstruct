@@ -5,6 +5,7 @@ import sysconfig
 import platform
 import shlex
 import importlib
+from types import SimpleNamespace
 import numpy as np
 
 import SCons.Errors
@@ -60,7 +61,31 @@ assert arch in [
 PANDAD_ONLY = GetOption('pandad_only')
 pkg_names = ['capnproto', 'libusb', 'ncurses', 'zeromq', 'zstd'] if PANDAD_ONLY else \
             ['acados', 'capnproto', 'eigen', 'ffmpeg', 'json11', 'libjpeg', 'libyuv', 'ncurses', 'zeromq', 'zstd']
-pkgs = [importlib.import_module(name) for name in pkg_names]
+
+# Production C3 images carry the native pandad headers and shared libraries,
+# but intentionally omit comma's Python dependency-wrapper packages. Keep the
+# full build hermetic; only the explicitly scoped device-native pandad build may
+# use the matching AGNOS system paths when those wrappers are unavailable.
+PANDAD_ONLY_SYSTEM_DEPS = {
+  'capnproto': ('/usr/local/include', '/usr/local/lib'),
+  'libusb': ('/usr/include/libusb-1.0', '/usr/lib/aarch64-linux-gnu'),
+  'ncurses': ('/usr/include', '/usr/lib/aarch64-linux-gnu'),
+  'zeromq': ('/usr/include', '/usr/lib/aarch64-linux-gnu'),
+  'zstd': ('/usr/include', '/usr/lib/aarch64-linux-gnu'),
+}
+
+def load_build_package(name):
+  try:
+    return importlib.import_module(name)
+  except ModuleNotFoundError as exc:
+    if not (PANDAD_ONLY and COMMA_HARDWARE and exc.name == name):
+      raise
+    include_dir, lib_dir = PANDAD_ONLY_SYSTEM_DEPS[name]
+    if not os.path.isdir(include_dir) or not os.path.isdir(lib_dir):
+      raise SCons.Errors.UserError(f"Missing C3 system dependency paths for {name}: {include_dir}, {lib_dir}") from exc
+    return SimpleNamespace(DIR=os.path.dirname(include_dir), INCLUDE_DIR=include_dir, LIB_DIR=lib_dir)
+
+pkgs = [load_build_package(name) for name in pkg_names]
 acados = None if PANDAD_ONLY else pkgs[pkg_names.index('acados')]
 ffmpeg = None if PANDAD_ONLY else pkgs[pkg_names.index('ffmpeg')]
 # Shared package ships .so/.dylib; older device venvs still have static .a only.
