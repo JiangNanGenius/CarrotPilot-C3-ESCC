@@ -27,6 +27,11 @@ def get_expected_signature(panda: Panda) -> bytes:
     cloudlog.exception("Error computing expected signature")
     return b""
 
+
+def next_missing_panda_count(current_count: int, usb_unavailable: bool) -> int:
+  """Do not treat a udev/ownership race as missing hardware."""
+  return 0 if usb_unavailable else current_count + 1
+
 def flash_panda(panda_serial: str) -> Panda:
   try:
     panda = Panda(panda_serial)
@@ -120,7 +125,12 @@ def main() -> None:
 
       panda_serials = Panda.list()
       if len(panda_serials) == 0:
-        no_internal_panda_count += 1
+        usb_unavailable = Panda.usb_list_unavailable()
+        no_internal_panda_count = next_missing_panda_count(no_internal_panda_count, usb_unavailable)
+        if usb_unavailable:
+          # During cold boot udev can expose the USB descriptor before access
+          # is granted. Recovering here needlessly forces the Panda into DFU.
+          time.sleep(1)
         continue
 
       cloudlog.info(f"{len(panda_serials)} panda(s) found, connecting - {panda_serials}")

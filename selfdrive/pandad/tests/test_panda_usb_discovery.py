@@ -106,8 +106,10 @@ class FakeLibusbHandle:
 def panda_module(request):
   module = importlib.import_module(request.param)
   module.Panda._usb_unavailable_last_log_t = None
+  module.Panda._usb_list_unavailable = False
   yield module
   module.Panda._usb_unavailable_last_log_t = None
+  module.Panda._usb_list_unavailable = False
 
 
 def install_usb_context(monkeypatch, module, devices):
@@ -127,6 +129,7 @@ def test_usb_list_preserves_successful_discovery(monkeypatch, panda_module):
   logger = install_logger(monkeypatch, panda_module)
 
   assert panda_module.Panda.usb_list() == [serial]
+  assert not panda_module.Panda.usb_list_unavailable()
   assert panda_module.Panda._usb_unavailable_last_log_t is None
   assert logger.warning_calls == []
   assert logger.exception_calls == []
@@ -137,6 +140,7 @@ def test_usb_list_reports_invalid_serial_without_logging_error(monkeypatch, pand
   logger = install_logger(monkeypatch, panda_module)
 
   assert panda_module.Panda.usb_list() == []
+  assert not panda_module.Panda.usb_list_unavailable()
   assert logger.warning_calls == [("found device with panda descriptors but invalid serial: %s", "short-serial")]
   assert logger.exception_calls == []
 
@@ -151,10 +155,13 @@ def test_usb_list_throttles_transient_unavailable_errors(monkeypatch, panda_modu
   monkeypatch.setattr(panda_module, "time", SimpleNamespace(monotonic=lambda: now[0]))
 
   assert panda_module.Panda.usb_list() == []
+  assert panda_module.Panda.usb_list_unavailable()
   now[0] = 5.0
   assert panda_module.Panda.usb_list() == []
+  assert panda_module.Panda.usb_list_unavailable()
   now[0] = 31.0
   assert panda_module.Panda.usb_list() == []
+  assert panda_module.Panda.usb_list_unavailable()
 
   assert len(logger.warning_calls) == 2
   assert all("not accessible yet" in call[0] for call in logger.warning_calls)
@@ -170,10 +177,13 @@ def test_usb_list_success_resets_unavailable_throttle(monkeypatch, panda_module)
   monkeypatch.setattr(panda_module, "time", SimpleNamespace(monotonic=lambda: now[0]))
 
   assert panda_module.Panda.usb_list() == []
+  assert panda_module.Panda.usb_list_unavailable()
   now[0] = 1.0
   assert panda_module.Panda.usb_list() == [serial]
+  assert not panda_module.Panda.usb_list_unavailable()
   now[0] = 2.0
   assert panda_module.Panda.usb_list() == []
+  assert panda_module.Panda.usb_list_unavailable()
 
   assert len(logger.warning_calls) == 2
   assert logger.exception_calls == []
@@ -184,6 +194,7 @@ def test_usb_list_keeps_traceback_for_unexpected_errors(monkeypatch, panda_modul
   logger = install_logger(monkeypatch, panda_module)
 
   assert panda_module.Panda.usb_list() == []
+  assert not panda_module.Panda.usb_list_unavailable()
   assert logger.warning_calls == []
   assert logger.exception_calls == [("error connecting to panda",)]
 
@@ -200,6 +211,7 @@ def test_usb_list_handles_context_access_error_without_traceback(monkeypatch, pa
   logger = install_logger(monkeypatch, panda_module)
 
   assert panda_module.Panda.usb_list() == []
+  assert panda_module.Panda.usb_list_unavailable()
   assert len(logger.warning_calls) == 1
   assert logger.exception_calls == []
 

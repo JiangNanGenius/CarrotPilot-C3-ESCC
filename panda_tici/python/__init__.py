@@ -106,6 +106,7 @@ class Panda:
 
   _USB_UNAVAILABLE_LOG_INTERVAL_S = 30.0
   _usb_unavailable_last_log_t: float | None = None
+  _usb_list_unavailable = False
 
   SERIAL_DEBUG = 0
   SERIAL_ESP = 1
@@ -359,6 +360,11 @@ class Panda:
       cls._usb_unavailable_last_log_t = now
 
   @classmethod
+  def usb_list_unavailable(cls) -> bool:
+    """Whether the latest USB scan saw a Panda that was temporarily inaccessible."""
+    return cls._usb_list_unavailable
+
+  @classmethod
   def usb_list(cls):
     ret = []
     usb_unavailable = False
@@ -383,6 +389,7 @@ class Panda:
     except Exception:
       logger.exception("exception while listing pandas")
 
+    cls._usb_list_unavailable = usb_unavailable
     if ret and not usb_unavailable:
       cls._usb_unavailable_last_log_t = None
     return ret
