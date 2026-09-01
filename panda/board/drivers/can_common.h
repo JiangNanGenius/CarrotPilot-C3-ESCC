@@ -29,6 +29,12 @@ bool can_loopback = false;
 __attribute__((section(".axisram"))) can_buffer(rx_q, CAN_RX_BUFFER_SIZE)
 __attribute__((section(".itcmram"))) can_buffer(tx1_q, CAN_TX_BUFFER_SIZE)
 __attribute__((section(".itcmram"))) can_buffer(tx2_q, CAN_TX_BUFFER_SIZE)
+#elif defined(STM32F4)
+// Keep the 64 KiB RX queue out of SRAM1 so the legacy boot-mode mailbox at
+// 0x2001FFFC remains outside normal data/BSS on STM32F413.
+__attribute__((section(".sram2"))) can_buffer(rx_q, CAN_RX_BUFFER_SIZE)
+can_buffer(tx1_q, CAN_TX_BUFFER_SIZE)
+can_buffer(tx2_q, CAN_TX_BUFFER_SIZE)
 #else
 can_buffer(rx_q, CAN_RX_BUFFER_SIZE)
 can_buffer(tx1_q, CAN_TX_BUFFER_SIZE)
@@ -226,14 +232,22 @@ uint8_t calculate_checksum(const uint8_t *dat, uint32_t len) {
 
 void can_set_checksum(CANPacket_t *packet) {
   packet->checksum = 0U;
-  packet->checksum = calculate_checksum((uint8_t *) packet, CANPACKET_HEAD_SIZE + GET_LEN(packet));
+  if (can_packet_data_valid(packet)) {
+    packet->checksum = calculate_checksum((uint8_t *) packet, CANPACKET_HEAD_SIZE + GET_LEN(packet));
+  }
 }
 
 bool can_check_checksum(CANPacket_t *packet) {
-  return (calculate_checksum((uint8_t *) packet, CANPACKET_HEAD_SIZE + GET_LEN(packet)) == 0U);
+  return can_packet_data_valid(packet) &&
+         (calculate_checksum((uint8_t *) packet, CANPACKET_HEAD_SIZE + GET_LEN(packet)) == 0U);
 }
 
 void can_send(CANPacket_t *to_push, uint8_t bus_number, bool skip_tx_hook) {
+  if (!can_packet_data_valid(to_push)) {
+    safety_tx_blocked += 1U;
+    return;
+  }
+
   if (skip_tx_hook || safety_tx_hook(to_push) != 0) {
     if (bus_number < PANDA_CAN_CNT) {
       // add CAN packet to send queue

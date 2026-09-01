@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 // bump this when changing the CAN packet
 #define CAN_PACKET_VERSION 4
 
@@ -27,3 +29,11 @@ typedef struct {
 #define GET_BUS(msg) ((msg)->bus)
 #define GET_LEN(msg) (dlc_to_len[(msg)->data_len_code])
 #define GET_ADDR(msg) ((msg)->addr)
+
+static inline bool can_packet_data_valid(const CANPacket_t *msg) {
+  bool valid = GET_LEN(msg) <= CANPACKET_DATA_SIZE_MAX;
+  #ifndef CANFD
+    valid = valid && (msg->fd == 0U);
+  #endif
+  return valid;
+}

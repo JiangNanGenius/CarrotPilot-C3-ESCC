@@ -1,3 +1,4 @@
+import struct
 from pathlib import Path
 
 import pytest
@@ -78,3 +79,68 @@ def test_firmware_can_packet_version_is_declared_by_packet_owner():
   safety = (ROOT / "opendbc_repo/opendbc/safety/safety.h").read_text()
   assert '#ifdef CANFD\n  #include "opendbc/safety/modes/hyundai_canfd.h"' in safety
   assert "#ifdef CANFD\n    {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks}," in safety
+
+
+@pytest.mark.parametrize("firmware_root", FIRMWARE_ROOTS)
+def test_f4_linker_uses_full_sram_with_stack_guard(firmware_root: Path):
+  linker = (firmware_root / "board/stm32f4/stm32f4_flash.ld").read_text()
+
+  # The legacy boot-mode mailbox is part of the installed bootstub ABI. The
+  # stack is independent and must use the full, 256 KiB STM32F413 SRAM1.
+  assert "enter_bootloader_mode = 0x2001FFFC" in linker
+  assert "_estack = ORIGIN(RAM) + LENGTH(RAM)" in linker
+  assert "_Min_Stack_Size = 0x4000" in linker
+  assert ".sram2 (NOLOAD)" in linker
+  assert "ASSERT(_ebss + _Min_Stack_Size <= _estack" in linker
+  assert "ASSERT(_ebss <= enter_bootloader_mode" in linker
+
+  queues = (firmware_root / "board/drivers/can_common.h").read_text()
+  assert '__attribute__((section(".sram2"))) can_buffer(rx_q, CAN_RX_BUFFER_SIZE)' in queues
+
+
+def test_owned_firmware_build_tracks_linker_and_signing_inputs():
+  build = (ROOT / "panda_tici/SConscript").read_text()
+  assert "env.Depends(bootstub_elf, linkerscript)" in build
+  assert "env.Depends(main_elf, linkerscript)" in build
+  assert "env.Depends(signed, [sign_py_node, cert_node])" in build
+
+  # Firmware metadata must describe this checkout, not a stale tracked Panda
+  # artifact copied from a release snapshot.
+  assert "version = get_version(BUILDER, BUILD_TYPE)" in build
+  assert "shutil.copy" not in build
+  assert "SOURCE_DIR" not in build
+
+  size_gate = (ROOT / "panda_tici/scripts/check_fw_size.py").read_text()
+  assert '".sram2": 64*1024' in size_gate
+  assert "static_end > boot_mailbox" in size_gate
+  assert "static_end + stack_guard > stack_top" in size_gate
+  assert "results = [check_space(file, mcu) for file, mcu in checks]" in size_gate
+  assert "sys.exit(0 if all(results) else 1)" in size_gate
+
+
+@pytest.mark.parametrize("firmware_root", FIRMWARE_ROOTS)
+@pytest.mark.parametrize("name", ("panda", "panda_h7"))
+def test_committed_signed_firmware_matches_raw_binary(firmware_root: Path, name: str):
+  raw = (firmware_root / f"board/obj/{name}.bin").read_bytes()
+  signed = (firmware_root / f"board/obj/{name}.bin.signed").read_bytes()
+
+  declared_length = int.from_bytes(signed[:4], "little")
+  assert declared_length == len(raw) + 8
+  assert len(signed) == declared_length + 128
+  assert signed[4:len(raw)] == raw[4:]
+  assert signed[len(raw):declared_length] == b"VERS" + struct.pack("<I", 2)
+
+
+@pytest.mark.parametrize("firmware_root", FIRMWARE_ROOTS)
+def test_classic_can_rejects_fd_and_oversized_packets_before_copy(firmware_root: Path):
+  comms = (firmware_root / "board/can_comms.h").read_text()
+  assert "can_packet_header_valid(can_write_buffer.data[0])" in comms
+  assert "can_packet_header_valid(data[pos])" in comms
+  assert "if (!can_packet_data_valid(&can_packet))" in comms
+
+  common = (firmware_root / "board/drivers/can_common.h").read_text()
+  assert "if (!can_packet_data_valid(to_push))" in common
+  assert "return can_packet_data_valid(packet)" in common
+
+  bxcan = (firmware_root / "board/drivers/bxcan.h").read_text()
+  assert "MIN(CANx->sFIFOMailBox[0].RDTR & 0xFU, 8U)" in bxcan

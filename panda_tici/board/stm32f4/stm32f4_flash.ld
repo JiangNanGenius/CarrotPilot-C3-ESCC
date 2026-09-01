@@ -3,8 +3,8 @@
 **
 **  File        : stm32f4_flash.ld
 **
-**  Abstract    : Linker script for STM32F407VG Device with
-**                1024KByte FLASH, 192KByte RAM
+**  Abstract    : Linker script for STM32F413 Device with
+**                1024KByte FLASH, 256KByte SRAM1
 **
 **                Set heap size, stack size and stack location according
 **                to application requirements.
@@ -32,14 +32,15 @@
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-/* Highest address of the user mode stack */
+/* Keep the boot-mode word at its legacy address for the installed bootstub. */
 enter_bootloader_mode = 0x2001FFFC;
-_estack = 0x2001FFFC;    /* end of 128K RAM on AHB bus*/
+/* AAPCS requires an 8-byte aligned, one-past-end initial stack pointer. */
+_estack = ORIGIN(RAM) + LENGTH(RAM);
 _app_start = 0x08004000; /* Reserve Sector 0(16K) for bootloader */
 
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0;      /* required amount of heap  */
-_Min_Stack_Size = 0x400; /* required amount of stack */
+_Min_Stack_Size = 0x4000; /* fail the link unless at least 16K remains */
 
 /* Specify the memory areas */
 MEMORY
@@ -141,6 +142,15 @@ SECTIONS
     __bss_end__ = _ebss;
   } >RAM
 
+  /* The F413 has a separate 64 KiB SRAM2 bank for the classic-CAN RX queue. */
+  .sram2 (NOLOAD) :
+  {
+    . = ALIGN(4);
+    *(.sram2)
+    *(.sram2*)
+    . = ALIGN(4);
+  } >RAM2
+
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
   {
@@ -164,3 +174,8 @@ SECTIONS
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
+
+ASSERT(_ebss + _Min_Stack_Size <= _estack,
+       "STM32F4 SRAM1 overflow: data/BSS leaves less than 16K stack")
+ASSERT(_ebss <= enter_bootloader_mode,
+       "STM32F4 data/BSS overlaps the installed bootstub mailbox")

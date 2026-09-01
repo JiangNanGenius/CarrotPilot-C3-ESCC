@@ -150,7 +150,9 @@ void can_rx(uint8_t can_number) {
     to_push.rejected = 0U;
     to_push.extended = (CANx->sFIFOMailBox[0].RIR >> 2) & 0x1U;
     to_push.addr = (to_push.extended != 0U) ? (CANx->sFIFOMailBox[0].RIR >> 3) : (CANx->sFIFOMailBox[0].RIR >> 21);
-    to_push.data_len_code = CANx->sFIFOMailBox[0].RDTR & 0xFU;
+    // Classic CAN carries at most eight bytes. Some controllers preserve raw
+    // DLC values 9..15 even though their payload is still eight bytes.
+    to_push.data_len_code = MIN(CANx->sFIFOMailBox[0].RDTR & 0xFU, 8U);
     to_push.bus = bus_number;
     WORD_TO_BYTE_ARRAY(&to_push.data[0], CANx->sFIFOMailBox[0].RDLR);
     WORD_TO_BYTE_ARRAY(&to_push.data[4], CANx->sFIFOMailBox[0].RDHR);
