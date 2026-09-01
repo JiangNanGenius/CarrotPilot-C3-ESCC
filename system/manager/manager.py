@@ -21,6 +21,7 @@ from openpilot.common.swaglog import cloudlog, add_file_handler
 from openpilot.system.version import get_build_metadata
 from openpilot.system.hardware.hw import Paths
 from openpilot.system.hardware import PC
+from openpilot.system.timed import restore_time_from_durable_state
 
 from openpilot.sunnypilot.system.params_migration import migrate_legacy_carrot_params, run_migration
 
@@ -39,12 +40,26 @@ def migrate_and_clear_params(params: Params) -> None:
   params.clear_all(ParamKeyFlag.CLEAR_ON_IGNITION_ON)
 
 
+def restore_time_before_process_start(params: Params) -> None:
+  """Apply the persisted wall-clock floor before anything names a log file."""
+  if PC:
+    return
+
+  try:
+    restore_time_from_durable_state(params)
+  except Exception:
+    # A corrupt/missing time checkpoint must never prevent manager startup.
+    # timed will retry after process launch and GPS/NTP can still correct time.
+    cloudlog.exception("manager failed to restore system time before process start")
+
+
 def manager_init() -> None:
+  params = Params()
+  restore_time_before_process_start(params)
   save_bootlog()
 
   build_metadata = get_build_metadata()
 
-  params = Params()
   migrate_and_clear_params(params)
   # if build_metadata.release_channel:
   #   params.clear_all(ParamKeyFlag.DEVELOPMENT_ONLY)

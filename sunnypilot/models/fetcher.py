@@ -7,7 +7,8 @@ See the LICENSE.md file in the root directory for more details.
 
 import time
 import requests
-from requests.exceptions import (SSLError, RequestException, HTTPError)
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import HTTPError, RequestException, SSLError
 from openpilot.common.params import Params
 from openpilot.common.swaglog import cloudlog
 from openpilot.sunnypilot.models.helpers import is_bundle_version_compatible
@@ -16,6 +17,13 @@ from cereal import custom
 
 
 OFFLINE = False
+
+# The manager polls once a second. An expired catalog must not turn a temporary
+# loss of connectivity into one blocking HTTP request (and one warning) per
+# poll. Keep retries responsive at first, then settle at five minutes; the
+# settings "Refresh Model List" action still bypasses an active backoff.
+FETCH_RETRY_INITIAL_SECONDS = 30.0
+FETCH_RETRY_MAX_SECONDS = 5 * 60.0
 
 
 class ModelParser:
@@ -102,8 +110,18 @@ class ModelCache:
   def _is_expired(self) -> bool:
     """Checks if the cache has expired"""
     current_time = int(time.monotonic() * 1e9)
-    last_sync = self.params.get(self._LAST_SYNC_KEY) or 0
+    last_sync = self.last_sync_time()
     return bool(last_sync == 0) or (current_time - last_sync) >= self.cache_timeout
+
+  def last_sync_time(self) -> int:
+    return int(self.params.get(self._LAST_SYNC_KEY) or 0)
+
+  def consume_refresh_request(self) -> bool:
+    """Consume the negative timestamp used as the model-list refresh signal."""
+    if self.last_sync_time() >= 0:
+      return False
+    self.params.put(self._LAST_SYNC_KEY, 0, block=True)
+    return True
 
   def get(self) -> tuple[dict, bool]:
     """
@@ -114,7 +132,8 @@ class ModelCache:
     try:
       cached_data = self.params.get(self._CACHE_KEY)
       if not cached_data:
-        cloudlog.warning("No cached model data available")
+        # This is expected on first boot and while offline. ModelFetcher logs
+        # the failed network attempt once, together with its retry delay.
         return {}, True
       return cached_data, self._is_expired()
     except Exception as e:
@@ -135,13 +154,54 @@ class ModelFetcher:
     self.params = params
     self.model_cache = ModelCache(params)
     self.model_parser = ModelParser()
+    self.has_usable_catalog = False
+    self._fetch_failures = 0
+    self._next_fetch_time = 0.0
+    self._last_fetch_error = ""
+    self._last_retry_delay = 0.0
+    self._last_sync_time = self.model_cache.last_sync_time()
+    self._last_cache_parse_error = ""
+
+  def _reset_fetch_backoff(self) -> None:
+    had_failures = self._fetch_failures > 0
+    self._fetch_failures = 0
+    self._next_fetch_time = 0.0
+    self._last_fetch_error = ""
+    self._last_retry_delay = 0.0
+    if had_failures:
+      cloudlog.info("Model catalog fetch recovered")
+
+  def _record_fetch_failure(self, error: Exception | str) -> None:
+    delay = min(FETCH_RETRY_INITIAL_SECONDS * (2 ** min(self._fetch_failures, 10)),
+                FETCH_RETRY_MAX_SECONDS)
+    self._fetch_failures += 1
+    self._last_retry_delay = delay
+    self._next_fetch_time = time.monotonic() + delay
+    self._last_fetch_error = str(error)
+
+  def _parse_cached_models(self, cached_data: dict) -> list[custom.ModelManagerSP.ModelBundle]:
+    if not cached_data:
+      self._last_cache_parse_error = ""
+      return []
+    try:
+      bundles = self.model_parser.parse_models(cached_data)
+      self._last_cache_parse_error = ""
+      return bundles
+    except Exception as e:
+      # Treat a corrupt cache as unavailable. The network path below may repair
+      # it, while the active bundle remains subject only to local file checks.
+      error = str(e)
+      if error != self._last_cache_parse_error:
+        cloudlog.warning(f"Ignoring invalid cached model catalog: {error}")
+        self._last_cache_parse_error = error
+      return []
 
   def _fetch_and_cache_models(self) -> list[custom.ModelManagerSP.ModelBundle] | None:
     """Fetches fresh model data from remote and updates cache.
-    Returns None on transport errors. Raises on 404 and other fatal HTTP errors.
+    Returns None on transport, HTTP, parse, or compatibility errors.
     """
     if OFFLINE:
-      cloudlog.info("offline: skipping remote model fetch")
+      self._record_fetch_failure("offline mode enabled")
       return None
 
     try:
@@ -156,41 +216,62 @@ class ModelFetcher:
       response.raise_for_status()
 
       json_data = response.json()
-      self.model_cache.set(json_data)
-      cloudlog.debug("Successfully updated models cache")
-      return self.model_parser.parse_models(json_data)
+      bundles = self.model_parser.parse_models(json_data)
+      if not bundles:
+        raise ValueError("remote model catalog contains no compatible bundles")
 
-    except ConnectionError as e:
-      cloudlog.warning(f"DNS/connection error while fetching models: {e}")
+      # Never replace a usable offline catalog with malformed or incompatible
+      # remote data. Parse first, then commit the cache atomically.
+      self.model_cache.set(json_data)
+      self._last_sync_time = self.model_cache.last_sync_time()
+      self._reset_fetch_backoff()
+      cloudlog.debug("Successfully updated models cache")
+      return bundles
+
     except SSLError as e:
-      cloudlog.warning(f"SSL error while fetching models: {e}")
+      self._record_fetch_failure(e)
+    except RequestsConnectionError as e:
+      self._record_fetch_failure(e)
     except RequestException as e:
-      cloudlog.warning(f"Request transport error while fetching models: {e}")
+      self._record_fetch_failure(e)
     except Exception as e:
-      cloudlog.exception(f"Unexpected error fetching models: {e}")
+      self._record_fetch_failure(e)
 
     return None
 
-  def get_available_bundles(self) -> list[custom.ModelManagerSP.ModelBundle]:
+  def get_available_bundles(self, force_refresh: bool = False) -> list[custom.ModelManagerSP.ModelBundle]:
     """Gets the list of available models, with smart cache handling"""
     cached_data, is_expired = self.model_cache.get()
+    cached_bundles = self._parse_cached_models(cached_data)
+    self.has_usable_catalog = bool(cached_bundles)
 
-    if cached_data and not is_expired:
+    # The existing refresh button invalidates LastSyncTime. Detect the
+    # nonzero->zero transition so a user-requested refresh is not held behind a
+    # previous offline retry delay. A zero value at process start is not a
+    # permanent force-refresh signal.
+    force_refresh |= self.model_cache.consume_refresh_request()
+    sync_time = self.model_cache.last_sync_time()
+    force_refresh |= self._last_sync_time > 0 and sync_time == 0
+    self._last_sync_time = sync_time
+    if force_refresh:
+      self._next_fetch_time = 0.0
+
+    if cached_bundles and not is_expired and not force_refresh:
       cloudlog.debug("Using valid cached models data")
-      cached_bundles = self.model_parser.parse_models(cached_data)
-      if cached_bundles:
-        return cached_bundles
-      cloudlog.warning("Cached model catalog is incompatible; fetching a compatible catalog")
+      return cached_bundles
+
+    if time.monotonic() < self._next_fetch_time:
+      return cached_bundles
 
     fetched_bundles = self._fetch_and_cache_models()
     if fetched_bundles is not None:
+      self.has_usable_catalog = True
       return fetched_bundles
 
-    if not cached_data:
-      cloudlog.warning("Failed to fetch fresh data and no cache available")
-
-    cloudlog.warning("Failed to fetch fresh data. Using expired cache as fallback")
-    return self.model_parser.parse_models(cached_data)
+    fallback = "using cached catalog" if cached_bundles else "no cached catalog available"
+    warning = f"Model catalog fetch failed ({self._last_fetch_error}); {fallback}; retrying in {int(self._last_retry_delay)}s"
+    cloudlog.warning(warning)
+    return cached_bundles
 
 if __name__ == "__main__":
   params = Params()

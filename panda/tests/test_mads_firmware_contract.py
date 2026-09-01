@@ -66,6 +66,15 @@ def test_host_configures_mads_before_entering_car_safety_mode():
   assert configure_mads < configure_car
 
 
+def test_c3_dos_panda_keeps_native_firmware_verification():
+  supported = (ROOT / "selfdrive/pandad/pandad.h").read_text()
+  assert "cereal::PandaState::PandaType::DOS" in supported
+
+  wrapper = (ROOT / "selfdrive/pandad/pandad.py").read_text()
+  assert 'return os.path.join(BASEDIR, "panda", "board", "obj", panda.get_mcu_type().config.app_fn)' in wrapper
+  assert "panda.flash(get_firmware_path(panda))" in wrapper
+
+
 def test_firmware_can_packet_version_is_declared_by_packet_owner():
   packet = (ROOT / "opendbc_repo/opendbc/safety/can.h").read_text()
   host = (ROOT / "panda/python/__init__.py").read_text()

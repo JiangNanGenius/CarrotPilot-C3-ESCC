@@ -7,8 +7,12 @@
 
 void pandad_main_thread(std::string serial);
 
-// deprecated devices
+// This fork is deployed on C3/DOS hardware. Keep the native DOS Panda in the
+// firmware contract instead of treating it as an unsupported legacy board:
+// the Python wrapper flashes the checkout-local F4 image and the C++ process
+// independently verifies the same signature before it starts CAN I/O.
 static const std::vector<cereal::PandaState::PandaType> SUPPORTED_PANDA_TYPES = {
+  cereal::PandaState::PandaType::DOS,
   cereal::PandaState::PandaType::RED_PANDA,
   cereal::PandaState::PandaType::TRES,
   cereal::PandaState::PandaType::CUATRO,

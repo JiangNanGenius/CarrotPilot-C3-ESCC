@@ -328,15 +328,22 @@ class ModelManagerSP:
     """Main entry point for downloading a model bundle"""
     asyncio.run(self._download_bundle(model_bundle, destination_path))
 
+  def _refresh_model_catalog(self) -> None:
+    self.available_models = self.model_fetcher.get_available_bundles()
+    # An empty result caused by being offline is not an authoritative statement
+    # that the active bundle was removed upstream. In that case validate only
+    # its local files, so a fully cached custom model remains usable offline.
+    validation_catalog = self.available_models if self.model_fetcher.has_usable_catalog else None
+    validate_active_bundle(self.params, validation_catalog)
+    self.active_bundle = get_active_bundle(self.params)
+
   def main_thread(self) -> None:
     """Main thread for model management"""
     rk = Ratekeeper(1, print_delay_threshold=None)
 
     while True:
       try:
-        self.available_models = self.model_fetcher.get_available_bundles()
-        validate_active_bundle(self.params, self.available_models)
-        self.active_bundle = get_active_bundle(self.params)
+        self._refresh_model_catalog()
 
         if (index_to_download := self.params.get("ModelManager_DownloadIndex")) is not None:
           if model_to_download := next((model for model in self.available_models if model.index == index_to_download), None):

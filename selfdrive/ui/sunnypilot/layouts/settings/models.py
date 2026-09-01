@@ -64,7 +64,7 @@ class ModelsLayout(Widget):
     self.on_policy_label = progress_item(tr("On-Policy Model"))
 
     self.refresh_item = button_item(tr("Refresh Model List"), tr("REFRESH"), "",
-                                    lambda: (ui_state.params.put("ModelManager_LastSyncTime", 0),
+                                    lambda: (ui_state.params.put("ModelManager_LastSyncTime", -1),
                                              gui_app.push_widget(alert_dialog(tr("Fetching Latest Models")))))
 
     self.clear_cache_item = ListItemSP(

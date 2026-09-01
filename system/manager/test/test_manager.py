@@ -68,6 +68,48 @@ class TestManager:
 
     assert len(calls) == 4
 
+  def test_time_restore_precedes_bootlog(self, monkeypatch):
+    calls = []
+    params = object()
+
+    class StopAfterBootlog(Exception):
+      pass
+
+    monkeypatch.setattr(manager, "PC", False)
+    monkeypatch.setattr(manager, "Params", lambda: params)
+    monkeypatch.setattr(manager, "restore_time_from_durable_state",
+                        lambda actual: calls.append(("restore_time", actual)))
+
+    def stop_after_bootlog():
+      calls.append(("bootlog", None))
+      raise StopAfterBootlog
+
+    monkeypatch.setattr(manager, "save_bootlog", stop_after_bootlog)
+
+    with pytest.raises(StopAfterBootlog):
+      manager.manager_init()
+
+    assert calls == [("restore_time", params), ("bootlog", None)]
+
+  def test_early_time_restore_is_best_effort_and_device_only(self, monkeypatch):
+    params = object()
+    calls = []
+
+    monkeypatch.setattr(manager, "PC", True)
+    monkeypatch.setattr(manager, "restore_time_from_durable_state", lambda actual: calls.append(actual))
+    manager.restore_time_before_process_start(params)
+    assert calls == []
+
+    def fail_restore(_params):
+      raise OSError("bad checkpoint")
+
+    monkeypatch.setattr(manager, "PC", False)
+    monkeypatch.setattr(manager, "restore_time_from_durable_state", fail_restore)
+    monkeypatch.setattr(manager.cloudlog, "exception", lambda message: calls.append(message))
+    manager.restore_time_before_process_start(params)
+
+    assert calls == ["manager failed to restore system time before process start"]
+
   def test_blacklisted_procs(self):
     # TODO: ensure there are blacklisted procs until we have a dedicated test
     assert len(BLACKLIST_PROCS), "No blacklisted procs to test not_run"
