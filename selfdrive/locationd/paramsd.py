@@ -10,6 +10,7 @@ from openpilot.common.realtime import config_realtime_process, DT_MDL
 from openpilot.selfdrive.locationd.models.car_kf import CarKalman, ObservationKind, States
 from openpilot.selfdrive.locationd.models.constants import GENERATED_DIR
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
+from openpilot.selfdrive.message_health import inputs_fresh
 from openpilot.common.swaglog import cloudlog
 
 MAX_ANGLE_OFFSET_DELTA = 20 * DT_MDL  # Max 20 deg/s
@@ -23,24 +24,15 @@ OFFSET_LOWERED_MAX = 8.0
 MIN_ACTIVE_SPEED = 1.0
 LOW_ACTIVE_SPEED = 10.0
 
-PARAMSD_RATE_CHECKED_SERVICES = ['livePose', 'liveCalibration']
-PARAMSD_AUXILIARY_SERVICES = ['carState']
+PARAMSD_INPUT_MAX_AGE_SECONDS = {
+  'liveCalibration': 1.0,
+  'carState': 0.5,
+}
 
 
 def paramsd_inputs_valid(sm) -> bool:
-  """Require fresh, valid inputs without rejecting harmless aux rate jitter.
-
-  paramsd is driven by livePose. On this C3, carState can sustain roughly
-  85-90 Hz rather than its nominal 100 Hz while every packet remains current
-  and valid. Applying aggregate frequency checks to that sampled auxiliary
-  stream marked every liveParameters packet invalid, which then invalidated
-  every longitudinalPlan. Keep the poll source's full frequency check and
-  fail closed for dead/invalid auxiliary inputs, but do not turn harmless
-  auxiliary rate variance into a system-wide planning outage.
-  """
-  return (sm.all_checks(PARAMSD_RATE_CHECKED_SERVICES) and
-          sm.all_alive(PARAMSD_AUXILIARY_SERVICES) and
-          sm.all_valid(PARAMSD_AUXILIARY_SERVICES))
+  """Validate producer freshness instead of consumer receive-rate jitter."""
+  return inputs_fresh(sm, 'livePose', PARAMSD_INPUT_MAX_AGE_SECONDS)
 
 
 class VehicleParamsLearner:

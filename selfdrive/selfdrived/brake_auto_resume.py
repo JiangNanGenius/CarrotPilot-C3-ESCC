@@ -10,6 +10,7 @@ GearShifter = car.CarState.GearShifter
 RELEASE_DELAY_FRAMES = int(1.0 / DT_CTRL)
 ARM_TIMEOUT_FRAMES = int(30.0 / DT_CTRL)
 MIN_RESUME_SPEED = 5.0  # m/s; stopped/parking maneuvers always require the driver
+AUTO_RESUME_GEARS = (GearShifter.drive, GearShifter.sport)
 
 
 class BrakeAutoResume:
@@ -44,7 +45,7 @@ class BrakeAutoResume:
 
     self.age_frames += 1
     unsafe = (cancel_pressed or CS.gasPressed or CS.regenBraking or not CS.canValid or
-              not CS.cruiseState.available or CS.gearShifter != GearShifter.drive or
+              not CS.cruiseState.available or CS.gearShifter not in AUTO_RESUME_GEARS or
               self.age_frames > ARM_TIMEOUT_FRAMES)
     if unsafe:
       self.disarm()

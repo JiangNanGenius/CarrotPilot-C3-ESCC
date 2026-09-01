@@ -24,6 +24,17 @@ STANDSTILL_THRESHOLD = 12 * 0.03125
 ENABLE_BUTTONS = (Buttons.RES_ACCEL, Buttons.SET_DECEL, Buttons.CANCEL)
 BUTTONS_DICT = {Buttons.RES_ACCEL: ButtonType.accelCruise, Buttons.SET_DECEL: ButtonType.decelCruise,
                 Buttons.GAP_DIST: ButtonType.gapAdjustCruise, Buttons.CANCEL: ButtonType.cancel}
+SELTOS_2023_SPORT_GEAR_RAW = 4
+
+
+def parse_classic_gear(fingerprint, shifter_values, raw_gear):
+  """Parse a classic Hyundai shifter value, including observed platform quirks."""
+  # The Seltos route shows LVR12 raw 4 in the physical S gate. Its shared DBC
+  # only defines raw 8 as S, so the generic lookup returned unknown and raised
+  # wrongGear. Scope the observed override to this exact platform family.
+  if fingerprint == CAR.KIA_SELTOS_2023 and raw_gear == SELTOS_2023_SPORT_GEAR_RAW:
+    return structs.CarState.GearShifter.sport
+  return CarStateBase.parse_gear_shifter(shifter_values.get(raw_gear))
 
 
 class CarState(CarStateBase, EsccCarStateBase, MadsCarState, CarStateExt):
@@ -171,7 +182,7 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState, CarStateExt):
     else:
       gear = cp.vl["LVR12"]["CF_Lvr_Gear"]
 
-    ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
+    ret.gearShifter = parse_classic_gear(self.CP.carFingerprint, self.shifter_values, gear)
 
     if (not self.CP.openpilotLongitudinalControl or self.CP.flags & HyundaiFlags.CAMERA_SCC) and not self.CP_SP.flags & HyundaiFlagsSP.NON_SCC:
       aeb_src = "FCA11" if self.CP.flags & HyundaiFlags.USE_FCA.value else "SCC12"

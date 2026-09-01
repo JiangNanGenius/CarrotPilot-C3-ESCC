@@ -1,6 +1,6 @@
 from cereal import log, messaging
 
-from openpilot.selfdrive.ui.sunnypilot.onroad.hud_renderer import cruise_source_label, radar_packet_status
+from openpilot.selfdrive.ui.sunnypilot.onroad.hud_renderer import cruise_source_label, cruise_target_is_usable, radar_packet_status
 
 
 CruiseTargetSource = log.LongitudinalPlan.CruiseTargetSource
@@ -41,3 +41,12 @@ def test_escc_green_requires_a_valid_error_free_radar_packet():
   assert radar_packet_status(True, True) == "fault"
   assert radar_packet_status(False, False) == "invalid"
   assert radar_packet_status(False, True) == "invalid"
+
+
+def test_cruise_target_requires_explicit_validity_and_finite_range():
+  assert cruise_target_is_usable(True, True, 40.0)
+  assert cruise_target_is_usable(True, True, 0.0)  # red-light stop is a real target
+  assert not cruise_target_is_usable(True, False, 40.0)
+  assert not cruise_target_is_usable(False, True, 40.0)
+  assert not cruise_target_is_usable(True, True, float("nan"))
+  assert not cruise_target_is_usable(True, True, 255.0)

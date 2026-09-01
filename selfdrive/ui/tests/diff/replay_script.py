@@ -218,6 +218,7 @@ def send_onroad(pm: PubMaster) -> None:
   long_plan.longitudinalPlan.trafficStopDistance = 0.0
   long_plan.longitudinalPlan.cruiseTargetSpeed = 32.0
   long_plan.longitudinalPlan.cruiseTargetSource = log.LongitudinalPlan.CruiseTargetSource.visionCurve
+  long_plan.longitudinalPlan.cruiseTargetValid = True
   long_plan.longitudinalPlan.longitudinalPlanSource = log.LongitudinalPlan.LongitudinalPlanSource.cruise
 
   long_plan_sp = messaging.new_message('longitudinalPlanSP')

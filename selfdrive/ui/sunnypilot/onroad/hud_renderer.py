@@ -4,11 +4,13 @@ Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
 This file is part of GeniusPilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
+import math
 import pyray as rl
 
 from cereal import car, log
 from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 from openpilot.common.constants import CV
+from openpilot.selfdrive.car.cruise import V_CRUISE_MAX
 from openpilot.selfdrive.ui.mici.onroad.torque_bar import TorqueBar
 from openpilot.selfdrive.ui.sunnypilot.onroad.developer_ui import DeveloperUiRenderer, DeveloperUiState, get_bottom_dev_ui_offset
 from openpilot.selfdrive.ui.sunnypilot.onroad.road_name import RoadNameRenderer
@@ -56,6 +58,11 @@ def radar_packet_status(packet_valid: bool, has_errors: bool) -> str:
   return "fault" if has_errors else "healthy"
 
 
+def cruise_target_is_usable(packet_valid: bool, target_valid: bool, target_speed_kph: float) -> bool:
+  return (packet_valid and target_valid and math.isfinite(target_speed_kph) and
+          0.0 <= target_speed_kph <= V_CRUISE_MAX)
+
+
 class HudRendererSP(HudRenderer):
   def __init__(self):
     super().__init__()
@@ -83,6 +90,7 @@ class HudRendererSP(HudRenderer):
     self.lead_from_radar: bool = False
     self.cruise_target_speed: float = 0.0
     self.cruise_target_source = CruiseTargetSource.instrumentSet
+    self.cruise_target_available: bool = False
     self.traffic_stop_distance: float = 0.0
     self.traffic_light_state: str = "off"
     self._traffic_light_hold_frames: int = 0
@@ -151,11 +159,18 @@ class HudRendererSP(HudRenderer):
       if ui_state.sm.valid['longitudinalPlan']:
         self.longitudinal_plan_alive = True
         long_plan = ui_state.sm['longitudinalPlan']
-        self.cruise_target_speed = long_plan.cruiseTargetSpeed
-        self.cruise_target_source = long_plan.cruiseTargetSource
-        if not ui_state.is_metric:
-          self.cruise_target_speed *= CV.KPH_TO_MPH
-        self.traffic_stop_distance = max(0.0, long_plan.trafficStopDistance)
+        self.cruise_target_available = cruise_target_is_usable(
+          True, long_plan.cruiseTargetValid, long_plan.cruiseTargetSpeed,
+        )
+        if self.cruise_target_available:
+          self.cruise_target_speed = long_plan.cruiseTargetSpeed
+          self.cruise_target_source = long_plan.cruiseTargetSource
+          if not ui_state.is_metric:
+            self.cruise_target_speed *= CV.KPH_TO_MPH
+        else:
+          self.cruise_target_speed = 0.0
+        stop_distance = float(long_plan.trafficStopDistance)
+        self.traffic_stop_distance = max(0.0, stop_distance) if math.isfinite(stop_distance) else 0.0
 
         traffic_state = int(long_plan.trafficState)
         if traffic_state == 1:
@@ -173,12 +188,14 @@ class HudRendererSP(HudRenderer):
         # An alive producer can continuously publish invalid envelopes. Never
         # retain an old target or green-light release through that condition.
         self.longitudinal_plan_alive = False
+        self.cruise_target_available = False
         self.cruise_target_speed = 0.0
         self.traffic_light_state = "off"
         self.traffic_stop_distance = 0.0
         self._traffic_light_hold_frames = 0
     elif not ui_state.sm.alive['longitudinalPlan']:
       self.longitudinal_plan_alive = False
+      self.cruise_target_available = False
       self.cruise_target_speed = 0.0
       self.traffic_light_state = "off"
       self.traffic_stop_distance = 0.0
@@ -245,7 +262,7 @@ class HudRendererSP(HudRenderer):
 
     # Zero is a real and safety-critical target at a red light. Reserve the
     # dash exclusively for a missing/stale longitudinal plan.
-    target_text = "–" if not self.longitudinal_plan_alive else str(round(max(0.0, self.cruise_target_speed)))
+    target_text = "–" if not self.cruise_target_available else str(round(max(0.0, self.cruise_target_speed)))
     target_size = 108 if len(target_text) >= 3 else 124
     target_width = measure_text_cached(self._font_bold, target_text, target_size).x
     rl.draw_text_ex(
@@ -254,7 +271,7 @@ class HudRendererSP(HudRenderer):
       rl.Vector2(x + (panel_width - target_width) / 2, y + 48),
       target_size,
       0,
-      set_speed_color if self.longitudinal_plan_alive else COLORS.DARK_GREY,
+      set_speed_color if self.cruise_target_available else COLORS.DARK_GREY,
     )
 
     unit = tr("km/h") if ui_state.is_metric else tr("mph")
@@ -265,11 +282,11 @@ class HudRendererSP(HudRenderer):
     rl.draw_line_ex(rl.Vector2(x + 22, divider_y), rl.Vector2(x + panel_width - 22, divider_y), 2, rl.Color(255, 255, 255, 38))
 
     max_speed_text = CRUISE_DISABLED_CHAR if not self.is_cruise_set else str(round(self.set_speed))
-    source_text = cruise_source_label(self.longitudinal_plan_alive, self.cruise_target_source)
+    source_text = cruise_source_label(self.cruise_target_available, self.cruise_target_source)
     metric_width = (panel_width - 58) / 2
     self._draw_cruise_metric(x + 20, y + 222, metric_width, "最高定速", max_speed_text, COLORS.WHITE)
     self._draw_cruise_metric(x + 38 + metric_width, y + 222, metric_width, "定速依据", source_text,
-                             COLORS.ENGAGED if self.longitudinal_plan_alive else COLORS.DARK_GREY, text_value=True)
+                             COLORS.ENGAGED if self.cruise_target_available else COLORS.DARK_GREY, text_value=True)
 
     rl.draw_line_ex(rl.Vector2(x + 22, y + 326), rl.Vector2(x + panel_width - 22, y + 326), 2, rl.Color(255, 255, 255, 38))
     self._draw_integrated_speed_limit(x + 20, y + 342, 168, 150)

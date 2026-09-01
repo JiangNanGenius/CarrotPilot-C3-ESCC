@@ -33,6 +33,24 @@ def test_resumes_once_after_stable_brake_release():
   assert not guard.update(True, False, released, released, events)
 
 
+def test_resumes_in_observed_sport_gear_with_all_existing_guards():
+  events = Events()
+  guard = BrakeAutoResume()
+  pressed = _state(brake=True, gear=GearShifter.sport)
+  released = _state(gear=GearShifter.sport)
+  assert not guard.update(True, True, pressed, released, events)
+  assert any(guard.update(True, False, released, pressed, events) for _ in range(RELEASE_DELAY_FRAMES))
+
+
+def test_manual_gate_does_not_auto_resume_without_vehicle_evidence():
+  events = Events()
+  guard = BrakeAutoResume()
+  pressed = _state(brake=True)
+  manual = _state(gear=GearShifter.manumatic)
+  assert not guard.update(True, True, pressed, _state(), events)
+  assert not any(guard.update(True, False, manual, pressed, events) for _ in range(RELEASE_DELAY_FRAMES + 2))
+
+
 def test_never_resumes_when_disabled_stopped_or_driver_cancels():
   events = Events()
   for feature_enabled, release in (

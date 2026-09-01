@@ -11,6 +11,7 @@ from openpilot.common.realtime import config_realtime_process, DT_MDL
 from openpilot.common.filter_simple import FirstOrderFilter
 from openpilot.common.swaglog import cloudlog
 from openpilot.selfdrive.locationd.helpers import PointBuckets, ParameterEstimator, PoseCalibrator, Pose
+from openpilot.selfdrive.message_health import inputs_fresh
 from openpilot.sunnypilot.livedelay.helpers import get_lat_delay
 from openpilot.sunnypilot.selfdrive.locationd.torqued_ext import TorqueEstimatorExt
 
@@ -37,22 +38,17 @@ MIN_ENGAGE_BUFFER = 2  # secs
 VERSION = 1  # bump this to invalidate old parameter caches
 ALLOWED_CARS = ['toyota', 'hyundai', 'rivian', 'honda', 'volkswagen']
 
-TORQUED_RATE_CHECKED_SERVICES = ['livePose', 'liveCalibration']
-TORQUED_REQUIRED_AUXILIARY_SERVICES = ['carControl', 'carOutput', 'carState']
+TORQUED_INPUT_MAX_AGE_SECONDS = {
+  'liveCalibration': 1.0,
+  'carControl': 0.5,
+  'carOutput': 0.5,
+  'carState': 0.5,
+}
 
 
 def torqued_inputs_valid(sm) -> bool:
-  """Validate learning inputs while tolerating auxiliary rate jitter.
-
-  livePose is torqued's poll source and retains the full frequency check. The
-  required auxiliary streams fail closed when dead or invalid, but do not make
-  the output invalid solely because their sampled rate differs from nominal.
-  liveDelay is intentionally excluded: it improves temporal alignment, but a
-  derived delay outage must not invalidate otherwise healthy torque learning.
-  """
-  return (sm.all_checks(TORQUED_RATE_CHECKED_SERVICES) and
-          sm.all_alive(TORQUED_REQUIRED_AUXILIARY_SERVICES) and
-          sm.all_valid(TORQUED_REQUIRED_AUXILIARY_SERVICES))
+  """Validate required inputs by publisher time; liveDelay remains optional."""
+  return inputs_fresh(sm, 'livePose', TORQUED_INPUT_MAX_AGE_SECONDS)
 
 
 def torqued_live_delay_usable(sm) -> bool:
@@ -282,9 +278,14 @@ def main(demo=False):
 
   params = Params()
   estimator = TorqueEstimator(messaging.log_from_bytes(params.get("CarParams", block=True), car.CarParams))
+  pose_frame = 0
 
   while True:
     sm.update()
+    if not sm.updated['livePose']:
+      continue
+
+    pose_frame += 1
     inputs_valid = torqued_inputs_valid(sm)
     if inputs_valid:
       for which in sm.updated.keys():
@@ -295,11 +296,11 @@ def main(demo=False):
     TorqueEstimatorExt.update_use_params(estimator)
 
     # 4Hz driven by livePose
-    if sm.frame % 5 == 0:
+    if pose_frame % 5 == 0:
       pm.send('liveTorqueParameters', estimator.get_msg(valid=inputs_valid, with_points=DEBUG))
 
     # Cache points every 60 seconds while onroad
-    if inputs_valid and sm.frame % 240 == 0:
+    if inputs_valid and pose_frame % 1200 == 0:
       msg = estimator.get_msg(valid=True, with_points=True)
       params.put_nonblocking("LiveTorqueParameters", msg.to_bytes())
 

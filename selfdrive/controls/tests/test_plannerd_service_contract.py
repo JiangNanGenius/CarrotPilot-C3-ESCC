@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from openpilot.selfdrive.controls.lib.longitudinal_planner import get_processing_delay
+from openpilot.selfdrive.controls.lib.longitudinal_planner import cruise_target_is_set, get_processing_delay
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -62,6 +62,13 @@ def test_driver_assistance_validity_only_uses_ldw_inputs():
 
 def test_processing_delay_uses_nanoseconds_consistently():
   assert get_processing_delay(10_050_000_000, 10_000_000_000) == pytest.approx(0.05)
+
+
+def test_unset_or_malformed_cruise_speed_never_becomes_a_hud_target():
+  assert cruise_target_is_set(40.0)
+  assert not cruise_target_is_set(255.0)
+  assert not cruise_target_is_set(-1.0)
+  assert not cruise_target_is_set(float("nan"))
 
 
 def test_new_cruise_authority_field_does_not_invalidate_legacy_replay_refs():

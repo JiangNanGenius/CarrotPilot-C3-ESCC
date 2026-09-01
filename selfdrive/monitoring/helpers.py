@@ -13,6 +13,16 @@ from openpilot.common.transformations.camera import DEVICE_CAMERAS
 from openpilot.system.hardware import HARDWARE
 
 EventName = log.OnroadEvent.EventName
+DRIVER_MONITORING_DRIVABLE_GEARS = (
+  car.CarState.GearShifter.drive,
+  car.CarState.GearShifter.low,
+  car.CarState.GearShifter.sport,
+  car.CarState.GearShifter.manumatic,
+)
+
+
+def driver_monitoring_wrong_gear(gear) -> bool:
+  return gear not in DRIVER_MONITORING_DRIVABLE_GEARS
 
 # ******************************************************************************************
 #  NOTE: To fork maintainers.
@@ -454,7 +464,7 @@ class DriverMonitoring:
     else:
       highway_speed = sm['carState'].vEgo
       enabled = sm['selfdriveState'].enabled or sm['carControl'].latActive
-      wrong_gear = sm['carState'].gearShifter not in (car.CarState.GearShifter.drive, car.CarState.GearShifter.low)
+      wrong_gear = driver_monitoring_wrong_gear(sm['carState'].gearShifter)
       standstill = sm['carState'].standstill
       driver_engaged = sm['carState'].steeringPressed or (sm['selfdriveState'].enabled and sm['carState'].gasPressed)
       brake_disengage_prob = sm['modelV2'].meta.disengagePredictions.brakeDisengageProbs[0] # brake disengage prob in next 2s

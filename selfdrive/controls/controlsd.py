@@ -11,6 +11,7 @@ from openpilot.common.swaglog import cloudlog
 
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.vehicle_model import VehicleModel
+from openpilot.selfdrive.car.cruise import V_CRUISE_MAX
 from openpilot.selfdrive.controls.lib.drive_helpers import clip_curvature
 from openpilot.selfdrive.controls.lib.latcontrol import LatControl
 from openpilot.selfdrive.controls.lib.latcontrol_pid import LatControlPID
@@ -29,9 +30,14 @@ LaneChangeDirection = log.LaneChangeDirection
 ACTUATOR_FIELDS = tuple(car.CarControl.Actuators.schema.fields.keys())
 
 
-def planner_hud_set_speed(v_cruise_cluster_kph: float, cruise_target_kph: float) -> float:
+def planner_hud_set_speed(v_cruise_cluster_kph: float, cruise_target_kph: float, cruise_target_valid: bool) -> float:
   """Return the final planner cruise ceiling for the vehicle HUD, in m/s."""
-  target_kph = cruise_target_kph if math.isfinite(cruise_target_kph) and cruise_target_kph > 0.0 else v_cruise_cluster_kph
+  if cruise_target_valid and math.isfinite(cruise_target_kph) and 0.0 <= cruise_target_kph <= V_CRUISE_MAX:
+    target_kph = cruise_target_kph
+  elif math.isfinite(v_cruise_cluster_kph) and 0.0 < v_cruise_cluster_kph <= V_CRUISE_MAX:
+    target_kph = v_cruise_cluster_kph
+  else:
+    target_kph = 0.0
   return float(max(0.0, target_kph) * CV.KPH_TO_MS)
 
 
@@ -187,7 +193,8 @@ class Controls(ControlsExt):
     # actually enforcing. The driver's configured maximum remains in
     # carState.vCruiseCluster and is shown separately by the onroad UI.
     planner_target = self.sm['longitudinalPlan'].cruiseTargetSpeed if longitudinal_plan_healthy else math.nan
-    hudControl.setSpeed = planner_hud_set_speed(CS.vCruiseCluster, planner_target)
+    planner_target_valid = longitudinal_plan_healthy and self.sm['longitudinalPlan'].cruiseTargetValid
+    hudControl.setSpeed = planner_hud_set_speed(CS.vCruiseCluster, planner_target, planner_target_valid)
     hudControl.speedVisible = CC.enabled
     hudControl.lanesVisible = CC.enabled
     hudControl.leadVisible = longitudinal_plan_healthy and self.sm['longitudinalPlan'].hasLead

@@ -12,6 +12,7 @@ from openpilot.common.params import Params
 from openpilot.common.realtime import config_realtime_process
 from openpilot.common.swaglog import cloudlog
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose, fft_next_good_size, parabolic_peak_interp
+from openpilot.selfdrive.message_health import inputs_fresh
 from openpilot.sunnypilot.livedelay.lagd_toggle import LagdToggle
 
 BLOCK_SIZE = 100
@@ -36,21 +37,17 @@ LAG_CANDIDATE_CORR_THRESHOLD = 0.9
 SMOOTH_K = 5
 SMOOTH_SIGMA = 1.0
 
-LAGD_RATE_CHECKED_SERVICES = ['livePose', 'liveCalibration']
-LAGD_AUXILIARY_SERVICES = ['carState', 'controlsState', 'carControl']
+LAGD_INPUT_MAX_AGE_SECONDS = {
+  'liveCalibration': 1.0,
+  'carState': 0.5,
+  'controlsState': 0.5,
+  'carControl': 0.5,
+}
 
 
 def lagd_inputs_valid(sm) -> bool:
-  """Require healthy inputs without rejecting harmless auxiliary rate jitter.
-
-  lagd is clocked by livePose, so the poll source keeps the complete frequency
-  check. The remaining inputs are sampled auxiliary streams: they must remain
-  alive and valid, but their nominal-rate jitter must not invalidate every
-  liveDelay packet or prevent learning.
-  """
-  return (sm.all_checks(LAGD_RATE_CHECKED_SERVICES) and
-          sm.all_alive(LAGD_AUXILIARY_SERVICES) and
-          sm.all_valid(LAGD_AUXILIARY_SERVICES))
+  """Validate producer freshness instead of consumer receive-rate jitter."""
+  return inputs_fresh(sm, 'livePose', LAGD_INPUT_MAX_AGE_SECONDS)
 
 
 def masked_symmetric_moving_average(x: np.ndarray, mask: np.ndarray, k: int, sigma: float) -> np.ndarray:
@@ -412,9 +409,17 @@ def main():
     lag_learner.reset(lag, valid_blocks)
 
   lagd_toggle = LagdToggle(CP)
+  pose_frame = 0
 
   while True:
     sm.update()
+    if not sm.updated['livePose']:
+      # SubMaster.frame also advances on a poll timeout. Publishing from that
+      # counter created isolated invalid 4 Hz packets whenever C3 scheduling
+      # delayed livePose; only a new producer frame may advance this cadence.
+      continue
+
+    pose_frame += 1
     inputs_valid = lagd_inputs_valid(sm)
     if inputs_valid:
       for which in sorted(sm.updated.keys(), key=lambda x: sm.logMonoTime[x]):
@@ -424,15 +429,15 @@ def main():
       lag_learner.update_points()
 
     # 4Hz driven by livePose
-    if sm.frame % 5 == 0:
+    if pose_frame % 5 == 0:
       if inputs_valid:
         lag_learner.update_estimate()
       lag_msg = lag_learner.get_msg(inputs_valid, DEBUG)
       lag_msg_dat = lag_msg.to_bytes()
       pm.send('liveDelay', lag_msg_dat)
 
-      if inputs_valid and sm.frame % 1200 == 0: # cache every 60 seconds
+      if inputs_valid and pose_frame % 1200 == 0: # cache every 60 seconds
         params.put_nonblocking("LiveDelay", lag_msg_dat)
 
-      if inputs_valid and sm.frame % 60 == 0:  # read from and write to params every 3 seconds
+      if inputs_valid and pose_frame % 60 == 0:  # read from and write to params every 3 seconds
         lagd_toggle.update(lag_msg)

@@ -352,6 +352,7 @@ def _build_longitudinal_plan(service: Any, previous: dict[str, Any] | None = Non
   p["trafficState"] = safe_int(safe_get(service, "trafficState"))
   p["trafficStopDistance"] = safe_float(safe_get(service, "trafficStopDistance"))
   p["cruiseTargetSpeed"] = safe_float(safe_get(service, "cruiseTargetSpeed"))
+  p["cruiseTargetValid"] = safe_bool(safe_get(service, "cruiseTargetValid"))
   p["shouldStop"] = safe_bool(safe_get(service, "shouldStop"))
   p["aTarget"] = safe_float(safe_get(service, "aTarget"))
   _fill_list(_ensure_list(p, "accels"), safe_get(service, "accels"), limit=33)

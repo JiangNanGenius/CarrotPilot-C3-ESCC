@@ -2,20 +2,13 @@ from openpilot.selfdrive.locationd.torqued import torqued_inputs_valid, torqued_
 
 
 class FakeSubMaster:
-  def __init__(self, *, alive=None, valid=None, freq_ok=None):
+  def __init__(self, *, alive=None, updated=None, valid=None, log_mono_time=None, freq_ok=None):
     services = ('livePose', 'carControl', 'carOutput', 'carState', 'liveCalibration', 'liveDelay')
     self.alive = dict.fromkeys(services, True) | (alive or {})
+    self.updated = dict.fromkeys(services, True) | (updated or {})
     self.valid = dict.fromkeys(services, True) | (valid or {})
+    self.logMonoTime = dict.fromkeys(services, 10_000_000_000) | (log_mono_time or {})
     self.freq_ok = dict.fromkeys(services, True) | (freq_ok or {})
-
-  def all_alive(self, services):
-    return all(self.alive[s] for s in services)
-
-  def all_valid(self, services):
-    return all(self.valid[s] for s in services)
-
-  def all_checks(self, services):
-    return self.all_alive(services) and self.all_valid(services) and all(self.freq_ok[s] for s in services)
 
 
 def test_auxiliary_frequency_jitter_does_not_invalidate_live_torque_parameters():
@@ -23,10 +16,10 @@ def test_auxiliary_frequency_jitter_does_not_invalidate_live_torque_parameters()
 
 
 def test_required_inputs_still_fail_closed():
-  assert not torqued_inputs_valid(FakeSubMaster(freq_ok={'livePose': False}))
-  assert not torqued_inputs_valid(FakeSubMaster(freq_ok={'liveCalibration': False}))
-  assert not torqued_inputs_valid(FakeSubMaster(alive={'carOutput': False}))
+  assert not torqued_inputs_valid(FakeSubMaster(updated={'livePose': False}))
+  assert not torqued_inputs_valid(FakeSubMaster(valid={'livePose': False}))
   assert not torqued_inputs_valid(FakeSubMaster(valid={'liveCalibration': False}))
+  assert not torqued_inputs_valid(FakeSubMaster(log_mono_time={'carOutput': 9_000_000_000}))
 
 
 def test_live_delay_is_optional_but_invalid_packets_are_not_consumed():

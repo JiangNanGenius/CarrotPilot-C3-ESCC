@@ -1158,6 +1158,7 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   trafficStopDistance @41 :Float32; # meters, visual traffic-stop planner
   cruiseTargetSpeed @42 :Float32;   # final planner cruise target, km/h
   cruiseTargetSource @43 :CruiseTargetSource; # authority that set cruiseTargetSpeed
+  cruiseTargetValid @44 :Bool;      # false while the driver's cruise ceiling is unset
 
 
   solverExecutionTime @35 :Float32;

@@ -3,8 +3,9 @@ from hypothesis import settings, given, strategies as st
 import unittest
 
 from opendbc.car import gen_empty_fingerprint
-from opendbc.car.structs import CarParams
+from opendbc.car.structs import CarParams, CarState
 from opendbc.car.fw_versions import build_fw_dict
+from opendbc.car.hyundai.carstate import parse_classic_gear
 from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
@@ -18,6 +19,7 @@ from opendbc.sunnypilot.car.hyundai.escc import ESCC_MSG
 from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP, HyundaiSafetyFlagsSP
 
 Ecu = CarParams.Ecu
+GearShifter = CarState.GearShifter
 
 # Some platforms have date codes in a different format we don't yet parse (or are missing).
 # For now, assert list of expected missing date cars
@@ -47,6 +49,16 @@ CANFD_EXPECTED_ECUS = {Ecu.fwdCamera, Ecu.fwdRadar}
 
 
 class TestHyundaiFingerprint(unittest.TestCase):
+  def test_seltos_2023_observed_raw_sport_gear(self):
+    dbc_values = {5: "D", 8: "S", 12: "T"}
+    expected = {4: GearShifter.sport, 5: GearShifter.drive,
+                8: GearShifter.sport, 12: GearShifter.manumatic}
+
+    for raw_gear in range(16):
+      assert parse_classic_gear(CAR.KIA_SELTOS_2023, dbc_values, raw_gear) == expected.get(raw_gear, GearShifter.unknown)
+    assert parse_classic_gear(CAR.KIA_SELTOS_2023_NON_SCC, dbc_values, 4) == GearShifter.unknown
+    assert parse_classic_gear(CAR.KIA_SELTOS, dbc_values, 4) == GearShifter.unknown
+
   def test_escc_auto_enables_longitudinal(self):
     fingerprint = gen_empty_fingerprint()
     fingerprint[0][ESCC_MSG] = 8

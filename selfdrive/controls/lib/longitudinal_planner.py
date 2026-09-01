@@ -13,7 +13,7 @@ from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import Longi
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
 from openpilot.selfdrive.controls.lib.drive_helpers import CONTROL_N, get_accel_from_plan, should_stop
 from openpilot.selfdrive.controls.lib.speed_reference import SpeedReference, INSTRUMENT_SPEED
-from openpilot.selfdrive.car.cruise import V_CRUISE_MAX, V_CRUISE_UNSET
+from openpilot.selfdrive.car.cruise import V_CRUISE_MAX
 from openpilot.common.swaglog import cloudlog
 
 from openpilot.sunnypilot.selfdrive.controls.lib.longitudinal_planner import LongitudinalPlannerSP
@@ -41,6 +41,11 @@ _A_TOTAL_MAX_BP = [20., 40.]
 
 def get_processing_delay(plan_mono_time: int, model_mono_time: int) -> float:
   return (plan_mono_time - model_mono_time) / 1e9
+
+
+def cruise_target_is_set(v_cruise_kph: float) -> bool:
+  """Reject unset and malformed set-speed sentinels before publishing HUD data."""
+  return math.isfinite(v_cruise_kph) and 0.0 < v_cruise_kph <= V_CRUISE_MAX
 
 
 def get_max_accel(v_ego):
@@ -84,6 +89,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.output_should_stop = False
     self.cruise_target_speed = 0.0
     self.cruise_target_source = CruiseTargetSource.instrumentSet
+    self.cruise_target_valid = False
 
     self.v_desired_trajectory = np.zeros(CONTROL_N)
     self.a_desired_trajectory = np.zeros(CONTROL_N)
@@ -114,7 +120,8 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # Reset current state when not engaged, or user is controlling the speed
     reset_state = long_control_off if self.CP.openpilotLongitudinalControl else not sm['selfdriveState'].enabled
     # PCM cruise speed may be updated a few cycles later, check if initialized
-    v_cruise_initialized = sm['carState'].vCruise != V_CRUISE_UNSET
+    v_cruise_initialized = cruise_target_is_set(sm['carState'].vCruise)
+    self.cruise_target_valid = v_cruise_initialized
     reset_state = reset_state or not v_cruise_initialized
 
     throttle_probs = sm['modelV2'].meta.disengagePredictions.gasPressProbs
@@ -185,7 +192,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
                                    else CruiseTargetSource.wheelSet)
     if sm['controlsState'].forceDecel:
       self.cruise_target_source = CruiseTargetSource.safetyDecel
-    self.cruise_target_speed = max(0.0, display_v_cruise * CV.MS_TO_KPH)
+    self.cruise_target_speed = max(0.0, display_v_cruise * CV.MS_TO_KPH) if self.cruise_target_valid else 0.0
 
     self.mpc.set_weights(prev_accel_constraint, personality=sm['selfdriveState'].personality)
     self.mpc.set_cur_state(self.v_desired_filter.x, self.output_a_target)
@@ -254,6 +261,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     longitudinalPlan.trafficStopDistance = float(max(0.0, self.carrot_planner.stop_dist))
     longitudinalPlan.cruiseTargetSpeed = float(self.cruise_target_speed)
     longitudinalPlan.cruiseTargetSource = self.cruise_target_source
+    longitudinalPlan.cruiseTargetValid = self.cruise_target_valid
 
     pm.send('longitudinalPlan', plan_send)
 
