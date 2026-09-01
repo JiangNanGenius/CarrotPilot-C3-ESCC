@@ -3,7 +3,7 @@ from cereal import log, custom
 from openpilot.common.params import Params
 
 from openpilot.selfdrive.controls.lib.desire_helper import DesireHelper
-from openpilot.sunnypilot.selfdrive.controls.lib.lane_turn_desire import LaneTurnController, LANE_CHANGE_SPEED_MIN
+from openpilot.sunnypilot.selfdrive.controls.lib.lane_turn_desire import LaneTurnController, LANE_CHANGE_SPEED_MIN, LANE_TURN_SPEED_MIN
 from openpilot.sunnypilot.selfdrive.controls.lib.auto_lane_change import AutoLaneChangeMode
 
 TurnDirection = custom.ModelDataV2SP.TurnDirection
@@ -17,6 +17,9 @@ TurnDirection = custom.ModelDataV2SP.TurnDirection
   (False, True, 6, False, True, TurnDirection.none),
   (False, False, 5, False, False, TurnDirection.none),
   (True, True, 5, False, False, TurnDirection.none),
+  (True, False, 0, False, False, TurnDirection.none),
+  (False, True, LANE_TURN_SPEED_MIN - 0.01, False, False, TurnDirection.none),
+  (False, True, LANE_TURN_SPEED_MIN, False, False, TurnDirection.turnRight),
 ])
 def test_lane_turn_desire_conditions(left_blinker, right_blinker, v_ego, blindspot_left, blindspot_right, expected):
   dh = DesireHelper()
@@ -36,6 +39,22 @@ def test_lane_turn_desire_disabled():
   controller.turn_direction = TurnDirection.none
   controller.update_lane_turn(False, False, True, False, 7)
   assert controller.get_turn_direction() == TurnDirection.none
+
+
+def test_stationary_blinker_does_not_accumulate_turn_desire():
+  dh = DesireHelper()
+  controller = LaneTurnController(dh)
+  controller.enabled = True
+  controller.lane_turn_value = LANE_CHANGE_SPEED_MIN
+
+  # Simulate roughly one minute stopped at a light with the right blinker on.
+  for _ in range(1200):
+    controller.update_lane_turn(False, False, False, True, 0.0)
+    assert controller.get_turn_direction() == TurnDirection.none
+
+  # The real low-speed turn becomes available only after the car is moving.
+  controller.update_lane_turn(False, False, False, True, LANE_TURN_SPEED_MIN)
+  assert controller.get_turn_direction() == TurnDirection.turnRight
 
 
 def test_lane_turn_overrides_lane_change():

@@ -49,6 +49,7 @@ class LatControlTorque(LatControl):
     self.jerk_filter = FirstOrderFilter(0.0, 1 / (2 * np.pi * LP_FILTER_CUTOFF_HZ), self.dt)
 
     self.extension = LatControlTorqueExt(self, CP, CP_SP, CI)
+    self._nnlc_active_last = False
 
   def update_live_torque_params(self, latAccelFactor, latAccelOffset, friction):
     self.torque_params.latAccelFactor = latAccelFactor
@@ -63,6 +64,18 @@ class LatControlTorque(LatControl):
   def update(self, active, CS, VM, params, steer_limited_by_safety, desired_curvature, calibrated_pose, curvature_limited, lat_delay):
     # Override torque params from extension
     if self.extension.update_override_torque_params(self.torque_params):
+      self.update_limits()
+
+    nnlc_active = self.extension._nnlc_enabled
+    if nnlc_active != self._nnlc_active_last:
+      # The shared PID changes units between the regular controller (lateral acceleration)
+      # and NNLC (normalized steering torque). Never carry integral state across that boundary.
+      self.pid.reset()
+      self._nnlc_active_last = nnlc_active
+
+    if nnlc_active:
+      self.pid.set_limits(self.steer_max, -self.steer_max)
+    else:
       self.update_limits()
 
     pid_log = log.ControlsState.LateralTorqueState.new_message()
@@ -97,15 +110,24 @@ class LatControlTorque(LatControl):
       # do error correction in lateral acceleration space, convert at end to handle non-linear torque responses correctly
       pid_log.error = float(error)
 
-      freeze_integrator = steer_limited_by_safety or CS.steeringPressed or CS.vEgo < 5
-      output_lataccel = self.pid.update(pid_log.error, speed=CS.vEgo, feedforward=ff, freeze_integrator=freeze_integrator)
-      output_torque = self.torque_from_lateral_accel(output_lataccel, self.torque_params)
+      if nnlc_active:
+        # NNLC performs the single PID update below in normalized torque space. Running the
+        # regular lateral-acceleration PID first would mix units and update the integrator twice.
+        output_torque = 0.0
+      else:
+        freeze_integrator = steer_limited_by_safety or CS.steeringPressed or CS.vEgo < 5
+        output_lataccel = self.pid.update(pid_log.error, speed=CS.vEgo, feedforward=ff, freeze_integrator=freeze_integrator)
+        output_torque = self.torque_from_lateral_accel(output_lataccel, self.torque_params)
 
       # Lateral acceleration torque controller extension updates
       # Overrides pid_log.error and output_torque
       pid_log, output_torque = self.extension.update(CS, VM, self.pid, params, ff, pid_log, setpoint, measurement, calibrated_pose, roll_compensation,
                                                      future_desired_lateral_accel, measurement, lateral_accel_deadzone, gravity_adjusted_future_lateral_accel,
                                                      desired_curvature, measured_curvature, steer_limited_by_safety, output_torque)
+
+      # This is the final software boundary before CarControl. Protect every lateral controller
+      # path from invalid or out-of-range torque, even if a future extension regresses its limits.
+      output_torque = float(np.clip(output_torque, -self.steer_max, self.steer_max)) if math.isfinite(output_torque) else 0.0
 
       pid_log.active = True
       pid_log.p = float(self.pid.p)

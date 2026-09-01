@@ -34,6 +34,40 @@ class TestManager:
   def test_duplicate_procs(self):
     assert len(procs) == len(managed_processes), "Duplicate process names"
 
+  def test_legacy_carrot_migration_runs_before_param_clear(self, monkeypatch):
+    calls = []
+
+    class FakeParams:
+      def clear_all(self, flag):
+        calls.append(("clear", flag))
+
+    monkeypatch.setattr(manager, "PC", False)
+    monkeypatch.setattr(manager, "migrate_legacy_carrot_params", lambda params: calls.append(("migrate", params)))
+    params = FakeParams()
+
+    manager.migrate_and_clear_params(params)
+
+    assert calls[0] == ("migrate", params)
+    assert [call[0] for call in calls[1:]] == ["clear"] * 4
+
+  def test_legacy_carrot_migration_failure_does_not_block_param_clear(self, monkeypatch):
+    calls = []
+
+    class FakeParams:
+      def clear_all(self, flag):
+        calls.append(flag)
+
+    def fail_migration(_params):
+      raise OSError("migration failed")
+
+    monkeypatch.setattr(manager, "PC", False)
+    monkeypatch.setattr(manager, "migrate_legacy_carrot_params", fail_migration)
+    monkeypatch.setattr(manager.cloudlog, "exception", lambda message: None)
+
+    manager.migrate_and_clear_params(FakeParams())
+
+    assert len(calls) == 4
+
   def test_blacklisted_procs(self):
     # TODO: ensure there are blacklisted procs until we have a dedicated test
     assert len(BLACKLIST_PROCS), "No blacklisted procs to test not_run"

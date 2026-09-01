@@ -172,10 +172,17 @@ class CarController(CarControllerBase, EsccCarController, LeadDataCarController,
       # TODO: unclear if this is needed
       jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0
       use_fca = self.CP.flags & HyundaiFlags.USE_FCA.value
+      # carControl and the custom longitudinal tuning state arrive at different
+      # rates. On a pedal edge, never let a stale acceleration request survive
+      # until the next tuning update: Panda has already revoked longitudinal
+      # authority by then and must receive the inactive SCC contract immediately.
+      pedal_pressed = CS.out.gasPressed or CS.out.brakePressed or CS.out.regenBraking
+      long_actuation_allowed = CC.longActive and not pedal_pressed
       can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2),
                                                       self.lead_data, hud_control, set_speed_in_units, stopping,
                                                       CC.cruiseControl.override, use_fca, self.CP,
-                                                      CS.main_cruise_enabled, self.tuning, self.ESCC))
+                                                      CS.main_cruise_enabled, self.tuning, self.ESCC,
+                                                      long_actuation_allowed=long_actuation_allowed))
 
     # 20 Hz LFA MFA message
     if self.frame % 5 == 0 and self.CP.flags & HyundaiFlags.SEND_LFA.value:

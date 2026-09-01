@@ -151,7 +151,11 @@ class DriverMonitoring:
     self.distracted_types = []
     self.driver_distracted = False
     self.driver_distraction_filter = FirstOrderFilter(0., self.settings._DISTRACTED_FILTER_TS, self.settings._DT_DMON)
-    self.wheel_on_right = False
+    # Start from the last confidently learned side. dmonitoringd can publish a
+    # packet before every one of its auxiliary subscriptions is healthy; using
+    # a hard-coded LHD value here made those packets flip an already-known RHD
+    # car back to the left until a full wheel-position calibration completed.
+    self.wheel_on_right = bool(rhd_saved)
     self.wheel_on_right_last = None
     self.wheel_on_right_default = rhd_saved
     self.face_detected = False
@@ -255,7 +259,8 @@ class DriverMonitoring:
 
     return distracted_types
 
-  def _update_states(self, driver_state, cal_rpy, car_speed, op_engaged, standstill, demo_mode=False, steering_angle_deg=0.):
+  def _select_driver_data(self, driver_state, car_speed, op_engaged, demo_mode=False):
+    """Update only wheel-side selection and return the selected driver data."""
     rhd_pred = driver_state.wheelOnRightProb
     # calibrates only when there's movement and either face detected
     if car_speed > self.settings._WHEELPOS_CALIB_MIN_SPEED and (driver_state.leftDriverData.faceProb > self.settings._FACE_THRESHOLD or
@@ -271,7 +276,10 @@ class DriverMonitoring:
     # make sure no switching when engaged
     if op_engaged and self.wheel_on_right_last is not None and self.wheel_on_right_last != self.wheel_on_right and not demo_mode:
       self.wheel_on_right = self.wheel_on_right_last
-    driver_data = driver_state.rightDriverData if self.wheel_on_right else driver_state.leftDriverData
+    return driver_state.rightDriverData if self.wheel_on_right else driver_state.leftDriverData
+
+  def _update_states(self, driver_state, cal_rpy, car_speed, op_engaged, standstill, demo_mode=False, steering_angle_deg=0.):
+    driver_data = self._select_driver_data(driver_state, car_speed, op_engaged, demo_mode)
     if not all(len(x) > 0 for x in (driver_data.faceOrientation, driver_data.facePosition,
                                     driver_data.faceOrientationStd, driver_data.facePositionStd)):
       return
@@ -419,6 +427,20 @@ class DriverMonitoring:
       "uncertainCount": self.dcam_uncertain_cnt,
     }
     return dat
+
+  def update_driver_metadata_only(self, driver_state, car_speed=0., op_engaged=False):
+    """Update only RHD selection and face presence during an aux outage.
+
+    This is used when driverStateV2 is healthy but one of dmonitoringd's
+    auxiliary inputs is temporarily invalid. RHD/face selection must keep
+    following the camera, while the resulting driverMonitoringState packet
+    remains invalid (fail closed). Pose calibration, distraction filters,
+    uncertainty counters and awareness events are intentionally untouched so
+    missing calibration or vehicle state cannot pollute the next valid frame.
+    """
+    driver_data = self._select_driver_data(driver_state, car_speed, op_engaged)
+    self.face_detected = driver_data.faceProb > self.settings._FACE_THRESHOLD
+    self.wheel_on_right_last = self.wheel_on_right
 
   def run_step(self, sm, demo=False):
     if demo:

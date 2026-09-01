@@ -168,6 +168,7 @@ class Controls(ControlsExt):
 
   def publish(self, CC, lac_log):
     CS = self.sm['carState']
+    longitudinal_plan_healthy = self.sm.all_checks(['longitudinalPlan'])
 
     # Orientation and angle rates can be useful for carcontroller
     # Only calibrated (car) frame is relevant for the carcontroller
@@ -178,16 +179,18 @@ class Controls(ControlsExt):
 
     CC.cruiseControl.override = CC.enabled and not CC.longActive and (self.CP.openpilotLongitudinalControl or not self.CP_SP.pcmCruiseSpeed)
     CC.cruiseControl.cancel = CS.cruiseState.enabled and (not CC.enabled or not self.CP.pcmCruise)
-    CC.cruiseControl.resume = CC.enabled and CS.cruiseState.standstill and not self.sm['longitudinalPlan'].shouldStop
+    CC.cruiseControl.resume = (CC.enabled and longitudinal_plan_healthy and CS.cruiseState.standstill and
+                               not self.sm['longitudinalPlan'].shouldStop)
 
     hudControl = CC.hudControl
     # Keep the cluster synchronized with the target the longitudinal planner is
     # actually enforcing. The driver's configured maximum remains in
     # carState.vCruiseCluster and is shown separately by the onroad UI.
-    hudControl.setSpeed = planner_hud_set_speed(CS.vCruiseCluster, self.sm['longitudinalPlan'].cruiseTargetSpeed)
+    planner_target = self.sm['longitudinalPlan'].cruiseTargetSpeed if longitudinal_plan_healthy else math.nan
+    hudControl.setSpeed = planner_hud_set_speed(CS.vCruiseCluster, planner_target)
     hudControl.speedVisible = CC.enabled
     hudControl.lanesVisible = CC.enabled
-    hudControl.leadVisible = self.sm['longitudinalPlan'].hasLead
+    hudControl.leadVisible = longitudinal_plan_healthy and self.sm['longitudinalPlan'].hasLead
     hudControl.leadDistanceBars = self.sm['selfdriveState'].personality.raw + 1
     hudControl.visualAlert = self.sm['selfdriveState'].alertHudVisual
 

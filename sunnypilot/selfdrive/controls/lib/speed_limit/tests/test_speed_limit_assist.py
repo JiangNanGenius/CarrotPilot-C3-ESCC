@@ -121,6 +121,28 @@ class TestSpeedLimitAssist:
                       SPEED_LIMITS['city'], True, 0, self.events_sp)
     assert not self.sla.enabled
 
+  def test_assist_preference_survives_transient_unavailable_car_params(self):
+    self.params.put("SpeedLimitMode", int(Mode.assist))
+    self.sla.frame = 0
+    original_op_long = self.sla.CP.openpilotLongitudinalControl
+    original_pcm_cruise_speed = self.sla.CP_SP.pcmCruiseSpeed
+
+    self.sla.CP.openpilotLongitudinalControl = False
+    self.sla.CP_SP.pcmCruiseSpeed = True
+    self.sla.update_params()
+
+    assert self.params.get("SpeedLimitMode", return_default=True) == Mode.assist
+    assert not self.sla.available
+    assert not self.sla.enabled
+
+    self.sla.CP.openpilotLongitudinalControl = original_op_long
+    self.sla.CP_SP.pcmCruiseSpeed = original_pcm_cruise_speed
+    self.sla.update_params()
+
+    assert self.params.get("SpeedLimitMode", return_default=True) == Mode.assist
+    assert self.sla.available
+    assert self.sla.enabled
+
   def test_disabled(self):
     self.params.put("SpeedLimitMode", int(Mode.off))
     for _ in range(int(10. / DT_MDL)):

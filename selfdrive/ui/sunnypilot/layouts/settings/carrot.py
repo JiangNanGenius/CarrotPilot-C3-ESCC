@@ -31,6 +31,7 @@ class CarrotLayout(Widget):
   def __init__(self):
     super().__init__()
     self._params = CarrotParams()
+    self._controls = []
 
     items = self._initialize_items()
     self._scroller = Scroller(items, line_separator=False, spacing=0)
@@ -44,15 +45,17 @@ class CarrotLayout(Widget):
     return 0
 
   def _toggle(self, key, title, description=""):
-    return toggle_item_sp(
+    item = toggle_item_sp(
       title=title,
       description=description,
       initial_state=self._params.get_bool(key),
       callback=lambda state: self._params.put_bool(key, state),
     )
+    self._controls.append((item, key, None))
+    return item
 
   def _selector(self, key, title, labels, values, description="", button_width=160):
-    return multiple_button_item_sp(
+    item = multiple_button_item_sp(
       title=title,
       description=description,
       buttons=labels,
@@ -60,6 +63,8 @@ class CarrotLayout(Widget):
       button_width=button_width,
       callback=lambda index: self._params.put_int(key, values[index]),
     )
+    self._controls.append((item, key, values))
+    return item
 
   def _initialize_items(self):
     items = [
@@ -71,8 +76,8 @@ class CarrotLayout(Widget):
         button_width=260,
       ),
       self._toggle(
-        "CarrotSpeedLimitEnable", "Carrot 直接限速",
-        "合并摄像头/车辆CAN、地图与导航App限速，直接限制规划速度。",
+        "CarrotSpeedLimitEnable", "Carrot 规划速度源",
+        "使用 Carrot 规划的道路限速、导航测速/减速带、车辆转发限速和弯道速度；Sunny Speed Limit 仍独立管理车辆与原生地图源。",
       ),
       self._selector(
         "AutoRoadSpeedLimitOffset", "道路限速偏移",
@@ -123,8 +128,10 @@ class CarrotLayout(Widget):
     self._scroller.show_event()
 
   def _refresh_toggle_states(self):
-    """进入页面时刷新 toggle 状态（从参数重新读）。"""
-    for item in self._scroller._items:
-      if hasattr(item.action_item, 'toggle') and hasattr(item.action_item.toggle, 'set_state'):
-        # 找到对应的参数键（从 title 匹配）
-        pass  # 简化：不做刷新，依赖 initial_state
+    """Re-read durable values so the legacy panel cannot show stale state."""
+    for item, key, values in self._controls:
+      if values is None:
+        item.action_item.set_state(self._params.get_bool(key))
+      else:
+        value = self._params.get_int(key)
+        item.action_item.set_selected_button(values.index(value) if value in values else 0)

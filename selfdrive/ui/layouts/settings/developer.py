@@ -131,8 +131,6 @@ class DeveloperLayout(Widget):
       escc_auto_long = bool(ui_state.CP_SP is not None and ui_state.CP_SP.flags & HyundaiFlagsSP.ENHANCED_SCC)
       if not alpha_avail or self._is_release or escc_auto_long:
         self._alpha_long_toggle.set_visible(False)
-        if not alpha_avail or escc_auto_long:
-          self._params.remove("AlphaLongitudinalEnabled")
       else:
         self._alpha_long_toggle.set_visible(True)
 

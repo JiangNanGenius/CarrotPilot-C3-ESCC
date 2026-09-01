@@ -81,8 +81,8 @@ class CruiseLayout(Widget):
       description="仪表模式会校正实际纵向目标，使车辆仪表显示贴合设定速度；不使用 GPS。")
 
     self.carrot_speed_limit = self._carrot_toggle(
-      "CarrotSpeedLimitEnable", "导航限速源",
-      "把导航 App 提供的限速也加入巡航上限。关闭后只使用下方 Speed Limit 中选择的车辆、地图或视觉限速源。")
+      "CarrotSpeedLimitEnable", "Carrot 规划速度源",
+      "把 Carrot 规划的道路限速、导航测速/减速带、车辆转发限速和弯道速度加入巡航上限。下方 Speed Limit 仍独立管理车辆与原生地图源。")
 
     self.carrot_traffic_stop = self._carrot_toggle(
       "CarrotTrafficStopEnable", "红绿灯停车",
@@ -176,26 +176,36 @@ class CruiseLayout(Widget):
   def _update_state(self):
     super()._update_state()
 
-    if ui_state.CP is not None and ui_state.CP_SP is not None:
-      has_long = ui_state.has_longitudinal_control
+    # CarParams and CarParamsSP arrive asynchronously after the settings UI.
+    # Never translate that normal startup window into "unsupported" or mutate
+    # a durable preference from placeholder vehicle state.
+    if ui_state.CP is None or ui_state.CP_SP is None:
+      self.custom_acc_toggle.action_item.set_enabled(False)
+      self.dec_toggle.action_item.set_enabled(False)
+      self.scc_v_toggle.action_item.set_enabled(False)
+      self.scc_m_toggle.action_item.set_enabled(False)
+      new_custom_acc_desc = tr(ONROAD_ONLY_DESCRIPTION)
+      if self.custom_acc_toggle.description != new_custom_acc_desc:
+        self.custom_acc_toggle.set_description(new_custom_acc_desc)
+        self.custom_acc_toggle.show_description(True)
+      self._on_custom_acc_toggle(self.custom_acc_toggle.action_item.get_state())
+      return
 
-      if has_long:
-        self.custom_acc_toggle.action_item.set_enabled((not ui_state.CP.pcmCruise) and ui_state.is_offroad())
-        self.dec_toggle.action_item.set_enabled(has_long)
-        self.scc_v_toggle.action_item.set_enabled(True)
-        self.scc_m_toggle.action_item.set_enabled(True)
-      else:
-        ui_state.params.remove("CustomAccIncrementsEnabled")
-        ui_state.params.remove("DynamicExperimentalControl")
-        ui_state.params.remove("SmartCruiseControlVision")
-        ui_state.params.remove("SmartCruiseControlMap")
-        self.custom_acc_toggle.action_item.set_enabled(False)
-        self.dec_toggle.action_item.set_enabled(False)
-        self.scc_v_toggle.action_item.set_enabled(False)
-        self.scc_m_toggle.action_item.set_enabled(False)
+    has_long = ui_state.has_longitudinal_control
 
+    if has_long:
+      self.custom_acc_toggle.action_item.set_enabled((not ui_state.CP.pcmCruise) and ui_state.is_offroad())
+      self.dec_toggle.action_item.set_enabled(has_long)
+      self.scc_v_toggle.action_item.set_enabled(True)
+      self.scc_m_toggle.action_item.set_enabled(True)
     else:
-      has_long = False
+      # Compatibility enforcement is centralized in UIStateSP once an
+      # authoritative CarParams is available. A menu refresh must never erase
+      # preferences or make its visual state diverge from durable storage.
+      self.custom_acc_toggle.action_item.set_enabled(False)
+      self.dec_toggle.action_item.set_enabled(False)
+      self.scc_v_toggle.action_item.set_enabled(False)
+      self.scc_m_toggle.action_item.set_enabled(False)
 
     show_custom_acc_desc = False
 
@@ -212,7 +222,6 @@ class CruiseLayout(Widget):
       else:
         new_custom_acc_desc = tr("This feature can only be used with sunnypilot longitudinal control enabled.")
         show_custom_acc_desc = True
-        self.custom_acc_toggle.action_item.set_state(False)
 
     if self.custom_acc_toggle.description != new_custom_acc_desc:
       self.custom_acc_toggle.set_description(new_custom_acc_desc)

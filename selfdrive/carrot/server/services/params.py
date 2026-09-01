@@ -20,22 +20,177 @@ except Exception:
 # -----------------------
 HAS_PARAMS = False
 Params = None
+NativeParams = None
 ParamKeyType = None
 
 try:
-  from openpilot.selfdrive.carrot.carrot_params import CarrotParams as _Params
-  Params = _Params
+  from openpilot.common.params import Params as _NativeParams, ParamKeyType as _ParamKeyType, UnknownKeyName
+  from openpilot.selfdrive.carrot.carrot_params import CarrotParams
+
+  NativeParams = _NativeParams
+  ParamKeyType = _ParamKeyType
   HAS_PARAMS = True
 except Exception:
   pass
 
-# ParamKeyType can live in different places across forks/versions, so handle it defensively.
-if HAS_PARAMS:
+
+_CARROT_SETTINGS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "carrot_settings.json"))
+
+
+def _load_carrot_owned_param_names() -> frozenset[str]:
+  """Return the authoritative keys stored in the isolated Carrot namespace.
+
+  Some Carrot keys are still present in the native C++ registry for backwards
+  compatibility. The settings manifest therefore takes precedence over
+  ``NativeParams.check_key`` so those duplicate keys cannot split again.
+  """
+  names: set[str] = {
+    # Explicitly keep the two known duplicate registry keys Carrot-owned even
+    # if the settings manifest is temporarily unavailable during an update.
+    "CarrotSpeedLimitEnable",
+    "CarrotTrafficStopEnable",
+  }
   try:
-    from openpilot.common.params import ParamKeyType as _ParamKeyType
-    ParamKeyType = _ParamKeyType
+    with open(_CARROT_SETTINGS_PATH, encoding="utf-8") as f:
+      data = json.load(f)
+    names.update(str(item["name"]) for item in data.get("params", []) if isinstance(item, dict) and item.get("name"))
   except Exception:
-    ParamKeyType = None
+    pass
+  return frozenset(names)
+
+
+CARROT_OWNED_PARAMS = _load_carrot_owned_param_names()
+
+# Native device/control actions must remain effective even if their registry
+# metadata is temporarily unavailable while a build is being updated.
+NATIVE_PARAM_ALLOWLIST = frozenset({
+  "AdbEnabled",
+  "AlwaysOnDM",
+  "AlphaLongitudinalEnabled",
+  "CalibrationParams",
+  "DisengageOnAccelerator",
+  "DoReboot",
+  "DoShutdown",
+  "ExperimentalMode",
+  "ExperimentalModeConfirmed",
+  "IsLdwEnabled",
+  "IsMetric",
+  "LiveDelay",
+  "LiveParameters",
+  "LiveParametersV2",
+  "LiveTorqueParameters",
+  "OnroadCycleRequested",
+  "OpenpilotEnabledToggle",
+  "RecordAudio",
+  "RecordFront",
+  "SshEnabled",
+})
+
+
+class RoutedParams:
+  """Route Web settings to their real owner without merging the two stores.
+
+  Carrot settings live under ``d_carrot`` to avoid C++ registry/lock races.
+  Device, safety and control settings remain in native ``d``. Keeping the
+  stores separate is intentional; this facade only selects the correct owner
+  for each key and keeps backup/reset operations scoped to Carrot settings.
+  """
+
+  def __init__(self, native_params=None, carrot_params=None):
+    if not HAS_PARAMS:
+      raise RuntimeError("Params unavailable")
+    self.native = native_params or NativeParams()
+    self.carrot = carrot_params or CarrotParams()
+
+  def _is_native(self, key: str) -> bool:
+    if key in CARROT_OWNED_PARAMS:
+      return False
+    if key in NATIVE_PARAM_ALLOWLIST:
+      return True
+    try:
+      self.native.check_key(key)
+      return True
+    except (UnknownKeyName, KeyError):
+      return False
+    except Exception:
+      # Unknown or temporarily unavailable registry metadata must never make a
+      # Carrot-only setting write into the native directory.
+      return False
+
+  def _store(self, key: str):
+    return self.native if self._is_native(key) else self.carrot
+
+  def get(self, key, block=False, return_default=False):
+    return self._store(key).get(key, block=block, return_default=return_default)
+
+  def put(self, key, value, block=True):
+    store = self._store(key)
+    if store is self.native:
+      return store.put(key, value, block=block)
+    return store.put(key, value)
+
+  def get_bool(self, key, block=False):
+    return self._store(key).get_bool(key, block=block)
+
+  def put_bool(self, key, value, block=True):
+    store = self._store(key)
+    if store is self.native:
+      return store.put_bool(key, value, block=block)
+    return store.put_bool(key, value)
+
+  def get_int(self, key, default=0, block=False):
+    store = self._store(key)
+    if store is self.native:
+      return store.get_int(key, default=default, block=block)
+    return store.get_int(key, default=default)
+
+  def put_int(self, key, value, block=True):
+    store = self._store(key)
+    if store is self.native:
+      return store.put_int(key, value, block=block)
+    return store.put_int(key, value)
+
+  def get_float(self, key, default=0.0, block=False):
+    store = self._store(key)
+    if store is self.native:
+      return store.get_float(key, default=default, block=block)
+    return store.get_float(key, default=default)
+
+  def put_float(self, key, value, block=True):
+    store = self._store(key)
+    if store is self.native:
+      return store.put_float(key, value, block=block)
+    return store.put_float(key, value)
+
+  def put_nonblocking(self, key, value):
+    return self._store(key).put_nonblocking(key, value)
+
+  def put_bool_nonblocking(self, key, value):
+    return self._store(key).put_bool_nonblocking(key, value)
+
+  def remove(self, key):
+    return self._store(key).remove(key)
+
+  def check_key(self, key):
+    return self._store(key).check_key(key)
+
+  def get_type(self, key):
+    return self._store(key).get_type(key)
+
+  def get_default_value(self, key):
+    return self._store(key).get_default_value(key)
+
+  def all_keys(self, flag=None):
+    # QR backup/default reset are Carrot-tuning operations. Never silently add
+    # native identity, safety or device-control keys to those payloads.
+    return self.carrot.all_keys(flag)
+
+  def clear_all(self, tx_flag=None):
+    return self.carrot.clear_all(tx_flag)
+
+
+if HAS_PARAMS:
+  Params = RoutedParams
 
 
 # In-memory fallback store when Params is unavailable

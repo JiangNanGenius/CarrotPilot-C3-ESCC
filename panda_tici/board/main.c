@@ -243,6 +243,10 @@ static void tick_handler(void) {
         heartbeat_engaged_mismatches = 0U;
       }
 
+      // MADS has a separate steering-only authorization. Keep the Panda as
+      // authority and withdraw it when the host stops declaring MADS enabled.
+      mads_heartbeat_engaged_check();
+
       if (!heartbeat_disabled) {
         // if the heartbeat has been gone for a while, go to SILENT safety mode and enter power save
         if (heartbeat_counter >= (check_started() ? HEARTBEAT_IGNITION_CNT_ON : HEARTBEAT_IGNITION_CNT_OFF)) {
@@ -262,6 +266,8 @@ static void tick_handler(void) {
 
           // clear heartbeat engaged state
           heartbeat_engaged = false;
+          heartbeat_engaged_mads = false;
+          mads_exit_controls(MADS_DISENGAGE_REASON_HEARTBEAT_ENGAGED_MISMATCH);
 
           if (current_safety_mode != SAFETY_SILENT) {
             set_safety_mode(SAFETY_SILENT, 0U);

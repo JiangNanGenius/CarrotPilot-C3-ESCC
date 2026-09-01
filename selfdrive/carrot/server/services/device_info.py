@@ -6,7 +6,7 @@ import subprocess
 import time
 from typing import Any, Dict, List
 
-from .params import HAS_PARAMS, Params, get_param_value
+from .params import HAS_PARAMS, NativeParams, get_param_value
 
 
 # ── calibration ──────────────────────────────────────────────
@@ -15,7 +15,7 @@ def get_calibration_status() -> Dict[str, Any]:
   if not HAS_PARAMS:
     return {"calibrated": False, "pitch": None, "yaw": None}
 
-  params = Params()
+  params = NativeParams()
   try:
     calib_bytes = params.get("CalibrationParams")
     if not calib_bytes:

@@ -37,6 +37,28 @@ MIN_ENGAGE_BUFFER = 2  # secs
 VERSION = 1  # bump this to invalidate old parameter caches
 ALLOWED_CARS = ['toyota', 'hyundai', 'rivian', 'honda', 'volkswagen']
 
+TORQUED_RATE_CHECKED_SERVICES = ['livePose', 'liveCalibration']
+TORQUED_REQUIRED_AUXILIARY_SERVICES = ['carControl', 'carOutput', 'carState']
+
+
+def torqued_inputs_valid(sm) -> bool:
+  """Validate learning inputs while tolerating auxiliary rate jitter.
+
+  livePose is torqued's poll source and retains the full frequency check. The
+  required auxiliary streams fail closed when dead or invalid, but do not make
+  the output invalid solely because their sampled rate differs from nominal.
+  liveDelay is intentionally excluded: it improves temporal alignment, but a
+  derived delay outage must not invalidate otherwise healthy torque learning.
+  """
+  return (sm.all_checks(TORQUED_RATE_CHECKED_SERVICES) and
+          sm.all_alive(TORQUED_REQUIRED_AUXILIARY_SERVICES) and
+          sm.all_valid(TORQUED_REQUIRED_AUXILIARY_SERVICES))
+
+
+def torqued_live_delay_usable(sm) -> bool:
+  """Only consume the optional derived delay when its packet is healthy."""
+  return sm.alive['liveDelay'] and sm.valid['liveDelay']
+
 
 def slope2rot(slope):
   sin = np.sqrt(slope ** 2 / (slope ** 2 + 1))
@@ -58,7 +80,8 @@ class TorqueEstimator(ParameterEstimator, TorqueEstimatorExt):
     TorqueEstimatorExt.__init__(self, CP)
     self.CP = CP
     self.hist_len = int(HISTORY / DT_MDL)
-    self.lag = 0.0
+    self.params = Params()
+    self.lag = get_lat_delay(self.params, CP.steerActuatorDelay + 0.2)
     self.track_all_points = track_all_points  # for offline analysis, without max lateral accel or max steer torque filters
     if decimated:
       self.min_bucket_points = MIN_BUCKET_POINTS / 10
@@ -102,8 +125,7 @@ class TorqueEstimator(ParameterEstimator, TorqueEstimatorExt):
     self.max_friction = (1.0 + self.friction_sanity) * self.offline_friction
 
     # try to restore cached params
-    params = Params()
-    self.params = params
+    params = self.params
     params_cache = params.get("CarParamsPrevRoute")
     torque_cache = params.get("LiveTorqueParameters")
     if params_cache is not None and torque_cache is not None:
@@ -263,9 +285,10 @@ def main(demo=False):
 
   while True:
     sm.update()
-    if sm.all_checks():
+    inputs_valid = torqued_inputs_valid(sm)
+    if inputs_valid:
       for which in sm.updated.keys():
-        if sm.updated[which]:
+        if sm.updated[which] and (which != 'liveDelay' or torqued_live_delay_usable(sm)):
           t = sm.logMonoTime[which] * 1e-9
           estimator.handle_log(t, which, sm[which])
 
@@ -273,11 +296,11 @@ def main(demo=False):
 
     # 4Hz driven by livePose
     if sm.frame % 5 == 0:
-      pm.send('liveTorqueParameters', estimator.get_msg(valid=sm.all_checks(), with_points=DEBUG))
+      pm.send('liveTorqueParameters', estimator.get_msg(valid=inputs_valid, with_points=DEBUG))
 
     # Cache points every 60 seconds while onroad
-    if sm.frame % 240 == 0:
-      msg = estimator.get_msg(valid=sm.all_checks(), with_points=True)
+    if inputs_valid and sm.frame % 240 == 0:
+      msg = estimator.get_msg(valid=True, with_points=True)
       params.put_nonblocking("LiveTorqueParameters", msg.to_bytes())
 
 

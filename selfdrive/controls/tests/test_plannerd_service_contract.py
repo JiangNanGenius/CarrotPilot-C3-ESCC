@@ -9,6 +9,7 @@ from openpilot.selfdrive.controls.lib.longitudinal_planner import get_processing
 ROOT = Path(__file__).resolve().parents[3]
 PLANNERD = ROOT / "selfdrive/controls/plannerd.py"
 LONGITUDINAL_PLANNER = ROOT / "selfdrive/controls/lib/longitudinal_planner.py"
+PROCESS_REPLAY = ROOT / "selfdrive/test/process_replay/process_replay.py"
 
 
 def _submaster_services() -> set[str]:
@@ -54,5 +55,15 @@ def test_optional_navigation_services_do_not_invalidate_base_plan():
     assert keyword in source
 
 
+def test_driver_assistance_validity_only_uses_ldw_inputs():
+  source = PLANNERD.read_text()
+  assert "msg.valid = sm.all_checks(['carState', 'carControl', 'modelV2'])" in source
+
+
 def test_processing_delay_uses_nanoseconds_consistently():
   assert get_processing_delay(10_050_000_000, 10_000_000_000) == pytest.approx(0.05)
+
+
+def test_new_cruise_authority_field_does_not_invalidate_legacy_replay_refs():
+  source = PROCESS_REPLAY.read_text()
+  assert '"longitudinalPlan.cruiseTargetSource"' in source

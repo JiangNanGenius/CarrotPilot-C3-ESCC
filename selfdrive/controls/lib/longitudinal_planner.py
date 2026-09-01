@@ -12,14 +12,20 @@ from openpilot.selfdrive.controls.lib.longcontrol import LongCtrlState
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc, LongitudinalPlanSource
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
 from openpilot.selfdrive.controls.lib.drive_helpers import CONTROL_N, get_accel_from_plan, should_stop
-from openpilot.selfdrive.controls.lib.speed_reference import SpeedReference
+from openpilot.selfdrive.controls.lib.speed_reference import SpeedReference, INSTRUMENT_SPEED
 from openpilot.selfdrive.car.cruise import V_CRUISE_MAX, V_CRUISE_UNSET
 from openpilot.common.swaglog import cloudlog
 
 from openpilot.sunnypilot.selfdrive.controls.lib.longitudinal_planner import LongitudinalPlannerSP
-from openpilot.selfdrive.carrot.carrot_speed_limit import CarrotSpeedLimit
+from openpilot.selfdrive.carrot.carrot_speed_limit import CarrotSpeedLimit, CarrotSpeedLimitSource
 from openpilot.selfdrive.carrot.carrot_traffic_stop import CarrotTrafficStop
 from openpilot.selfdrive.carrot.carrot_functions import CarrotPlanner
+from openpilot.selfdrive.controls.lib.cruise_target_source import (
+  CruiseTargetSource,
+  base_cruise_target_source,
+  carrot_cruise_target_source,
+  control_and_display_cruise_targets,
+)
 
 A_CRUISE_MAX_VALS = [1.6, 1.2, 0.8, 0.6]
 A_CRUISE_MAX_BP = [0., 10.0, 25., 40.]
@@ -32,7 +38,6 @@ MIN_ALLOW_THROTTLE_SPEED = 2.5
 # Lookup table for turns
 _A_TOTAL_MAX_V = [1.7, 3.2]
 _A_TOTAL_MAX_BP = [20., 40.]
-
 
 def get_processing_delay(plan_mono_time: int, model_mono_time: int) -> float:
   return (plan_mono_time - model_mono_time) / 1e9
@@ -78,6 +83,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.output_a_target = init_a
     self.output_should_stop = False
     self.cruise_target_speed = 0.0
+    self.cruise_target_source = CruiseTargetSource.instrumentSet
 
     self.v_desired_trajectory = np.zeros(CONTROL_N)
     self.a_desired_trajectory = np.zeros(CONTROL_N)
@@ -134,6 +140,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
 
     # Get new v_cruise and a_target from Smart Cruise Control and Speed Limit Assist
     v_cruise, self.output_a_target = LongitudinalPlannerSP.update_targets(self, sm, self.v_desired_filter.x, self.output_a_target, v_cruise)
+    self.cruise_target_source = base_cruise_target_source(self.source, self.resolver.source, self.speed_reference.reference)
 
     # Carrot visual traffic-stop state and eco target. Dedicated helpers below
     # own speed-limit selection and nav-app red-light handling; MPC continues
@@ -144,21 +151,41 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
         v_cruise_kph_carrot = self.carrot_planner.update(
           sm, v_cruise * CV.MS_TO_KPH, mode="combined", traffic_stop_enabled=traffic_stop_enabled,
         )
-        v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
+        carrot_v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
+        if carrot_v_cruise < v_cruise - 1e-3 and int(self.carrot_planner.trafficState.value) == 1:
+          self.cruise_target_source = CruiseTargetSource.trafficLight
+        v_cruise = carrot_v_cruise
       except Exception:
         # Carrot visual stopping is an optional extension. A migration or
         # malformed setting must not take down plannerd and all longitudinal
         # control; disable it for this drive and retain the Sunny/MPC target.
         self.carrot_planner_faulted = True
         cloudlog.exception("CarrotPlanner update failed; disabling it for this drive")
-    # The two limit-control modes are mutually exclusive. Sunny assist keeps
-    # the original cluster-set-speed state machine; Carrot direct mode clamps
-    # the planner only when that instrument-based assist is not selected.
-    if not self.sla.enabled:
-      v_cruise = self.carrot_speed_limit.update(sm, v_cruise, self.resolver.speed_limit)
+    # Sunny keeps its native camera/map policy and configured offset. Carrot's
+    # independently enabled aggregate may also contribute a forwarded vehicle
+    # limit; desiredSource below keeps the final displayed authority truthful.
+    v_cruise = self.carrot_speed_limit.update(sm, v_cruise)
+    if self.carrot_speed_limit.active_source != CarrotSpeedLimitSource.none:
+      self.cruise_target_source = carrot_cruise_target_source(
+        self.carrot_speed_limit.active_source, self.speed_reference.reference,
+      )
     v_cruise = self.carrot_traffic_stop.update(sm, v_cruise)
-    v_cruise = self.speed_reference.update(v_cruise, v_ego, sm['carState'].vEgoCluster, sm['carState'].aEgo)
-    self.cruise_target_speed = max(0.0, v_cruise * CV.MS_TO_KPH)
+    if self.carrot_traffic_stop.active:
+      self.cruise_target_source = CruiseTargetSource.trafficLight
+
+    # Keep the driver-facing target in the selected reference domain. In
+    # instrument mode the MPC intentionally receives a lower wheel-speed target
+    # so the vehicle's speedometer reaches this displayed ceiling; publishing
+    # the scaled internal value made a 40 km/h target appear as ~38 km/h.
+    v_cruise, display_v_cruise = control_and_display_cruise_targets(
+      self.speed_reference, v_cruise, v_ego, sm['carState'].vEgoCluster, sm['carState'].aEgo,
+    )
+    if self.cruise_target_source in (CruiseTargetSource.instrumentSet, CruiseTargetSource.wheelSet):
+      self.cruise_target_source = (CruiseTargetSource.instrumentSet if self.speed_reference.reference == INSTRUMENT_SPEED
+                                   else CruiseTargetSource.wheelSet)
+    if sm['controlsState'].forceDecel:
+      self.cruise_target_source = CruiseTargetSource.safetyDecel
+    self.cruise_target_speed = max(0.0, display_v_cruise * CV.MS_TO_KPH)
 
     self.mpc.set_weights(prev_accel_constraint, personality=sm['selfdriveState'].personality)
     self.mpc.set_cur_state(self.v_desired_filter.x, self.output_a_target)
@@ -223,9 +250,10 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     longitudinalPlan.shouldStop = bool(self.output_should_stop)
     longitudinalPlan.allowBrake = True
     longitudinalPlan.allowThrottle = bool(self.allow_throttle)
-    longitudinalPlan.trafficState = int(self.carrot_planner.trafficState.value)
+    longitudinalPlan.trafficState = 1 if self.carrot_traffic_stop.active else int(self.carrot_planner.trafficState.value)
     longitudinalPlan.trafficStopDistance = float(max(0.0, self.carrot_planner.stop_dist))
     longitudinalPlan.cruiseTargetSpeed = float(self.cruise_target_speed)
+    longitudinalPlan.cruiseTargetSource = self.cruise_target_source
 
     pm.send('longitudinalPlan', plan_send)
 

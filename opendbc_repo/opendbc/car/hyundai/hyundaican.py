@@ -39,7 +39,8 @@ def create_lkas11(packer, frame, CP, apply_torque, steer_req,
   values["CF_Lkas_MsgCount"] = frame % 0x10
 
   if CP.carFingerprint in (CAR.HYUNDAI_SONATA, CAR.HYUNDAI_PALISADE, CAR.KIA_NIRO_EV, CAR.KIA_NIRO_HEV_2021, CAR.KIA_NIRO_PHEV_2022, CAR.HYUNDAI_SANTA_FE,
-                           CAR.HYUNDAI_IONIQ_EV_2020, CAR.HYUNDAI_IONIQ_PHEV, CAR.KIA_SELTOS, CAR.HYUNDAI_ELANTRA_2021, CAR.GENESIS_G70_2020,
+                           CAR.HYUNDAI_IONIQ_EV_2020, CAR.HYUNDAI_IONIQ_PHEV, CAR.KIA_SELTOS, CAR.KIA_SELTOS_2023,
+                           CAR.HYUNDAI_ELANTRA_2021, CAR.GENESIS_G70_2020,
                            CAR.HYUNDAI_ELANTRA_HEV_2021, CAR.HYUNDAI_SONATA_HYBRID, CAR.HYUNDAI_KONA_EV, CAR.HYUNDAI_KONA_HEV, CAR.HYUNDAI_KONA_EV_2022,
                            CAR.HYUNDAI_SANTA_FE_2022, CAR.KIA_K5_2021, CAR.HYUNDAI_IONIQ_HEV_2022, CAR.HYUNDAI_SANTA_FE_HEV_2022,
                            CAR.HYUNDAI_SANTA_FE_PHEV_2022, CAR.KIA_STINGER_2022, CAR.KIA_K5_HEV_2020, CAR.KIA_CEED,
@@ -139,8 +140,10 @@ def create_lfahda_mfc(packer, enabled, lfa_icon, planned_target_speed):
 
 def create_acc_commands(packer, enabled, accel, upper_jerk, idx, lead_data: CanLeadData,
                         hud_control, set_speed, stopping, long_override, use_fca, CP,
-                        main_cruise_enabled, tuning, ESCC: EnhancedSmartCruiseControl | None = None):
+                        main_cruise_enabled, tuning, ESCC: EnhancedSmartCruiseControl | None = None,
+                        long_actuation_allowed: bool = True):
   commands = []
+  actuation_enabled = enabled and long_actuation_allowed
 
   def get_scc11_values():
     return {
@@ -157,10 +160,13 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, lead_data: CanL
 
   def get_scc12_values():
     scc12_values = {
-      "ACCMode": 2 if enabled and long_override else 1 if enabled else 0,
-      "StopReq": 1 if tuning.stopping else 0,
-      "aReqRaw": tuning.desired_accel,
-      "aReqValue": tuning.actual_accel,  # stock ramps up and down respecting jerk limit until it reaches aReqRaw
+      # ACCMode 2 is the non-actuating driver-override state. Keep it while
+      # gas override is active, but publish mode 0 immediately for other
+      # inactive states (notably the brake edge before CC.enabled catches up).
+      "ACCMode": 2 if enabled and long_override else 1 if actuation_enabled else 0,
+      "StopReq": 1 if actuation_enabled and tuning.stopping else 0,
+      "aReqRaw": tuning.desired_accel if actuation_enabled else 0.0,
+      "aReqValue": tuning.actual_accel if actuation_enabled else 0.0,  # stock ramps respecting jerk until aReqRaw
       "CR_VSM_Alive": idx % 0xF,
     }
 
@@ -187,7 +193,7 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, lead_data: CanL
       "ComfortBandLower": tuning.comfort_band_lower, # stock usually is 0 but sometimes uses higher values
       "JerkUpperLimit": tuning.jerk_upper, # stock usually is 1.0 but sometimes uses higher values
       "JerkLowerLimit": tuning.jerk_lower, # stock usually is 0.5 but sometimes uses higher values
-      "ACCMode": 2 if enabled and long_override else 1 if enabled else 4, # stock will always be 4 instead of 0 after first disengage
+      "ACCMode": 2 if enabled and long_override else 1 if actuation_enabled else 4, # stock will always be 4 instead of 0 after first disengage
       "ObjGap": lead_data.object_gap, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
       "ObjDistStat": lead_data.object_rel_gap,
     }

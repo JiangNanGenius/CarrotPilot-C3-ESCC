@@ -23,6 +23,25 @@ OFFSET_LOWERED_MAX = 8.0
 MIN_ACTIVE_SPEED = 1.0
 LOW_ACTIVE_SPEED = 10.0
 
+PARAMSD_RATE_CHECKED_SERVICES = ['livePose', 'liveCalibration']
+PARAMSD_AUXILIARY_SERVICES = ['carState']
+
+
+def paramsd_inputs_valid(sm) -> bool:
+  """Require fresh, valid inputs without rejecting harmless aux rate jitter.
+
+  paramsd is driven by livePose. On this C3, carState can sustain roughly
+  85-90 Hz rather than its nominal 100 Hz while every packet remains current
+  and valid. Applying aggregate frequency checks to that sampled auxiliary
+  stream marked every liveParameters packet invalid, which then invalidated
+  every longitudinalPlan. Keep the poll source's full frequency check and
+  fail closed for dead/invalid auxiliary inputs, but do not turn harmless
+  auxiliary rate variance into a system-wide planning outage.
+  """
+  return (sm.all_checks(PARAMSD_RATE_CHECKED_SERVICES) and
+          sm.all_alive(PARAMSD_AUXILIARY_SERVICES) and
+          sm.all_valid(PARAMSD_AUXILIARY_SERVICES))
+
 
 class VehicleParamsLearner:
   def __init__(self, CP: car.CarParams, steer_ratio: float, stiffness_factor: float, angle_offset: float, P_initial: np.ndarray | None = None):
@@ -279,14 +298,15 @@ def main():
 
   while True:
     sm.update()
-    if sm.all_checks():
+    inputs_valid = paramsd_inputs_valid(sm)
+    if inputs_valid:
       for which in sorted(sm.updated.keys(), key=lambda x: sm.logMonoTime[x]):
         if sm.updated[which]:
           t = sm.logMonoTime[which] * 1e-9
           learner.handle_log(t, which, sm[which])
 
     if sm.updated['livePose']:
-      msg = learner.get_msg(sm.all_checks(), debug=DEBUG)
+      msg = learner.get_msg(inputs_valid, debug=DEBUG)
 
       msg_dat = msg.to_bytes()
       if sm.frame % 1200 == 0:  # once a minute

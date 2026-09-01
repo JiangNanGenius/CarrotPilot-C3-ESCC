@@ -36,6 +36,22 @@ LAG_CANDIDATE_CORR_THRESHOLD = 0.9
 SMOOTH_K = 5
 SMOOTH_SIGMA = 1.0
 
+LAGD_RATE_CHECKED_SERVICES = ['livePose', 'liveCalibration']
+LAGD_AUXILIARY_SERVICES = ['carState', 'controlsState', 'carControl']
+
+
+def lagd_inputs_valid(sm) -> bool:
+  """Require healthy inputs without rejecting harmless auxiliary rate jitter.
+
+  lagd is clocked by livePose, so the poll source keeps the complete frequency
+  check. The remaining inputs are sampled auxiliary streams: they must remain
+  alive and valid, but their nominal-rate jitter must not invalidate every
+  liveDelay packet or prevent learning.
+  """
+  return (sm.all_checks(LAGD_RATE_CHECKED_SERVICES) and
+          sm.all_alive(LAGD_AUXILIARY_SERVICES) and
+          sm.all_valid(LAGD_AUXILIARY_SERVICES))
+
 
 def masked_symmetric_moving_average(x: np.ndarray, mask: np.ndarray, k: int, sigma: float) -> np.ndarray:
   assert k >= 1 and k % 2 == 1, "k must be positive and odd"
@@ -399,7 +415,8 @@ def main():
 
   while True:
     sm.update()
-    if sm.all_checks():
+    inputs_valid = lagd_inputs_valid(sm)
+    if inputs_valid:
       for which in sorted(sm.updated.keys(), key=lambda x: sm.logMonoTime[x]):
         if sm.updated[which]:
           t = sm.logMonoTime[which] * 1e-9
@@ -408,13 +425,14 @@ def main():
 
     # 4Hz driven by livePose
     if sm.frame % 5 == 0:
-      lag_learner.update_estimate()
-      lag_msg = lag_learner.get_msg(sm.all_checks(), DEBUG)
+      if inputs_valid:
+        lag_learner.update_estimate()
+      lag_msg = lag_learner.get_msg(inputs_valid, DEBUG)
       lag_msg_dat = lag_msg.to_bytes()
       pm.send('liveDelay', lag_msg_dat)
 
-      if sm.frame % 1200 == 0: # cache every 60 seconds
+      if inputs_valid and sm.frame % 1200 == 0: # cache every 60 seconds
         params.put_nonblocking("LiveDelay", lag_msg_dat)
 
-      if sm.frame % 60 == 0:  # read from and write to params every 3 seconds
+      if inputs_valid and sm.frame % 60 == 0:  # read from and write to params every 3 seconds
         lagd_toggle.update(lag_msg)

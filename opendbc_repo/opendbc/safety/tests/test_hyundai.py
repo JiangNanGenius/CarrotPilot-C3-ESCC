@@ -159,6 +159,10 @@ class TestHyundaiSafety(HyundaiButtonBase, common.CarSafetyTest, common.DriverTo
   def _main_cruise_button_msg(self, enabled):
     return self._button_msg(0, enabled)
 
+  def test_lfahda_mfc_dlc(self):
+    self.assertTrue(self._tx(common.make_msg(0, 0x485, length=8)))
+    self.assertFalse(self._tx(common.make_msg(0, 0x485, length=4)))
+
   def test_pcm_main_cruise_state_availability(self):
     """Test that ACC main state is correctly set when receiving SCC11 (0x420), toggling HYUNDAI_LONG flag.
 
@@ -491,6 +495,36 @@ class TestHyundaiLongitudinalESCCSafety(HyundaiLongitudinalBase, TestHyundaiSafe
   def _tx_acc_state_msg(self, enable):
     values = {"MainMode_ACC": enable}
     return self.packer.make_can_msg_safety("SCC11", 0, values)
+
+  def test_mads_lateral_only_authorization(self):
+    """MADS may authorize bounded steering without authorizing ESCC acceleration."""
+    safety_param_sp = HyundaiSafetyFlagsSP.ESCC | HyundaiSafetyFlagsSP.LONG_MAIN_CRUISE_TOGGLEABLE | self.SAFETY_PARAM_SP
+    self.safety.set_current_safety_param_sp(safety_param_sp)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG)
+    self.safety.init_tests()
+    self.safety.set_mads_params(True, False, False)
+
+    self._rx(self._main_cruise_button_msg(False))
+    self._rx(self._main_cruise_button_msg(True))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self.safety.get_controls_allowed_lateral())
+
+    # Steering still passes the standard Hyundai torque/rate/driver limits.
+    self.assertTrue(self._tx(self._torque_cmd_msg(self.MAX_RATE_UP)))
+
+    # The lateral-only permission must never authorize acceleration.
+    self.assertTrue(self._tx(self._accel_msg(0.0)))
+    self.assertFalse(self._tx(self._accel_msg(0.1)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # Three 1 Hz MADS heartbeat mismatches withdraw steering authorization.
+    self.safety.set_heartbeat_engaged_mads(False)
+    for _ in range(2):
+      self.safety.mads_heartbeat_engaged_check()
+      self.assertTrue(self.safety.get_controls_allowed_lateral())
+    self.safety.mads_heartbeat_engaged_check()
+    self.assertFalse(self.safety.get_controls_allowed_lateral())
+    self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_RATE_UP)))
 
   def test_tester_present_allowed(self):
     pass

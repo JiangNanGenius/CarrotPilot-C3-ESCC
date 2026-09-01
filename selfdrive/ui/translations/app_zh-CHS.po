@@ -855,8 +855,20 @@ msgstr "错误"
 msgid "download failed"
 msgstr "下载失败"
 
+msgid "download cancelled"
+msgstr "下载已取消"
+
+msgid "downloaded"
+msgstr "已下载"
+
 msgid "downloading"
 msgstr "下载中"
+
+msgid "starting download"
+msgstr "正在开始下载"
+
+msgid "pending"
+msgstr "等待下载"
 
 msgid "progress"
 msgstr "进度"
@@ -902,6 +914,9 @@ msgstr "启用动态实验控制"
 
 msgid "Current Model"
 msgstr "当前模型"
+
+msgid "Model Download"
+msgstr "模型下载"
 
 msgid "Driving Model"
 msgstr "驾驶模型"

@@ -6,7 +6,7 @@ See the LICENSE.md file in the root directory for more details.
 """
 from enum import Enum
 
-from cereal import messaging, log, car, custom
+from cereal import messaging, log, custom
 from openpilot.common.params import Params
 from openpilot.selfdrive.ui.sunnypilot.layouts.settings.display import OnroadBrightness
 from openpilot.system.ui.lib.application import gui_app
@@ -150,38 +150,14 @@ class UIStateSP:
       self.reset_onroad_sleep_timer()
 
   def _enforce_constraints(self) -> None:
-    has_long = self.has_longitudinal_control
-    CP = self.CP
+    """Never turn a transient fingerprint into permanent preference loss.
 
-    if CP is not None:
-      # Angle steering: no torque-based lateral controls
-      if CP.steerControlType == car.CarParams.SteerControlType.angle:
-        self.params.remove("EnforceTorqueControl")
-        self.params.remove("NeuralNetworkLateralControl")
-
-      # Alpha longitudinal: clear if not available
-      if not CP.alphaLongitudinalAvailable:
-        self.params.remove("AlphaLongitudinalEnabled")
-
-      # BSM not available: clear BSM-dependent settings
-      if not CP.enableBsm:
-        self.params.remove("AutoLaneChangeBsmDelay")
-    else:
-      # No CarParams: clear all car-dependent params as safety default
-      self.params.remove("EnforceTorqueControl")
-      self.params.remove("NeuralNetworkLateralControl")
-      self.params.remove("AlphaLongitudinalEnabled")
-
-    # No longitudinal control: no experimental mode or DEC
-    if not has_long:
-      self.params.remove("ExperimentalMode")
-      self.params.remove("DynamicExperimentalControl")
-
-    # Cruise features requiring longitudinal
-    if not has_long:
-      self.params.remove("CustomAccIncrementsEnabled")
-      self.params.remove("SmartCruiseControlVision")
-      self.params.remove("SmartCruiseControlMap")
+    Settings panels and control initializers already disable or ignore features
+    that the authoritative CarParams cannot support. Deleting preferences here
+    meant a startup mock fingerprint, a model handover, or recalibration UI
+    restart permanently changed the next correctly fingerprinted drive.
+    """
+    return
 
 
 class DeviceSP:

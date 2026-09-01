@@ -12,6 +12,12 @@ from openpilot.common.params import Params
 TurnDirection = custom.ModelDataV2SP.TurnDirection
 
 LANE_CHANGE_SPEED_MIN = 20 * CV.MPH_TO_MS
+# Do not feed a turn desire into modeld while stopped. A long blinker wait at a
+# red light otherwise accumulates the same turn token in the recurrent model
+# for hundreds of frames and can leave a steering bias after the car moves.
+# One metre per second still enables the intended low-speed intersection turn
+# shortly after launch, without poisoning the stationary model history.
+LANE_TURN_SPEED_MIN = 1.0
 
 
 class LaneTurnController:
@@ -34,9 +40,10 @@ class LaneTurnController:
     self.param_read_counter += 1
 
   def update_lane_turn(self, blindspot_left: bool, blindspot_right: bool, left_blinker: bool, right_blinker: bool, v_ego: float) -> None:
-    if left_blinker and not right_blinker and v_ego < self.lane_turn_value and not blindspot_left:
+    moving = v_ego >= LANE_TURN_SPEED_MIN
+    if moving and left_blinker and not right_blinker and v_ego < self.lane_turn_value and not blindspot_left:
       self.turn_direction = TurnDirection.turnLeft
-    elif right_blinker and not left_blinker and v_ego < self.lane_turn_value and not blindspot_right:
+    elif moving and right_blinker and not left_blinker and v_ego < self.lane_turn_value and not blindspot_right:
       self.turn_direction = TurnDirection.turnRight
     else:
       self.turn_direction = TurnDirection.none

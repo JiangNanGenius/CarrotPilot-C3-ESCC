@@ -123,7 +123,6 @@ class SpeedLimitSettingsLayout(Widget):
   def _update_state(self):
     super()._update_state()
 
-    speed_limit_mode_param = ui_state.params.get("SpeedLimitMode", return_default=True)
     if ui_state.CP is not None and ui_state.CP_SP is not None:
       brand = ui_state.CP.brand
       has_long = ui_state.has_longitudinal_control
@@ -138,9 +137,6 @@ class SpeedLimitSettingsLayout(Widget):
       sla_disallow_in_release = brand == "tesla" and ui_state.is_sp_release
       sla_always_disallow = brand == "rivian"
       sla_available = (has_long or has_icbm) and not sla_disallow_in_release and not sla_always_disallow
-
-      if not sla_available and speed_limit_mode_param == int(SpeedLimitMode.assist):
-        ui_state.params.put("SpeedLimitMode", int(SpeedLimitMode.warning))
 
     else:
       sla_available = False

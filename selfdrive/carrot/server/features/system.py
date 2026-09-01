@@ -9,7 +9,7 @@ from ..live_runtime.broker import RealtimeBroker
 from ..live_runtime.normalize import to_transport_safe
 from ..config import OFFROAD_ASSETS_DIR
 from ..services.device_info import get_calibration_status, get_device_network
-from ..services.params import HAS_PARAMS, Params, restore_param_values_validated
+from ..services.params import HAS_PARAMS, NativeParams, restore_param_values_validated
 from ..services.settings import get_settings_cached
 from ..services.time_sync import TIME_SYNC_DEBUG_DEFAULT, sync_system_time_from_browser
 
@@ -171,7 +171,10 @@ async def api_reboot(request: web.Request) -> web.Response:
     return blocked
   try:
     if HAS_PARAMS:
-      Params().put_bool("DoReboot", True)
+      # Reboot/shutdown/calibration are native manager actions, not Carrot
+      # tuning params. Writing these to d_carrot returns success but has no
+      # effect because manager watches the native d namespace.
+      NativeParams().put_bool("DoReboot", True)
     else:
       # Params-less development fallback only.
       subprocess.Popen(["sudo", "reboot"])
@@ -260,7 +263,7 @@ async def api_poweroff(request: web.Request) -> web.Response:
   if not HAS_PARAMS:
     return web.json_response({"ok": False, "error": "params unavailable"}, status=500)
   try:
-    Params().put_bool("DoShutdown", True)
+    NativeParams().put_bool("DoShutdown", True)
     return web.json_response({"ok": True})
   except Exception as e:
     return web.json_response({"ok": False, "error": str(e)}, status=500)
@@ -273,7 +276,7 @@ async def api_recalibrate(request: web.Request) -> web.Response:
   if not HAS_PARAMS:
     return web.json_response({"ok": False, "error": "params unavailable"}, status=500)
   try:
-    params = Params()
+    params = NativeParams()
     for key in ("CalibrationParams", "LiveTorqueParameters",
                 "LiveParameters", "LiveParametersV2", "LiveDelay"):
       try:

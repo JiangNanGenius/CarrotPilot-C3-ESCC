@@ -27,18 +27,28 @@ class ProgressBarAction(ItemAction):
 
   def _render(self, rect: rl.Rectangle):
     font_size = 40
-    text_size = measure_text_cached(self._font, self.text, font_size)
     padding = 30
-    bar_width = text_size.x + 2 * padding
+    # The old renderer only reserved room for a "100%" prefix. Bundle progress
+    # also contains file counts and ETA, which made the bar narrower than its
+    # text and pushed the useful percentage outside the action area.
+    bar_width = max(1.0, rect.width)
+
+    display_text = self.text
+    max_text_width = max(1.0, bar_width - 2 * padding)
+    text_size = measure_text_cached(self._font, display_text, font_size)
+    if text_size.x > max_text_width:
+      ellipsis = "..."
+      left, right = 0, len(display_text)
+      while left < right:
+        mid = (left + right) // 2
+        candidate = display_text[:mid] + ellipsis
+        if measure_text_cached(self._font, candidate, font_size).x <= max_text_width:
+          left = mid + 1
+        else:
+          right = mid
+      display_text = display_text[:max(0, left - 1)] + ellipsis
+      text_size = measure_text_cached(self._font, display_text, font_size)
     text_x = (bar_width - text_size.x) / 2
-
-    if self.show_progress and len(parts := self.text.split(' - ', 1)) == 2:
-      prefix = parts[0]
-      max_prefix_w = measure_text_cached(self._font, "100%", font_size).x
-      current_prefix_w = measure_text_cached(self._font, prefix, font_size).x
-
-      bar_width = (text_size.x - current_prefix_w + max_prefix_w) + 2 * padding
-      text_x = padding + (max_prefix_w - current_prefix_w)
 
     bar_height = 60
     bar_rect = rl.Rectangle(rect.x + rect.width - bar_width, rect.y + (rect.height - bar_height) / 2, bar_width, bar_height)
@@ -46,10 +56,24 @@ class ProgressBarAction(ItemAction):
     if self.show_progress:
       inner_rect = rl.Rectangle(bar_rect.x + 4, bar_rect.y + 4, bar_rect.width - 8, bar_rect.height - 8)
       if inner_rect.width > 0:
-        fill_width = max(0, min(inner_rect.width, inner_rect.width * (self.progress / 100.0)))
-        rl.draw_rectangle_rounded(rl.Rectangle(inner_rect.x, inner_rect.y, fill_width, inner_rect.height), 0.2, 10, rl.Color(30, 121, 232, 255))
+        rl.draw_rectangle_rounded(inner_rect, 0.2, 10, rl.Color(43, 43, 43, 220))
+        if self.progress > 0:
+          fill_width = max(0, min(inner_rect.width, inner_rect.width * (self.progress / 100.0)))
+          rl.draw_rectangle_rounded(rl.Rectangle(inner_rect.x, inner_rect.y, fill_width, inner_rect.height), 0.2, 10, rl.Color(30, 121, 232, 255))
+        else:
+          # DNS/TLS and servers without Content-Length have no honest percent.
+          # Show an indeterminate moving segment so 0% is visibly active rather
+          # than looking like the model-selection tap was ignored.
+          segment_width = max(48.0, inner_rect.width * 0.22)
+          phase = (rl.get_time() % 1.6) / 1.6
+          segment_x = inner_rect.x - segment_width + phase * (inner_rect.width + segment_width)
+          visible_x = max(inner_rect.x, segment_x)
+          visible_right = min(inner_rect.x + inner_rect.width, segment_x + segment_width)
+          if visible_right > visible_x:
+            rl.draw_rectangle_rounded(rl.Rectangle(visible_x, inner_rect.y, visible_right - visible_x, inner_rect.height),
+                                      0.2, 10, rl.Color(30, 121, 232, 255))
 
-    rl.draw_text_ex(self._font, self.text, rl.Vector2(bar_rect.x + text_x, bar_rect.y + (bar_height - text_size.y) / 2), font_size, 0, self.text_color)
+    rl.draw_text_ex(self._font, display_text, rl.Vector2(bar_rect.x + text_x, bar_rect.y + (bar_height - text_size.y) / 2), font_size, 0, self.text_color)
 
 
 def progress_item(title):

@@ -1157,6 +1157,7 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   trafficState @40 :Int8;          # 0 off, 1 red/stop, 2 green/go
   trafficStopDistance @41 :Float32; # meters, visual traffic-stop planner
   cruiseTargetSpeed @42 :Float32;   # final planner cruise target, km/h
+  cruiseTargetSource @43 :CruiseTargetSource; # authority that set cruiseTargetSpeed
 
 
   solverExecutionTime @35 :Float32;
@@ -1167,6 +1168,21 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
     lead1 @2;
     lead2 @3;
     e2e @4;
+  }
+
+  # This describes the final cruise ceiling shown to the driver. It is
+  # deliberately separate from LongitudinalPlanSource, which describes the
+  # MPC trajectory source (lead/e2e/cruise) rather than the speed constraint.
+  enum CruiseTargetSource {
+    instrumentSet @0;
+    wheelSet @1;
+    vehicleLimit @2;
+    mapLimit @3;
+    navigationLimit @4;
+    visionCurve @5;
+    mapCurve @6;
+    trafficLight @7;
+    safetyDecel @8;
   }
 
 

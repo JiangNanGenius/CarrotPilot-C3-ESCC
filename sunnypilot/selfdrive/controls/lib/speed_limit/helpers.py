@@ -8,7 +8,6 @@ See the LICENSE.md file in the root directory for more details.
 from cereal import custom, car
 from openpilot.common.constants import CV
 from openpilot.common.params import Params
-from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.common import Mode as SpeedLimitMode
 
 
 def compare_cluster_target(v_cruise_cluster: float, target_set_speed: float, is_metric: bool) -> tuple[bool, bool]:
@@ -36,9 +35,5 @@ def set_speed_limit_assist_availability(CP: car.CarParams, CP_SP: custom.CarPara
 
   if not CP.openpilotLongitudinalControl and CP_SP.pcmCruiseSpeed:
     allowed = False
-
-  if not allowed:
-    if params.get("SpeedLimitMode", return_default=True) == SpeedLimitMode.assist:
-      params.put("SpeedLimitMode", int(SpeedLimitMode.warning))
 
   return allowed

@@ -44,7 +44,10 @@ def main():
 
       ldw.update(sm.frame, sm['modelV2'], sm['carState'], sm['carControl'])
       msg = messaging.new_message('driverAssistance')
-      msg.valid = sm.all_checks(['carState', 'carControl', 'modelV2', 'liveParameters'])
+      # LDW consumes only these three services. Coupling its envelope to
+      # liveParameters made every driverAssistance packet invalid whenever
+      # paramsd had an unrelated rate issue.
+      msg.valid = sm.all_checks(['carState', 'carControl', 'modelV2'])
       msg.driverAssistance.leftLaneDeparture = ldw.left
       msg.driverAssistance.rightLaneDeparture = ldw.right
       pm.send('driverAssistance', msg)

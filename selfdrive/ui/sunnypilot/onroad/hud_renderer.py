@@ -13,7 +13,7 @@ from openpilot.selfdrive.ui.mici.onroad.torque_bar import TorqueBar
 from openpilot.selfdrive.ui.sunnypilot.onroad.developer_ui import DeveloperUiRenderer, DeveloperUiState, get_bottom_dev_ui_offset
 from openpilot.selfdrive.ui.sunnypilot.onroad.road_name import RoadNameRenderer
 from openpilot.selfdrive.ui.sunnypilot.onroad.rocket_fuel import RocketFuel
-from openpilot.selfdrive.ui.sunnypilot.onroad.speed_limit import SpeedLimitRenderer, SpeedLimitSource
+from openpilot.selfdrive.ui.sunnypilot.onroad.speed_limit import SpeedLimitRenderer
 from openpilot.selfdrive.ui.sunnypilot.onroad.smart_cruise_control import SmartCruiseControlRenderer
 from openpilot.selfdrive.ui.sunnypilot.onroad.turn_signal import TurnSignalController
 from openpilot.selfdrive.ui.sunnypilot.onroad.circular_alerts import CircularAlertsRenderer
@@ -26,26 +26,34 @@ from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.text_measure import measure_text_cached
 
 SLA_ACTIVE_COLOR = rl.Color(0x91, 0x9b, 0x95, 0xff)
-LongitudinalPlanSource = log.LongitudinalPlan.LongitudinalPlanSource
+CruiseTargetSource = log.LongitudinalPlan.CruiseTargetSource
 
 
-def cruise_source_label(plan_alive: bool, plan_source, traffic_state: str, speed_limit_active: bool,
-                        speed_limit_source, vision_active: bool, map_active: bool) -> str:
+def cruise_source_label(plan_alive: bool, target_source) -> str:
   if not plan_alive:
     return "不可用"
-  if traffic_state == "red":
-    return "红灯停车"
-  if speed_limit_active:
-    return "车辆限速" if speed_limit_source == SpeedLimitSource.car else "地图限速"
-  if vision_active:
-    return "视觉弯道"
-  if map_active:
-    return "地图弯道"
-  if plan_source in (LongitudinalPlanSource.lead0, LongitudinalPlanSource.lead1, LongitudinalPlanSource.lead2):
-    return "前车跟随"
-  if plan_source == LongitudinalPlanSource.e2e:
-    return "模型规划"
-  return "驾驶设定"
+  # pycapnp readers expose enum fields as _DynamicEnum objects. They compare
+  # equal to the generated integer constants, but have a different hash, so a
+  # direct dictionary lookup silently falls through to the default label.
+  target_source = getattr(target_source, "raw", target_source)
+  return {
+    CruiseTargetSource.instrumentSet: "仪表定速",
+    CruiseTargetSource.wheelSet: "实际车速",
+    CruiseTargetSource.vehicleLimit: "车辆限速",
+    CruiseTargetSource.mapLimit: "地图限速",
+    CruiseTargetSource.navigationLimit: "导航限速",
+    CruiseTargetSource.visionCurve: "视觉弯道",
+    CruiseTargetSource.mapCurve: "地图弯道",
+    CruiseTargetSource.trafficLight: "红灯停车",
+    CruiseTargetSource.safetyDecel: "安全减速",
+  }.get(target_source, "仪表定速")
+
+
+def radar_packet_status(packet_valid: bool, has_errors: bool) -> str:
+  """Map one fresh radar packet to a truthful driver-facing health state."""
+  if not packet_valid:
+    return "invalid"
+  return "fault" if has_errors else "healthy"
 
 
 class HudRendererSP(HudRenderer):
@@ -67,11 +75,14 @@ class HudRendererSP(HudRenderer):
     self.speed_cluster: float = 0.0
     self.speed_conv: float = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
     self.radar_available: bool = False
+    self.radar_status: str = "initializing"
+    self.radar_seen: bool = False
+    self._radar_wait_frames: int = 0
     self.escc_enabled: bool = False
     self.lead_detected: bool = False
     self.lead_from_radar: bool = False
     self.cruise_target_speed: float = 0.0
-    self.longitudinal_plan_source = LongitudinalPlanSource.cruise
+    self.cruise_target_source = CruiseTargetSource.instrumentSet
     self.traffic_stop_distance: float = 0.0
     self.traffic_light_state: str = "off"
     self._traffic_light_hold_frames: int = 0
@@ -112,50 +123,66 @@ class HudRendererSP(HudRenderer):
     else:
       self.gear_shifter = "?"
 
-    # Accept the first fresh message immediately; alive takes a few samples to
-    # settle at startup. A genuinely stale stream still clears the indicator.
-    if ui_state.sm.updated['radarState'] and ui_state.sm.valid['radarState']:
+    # Hardware health comes from explicit radar errors. Message-envelope
+    # validity can be false during producer timestamp convergence and must not
+    # paint healthy ESCC hardware red.
+    if ui_state.sm.updated['radarState']:
       radar_state = ui_state.sm['radarState']
-      lead_one = ui_state.sm['radarState'].leadOne
-      self.radar_available = not any(radar_state.radarErrors.to_dict().values())
-      self.lead_detected = lead_one.status
-      self.lead_from_radar = lead_one.radar
+      lead_one = radar_state.leadOne
+      self.radar_seen = True
+      self._radar_wait_frames = 0
+      self.radar_status = radar_packet_status(
+        ui_state.sm.valid['radarState'], any(radar_state.radarErrors.to_dict().values()),
+      )
+      self.radar_available = self.radar_status == "healthy"
+      self.lead_detected = self.radar_available and lead_one.status
+      self.lead_from_radar = self.radar_available and lead_one.radar
     elif not ui_state.sm.alive['radarState']:
+      self._radar_wait_frames += 1
+      if self.radar_seen or self._radar_wait_frames > 3 * gui_app.target_fps:
+        self.radar_status = "stale"
       self.radar_available = False
       self.lead_detected = False
       self.lead_from_radar = False
 
     # Visual traffic-light stopping and the final planner target are published
     # by longitudinal_planner. Keep the green state briefly so it is readable.
-    if ui_state.sm.updated['longitudinalPlan'] and ui_state.sm.valid['longitudinalPlan']:
-      self.longitudinal_plan_alive = True
-      long_plan = ui_state.sm['longitudinalPlan']
-      self.cruise_target_speed = long_plan.cruiseTargetSpeed
-      self.longitudinal_plan_source = long_plan.longitudinalPlanSource
-      if not ui_state.is_metric:
-        self.cruise_target_speed *= CV.KPH_TO_MPH
-      self.traffic_stop_distance = max(0.0, long_plan.trafficStopDistance)
+    if ui_state.sm.updated['longitudinalPlan']:
+      if ui_state.sm.valid['longitudinalPlan']:
+        self.longitudinal_plan_alive = True
+        long_plan = ui_state.sm['longitudinalPlan']
+        self.cruise_target_speed = long_plan.cruiseTargetSpeed
+        self.cruise_target_source = long_plan.cruiseTargetSource
+        if not ui_state.is_metric:
+          self.cruise_target_speed *= CV.KPH_TO_MPH
+        self.traffic_stop_distance = max(0.0, long_plan.trafficStopDistance)
 
-      traffic_state = int(long_plan.trafficState)
-      if traffic_state == 1:
-        self.traffic_light_state = "red"
-        self._traffic_light_hold_frames = max(1, int(0.5 * gui_app.target_fps))
-      elif traffic_state == 2:
-        self.traffic_light_state = "green"
-        self._traffic_light_hold_frames = max(1, int(2.0 * gui_app.target_fps))
-      elif self._traffic_light_hold_frames > 0:
-        self._traffic_light_hold_frames -= 1
+        traffic_state = int(long_plan.trafficState)
+        if traffic_state == 1:
+          self.traffic_light_state = "red"
+          self._traffic_light_hold_frames = max(1, int(0.5 * gui_app.target_fps))
+        elif traffic_state == 2:
+          self.traffic_light_state = "green"
+          self._traffic_light_hold_frames = max(1, int(2.0 * gui_app.target_fps))
+        elif self._traffic_light_hold_frames > 0:
+          self._traffic_light_hold_frames -= 1
+        else:
+          self.traffic_light_state = "off"
+          self.traffic_stop_distance = 0.0
       else:
+        # An alive producer can continuously publish invalid envelopes. Never
+        # retain an old target or green-light release through that condition.
+        self.longitudinal_plan_alive = False
+        self.cruise_target_speed = 0.0
         self.traffic_light_state = "off"
         self.traffic_stop_distance = 0.0
+        self._traffic_light_hold_frames = 0
     elif not ui_state.sm.alive['longitudinalPlan']:
       self.longitudinal_plan_alive = False
       self.cruise_target_speed = 0.0
-      if self._traffic_light_hold_frames > 0:
-        self._traffic_light_hold_frames -= 1
-      else:
-        self.traffic_light_state = "off"
-        self.traffic_stop_distance = 0.0
+      self.traffic_light_state = "off"
+      self.traffic_stop_distance = 0.0
+      self._traffic_light_hold_frames = 0
 
     super()._update_state()
     self.road_name_renderer.update()
@@ -216,7 +243,9 @@ class HudRendererSP(HudRenderer):
 
     self._draw_gear_shifter(rl.Rectangle(x + panel_width - 70, y + 13, 50, 48))
 
-    target_text = "–" if not self.longitudinal_plan_alive or self.cruise_target_speed <= 0 else str(round(self.cruise_target_speed))
+    # Zero is a real and safety-critical target at a red light. Reserve the
+    # dash exclusively for a missing/stale longitudinal plan.
+    target_text = "–" if not self.longitudinal_plan_alive else str(round(max(0.0, self.cruise_target_speed)))
     target_size = 108 if len(target_text) >= 3 else 124
     target_width = measure_text_cached(self._font_bold, target_text, target_size).x
     rl.draw_text_ex(
@@ -236,16 +265,7 @@ class HudRendererSP(HudRenderer):
     rl.draw_line_ex(rl.Vector2(x + 22, divider_y), rl.Vector2(x + panel_width - 22, divider_y), 2, rl.Color(255, 255, 255, 38))
 
     max_speed_text = CRUISE_DISABLED_CHAR if not self.is_cruise_set else str(round(self.set_speed))
-    speed_limit_active = long_plan_sp.speedLimit.assist.active
-    source_text = cruise_source_label(
-      self.longitudinal_plan_alive,
-      self.longitudinal_plan_source,
-      self.traffic_light_state,
-      speed_limit_active,
-      self.speed_limit_renderer.speed_limit_source,
-      self.smart_cruise_control_renderer.vision_active,
-      self.smart_cruise_control_renderer.map_active,
-    )
+    source_text = cruise_source_label(self.longitudinal_plan_alive, self.cruise_target_source)
     metric_width = (panel_width - 58) / 2
     self._draw_cruise_metric(x + 20, y + 222, metric_width, "最高定速", max_speed_text, COLORS.WHITE)
     self._draw_cruise_metric(x + 38 + metric_width, y + 222, metric_width, "定速依据", source_text,
@@ -285,7 +305,8 @@ class HudRendererSP(HudRenderer):
     if not self.longitudinal_plan_alive:
       label, detail, color = "纵向离线", "不可用", rl.RED
     elif self.traffic_light_state == "red":
-      label, detail, color = "红灯停车", f"距停点 {self.traffic_stop_distance:.0f}m", rl.RED
+      detail = f"距停点 {self.traffic_stop_distance:.0f}m" if self.traffic_stop_distance > 0 else "停车控制中"
+      label, color = "红灯停车", rl.RED
     elif self.traffic_light_state == "green":
       label, detail, color = "绿灯通行", "路径已放行", rl.GREEN
     else:
@@ -349,74 +370,39 @@ class HudRendererSP(HudRenderer):
       text_color,
     )
 
-  def _draw_traffic_light_status(self, rect: rl.Rectangle) -> None:
-    """Draw the active traffic-control decision near the driver's sightline."""
-    if self.traffic_light_state == "off":
-      return
-
-    w = TRAFFIC_CARD_WIDTH
-    h = TRAFFIC_CARD_HEIGHT
-    x = rect.x + (rect.width - w) / 2
-    y = rect.y + rect.height - h - TRAFFIC_CARD_BOTTOM_MARGIN
-    center_x = x + 82
-    center_y = y + h / 2
-
-    bg_color = rl.Color(0, 0, 0, 200)
-    card_rect = rl.Rectangle(x, y, w, h)
-    rl.draw_rectangle_rounded(card_rect, 0.14, 12, bg_color)
-
-    if self.traffic_light_state == "red":
-      color = rl.RED
-    elif self.traffic_light_state == "green":
-      color = rl.GREEN
-    else:
-      color = rl.GRAY
-
-    rl.draw_rectangle_rounded_lines_ex(card_rect, 0.14, 12, 3, rl.color_alpha(color, 0.72))
-    rl.draw_circle(int(center_x), int(center_y), 47, rl.Color(10, 10, 10, 255))
-    rl.draw_circle(int(center_x), int(center_y), 40, color)
-    rl.draw_circle_lines(int(center_x), int(center_y), 48, rl.Color(255, 255, 255, 105))
-
-    symbol = "!" if self.traffic_light_state == "red" else "GO"
-    symbol_size = 42 if self.traffic_light_state == "red" else 27
-    text_width = measure_text_cached(self._font_bold, symbol, symbol_size).x
-    rl.draw_text_ex(
-      self._font_bold,
-      symbol,
-      rl.Vector2(center_x - text_width / 2, center_y - symbol_size / 2),
-      symbol_size,
-      0,
-      rl.WHITE,
-    )
-
-    status_text = "STOP" if self.traffic_light_state == "red" else "GO"
-    rl.draw_text_ex(self._font_bold, status_text, rl.Vector2(x + 154, y + 22), 54, 0, rl.WHITE)
-    if self.traffic_light_state == "red" and 0 < self.traffic_stop_distance < 300:
-      distance_text = f"STOP LINE  {self.traffic_stop_distance:.0f} m"
-    else:
-      distance_text = "PATH CLEAR"
-    rl.draw_text_ex(self._font_semi_bold, distance_text, rl.Vector2(x + 156, y + 91), 32, 0, rl.Color(238, 238, 238, 255))
-
   def _draw_radar_status(self, rect: rl.Rectangle) -> None:
     """Draw radar status indicator (top-right corner)."""
-    w = 186
-    h = 58
+    w = 218
+    h = 70
     x = rect.x + rect.width - UI_CONFIG.border_size - UI_CONFIG.button_size - w - 18
     y = rect.y + 42
 
     bg_color = rl.Color(0, 0, 0, 180)
     rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.22, 8, bg_color)
 
-    radar_color = COLORS.ENGAGED if self.radar_available else rl.RED
-    rl.draw_circle(int(x + 24), int(y + h // 2), 9, radar_color)
+    if self.radar_status == "healthy":
+      radar_color = COLORS.ENGAGED
+    elif self.radar_status in ("initializing", "invalid"):
+      radar_color = rl.Color(255, 190, 32, 255)
+    else:
+      radar_color = rl.RED
+    rl.draw_circle(int(x + 25), int(y + h // 2), 10, radar_color)
 
     text = "ESCC" if self.escc_enabled else "RADAR"
     text_color = radar_color
-    rl.draw_text_ex(self._font_semi_bold, text, rl.Vector2(x + 44, y + 8), 23, 0, text_color)
+    rl.draw_text_ex(self._font_semi_bold, text, rl.Vector2(x + 48, y + 8), 25, 0, text_color)
 
-    if self.radar_available:
-      detail = "正常 · 雷达前车" if self.lead_detected and self.lead_from_radar else \
-               "正常 · 视觉前车" if self.lead_detected else "工作正常"
+    if self.radar_status == "healthy":
+      # Keep status text inside the shipped atlas. The middle-dot glyph is not
+      # part of the CJK fallback set and rendered as a replacement character.
+      detail = "正常 / 雷达前车" if self.lead_detected and self.lead_from_radar else \
+               "正常 / 视觉前车" if self.lead_detected else "硬件正常"
+    elif self.radar_status == "initializing":
+      detail = "正在初始化"
+    elif self.radar_status == "invalid":
+      detail = "数据校验中"
+    elif self.radar_status == "stale":
+      detail = "数据中断"
     else:
-      detail = "状态异常"
-    rl.draw_text_ex(self._font_medium, detail, rl.Vector2(x + 44, y + 31), 19, 0, radar_color)
+      detail = "雷达故障"
+    rl.draw_text_ex(self._font_medium, detail, rl.Vector2(x + 48, y + 39), 20, 0, radar_color)

@@ -91,13 +91,16 @@ def enable_cluster_hud(started, params, CP: car.CarParams) -> bool:
 
 def enable_app_navi_status(started, params, CP: car.CarParams) -> bool:
   try:
-    return params.get_bool("EnableAmapNaviStatus")
+    # These legacy Carrot toggles are integer settings outside the native C++
+    # registry. ParamsExt.get_int owns the d_carrot fallback; get_bool raises
+    # UnknownKeyName and previously kept both processes permanently disabled.
+    return params.get_int("EnableAmapNaviStatus") != 0
   except Exception:
     return False
 
 def enable_xiaoge_data(started, params, CP: car.CarParams) -> bool:
   try:
-    return params.get_bool("ShareData")
+    return params.get_int("ShareData") != 0
   except Exception:
     return False
 

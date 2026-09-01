@@ -21,10 +21,11 @@ _PARAM_REFRESH_FRAMES = 100
 
 
 class CarrotTrafficStop:
-  def __init__(self):
-    self.params = CarrotParams()
+  def __init__(self, params=None):
+    self.params = params or CarrotParams()
     self.enabled = self.params.get_bool("CarrotTrafficStopEnable")
     self.frame = 0
+    self.active = False
 
   def refresh_enabled(self) -> bool:
     if self.frame % _PARAM_REFRESH_FRAMES == 0:
@@ -33,14 +34,16 @@ class CarrotTrafficStop:
     return self.enabled
 
   def update(self, sm, v_cruise_ms: float) -> float:
+    self.active = False
     if not self.enabled:
       return v_cruise_ms
 
     try:
-      if sm.alive['carrotMan']:
+      if sm.alive['carrotMan'] and sm.valid['carrotMan']:
         traffic_state = sm['carrotMan'].trafficState
         # 1 == red light -> request early deceleration.
         if traffic_state == 1:
+          self.active = True
           return 0.0
     except Exception:
       pass

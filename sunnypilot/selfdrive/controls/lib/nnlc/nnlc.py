@@ -36,6 +36,7 @@ class NeuralNetworkLateralControl(LatControlTorqueExtBase):
     super().__init__(lac_torque, CP, CP_SP, CI)
     self.params = Params()
     self.enabled = self.params.get_bool("NeuralNetworkLateralControl")
+    self.fuzzy_hyundai_model = CP.brand == "hyundai" and CP_SP.neuralNetworkLateralControl.fuzzyFingerprint
     self.has_nn_model = CP_SP.neuralNetworkLateralControl.model.path != MOCK_MODEL_PATH
 
     # NN model takes current v_ego, lateral_accel, lat accel/jerk error, roll, and past/future/planned data
@@ -61,7 +62,10 @@ class NeuralNetworkLateralControl(LatControlTorqueExtBase):
 
   @property
   def _nnlc_enabled(self):
-    return self.enabled and self.model_valid and self.has_nn_model
+    # A substitute model is useful for discovery, but Hyundai EPS torque response varies enough
+    # between platforms that it must not be used for live control without an exact fingerprint.
+    # Fall back to the deterministic torque controller until this platform has its own model.
+    return self.enabled and self.model_valid and self.has_nn_model and not self.fuzzy_hyundai_model
 
   def update_limits(self):
     if not self._nnlc_enabled:
@@ -94,6 +98,11 @@ class NeuralNetworkLateralControl(LatControlTorqueExtBase):
   def update_neural_network_feedforward(self, CS, params, calibrated_pose) -> None:
     if not self._nnlc_enabled:
       return
+
+    # The regular torque controller PID operates in lateral-acceleration space. NNLC reuses the
+    # PID in normalized steering-torque space, so its limits must be applied on the very first
+    # valid model frame rather than relying on a later live-parameter update from controlsd.
+    self.update_limits()
 
     self.update_feedforward_torque_space(CS)
 

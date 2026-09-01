@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import argparse
-import coverage
 import pyray as rl
 
 from tqdm import tqdm
@@ -137,6 +136,14 @@ def main():
 
   print(f"Running {variant} UI replay...")
   with OpenpilotPrefix():
+    # The deployed production venv intentionally omits the test-only coverage
+    # package. HUD acceptance is a two-second render smoke test and must remain
+    # runnable on that exact device environment without installing anything.
+    if os.getenv("HUD_ACCEPTANCE_ONLY") == "1":
+      run_replay(variant)
+      return
+
+    import coverage
     sources = ["openpilot.system.ui"]
     if variant == "mici":
       sources.append("openpilot.selfdrive.ui.mici")

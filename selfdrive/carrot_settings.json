@@ -2516,18 +2516,18 @@
     {
       "group": "SPEED",
       "name": "CarrotSpeedLimitEnable",
-      "title": "Carrot Speed Limit(1)",
-      "descr": "Combine camera/CAN + map + nav-app speed limits and apply automatically (no button confirm).",
+      "title": "Carrot planned speed source(1)",
+      "descr": "Add Carrot's road-limit, navigation camera/bump, forwarded vehicle-limit and curve targets to the cruise ceiling. Sunny Speed Limit independently manages its vehicle and native-map sources.",
       "egroup": "SPEED",
-      "etitle": "Carrot Speed Limit(1)",
-      "edescr": "Combine camera/CAN + map + nav-app speed limits and apply automatically (no button confirm).",
+      "etitle": "Carrot planned speed source(1)",
+      "edescr": "Add Carrot's road-limit, navigation camera/bump, forwarded vehicle-limit and curve targets to the cruise ceiling. Sunny Speed Limit independently manages its vehicle and native-map sources.",
       "min": 0,
       "max": 1,
       "default": 1,
       "unit": 1,
       "cgroup": "速度控制",
-      "ctitle": "Carrot 限速(1)",
-      "cdescr": "合并摄像头/车辆CAN + 地图 + 导航App 三路限速，自动应用（无需按键确认）。"
+      "ctitle": "Carrot 规划速度源(1)",
+      "cdescr": "把 Carrot 规划的道路限速、导航测速/减速带、车辆转发限速和弯道速度加入巡航上限。Sunny Speed Limit 仍独立管理车辆与原生地图源。"
     },
     {
       "group": "SPEED",

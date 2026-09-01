@@ -91,19 +91,23 @@ class ModelManagerSP:
 
       with open(path, 'wb') as f:
         for chunk in response.iter_content(chunk_size=self._chunk_size):  # type: bytes
+          if not chunk:
+            continue
           f.write(chunk)
           bytes_downloaded += len(chunk)
 
           if self.params.get("ModelManager_DownloadIndex") is None:
             raise DownloadCancelled("Download cancelled")
 
-          if total_size > 0:
-            progress = (bytes_downloaded / total_size) * 100
-            model.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.downloading
-            model.downloadProgress.progress = progress
-            model.downloadProgress.eta = self._calculate_eta(model.fileName, progress)
-            self._sync_artifact_progress(model)
-            self._report_status()
+          # Some CDNs use chunked transfer and omit Content-Length. Keep
+          # publishing a live downloading state in that case; the UI renders an
+          # indeterminate bar instead of showing a dishonest percentage.
+          progress = min(99.0, (bytes_downloaded / total_size) * 100) if total_size > 0 else 0.0
+          model.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.downloading
+          model.downloadProgress.progress = progress
+          model.downloadProgress.eta = self._calculate_eta(model.fileName, progress) if total_size > 0 else 0
+          self._sync_artifact_progress(model)
+          self._report_status()
 
     # Clean up start time after download completes
     del self._download_start_times[model.fileName]
@@ -130,17 +134,26 @@ class ModelManagerSP:
           chunk_size = int(response.headers.get("content-length", 0))
           with open(chunk_path, 'wb') as f:
             for data in response.iter_content(chunk_size=self._chunk_size):
+              if not data:
+                continue
               f.write(data)
               chunk_downloaded += len(data)
               if self.params.get("ModelManager_DownloadIndex") is None:
                 raise DownloadCancelled("Download cancelled")
-              intra = chunk_downloaded / max(chunk_size, 1)
+              intra = min(1.0, chunk_downloaded / chunk_size) if chunk_size > 0 else 0.0
               progress = min(99.0, ((i + intra) / num_chunks) * 100)
               artifact.downloadProgress.status = custom.ModelManagerSP.DownloadStatus.downloading
               artifact.downloadProgress.progress = progress
-              artifact.downloadProgress.eta = self._calculate_eta(artifact.fileName, progress)
+              artifact.downloadProgress.eta = self._calculate_eta(artifact.fileName, progress) if chunk_size > 0 else 0
               self._sync_artifact_progress(artifact)
               self._report_status()
+
+          if chunk_size <= 0:
+            # With no byte total, completed chunks are still an exact lower
+            # bound. Advance only after the response finishes.
+            artifact.downloadProgress.progress = min(99.0, ((i + 1) / num_chunks) * 100)
+            self._sync_artifact_progress(artifact)
+            self._report_status()
 
     with open(manifest_path, 'w') as f:
       f.write(str(num_chunks))

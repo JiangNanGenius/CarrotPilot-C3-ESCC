@@ -28,11 +28,12 @@ AUTO_SPEED_RAISE_INTERVAL_FRAMES = 100
 
 
 def auto_speed_limit_raise(current_kph: float, road_limit_kph: float, ratio: float,
-                           lead_status: bool, lead_distance_m: float, lead_speed_kph: float) -> float:
+                           lead_status: bool, lead_distance_m: float, lead_speed_kph: float,
+                           inputs_valid: bool = True) -> float:
   """Return one conservative 5 km/h upward step, matching Carrot's lead-gated behavior."""
   ceiling_kph = min(V_CRUISE_MAX, road_limit_kph * ratio)
   lead_is_pulling_away = lead_status and 0.0 < lead_distance_m < 60.0 and lead_speed_kph + 5.0 > current_kph
-  if ratio <= 0.0 or road_limit_kph <= 0.0 or not lead_is_pulling_away or current_kph >= ceiling_kph:
+  if not inputs_valid or ratio <= 0.0 or road_limit_kph <= 0.0 or not lead_is_pulling_away or current_kph >= ceiling_kph:
     return current_kph
   return float(min(current_kph + 5.0, ceiling_kph))
 
@@ -74,8 +75,10 @@ class VCruiseHelperSP:
     self.sla_state = SpeedLimitAssistState.disabled
     self.prev_sla_state = SpeedLimitAssistState.disabled
     self.has_speed_limit = False
+    self.current_speed_limit_valid = False
     self.speed_limit_final_last = 0.
     self.speed_limit_final_last_kph = 0.
+    self.speed_limit_final_kph = 0.
     self.prev_speed_limit_final_last_kph = 0.
     self.req_plus = False
     self.req_minus = False
@@ -90,7 +93,7 @@ class VCruiseHelperSP:
     self.long_increment = self.params.get("CustomAccLongPressIncrement", return_default=True)
     self.auto_speed_limit_ratio = max(0.0, self.carrot_params.get_float("AutoSpeedUptoRoadSpeedLimit") * 0.01)
 
-  def update_auto_speed_limit_raise(self, CS: car.CarState, radar_state, enabled: bool) -> None:
+  def update_auto_speed_limit_raise(self, CS: car.CarState, radar_state, enabled: bool, inputs_valid: bool = True) -> None:
     """Optionally raise the driver's maximum toward the road limit.
 
     This never lowers the set speed and never changes the planner's final
@@ -110,7 +113,7 @@ class VCruiseHelperSP:
     lead = radar_state.leadOne
     owns_set_speed = owns_cruise_set_speed(self.CP.pcmCruise, self.CP_SP.pcmCruiseSpeed)
     eligible = (enabled and owns_set_speed and self.auto_speed_limit_ratio > 0.0 and
-                self.has_speed_limit and not self.auto_speed_raise_paused and not CS.brakePressed and
+                inputs_valid and self.current_speed_limit_valid and not self.auto_speed_raise_paused and not CS.brakePressed and
                 not CS.gasPressed and CS.vEgo > 5.0 and lead.status)
     if not eligible:
       self.auto_speed_raise_frames = 0
@@ -121,9 +124,9 @@ class VCruiseHelperSP:
       return
     self.auto_speed_raise_frames = 0
 
-    raised_kph = auto_speed_limit_raise(self.v_cruise_kph, self.speed_limit_final_last_kph,
+    raised_kph = auto_speed_limit_raise(self.v_cruise_kph, self.speed_limit_final_kph,
                                         self.auto_speed_limit_ratio, lead.status, lead.dRel,
-                                        lead.vLeadK * CV.MS_TO_KPH)
+                                        lead.vLeadK * CV.MS_TO_KPH, inputs_valid)
     if raised_kph > self.v_cruise_kph:
       self.v_cruise_kph = raised_kph
       self.v_cruise_cluster_kph = raised_kph
@@ -166,11 +169,24 @@ class VCruiseHelperSP:
 
     return enabled
 
-  def update_speed_limit_assist(self, is_metric, LP_SP: custom.LongitudinalPlanSP) -> None:
+  def update_speed_limit_assist(self, is_metric, LP_SP: custom.LongitudinalPlanSP, inputs_valid: bool = True) -> None:
+    if not inputs_valid:
+      self.has_speed_limit = False
+      self.current_speed_limit_valid = False
+      self.speed_limit_final_last = 0.
+      self.speed_limit_final_last_kph = 0.
+      self.speed_limit_final_kph = 0.
+      self.sla_state = SpeedLimitAssistState.disabled
+      self.req_plus = False
+      self.req_minus = False
+      return
+
     resolver = LP_SP.speedLimit.resolver
     self.has_speed_limit = resolver.speedLimitValid or resolver.speedLimitLastValid
+    self.current_speed_limit_valid = resolver.speedLimitValid
     self.speed_limit_final_last = LP_SP.speedLimit.resolver.speedLimitFinalLast
     self.speed_limit_final_last_kph = self.speed_limit_final_last * CV.MS_TO_KPH
+    self.speed_limit_final_kph = LP_SP.speedLimit.resolver.speedLimitFinal * CV.MS_TO_KPH
     self.sla_state = LP_SP.speedLimit.assist.state
     self.req_plus, self.req_minus = compare_cluster_target(self.v_cruise_cluster_kph * CV.KPH_TO_MS,
                                                            self.speed_limit_final_last, is_metric)

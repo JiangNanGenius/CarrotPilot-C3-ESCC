@@ -46,9 +46,13 @@ def setup_sm_mock(mocker: MockerFixture):
     'speedLimitAheadDistance': 0.,
   }, mocker)
   gps_data = create_mock({
-    'unixTimestampMillis': time.monotonic() * 1e3,
+    # Wall-clock GPS time must not be used as a monotonic freshness clock.
+    'unixTimestampMillis': 1_800_000_000_000,
   }, mocker)
   sm_mock = mocker.MagicMock()
+  sm_mock.alive = {'liveMapDataSP': True}
+  sm_mock.valid = {'liveMapDataSP': True}
+  sm_mock.recv_time = {'liveMapDataSP': time.monotonic()}
   sm_mock.__getitem__.side_effect = lambda key: {
     'carState': car_state,
     'liveMapDataSP': live_map_data,
@@ -137,8 +141,19 @@ class TestSpeedLimitResolverValidation:
   def test_old_map_data_ignored(self, resolver_class, policy, mocker: MockerFixture):
     resolver = resolver_class()
     resolver.policy = policy
-    sm_mock = mocker.MagicMock()
-    sm_mock['gpsLocation'].unixTimestampMillis = (time.monotonic() - 2 * LIMIT_MAX_MAP_DATA_AGE) * 1e3
+    sm_mock = setup_sm_mock(mocker)
+    sm_mock.recv_time['liveMapDataSP'] = time.monotonic() - 2 * LIMIT_MAX_MAP_DATA_AGE
     resolver._get_from_map_data(sm_mock)
+    assert resolver.limit_solutions[SpeedLimitSource.map] == 0.
+    assert resolver.distance_solutions[SpeedLimitSource.map] == 0.
+
+  @pytest.mark.parametrize("health_key", ["alive", "valid"])
+  def test_dead_or_invalid_map_data_ignored(self, resolver_class, health_key, mocker: MockerFixture):
+    resolver = resolver_class()
+    sm_mock = setup_sm_mock(mocker)
+    getattr(sm_mock, health_key)['liveMapDataSP'] = False
+
+    resolver._get_from_map_data(sm_mock)
+
     assert resolver.limit_solutions[SpeedLimitSource.map] == 0.
     assert resolver.distance_solutions[SpeedLimitSource.map] == 0.

@@ -43,8 +43,8 @@ def generate_modelV2():
 
 class TestNeuralNetworkLateralControl:
 
-  @parameterized.expand([HONDA.HONDA_CIVIC, TOYOTA.TOYOTA_RAV4, HYUNDAI.HYUNDAI_SANTA_CRUZ_1ST_GEN, GM.CHEVROLET_BOLT_EUV])
-  def test_saturation(self, car_name):
+  @staticmethod
+  def setup_controller(car_name):
     params = Params()
     params.put_bool("NeuralNetworkLateralControl", True)
 
@@ -56,9 +56,13 @@ class TestNeuralNetworkLateralControl:
     sunnypilot_interfaces.setup_interfaces(CI, params)
 
     CP_SP = convert_to_capnp(CP_SP)
+    return CP, CP_SP, CI, LatControlTorque(CP.as_reader(), CP_SP.as_reader(), CI, DT_CTRL)
+
+  @parameterized.expand([HONDA.HONDA_CIVIC, TOYOTA.TOYOTA_RAV4, HYUNDAI.HYUNDAI_SANTA_CRUZ_1ST_GEN, GM.CHEVROLET_BOLT_EUV])
+  def test_saturation(self, car_name):
+    CP, _, CI, controller = self.setup_controller(car_name)
     VM = VehicleModel(CP)
 
-    controller = LatControlTorque(CP.as_reader(), CP_SP.as_reader(), CI, DT_CTRL)
     torque_params = CP.lateralTuning.torque
 
     CS = car.CarState.new_message()
@@ -81,22 +85,51 @@ class TestNeuralNetworkLateralControl:
       controller.extension.update_model_v2(model_v2)
       controller.extension.update_lateral_lag(test_lag)
       controller.update_live_torque_params(torque_params.latAccelFactor, torque_params.latAccelOffset, torque_params.friction)
-      controller.extension.update_limits()
-      _, _, lac_log = controller.update(True, CS, VM, params, False, 0, pose, True, 0.2)
+      torque, _, lac_log = controller.update(True, CS, VM, params, False, 0, pose, True, 0.2)
+      assert -1.0 <= torque <= 1.0
     assert lac_log.saturated
 
     for _ in range(1000):
       controller.extension.update_model_v2(model_v2)
       controller.extension.update_lateral_lag(test_lag)
       controller.update_live_torque_params(torque_params.latAccelFactor, torque_params.latAccelOffset, torque_params.friction)
-      controller.extension.update_limits()
-      _, _, lac_log = controller.update(True, CS, VM, params, False, 0, pose, False, 0.2)
+      torque, _, lac_log = controller.update(True, CS, VM, params, False, 0, pose, False, 0.2)
+      assert -1.0 <= torque <= 1.0
     assert not lac_log.saturated
 
     for _ in range(1000):
       controller.extension.update_model_v2(model_v2)
       controller.extension.update_lateral_lag(test_lag)
       controller.update_live_torque_params(torque_params.latAccelFactor, torque_params.latAccelOffset, torque_params.friction)
-      controller.extension.update_limits()
-      _, _, lac_log = controller.update(True, CS, VM, params, False, 1, pose, False, 0.2)
+      torque, _, lac_log = controller.update(True, CS, VM, params, False, 1, pose, False, 0.2)
+      assert -1.0 <= torque <= 1.0
     assert lac_log.saturated
+
+  def test_output_bounded_without_manual_extension_limit_update(self):
+    CP, _, _, controller = self.setup_controller(HONDA.HONDA_CIVIC)
+    VM = VehicleModel(CP)
+
+    CS = car.CarState.new_message()
+    CS.vEgo = 30
+
+    live_params = log.LiveParametersData.new_message()
+    pose = Pose.from_live_pose(generate_livePose().livePose)
+    model_v2 = generate_modelV2().modelV2
+    controller.extension.update_model_v2(model_v2)
+
+    outputs = [controller.update(True, CS, VM, live_params, False, curvature, pose, False, 0.2)[0]
+               for curvature in (-1.0, 1.0)]
+
+    assert controller.extension._nnlc_enabled
+    assert controller.pid.neg_limit == -1.0
+    assert controller.pid.pos_limit == 1.0
+    assert all(-1.0 <= torque <= 1.0 for torque in outputs)
+
+  def test_fuzzy_hyundai_model_falls_back_to_standard_torque_control(self):
+    CP, CP_SP, _, controller = self.setup_controller(HYUNDAI.KIA_SELTOS_2023)
+    controller.extension.update_model_v2(generate_modelV2().modelV2)
+
+    assert CP_SP.neuralNetworkLateralControl.fuzzyFingerprint
+    assert controller.extension.enabled
+    assert controller.extension.has_nn_model
+    assert not controller.extension._nnlc_enabled

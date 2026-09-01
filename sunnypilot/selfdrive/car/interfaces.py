@@ -59,20 +59,21 @@ def _initialize_torque_lateral_control(CI: CarInterfaceBase, CP: structs.CarPara
 
 
 def _cleanup_unsupported_params(CP: structs.CarParams, CP_SP: structs.CarParamsSP, params: Params = None) -> None:
+  """Apply runtime availability handling without erasing durable preferences.
+
+  CarParams can temporarily describe MOCK or another incompatible platform while
+  fingerprinting/recalibration is in progress. Capability checks in the feature
+  initializers remain authoritative for the current drive; the driver's saved
+  choices must survive so they can become active again when the real car returns.
+  """
   if params is None:
     params = Params()
 
   if CP.steerControlType == structs.CarParams.SteerControlType.angle:
-    cloudlog.warning("SteerControlType is angle, cleaning up params")
-    params.remove("NeuralNetworkLateralControl")
-    params.remove("EnforceTorqueControl")
+    cloudlog.info("SteerControlType is angle; torque and NNLC preferences retained but inactive")
 
   if not CP.openpilotLongitudinalControl and CP_SP.pcmCruiseSpeed:
-    cloudlog.warning("openpilot Longitudinal Control and ICBM not available, cleaning up params")
-    params.remove("DynamicExperimentalControl")
-    params.remove("CustomAccIncrementsEnabled")
-    params.remove("SmartCruiseControlVision")
-    params.remove("SmartCruiseControlMap")
+    cloudlog.info("openpilot longitudinal control is unavailable; longitudinal preferences retained but inactive")
 
   set_speed_limit_assist_availability(CP, CP_SP, params)
 
@@ -84,7 +85,7 @@ def setup_interfaces(CI: CarInterfaceBase, params: Params = None) -> None:
   enforce_torque = _enforce_torque_lateral_control(CP, params)
   nnlc_enabled = _initialize_neural_network_lateral_control(CP, CP_SP, params)
   _initialize_torque_lateral_control(CI, CP, enforce_torque, nnlc_enabled)
-  _cleanup_unsupported_params(CP, CP_SP)
+  _cleanup_unsupported_params(CP, CP_SP, params)
 
 
 def initialize_params(params) -> list[dict[str, Any]]:

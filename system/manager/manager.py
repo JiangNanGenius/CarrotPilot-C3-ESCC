@@ -22,7 +22,21 @@ from openpilot.system.version import get_build_metadata
 from openpilot.system.hardware.hw import Paths
 from openpilot.system.hardware import PC
 
-from openpilot.sunnypilot.system.params_migration import run_migration
+from openpilot.sunnypilot.system.params_migration import migrate_legacy_carrot_params, run_migration
+
+
+def migrate_and_clear_params(params: Params) -> None:
+  if not PC:
+    try:
+      migrate_legacy_carrot_params(params)
+    except Exception:
+      # The migration is best-effort and must never prevent manager startup.
+      cloudlog.exception("manager failed to migrate legacy Carrot params")
+
+  params.clear_all(ParamKeyFlag.CLEAR_ON_MANAGER_START)
+  params.clear_all(ParamKeyFlag.CLEAR_ON_ONROAD_TRANSITION)
+  params.clear_all(ParamKeyFlag.CLEAR_ON_OFFROAD_TRANSITION)
+  params.clear_all(ParamKeyFlag.CLEAR_ON_IGNITION_ON)
 
 
 def manager_init() -> None:
@@ -31,10 +45,7 @@ def manager_init() -> None:
   build_metadata = get_build_metadata()
 
   params = Params()
-  params.clear_all(ParamKeyFlag.CLEAR_ON_MANAGER_START)
-  params.clear_all(ParamKeyFlag.CLEAR_ON_ONROAD_TRANSITION)
-  params.clear_all(ParamKeyFlag.CLEAR_ON_OFFROAD_TRANSITION)
-  params.clear_all(ParamKeyFlag.CLEAR_ON_IGNITION_ON)
+  migrate_and_clear_params(params)
   # if build_metadata.release_channel:
   #   params.clear_all(ParamKeyFlag.DEVELOPMENT_ONLY)
 

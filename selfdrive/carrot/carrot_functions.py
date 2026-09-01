@@ -38,6 +38,21 @@ class TrafficState(Enum):
 
 A_CRUISE_MAX_BP_CARROT = [0., 10 * CV.KPH_TO_MS, 40 * CV.KPH_TO_MS, 60 * CV.KPH_TO_MS, 80 * CV.KPH_TO_MS, 110 * CV.KPH_TO_MS, 140 * CV.KPH_TO_MS]
 
+# Keep the requested stopping point ahead of the model's stop line. This is a
+# distance to subtract from the remaining travel distance, never a minimum
+# distance to add: increasing the buffer must only make the speed target more
+# conservative. The original controller already reserved 1 m in its v_soft
+# calculation; the additional 1 m addresses the reported close stopping.
+TRAFFIC_STOP_SAFETY_BUFFER_M = 2.0
+
+
+def traffic_stop_target_speed(stop_distance_m: float, comfort_brake: float,
+                              safety_buffer_m: float = TRAFFIC_STOP_SAFETY_BUFFER_M) -> float:
+  """Return the kinematic speed ceiling for a buffered traffic-light stop."""
+  usable_distance_m = max(0.0, stop_distance_m - max(0.0, safety_buffer_m))
+  return float(np.sqrt(max(0.0, 2.0 * max(0.0, comfort_brake) * usable_distance_m)))
+
+
 class CarrotPlanner:
   def __init__(self):
     self.params = Params()
@@ -119,7 +134,7 @@ class CarrotPlanner:
 
     self.eco_over_speed = 2
     self.eco_target_speed = 0
-    
+
     self.autoNaviSpeedDecelRate = 1.5
 
     self.desireState = 0.0
@@ -148,7 +163,8 @@ class CarrotPlanner:
       self.params_count = 0
 
   def get_carrot_accel(self, v_ego):
-    cruiseMaxVals = [self.cruiseMaxVals0, self.cruiseMaxVals1, self.cruiseMaxVals2, self.cruiseMaxVals3, self.cruiseMaxVals4, self.cruiseMaxVals5, self.cruiseMaxVals6]
+    cruiseMaxVals = [self.cruiseMaxVals0, self.cruiseMaxVals1, self.cruiseMaxVals2, self.cruiseMaxVals3,
+                     self.cruiseMaxVals4, self.cruiseMaxVals5, self.cruiseMaxVals6]
     factor = self.myHighModeFactor if self.myDrivingMode == DrivingMode.High else self.mySafeFactor
     return np.interp(v_ego, A_CRUISE_MAX_BP_CARROT, cruiseMaxVals) * factor
 
@@ -348,7 +364,7 @@ class CarrotPlanner:
 
   def _update_carrot_man(self, sm, v_ego_kph, v_cruise_kph):
     atc_active = False
-    if sm.alive['carrotMan']:
+    if sm.alive['carrotMan'] and sm.valid['carrotMan']:
       carrot_man = sm['carrotMan']
       atc_turn_left = carrot_man.atcType in ["turn left", "atc left"]
       trigger_start = self.carrot_stay_stop = False
@@ -375,6 +391,15 @@ class CarrotPlanner:
       # desiredSpeed is applied by CarrotSpeedLimit after the Sunny/Carrot
       # mode selector. Applying it here as well made the selector ineffective
       # and could clamp cruise even when direct Carrot limiting was disabled.
+    else:
+      # External navigation is optional. An invalid packet must relinquish all
+      # control immediately; in particular, a stale green must never release a
+      # visual stop or initiate a turn.
+      self.carrot_stay_stop = False
+      self.trafficState_carrot = 0
+      self.activeCarrot = 0
+      self.xDistToTurn = 0
+      self.atcType = ""
 
     return v_cruise_kph, atc_active
 
@@ -430,7 +455,7 @@ class CarrotPlanner:
     self.mySafeFactor = 1.0
 
     v_cruise_kph, atc_active = self._update_carrot_man(sm, v_ego_kph, v_cruise_kph)
-    
+
     #if atc_active and not self.atc_active and self.xState not in [XState.e2eStop, XState.e2eStopped, XState.lead]:
     #  if self.atcType in ["turn left", "turn right", "atc left", "atc right"]:
     #    self.xState = XState.e2ePrepare
@@ -512,9 +537,10 @@ class CarrotPlanner:
           # 停车距离优化：高速时保持安全距离（0.7→0.85）
           self.trafficStopAdjustRatio = np.interp(v_ego_kph, [0, 100], [1.0, 0.85])
           stop_dist = stop_model_x_rl * np.interp(stop_model_x_rl, [0, 50], [1.0, self.trafficStopAdjustRatio])
-          # 最小停车距离保护（默认 4.0 米）
-          MIN_STOP_DISTANCE = 4.0
-          stop_dist = max(stop_dist, MIN_STOP_DISTANCE)
+          # stop_dist is remaining travel distance. Never raise it to create a
+          # "buffer"; that permits a higher speed and moves the stop later.
+          # The physical safety margin is subtracted in traffic_stop_target_speed.
+          stop_dist = max(0.0, stop_dist)
           # 修正记录逻辑：无论距离多少都记录
           self.actual_stop_distance = stop_dist
           stop_model_x = 0
@@ -579,8 +605,7 @@ class CarrotPlanner:
 
     stopping_active = (self.xState in [XState.e2eStop, XState.e2eStopped])
     if stopping_active and stop_dist < 300.0:
-      stop_dist_soft = max(stop_dist - 1.0, 0.0)
-      v_soft = float(np.sqrt(max(0.0, 2.0 * self.comfort_brake * stop_dist_soft)))
+      v_soft = traffic_stop_target_speed(stop_dist, self.comfort_brake)
       v_cruise = min(v_cruise, v_soft)
 
     self.v_cruise = v_cruise
@@ -608,7 +633,6 @@ class DrivingModeDetector:
 
     def update_data(self, carstate, leadOne):
       my_speed = carstate.vEgo * CV.MS_TO_KPH
-      my_accel = carstate.aEgo
       lead_speed = 0
       lead_accel = 0
       distance = 200
@@ -632,7 +656,7 @@ class DrivingModeDetector:
 
       # ---- 디바운스 로직 ----
       if enter:
-        self.counter += 1  
+        self.counter += 1
       elif exit_:
         self.counter -= 1
 

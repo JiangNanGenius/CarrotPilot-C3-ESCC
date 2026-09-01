@@ -160,19 +160,23 @@ class ModelsLayout(Widget):
     if summary.bundleName:
       self.bundle_download_label.set_visible(True)
       show = summary.status == custom.ModelManagerSP.DownloadStatus.downloading
+      bundle_name = bundle.internalName or summary.bundleName
       if summary.error:
         if summary.status == custom.ModelManagerSP.DownloadStatus.cancelled:
-          text = f"{tr('download cancelled')} - {summary.bundleName}"
+          text = f"{tr('download cancelled')} - {bundle_name}"
           color = rl.GRAY
         else:
-          text = f"{tr('download failed')} - {summary.bundleName}"
+          text = f"{tr('download failed')} - {bundle_name}"
           color = rl.RED
       elif show:
-        eta = f" · {summary.eta}s" if summary.eta else ""
-        text = f"{int(summary.progress)}% · {summary.completedFiles}/{summary.totalFiles}{eta} - {summary.bundleName}"
+        if summary.progress > 0:
+          eta = f" | {summary.eta}s" if summary.eta else ""
+          text = f"{int(summary.progress)}% | {summary.completedFiles}/{summary.totalFiles}{eta} - {bundle_name}"
+        else:
+          text = f"{tr('starting download')} - {bundle_name}"
         color = rl.WHITE
       else:
-        text = f"100% - {summary.bundleName}"
+        text = f"100% - {bundle_name}"
         color = ON_COLOR
       self.bundle_download_label.action_item.update(summary.progress, text, show, color)
 
@@ -193,16 +197,17 @@ class ModelsLayout(Widget):
       if label := labels.get(getattr(model.type, 'raw', model.type)):
         label.set_visible(True)
         p = model.artifact.downloadProgress
-        text, show, color = f"pending - {bundle.displayName}", False, rl.GRAY
+        bundle_name = bundle.internalName or bundle.displayName
+        text, show, color = f"{tr('pending')} - {bundle_name}", False, rl.GRAY
         if p.status == custom.ModelManagerSP.DownloadStatus.downloading:
-          text, show = f"{int(p.progress)}% - {bundle.displayName}", True
+          text, show = ((f"{int(p.progress)}%" if p.progress > 0 else tr("starting download")) + f" - {bundle_name}"), True
         elif p.status in (custom.ModelManagerSP.DownloadStatus.downloaded, custom.ModelManagerSP.DownloadStatus.cached):
           status_text = tr("from cache" if p.status == custom.ModelManagerSP.DownloadStatus.cached else "downloaded")
-          text, color = f"{bundle.displayName} - {status_text if status_changed else tr('ready')}", ON_COLOR
+          text, color = f"{bundle_name} - {status_text if status_changed else tr('ready')}", ON_COLOR
         elif p.status == custom.ModelManagerSP.DownloadStatus.failed:
-          text, color = f"download failed - {bundle.displayName}", rl.RED
+          text, color = f"{tr('download failed')} - {bundle_name}", rl.RED
         elif p.status == custom.ModelManagerSP.DownloadStatus.cancelled:
-          text, color = f"download cancelled - {bundle.displayName}", rl.GRAY
+          text, color = f"{tr('download cancelled')} - {bundle_name}", rl.GRAY
         label.action_item.update(p.progress, text, show, color)
 
   @staticmethod

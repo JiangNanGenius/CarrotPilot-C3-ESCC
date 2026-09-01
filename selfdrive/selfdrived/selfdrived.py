@@ -51,6 +51,16 @@ TurnDirection = custom.ModelDataV2SP.TurnDirection
 IGNORED_SAFETY_MODES = (SafetyModel.silent, SafetyModel.noOutput)
 
 
+def runtime_experimental_mode(params: Params, CP: car.CarParams) -> bool:
+  """Return the effective mode without mutating the driver's saved preference."""
+  return params.get_bool("ExperimentalMode") and CP.openpilotLongitudinalControl
+
+
+def service_data_available(sm: messaging.SubMaster, service: str) -> bool:
+  """Reject a valid-but-stale payload after its producer stops publishing."""
+  return sm.alive[service] and sm.valid[service]
+
+
 class SelfdriveD(CruiseHelper):
   def __init__(self, CP=None, CP_SP=None):
     self.params = Params()
@@ -112,11 +122,9 @@ class SelfdriveD(CruiseHelper):
 
     car_recognized = self.CP.brand != 'mock'
 
-    # cleanup old params
-    if not self.CP.alphaLongitudinalAvailable:
-      self.params.remove("AlphaLongitudinalEnabled")
-    if not self.CP.openpilotLongitudinalControl:
-      self.params.remove("ExperimentalMode")
+    # CarParams may be transiently MOCK/incompatible during fingerprinting.
+    # Runtime capability gates are authoritative; durable driver preferences
+    # must remain available for the next valid fingerprint.
 
     self.CS_prev = car.CarState.new_message()
     self.AM = AlertManager()
@@ -220,8 +228,10 @@ class SelfdriveD(CruiseHelper):
       self.events.add(EventName.resumeBlocked)
 
     if not self.CP.notCar:
-      self.events.add_from_msg(self.sm['driverMonitoringState'].events)
-      self.events_sp.add_from_msg(self.sm['longitudinalPlanSP'].events)
+      if service_data_available(self.sm, 'driverMonitoringState'):
+        self.events.add_from_msg(self.sm['driverMonitoringState'].events)
+      if service_data_available(self.sm, 'longitudinalPlanSP'):
+        self.events_sp.add_from_msg(self.sm['longitudinalPlanSP'].events)
 
     # Add car events, ignore if CAN isn't valid
     if CS.canValid:
@@ -351,11 +361,11 @@ class SelfdriveD(CruiseHelper):
         cloudlog.event("process_not_running", not_running=not_running, error=True)
       self.not_running_prev = not_running
     if self.sm.recv_frame['managerState'] and (not_running - self.ignored_processes):
-      pass#self.events.add(EventName.processNotRunning)
+      self.events.add(EventName.processNotRunning)
     else:
       if not SIMULATION and not self.rk.lagging:
         if not self.sm.all_alive(self.camera_packets):
-          pass#self.events.add(EventName.cameraMalfunction)
+          self.events.add(EventName.cameraMalfunction)
         elif not self.sm.all_freq_ok(self.camera_packets):
           self.events.add(EventName.cameraFrameRate)
     if not REPLAY and self.rk.lagging:
@@ -378,11 +388,11 @@ class SelfdriveD(CruiseHelper):
     no_system_errors = (not has_disable_events) or (len(self.events) == num_events)
     if not self.sm.all_checks() and no_system_errors:
       if not self.sm.all_alive():
-        pass#self.events.add(EventName.commIssue)
+        self.events.add(EventName.commIssue)
       elif not self.sm.all_freq_ok():
-        pass#self.events.add(EventName.commIssueAvgFreq)
+        self.events.add(EventName.commIssueAvgFreq)
       else:
-        pass#self.events.add(EventName.commIssue)
+        self.events.add(EventName.commIssue)
 
       logs = {
         'invalid': [s for s, valid in self.sm.valid.items() if not valid],
@@ -405,7 +415,7 @@ class SelfdriveD(CruiseHelper):
 
     # conservative HW alert. if the data or frequency are off, locationd will throw an error
     if any((self.sm.frame - self.sm.recv_frame[s])*DT_CTRL > 10. for s in self.sensor_packets):
-      pass#self.events.add(EventName.sensorDataInvalid)
+      self.events.add(EventName.sensorDataInvalid)
 
     if not REPLAY:
       # Check for mismatch between openpilot and car's PCM
@@ -440,7 +450,7 @@ class SelfdriveD(CruiseHelper):
     # GPS checks
     gps_ok = self.sm.recv_frame[self.gps_location_service] > 0 and (self.sm.frame - self.sm.recv_frame[self.gps_location_service]) * DT_CTRL < 2.0
     if not gps_ok and self.sm['livePose'].inputsOK and (self.distance_traveled > 1500):
-      pass#self.events.add(EventName.noGps)
+      self.events.add(EventName.noGps)
     if gps_ok:
       self.distance_traveled = 0
     self.distance_traveled += abs(CS.vEgo) * DT_CTRL
@@ -597,7 +607,7 @@ class SelfdriveD(CruiseHelper):
       self.is_metric = self.params.get_bool("IsMetric")
       self.is_ldw_enabled = self.params.get_bool("IsLdwEnabled")
       self.disengage_on_accelerator = self.params.get_bool("DisengageOnAccelerator")
-      self.experimental_mode = self.params.get_bool("ExperimentalMode") and self.CP.openpilotLongitudinalControl
+      self.experimental_mode = runtime_experimental_mode(self.params, self.CP)
       self.personality = self.params.get("LongitudinalPersonality", return_default=True)
       self.brake_auto_resume_enabled = self.carrot_params.get_bool("BrakeCruiseAutoResume")
 

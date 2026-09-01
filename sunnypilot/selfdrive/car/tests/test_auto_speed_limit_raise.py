@@ -12,6 +12,7 @@ def test_auto_raise_requires_enabled_ratio_and_safe_lead_gate():
   assert auto_speed_limit_raise(40.0, 60.0, 1.0, False, 35.0, 60.0) == 40.0
   assert auto_speed_limit_raise(40.0, 60.0, 1.0, True, 75.0, 60.0) == 40.0
   assert auto_speed_limit_raise(40.0, 60.0, 1.0, True, 35.0, 20.0) == 40.0
+  assert auto_speed_limit_raise(40.0, 60.0, 1.0, True, 35.0, 60.0, inputs_valid=False) == 40.0
 
 
 def test_software_owned_set_speed_includes_seltos_mixed_flags():

@@ -29,6 +29,20 @@ def make_msg(face_detected, distracted=False, model_uncertain=False):
   return ds
 
 
+def make_rhd_msg(face_detected=True):
+  ds = make_msg(False)
+  ds.wheelOnRightProb = 1.0
+  ds.rightDriverData.faceOrientation = [0., 0., 0.]
+  ds.rightDriverData.facePosition = [0., 0.]
+  ds.rightDriverData.faceProb = float(face_detected)
+  ds.rightDriverData.eyesVisibleProb = 1.
+  ds.rightDriverData.eyesClosedProb = 0.
+  ds.rightDriverData.faceOrientationStd = [0., 0., 0.]
+  ds.rightDriverData.facePositionStd = [0., 0.]
+  ds.rightDriverData.phoneProb = 0.
+  return ds
+
+
 # driver state from neural net, 10Hz
 msg_NO_FACE_DETECTED = make_msg(False)
 msg_ATTENTIVE = make_msg(True)
@@ -64,6 +78,21 @@ class TestMonitoring:
 
   def _assert_no_events(self, events):
     assert all(not len(e) for e in events)
+
+  def test_saved_rhd_is_used_before_live_calibration(self):
+    dm = DriverMonitoring(rhd_saved=True)
+
+    assert dm.wheel_on_right
+    assert dm.get_state_packet(valid=False).driverMonitoringState.isRHD
+
+    initial_filter = dm.driver_distraction_filter.x
+    initial_pitch_count = dm.pose.pitch_offseter.filtered_stat.n
+    dm.update_driver_metadata_only(make_rhd_msg(), car_speed=0.)
+    assert dm.wheel_on_right
+    assert dm.face_detected
+    assert not dm.current_events.names
+    assert dm.driver_distraction_filter.x == initial_filter
+    assert dm.pose.pitch_offseter.filtered_stat.n == initial_pitch_count
 
   # engaged, driver is attentive all the time
   def test_fully_aware_driver(self):
