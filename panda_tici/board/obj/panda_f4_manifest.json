@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "target": "STM32F413 Panda F4 application",
+  "source_commit": "03c0329ab93fcc04a7e64ea34919cfa081d2a157",
+  "firmware_version": "DEV-03c0329a-DEBUG",
+  "build_type": "DEBUG",
+  "compiler": "arm-none-eabi-gcc 13.2.1 20231009",
+  "objcopy": "GNU objcopy 2.41.0.20231009",
+  "artifacts": {
+    "panda.elf": {
+      "size": 354060,
+      "sha256": "d5adbfee086a6526c25096e65c5a5047043954b11fef5dbf9341ae75e0f2eb3a"
+    },
+    "panda.bin": {
+      "size": 77904,
+      "sha256": "0169541a555d27874881ac18858a0e12d05dbe625a02636ab6c27f5a523c74cf"
+    },
+    "panda.bin.signed": {
+      "size": 78040,
+      "sha256": "b0977db30d549b5e4203cda2463b047dbbc3e4dd8c87486c8c5f7354f9796635"
+    },
+    "gitversion.h": {
+      "size": 90,
+      "sha256": "dbf0ea5e9161651a70d1b9691f3a46799207c9a6f114a0e1b4b85913effcf8fa"
+    },
+    "version": {
+      "size": 18,
+      "sha256": "5412daba1c08aa4b896d9d084fc01c2a5d7ac7b75bab58b4a049a69f70aaab7b"
+    }
+  },
+  "signed_format": {
+    "declared_length": 77912,
+    "format_version": 2,
+    "signature_sha256": "70a4e82bf062563660e45e54bd5663b63af7d37d2a1aac0a0f556fb4e6aa4a72",
+    "public_key_der_sha256": "7b96375770f70167da174aec1908415d59ff8b6c9b79c87d50423c11682be304",
+    "rsa_verified": true,
+    "signed_payload_matches_raw": true
+  },
+  "memory_layout": {
+    "initial_msp": "0x20040000",
+    "reset_vector": "0x0800cef9",
+    "edata": "0x20007fb8",
+    "ebss": "0x20012ed0",
+    "boot_mailbox": "0x2001fffc",
+    "stack_top": "0x20040000",
+    "rx_queue_start": "0x20040000",
+    "rx_queue_size": 65536,
+    "minimum_stack_guard": 16384
+  },
+  "device_bench": {
+    "date": "2026-09-01",
+    "device_serial": "220024001051323332363730",
+    "exact_signature_match": true,
+    "continuous_uptime_seconds": 108,
+    "faults": 0,
+    "rx_buffer_overflow": 0,
+    "tx_buffer_overflow": 0,
+    "malformed_classic_dlc_12_rejected_without_reset": true,
+    "fd_frame_rejected_without_reset": true,
+    "fragmented_fd_dlc_12_rejected_without_reset": true,
+    "vehicle_bus_verified": false
+  }
+}
