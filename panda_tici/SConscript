@@ -176,9 +176,10 @@ Export('base_project_f4', 'base_project_h7', 'build_project')
 # from the release snapshot made firmware report an unrelated, stale commit.
 os.makedirs("board/obj", exist_ok=True)
 version = get_version(BUILDER, BUILD_TYPE)
+version_size = len(version) + 1
 with open("board/obj/gitversion.h", "w") as f:
-  f.write(f'extern const uint8_t gitversion[{len(version)}];\n')
-  f.write(f'const uint8_t gitversion[{len(version)}] = "{version}";\n')
+  f.write(f'extern const uint8_t gitversion[{version_size}];\n')
+  f.write(f'const uint8_t gitversion[{version_size}] = "{version}";\n')
 
 with open("board/obj/version", "w") as f:
   f.write(version)

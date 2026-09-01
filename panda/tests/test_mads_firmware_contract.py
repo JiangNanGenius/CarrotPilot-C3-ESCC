@@ -107,8 +107,13 @@ def test_owned_firmware_build_tracks_linker_and_signing_inputs():
   # Firmware metadata must describe this checkout, not a stale tracked Panda
   # artifact copied from a release snapshot.
   assert "version = get_version(BUILDER, BUILD_TYPE)" in build
+  assert "version_size = len(version) + 1" in build
   assert "shutil.copy" not in build
   assert "SOURCE_DIR" not in build
+
+  for firmware_root in FIRMWARE_ROOTS:
+    flasher = (firmware_root / "board/flasher.h").read_text()
+    assert "resp_len = sizeof(gitversion) - 1U" in flasher
 
   size_gate = (ROOT / "panda_tici/scripts/check_fw_size.py").read_text()
   assert '".sram2": 64*1024' in size_gate
