@@ -1,3 +1,5 @@
+#include <array>
+
 #include "catch2/catch.hpp"
 #include "msgq/msgq.h"
 
@@ -8,6 +10,59 @@ static void cleanup_test_queue() {
   remove("/dev/shm/msgq_test_queue");
 #endif
 }
+
+class ScopedTestQueue {
+public:
+  msgq_queue_t queue = {};
+
+  int open(const char *path, size_t size) {
+    const int result = msgq_new_queue(&queue, path, size);
+    is_open = result == 0;
+    return result;
+  }
+
+  ~ScopedTestQueue() {
+    if (is_open) {
+      msgq_close_queue(&queue);
+    }
+  }
+
+private:
+  bool is_open = false;
+};
+
+class ScopedTestMessage {
+public:
+  msgq_msg_t msg = {};
+
+  int init_data(char *data, size_t size) {
+    const int result = msgq_msg_init_data(&msg, data, size);
+    is_open = result == 0;
+    return result;
+  }
+
+  int receive(msgq_queue_t *queue) {
+    const int result = msgq_msg_recv(&msg, queue);
+    is_open = result > 0;
+    return result;
+  }
+
+  ~ScopedTestMessage() {
+    if (is_open) {
+      msgq_msg_close(&msg);
+    }
+  }
+
+private:
+  bool is_open = false;
+};
+
+class TestQueuePathCleanup {
+public:
+  ~TestQueuePathCleanup() {
+    cleanup_test_queue();
+  }
+};
 
 TEST_CASE("ALIGN")
 {
@@ -428,5 +483,41 @@ TEST_CASE("1 publisher, 2 subscribers", "[integration]")
     msgq_msg_close(&outgoing_msg);
     msgq_msg_close(&msg1);
     msgq_msg_close(&msg2);
+  }
+}
+
+TEST_CASE("publisher supports configured subscriber capacity without eviction", "[integration]")
+{
+  cleanup_test_queue();
+  TestQueuePathCleanup path_cleanup;
+  static_assert(NUM_READERS >= 40, "Carrot realtime requires at least 40 reader slots");
+  static_assert(sizeof(msgq_header_t) == (3 + 3 * NUM_READERS) * sizeof(uint64_t),
+                "msgq header layout changed unexpectedly");
+
+  ScopedTestQueue writer;
+  std::array<ScopedTestQueue, NUM_READERS> readers;
+  REQUIRE(writer.open("test_queue", 1024) == 0);
+  msgq_init_publisher(&writer.queue);
+
+  std::array<uint64_t, NUM_READERS> reader_uids;
+  for (size_t i = 0; i < readers.size(); ++i) {
+    REQUIRE(readers[i].open("test_queue", 1024) == 0);
+    msgq_init_subscriber(&readers[i].queue);
+    REQUIRE(*writer.queue.num_readers == i + 1);
+    reader_uids[i] = readers[i].queue.read_uid_local;
+  }
+
+  const uint64_t payload = 0x434152524f545155ULL;
+  ScopedTestMessage outgoing_msg;
+  REQUIRE(outgoing_msg.init_data((char *)&payload, sizeof(payload)) == 0);
+  REQUIRE(msgq_msg_send(&outgoing_msg.msg, &writer.queue) == sizeof(payload));
+
+  for (size_t i = 0; i < readers.size(); ++i) {
+    REQUIRE(readers[i].queue.read_uid_local == reader_uids[i]);
+    REQUIRE(*readers[i].queue.read_uids[readers[i].queue.reader_id] == reader_uids[i]);
+
+    ScopedTestMessage incoming_msg;
+    REQUIRE(incoming_msg.receive(&readers[i].queue) == sizeof(payload));
+    REQUIRE(memcmp(incoming_msg.msg.data, &payload, sizeof(payload)) == 0);
   }
 }

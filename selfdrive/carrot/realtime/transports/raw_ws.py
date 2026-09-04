@@ -202,5 +202,9 @@ class RawWsHub:
         current = self._tasks.get(service)
         if current is asyncio.current_task():
           self._tasks.pop(service, None)
-      self._sockets.pop(service, None)
+      # Keep one socket per service for the lifetime of the hub. The msgq
+      # backend allocates a fixed reader slot when a socket is created and does
+      # not reclaim that slot when the Python socket is destroyed. Recreating a
+      # socket after every idle WebSocket interval would therefore exhaust the
+      # service's reader slots and evict unrelated control-process readers.
       self._send_failures.pop(service, None)

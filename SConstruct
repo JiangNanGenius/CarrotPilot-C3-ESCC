@@ -1,10 +1,14 @@
 import os
+import json
 import subprocess
 import sys
 import sysconfig
 import platform
 import shlex
 import importlib
+import importlib.metadata
+import importlib.util
+import tomllib
 from types import SimpleNamespace
 import numpy as np
 
@@ -59,8 +63,28 @@ assert arch in [
 ]
 
 PANDAD_ONLY = GetOption('pandad_only')
+C3_BUILD_DEPS_DIR = "/data/c3-build-deps"
+FULL_BUILD_PKG_NAMES = ('acados', 'capnproto', 'eigen', 'ffmpeg', 'json11', 'libjpeg', 'libyuv', 'ncurses', 'zeromq', 'zstd')
+C3_BUILD_DEPS_CANDIDATE = (
+  COMMA_HARDWARE and arch == "comma_arm64" and not PANDAD_ONLY and os.path.isdir(C3_BUILD_DEPS_DIR)
+)
+C3_FULL_BUILD_DEPS = C3_BUILD_DEPS_CANDIDATE and any(
+  importlib.util.find_spec(name) is None for name in FULL_BUILD_PKG_NAMES
+)
+if C3_FULL_BUILD_DEPS:
+  # The read-only AGNOS root intentionally has no room for build wrappers.
+  # Keep the lockfile-pinned ARM64 packages on /data so full rebuilds also work
+  # offline after source-only deployments.
+  expected_root = os.path.realpath(C3_BUILD_DEPS_DIR)
+  sys.path[:] = [p for p in sys.path if os.path.realpath(p or os.curdir) != expected_root]
+  sys.path.insert(0, C3_BUILD_DEPS_DIR)
+  submodule_python_paths = [
+    C3_BUILD_DEPS_DIR,
+    *[p for p in submodule_python_paths if os.path.realpath(p) != expected_root],
+  ]
+
 pkg_names = ['capnproto', 'libusb', 'ncurses', 'zeromq', 'zstd'] if PANDAD_ONLY else \
-            ['acados', 'capnproto', 'eigen', 'ffmpeg', 'json11', 'libjpeg', 'libyuv', 'ncurses', 'zeromq', 'zstd']
+            list(FULL_BUILD_PKG_NAMES)
 
 # Production C3 images carry the native pandad headers and shared libraries,
 # but intentionally omit comma's Python dependency-wrapper packages. Keep the
@@ -78,6 +102,10 @@ def load_build_package(name):
   try:
     return importlib.import_module(name)
   except ModuleNotFoundError as exc:
+    if COMMA_HARDWARE and arch == "comma_arm64" and not PANDAD_ONLY and exc.name == name:
+      raise SCons.Errors.UserError(
+        f"Missing C3 full-build dependency '{name}'; expected lockfile-pinned wrappers in {C3_BUILD_DEPS_DIR}"
+      ) from exc
     if not (PANDAD_ONLY and COMMA_HARDWARE and exc.name == name):
       raise
     include_dir, lib_dir = PANDAD_ONLY_SYSTEM_DEPS[name]
@@ -87,7 +115,111 @@ def load_build_package(name):
 
 pkgs = [load_build_package(name) for name in pkg_names]
 acados = None if PANDAD_ONLY else pkgs[pkg_names.index('acados')]
+capnproto = pkgs[pkg_names.index('capnproto')]
 ffmpeg = None if PANDAD_ONLY else pkgs[pkg_names.index('ffmpeg')]
+if C3_FULL_BUILD_DEPS:
+  def require_bundle_path(name, label, path, *, executable=False):
+    real_path = os.path.realpath(path)
+    if os.path.commonpath([expected_root, real_path]) != expected_root:
+      raise SCons.Errors.UserError(f"C3 build dependency '{name}' has external {label}: {path}")
+    if not os.path.isfile(path):
+      raise SCons.Errors.UserError(f"C3 build dependency '{name}' is missing {label}: {path}")
+    if executable and not os.access(path, os.X_OK):
+      raise SCons.Errors.UserError(f"C3 build dependency '{name}' has non-executable {label}: {path}")
+
+  with open(File('#uv.lock').abspath, 'rb') as lock_file:
+    lock_packages = {package['name']: package for package in tomllib.load(lock_file)['package']}
+
+  for name, package in zip(pkg_names, pkgs, strict=True):
+    package_file = os.path.realpath(package.__file__)
+    if os.path.commonpath([expected_root, package_file]) != expected_root:
+      raise SCons.Errors.UserError(f"C3 build dependency '{name}' was loaded outside {C3_BUILD_DEPS_DIR}: {package_file}")
+    for attr in ("DIR", "INCLUDE_DIR", "LIB_DIR"):
+      path = getattr(package, attr, None)
+      if not path or not os.path.isdir(path):
+        raise SCons.Errors.UserError(f"Invalid C3 build dependency '{name}': {attr}={path}")
+      if os.path.commonpath([expected_root, os.path.realpath(path)]) != expected_root:
+        raise SCons.Errors.UserError(f"C3 build dependency '{name}' mixes an external {attr}: {path}")
+
+    locked_package = lock_packages[name]
+    locked_version = locked_package['version']
+    locked_git = locked_package['source']['git']
+    locked_commit = locked_git.rsplit('#', 1)[-1]
+    distribution = importlib.metadata.distribution(name)
+    distribution_root = os.path.realpath(distribution.locate_file(''))
+    if os.path.commonpath([expected_root, distribution_root]) != expected_root:
+      raise SCons.Errors.UserError(f"C3 build dependency '{name}' metadata was loaded outside {C3_BUILD_DEPS_DIR}")
+    direct_url_text = distribution.read_text('direct_url.json')
+    direct_url = json.loads(direct_url_text) if direct_url_text else {}
+    installed_commit = direct_url.get('vcs_info', {}).get('commit_id')
+    if distribution.version != locked_version or installed_commit != locked_commit:
+      raise SCons.Errors.UserError(
+        f"C3 build dependency '{name}' does not match uv.lock: "
+        f"version={distribution.version}, commit={installed_commit}"
+      )
+
+  required_bundle_files = {
+    'acados': [
+      (acados.INCLUDE_DIR, 'acados_c/ocp_nlp_interface.h'),
+      (acados.INCLUDE_DIR, 'blasfeo/include/blasfeo_d_aux.h'),
+      (acados.INCLUDE_DIR, 'hpipm/include/hpipm_d_ocp_qp.h'),
+      (acados.LIB_DIR, 'libacados.so'),
+      (acados.LIB_DIR, 'libblasfeo.so'),
+      (acados.LIB_DIR, 'libhpipm.so'),
+      (acados.LIB_DIR, 'libqpOASES_e.so'),
+      (acados.LIB_DIR, 'libqpOASES_e.so.3.1'),
+      (acados.TEMPLATE_DIR, 'acados_layout.json'),
+      (acados.TEMPLATE_DIR, 'acados_ocp_solver_pyx.pyx'),
+      (acados.TEMPLATE_DIR, 'acados_solver_common.pxd'),
+      *[(acados.TEMPLATE_DIR, f'c_templates_tera/{template}') for template in (
+        'CMakeLists.in.txt',
+        'Makefile.in',
+        'acados_sim_solver.in.c',
+        'acados_sim_solver.in.h',
+        'acados_sim_solver.in.pxd',
+        'acados_solver.in.c',
+        'acados_solver.in.h',
+        'acados_solver.in.pxd',
+        'constraints.in.h',
+        'cost.in.h',
+        'main.in.c',
+        'main_sim.in.c',
+        'model.in.h',
+      )],
+    ],
+    'capnproto': [
+      (capnproto.INCLUDE_DIR, 'capnp/message.h'),
+      (capnproto.LIB_DIR, 'libcapnp.a'),
+      (capnproto.LIB_DIR, 'libkj.a'),
+    ],
+    'eigen': [(pkgs[pkg_names.index('eigen')].INCLUDE_DIR, 'eigen3/Eigen/Core')],
+    'ffmpeg': [
+      (ffmpeg.INCLUDE_DIR, 'libavcodec/avcodec.h'),
+      (ffmpeg.INCLUDE_DIR, 'libavformat/avformat.h'),
+      (ffmpeg.INCLUDE_DIR, 'libavutil/avutil.h'),
+      (ffmpeg.INCLUDE_DIR, 'libswresample/swresample.h'),
+      *[(ffmpeg.LIB_DIR, f'lib{lib}.a') for lib in ('avformat', 'avcodec', 'swresample', 'avutil', 'x264', 'z', 'va', 'va-drm', 'drm')],
+    ],
+    'json11': [(pkgs[pkg_names.index('json11')].INCLUDE_DIR, 'json11/json11.hpp'), (pkgs[pkg_names.index('json11')].LIB_DIR, 'libjson11.a')],
+    'libjpeg': [(pkgs[pkg_names.index('libjpeg')].INCLUDE_DIR, 'jpeglib.h'), (pkgs[pkg_names.index('libjpeg')].LIB_DIR, 'libjpeg.a')],
+    'libyuv': [(pkgs[pkg_names.index('libyuv')].INCLUDE_DIR, 'libyuv.h'), (pkgs[pkg_names.index('libyuv')].LIB_DIR, 'libyuv.a')],
+    'ncurses': [(pkgs[pkg_names.index('ncurses')].INCLUDE_DIR, 'ncurses.h'), (pkgs[pkg_names.index('ncurses')].LIB_DIR, 'libncurses.a')],
+    'zeromq': [(pkgs[pkg_names.index('zeromq')].INCLUDE_DIR, 'zmq.h'), (pkgs[pkg_names.index('zeromq')].LIB_DIR, 'libzmq.a')],
+    'zstd': [(pkgs[pkg_names.index('zstd')].INCLUDE_DIR, 'zstd.h'), (pkgs[pkg_names.index('zstd')].LIB_DIR, 'libzstd.a')],
+  }
+  for name, required_files in required_bundle_files.items():
+    for base_dir, relative_path in required_files:
+      require_bundle_path(name, relative_path, os.path.join(base_dir, relative_path))
+
+  capnp_bin = os.path.join(capnproto.DIR, "bin", "capnp")
+  capnpc_bin = os.path.join(capnproto.DIR, "bin", "capnpc")
+  capnpc_cpp_bin = os.path.join(capnproto.DIR, "bin", "capnpc-c++")
+  for name, path in (("acados", acados.TERA_PATH), ("capnproto", capnp_bin),
+                     ("capnproto", capnpc_bin), ("capnproto", capnpc_cpp_bin)):
+    require_bundle_path(name, "build tool", path, executable=True)
+  capnp_version = subprocess.check_output([capnp_bin, "--version"], text=True).strip()
+  if capnp_version != "Cap'n Proto version 1.0.1":
+    raise SCons.Errors.UserError(f"C3 Cap'n Proto compiler/header mismatch risk: {capnp_version}")
 # Shared package ships .so/.dylib; older device venvs still have static .a only.
 # Keep static link deps (x264/z/va/drm) when the installed package is static so
 # COMMA_HARDWARE CI works without upgrading the device venv yet.
@@ -147,8 +279,16 @@ def _libflags(target, source, env, for_signature):
   return _stripixes(env['LIBLINKPREFIX'], libs, env['LIBLINKSUFFIX'],
                     env['LIBPREFIXES'], env['LIBSUFFIXES'], env, env['LIBLITERALPREFIX'])
 
+build_path = os.environ['PATH']
+if C3_FULL_BUILD_DEPS:
+  build_path = os.pathsep.join([
+    os.path.join(capnproto.DIR, "bin"),
+    os.path.dirname(sys.executable),
+    build_path,
+  ])
+
 build_env = {
-    "PATH": os.environ['PATH'],
+    "PATH": build_path,
     "PYTHONPATH": os.pathsep.join(submodule_python_paths),
 }
 if not PANDAD_ONLY:

@@ -180,6 +180,8 @@ class CameraWsHub:
         except Exception:
           pass
       camera_clients.clear()
+    for camera_sockets in self._sockets.values():
+      camera_sockets.clear()
     self._ws_send_failures.clear()
 
   def status(self) -> dict[str, Any]:
@@ -289,7 +291,9 @@ class CameraWsHub:
       current = self._producer_tasks.get(camera)
       if current is asyncio.current_task():
         self._producer_tasks.pop(camera, None)
-    self._sockets[camera] = {}
+    # Retain msgq sockets across an idle producer restart. Destroying and
+    # recreating them consumes another fixed msgq reader slot because that
+    # backend does not reclaim subscriber slots until its publisher restarts.
     self._sm_frame_id.pop(camera, None)
 
   async def _camera_sender_loop(self, camera: str) -> None:

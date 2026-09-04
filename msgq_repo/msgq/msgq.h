@@ -6,7 +6,9 @@
 #include <atomic>
 
 #define DEFAULT_SEGMENT_SIZE (1 * 1024 * 1024)
-#define NUM_READERS 15
+// carState exceeds the legacy 15-reader limit. Keep headroom for Carrot
+// realtime, cluster, and optional diagnostic clients.
+#define NUM_READERS 40
 #define ALIGN(n) ((n + (8 - 1)) & -8)
 
 #define UNUSED(x) (void)x

@@ -183,6 +183,15 @@ static void thread_signal(uint32_t tid) {
   #endif
 }
 
+static bool should_log_reader_eviction() {
+  static std::atomic<int64_t> last_log_ms = 0;
+  const int64_t now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+    std::chrono::steady_clock::now().time_since_epoch()).count();
+  int64_t previous_ms = last_log_ms.load();
+  return (previous_ms == 0 || (now_ms - previous_ms) >= 10000) &&
+         last_log_ms.compare_exchange_strong(previous_ms, now_ms);
+}
+
 void msgq_init_subscriber(msgq_queue_t * q) {
   assert(q != NULL);
   assert(q->num_readers != NULL);
@@ -196,7 +205,13 @@ void msgq_init_subscriber(msgq_queue_t * q) {
 
     // No more slots available. Reset all subscribers to kick out inactive ones
     if (new_num_readers > NUM_READERS){
-      //std::cout << "Warning, evicting all subscribers!" << std::endl;
+      if (should_log_reader_eviction()) {
+        std::cerr << "Warning, evicting all subscribers! endpoint=" << q->endpoint
+                  << " num_readers=" << cur_num_readers
+                  << " limit=" << NUM_READERS
+                  << " pid=" << getpid()
+                  << std::endl;
+      }
       *q->num_readers = 0;
 
       for (size_t i = 0; i < NUM_READERS; i++){
