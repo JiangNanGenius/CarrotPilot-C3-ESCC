@@ -3,8 +3,8 @@ set -eu
 
 PROJECT_NAME="CarrotPilot-C3-ESCC"
 DEFAULT_REPO_URL="https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC.git"
-DEFAULT_REF="install-c3-escc-test"
-TEST_CHANNEL_REF="install-c3-escc-test"
+DEFAULT_REF="genius/c3"
+TEST_CHANNEL_REF="genius/c3"
 DEV_CHANNEL_REF="personal/c3-escc-atune"
 ALPHA_CHANNEL_REF="alpha-sunnypilot-c3"
 STATIC_CHANNEL_REF="carrotpilot-c3-escc-20260618-static28"
@@ -77,7 +77,7 @@ Available channels:
   static  -> $STATIC_CHANNEL_REF
 
 Notes:
-  test is the current controlled-test install branch.
+  test follows the current maintained genius/c3 branch.
   alpha is the SunnyPilot 0.11 C3 architecture experiment line; do not use it as a daily driving target.
   stable is intentionally unavailable until the first real-car stable tag exists.
   dev follows the integration branch and is not a daily install target.
@@ -336,7 +336,7 @@ For ESCC evidence, keep the car parked, enable EnableEscc=1 manually only after 
   cd /data/openpilot
   python3 scripts/personal/collect_real_car_evidence.py --sample-seconds 20 --archive
 
-Do not treat this test install as stable until the evidence readiness report and road-test evidence check pass.
+Do not treat this install as road-validated until the evidence readiness report and road-test evidence check pass.
 EOF
     mv "$tmp" "$path"
   fi
