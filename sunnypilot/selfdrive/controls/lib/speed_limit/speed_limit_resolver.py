@@ -20,6 +20,23 @@ SpeedLimitSource = custom.LongitudinalPlanSP.SpeedLimit.Source
 ALL_SOURCES = tuple(SpeedLimitSource.schema.enumerants.values())
 
 
+def get_segmented_speed_limit_offset(speed_limit: float, is_metric: bool,
+                                     low_offset: float, medium_offset: float, high_offset: float) -> float:
+  """Return a fixed offset selected from the displayed posted-speed band."""
+  speed_conv = CV.MS_TO_KPH if is_metric else CV.MS_TO_MPH
+  # Posted limits are discrete display values. Round away conversion noise so
+  # exact band boundaries (for example 60 km/h or 40 mph) stay in their band.
+  posted_speed = round(speed_limit * speed_conv, 3)
+  low_max, medium_max = (60.0, 80.0) if is_metric else (40.0, 50.0)
+  if posted_speed <= low_max:
+    offset = low_offset
+  elif posted_speed <= medium_max:
+    offset = medium_offset
+  else:
+    offset = high_offset
+  return float(offset / speed_conv)
+
+
 class SpeedLimitResolver:
   limit_solutions: dict[custom.LongitudinalPlanSP.SpeedLimit.Source, float]
   distance_solutions: dict[custom.LongitudinalPlanSP.SpeedLimit.Source, float]
@@ -65,6 +82,9 @@ class SpeedLimitResolver:
       self.params
     )
     self.offset_value = self.params.get("SpeedLimitValueOffset", return_default=True)
+    self.segmented_offset_low = self.params.get("SpeedLimitSegmentedOffsetLow", return_default=True)
+    self.segmented_offset_medium = self.params.get("SpeedLimitSegmentedOffsetMedium", return_default=True)
+    self.segmented_offset_high = self.params.get("SpeedLimitSegmentedOffsetHigh", return_default=True)
 
     self.speed_limit = 0.
     self.speed_limit_last = 0.
@@ -93,6 +113,9 @@ class SpeedLimitResolver:
       self.is_metric = self.params.get_bool("IsMetric")
       self.offset_type = self.params.get("SpeedLimitOffsetType", return_default=True)
       self.offset_value = self.params.get("SpeedLimitValueOffset", return_default=True)
+      self.segmented_offset_low = self.params.get("SpeedLimitSegmentedOffsetLow", return_default=True)
+      self.segmented_offset_medium = self.params.get("SpeedLimitSegmentedOffsetMedium", return_default=True)
+      self.segmented_offset_high = self.params.get("SpeedLimitSegmentedOffsetHigh", return_default=True)
 
   def _get_speed_limit_offset(self) -> float:
     if self.offset_type == OffsetType.off:
@@ -101,6 +124,11 @@ class SpeedLimitResolver:
       return float(self.offset_value * (CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS))
     elif self.offset_type == OffsetType.percentage:
       return float(self.offset_value * 0.01 * self.speed_limit)
+    elif self.offset_type == OffsetType.segmented:
+      return get_segmented_speed_limit_offset(
+        self.speed_limit, self.is_metric,
+        self.segmented_offset_low, self.segmented_offset_medium, self.segmented_offset_high,
+      )
     else:
       raise NotImplementedError("Offset not supported")
 
@@ -110,6 +138,8 @@ class SpeedLimitResolver:
 
   def _get_from_car_state(self, sm: messaging.SubMaster) -> None:
     self._reset_limit_sources(SpeedLimitSource.car)
+    if not sm.alive['carStateSP'] or not sm.valid['carStateSP']:
+      return
     self.limit_solutions[SpeedLimitSource.car] = sm['carStateSP'].speedLimit
     self.distance_solutions[SpeedLimitSource.car] = 0.
 

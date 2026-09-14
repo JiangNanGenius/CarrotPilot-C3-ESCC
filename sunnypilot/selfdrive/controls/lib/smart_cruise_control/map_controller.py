@@ -8,7 +8,7 @@ from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.car.cruise import V_CRUISE_UNSET
 from openpilot.sunnypilot import PARAMS_UPDATE_PERIOD
 from openpilot.sunnypilot.navd.helpers import coordinate_from_param, Coordinate
-from openpilot.sunnypilot.selfdrive.controls.lib.smart_cruise_control import MIN_V
+from openpilot.sunnypilot.selfdrive.controls.lib.smart_cruise_control import MIN_V, apply_decel_strength
 
 MapState = VisionState = custom.LongitudinalPlanSP.SmartCruiseControl.MapState
 
@@ -36,9 +36,19 @@ def velocities_from_param(param: str, params: Params):
   if json_str is None:
     return None
 
-  velocities = json.loads(json_str)
-
-  return velocities
+  try:
+    velocities = json.loads(json_str)
+    if not isinstance(velocities, list):
+      return []
+    return [point for point in velocities if isinstance(point, dict) and
+            all(isinstance(point.get(k), (int, float)) and not isinstance(point[k], bool) and
+                math.isfinite(point[k]) for k in ('latitude', 'longitude', 'velocity')) and
+            -90 <= point['latitude'] <= 90 and -180 <= point['longitude'] <= 180 and
+            0 <= point['velocity'] <= 100]
+  except (ValueError, TypeError):
+    # An optional map producer may be updating/restarting. Do not crash the
+    # longitudinal planner or keep an old target on a malformed snapshot.
+    return []
 
 
 def calculate_accel(t, target_jerk, a_ego):
@@ -51,6 +61,24 @@ def calculate_velocity(t, target_jerk, a_ego, v_ego):
 
 def calculate_distance(t, target_jerk, a_ego, v_ego):
   return t * v_ego + a_ego/2 * (t ** 2) + target_jerk/6 * (t ** 3)
+
+
+def time_to_velocity(v_ego, a_ego, target_velocity, target_jerk):
+  """First non-negative time at which constant jerk reaches target speed."""
+  if not all(math.isfinite(value) for value in (v_ego, a_ego, target_velocity, target_jerk)):
+    return None
+  a, b, c = target_jerk / 2, a_ego, v_ego - target_velocity
+  if abs(a) < 1e-12:
+    if abs(b) < 1e-12:
+      return 0.0 if abs(c) < 1e-12 else None
+    t = -c / b
+    return t if t >= 0 else None
+  discriminant = b * b - 4 * a * c
+  if discriminant < 0:
+    return None
+  root = math.sqrt(discriminant)
+  roots = [t for t in ((-b - root) / (2 * a), (-b + root) / (2 * a)) if t >= 0]
+  return min(roots) if roots else None
 
 
 # points should be in radians
@@ -74,6 +102,7 @@ class SmartCruiseControlMap:
     self.params = Params()
     self.mem_params = Params("/dev/shm/params") if platform.system() != "Darwin" else self.params
     self.enabled = self.params.get_bool("SmartCruiseControlMap")
+    self.decel_strength = self.params.get_int("SCCMapDecelStrength")
     self.long_enabled = False
     self.long_override = False
     self.is_enabled = False
@@ -99,6 +128,7 @@ class SmartCruiseControlMap:
   def update_params(self):
     if self.frame % int(PARAMS_UPDATE_PERIOD / DT_MDL) == 0:
       self.enabled = self.params.get_bool("SmartCruiseControlMap")
+      self.decel_strength = self.params.get_int("SCCMapDecelStrength")
 
   def update_calculations(self) -> None:
     self.last_position = coordinate_from_param("LastGPSPosition", self.mem_params) or Coordinate(0.0, 0.0)
@@ -148,16 +178,8 @@ class SmartCruiseControlMap:
       max_d = 0
       if tv > min_accel_v:
         # calculate time needed based on target jerk
-        a = 0.5 * TARGET_JERK
-        b = self.a_ego
-        c = self.v_ego - tv
-        t_a = -1 * ((b**2 - 4 * a * c) ** 0.5 + b) / 2 * a
-        t_b = ((b**2 - 4 * a * c) ** 0.5 - b) / 2 * a
-        if not isinstance(t_a, complex) and t_a > 0:
-          t = t_a
-        else:
-          t = t_b
-        if isinstance(t, complex):
+        t = time_to_velocity(self.v_ego, self.a_ego, tv, TARGET_JERK)
+        if t is None:
           continue
 
         max_d = max_d + calculate_distance(t, TARGET_JERK, self.a_ego, self.v_ego)
@@ -257,5 +279,9 @@ class SmartCruiseControlMap:
 
     self.output_v_target = self.get_v_target_from_control()
     self.output_a_target = self.get_a_target_from_control()
+    if self.is_active:
+      self.output_v_target, self.output_a_target = apply_decel_strength(
+        self.output_v_target, self.output_a_target, self.v_cruise, self.a_ego, self.decel_strength,
+      )
 
     self.frame += 1

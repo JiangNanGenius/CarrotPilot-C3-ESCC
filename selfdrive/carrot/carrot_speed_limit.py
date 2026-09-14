@@ -87,7 +87,7 @@ class CarrotSpeedLimit:
       self.enabled = self.params.get_bool("CarrotSpeedLimitEnable")
     self.frame += 1
 
-  def update(self, sm, v_cruise_ms: float) -> float:
+  def update(self, sm, v_cruise_ms: float, *, independent_constraints: bool = False) -> float:
     self._refresh_enabled()
     self.active_source = CarrotSpeedLimitSource.none
     if not self.enabled:
@@ -98,10 +98,19 @@ class CarrotSpeedLimit:
     try:
       if sm.alive['carrotMan'] and sm.valid['carrotMan']:
         carrot_man = sm['carrotMan']
+        desired_source = carrot_man.desiredSource
         desired_kph = float(carrot_man.desiredSpeed)
+        if independent_constraints:
+          if getattr(carrot_man, 'constraintValid', False):
+            desired_kph = float(carrot_man.constraintSpeed)
+            desired_source = carrot_man.constraintSource
+          elif desired_source in ('road', 'gas', 'driver'):
+            # Older producers cannot separate a curve hidden behind a road
+            # limit. Do not use their aggregate to undo the planner override.
+            return v_cruise_ms
         desired_ms = desired_kph * CV.KPH_TO_MS
         if _MIN_NAV_SPEED_KPH < desired_kph <= _MAX_NAV_SPEED_KPH and desired_ms < v_cruise_ms:
-          self.active_source = classify_carrot_desired_source(carrot_man.desiredSource)
+          self.active_source = classify_carrot_desired_source(desired_source)
           return desired_ms
     except Exception:
       pass

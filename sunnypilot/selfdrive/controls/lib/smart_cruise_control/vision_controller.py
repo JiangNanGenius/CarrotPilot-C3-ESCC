@@ -12,7 +12,7 @@ from openpilot.common.params import Params
 from openpilot.common.realtime import DT_MDL
 from openpilot.selfdrive.car.cruise import V_CRUISE_UNSET
 from openpilot.sunnypilot import PARAMS_UPDATE_PERIOD
-from openpilot.sunnypilot.selfdrive.controls.lib.smart_cruise_control import MIN_V
+from openpilot.sunnypilot.selfdrive.controls.lib.smart_cruise_control import MIN_V, apply_decel_strength
 
 VisionState = custom.LongitudinalPlanSP.SmartCruiseControl.VisionState
 
@@ -60,6 +60,7 @@ class SmartCruiseControlVision:
     self.is_enabled = False
     self.is_active = False
     self.enabled = self.params.get_bool("SmartCruiseControlVision")
+    self.decel_strength = self.params.get_int("SCCVisionDecelStrength")
     self.v_cruise_setpoint = 0.
 
     self.state = VisionState.disabled
@@ -86,6 +87,7 @@ class SmartCruiseControlVision:
   def _update_params(self) -> None:
     if self.frame % int(PARAMS_UPDATE_PERIOD / DT_MDL) == 0:
       self.enabled = self.params.get_bool("SmartCruiseControlVision")
+      self.decel_strength = self.params.get_int("SCCVisionDecelStrength")
 
   def _update_calculations(self, sm: messaging.SubMaster) -> None:
     if not self.long_enabled:
@@ -105,7 +107,7 @@ class SmartCruiseControlVision:
       max_curve = self.max_pred_lat_acc / (v_ego**2)
 
       # Get the target velocity for the maximum curve
-      self.v_target = (self._a_lat_reg_max / max_curve) ** 0.5
+      self.v_target = (self._a_lat_reg_max / max_curve) ** 0.5 if max_curve > 0 else V_CRUISE_UNSET
 
   def _update_state_machine(self) -> tuple[bool, bool]:
     # ENABLED, ENTERING, TURNING, LEAVING, OVERRIDING
@@ -200,6 +202,20 @@ class SmartCruiseControlVision:
     self.v_cruise_setpoint = v_cruise_setpoint
 
     self._update_params()
+    rate = np.asarray(sm['modelV2'].orientationRate.z)
+    velocity = np.asarray(sm['modelV2'].velocity.x)
+    if (len(rate) < 2 or rate.shape != velocity.shape or
+        not np.all(np.isfinite(rate)) or not np.all(np.isfinite(velocity)) or
+        not sm.alive['modelV2'] or not sm.valid['modelV2']):
+      # Optional curve prediction must not crash the longitudinal process on
+      # a missing/incompatible model packet. Normal model health gates remain.
+      self.state = VisionState.disabled
+      self.is_enabled = self.is_active = False
+      self.current_lat_acc = self.max_pred_lat_acc = 0.0
+      self.output_v_target = V_CRUISE_UNSET
+      self.output_a_target = a_ego
+      self.frame += 1
+      return
     self._update_calculations(sm)
 
     self.is_enabled, self.is_active = self._update_state_machine()
@@ -207,5 +223,9 @@ class SmartCruiseControlVision:
 
     self.output_v_target = self.get_v_target_from_control()
     self.output_a_target = self.get_a_target_from_control()
+    if self.is_active:
+      self.output_v_target, self.output_a_target = apply_decel_strength(
+        self.output_v_target, self.output_a_target, self.v_cruise_setpoint, self.a_ego, self.decel_strength,
+      )
 
     self.frame += 1

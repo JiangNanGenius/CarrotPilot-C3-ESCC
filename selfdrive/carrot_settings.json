@@ -2,6 +2,19 @@
   "apilot": 20220111,
   "params": [
     {
+      "group": "UI",
+      "name": "TrafficCueSound",
+      "title": "Signal and start chimes",
+      "descr": "Independent of Quiet Mode; system alerts take priority. Notifications only, never enables or resumes control.",
+      "min": 0,
+      "max": 1,
+      "default": 1,
+      "unit": 1,
+      "cgroup": "提示",
+      "ctitle": "信号识别与起步提示音",
+      "cdescr": "停车信号和自动开始移动时各提醒一次；独立于全局静音，故障报警优先，不控制起步。"
+    },
+    {
       "group": "LAT",
       "name": "PathOffset",
       "title": "Lane Deviation Left/Right Correction(0)",
@@ -585,13 +598,26 @@
       "egroup": "LONG",
       "etitle": "StopDistance(600)cm",
       "edescr": "Target stop distance used by Carrot longitudinal control. Higher values stop farther behind the lead/stop point.",
-      "min": 400,
-      "max": 1000,
+      "min": 300,
+      "max": 1200,
       "default": 600,
       "unit": 10,
       "cgroup": "纵向控制",
       "ctitle": "停止距离(600)cm",
-      "cdescr": "Carrot 纵向控制使用的目标停车距离。值越大，距离前车或停止点越远就开始收住。"
+      "cdescr": "前车跟停的雷达目标距离，不等于保险杠间距；默认 600 厘米，不改变行驶跟车时距。"
+    },
+    {
+      "group": "LONG",
+      "name": "TrafficStopBufferCm",
+      "title": "Traffic stop buffer (cm)",
+      "descr": "Distance reserved before the visual stop line. Larger values lower the approach speed.",
+      "min": 100,
+      "max": 1000,
+      "default": 200,
+      "unit": 50,
+      "cgroup": "纵向控制",
+      "ctitle": "红灯停止线提前量（厘米）",
+      "cdescr": "默认 200 厘米。数值越大越早收速；这是相对模型停止点的提前量。"
     },
     {
       "group": "LONG",

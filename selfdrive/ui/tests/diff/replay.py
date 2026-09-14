@@ -17,7 +17,7 @@ from openpilot.system.version import terms_version, training_version, terms_vers
 
 LayoutVariant = Literal["mici", "tizi"]
 
-FPS = 60
+FPS = int(os.getenv("UI_REPLAY_FPS", "60"))
 HEADLESS = os.getenv("WINDOWED", "0") != "1"
 
 
@@ -35,6 +35,14 @@ def setup_state():
   params.put("UpdaterCurrentReleaseNotes", parse_release_notes(BASEDIR))
   params.put("HasAcceptedTermsSP", terms_version_sp)
 
+  if os.getenv("SPEED_LIMIT_OFFSET_ACCEPTANCE") == "1":
+    # These must exist before constructing the settings controls so their
+    # initial selected button and values match the acceptance scenario.
+    params.put_int("SpeedLimitOffsetType", 3)
+    params.put_int("SpeedLimitSegmentedOffsetLow", 0)
+    params.put_int("SpeedLimitSegmentedOffsetMedium", 1)
+    params.put_int("SpeedLimitSegmentedOffsetHigh", 2)
+
   # Params for mici home
   params.put("Version", "0.10.1")
   params.put("GitBranch", "test-branch")
@@ -46,6 +54,10 @@ def setup_state():
 
 
 def run_replay(variant: LayoutVariant) -> None:
+  # An isolated Params prefix does not isolate NetworkManager. Opening the
+  # settings widget must not apply the fixture's GSM defaults to the device.
+  from openpilot.system.ui.lib.wifi_manager import WifiManager
+  WifiManager.update_gsm_settings = lambda *args, **kwargs: None
   if HEADLESS:
     rl.set_config_flags(rl.ConfigFlags.FLAG_WINDOW_HIDDEN)
     os.environ["OFFSCREEN"] = "1"  # Run UI without FPS limit (set before importing gui_app)
@@ -139,7 +151,8 @@ def main():
     # The deployed production venv intentionally omits the test-only coverage
     # package. HUD acceptance is a two-second render smoke test and must remain
     # runnable on that exact device environment without installing anything.
-    if os.getenv("HUD_ACCEPTANCE_ONLY") == "1":
+    if (os.getenv("HUD_ACCEPTANCE_ONLY") == "1" or os.getenv("CRUISE_ACCEPTANCE_ONLY") == "1" or
+        os.getenv("SPEED_LIMIT_OFFSET_ACCEPTANCE") == "1"):
       run_replay(variant)
       return
 

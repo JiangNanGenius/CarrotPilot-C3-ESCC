@@ -81,8 +81,8 @@ OBJ+= $(OCP_OBJ)
 EXTERNAL_DIR=
 EXTERNAL_LIB=
 
-INCLUDE_PATH = /data/openpilot/third_party/acados/include
-LIB_PATH = /data/openpilot/third_party/acados/lib
+INCLUDE_PATH = /data/c3-build-deps/acados/install/include
+LIB_PATH = /data/c3-build-deps/acados/install/lib
 
 # preprocessor flags for make's implicit rules
 CPPFLAGS+= -I$(INCLUDE_PATH)
@@ -143,7 +143,7 @@ ocp_cython_c: ocp_shared_lib
 	-o acados_ocp_solver_pyx.c \
 	-I $(INCLUDE_PATH)/../interfaces/acados_template/acados_template \
 	$(INCLUDE_PATH)/../interfaces/acados_template/acados_template/acados_ocp_solver_pyx.pyx \
-	-I /data/openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code \
+	-I /data/codex-validation-20260909-dYONvd/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code \
 
 ocp_cython_o: ocp_cython_c
 	$(CC) $(ACADOS_FLAGS) -c -O2 \
@@ -170,7 +170,7 @@ sim_cython_c: sim_shared_lib
 	-o acados_sim_solver_pyx.c \
 	-I $(INCLUDE_PATH)/../interfaces/acados_template/acados_template \
 	$(INCLUDE_PATH)/../interfaces/acados_template/acados_template/acados_sim_solver_pyx.pyx \
-	-I /data/openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code \
+	-I /data/codex-validation-20260909-dYONvd/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code \
 
 sim_cython_o: sim_cython_c
 	$(CC) $(ACADOS_FLAGS) -c -O2 \

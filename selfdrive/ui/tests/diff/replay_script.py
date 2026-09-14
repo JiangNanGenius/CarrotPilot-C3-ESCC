@@ -176,7 +176,7 @@ def setup_onroad_params() -> None:
 
 # --- Send functions ---
 
-def send_onroad(pm: PubMaster) -> None:
+def send_onroad(pm: PubMaster, scenario: str | None = None) -> None:
   ds = messaging.new_message('deviceState')
   ds.deviceState.started = True
   ds.deviceState.networkType = log.DeviceState.NetworkType.wifi
@@ -197,6 +197,7 @@ def send_onroad(pm: PubMaster) -> None:
   controls.controlsState.deprecated.vCruise = 40.0
 
   car_control = messaging.new_message('carControl')
+  car_control.valid = True
   car_control.carControl.enabled = True
   car_control.carControl.latActive = True
   car_control.carControl.longActive = True
@@ -222,6 +223,7 @@ def send_onroad(pm: PubMaster) -> None:
   long_plan.longitudinalPlan.longitudinalPlanSource = log.LongitudinalPlan.LongitudinalPlanSource.cruise
 
   long_plan_sp = messaging.new_message('longitudinalPlanSP')
+  long_plan_sp.valid = True
   resolver = long_plan_sp.longitudinalPlanSP.speedLimit.resolver
   resolver.speedLimit = 40.0 * CV.KPH_TO_MS
   resolver.speedLimitLast = 40.0 * CV.KPH_TO_MS
@@ -236,6 +238,33 @@ def send_onroad(pm: PubMaster) -> None:
   vision = long_plan_sp.longitudinalPlanSP.smartCruiseControl.vision
   vision.enabled = True
   vision.active = True
+  map_curve = long_plan_sp.longitudinalPlanSP.smartCruiseControl.map
+  map_curve.enabled = True
+
+  if scenario is not None:
+    cases = {
+      'road': (40.0, log.LongitudinalPlan.CruiseTargetSource.vehicleLimit),
+      'driver': (60.0, log.LongitudinalPlan.CruiseTargetSource.driverOverride),
+      'curve': (32.0, log.LongitudinalPlan.CruiseTargetSource.visionCurve),
+      'map_curve': (32.0, log.LongitudinalPlan.CruiseTargetSource.mapCurve),
+      'preview': (40.0, log.LongitudinalPlan.CruiseTargetSource.vehicleLimit),
+      'traffic': (0.0, log.LongitudinalPlan.CruiseTargetSource.trafficLight),
+      'invalid': (0.0, log.LongitudinalPlan.CruiseTargetSource.instrumentSet),
+    }
+    target, source = cases[scenario]
+    cs.carState.vCruise = cs.carState.vCruiseCluster = 80.0
+    cs.carState.vEgo = cs.carState.vEgoCluster = target * CV.KPH_TO_MS
+    long_plan.longitudinalPlan.cruiseTargetSpeed = target
+    long_plan.longitudinalPlan.cruiseTargetSource = source
+    long_plan.longitudinalPlan.cruiseTargetValid = scenario != 'invalid'
+    long_plan.valid = scenario != 'invalid'
+    long_plan.longitudinalPlan.trafficState = 1 if scenario == 'traffic' else 0
+    long_plan.longitudinalPlan.trafficStopDistance = 2.0 if scenario == 'traffic' else 0.0
+    vision.active = scenario == 'curve'
+    map_curve.active = scenario == 'map_curve'
+    map_curve.vTarget = 32.0 * CV.KPH_TO_MS
+    vision.maxPredictedLateralAccel = 1.15 if scenario == 'preview' else 0.0
+    long_plan_sp.valid = scenario != 'invalid'
   vision.vTarget = 32.0 * CV.KPH_TO_MS
 
   pm.send('deviceState', ds)
@@ -571,9 +600,64 @@ def build_script(pm: PubMaster, main_layout, variant: LayoutVariant) -> list[Scr
   print(f"Building {variant} replay script...")
 
   script = Script(FPS)
+  if os.getenv('SPEED_LIMIT_OFFSET_ACCEPTANCE') == '1':
+    from openpilot.selfdrive.ui.layouts.main import MainState
+    from openpilot.selfdrive.ui.layouts.settings.settings import PanelType
+    from openpilot.selfdrive.ui.sunnypilot.layouts.settings.cruise import PanelType as CruisePanelType
+
+    def open_segmented_speed_limit():
+      params = Params()
+      params.put_int("SpeedLimitOffsetType", 3)
+      params.put_int("SpeedLimitSegmentedOffsetLow", 0)
+      params.put_int("SpeedLimitSegmentedOffsetMedium", 1)
+      params.put_int("SpeedLimitSegmentedOffsetHigh", 2)
+      main_layout.open_settings(PanelType.CRUISE)
+      cruise_panel = main_layout._layouts[MainState.SETTINGS]._panels[PanelType.CRUISE].instance
+      cruise_panel._set_current_panel(CruisePanelType.SLA)
+
+    def set_speed_limit_offset(offset):
+      cruise_panel = main_layout._layouts[MainState.SETTINGS]._panels[PanelType.CRUISE].instance
+      cruise_panel._speed_limit_layout._scroller.scroll_panel.set_offset(offset)
+
+    script.setup(open_segmented_speed_limit, wait_after=2 * FPS)
+    script.setup(lambda: set_speed_limit_offset(-1150), wait_after=2 * FPS)
+    script.end()
+    return script.entries
+  if os.getenv('CRUISE_ACCEPTANCE_ONLY') == '1':
+    from openpilot.selfdrive.ui.layouts.main import MainState
+    from openpilot.selfdrive.ui.layouts.settings.settings import PanelType
+    def open_cruise():
+      if os.getenv('CRUISE_NAV_ACCEPTANCE') == '1':
+        assert main_layout._current_mode == MainState.SETTINGS
+        assert main_layout._layouts[MainState.SETTINGS]._current_panel == PanelType.CRUISE
+      else:
+        main_layout.open_settings(PanelType.CRUISE)
+      panel = main_layout._layouts[MainState.SETTINGS]._panels[PanelType.CRUISE].instance
+      for item in (panel.carrot_speed_limit, panel.traffic_cue_sound, panel.traffic_stop_buffer,
+                   panel.auto_speed_limit_raise, panel.scc_v_strength, panel.scc_m_strength):
+        item.show_description(True)
+    def set_cruise_offset(offset):
+      panel = main_layout._layouts[MainState.SETTINGS]._panels[PanelType.CRUISE].instance
+      panel._scroller.scroll_panel.set_offset(offset)
+    if os.getenv('CRUISE_NAV_ACCEPTANCE') == '1':
+      script.wait(FPS)
+      script.click(150, 90, wait_after=FPS)
+      script.click(230, 950, wait_after=FPS)
+    script.setup(open_cruise, wait_after=FPS)
+    # Deterministic offsets make the release frames independent of the host's
+    # rendering speed and keep every new control visible in acceptance output.
+    script.setup(lambda: set_cruise_offset(-1100), wait_after=2 * FPS)
+    script.setup(lambda: set_cruise_offset(-2300), wait_after=2 * FPS)
+    script.end()
+    return script.entries
   if os.getenv("HUD_ACCEPTANCE_ONLY") == "1":
     script.setup(setup_onroad_params, wait_after=0)
-    script.set_send(lambda: send_onroad(pm), wait_after=2 * FPS)
+    scenario = os.getenv('HUD_ACCEPTANCE_SCENARIO')
+    if scenario == 'all':
+      for case in ('road', 'preview', 'curve', 'map_curve', 'traffic', 'invalid'):
+        script.set_send(lambda case=case: send_onroad(pm, case), wait_after=FPS)
+    else:
+      script.set_send(lambda: send_onroad(pm, scenario), wait_after=2 * FPS)
     script.end()
     return script.entries
 

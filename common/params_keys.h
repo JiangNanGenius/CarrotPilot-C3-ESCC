@@ -250,12 +250,17 @@ inline static std::unordered_map<std::string, ParamKeyAttributes> keys = {
 
     // Speed Limit
     {"SpeedLimitMode", {PERSISTENT | BACKUP, INT, "1"}},
+    {"SpeedLimitSegmentedOffsetHigh", {PERSISTENT | BACKUP, INT, "2"}},
+    {"SpeedLimitSegmentedOffsetLow", {PERSISTENT | BACKUP, INT, "0"}},
+    {"SpeedLimitSegmentedOffsetMedium", {PERSISTENT | BACKUP, INT, "1"}},
     {"SpeedLimitOffsetType", {PERSISTENT | BACKUP, INT, "0"}},
     {"SpeedLimitPolicy", {PERSISTENT | BACKUP, INT, "3"}},
     {"SpeedLimitValueOffset", {PERSISTENT | BACKUP, INT, "0"}},
 
     // Smart Cruise Control
     {"MapTargetVelocities", {CLEAR_ON_ONROAD_TRANSITION, STRING}},
+    {"SCCMapDecelStrength", {PERSISTENT | BACKUP, INT, "100"}},
+    {"SCCVisionDecelStrength", {PERSISTENT | BACKUP, INT, "100"}},
     {"SmartCruiseControlMap", {PERSISTENT | BACKUP, BOOL, "0"}},
     {"SmartCruiseControlVision", {PERSISTENT | BACKUP, BOOL, "0"}},
 

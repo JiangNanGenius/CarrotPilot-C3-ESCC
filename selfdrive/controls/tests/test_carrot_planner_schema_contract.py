@@ -96,8 +96,14 @@ def test_visual_stop_uses_the_same_feature_gate_as_nav_stop():
 
 def test_unwired_follow_controls_are_not_exposed():
   source = CRUISE_SETTINGS.read_text()
-  for key in ("TFollowGap1", "TFollowGap2", "TFollowGap3", "TFollowGap4", "JLeadFactor3", "StopDistanceCarrot"):
+  for key in ("TFollowGap1", "TFollowGap2", "TFollowGap3", "TFollowGap4", "JLeadFactor3"):
     assert key not in source
+
+
+def test_exposed_stop_distance_reaches_mpc_runtime_parameter():
+  assert '"StopDistanceCarrot"' in CRUISE_SETTINGS.read_text()
+  assert 'stop_distance=self.stop_distances.follow' in LONGITUDINAL_PLANNER.read_text()
+  assert 'self.params[:,6]' in LONGITUDINAL_MPC.read_text()
 
 
 def test_realtime_planner_does_not_construct_carrot_learner():

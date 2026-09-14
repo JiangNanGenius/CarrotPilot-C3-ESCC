@@ -1115,8 +1115,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__acados_template__acados_ocp_solver_pyx
-#define __PYX_HAVE_API__acados_template__acados_ocp_solver_pyx
+#define __PYX_HAVE__acados__acados_template__acados_ocp_solver_pyx
+#define __PYX_HAVE_API__acados__acados_template__acados_ocp_solver_pyx
 /* Early includes */
 #include <string.h>
 #include "acados/ocp_nlp/ocp_nlp_common.h"
@@ -1125,7 +1125,7 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include <stdio.h>
 
     /* Using NumPy API declarations from "numpy/__init__.cython-30.pxd" */
-    
+
 #include "numpy/arrayobject.h"
 #include "numpy/ndarrayobject.h"
 #include "numpy/ndarraytypes.h"
@@ -1362,7 +1362,7 @@ static const char *__pyx_filename;
 /* #### Code section: filename_table ### */
 
 static const char* const __pyx_f[] = {
-  "third_party/acados/acados_template/acados_ocp_solver_pyx.pyx",
+  "acados/acados_template/acados_ocp_solver_pyx.pyx",
   "<stringsource>",
   "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd",
   "cpython/type.pxd",
@@ -1589,7 +1589,7 @@ typedef struct {
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":743
  * # in Cython to enable them only on the right systems.
- * 
+ *
  * ctypedef npy_int8       int8_t             # <<<<<<<<<<<<<<
  * ctypedef npy_int16      int16_t
  * ctypedef npy_int32      int32_t
@@ -1597,7 +1597,7 @@ typedef struct {
 typedef npy_int8 __pyx_t_5numpy_int8_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":744
- * 
+ *
  * ctypedef npy_int8       int8_t
  * ctypedef npy_int16      int16_t             # <<<<<<<<<<<<<<
  * ctypedef npy_int32      int32_t
@@ -1610,7 +1610,7 @@ typedef npy_int16 __pyx_t_5numpy_int16_t;
  * ctypedef npy_int16      int16_t
  * ctypedef npy_int32      int32_t             # <<<<<<<<<<<<<<
  * ctypedef npy_int64      int64_t
- * 
+ *
 */
 typedef npy_int32 __pyx_t_5numpy_int32_t;
 
@@ -1618,14 +1618,14 @@ typedef npy_int32 __pyx_t_5numpy_int32_t;
  * ctypedef npy_int16      int16_t
  * ctypedef npy_int32      int32_t
  * ctypedef npy_int64      int64_t             # <<<<<<<<<<<<<<
- * 
+ *
  * ctypedef npy_uint8      uint8_t
 */
 typedef npy_int64 __pyx_t_5numpy_int64_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":748
  * ctypedef npy_int64      int64_t
- * 
+ *
  * ctypedef npy_uint8      uint8_t             # <<<<<<<<<<<<<<
  * ctypedef npy_uint16     uint16_t
  * ctypedef npy_uint32     uint32_t
@@ -1633,7 +1633,7 @@ typedef npy_int64 __pyx_t_5numpy_int64_t;
 typedef npy_uint8 __pyx_t_5numpy_uint8_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":749
- * 
+ *
  * ctypedef npy_uint8      uint8_t
  * ctypedef npy_uint16     uint16_t             # <<<<<<<<<<<<<<
  * ctypedef npy_uint32     uint32_t
@@ -1646,7 +1646,7 @@ typedef npy_uint16 __pyx_t_5numpy_uint16_t;
  * ctypedef npy_uint16     uint16_t
  * ctypedef npy_uint32     uint32_t             # <<<<<<<<<<<<<<
  * ctypedef npy_uint64     uint64_t
- * 
+ *
 */
 typedef npy_uint32 __pyx_t_5numpy_uint32_t;
 
@@ -1654,14 +1654,14 @@ typedef npy_uint32 __pyx_t_5numpy_uint32_t;
  * ctypedef npy_uint16     uint16_t
  * ctypedef npy_uint32     uint32_t
  * ctypedef npy_uint64     uint64_t             # <<<<<<<<<<<<<<
- * 
+ *
  * ctypedef npy_float32    float32_t
 */
 typedef npy_uint64 __pyx_t_5numpy_uint64_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":753
  * ctypedef npy_uint64     uint64_t
- * 
+ *
  * ctypedef npy_float32    float32_t             # <<<<<<<<<<<<<<
  * ctypedef npy_float64    float64_t
  * #ctypedef npy_float80    float80_t
@@ -1669,7 +1669,7 @@ typedef npy_uint64 __pyx_t_5numpy_uint64_t;
 typedef npy_float32 __pyx_t_5numpy_float32_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":754
- * 
+ *
  * ctypedef npy_float32    float32_t
  * ctypedef npy_float64    float64_t             # <<<<<<<<<<<<<<
  * #ctypedef npy_float80    float80_t
@@ -1679,43 +1679,43 @@ typedef npy_float64 __pyx_t_5numpy_float64_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":761
  * ctypedef double complex complex128_t
- * 
+ *
  * ctypedef npy_longlong   longlong_t             # <<<<<<<<<<<<<<
  * ctypedef npy_ulonglong  ulonglong_t
- * 
+ *
 */
 typedef npy_longlong __pyx_t_5numpy_longlong_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":762
- * 
+ *
  * ctypedef npy_longlong   longlong_t
  * ctypedef npy_ulonglong  ulonglong_t             # <<<<<<<<<<<<<<
- * 
+ *
  * ctypedef npy_intp       intp_t
 */
 typedef npy_ulonglong __pyx_t_5numpy_ulonglong_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":764
  * ctypedef npy_ulonglong  ulonglong_t
- * 
+ *
  * ctypedef npy_intp       intp_t             # <<<<<<<<<<<<<<
  * ctypedef npy_uintp      uintp_t
- * 
+ *
 */
 typedef npy_intp __pyx_t_5numpy_intp_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":765
- * 
+ *
  * ctypedef npy_intp       intp_t
  * ctypedef npy_uintp      uintp_t             # <<<<<<<<<<<<<<
- * 
+ *
  * ctypedef npy_double     float_t
 */
 typedef npy_uintp __pyx_t_5numpy_uintp_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":767
  * ctypedef npy_uintp      uintp_t
- * 
+ *
  * ctypedef npy_double     float_t             # <<<<<<<<<<<<<<
  * ctypedef npy_double     double_t
  * ctypedef npy_longdouble longdouble_t
@@ -1723,11 +1723,11 @@ typedef npy_uintp __pyx_t_5numpy_uintp_t;
 typedef npy_double __pyx_t_5numpy_float_t;
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":768
- * 
+ *
  * ctypedef npy_double     float_t
  * ctypedef npy_double     double_t             # <<<<<<<<<<<<<<
  * ctypedef npy_longdouble longdouble_t
- * 
+ *
 */
 typedef npy_double __pyx_t_5numpy_double_t;
 
@@ -1735,7 +1735,7 @@ typedef npy_double __pyx_t_5numpy_double_t;
  * ctypedef npy_double     float_t
  * ctypedef npy_double     double_t
  * ctypedef npy_longdouble longdouble_t             # <<<<<<<<<<<<<<
- * 
+ *
  * ctypedef float complex       cfloat_t
 */
 typedef npy_longdouble __pyx_t_5numpy_longdouble_t;
@@ -1779,20 +1779,20 @@ static CYTHON_INLINE __pyx_t_long_double_complex __pyx_t_long_double_complex_fro
 /* #### Code section: type_declarations ### */
 
 /*--- Type declarations ---*/
-struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython;
+struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython;
 struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":48
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":48
+ *
+ *
  * cdef class AcadosOcpSolverCython:             # <<<<<<<<<<<<<<
  *     """
  *     Class to interact with the acados ocp solver C object.
 */
-struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython {
+struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython {
   PyObject_HEAD
   long_solver_capsule *capsule;
   void *nlp_opts;
@@ -1810,8 +1810,8 @@ struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython
 
 
 /* "View.MemoryView":110
- * 
- * 
+ *
+ *
  * @cython.collection_type("sequence")             # <<<<<<<<<<<<<<
  * @cname("__pyx_array")
  * cdef class array:
@@ -1835,8 +1835,8 @@ struct __pyx_array_obj {
 
 
 /* "View.MemoryView":299
- * 
- * 
+ *
+ *
  * @cname('__pyx_MemviewEnum')             # <<<<<<<<<<<<<<
  * cdef class Enum(object):
  *     cdef object name
@@ -1848,11 +1848,11 @@ struct __pyx_MemviewEnum_obj {
 
 
 /* "View.MemoryView":334
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview')             # <<<<<<<<<<<<<<
  * cdef class memoryview:
- * 
+ *
 */
 struct __pyx_memoryview_obj {
   PyObject_HEAD
@@ -1870,8 +1870,8 @@ struct __pyx_memoryview_obj {
 
 
 /* "View.MemoryView":950
- * 
- * 
+ *
+ *
  * @cython.collection_type("sequence")             # <<<<<<<<<<<<<<
  * @cname('__pyx_memoryviewslice')
  * cdef class _memoryviewslice(memoryview):
@@ -1887,8 +1887,8 @@ struct __pyx_memoryviewslice_obj {
 
 
 /* "View.MemoryView":110
- * 
- * 
+ *
+ *
  * @cython.collection_type("sequence")             # <<<<<<<<<<<<<<
  * @cname("__pyx_array")
  * cdef class array:
@@ -1901,11 +1901,11 @@ static struct __pyx_vtabstruct_array *__pyx_vtabptr_array;
 
 
 /* "View.MemoryView":334
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview')             # <<<<<<<<<<<<<<
  * cdef class memoryview:
- * 
+ *
 */
 
 struct __pyx_vtabstruct_memoryview {
@@ -1922,8 +1922,8 @@ static struct __pyx_vtabstruct_memoryview *__pyx_vtabptr_memoryview;
 
 
 /* "View.MemoryView":950
- * 
- * 
+ *
+ *
  * @cython.collection_type("sequence")             # <<<<<<<<<<<<<<
  * @cname('__pyx_memoryviewslice')
  * cdef class _memoryviewslice(memoryview):
@@ -3306,7 +3306,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__p
 
 /* Module declarations from "numpy" */
 
-/* Module declarations from "acados_template.acados_ocp_solver_pyx" */
+/* Module declarations from "acados.acados_template.acados_ocp_solver_pyx" */
 static PyObject *__pyx_collections_abc_Sequence = 0;
 static PyObject *generic = 0;
 static PyObject *strided = 0;
@@ -3357,11 +3357,11 @@ static const __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_int32_t = { "int32_
 static const __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
 static const __Pyx_TypeInfo __Pyx_TypeInfo_unsigned_char = { "unsigned char", NULL, sizeof(unsigned char), { 0 }, 0, __PYX_IS_UNSIGNED(unsigned char) ? 'U' : 'I', __PYX_IS_UNSIGNED(unsigned char), 0 };
 /* #### Code section: before_global_var ### */
-#define __Pyx_MODULE_NAME "acados_template.acados_ocp_solver_pyx"
-extern int __pyx_module_is_main_acados_template__acados_ocp_solver_pyx;
-int __pyx_module_is_main_acados_template__acados_ocp_solver_pyx = 0;
+#define __Pyx_MODULE_NAME "acados.acados_template.acados_ocp_solver_pyx"
+extern int __pyx_module_is_main_acados__acados_template__acados_ocp_solver_pyx;
+int __pyx_module_is_main_acados__acados_template__acados_ocp_solver_pyx = 0;
 
-/* Implementation of "acados_template.acados_ocp_solver_pyx" */
+/* Implementation of "acados.acados_template.acados_ocp_solver_pyx" */
 /* #### Code section: global_var ### */
 static PyObject *__pyx_builtin_AssertionError;
 static PyObject *__pyx_builtin_print;
@@ -3763,7 +3763,7 @@ static const char __pyx_k_Out_of_bounds_on_buffer_access_a[] = "Out of bounds on
 static const char __pyx_k_Unable_to_convert_item_to_object[] = "Unable to convert item to object";
 static const char __pyx_k_Warning_acados_ocp_solver_reache[] = "Warning: acados_ocp_solver reached maximum iterations.";
 static const char __pyx_k_acados_acados_ocp_solver_returne[] = "acados acados_ocp_solver returned status ";
-static const char __pyx_k_acados_template_acados_ocp_solve[] = "acados_template.acados_ocp_solver_pyx";
+static const char __pyx_k_acados_acados_template_acados_oc[] = "acados.acados_template.acados_ocp_solver_pyx";
 static const char __pyx_k_alpha_values_are_not_available_f[] = "alpha values are not available for SQP_RTI";
 static const char __pyx_k_constraints_set_value_must_be_nu[] = "constraints_set: value must be numpy array, got ";
 static const char __pyx_k_cost_set_value_must_be_numpy_arr[] = "cost_set: value must be numpy array, got ";
@@ -3778,7 +3778,6 @@ static const char __pyx_k_set_value_must_be_numpy_array_go[] = "set: value must 
 static const char __pyx_k_solver_option_must_be_of_type_fl[] = "solver option {} must be of type float. You have {}.";
 static const char __pyx_k_solver_option_must_be_of_type_in[] = "solver option {} must be of type int. You have {}.";
 static const char __pyx_k_solver_option_must_be_of_type_st[] = "solver option {} must be of type str. You have {}.";
-static const char __pyx_k_third_party_acados_acados_templa[] = "third_party/acados/acados_template/acados_ocp_solver_pyx.pyx";
 static const char __pyx_k_unable_to_allocate_shape_and_str[] = "unable to allocate shape and strides.";
 static const char __pyx_k_AcadosOcpSolverCython__get_stat_2[] = "_AcadosOcpSolverCython__get_stat_double";
 static const char __pyx_k_AcadosOcpSolverCython__get_stat_3[] = "_AcadosOcpSolverCython__get_stat_matrix";
@@ -3790,6 +3789,7 @@ static const char __pyx_k_AcadosOcpSolverCython_eval_param_2[] = "AcadosOcpSolve
 static const char __pyx_k_AcadosOcpSolverCython_eval_param_3[] = "AcadosOcpSolverCython.eval_param_sens";
 static const char __pyx_k_AcadosOcpSolverCython_options_se_2[] = "AcadosOcpSolverCython.options_set";
 static const char __pyx_k_AcadosOcpSolverCython_solve_argu_2[] = "AcadosOcpSolverCython.solve(): argument 'rti_phase' can take only value 0 for SQP-type solvers";
+static const char __pyx_k_acados_acados_template_acados_oc_2[] = "acados/acados_template/acados_ocp_solver_pyx.pyx";
 /* #### Code section: decls ### */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
@@ -3832,36 +3832,36 @@ static void __pyx_memoryviewslice___pyx_pf_15View_dot_MemoryView_16_memoryviewsl
 static PyObject *__pyx_pf___pyx_memoryviewslice___reduce_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf___pyx_memoryviewslice_2__setstate_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_15View_dot_MemoryView___pyx_unpickle_Enum(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
-static int __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython___cinit__(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_model_name, PyObject *__pyx_v_nlp_solver_type, PyObject *__pyx_v_N); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_x0_bar); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_reset_qp_solver_mem); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_data_); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps(CYTHON_UNUSED struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_new_time_steps); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N(CYTHON_UNUSED struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_qp_solver_cond_N); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_index, PyObject *__pyx_v_stage, PyObject *__pyx_v_field); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
+static int __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython___cinit__(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_model_name, PyObject *__pyx_v_nlp_solver_type, PyObject *__pyx_v_N); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_x0_bar); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_reset_qp_solver_mem); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_data_); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps(CYTHON_UNUSED struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_new_time_steps); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N(CYTHON_UNUSED struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_qp_solver_cond_N); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_index, PyObject *__pyx_v_stage, PyObject *__pyx_v_field); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
 static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_x); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_filename, PyObject *__pyx_v_overwrite); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field_); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_28__get_stat_int(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_30__get_stat_double(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_32__get_stat_matrix(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field, PyObject *__pyx_v_n, PyObject *__pyx_v_m); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_recompute); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_idx_values_, PyObject *__pyx_v_param_values_); /* proto */
-static void __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_50__del__(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_52__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_54__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_tp_new_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_filename, PyObject *__pyx_v_overwrite); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_filename); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field_); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_28__get_stat_int(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_30__get_stat_double(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_32__get_stat_matrix(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field, PyObject *__pyx_v_n, PyObject *__pyx_v_m); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_recompute); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_idx_values_, PyObject *__pyx_v_param_values_); /* proto */
+static void __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_50__del__(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_52__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_54__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
+static PyObject *__pyx_tp_new_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_array(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_Enum(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_memoryview(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
@@ -3920,12 +3920,12 @@ typedef struct {
   PyTypeObject *__pyx_ptype_5numpy_flexible;
   PyTypeObject *__pyx_ptype_5numpy_character;
   PyTypeObject *__pyx_ptype_5numpy_ufunc;
-  PyObject *__pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython;
+  PyObject *__pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython;
   PyObject *__pyx_type___pyx_array;
   PyObject *__pyx_type___pyx_MemviewEnum;
   PyObject *__pyx_type___pyx_memoryview;
   PyObject *__pyx_type___pyx_memoryviewslice;
-  PyTypeObject *__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython;
+  PyTypeObject *__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython;
   PyTypeObject *__pyx_array_type;
   PyTypeObject *__pyx_MemviewEnum_type;
   PyTypeObject *__pyx_memoryview_type;
@@ -4081,249 +4081,249 @@ static __pyx_mstatetype * const __pyx_mstate_global = &__pyx_mstate_global_stati
 #define __pyx_kp_u__9 __pyx_string_tab[94]
 #define __pyx_n_u_abc __pyx_string_tab[95]
 #define __pyx_kp_u_acados_acados_ocp_solver_returne __pyx_string_tab[96]
-#define __pyx_n_u_acados_template_acados_ocp_solve __pyx_string_tab[97]
-#define __pyx_kp_u_add_note __pyx_string_tab[98]
-#define __pyx_n_u_allocate_buffer __pyx_string_tab[99]
-#define __pyx_n_u_alpha __pyx_string_tab[100]
-#define __pyx_n_u_alpha_min __pyx_string_tab[101]
-#define __pyx_n_u_alpha_reduction __pyx_string_tab[102]
-#define __pyx_kp_u_alpha_values_are_not_available_f __pyx_string_tab[103]
-#define __pyx_kp_u_and __pyx_string_tab[104]
-#define __pyx_n_u_array __pyx_string_tab[105]
-#define __pyx_n_u_ascontiguousarray __pyx_string_tab[106]
-#define __pyx_n_u_asfortranarray __pyx_string_tab[107]
-#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[108]
-#define __pyx_kp_u_at_0x __pyx_string_tab[109]
-#define __pyx_kp_u_at_stage __pyx_string_tab[110]
-#define __pyx_n_u_base __pyx_string_tab[111]
-#define __pyx_n_u_c __pyx_string_tab[112]
-#define __pyx_n_u_class __pyx_string_tab[113]
-#define __pyx_n_u_class_getitem __pyx_string_tab[114]
-#define __pyx_n_u_cline_in_traceback __pyx_string_tab[115]
-#define __pyx_kp_u_collections_abc __pyx_string_tab[116]
-#define __pyx_n_u_constraints_fields __pyx_string_tab[117]
-#define __pyx_n_u_constraints_set __pyx_string_tab[118]
-#define __pyx_kp_u_constraints_set_value_must_be_nu __pyx_string_tab[119]
-#define __pyx_kp_u_contiguous_and_direct __pyx_string_tab[120]
-#define __pyx_kp_u_contiguous_and_indirect __pyx_string_tab[121]
-#define __pyx_n_u_cost_fields __pyx_string_tab[122]
-#define __pyx_n_u_cost_set __pyx_string_tab[123]
-#define __pyx_kp_u_cost_set_value_must_be_numpy_arr __pyx_string_tab[124]
-#define __pyx_n_u_count __pyx_string_tab[125]
-#define __pyx_n_u_custom_update __pyx_string_tab[126]
-#define __pyx_n_u_d __pyx_string_tab[127]
-#define __pyx_n_u_data __pyx_string_tab[128]
-#define __pyx_n_u_data_2 __pyx_string_tab[129]
-#define __pyx_n_u_data_len __pyx_string_tab[130]
-#define __pyx_n_u_datetime __pyx_string_tab[131]
-#define __pyx_n_u_default __pyx_string_tab[132]
-#define __pyx_n_u_dict __pyx_string_tab[133]
-#define __pyx_n_u_dims __pyx_string_tab[134]
-#define __pyx_kp_u_disable __pyx_string_tab[135]
-#define __pyx_n_u_double_fields __pyx_string_tab[136]
-#define __pyx_n_u_double_value __pyx_string_tab[137]
-#define __pyx_n_u_dtype __pyx_string_tab[138]
-#define __pyx_n_u_dtype_is_object __pyx_string_tab[139]
-#define __pyx_n_u_dump __pyx_string_tab[140]
-#define __pyx_kp_u_enable __pyx_string_tab[141]
-#define __pyx_n_u_encode __pyx_string_tab[142]
-#define __pyx_n_u_enter __pyx_string_tab[143]
-#define __pyx_n_u_enumerate __pyx_string_tab[144]
-#define __pyx_n_u_eps_sufficient_descent __pyx_string_tab[145]
-#define __pyx_n_u_error __pyx_string_tab[146]
-#define __pyx_n_u_eval_param_sens __pyx_string_tab[147]
-#define __pyx_n_u_ex __pyx_string_tab[148]
-#define __pyx_n_u_exit __pyx_string_tab[149]
-#define __pyx_n_u_f __pyx_string_tab[150]
-#define __pyx_n_u_field __pyx_string_tab[151]
-#define __pyx_n_u_field_2 __pyx_string_tab[152]
-#define __pyx_n_u_fields __pyx_string_tab[153]
-#define __pyx_n_u_filename __pyx_string_tab[154]
-#define __pyx_n_u_flags __pyx_string_tab[155]
-#define __pyx_n_u_float64 __pyx_string_tab[156]
-#define __pyx_n_u_format __pyx_string_tab[157]
-#define __pyx_n_u_fortran __pyx_string_tab[158]
-#define __pyx_n_u_full_stats __pyx_string_tab[159]
-#define __pyx_n_u_full_step_dual __pyx_string_tab[160]
-#define __pyx_n_u_func __pyx_string_tab[161]
-#define __pyx_kp_u_gc __pyx_string_tab[162]
-#define __pyx_n_u_get __pyx_string_tab[163]
-#define __pyx_n_u_get_cost __pyx_string_tab[164]
-#define __pyx_n_u_get_from_qp_in __pyx_string_tab[165]
-#define __pyx_n_u_get_pointers_solver __pyx_string_tab[166]
-#define __pyx_n_u_get_residuals __pyx_string_tab[167]
-#define __pyx_n_u_get_stat_double __pyx_string_tab[168]
-#define __pyx_n_u_get_stat_int __pyx_string_tab[169]
-#define __pyx_n_u_get_stat_matrix __pyx_string_tab[170]
-#define __pyx_n_u_get_stats __pyx_string_tab[171]
-#define __pyx_n_u_getcwd __pyx_string_tab[172]
-#define __pyx_n_u_getstate __pyx_string_tab[173]
-#define __pyx_n_u_globalization __pyx_string_tab[174]
-#define __pyx_n_u_globalization_use_SOC __pyx_string_tab[175]
-#define __pyx_kp_u_got __pyx_string_tab[176]
-#define __pyx_kp_u_got_differing_extents_in_dimensi __pyx_string_tab[177]
-#define __pyx_n_u_i __pyx_string_tab[178]
-#define __pyx_n_u_i_string __pyx_string_tab[179]
-#define __pyx_n_u_id __pyx_string_tab[180]
-#define __pyx_n_u_idx __pyx_string_tab[181]
-#define __pyx_n_u_idx_values __pyx_string_tab[182]
-#define __pyx_n_u_import __pyx_string_tab[183]
-#define __pyx_n_u_indent __pyx_string_tab[184]
-#define __pyx_n_u_index __pyx_string_tab[185]
-#define __pyx_n_u_initialize_t_slacks __pyx_string_tab[186]
-#define __pyx_n_u_initializing __pyx_string_tab[187]
-#define __pyx_n_u_int __pyx_string_tab[188]
-#define __pyx_n_u_int32 __pyx_string_tab[189]
-#define __pyx_n_u_int_fields __pyx_string_tab[190]
-#define __pyx_n_u_int_value __pyx_string_tab[191]
-#define __pyx_n_u_is_coroutine __pyx_string_tab[192]
-#define __pyx_kp_u_isenabled __pyx_string_tab[193]
-#define __pyx_n_u_isfile __pyx_string_tab[194]
-#define __pyx_n_u_itemsize __pyx_string_tab[195]
-#define __pyx_kp_u_itemsize_0_for_cython_array __pyx_string_tab[196]
-#define __pyx_n_u_iterate __pyx_string_tab[197]
-#define __pyx_n_u_join __pyx_string_tab[198]
-#define __pyx_n_u_json __pyx_string_tab[199]
-#define __pyx_kp_u_json_2 __pyx_string_tab[200]
-#define __pyx_n_u_k __pyx_string_tab[201]
-#define __pyx_n_u_key __pyx_string_tab[202]
-#define __pyx_n_u_keys __pyx_string_tab[203]
-#define __pyx_n_u_lN __pyx_string_tab[204]
-#define __pyx_n_u_lam __pyx_string_tab[205]
-#define __pyx_n_u_lam_2 __pyx_string_tab[206]
-#define __pyx_n_u_lambda __pyx_string_tab[207]
-#define __pyx_n_u_lbu __pyx_string_tab[208]
-#define __pyx_n_u_lbx __pyx_string_tab[209]
-#define __pyx_n_u_line_search_use_sufficient_desce __pyx_string_tab[210]
-#define __pyx_n_u_load __pyx_string_tab[211]
-#define __pyx_n_u_load_iterate __pyx_string_tab[212]
-#define __pyx_kp_u_load_iterate_failed_file_does_no __pyx_string_tab[213]
-#define __pyx_n_u_m __pyx_string_tab[214]
-#define __pyx_n_u_main __pyx_string_tab[215]
-#define __pyx_n_u_mem_fields __pyx_string_tab[216]
-#define __pyx_n_u_memview __pyx_string_tab[217]
-#define __pyx_n_u_min_size __pyx_string_tab[218]
-#define __pyx_n_u_mode __pyx_string_tab[219]
-#define __pyx_n_u_model_name __pyx_string_tab[220]
-#define __pyx_n_u_module __pyx_string_tab[221]
-#define __pyx_n_u_msg __pyx_string_tab[222]
-#define __pyx_n_u_n __pyx_string_tab[223]
-#define __pyx_n_u_n_update __pyx_string_tab[224]
-#define __pyx_n_u_name __pyx_string_tab[225]
-#define __pyx_n_u_name_2 __pyx_string_tab[226]
-#define __pyx_n_u_ndarray __pyx_string_tab[227]
-#define __pyx_n_u_ndim __pyx_string_tab[228]
-#define __pyx_n_u_new __pyx_string_tab[229]
-#define __pyx_n_u_new_time_steps __pyx_string_tab[230]
-#define __pyx_n_u_nlp_solver_type __pyx_string_tab[231]
-#define __pyx_kp_u_no_default___reduce___due_to_non __pyx_string_tab[232]
-#define __pyx_n_u_np __pyx_string_tab[233]
-#define __pyx_n_u_numpy __pyx_string_tab[234]
-#define __pyx_kp_u_numpy__core_multiarray_failed_to __pyx_string_tab[235]
-#define __pyx_kp_u_numpy__core_umath_failed_to_impo __pyx_string_tab[236]
-#define __pyx_n_u_nx __pyx_string_tab[237]
-#define __pyx_n_u_obj __pyx_string_tab[238]
-#define __pyx_kp_u_object __pyx_string_tab[239]
-#define __pyx_n_u_open __pyx_string_tab[240]
-#define __pyx_n_u_options_set __pyx_string_tab[241]
-#define __pyx_n_u_order __pyx_string_tab[242]
-#define __pyx_n_u_os __pyx_string_tab[243]
-#define __pyx_n_u_out __pyx_string_tab[244]
-#define __pyx_n_u_out_fields __pyx_string_tab[245]
-#define __pyx_n_u_out_mat __pyx_string_tab[246]
-#define __pyx_n_u_overwrite __pyx_string_tab[247]
-#define __pyx_n_u_p __pyx_string_tab[248]
-#define __pyx_n_u_pack __pyx_string_tab[249]
-#define __pyx_n_u_param_values __pyx_string_tab[250]
-#define __pyx_kp_u_param_values_2 __pyx_string_tab[251]
-#define __pyx_kp_u_param_values__and_idx_values__mu __pyx_string_tab[252]
-#define __pyx_kp_u_param_values__must_be_np_array __pyx_string_tab[253]
-#define __pyx_n_u_path __pyx_string_tab[254]
-#define __pyx_n_u_pi __pyx_string_tab[255]
-#define __pyx_n_u_pi_2 __pyx_string_tab[256]
-#define __pyx_n_u_pickle __pyx_string_tab[257]
-#define __pyx_n_u_pop __pyx_string_tab[258]
-#define __pyx_n_u_print __pyx_string_tab[259]
-#define __pyx_n_u_print_level __pyx_string_tab[260]
-#define __pyx_n_u_print_statistics __pyx_string_tab[261]
-#define __pyx_n_u_pyx_checksum __pyx_string_tab[262]
-#define __pyx_n_u_pyx_state __pyx_string_tab[263]
-#define __pyx_n_u_pyx_type __pyx_string_tab[264]
-#define __pyx_n_u_pyx_unpickle_Enum __pyx_string_tab[265]
-#define __pyx_n_u_pyx_vtable __pyx_string_tab[266]
-#define __pyx_n_u_qp_iter __pyx_string_tab[267]
-#define __pyx_n_u_qp_mu0 __pyx_string_tab[268]
-#define __pyx_n_u_qp_solver_cond_N __pyx_string_tab[269]
-#define __pyx_n_u_qp_tau_min __pyx_string_tab[270]
-#define __pyx_n_u_qp_tol_comp __pyx_string_tab[271]
-#define __pyx_n_u_qp_tol_eq __pyx_string_tab[272]
-#define __pyx_n_u_qp_tol_ineq __pyx_string_tab[273]
-#define __pyx_n_u_qp_tol_stat __pyx_string_tab[274]
-#define __pyx_n_u_qp_warm_start __pyx_string_tab[275]
-#define __pyx_n_u_qualname __pyx_string_tab[276]
-#define __pyx_n_u_r __pyx_string_tab[277]
-#define __pyx_n_u_range __pyx_string_tab[278]
-#define __pyx_n_u_recompute __pyx_string_tab[279]
-#define __pyx_n_u_reduce __pyx_string_tab[280]
-#define __pyx_n_u_reduce_cython __pyx_string_tab[281]
-#define __pyx_n_u_reduce_ex __pyx_string_tab[282]
-#define __pyx_n_u_register __pyx_string_tab[283]
-#define __pyx_n_b_res_comp __pyx_string_tab[284]
-#define __pyx_n_b_res_eq __pyx_string_tab[285]
-#define __pyx_n_b_res_ineq __pyx_string_tab[286]
-#define __pyx_n_b_res_stat __pyx_string_tab[287]
-#define __pyx_n_u_reset __pyx_string_tab[288]
-#define __pyx_n_u_reset_qp_solver_mem __pyx_string_tab[289]
-#define __pyx_n_u_residuals __pyx_string_tab[290]
-#define __pyx_n_u_rti_phase __pyx_string_tab[291]
-#define __pyx_n_u_self __pyx_string_tab[292]
-#define __pyx_n_u_set __pyx_string_tab[293]
-#define __pyx_n_u_set_name __pyx_string_tab[294]
-#define __pyx_n_u_set_new_time_steps __pyx_string_tab[295]
-#define __pyx_n_u_set_params_sparse __pyx_string_tab[296]
-#define __pyx_kp_u_set_value_must_be_numpy_array_go __pyx_string_tab[297]
-#define __pyx_n_u_setstate __pyx_string_tab[298]
-#define __pyx_n_u_setstate_cython __pyx_string_tab[299]
-#define __pyx_n_u_shape __pyx_string_tab[300]
-#define __pyx_n_u_size __pyx_string_tab[301]
-#define __pyx_n_u_sl __pyx_string_tab[302]
-#define __pyx_n_u_sl_2 __pyx_string_tab[303]
-#define __pyx_n_u_solution __pyx_string_tab[304]
-#define __pyx_n_u_solve __pyx_string_tab[305]
-#define __pyx_n_u_solve_for_x0 __pyx_string_tab[306]
-#define __pyx_kp_u_solver_option_must_be_of_type_fl __pyx_string_tab[307]
-#define __pyx_kp_u_solver_option_must_be_of_type_in __pyx_string_tab[308]
-#define __pyx_kp_u_solver_option_must_be_of_type_st __pyx_string_tab[309]
-#define __pyx_n_u_sort_keys __pyx_string_tab[310]
-#define __pyx_n_u_spec __pyx_string_tab[311]
-#define __pyx_n_u_split __pyx_string_tab[312]
-#define __pyx_n_u_sqp_iter __pyx_string_tab[313]
-#define __pyx_n_u_stage __pyx_string_tab[314]
-#define __pyx_n_u_start __pyx_string_tab[315]
-#define __pyx_n_u_stat_m __pyx_string_tab[316]
-#define __pyx_n_u_stat_n __pyx_string_tab[317]
-#define __pyx_n_u_statistics __pyx_string_tab[318]
-#define __pyx_n_u_status __pyx_string_tab[319]
-#define __pyx_n_u_step __pyx_string_tab[320]
-#define __pyx_n_u_step_length __pyx_string_tab[321]
-#define __pyx_n_u_stop __pyx_string_tab[322]
-#define __pyx_n_u_store_iterate __pyx_string_tab[323]
-#define __pyx_n_u_store_iterate_locals_lambda __pyx_string_tab[324]
-#define __pyx_kp_u_stored_current_iterate_in __pyx_string_tab[325]
-#define __pyx_n_u_strftime __pyx_string_tab[326]
-#define __pyx_kp_u_strided_and_direct __pyx_string_tab[327]
-#define __pyx_kp_u_strided_and_direct_or_indirect __pyx_string_tab[328]
-#define __pyx_kp_u_strided_and_indirect __pyx_string_tab[329]
-#define __pyx_n_u_string_fields __pyx_string_tab[330]
-#define __pyx_n_u_string_value __pyx_string_tab[331]
-#define __pyx_kp_u_stringsource __pyx_string_tab[332]
-#define __pyx_n_u_struct __pyx_string_tab[333]
-#define __pyx_n_u_su __pyx_string_tab[334]
-#define __pyx_n_u_su_2 __pyx_string_tab[335]
-#define __pyx_n_u_t __pyx_string_tab[336]
-#define __pyx_n_u_t_2 __pyx_string_tab[337]
-#define __pyx_n_u_test __pyx_string_tab[338]
-#define __pyx_kp_u_third_party_acados_acados_templa __pyx_string_tab[339]
+#define __pyx_n_u_acados_acados_template_acados_oc __pyx_string_tab[97]
+#define __pyx_kp_u_acados_acados_template_acados_oc_2 __pyx_string_tab[98]
+#define __pyx_kp_u_add_note __pyx_string_tab[99]
+#define __pyx_n_u_allocate_buffer __pyx_string_tab[100]
+#define __pyx_n_u_alpha __pyx_string_tab[101]
+#define __pyx_n_u_alpha_min __pyx_string_tab[102]
+#define __pyx_n_u_alpha_reduction __pyx_string_tab[103]
+#define __pyx_kp_u_alpha_values_are_not_available_f __pyx_string_tab[104]
+#define __pyx_kp_u_and __pyx_string_tab[105]
+#define __pyx_n_u_array __pyx_string_tab[106]
+#define __pyx_n_u_ascontiguousarray __pyx_string_tab[107]
+#define __pyx_n_u_asfortranarray __pyx_string_tab[108]
+#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[109]
+#define __pyx_kp_u_at_0x __pyx_string_tab[110]
+#define __pyx_kp_u_at_stage __pyx_string_tab[111]
+#define __pyx_n_u_base __pyx_string_tab[112]
+#define __pyx_n_u_c __pyx_string_tab[113]
+#define __pyx_n_u_class __pyx_string_tab[114]
+#define __pyx_n_u_class_getitem __pyx_string_tab[115]
+#define __pyx_n_u_cline_in_traceback __pyx_string_tab[116]
+#define __pyx_kp_u_collections_abc __pyx_string_tab[117]
+#define __pyx_n_u_constraints_fields __pyx_string_tab[118]
+#define __pyx_n_u_constraints_set __pyx_string_tab[119]
+#define __pyx_kp_u_constraints_set_value_must_be_nu __pyx_string_tab[120]
+#define __pyx_kp_u_contiguous_and_direct __pyx_string_tab[121]
+#define __pyx_kp_u_contiguous_and_indirect __pyx_string_tab[122]
+#define __pyx_n_u_cost_fields __pyx_string_tab[123]
+#define __pyx_n_u_cost_set __pyx_string_tab[124]
+#define __pyx_kp_u_cost_set_value_must_be_numpy_arr __pyx_string_tab[125]
+#define __pyx_n_u_count __pyx_string_tab[126]
+#define __pyx_n_u_custom_update __pyx_string_tab[127]
+#define __pyx_n_u_d __pyx_string_tab[128]
+#define __pyx_n_u_data __pyx_string_tab[129]
+#define __pyx_n_u_data_2 __pyx_string_tab[130]
+#define __pyx_n_u_data_len __pyx_string_tab[131]
+#define __pyx_n_u_datetime __pyx_string_tab[132]
+#define __pyx_n_u_default __pyx_string_tab[133]
+#define __pyx_n_u_dict __pyx_string_tab[134]
+#define __pyx_n_u_dims __pyx_string_tab[135]
+#define __pyx_kp_u_disable __pyx_string_tab[136]
+#define __pyx_n_u_double_fields __pyx_string_tab[137]
+#define __pyx_n_u_double_value __pyx_string_tab[138]
+#define __pyx_n_u_dtype __pyx_string_tab[139]
+#define __pyx_n_u_dtype_is_object __pyx_string_tab[140]
+#define __pyx_n_u_dump __pyx_string_tab[141]
+#define __pyx_kp_u_enable __pyx_string_tab[142]
+#define __pyx_n_u_encode __pyx_string_tab[143]
+#define __pyx_n_u_enter __pyx_string_tab[144]
+#define __pyx_n_u_enumerate __pyx_string_tab[145]
+#define __pyx_n_u_eps_sufficient_descent __pyx_string_tab[146]
+#define __pyx_n_u_error __pyx_string_tab[147]
+#define __pyx_n_u_eval_param_sens __pyx_string_tab[148]
+#define __pyx_n_u_ex __pyx_string_tab[149]
+#define __pyx_n_u_exit __pyx_string_tab[150]
+#define __pyx_n_u_f __pyx_string_tab[151]
+#define __pyx_n_u_field __pyx_string_tab[152]
+#define __pyx_n_u_field_2 __pyx_string_tab[153]
+#define __pyx_n_u_fields __pyx_string_tab[154]
+#define __pyx_n_u_filename __pyx_string_tab[155]
+#define __pyx_n_u_flags __pyx_string_tab[156]
+#define __pyx_n_u_float64 __pyx_string_tab[157]
+#define __pyx_n_u_format __pyx_string_tab[158]
+#define __pyx_n_u_fortran __pyx_string_tab[159]
+#define __pyx_n_u_full_stats __pyx_string_tab[160]
+#define __pyx_n_u_full_step_dual __pyx_string_tab[161]
+#define __pyx_n_u_func __pyx_string_tab[162]
+#define __pyx_kp_u_gc __pyx_string_tab[163]
+#define __pyx_n_u_get __pyx_string_tab[164]
+#define __pyx_n_u_get_cost __pyx_string_tab[165]
+#define __pyx_n_u_get_from_qp_in __pyx_string_tab[166]
+#define __pyx_n_u_get_pointers_solver __pyx_string_tab[167]
+#define __pyx_n_u_get_residuals __pyx_string_tab[168]
+#define __pyx_n_u_get_stat_double __pyx_string_tab[169]
+#define __pyx_n_u_get_stat_int __pyx_string_tab[170]
+#define __pyx_n_u_get_stat_matrix __pyx_string_tab[171]
+#define __pyx_n_u_get_stats __pyx_string_tab[172]
+#define __pyx_n_u_getcwd __pyx_string_tab[173]
+#define __pyx_n_u_getstate __pyx_string_tab[174]
+#define __pyx_n_u_globalization __pyx_string_tab[175]
+#define __pyx_n_u_globalization_use_SOC __pyx_string_tab[176]
+#define __pyx_kp_u_got __pyx_string_tab[177]
+#define __pyx_kp_u_got_differing_extents_in_dimensi __pyx_string_tab[178]
+#define __pyx_n_u_i __pyx_string_tab[179]
+#define __pyx_n_u_i_string __pyx_string_tab[180]
+#define __pyx_n_u_id __pyx_string_tab[181]
+#define __pyx_n_u_idx __pyx_string_tab[182]
+#define __pyx_n_u_idx_values __pyx_string_tab[183]
+#define __pyx_n_u_import __pyx_string_tab[184]
+#define __pyx_n_u_indent __pyx_string_tab[185]
+#define __pyx_n_u_index __pyx_string_tab[186]
+#define __pyx_n_u_initialize_t_slacks __pyx_string_tab[187]
+#define __pyx_n_u_initializing __pyx_string_tab[188]
+#define __pyx_n_u_int __pyx_string_tab[189]
+#define __pyx_n_u_int32 __pyx_string_tab[190]
+#define __pyx_n_u_int_fields __pyx_string_tab[191]
+#define __pyx_n_u_int_value __pyx_string_tab[192]
+#define __pyx_n_u_is_coroutine __pyx_string_tab[193]
+#define __pyx_kp_u_isenabled __pyx_string_tab[194]
+#define __pyx_n_u_isfile __pyx_string_tab[195]
+#define __pyx_n_u_itemsize __pyx_string_tab[196]
+#define __pyx_kp_u_itemsize_0_for_cython_array __pyx_string_tab[197]
+#define __pyx_n_u_iterate __pyx_string_tab[198]
+#define __pyx_n_u_join __pyx_string_tab[199]
+#define __pyx_n_u_json __pyx_string_tab[200]
+#define __pyx_kp_u_json_2 __pyx_string_tab[201]
+#define __pyx_n_u_k __pyx_string_tab[202]
+#define __pyx_n_u_key __pyx_string_tab[203]
+#define __pyx_n_u_keys __pyx_string_tab[204]
+#define __pyx_n_u_lN __pyx_string_tab[205]
+#define __pyx_n_u_lam __pyx_string_tab[206]
+#define __pyx_n_u_lam_2 __pyx_string_tab[207]
+#define __pyx_n_u_lambda __pyx_string_tab[208]
+#define __pyx_n_u_lbu __pyx_string_tab[209]
+#define __pyx_n_u_lbx __pyx_string_tab[210]
+#define __pyx_n_u_line_search_use_sufficient_desce __pyx_string_tab[211]
+#define __pyx_n_u_load __pyx_string_tab[212]
+#define __pyx_n_u_load_iterate __pyx_string_tab[213]
+#define __pyx_kp_u_load_iterate_failed_file_does_no __pyx_string_tab[214]
+#define __pyx_n_u_m __pyx_string_tab[215]
+#define __pyx_n_u_main __pyx_string_tab[216]
+#define __pyx_n_u_mem_fields __pyx_string_tab[217]
+#define __pyx_n_u_memview __pyx_string_tab[218]
+#define __pyx_n_u_min_size __pyx_string_tab[219]
+#define __pyx_n_u_mode __pyx_string_tab[220]
+#define __pyx_n_u_model_name __pyx_string_tab[221]
+#define __pyx_n_u_module __pyx_string_tab[222]
+#define __pyx_n_u_msg __pyx_string_tab[223]
+#define __pyx_n_u_n __pyx_string_tab[224]
+#define __pyx_n_u_n_update __pyx_string_tab[225]
+#define __pyx_n_u_name __pyx_string_tab[226]
+#define __pyx_n_u_name_2 __pyx_string_tab[227]
+#define __pyx_n_u_ndarray __pyx_string_tab[228]
+#define __pyx_n_u_ndim __pyx_string_tab[229]
+#define __pyx_n_u_new __pyx_string_tab[230]
+#define __pyx_n_u_new_time_steps __pyx_string_tab[231]
+#define __pyx_n_u_nlp_solver_type __pyx_string_tab[232]
+#define __pyx_kp_u_no_default___reduce___due_to_non __pyx_string_tab[233]
+#define __pyx_n_u_np __pyx_string_tab[234]
+#define __pyx_n_u_numpy __pyx_string_tab[235]
+#define __pyx_kp_u_numpy__core_multiarray_failed_to __pyx_string_tab[236]
+#define __pyx_kp_u_numpy__core_umath_failed_to_impo __pyx_string_tab[237]
+#define __pyx_n_u_nx __pyx_string_tab[238]
+#define __pyx_n_u_obj __pyx_string_tab[239]
+#define __pyx_kp_u_object __pyx_string_tab[240]
+#define __pyx_n_u_open __pyx_string_tab[241]
+#define __pyx_n_u_options_set __pyx_string_tab[242]
+#define __pyx_n_u_order __pyx_string_tab[243]
+#define __pyx_n_u_os __pyx_string_tab[244]
+#define __pyx_n_u_out __pyx_string_tab[245]
+#define __pyx_n_u_out_fields __pyx_string_tab[246]
+#define __pyx_n_u_out_mat __pyx_string_tab[247]
+#define __pyx_n_u_overwrite __pyx_string_tab[248]
+#define __pyx_n_u_p __pyx_string_tab[249]
+#define __pyx_n_u_pack __pyx_string_tab[250]
+#define __pyx_n_u_param_values __pyx_string_tab[251]
+#define __pyx_kp_u_param_values_2 __pyx_string_tab[252]
+#define __pyx_kp_u_param_values__and_idx_values__mu __pyx_string_tab[253]
+#define __pyx_kp_u_param_values__must_be_np_array __pyx_string_tab[254]
+#define __pyx_n_u_path __pyx_string_tab[255]
+#define __pyx_n_u_pi __pyx_string_tab[256]
+#define __pyx_n_u_pi_2 __pyx_string_tab[257]
+#define __pyx_n_u_pickle __pyx_string_tab[258]
+#define __pyx_n_u_pop __pyx_string_tab[259]
+#define __pyx_n_u_print __pyx_string_tab[260]
+#define __pyx_n_u_print_level __pyx_string_tab[261]
+#define __pyx_n_u_print_statistics __pyx_string_tab[262]
+#define __pyx_n_u_pyx_checksum __pyx_string_tab[263]
+#define __pyx_n_u_pyx_state __pyx_string_tab[264]
+#define __pyx_n_u_pyx_type __pyx_string_tab[265]
+#define __pyx_n_u_pyx_unpickle_Enum __pyx_string_tab[266]
+#define __pyx_n_u_pyx_vtable __pyx_string_tab[267]
+#define __pyx_n_u_qp_iter __pyx_string_tab[268]
+#define __pyx_n_u_qp_mu0 __pyx_string_tab[269]
+#define __pyx_n_u_qp_solver_cond_N __pyx_string_tab[270]
+#define __pyx_n_u_qp_tau_min __pyx_string_tab[271]
+#define __pyx_n_u_qp_tol_comp __pyx_string_tab[272]
+#define __pyx_n_u_qp_tol_eq __pyx_string_tab[273]
+#define __pyx_n_u_qp_tol_ineq __pyx_string_tab[274]
+#define __pyx_n_u_qp_tol_stat __pyx_string_tab[275]
+#define __pyx_n_u_qp_warm_start __pyx_string_tab[276]
+#define __pyx_n_u_qualname __pyx_string_tab[277]
+#define __pyx_n_u_r __pyx_string_tab[278]
+#define __pyx_n_u_range __pyx_string_tab[279]
+#define __pyx_n_u_recompute __pyx_string_tab[280]
+#define __pyx_n_u_reduce __pyx_string_tab[281]
+#define __pyx_n_u_reduce_cython __pyx_string_tab[282]
+#define __pyx_n_u_reduce_ex __pyx_string_tab[283]
+#define __pyx_n_u_register __pyx_string_tab[284]
+#define __pyx_n_b_res_comp __pyx_string_tab[285]
+#define __pyx_n_b_res_eq __pyx_string_tab[286]
+#define __pyx_n_b_res_ineq __pyx_string_tab[287]
+#define __pyx_n_b_res_stat __pyx_string_tab[288]
+#define __pyx_n_u_reset __pyx_string_tab[289]
+#define __pyx_n_u_reset_qp_solver_mem __pyx_string_tab[290]
+#define __pyx_n_u_residuals __pyx_string_tab[291]
+#define __pyx_n_u_rti_phase __pyx_string_tab[292]
+#define __pyx_n_u_self __pyx_string_tab[293]
+#define __pyx_n_u_set __pyx_string_tab[294]
+#define __pyx_n_u_set_name __pyx_string_tab[295]
+#define __pyx_n_u_set_new_time_steps __pyx_string_tab[296]
+#define __pyx_n_u_set_params_sparse __pyx_string_tab[297]
+#define __pyx_kp_u_set_value_must_be_numpy_array_go __pyx_string_tab[298]
+#define __pyx_n_u_setstate __pyx_string_tab[299]
+#define __pyx_n_u_setstate_cython __pyx_string_tab[300]
+#define __pyx_n_u_shape __pyx_string_tab[301]
+#define __pyx_n_u_size __pyx_string_tab[302]
+#define __pyx_n_u_sl __pyx_string_tab[303]
+#define __pyx_n_u_sl_2 __pyx_string_tab[304]
+#define __pyx_n_u_solution __pyx_string_tab[305]
+#define __pyx_n_u_solve __pyx_string_tab[306]
+#define __pyx_n_u_solve_for_x0 __pyx_string_tab[307]
+#define __pyx_kp_u_solver_option_must_be_of_type_fl __pyx_string_tab[308]
+#define __pyx_kp_u_solver_option_must_be_of_type_in __pyx_string_tab[309]
+#define __pyx_kp_u_solver_option_must_be_of_type_st __pyx_string_tab[310]
+#define __pyx_n_u_sort_keys __pyx_string_tab[311]
+#define __pyx_n_u_spec __pyx_string_tab[312]
+#define __pyx_n_u_split __pyx_string_tab[313]
+#define __pyx_n_u_sqp_iter __pyx_string_tab[314]
+#define __pyx_n_u_stage __pyx_string_tab[315]
+#define __pyx_n_u_start __pyx_string_tab[316]
+#define __pyx_n_u_stat_m __pyx_string_tab[317]
+#define __pyx_n_u_stat_n __pyx_string_tab[318]
+#define __pyx_n_u_statistics __pyx_string_tab[319]
+#define __pyx_n_u_status __pyx_string_tab[320]
+#define __pyx_n_u_step __pyx_string_tab[321]
+#define __pyx_n_u_step_length __pyx_string_tab[322]
+#define __pyx_n_u_stop __pyx_string_tab[323]
+#define __pyx_n_u_store_iterate __pyx_string_tab[324]
+#define __pyx_n_u_store_iterate_locals_lambda __pyx_string_tab[325]
+#define __pyx_kp_u_stored_current_iterate_in __pyx_string_tab[326]
+#define __pyx_n_u_strftime __pyx_string_tab[327]
+#define __pyx_kp_u_strided_and_direct __pyx_string_tab[328]
+#define __pyx_kp_u_strided_and_direct_or_indirect __pyx_string_tab[329]
+#define __pyx_kp_u_strided_and_indirect __pyx_string_tab[330]
+#define __pyx_n_u_string_fields __pyx_string_tab[331]
+#define __pyx_n_u_string_value __pyx_string_tab[332]
+#define __pyx_kp_u_stringsource __pyx_string_tab[333]
+#define __pyx_n_u_struct __pyx_string_tab[334]
+#define __pyx_n_u_su __pyx_string_tab[335]
+#define __pyx_n_u_su_2 __pyx_string_tab[336]
+#define __pyx_n_u_t __pyx_string_tab[337]
+#define __pyx_n_u_t_2 __pyx_string_tab[338]
+#define __pyx_n_u_test __pyx_string_tab[339]
 #define __pyx_n_u_time_glob __pyx_string_tab[340]
 #define __pyx_n_u_time_lin __pyx_string_tab[341]
 #define __pyx_n_u_time_qp __pyx_string_tab[342]
@@ -4408,8 +4408,8 @@ static CYTHON_SMALL_CODE int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_flexible);
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_character);
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_ufunc);
-  Py_CLEAR(clear_module_state->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython);
-  Py_CLEAR(clear_module_state->__pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython);
+  Py_CLEAR(clear_module_state->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython);
+  Py_CLEAR(clear_module_state->__pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython);
   Py_CLEAR(clear_module_state->__pyx_array_type);
   Py_CLEAR(clear_module_state->__pyx_type___pyx_array);
   Py_CLEAR(clear_module_state->__pyx_MemviewEnum_type);
@@ -4469,8 +4469,8 @@ static CYTHON_SMALL_CODE int __pyx_m_traverse(PyObject *m, visitproc visit, void
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_flexible);
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_character);
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_ufunc);
-  Py_VISIT(traverse_module_state->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython);
-  Py_VISIT(traverse_module_state->__pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython);
+  Py_VISIT(traverse_module_state->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython);
+  Py_VISIT(traverse_module_state->__pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython);
   Py_VISIT(traverse_module_state->__pyx_array_type);
   Py_VISIT(traverse_module_state->__pyx_type___pyx_array);
   Py_VISIT(traverse_module_state->__pyx_MemviewEnum_type);
@@ -4500,8 +4500,8 @@ static CYTHON_SMALL_CODE int __pyx_m_traverse(PyObject *m, visitproc visit, void
 /* #### Code section: module_code ### */
 
 /* "carray.to_py":113
- * 
- * 
+ *
+ *
  * @cname("__Pyx_carray_to_py_int")             # <<<<<<<<<<<<<<
  * cdef inline list __Pyx_carray_to_py_int(base_type *v, Py_ssize_t length):
  *     cdef size_t i
@@ -4573,7 +4573,7 @@ static CYTHON_INLINE PyObject *__Pyx_carray_to_py_int(int *__pyx_v_v, Py_ssize_t
  *         Py_INCREF(value)
  *         __Pyx_PyList_SET_ITEM(l, i, value)             # <<<<<<<<<<<<<<
  *     return l
- * 
+ *
 */
     __pyx_t_5 = __Pyx_PyList_SET_ITEM(__pyx_v_l, __pyx_v_i, __pyx_v_value); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(1, 121, __pyx_L1_error)
   }
@@ -4582,8 +4582,8 @@ static CYTHON_INLINE PyObject *__Pyx_carray_to_py_int(int *__pyx_v_v, Py_ssize_t
  *         Py_INCREF(value)
  *         __Pyx_PyList_SET_ITEM(l, i, value)
  *     return l             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_l);
@@ -4591,8 +4591,8 @@ static CYTHON_INLINE PyObject *__Pyx_carray_to_py_int(int *__pyx_v_v, Py_ssize_t
   goto __pyx_L0;
 
   /* "carray.to_py":113
- * 
- * 
+ *
+ *
  * @cname("__Pyx_carray_to_py_int")             # <<<<<<<<<<<<<<
  * cdef inline list __Pyx_carray_to_py_int(base_type *v, Py_ssize_t length):
  *     cdef size_t i
@@ -4612,8 +4612,8 @@ static CYTHON_INLINE PyObject *__Pyx_carray_to_py_int(int *__pyx_v_v, Py_ssize_t
 }
 
 /* "carray.to_py":125
- * 
- * 
+ *
+ *
  * @cname("__Pyx_carray_to_tuple_int")             # <<<<<<<<<<<<<<
  * cdef inline tuple __Pyx_carray_to_tuple_int(base_type *v, Py_ssize_t length):
  *     cdef size_t i
@@ -4700,8 +4700,8 @@ static CYTHON_INLINE PyObject *__Pyx_carray_to_tuple_int(int *__pyx_v_v, Py_ssiz
   goto __pyx_L0;
 
   /* "carray.to_py":125
- * 
- * 
+ *
+ *
  * @cname("__Pyx_carray_to_tuple_int")             # <<<<<<<<<<<<<<
  * cdef inline tuple __Pyx_carray_to_tuple_int(base_type *v, Py_ssize_t length):
  *     cdef size_t i
@@ -4722,10 +4722,10 @@ static CYTHON_INLINE PyObject *__Pyx_carray_to_tuple_int(int *__pyx_v_v, Py_ssiz
 
 /* "View.MemoryView":129
  *         cdef bint dtype_is_object
- * 
+ *
  *     def __cinit__(array self, tuple shape, Py_ssize_t itemsize, format not None,             # <<<<<<<<<<<<<<
  *                   mode="c", bint allocate_buffer=True):
- * 
+ *
 */
 
 /* Python wrapper */
@@ -4817,10 +4817,10 @@ static int __pyx_array___cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, P
     } else {
 
       /* "View.MemoryView":130
- * 
+ *
  *     def __cinit__(array self, tuple shape, Py_ssize_t itemsize, format not None,
  *                   mode="c", bint allocate_buffer=True):             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef int idx
 */
       __pyx_v_allocate_buffer = ((int)1);
@@ -4847,10 +4847,10 @@ static int __pyx_array___cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, P
 
   /* "View.MemoryView":129
  *         cdef bint dtype_is_object
- * 
+ *
  *     def __cinit__(array self, tuple shape, Py_ssize_t itemsize, format not None,             # <<<<<<<<<<<<<<
  *                   mode="c", bint allocate_buffer=True):
- * 
+ *
 */
 
   /* function exit code */
@@ -4896,10 +4896,10 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
 
   /* "View.MemoryView":135
  *         cdef Py_ssize_t dim
- * 
+ *
  *         self.ndim = <int> len(shape)             # <<<<<<<<<<<<<<
  *         self.itemsize = itemsize
- * 
+ *
 */
   if (unlikely(__pyx_v_shape == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
@@ -4909,29 +4909,29 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
   __pyx_v_self->ndim = ((int)__pyx_t_1);
 
   /* "View.MemoryView":136
- * 
+ *
  *         self.ndim = <int> len(shape)
  *         self.itemsize = itemsize             # <<<<<<<<<<<<<<
- * 
+ *
  *         if not self.ndim:
 */
   __pyx_v_self->itemsize = __pyx_v_itemsize;
 
   /* "View.MemoryView":138
  *         self.itemsize = itemsize
- * 
+ *
  *         if not self.ndim:             # <<<<<<<<<<<<<<
  *             raise ValueError, "Empty shape tuple for cython.array"
- * 
+ *
 */
   __pyx_t_2 = (!(__pyx_v_self->ndim != 0));
   if (unlikely(__pyx_t_2)) {
 
     /* "View.MemoryView":139
- * 
+ *
  *         if not self.ndim:
  *             raise ValueError, "Empty shape tuple for cython.array"             # <<<<<<<<<<<<<<
- * 
+ *
  *         if itemsize <= 0:
 */
     __Pyx_Raise(__pyx_builtin_ValueError, __pyx_mstate_global->__pyx_kp_u_Empty_shape_tuple_for_cython_arr, 0, 0);
@@ -4939,28 +4939,28 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
 
     /* "View.MemoryView":138
  *         self.itemsize = itemsize
- * 
+ *
  *         if not self.ndim:             # <<<<<<<<<<<<<<
  *             raise ValueError, "Empty shape tuple for cython.array"
- * 
+ *
 */
   }
 
   /* "View.MemoryView":141
  *             raise ValueError, "Empty shape tuple for cython.array"
- * 
+ *
  *         if itemsize <= 0:             # <<<<<<<<<<<<<<
  *             raise ValueError, "itemsize <= 0 for cython.array"
- * 
+ *
 */
   __pyx_t_2 = (__pyx_v_itemsize <= 0);
   if (unlikely(__pyx_t_2)) {
 
     /* "View.MemoryView":142
- * 
+ *
  *         if itemsize <= 0:
  *             raise ValueError, "itemsize <= 0 for cython.array"             # <<<<<<<<<<<<<<
- * 
+ *
  *         if not isinstance(format, bytes):
 */
     __Pyx_Raise(__pyx_builtin_ValueError, __pyx_mstate_global->__pyx_kp_u_itemsize_0_for_cython_array, 0, 0);
@@ -4968,26 +4968,26 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
 
     /* "View.MemoryView":141
  *             raise ValueError, "Empty shape tuple for cython.array"
- * 
+ *
  *         if itemsize <= 0:             # <<<<<<<<<<<<<<
  *             raise ValueError, "itemsize <= 0 for cython.array"
- * 
+ *
 */
   }
 
   /* "View.MemoryView":144
  *             raise ValueError, "itemsize <= 0 for cython.array"
- * 
+ *
  *         if not isinstance(format, bytes):             # <<<<<<<<<<<<<<
  *             format = format.encode('ASCII')
  *         self._format = format  # keep a reference to the byte string
 */
-  __pyx_t_2 = PyBytes_Check(__pyx_v_format); 
+  __pyx_t_2 = PyBytes_Check(__pyx_v_format);
   __pyx_t_3 = (!__pyx_t_2);
   if (__pyx_t_3) {
 
     /* "View.MemoryView":145
- * 
+ *
  *         if not isinstance(format, bytes):
  *             format = format.encode('ASCII')             # <<<<<<<<<<<<<<
  *         self._format = format  # keep a reference to the byte string
@@ -5008,7 +5008,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
 
     /* "View.MemoryView":144
  *             raise ValueError, "itemsize <= 0 for cython.array"
- * 
+ *
  *         if not isinstance(format, bytes):             # <<<<<<<<<<<<<<
  *             format = format.encode('ASCII')
  *         self._format = format  # keep a reference to the byte string
@@ -5020,7 +5020,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  *             format = format.encode('ASCII')
  *         self._format = format  # keep a reference to the byte string             # <<<<<<<<<<<<<<
  *         self.format = self._format
- * 
+ *
 */
   __pyx_t_4 = __pyx_v_format;
   __Pyx_INCREF(__pyx_t_4);
@@ -5035,8 +5035,8 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  *             format = format.encode('ASCII')
  *         self._format = format  # keep a reference to the byte string
  *         self.format = self._format             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   if (unlikely(__pyx_v_self->_format == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
@@ -5046,55 +5046,55 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
   __pyx_v_self->format = __pyx_t_7;
 
   /* "View.MemoryView":150
- * 
- * 
+ *
+ *
  *         self._shape = <Py_ssize_t *> PyObject_Malloc(sizeof(Py_ssize_t)*self.ndim*2)             # <<<<<<<<<<<<<<
  *         self._strides = self._shape + self.ndim
- * 
+ *
 */
   __pyx_v_self->_shape = ((Py_ssize_t *)PyObject_Malloc((((sizeof(Py_ssize_t)) * __pyx_v_self->ndim) * 2)));
 
   /* "View.MemoryView":151
- * 
+ *
  *         self._shape = <Py_ssize_t *> PyObject_Malloc(sizeof(Py_ssize_t)*self.ndim*2)
  *         self._strides = self._shape + self.ndim             # <<<<<<<<<<<<<<
- * 
+ *
  *         if not self._shape:
 */
   __pyx_v_self->_strides = (__pyx_v_self->_shape + __pyx_v_self->ndim);
 
   /* "View.MemoryView":153
  *         self._strides = self._shape + self.ndim
- * 
+ *
  *         if not self._shape:             # <<<<<<<<<<<<<<
  *             raise MemoryError, "unable to allocate shape and strides."
- * 
+ *
 */
   __pyx_t_3 = (!(__pyx_v_self->_shape != 0));
   if (unlikely(__pyx_t_3)) {
 
     /* "View.MemoryView":154
- * 
+ *
  *         if not self._shape:
  *             raise MemoryError, "unable to allocate shape and strides."             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     __Pyx_Raise(__pyx_builtin_MemoryError, __pyx_mstate_global->__pyx_kp_u_unable_to_allocate_shape_and_str, 0, 0);
     __PYX_ERR(1, 154, __pyx_L1_error)
 
     /* "View.MemoryView":153
  *         self._strides = self._shape + self.ndim
- * 
+ *
  *         if not self._shape:             # <<<<<<<<<<<<<<
  *             raise MemoryError, "unable to allocate shape and strides."
- * 
+ *
 */
   }
 
   /* "View.MemoryView":157
- * 
- * 
+ *
+ *
  *         for idx, dim in enumerate(shape):             # <<<<<<<<<<<<<<
  *             if dim <= 0:
  *                 raise ValueError, f"Invalid shape in axis {idx}: {dim}."
@@ -5125,7 +5125,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
     __pyx_t_8 = (__pyx_t_8 + 1);
 
     /* "View.MemoryView":158
- * 
+ *
  *         for idx, dim in enumerate(shape):
  *             if dim <= 0:             # <<<<<<<<<<<<<<
  *                 raise ValueError, f"Invalid shape in axis {idx}: {dim}."
@@ -5139,7 +5139,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  *             if dim <= 0:
  *                 raise ValueError, f"Invalid shape in axis {idx}: {dim}."             # <<<<<<<<<<<<<<
  *             self._shape[idx] = dim
- * 
+ *
 */
       __pyx_t_5 = __Pyx_PyUnicode_From_int(__pyx_v_idx, 0, ' ', 'd'); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 159, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
@@ -5160,7 +5160,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
       __PYX_ERR(1, 159, __pyx_L1_error)
 
       /* "View.MemoryView":158
- * 
+ *
  *         for idx, dim in enumerate(shape):
  *             if dim <= 0:             # <<<<<<<<<<<<<<
  *                 raise ValueError, f"Invalid shape in axis {idx}: {dim}."
@@ -5172,14 +5172,14 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  *             if dim <= 0:
  *                 raise ValueError, f"Invalid shape in axis {idx}: {dim}."
  *             self._shape[idx] = dim             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef char order
 */
     (__pyx_v_self->_shape[__pyx_v_idx]) = __pyx_v_dim;
 
     /* "View.MemoryView":157
- * 
- * 
+ *
+ *
  *         for idx, dim in enumerate(shape):             # <<<<<<<<<<<<<<
  *             if dim <= 0:
  *                 raise ValueError, f"Invalid shape in axis {idx}: {dim}."
@@ -5188,7 +5188,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
   /* "View.MemoryView":163
- * 
+ *
  *         cdef char order
  *         if mode == 'c':             # <<<<<<<<<<<<<<
  *             order = b'C'
@@ -5220,7 +5220,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
     __pyx_v_self->mode = __pyx_mstate_global->__pyx_n_u_c;
 
     /* "View.MemoryView":163
- * 
+ *
  *         cdef char order
  *         if mode == 'c':             # <<<<<<<<<<<<<<
  *             order = b'C'
@@ -5275,7 +5275,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  *             self.mode = u'fortran'
  *         else:
  *             raise ValueError, f"Invalid mode, expected 'c' or 'fortran', got {mode}"             # <<<<<<<<<<<<<<
- * 
+ *
  *         self.len = fill_contig_strides_array(self._shape, self._strides, itemsize, self.ndim, order)
 */
   /*else*/ {
@@ -5292,27 +5292,27 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
 
   /* "View.MemoryView":172
  *             raise ValueError, f"Invalid mode, expected 'c' or 'fortran', got {mode}"
- * 
+ *
  *         self.len = fill_contig_strides_array(self._shape, self._strides, itemsize, self.ndim, order)             # <<<<<<<<<<<<<<
- * 
+ *
  *         self.free_data = allocate_buffer
 */
   __pyx_v_self->len = __pyx_fill_contig_strides_array(__pyx_v_self->_shape, __pyx_v_self->_strides, __pyx_v_itemsize, __pyx_v_self->ndim, __pyx_v_order);
 
   /* "View.MemoryView":174
  *         self.len = fill_contig_strides_array(self._shape, self._strides, itemsize, self.ndim, order)
- * 
+ *
  *         self.free_data = allocate_buffer             # <<<<<<<<<<<<<<
  *         self.dtype_is_object = format == b'O'
- * 
+ *
 */
   __pyx_v_self->free_data = __pyx_v_allocate_buffer;
 
   /* "View.MemoryView":175
- * 
+ *
  *         self.free_data = allocate_buffer
  *         self.dtype_is_object = format == b'O'             # <<<<<<<<<<<<<<
- * 
+ *
  *         if allocate_buffer:
 */
   __pyx_t_12 = PyObject_RichCompare(__pyx_v_format, __pyx_mstate_global->__pyx_n_b_O, Py_EQ); __Pyx_XGOTREF(__pyx_t_12); if (unlikely(!__pyx_t_12)) __PYX_ERR(1, 175, __pyx_L1_error)
@@ -5322,37 +5322,37 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
 
   /* "View.MemoryView":177
  *         self.dtype_is_object = format == b'O'
- * 
+ *
  *         if allocate_buffer:             # <<<<<<<<<<<<<<
  *             _allocate_buffer(self)
- * 
+ *
 */
   if (__pyx_v_allocate_buffer) {
 
     /* "View.MemoryView":178
- * 
+ *
  *         if allocate_buffer:
  *             _allocate_buffer(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *     @cname('getbuffer')
 */
     __pyx_t_8 = __pyx_array_allocate_buffer(__pyx_v_self); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(1, 178, __pyx_L1_error)
 
     /* "View.MemoryView":177
  *         self.dtype_is_object = format == b'O'
- * 
+ *
  *         if allocate_buffer:             # <<<<<<<<<<<<<<
  *             _allocate_buffer(self)
- * 
+ *
 */
   }
 
   /* "View.MemoryView":129
  *         cdef bint dtype_is_object
- * 
+ *
  *     def __cinit__(array self, tuple shape, Py_ssize_t itemsize, format not None,             # <<<<<<<<<<<<<<
  *                   mode="c", bint allocate_buffer=True):
- * 
+ *
 */
 
   /* function exit code */
@@ -5373,7 +5373,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
 
 /* "View.MemoryView":180
  *             _allocate_buffer(self)
- * 
+ *
  *     @cname('getbuffer')             # <<<<<<<<<<<<<<
  *     def __getbuffer__(self, Py_buffer *info, int flags):
  *         cdef int bufmode = -1
@@ -5534,7 +5534,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *                 raise ValueError, "Can only create a buffer that is contiguous in memory."
  *         info.buf = self.data             # <<<<<<<<<<<<<<
  *         info.len = self.len
- * 
+ *
 */
   __pyx_t_2 = __pyx_v_self->data;
   __pyx_v_info->buf = __pyx_t_2;
@@ -5543,7 +5543,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *                 raise ValueError, "Can only create a buffer that is contiguous in memory."
  *         info.buf = self.data
  *         info.len = self.len             # <<<<<<<<<<<<<<
- * 
+ *
  *         if flags & PyBUF_STRIDES:
 */
   __pyx_t_3 = __pyx_v_self->len;
@@ -5551,7 +5551,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
 
   /* "View.MemoryView":193
  *         info.len = self.len
- * 
+ *
  *         if flags & PyBUF_STRIDES:             # <<<<<<<<<<<<<<
  *             info.ndim = self.ndim
  *             info.shape = self._shape
@@ -5560,7 +5560,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
   if (__pyx_t_1) {
 
     /* "View.MemoryView":194
- * 
+ *
  *         if flags & PyBUF_STRIDES:
  *             info.ndim = self.ndim             # <<<<<<<<<<<<<<
  *             info.shape = self._shape
@@ -5591,7 +5591,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
 
     /* "View.MemoryView":193
  *         info.len = self.len
- * 
+ *
  *         if flags & PyBUF_STRIDES:             # <<<<<<<<<<<<<<
  *             info.ndim = self.ndim
  *             info.shape = self._shape
@@ -5614,7 +5614,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *             info.ndim = 1
  *             info.shape = &self.len if flags & PyBUF_ND else NULL             # <<<<<<<<<<<<<<
  *             info.strides = NULL
- * 
+ *
 */
     __pyx_t_1 = ((__pyx_v_flags & PyBUF_ND) != 0);
     if (__pyx_t_1) {
@@ -5628,7 +5628,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *             info.ndim = 1
  *             info.shape = &self.len if flags & PyBUF_ND else NULL
  *             info.strides = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *         info.suboffsets = NULL
 */
     __pyx_v_info->strides = NULL;
@@ -5637,7 +5637,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
 
   /* "View.MemoryView":202
  *             info.strides = NULL
- * 
+ *
  *         info.suboffsets = NULL             # <<<<<<<<<<<<<<
  *         info.itemsize = self.itemsize
  *         info.readonly = 0
@@ -5645,7 +5645,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
   __pyx_v_info->suboffsets = NULL;
 
   /* "View.MemoryView":203
- * 
+ *
  *         info.suboffsets = NULL
  *         info.itemsize = self.itemsize             # <<<<<<<<<<<<<<
  *         info.readonly = 0
@@ -5668,7 +5668,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *         info.readonly = 0
  *         info.format = self.format if flags & PyBUF_FORMAT else NULL             # <<<<<<<<<<<<<<
  *         info.obj = self
- * 
+ *
 */
   __pyx_t_1 = ((__pyx_v_flags & PyBUF_FORMAT) != 0);
   if (__pyx_t_1) {
@@ -5682,7 +5682,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *         info.readonly = 0
  *         info.format = self.format if flags & PyBUF_FORMAT else NULL
  *         info.obj = self             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __dealloc__(array self):
 */
   __Pyx_INCREF((PyObject *)__pyx_v_self);
@@ -5693,7 +5693,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
 
   /* "View.MemoryView":180
  *             _allocate_buffer(self)
- * 
+ *
  *     @cname('getbuffer')             # <<<<<<<<<<<<<<
  *     def __getbuffer__(self, Py_buffer *info, int flags):
  *         cdef int bufmode = -1
@@ -5722,7 +5722,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
 
 /* "View.MemoryView":208
  *         info.obj = self
- * 
+ *
  *     def __dealloc__(array self):             # <<<<<<<<<<<<<<
  *         if self.callback_free_data != NULL:
  *             self.callback_free_data(self.data)
@@ -5746,7 +5746,7 @@ static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struc
   int __pyx_t_2;
 
   /* "View.MemoryView":209
- * 
+ *
  *     def __dealloc__(array self):
  *         if self.callback_free_data != NULL:             # <<<<<<<<<<<<<<
  *             self.callback_free_data(self.data)
@@ -5765,7 +5765,7 @@ static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struc
     __pyx_v_self->callback_free_data(__pyx_v_self->data);
 
     /* "View.MemoryView":209
- * 
+ *
  *     def __dealloc__(array self):
  *         if self.callback_free_data != NULL:             # <<<<<<<<<<<<<<
  *             self.callback_free_data(self.data)
@@ -5823,7 +5823,7 @@ static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struc
  *                 refcount_objects_in_slice(self.data, self._shape, self._strides, self.ndim, inc=False)
  *             free(self.data)             # <<<<<<<<<<<<<<
  *         PyObject_Free(self._shape)
- * 
+ *
 */
     free(__pyx_v_self->data);
 
@@ -5841,14 +5841,14 @@ static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struc
  *                 refcount_objects_in_slice(self.data, self._shape, self._strides, self.ndim, inc=False)
  *             free(self.data)
  *         PyObject_Free(self._shape)             # <<<<<<<<<<<<<<
- * 
+ *
  *     @property
 */
   PyObject_Free(__pyx_v_self->_shape);
 
   /* "View.MemoryView":208
  *         info.obj = self
- * 
+ *
  *     def __dealloc__(array self):             # <<<<<<<<<<<<<<
  *         if self.callback_free_data != NULL:
  *             self.callback_free_data(self.data)
@@ -5859,7 +5859,7 @@ static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struc
 
 /* "View.MemoryView":217
  *         PyObject_Free(self._shape)
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def memview(self):
  *         return self.get_memview()
@@ -5893,7 +5893,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_5array_7memview___get__(struct _
  *     @property
  *     def memview(self):
  *         return self.get_memview()             # <<<<<<<<<<<<<<
- * 
+ *
  *     @cname('get_memview')
 */
   __Pyx_XDECREF(__pyx_r);
@@ -5905,7 +5905,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_5array_7memview___get__(struct _
 
   /* "View.MemoryView":217
  *         PyObject_Free(self._shape)
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def memview(self):
  *         return self.get_memview()
@@ -5924,7 +5924,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_5array_7memview___get__(struct _
 
 /* "View.MemoryView":221
  *         return self.get_memview()
- * 
+ *
  *     @cname('get_memview')             # <<<<<<<<<<<<<<
  *     cdef get_memview(self):
  *         flags =  PyBUF_ANY_CONTIGUOUS|PyBUF_FORMAT|PyBUF_WRITABLE
@@ -5950,7 +5950,7 @@ static PyObject *__pyx_array_get_memview(struct __pyx_array_obj *__pyx_v_self) {
  *     cdef get_memview(self):
  *         flags =  PyBUF_ANY_CONTIGUOUS|PyBUF_FORMAT|PyBUF_WRITABLE             # <<<<<<<<<<<<<<
  *         return  memoryview(self, flags, self.dtype_is_object)
- * 
+ *
 */
   __pyx_v_flags = ((PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) | PyBUF_WRITABLE);
 
@@ -5958,13 +5958,13 @@ static PyObject *__pyx_array_get_memview(struct __pyx_array_obj *__pyx_v_self) {
  *     cdef get_memview(self):
  *         flags =  PyBUF_ANY_CONTIGUOUS|PyBUF_FORMAT|PyBUF_WRITABLE
  *         return  memoryview(self, flags, self.dtype_is_object)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __len__(self):
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = NULL;
   __Pyx_INCREF((PyObject *)__pyx_mstate_global->__pyx_memoryview_type);
-  __pyx_t_3 = ((PyObject *)__pyx_mstate_global->__pyx_memoryview_type); 
+  __pyx_t_3 = ((PyObject *)__pyx_mstate_global->__pyx_memoryview_type);
   __pyx_t_4 = __Pyx_PyLong_From_int(__pyx_v_flags); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 224, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_5 = __Pyx_PyBool_FromLong(__pyx_v_self->dtype_is_object); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 224, __pyx_L1_error)
@@ -5986,7 +5986,7 @@ static PyObject *__pyx_array_get_memview(struct __pyx_array_obj *__pyx_v_self) {
 
   /* "View.MemoryView":221
  *         return self.get_memview()
- * 
+ *
  *     @cname('get_memview')             # <<<<<<<<<<<<<<
  *     cdef get_memview(self):
  *         flags =  PyBUF_ANY_CONTIGUOUS|PyBUF_FORMAT|PyBUF_WRITABLE
@@ -6009,10 +6009,10 @@ static PyObject *__pyx_array_get_memview(struct __pyx_array_obj *__pyx_v_self) {
 
 /* "View.MemoryView":226
  *         return  memoryview(self, flags, self.dtype_is_object)
- * 
+ *
  *     def __len__(self):             # <<<<<<<<<<<<<<
  *         return self._shape[0]
- * 
+ *
 */
 
 /* Python wrapper */
@@ -6034,10 +6034,10 @@ static Py_ssize_t __pyx_array___pyx_pf_15View_dot_MemoryView_5array_6__len__(str
   Py_ssize_t __pyx_r;
 
   /* "View.MemoryView":227
- * 
+ *
  *     def __len__(self):
  *         return self._shape[0]             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __getattr__(self, attr):
 */
   __pyx_r = (__pyx_v_self->_shape[0]);
@@ -6045,10 +6045,10 @@ static Py_ssize_t __pyx_array___pyx_pf_15View_dot_MemoryView_5array_6__len__(str
 
   /* "View.MemoryView":226
  *         return  memoryview(self, flags, self.dtype_is_object)
- * 
+ *
  *     def __len__(self):             # <<<<<<<<<<<<<<
  *         return self._shape[0]
- * 
+ *
 */
 
   /* function exit code */
@@ -6058,10 +6058,10 @@ static Py_ssize_t __pyx_array___pyx_pf_15View_dot_MemoryView_5array_6__len__(str
 
 /* "View.MemoryView":229
  *         return self._shape[0]
- * 
+ *
  *     def __getattr__(self, attr):             # <<<<<<<<<<<<<<
  *         return getattr(self.memview, attr)
- * 
+ *
 */
 
 /* Python wrapper */
@@ -6090,10 +6090,10 @@ static PyObject *__pyx_array___pyx_pf_15View_dot_MemoryView_5array_8__getattr__(
   __Pyx_RefNannySetupContext("__getattr__", 0);
 
   /* "View.MemoryView":230
- * 
+ *
  *     def __getattr__(self, attr):
  *         return getattr(self.memview, attr)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __getitem__(self, item):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -6108,10 +6108,10 @@ static PyObject *__pyx_array___pyx_pf_15View_dot_MemoryView_5array_8__getattr__(
 
   /* "View.MemoryView":229
  *         return self._shape[0]
- * 
+ *
  *     def __getattr__(self, attr):             # <<<<<<<<<<<<<<
  *         return getattr(self.memview, attr)
- * 
+ *
 */
 
   /* function exit code */
@@ -6128,10 +6128,10 @@ static PyObject *__pyx_array___pyx_pf_15View_dot_MemoryView_5array_8__getattr__(
 
 /* "View.MemoryView":232
  *         return getattr(self.memview, attr)
- * 
+ *
  *     def __getitem__(self, item):             # <<<<<<<<<<<<<<
  *         return self.memview[item]
- * 
+ *
 */
 
 /* Python wrapper */
@@ -6160,10 +6160,10 @@ static PyObject *__pyx_array___pyx_pf_15View_dot_MemoryView_5array_10__getitem__
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
   /* "View.MemoryView":233
- * 
+ *
  *     def __getitem__(self, item):
  *         return self.memview[item]             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __setitem__(self, item, value):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -6178,10 +6178,10 @@ static PyObject *__pyx_array___pyx_pf_15View_dot_MemoryView_5array_10__getitem__
 
   /* "View.MemoryView":232
  *         return getattr(self.memview, attr)
- * 
+ *
  *     def __getitem__(self, item):             # <<<<<<<<<<<<<<
  *         return self.memview[item]
- * 
+ *
 */
 
   /* function exit code */
@@ -6198,10 +6198,10 @@ static PyObject *__pyx_array___pyx_pf_15View_dot_MemoryView_5array_10__getitem__
 
 /* "View.MemoryView":235
  *         return self.memview[item]
- * 
+ *
  *     def __setitem__(self, item, value):             # <<<<<<<<<<<<<<
  *         self.memview[item] = value
- * 
+ *
 */
 
 /* Python wrapper */
@@ -6229,11 +6229,11 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_12__setitem__(struc
   __Pyx_RefNannySetupContext("__setitem__", 0);
 
   /* "View.MemoryView":236
- * 
+ *
  *     def __setitem__(self, item, value):
  *         self.memview[item] = value             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_memview); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 236, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -6242,10 +6242,10 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_12__setitem__(struc
 
   /* "View.MemoryView":235
  *         return self.memview[item]
- * 
+ *
  *     def __setitem__(self, item, value):             # <<<<<<<<<<<<<<
  *         self.memview[item] = value
- * 
+ *
 */
 
   /* function exit code */
@@ -6267,14 +6267,14 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_12__setitem__(struc
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw___pyx_array_1__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_array_1__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_pw___pyx_array_1__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_array_1__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -6347,14 +6347,14 @@ static PyObject *__pyx_pf___pyx_array___reduce_cython__(CYTHON_UNUSED struct __p
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw___pyx_array_3__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_array_3__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_pw___pyx_array_3__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_array_3__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -6464,10 +6464,10 @@ static PyObject *__pyx_pf___pyx_array_2__setstate_cython__(CYTHON_UNUSED struct 
 
 /* "View.MemoryView":245
  *         pass
- * 
+ *
  * @cname("__pyx_array_allocate_buffer")             # <<<<<<<<<<<<<<
  * cdef int _allocate_buffer(array self) except -1:
- * 
+ *
 */
 
 static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
@@ -6484,7 +6484,7 @@ static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
 
   /* "View.MemoryView":252
  *     cdef PyObject **p
- * 
+ *
  *     self.free_data = True             # <<<<<<<<<<<<<<
  *     self.data = <char *>malloc(self.len)
  *     if not self.data:
@@ -6492,7 +6492,7 @@ static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
   __pyx_v_self->free_data = 1;
 
   /* "View.MemoryView":253
- * 
+ *
  *     self.free_data = True
  *     self.data = <char *>malloc(self.len)             # <<<<<<<<<<<<<<
  *     if not self.data:
@@ -6505,7 +6505,7 @@ static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
  *     self.data = <char *>malloc(self.len)
  *     if not self.data:             # <<<<<<<<<<<<<<
  *         raise MemoryError, "unable to allocate array data."
- * 
+ *
 */
   __pyx_t_1 = (!(__pyx_v_self->data != 0));
   if (unlikely(__pyx_t_1)) {
@@ -6514,7 +6514,7 @@ static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
  *     self.data = <char *>malloc(self.len)
  *     if not self.data:
  *         raise MemoryError, "unable to allocate array data."             # <<<<<<<<<<<<<<
- * 
+ *
  *     if self.dtype_is_object:
 */
     __Pyx_Raise(__pyx_builtin_MemoryError, __pyx_mstate_global->__pyx_kp_u_unable_to_allocate_array_data, 0, 0);
@@ -6525,13 +6525,13 @@ static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
  *     self.data = <char *>malloc(self.len)
  *     if not self.data:             # <<<<<<<<<<<<<<
  *         raise MemoryError, "unable to allocate array data."
- * 
+ *
 */
   }
 
   /* "View.MemoryView":257
  *         raise MemoryError, "unable to allocate array data."
- * 
+ *
  *     if self.dtype_is_object:             # <<<<<<<<<<<<<<
  *         p = <PyObject **> self.data
  *         for i in range(self.len // self.itemsize):
@@ -6539,7 +6539,7 @@ static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
   if (__pyx_v_self->dtype_is_object) {
 
     /* "View.MemoryView":258
- * 
+ *
  *     if self.dtype_is_object:
  *         p = <PyObject **> self.data             # <<<<<<<<<<<<<<
  *         for i in range(self.len // self.itemsize):
@@ -6581,14 +6581,14 @@ static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
  *             p[i] = Py_None
  *             Py_INCREF(Py_None)             # <<<<<<<<<<<<<<
  *     return 0
- * 
+ *
 */
       Py_INCREF(Py_None);
     }
 
     /* "View.MemoryView":257
  *         raise MemoryError, "unable to allocate array data."
- * 
+ *
  *     if self.dtype_is_object:             # <<<<<<<<<<<<<<
  *         p = <PyObject **> self.data
  *         for i in range(self.len // self.itemsize):
@@ -6599,18 +6599,18 @@ static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
  *             p[i] = Py_None
  *             Py_INCREF(Py_None)
  *     return 0             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = 0;
   goto __pyx_L0;
 
   /* "View.MemoryView":245
  *         pass
- * 
+ *
  * @cname("__pyx_array_allocate_buffer")             # <<<<<<<<<<<<<<
  * cdef int _allocate_buffer(array self) except -1:
- * 
+ *
 */
 
   /* function exit code */
@@ -6622,8 +6622,8 @@ static int __pyx_array_allocate_buffer(struct __pyx_array_obj *__pyx_v_self) {
 }
 
 /* "View.MemoryView":265
- * 
- * 
+ *
+ *
  * @cname("__pyx_array_new")             # <<<<<<<<<<<<<<
  * cdef array array_cwrapper(tuple shape, Py_ssize_t itemsize, char *format, const char *c_mode, char *buf):
  *     cdef array result
@@ -6647,7 +6647,7 @@ static struct __pyx_array_obj *__pyx_array_new(PyObject *__pyx_v_shape, Py_ssize
  * cdef array array_cwrapper(tuple shape, Py_ssize_t itemsize, char *format, const char *c_mode, char *buf):
  *     cdef array result
  *     cdef str mode = "fortran" if c_mode[0] == b'f' else "c"  # this often comes from a constant C string.             # <<<<<<<<<<<<<<
- * 
+ *
  *     if buf is NULL:
 */
   __pyx_t_2 = ((__pyx_v_c_mode[0]) == 'f');
@@ -6663,7 +6663,7 @@ static struct __pyx_array_obj *__pyx_array_new(PyObject *__pyx_v_shape, Py_ssize
 
   /* "View.MemoryView":270
  *     cdef str mode = "fortran" if c_mode[0] == b'f' else "c"  # this often comes from a constant C string.
- * 
+ *
  *     if buf is NULL:             # <<<<<<<<<<<<<<
  *         result = array.__new__(array, shape, itemsize, format, mode)
  *     else:
@@ -6672,7 +6672,7 @@ static struct __pyx_array_obj *__pyx_array_new(PyObject *__pyx_v_shape, Py_ssize
   if (__pyx_t_2) {
 
     /* "View.MemoryView":271
- * 
+ *
  *     if buf is NULL:
  *         result = array.__new__(array, shape, itemsize, format, mode)             # <<<<<<<<<<<<<<
  *     else:
@@ -6704,7 +6704,7 @@ static struct __pyx_array_obj *__pyx_array_new(PyObject *__pyx_v_shape, Py_ssize
 
     /* "View.MemoryView":270
  *     cdef str mode = "fortran" if c_mode[0] == b'f' else "c"  # this often comes from a constant C string.
- * 
+ *
  *     if buf is NULL:             # <<<<<<<<<<<<<<
  *         result = array.__new__(array, shape, itemsize, format, mode)
  *     else:
@@ -6717,7 +6717,7 @@ static struct __pyx_array_obj *__pyx_array_new(PyObject *__pyx_v_shape, Py_ssize
  *     else:
  *         result = array.__new__(array, shape, itemsize, format, mode, allocate_buffer=False)             # <<<<<<<<<<<<<<
  *         result.data = buf
- * 
+ *
 */
   /*else*/ {
     __pyx_t_3 = PyLong_FromSsize_t(__pyx_v_itemsize); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 273, __pyx_L1_error)
@@ -6752,7 +6752,7 @@ static struct __pyx_array_obj *__pyx_array_new(PyObject *__pyx_v_shape, Py_ssize
  *     else:
  *         result = array.__new__(array, shape, itemsize, format, mode, allocate_buffer=False)
  *         result.data = buf             # <<<<<<<<<<<<<<
- * 
+ *
  *     return result
 */
     __pyx_v_result->data = __pyx_v_buf;
@@ -6761,10 +6761,10 @@ static struct __pyx_array_obj *__pyx_array_new(PyObject *__pyx_v_shape, Py_ssize
 
   /* "View.MemoryView":276
  *         result.data = buf
- * 
+ *
  *     return result             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF((PyObject *)__pyx_r);
   __Pyx_INCREF((PyObject *)__pyx_v_result);
@@ -6772,8 +6772,8 @@ static struct __pyx_array_obj *__pyx_array_new(PyObject *__pyx_v_shape, Py_ssize
   goto __pyx_L0;
 
   /* "View.MemoryView":265
- * 
- * 
+ *
+ *
  * @cname("__pyx_array_new")             # <<<<<<<<<<<<<<
  * cdef array array_cwrapper(tuple shape, Py_ssize_t itemsize, char *format, const char *c_mode, char *buf):
  *     cdef array result
@@ -6907,7 +6907,7 @@ static int __pyx_MemviewEnum___pyx_pf_15View_dot_MemoryView_4Enum___init__(struc
  *         self.name = name
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return self.name
- * 
+ *
 */
 
 /* Python wrapper */
@@ -6934,7 +6934,7 @@ static PyObject *__pyx_MemviewEnum___pyx_pf_15View_dot_MemoryView_4Enum_2__repr_
  *         self.name = name
  *     def __repr__(self):
  *         return self.name             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef generic = Enum("<strided and direct or indirect>")
 */
   __Pyx_XDECREF(__pyx_r);
@@ -6947,7 +6947,7 @@ static PyObject *__pyx_MemviewEnum___pyx_pf_15View_dot_MemoryView_4Enum_2__repr_
  *         self.name = name
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return self.name
- * 
+ *
 */
 
   /* function exit code */
@@ -6964,14 +6964,14 @@ static PyObject *__pyx_MemviewEnum___pyx_pf_15View_dot_MemoryView_4Enum_2__repr_
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw___pyx_MemviewEnum_1__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_MemviewEnum_1__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_pw___pyx_MemviewEnum_1__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_MemviewEnum_1__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -7224,14 +7224,14 @@ static PyObject *__pyx_pf___pyx_MemviewEnum___reduce_cython__(struct __pyx_Memvi
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw___pyx_MemviewEnum_3__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_MemviewEnum_3__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_pw___pyx_MemviewEnum_3__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_MemviewEnum_3__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -7348,7 +7348,7 @@ static PyObject *__pyx_pf___pyx_MemviewEnum_2__setstate_cython__(struct __pyx_Me
 
 /* "View.MemoryView":347
  *     cdef const __Pyx_TypeInfo *typeinfo
- * 
+ *
  *     def __cinit__(memoryview self, object obj, int flags, bint dtype_is_object=False):             # <<<<<<<<<<<<<<
  *         self.obj = obj
  *         self.flags = flags
@@ -7461,7 +7461,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
   /* "View.MemoryView":348
- * 
+ *
  *     def __cinit__(memoryview self, object obj, int flags, bint dtype_is_object=False):
  *         self.obj = obj             # <<<<<<<<<<<<<<
  *         self.flags = flags
@@ -7524,7 +7524,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
  *             if <PyObject *> self.view.obj == NULL:
  *                 (<__pyx_buffer *> &self.view).obj = Py_None             # <<<<<<<<<<<<<<
  *                 Py_INCREF(Py_None)
- * 
+ *
 */
       ((Py_buffer *)(&__pyx_v_self->view))->obj = Py_None;
 
@@ -7532,7 +7532,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
  *             if <PyObject *> self.view.obj == NULL:
  *                 (<__pyx_buffer *> &self.view).obj = Py_None
  *                 Py_INCREF(Py_None)             # <<<<<<<<<<<<<<
- * 
+ *
  *         if not __PYX_CYTHON_ATOMICS_ENABLED():
 */
       Py_INCREF(Py_None);
@@ -7557,7 +7557,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
 
   /* "View.MemoryView":356
  *                 Py_INCREF(Py_None)
- * 
+ *
  *         if not __PYX_CYTHON_ATOMICS_ENABLED():             # <<<<<<<<<<<<<<
  *             global __pyx_memoryview_thread_locks_used
  *             if (__pyx_memoryview_thread_locks_used < 8 and
@@ -7569,7 +7569,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
  *         if not __PYX_CYTHON_ATOMICS_ENABLED():
  *             global __pyx_memoryview_thread_locks_used
  *             if (__pyx_memoryview_thread_locks_used < 8 and             # <<<<<<<<<<<<<<
- * 
+ *
  *                     not __PYX_GET_CYTHON_COMPILING_IN_CPYTHON_FREETHREADING()):
 */
     __pyx_t_2 = (__pyx_memoryview_thread_locks_used < 8);
@@ -7581,7 +7581,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
 
     /* "View.MemoryView":360
  *             if (__pyx_memoryview_thread_locks_used < 8 and
- * 
+ *
  *                     not __PYX_GET_CYTHON_COMPILING_IN_CPYTHON_FREETHREADING()):             # <<<<<<<<<<<<<<
  *                 self.lock = __pyx_memoryview_thread_locks[__pyx_memoryview_thread_locks_used]
  *                 __pyx_memoryview_thread_locks_used += 1
@@ -7594,13 +7594,13 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
  *         if not __PYX_CYTHON_ATOMICS_ENABLED():
  *             global __pyx_memoryview_thread_locks_used
  *             if (__pyx_memoryview_thread_locks_used < 8 and             # <<<<<<<<<<<<<<
- * 
+ *
  *                     not __PYX_GET_CYTHON_COMPILING_IN_CPYTHON_FREETHREADING()):
 */
     if (__pyx_t_1) {
 
       /* "View.MemoryView":361
- * 
+ *
  *                     not __PYX_GET_CYTHON_COMPILING_IN_CPYTHON_FREETHREADING()):
  *                 self.lock = __pyx_memoryview_thread_locks[__pyx_memoryview_thread_locks_used]             # <<<<<<<<<<<<<<
  *                 __pyx_memoryview_thread_locks_used += 1
@@ -7621,7 +7621,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
  *         if not __PYX_CYTHON_ATOMICS_ENABLED():
  *             global __pyx_memoryview_thread_locks_used
  *             if (__pyx_memoryview_thread_locks_used < 8 and             # <<<<<<<<<<<<<<
- * 
+ *
  *                     not __PYX_GET_CYTHON_COMPILING_IN_CPYTHON_FREETHREADING()):
 */
     }
@@ -7650,7 +7650,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
  *                 self.lock = PyThread_allocate_lock()
  *                 if self.lock is NULL:             # <<<<<<<<<<<<<<
  *                     raise MemoryError
- * 
+ *
 */
       __pyx_t_1 = (__pyx_v_self->lock == NULL);
       if (unlikely(__pyx_t_1)) {
@@ -7659,7 +7659,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
  *                 self.lock = PyThread_allocate_lock()
  *                 if self.lock is NULL:
  *                     raise MemoryError             # <<<<<<<<<<<<<<
- * 
+ *
  *         if flags & PyBUF_FORMAT:
 */
         PyErr_NoMemory(); __PYX_ERR(1, 366, __pyx_L1_error)
@@ -7669,7 +7669,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
  *                 self.lock = PyThread_allocate_lock()
  *                 if self.lock is NULL:             # <<<<<<<<<<<<<<
  *                     raise MemoryError
- * 
+ *
 */
       }
 
@@ -7684,7 +7684,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
 
     /* "View.MemoryView":356
  *                 Py_INCREF(Py_None)
- * 
+ *
  *         if not __PYX_CYTHON_ATOMICS_ENABLED():             # <<<<<<<<<<<<<<
  *             global __pyx_memoryview_thread_locks_used
  *             if (__pyx_memoryview_thread_locks_used < 8 and
@@ -7693,7 +7693,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
 
   /* "View.MemoryView":368
  *                     raise MemoryError
- * 
+ *
  *         if flags & PyBUF_FORMAT:             # <<<<<<<<<<<<<<
  *             self.dtype_is_object = (self.view.format[0] == b'O' and self.view.format[1] == b'\0')
  *         else:
@@ -7702,7 +7702,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
   if (__pyx_t_1) {
 
     /* "View.MemoryView":369
- * 
+ *
  *         if flags & PyBUF_FORMAT:
  *             self.dtype_is_object = (self.view.format[0] == b'O' and self.view.format[1] == b'\0')             # <<<<<<<<<<<<<<
  *         else:
@@ -7721,7 +7721,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
 
     /* "View.MemoryView":368
  *                     raise MemoryError
- * 
+ *
  *         if flags & PyBUF_FORMAT:             # <<<<<<<<<<<<<<
  *             self.dtype_is_object = (self.view.format[0] == b'O' and self.view.format[1] == b'\0')
  *         else:
@@ -7733,7 +7733,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
  *             self.dtype_is_object = (self.view.format[0] == b'O' and self.view.format[1] == b'\0')
  *         else:
  *             self.dtype_is_object = dtype_is_object             # <<<<<<<<<<<<<<
- * 
+ *
  *         assert <Py_intptr_t><void*>(&self.acquisition_count) % sizeof(__pyx_atomic_int_type) == 0
 */
   /*else*/ {
@@ -7743,10 +7743,10 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
 
   /* "View.MemoryView":373
  *             self.dtype_is_object = dtype_is_object
- * 
+ *
  *         assert <Py_intptr_t><void*>(&self.acquisition_count) % sizeof(__pyx_atomic_int_type) == 0             # <<<<<<<<<<<<<<
  *         self.typeinfo = NULL
- * 
+ *
 */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(__pyx_assertions_enabled())) {
@@ -7767,17 +7767,17 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
   #endif
 
   /* "View.MemoryView":374
- * 
+ *
  *         assert <Py_intptr_t><void*>(&self.acquisition_count) % sizeof(__pyx_atomic_int_type) == 0
  *         self.typeinfo = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __dealloc__(memoryview self):
 */
   __pyx_v_self->typeinfo = NULL;
 
   /* "View.MemoryView":347
  *     cdef const __Pyx_TypeInfo *typeinfo
- * 
+ *
  *     def __cinit__(memoryview self, object obj, int flags, bint dtype_is_object=False):             # <<<<<<<<<<<<<<
  *         self.obj = obj
  *         self.flags = flags
@@ -7796,7 +7796,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview___cinit_
 
 /* "View.MemoryView":376
  *         self.typeinfo = NULL
- * 
+ *
  *     def __dealloc__(memoryview self):             # <<<<<<<<<<<<<<
  *         if self.obj is not None:
  *             PyBuffer_Release(&self.view)
@@ -7825,7 +7825,7 @@ static void __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_2__deal
   PyThread_type_lock __pyx_t_6;
 
   /* "View.MemoryView":377
- * 
+ *
  *     def __dealloc__(memoryview self):
  *         if self.obj is not None:             # <<<<<<<<<<<<<<
  *             PyBuffer_Release(&self.view)
@@ -7839,12 +7839,12 @@ static void __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_2__deal
  *         if self.obj is not None:
  *             PyBuffer_Release(&self.view)             # <<<<<<<<<<<<<<
  *         elif (<__pyx_buffer *> &self.view).obj == Py_None:
- * 
+ *
 */
     PyBuffer_Release((&__pyx_v_self->view));
 
     /* "View.MemoryView":377
- * 
+ *
  *     def __dealloc__(memoryview self):
  *         if self.obj is not None:             # <<<<<<<<<<<<<<
  *             PyBuffer_Release(&self.view)
@@ -7857,7 +7857,7 @@ static void __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_2__deal
  *         if self.obj is not None:
  *             PyBuffer_Release(&self.view)
  *         elif (<__pyx_buffer *> &self.view).obj == Py_None:             # <<<<<<<<<<<<<<
- * 
+ *
  *             (<__pyx_buffer *> &self.view).obj = NULL
 */
   __pyx_t_1 = (((Py_buffer *)(&__pyx_v_self->view))->obj == Py_None);
@@ -7865,18 +7865,18 @@ static void __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_2__deal
 
     /* "View.MemoryView":381
  *         elif (<__pyx_buffer *> &self.view).obj == Py_None:
- * 
+ *
  *             (<__pyx_buffer *> &self.view).obj = NULL             # <<<<<<<<<<<<<<
  *             Py_DECREF(Py_None)
- * 
+ *
 */
     ((Py_buffer *)(&__pyx_v_self->view))->obj = NULL;
 
     /* "View.MemoryView":382
- * 
+ *
  *             (<__pyx_buffer *> &self.view).obj = NULL
  *             Py_DECREF(Py_None)             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef int i
 */
     Py_DECREF(Py_None);
@@ -7885,7 +7885,7 @@ static void __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_2__deal
  *         if self.obj is not None:
  *             PyBuffer_Release(&self.view)
  *         elif (<__pyx_buffer *> &self.view).obj == Py_None:             # <<<<<<<<<<<<<<
- * 
+ *
  *             (<__pyx_buffer *> &self.view).obj = NULL
 */
   }
@@ -8000,7 +8000,7 @@ static void __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_2__deal
  *                     break
  *             else:
  *                 PyThread_free_lock(self.lock)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef char *get_item_pointer(memoryview self, object index) except NULL:
 */
       PyThread_free_lock(__pyx_v_self->lock);
@@ -8018,7 +8018,7 @@ static void __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_2__deal
 
   /* "View.MemoryView":376
  *         self.typeinfo = NULL
- * 
+ *
  *     def __dealloc__(memoryview self):             # <<<<<<<<<<<<<<
  *         if self.obj is not None:
  *             PyBuffer_Release(&self.view)
@@ -8029,7 +8029,7 @@ static void __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_2__deal
 
 /* "View.MemoryView":397
  *                 PyThread_free_lock(self.lock)
- * 
+ *
  *     cdef char *get_item_pointer(memoryview self, object index) except NULL:             # <<<<<<<<<<<<<<
  *         cdef Py_ssize_t dim
  *         cdef char *itemp = <char *> self.view.buf
@@ -8057,17 +8057,17 @@ static char *__pyx_memoryview_get_item_pointer(struct __pyx_memoryview_obj *__py
  *     cdef char *get_item_pointer(memoryview self, object index) except NULL:
  *         cdef Py_ssize_t dim
  *         cdef char *itemp = <char *> self.view.buf             # <<<<<<<<<<<<<<
- * 
+ *
  *         for dim, idx in enumerate(index):
 */
   __pyx_v_itemp = ((char *)__pyx_v_self->view.buf);
 
   /* "View.MemoryView":401
  *         cdef char *itemp = <char *> self.view.buf
- * 
+ *
  *         for dim, idx in enumerate(index):             # <<<<<<<<<<<<<<
  *             itemp = pybuffer_index(&self.view, itemp, idx, dim)
- * 
+ *
 */
   __pyx_t_1 = 0;
   if (likely(PyList_CheckExact(__pyx_v_index)) || PyTuple_CheckExact(__pyx_v_index)) {
@@ -8125,10 +8125,10 @@ static char *__pyx_memoryview_get_item_pointer(struct __pyx_memoryview_obj *__py
     __pyx_t_1 = (__pyx_t_1 + 1);
 
     /* "View.MemoryView":402
- * 
+ *
  *         for dim, idx in enumerate(index):
  *             itemp = pybuffer_index(&self.view, itemp, idx, dim)             # <<<<<<<<<<<<<<
- * 
+ *
  *         return itemp
 */
     __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_idx); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(1, 402, __pyx_L1_error)
@@ -8137,27 +8137,27 @@ static char *__pyx_memoryview_get_item_pointer(struct __pyx_memoryview_obj *__py
 
     /* "View.MemoryView":401
  *         cdef char *itemp = <char *> self.view.buf
- * 
+ *
  *         for dim, idx in enumerate(index):             # <<<<<<<<<<<<<<
  *             itemp = pybuffer_index(&self.view, itemp, idx, dim)
- * 
+ *
 */
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "View.MemoryView":404
  *             itemp = pybuffer_index(&self.view, itemp, idx, dim)
- * 
+ *
  *         return itemp             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = __pyx_v_itemp;
   goto __pyx_L0;
 
   /* "View.MemoryView":397
  *                 PyThread_free_lock(self.lock)
- * 
+ *
  *     cdef char *get_item_pointer(memoryview self, object index) except NULL:             # <<<<<<<<<<<<<<
  *         cdef Py_ssize_t dim
  *         cdef char *itemp = <char *> self.view.buf
@@ -8176,8 +8176,8 @@ static char *__pyx_memoryview_get_item_pointer(struct __pyx_memoryview_obj *__py
 }
 
 /* "View.MemoryView":407
- * 
- * 
+ *
+ *
  *     def __getitem__(memoryview self, object index):             # <<<<<<<<<<<<<<
  *         if index is Ellipsis:
  *             return self
@@ -8215,11 +8215,11 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_4_
   __Pyx_RefNannySetupContext("__getitem__", 0);
 
   /* "View.MemoryView":408
- * 
+ *
  *     def __getitem__(memoryview self, object index):
  *         if index is Ellipsis:             # <<<<<<<<<<<<<<
  *             return self
- * 
+ *
 */
   __pyx_t_1 = (__pyx_v_index == __pyx_builtin_Ellipsis);
   if (__pyx_t_1) {
@@ -8228,7 +8228,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_4_
  *     def __getitem__(memoryview self, object index):
  *         if index is Ellipsis:
  *             return self             # <<<<<<<<<<<<<<
- * 
+ *
  *         have_slices, indices = _unellipsify(index, self.view.ndim)
 */
     __Pyx_XDECREF(__pyx_r);
@@ -8237,19 +8237,19 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_4_
     goto __pyx_L0;
 
     /* "View.MemoryView":408
- * 
+ *
  *     def __getitem__(memoryview self, object index):
  *         if index is Ellipsis:             # <<<<<<<<<<<<<<
  *             return self
- * 
+ *
 */
   }
 
   /* "View.MemoryView":411
  *             return self
- * 
+ *
  *         have_slices, indices = _unellipsify(index, self.view.ndim)             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef char *itemp
 */
   __pyx_t_2 = _unellipsify(__pyx_v_index, __pyx_v_self->view.ndim); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 411, __pyx_L1_error)
@@ -8283,7 +8283,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_4_
   __pyx_t_4 = 0;
 
   /* "View.MemoryView":414
- * 
+ *
  *         cdef char *itemp
  *         if have_slices:             # <<<<<<<<<<<<<<
  *             return memview_slice(self, indices)
@@ -8307,7 +8307,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_4_
     goto __pyx_L0;
 
     /* "View.MemoryView":414
- * 
+ *
  *         cdef char *itemp
  *         if have_slices:             # <<<<<<<<<<<<<<
  *             return memview_slice(self, indices)
@@ -8320,7 +8320,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_4_
  *         else:
  *             itemp = self.get_item_pointer(indices)             # <<<<<<<<<<<<<<
  *             return self.convert_item_to_object(itemp)
- * 
+ *
 */
   /*else*/ {
     __pyx_t_5 = ((struct __pyx_vtabstruct_memoryview *)__pyx_v_self->__pyx_vtab)->get_item_pointer(__pyx_v_self, __pyx_v_indices); if (unlikely(__pyx_t_5 == ((char *)0))) __PYX_ERR(1, 417, __pyx_L1_error)
@@ -8330,7 +8330,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_4_
  *         else:
  *             itemp = self.get_item_pointer(indices)
  *             return self.convert_item_to_object(itemp)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __setitem__(memoryview self, object index, object value):
 */
     __Pyx_XDECREF(__pyx_r);
@@ -8342,8 +8342,8 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_4_
   }
 
   /* "View.MemoryView":407
- * 
- * 
+ *
+ *
  *     def __getitem__(memoryview self, object index):             # <<<<<<<<<<<<<<
  *         if index is Ellipsis:
  *             return self
@@ -8366,7 +8366,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_4_
 
 /* "View.MemoryView":420
  *             return self.convert_item_to_object(itemp)
- * 
+ *
  *     def __setitem__(memoryview self, object index, object value):             # <<<<<<<<<<<<<<
  *         if self.view.readonly:
  *             raise TypeError, "Cannot assign to read-only memoryview"
@@ -8403,11 +8403,11 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_6__setit
   __Pyx_INCREF(__pyx_v_index);
 
   /* "View.MemoryView":421
- * 
+ *
  *     def __setitem__(memoryview self, object index, object value):
  *         if self.view.readonly:             # <<<<<<<<<<<<<<
  *             raise TypeError, "Cannot assign to read-only memoryview"
- * 
+ *
 */
   if (unlikely(__pyx_v_self->view.readonly)) {
 
@@ -8415,26 +8415,26 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_6__setit
  *     def __setitem__(memoryview self, object index, object value):
  *         if self.view.readonly:
  *             raise TypeError, "Cannot assign to read-only memoryview"             # <<<<<<<<<<<<<<
- * 
+ *
  *         have_slices, index = _unellipsify(index, self.view.ndim)
 */
     __Pyx_Raise(__pyx_builtin_TypeError, __pyx_mstate_global->__pyx_kp_u_Cannot_assign_to_read_only_memor, 0, 0);
     __PYX_ERR(1, 422, __pyx_L1_error)
 
     /* "View.MemoryView":421
- * 
+ *
  *     def __setitem__(memoryview self, object index, object value):
  *         if self.view.readonly:             # <<<<<<<<<<<<<<
  *             raise TypeError, "Cannot assign to read-only memoryview"
- * 
+ *
 */
   }
 
   /* "View.MemoryView":424
  *             raise TypeError, "Cannot assign to read-only memoryview"
- * 
+ *
  *         have_slices, index = _unellipsify(index, self.view.ndim)             # <<<<<<<<<<<<<<
- * 
+ *
  *         if have_slices:
 */
   __pyx_t_1 = _unellipsify(__pyx_v_index, __pyx_v_self->view.ndim); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 424, __pyx_L1_error)
@@ -8469,7 +8469,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_6__setit
 
   /* "View.MemoryView":426
  *         have_slices, index = _unellipsify(index, self.view.ndim)
- * 
+ *
  *         if have_slices:             # <<<<<<<<<<<<<<
  *             obj = self.is_slice(value)
  *             if obj is not None:
@@ -8478,7 +8478,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_6__setit
   if (__pyx_t_4) {
 
     /* "View.MemoryView":427
- * 
+ *
  *         if have_slices:
  *             obj = self.is_slice(value)             # <<<<<<<<<<<<<<
  *             if obj is not None:
@@ -8543,7 +8543,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_6__setit
 
     /* "View.MemoryView":426
  *         have_slices, index = _unellipsify(index, self.view.ndim)
- * 
+ *
  *         if have_slices:             # <<<<<<<<<<<<<<
  *             obj = self.is_slice(value)
  *             if obj is not None:
@@ -8555,7 +8555,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_6__setit
  *                 self.setitem_slice_assign_scalar(self[index], value)
  *         else:
  *             self.setitem_indexed(index, value)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef is_slice(self, obj):
 */
   /*else*/ {
@@ -8567,7 +8567,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_6__setit
 
   /* "View.MemoryView":420
  *             return self.convert_item_to_object(itemp)
- * 
+ *
  *     def __setitem__(memoryview self, object index, object value):             # <<<<<<<<<<<<<<
  *         if self.view.readonly:
  *             raise TypeError, "Cannot assign to read-only memoryview"
@@ -8592,7 +8592,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_6__setit
 
 /* "View.MemoryView":435
  *             self.setitem_indexed(index, value)
- * 
+ *
  *     cdef is_slice(self, obj):             # <<<<<<<<<<<<<<
  *         if not isinstance(obj, memoryview):
  *             try:
@@ -8620,13 +8620,13 @@ static PyObject *__pyx_memoryview_is_slice(struct __pyx_memoryview_obj *__pyx_v_
   __Pyx_INCREF(__pyx_v_obj);
 
   /* "View.MemoryView":436
- * 
+ *
  *     cdef is_slice(self, obj):
  *         if not isinstance(obj, memoryview):             # <<<<<<<<<<<<<<
  *             try:
  *                 obj = memoryview(obj, self.flags & ~PyBUF_WRITABLE | PyBUF_ANY_CONTIGUOUS,
 */
-  __pyx_t_1 = __Pyx_TypeCheck(__pyx_v_obj, __pyx_mstate_global->__pyx_memoryview_type); 
+  __pyx_t_1 = __Pyx_TypeCheck(__pyx_v_obj, __pyx_mstate_global->__pyx_memoryview_type);
   __pyx_t_2 = (!__pyx_t_1);
   if (__pyx_t_2) {
 
@@ -8655,7 +8655,7 @@ static PyObject *__pyx_memoryview_is_slice(struct __pyx_memoryview_obj *__pyx_v_
 */
         __pyx_t_7 = NULL;
         __Pyx_INCREF((PyObject *)__pyx_mstate_global->__pyx_memoryview_type);
-        __pyx_t_8 = ((PyObject *)__pyx_mstate_global->__pyx_memoryview_type); 
+        __pyx_t_8 = ((PyObject *)__pyx_mstate_global->__pyx_memoryview_type);
         __pyx_t_9 = __Pyx_PyLong_From_int(((__pyx_v_self->flags & (~PyBUF_WRITABLE)) | PyBUF_ANY_CONTIGUOUS)); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 438, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_9);
 
@@ -8706,7 +8706,7 @@ static PyObject *__pyx_memoryview_is_slice(struct __pyx_memoryview_obj *__pyx_v_
  *                                  self.dtype_is_object)
  *             except TypeError:             # <<<<<<<<<<<<<<
  *                 return None
- * 
+ *
 */
       __pyx_t_12 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_TypeError);
       if (__pyx_t_12) {
@@ -8716,7 +8716,7 @@ static PyObject *__pyx_memoryview_is_slice(struct __pyx_memoryview_obj *__pyx_v_
  *                                  self.dtype_is_object)
  *             except TypeError:
  *                 return None             # <<<<<<<<<<<<<<
- * 
+ *
  *         return obj
 */
         __Pyx_XDECREF(__pyx_r);
@@ -8748,7 +8748,7 @@ static PyObject *__pyx_memoryview_is_slice(struct __pyx_memoryview_obj *__pyx_v_
     }
 
     /* "View.MemoryView":436
- * 
+ *
  *     cdef is_slice(self, obj):
  *         if not isinstance(obj, memoryview):             # <<<<<<<<<<<<<<
  *             try:
@@ -8758,9 +8758,9 @@ static PyObject *__pyx_memoryview_is_slice(struct __pyx_memoryview_obj *__pyx_v_
 
   /* "View.MemoryView":443
  *                 return None
- * 
+ *
  *         return obj             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef setitem_slice_assignment(self, dst, src):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -8770,7 +8770,7 @@ static PyObject *__pyx_memoryview_is_slice(struct __pyx_memoryview_obj *__pyx_v_
 
   /* "View.MemoryView":435
  *             self.setitem_indexed(index, value)
- * 
+ *
  *     cdef is_slice(self, obj):             # <<<<<<<<<<<<<<
  *         if not isinstance(obj, memoryview):
  *             try:
@@ -8794,7 +8794,7 @@ static PyObject *__pyx_memoryview_is_slice(struct __pyx_memoryview_obj *__pyx_v_
 
 /* "View.MemoryView":445
  *         return obj
- * 
+ *
  *     cdef setitem_slice_assignment(self, dst, src):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice dst_slice
  *         cdef __Pyx_memviewslice src_slice
@@ -8822,7 +8822,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assignment(struct __pyx_memoryvi
  *         cdef __Pyx_memviewslice src_slice
  *         cdef __Pyx_memviewslice msrc = get_slice_from_memview(src, &src_slice)[0]             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice mdst = get_slice_from_memview(dst, &dst_slice)[0]
- * 
+ *
 */
   if (!(likely(((__pyx_v_src) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_src, __pyx_mstate_global->__pyx_memoryview_type))))) __PYX_ERR(1, 448, __pyx_L1_error)
   __pyx_t_1 = __pyx_memoryview_get_slice_from_memoryview(((struct __pyx_memoryview_obj *)__pyx_v_src), (&__pyx_v_src_slice)); if (unlikely(__pyx_t_1 == ((__Pyx_memviewslice *)0))) __PYX_ERR(1, 448, __pyx_L1_error)
@@ -8832,7 +8832,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assignment(struct __pyx_memoryvi
  *         cdef __Pyx_memviewslice src_slice
  *         cdef __Pyx_memviewslice msrc = get_slice_from_memview(src, &src_slice)[0]
  *         cdef __Pyx_memviewslice mdst = get_slice_from_memview(dst, &dst_slice)[0]             # <<<<<<<<<<<<<<
- * 
+ *
  *         memoryview_copy_contents(msrc, mdst, src.ndim, dst.ndim, self.dtype_is_object)
 */
   if (!(likely(((__pyx_v_dst) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_dst, __pyx_mstate_global->__pyx_memoryview_type))))) __PYX_ERR(1, 449, __pyx_L1_error)
@@ -8841,9 +8841,9 @@ static PyObject *__pyx_memoryview_setitem_slice_assignment(struct __pyx_memoryvi
 
   /* "View.MemoryView":451
  *         cdef __Pyx_memviewslice mdst = get_slice_from_memview(dst, &dst_slice)[0]
- * 
+ *
  *         memoryview_copy_contents(msrc, mdst, src.ndim, dst.ndim, self.dtype_is_object)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef setitem_slice_assign_scalar(self, memoryview dst, value):
 */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_src, __pyx_mstate_global->__pyx_n_u_ndim); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 451, __pyx_L1_error)
@@ -8858,7 +8858,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assignment(struct __pyx_memoryvi
 
   /* "View.MemoryView":445
  *         return obj
- * 
+ *
  *     cdef setitem_slice_assignment(self, dst, src):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice dst_slice
  *         cdef __Pyx_memviewslice src_slice
@@ -8879,7 +8879,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assignment(struct __pyx_memoryvi
 
 /* "View.MemoryView":453
  *         memoryview_copy_contents(msrc, mdst, src.ndim, dst.ndim, self.dtype_is_object)
- * 
+ *
  *     cdef setitem_slice_assign_scalar(self, memoryview dst, value):             # <<<<<<<<<<<<<<
  *         cdef int array[128]
  *         cdef void *tmp = NULL
@@ -8915,7 +8915,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
  *         cdef int array[128]
  *         cdef void *tmp = NULL             # <<<<<<<<<<<<<<
  *         cdef void *item
- * 
+ *
 */
   __pyx_v_tmp = NULL;
 
@@ -8923,7 +8923,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
  *         cdef __Pyx_memviewslice *dst_slice
  *         cdef __Pyx_memviewslice tmp_slice
  *         dst_slice = get_slice_from_memview(dst, &tmp_slice)             # <<<<<<<<<<<<<<
- * 
+ *
  *         if <size_t>self.view.itemsize > sizeof(array):
 */
   __pyx_t_1 = __pyx_memoryview_get_slice_from_memoryview(__pyx_v_dst, (&__pyx_v_tmp_slice)); if (unlikely(__pyx_t_1 == ((__Pyx_memviewslice *)0))) __PYX_ERR(1, 460, __pyx_L1_error)
@@ -8931,7 +8931,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
 
   /* "View.MemoryView":462
  *         dst_slice = get_slice_from_memview(dst, &tmp_slice)
- * 
+ *
  *         if <size_t>self.view.itemsize > sizeof(array):             # <<<<<<<<<<<<<<
  *             tmp = PyMem_Malloc(self.view.itemsize)
  *             if tmp == NULL:
@@ -8940,7 +8940,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
   if (__pyx_t_2) {
 
     /* "View.MemoryView":463
- * 
+ *
  *         if <size_t>self.view.itemsize > sizeof(array):
  *             tmp = PyMem_Malloc(self.view.itemsize)             # <<<<<<<<<<<<<<
  *             if tmp == NULL:
@@ -8987,7 +8987,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
 
     /* "View.MemoryView":462
  *         dst_slice = get_slice_from_memview(dst, &tmp_slice)
- * 
+ *
  *         if <size_t>self.view.itemsize > sizeof(array):             # <<<<<<<<<<<<<<
  *             tmp = PyMem_Malloc(self.view.itemsize)
  *             if tmp == NULL:
@@ -8999,7 +8999,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
  *             item = tmp
  *         else:
  *             item = <void *> array             # <<<<<<<<<<<<<<
- * 
+ *
  *         try:
 */
   /*else*/ {
@@ -9009,7 +9009,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
 
   /* "View.MemoryView":470
  *             item = <void *> array
- * 
+ *
  *         try:             # <<<<<<<<<<<<<<
  *             if self.dtype_is_object:
  *                 (<PyObject **> item)[0] = <PyObject *> value
@@ -9017,7 +9017,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
   /*try:*/ {
 
     /* "View.MemoryView":471
- * 
+ *
  *         try:
  *             if self.dtype_is_object:             # <<<<<<<<<<<<<<
  *                 (<PyObject **> item)[0] = <PyObject *> value
@@ -9035,7 +9035,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
       (((PyObject **)__pyx_v_item)[0]) = ((PyObject *)__pyx_v_value);
 
       /* "View.MemoryView":471
- * 
+ *
  *         try:
  *             if self.dtype_is_object:             # <<<<<<<<<<<<<<
  *                 (<PyObject **> item)[0] = <PyObject *> value
@@ -9048,8 +9048,8 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
  *                 (<PyObject **> item)[0] = <PyObject *> value
  *             else:
  *                 self.assign_item_from_object(<char *> item, value)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     /*else*/ {
       __pyx_t_3 = ((struct __pyx_vtabstruct_memoryview *)__pyx_v_self->__pyx_vtab)->assign_item_from_object(__pyx_v_self, ((char *)__pyx_v_item), __pyx_v_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 474, __pyx_L6_error)
@@ -9059,8 +9059,8 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
     __pyx_L8:;
 
     /* "View.MemoryView":478
- * 
- * 
+ *
+ *
  *             if self.view.suboffsets != NULL:             # <<<<<<<<<<<<<<
  *                 assert_direct_dimensions(self.view.suboffsets, self.view.ndim)
  *             slice_assign_scalar(dst_slice, dst.view.ndim, self.view.itemsize,
@@ -9069,7 +9069,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
     if (__pyx_t_2) {
 
       /* "View.MemoryView":479
- * 
+ *
  *             if self.view.suboffsets != NULL:
  *                 assert_direct_dimensions(self.view.suboffsets, self.view.ndim)             # <<<<<<<<<<<<<<
  *             slice_assign_scalar(dst_slice, dst.view.ndim, self.view.itemsize,
@@ -9078,8 +9078,8 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
       __pyx_t_4 = assert_direct_dimensions(__pyx_v_self->view.suboffsets, __pyx_v_self->view.ndim); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(1, 479, __pyx_L6_error)
 
       /* "View.MemoryView":478
- * 
- * 
+ *
+ *
  *             if self.view.suboffsets != NULL:             # <<<<<<<<<<<<<<
  *                 assert_direct_dimensions(self.view.suboffsets, self.view.ndim)
  *             slice_assign_scalar(dst_slice, dst.view.ndim, self.view.itemsize,
@@ -9100,7 +9100,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
  *                                 item, self.dtype_is_object)
  *         finally:
  *             PyMem_Free(tmp)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef setitem_indexed(self, index, value):
 */
   /*finally:*/ {
@@ -9143,7 +9143,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
 
   /* "View.MemoryView":453
  *         memoryview_copy_contents(msrc, mdst, src.ndim, dst.ndim, self.dtype_is_object)
- * 
+ *
  *     cdef setitem_slice_assign_scalar(self, memoryview dst, value):             # <<<<<<<<<<<<<<
  *         cdef int array[128]
  *         cdef void *tmp = NULL
@@ -9164,7 +9164,7 @@ static PyObject *__pyx_memoryview_setitem_slice_assign_scalar(struct __pyx_memor
 
 /* "View.MemoryView":485
  *             PyMem_Free(tmp)
- * 
+ *
  *     cdef setitem_indexed(self, index, value):             # <<<<<<<<<<<<<<
  *         cdef char *itemp = self.get_item_pointer(index)
  *         self.assign_item_from_object(itemp, value)
@@ -9182,11 +9182,11 @@ static PyObject *__pyx_memoryview_setitem_indexed(struct __pyx_memoryview_obj *_
   __Pyx_RefNannySetupContext("setitem_indexed", 0);
 
   /* "View.MemoryView":486
- * 
+ *
  *     cdef setitem_indexed(self, index, value):
  *         cdef char *itemp = self.get_item_pointer(index)             # <<<<<<<<<<<<<<
  *         self.assign_item_from_object(itemp, value)
- * 
+ *
 */
   __pyx_t_1 = ((struct __pyx_vtabstruct_memoryview *)__pyx_v_self->__pyx_vtab)->get_item_pointer(__pyx_v_self, __pyx_v_index); if (unlikely(__pyx_t_1 == ((char *)0))) __PYX_ERR(1, 486, __pyx_L1_error)
   __pyx_v_itemp = __pyx_t_1;
@@ -9195,7 +9195,7 @@ static PyObject *__pyx_memoryview_setitem_indexed(struct __pyx_memoryview_obj *_
  *     cdef setitem_indexed(self, index, value):
  *         cdef char *itemp = self.get_item_pointer(index)
  *         self.assign_item_from_object(itemp, value)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef convert_item_to_object(self, char *itemp):
 */
   __pyx_t_2 = ((struct __pyx_vtabstruct_memoryview *)__pyx_v_self->__pyx_vtab)->assign_item_from_object(__pyx_v_self, __pyx_v_itemp, __pyx_v_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 487, __pyx_L1_error)
@@ -9204,7 +9204,7 @@ static PyObject *__pyx_memoryview_setitem_indexed(struct __pyx_memoryview_obj *_
 
   /* "View.MemoryView":485
  *             PyMem_Free(tmp)
- * 
+ *
  *     cdef setitem_indexed(self, index, value):             # <<<<<<<<<<<<<<
  *         cdef char *itemp = self.get_item_pointer(index)
  *         self.assign_item_from_object(itemp, value)
@@ -9225,7 +9225,7 @@ static PyObject *__pyx_memoryview_setitem_indexed(struct __pyx_memoryview_obj *_
 
 /* "View.MemoryView":489
  *         self.assign_item_from_object(itemp, value)
- * 
+ *
  *     cdef convert_item_to_object(self, char *itemp):             # <<<<<<<<<<<<<<
  *         """Only used if instantiated manually by the user, or if Cython doesn't
  *         know how to convert the type"""
@@ -9258,7 +9258,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
  *         know how to convert the type"""
  *         import struct             # <<<<<<<<<<<<<<
  *         cdef bytes bytesitem
- * 
+ *
 */
   __pyx_t_1 = __Pyx_ImportDottedModule(__pyx_mstate_global->__pyx_n_u_struct, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 492, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -9267,7 +9267,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
 
   /* "View.MemoryView":495
  *         cdef bytes bytesitem
- * 
+ *
  *         bytesitem = itemp[:self.view.itemsize]             # <<<<<<<<<<<<<<
  *         try:
  *             result = struct.unpack(self.view.format, bytesitem)
@@ -9278,7 +9278,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
   __pyx_t_1 = 0;
 
   /* "View.MemoryView":496
- * 
+ *
  *         bytesitem = itemp[:self.view.itemsize]
  *         try:             # <<<<<<<<<<<<<<
  *             result = struct.unpack(self.view.format, bytesitem)
@@ -9317,7 +9317,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
       __pyx_t_1 = 0;
 
       /* "View.MemoryView":496
- * 
+ *
  *         bytesitem = itemp[:self.view.itemsize]
  *         try:             # <<<<<<<<<<<<<<
  *             result = struct.unpack(self.view.format, bytesitem)
@@ -9342,7 +9342,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
  *             if len(self.view.format) == 1:
  *                 return result[0]             # <<<<<<<<<<<<<<
  *             return result
- * 
+ *
 */
         __Pyx_XDECREF(__pyx_r);
         __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_result, 0, long, 1, __Pyx_PyLong_From_long, 0, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 502, __pyx_L5_except_error)
@@ -9364,7 +9364,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
  *             if len(self.view.format) == 1:
  *                 return result[0]
  *             return result             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef assign_item_from_object(self, char *itemp, object value):
 */
       __Pyx_XDECREF(__pyx_r);
@@ -9411,7 +9411,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
     goto __pyx_L5_except_error;
 
     /* "View.MemoryView":496
- * 
+ *
  *         bytesitem = itemp[:self.view.itemsize]
  *         try:             # <<<<<<<<<<<<<<
  *             result = struct.unpack(self.view.format, bytesitem)
@@ -9433,7 +9433,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
 
   /* "View.MemoryView":489
  *         self.assign_item_from_object(itemp, value)
- * 
+ *
  *     cdef convert_item_to_object(self, char *itemp):             # <<<<<<<<<<<<<<
  *         """Only used if instantiated manually by the user, or if Cython doesn't
  *         know how to convert the type"""
@@ -9458,7 +9458,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
 
 /* "View.MemoryView":505
  *             return result
- * 
+ *
  *     cdef assign_item_from_object(self, char *itemp, object value):             # <<<<<<<<<<<<<<
  *         """Only used if instantiated manually by the user, or if Cython doesn't
  *         know how to convert the type"""
@@ -9503,16 +9503,16 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 
   /* "View.MemoryView":513
  *         cdef Py_ssize_t i
- * 
+ *
  *         if isinstance(value, tuple):             # <<<<<<<<<<<<<<
  *             bytesvalue = struct.pack(self.view.format, *value)
  *         else:
 */
-  __pyx_t_2 = PyTuple_Check(__pyx_v_value); 
+  __pyx_t_2 = PyTuple_Check(__pyx_v_value);
   if (__pyx_t_2) {
 
     /* "View.MemoryView":514
- * 
+ *
  *         if isinstance(value, tuple):
  *             bytesvalue = struct.pack(self.view.format, *value)             # <<<<<<<<<<<<<<
  *         else:
@@ -9543,7 +9543,7 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 
     /* "View.MemoryView":513
  *         cdef Py_ssize_t i
- * 
+ *
  *         if isinstance(value, tuple):             # <<<<<<<<<<<<<<
  *             bytesvalue = struct.pack(self.view.format, *value)
  *         else:
@@ -9555,7 +9555,7 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
  *             bytesvalue = struct.pack(self.view.format, *value)
  *         else:
  *             bytesvalue = struct.pack(self.view.format, value)             # <<<<<<<<<<<<<<
- * 
+ *
  *         for i, c in enumerate(bytesvalue):
 */
   /*else*/ {
@@ -9580,10 +9580,10 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 
   /* "View.MemoryView":518
  *             bytesvalue = struct.pack(self.view.format, value)
- * 
+ *
  *         for i, c in enumerate(bytesvalue):             # <<<<<<<<<<<<<<
  *             itemp[i] = c
- * 
+ *
 */
   __pyx_t_7 = 0;
   if (unlikely(__pyx_v_bytesvalue == Py_None)) {
@@ -9600,28 +9600,28 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
     __pyx_v_c = (__pyx_t_9[0]);
 
     /* "View.MemoryView":519
- * 
+ *
  *         for i, c in enumerate(bytesvalue):
  *             itemp[i] = c             # <<<<<<<<<<<<<<
- * 
+ *
  *     @cname('getbuffer')
 */
     __pyx_v_i = __pyx_t_7;
 
     /* "View.MemoryView":518
  *             bytesvalue = struct.pack(self.view.format, value)
- * 
+ *
  *         for i, c in enumerate(bytesvalue):             # <<<<<<<<<<<<<<
  *             itemp[i] = c
- * 
+ *
 */
     __pyx_t_7 = (__pyx_t_7 + 1);
 
     /* "View.MemoryView":519
- * 
+ *
  *         for i, c in enumerate(bytesvalue):
  *             itemp[i] = c             # <<<<<<<<<<<<<<
- * 
+ *
  *     @cname('getbuffer')
 */
     (__pyx_v_itemp[__pyx_v_i]) = __pyx_v_c;
@@ -9630,7 +9630,7 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 
   /* "View.MemoryView":505
  *             return result
- * 
+ *
  *     cdef assign_item_from_object(self, char *itemp, object value):             # <<<<<<<<<<<<<<
  *         """Only used if instantiated manually by the user, or if Cython doesn't
  *         know how to convert the type"""
@@ -9657,7 +9657,7 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 
 /* "View.MemoryView":521
  *             itemp[i] = c
- * 
+ *
  *     @cname('getbuffer')             # <<<<<<<<<<<<<<
  *     def __getbuffer__(self, Py_buffer *info, int flags):
  *         if flags & PyBUF_WRITABLE and self.view.readonly:
@@ -9704,7 +9704,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  *     def __getbuffer__(self, Py_buffer *info, int flags):
  *         if flags & PyBUF_WRITABLE and self.view.readonly:             # <<<<<<<<<<<<<<
  *             raise ValueError, "Cannot create writable memory view from read-only memoryview"
- * 
+ *
 */
   __pyx_t_2 = ((__pyx_v_flags & PyBUF_WRITABLE) != 0);
   if (__pyx_t_2) {
@@ -9720,7 +9720,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  *     def __getbuffer__(self, Py_buffer *info, int flags):
  *         if flags & PyBUF_WRITABLE and self.view.readonly:
  *             raise ValueError, "Cannot create writable memory view from read-only memoryview"             # <<<<<<<<<<<<<<
- * 
+ *
  *         if flags & PyBUF_ND:
 */
     __Pyx_Raise(__pyx_builtin_ValueError, __pyx_mstate_global->__pyx_kp_u_Cannot_create_writable_memory_vi, 0, 0);
@@ -9731,13 +9731,13 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  *     def __getbuffer__(self, Py_buffer *info, int flags):
  *         if flags & PyBUF_WRITABLE and self.view.readonly:             # <<<<<<<<<<<<<<
  *             raise ValueError, "Cannot create writable memory view from read-only memoryview"
- * 
+ *
 */
   }
 
   /* "View.MemoryView":526
  *             raise ValueError, "Cannot create writable memory view from read-only memoryview"
- * 
+ *
  *         if flags & PyBUF_ND:             # <<<<<<<<<<<<<<
  *             info.shape = self.view.shape
  *         else:
@@ -9746,7 +9746,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
   if (__pyx_t_1) {
 
     /* "View.MemoryView":527
- * 
+ *
  *         if flags & PyBUF_ND:
  *             info.shape = self.view.shape             # <<<<<<<<<<<<<<
  *         else:
@@ -9757,7 +9757,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 
     /* "View.MemoryView":526
  *             raise ValueError, "Cannot create writable memory view from read-only memoryview"
- * 
+ *
  *         if flags & PyBUF_ND:             # <<<<<<<<<<<<<<
  *             info.shape = self.view.shape
  *         else:
@@ -9769,7 +9769,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  *             info.shape = self.view.shape
  *         else:
  *             info.shape = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *         if flags & PyBUF_STRIDES:
 */
   /*else*/ {
@@ -9779,7 +9779,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 
   /* "View.MemoryView":531
  *             info.shape = NULL
- * 
+ *
  *         if flags & PyBUF_STRIDES:             # <<<<<<<<<<<<<<
  *             info.strides = self.view.strides
  *         else:
@@ -9788,7 +9788,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
   if (__pyx_t_1) {
 
     /* "View.MemoryView":532
- * 
+ *
  *         if flags & PyBUF_STRIDES:
  *             info.strides = self.view.strides             # <<<<<<<<<<<<<<
  *         else:
@@ -9799,7 +9799,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 
     /* "View.MemoryView":531
  *             info.shape = NULL
- * 
+ *
  *         if flags & PyBUF_STRIDES:             # <<<<<<<<<<<<<<
  *             info.strides = self.view.strides
  *         else:
@@ -9811,7 +9811,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  *             info.strides = self.view.strides
  *         else:
  *             info.strides = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *         if flags & PyBUF_INDIRECT:
 */
   /*else*/ {
@@ -9821,7 +9821,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 
   /* "View.MemoryView":536
  *             info.strides = NULL
- * 
+ *
  *         if flags & PyBUF_INDIRECT:             # <<<<<<<<<<<<<<
  *             info.suboffsets = self.view.suboffsets
  *         else:
@@ -9830,7 +9830,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
   if (__pyx_t_1) {
 
     /* "View.MemoryView":537
- * 
+ *
  *         if flags & PyBUF_INDIRECT:
  *             info.suboffsets = self.view.suboffsets             # <<<<<<<<<<<<<<
  *         else:
@@ -9841,7 +9841,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 
     /* "View.MemoryView":536
  *             info.strides = NULL
- * 
+ *
  *         if flags & PyBUF_INDIRECT:             # <<<<<<<<<<<<<<
  *             info.suboffsets = self.view.suboffsets
  *         else:
@@ -9853,7 +9853,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  *             info.suboffsets = self.view.suboffsets
  *         else:
  *             info.suboffsets = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *         if flags & PyBUF_FORMAT:
 */
   /*else*/ {
@@ -9863,7 +9863,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 
   /* "View.MemoryView":541
  *             info.suboffsets = NULL
- * 
+ *
  *         if flags & PyBUF_FORMAT:             # <<<<<<<<<<<<<<
  *             info.format = self.view.format
  *         else:
@@ -9872,7 +9872,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
   if (__pyx_t_1) {
 
     /* "View.MemoryView":542
- * 
+ *
  *         if flags & PyBUF_FORMAT:
  *             info.format = self.view.format             # <<<<<<<<<<<<<<
  *         else:
@@ -9883,7 +9883,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 
     /* "View.MemoryView":541
  *             info.suboffsets = NULL
- * 
+ *
  *         if flags & PyBUF_FORMAT:             # <<<<<<<<<<<<<<
  *             info.format = self.view.format
  *         else:
@@ -9895,7 +9895,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  *             info.format = self.view.format
  *         else:
  *             info.format = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *         info.buf = self.view.buf
 */
   /*else*/ {
@@ -9905,7 +9905,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 
   /* "View.MemoryView":546
  *             info.format = NULL
- * 
+ *
  *         info.buf = self.view.buf             # <<<<<<<<<<<<<<
  *         info.ndim = self.view.ndim
  *         info.itemsize = self.view.itemsize
@@ -9914,7 +9914,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
   __pyx_v_info->buf = __pyx_t_5;
 
   /* "View.MemoryView":547
- * 
+ *
  *         info.buf = self.view.buf
  *         info.ndim = self.view.ndim             # <<<<<<<<<<<<<<
  *         info.itemsize = self.view.itemsize
@@ -9948,7 +9948,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  *         info.len = self.view.len
  *         info.readonly = self.view.readonly             # <<<<<<<<<<<<<<
  *         info.obj = self
- * 
+ *
 */
   __pyx_t_1 = __pyx_v_self->view.readonly;
   __pyx_v_info->readonly = __pyx_t_1;
@@ -9957,8 +9957,8 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
  *         info.len = self.view.len
  *         info.readonly = self.view.readonly
  *         info.obj = self             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_INCREF((PyObject *)__pyx_v_self);
   __Pyx_GIVEREF((PyObject *)__pyx_v_self);
@@ -9968,7 +9968,7 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 
   /* "View.MemoryView":521
  *             itemp[i] = c
- * 
+ *
  *     @cname('getbuffer')             # <<<<<<<<<<<<<<
  *     def __getbuffer__(self, Py_buffer *info, int flags):
  *         if flags & PyBUF_WRITABLE and self.view.readonly:
@@ -9996,8 +9996,8 @@ static int __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_8__getbu
 }
 
 /* "View.MemoryView":554
- * 
- * 
+ *
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def T(self):
  *         cdef _memoryviewslice result = memoryview_copy(self)
@@ -10047,7 +10047,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_1T___get__(struct _
  *         cdef _memoryviewslice result = memoryview_copy(self)
  *         transpose_memslice(&result.from_slice)             # <<<<<<<<<<<<<<
  *         return result
- * 
+ *
 */
   __pyx_t_2 = __pyx_memslice_transpose((&__pyx_v_result->from_slice)); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(1, 557, __pyx_L1_error)
 
@@ -10055,7 +10055,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_1T___get__(struct _
  *         cdef _memoryviewslice result = memoryview_copy(self)
  *         transpose_memslice(&result.from_slice)
  *         return result             # <<<<<<<<<<<<<<
- * 
+ *
  *     @property
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10064,8 +10064,8 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_1T___get__(struct _
   goto __pyx_L0;
 
   /* "View.MemoryView":554
- * 
- * 
+ *
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def T(self):
  *         cdef _memoryviewslice result = memoryview_copy(self)
@@ -10085,7 +10085,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_1T___get__(struct _
 
 /* "View.MemoryView":560
  *         return result
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def base(self):
  *         return self._get_base()
@@ -10119,7 +10119,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4base___get__(struc
  *     @property
  *     def base(self):
  *         return self._get_base()             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef _get_base(self):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10131,7 +10131,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4base___get__(struc
 
   /* "View.MemoryView":560
  *         return result
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def base(self):
  *         return self._get_base()
@@ -10150,10 +10150,10 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4base___get__(struc
 
 /* "View.MemoryView":564
  *         return self._get_base()
- * 
+ *
  *     cdef _get_base(self):             # <<<<<<<<<<<<<<
  *         return self.obj
- * 
+ *
 */
 
 static PyObject *__pyx_memoryview__get_base(struct __pyx_memoryview_obj *__pyx_v_self) {
@@ -10162,10 +10162,10 @@ static PyObject *__pyx_memoryview__get_base(struct __pyx_memoryview_obj *__pyx_v
   __Pyx_RefNannySetupContext("_get_base", 0);
 
   /* "View.MemoryView":565
- * 
+ *
  *     cdef _get_base(self):
  *         return self.obj             # <<<<<<<<<<<<<<
- * 
+ *
  *     @property
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10175,10 +10175,10 @@ static PyObject *__pyx_memoryview__get_base(struct __pyx_memoryview_obj *__pyx_v
 
   /* "View.MemoryView":564
  *         return self._get_base()
- * 
+ *
  *     cdef _get_base(self):             # <<<<<<<<<<<<<<
  *         return self.obj
- * 
+ *
 */
 
   /* function exit code */
@@ -10190,7 +10190,7 @@ static PyObject *__pyx_memoryview__get_base(struct __pyx_memoryview_obj *__pyx_v
 
 /* "View.MemoryView":567
  *         return self.obj
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def shape(self):
  *         return tuple([length for length in self.view.shape[:self.view.ndim]])
@@ -10229,7 +10229,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_5shape___get__(stru
  *     @property
  *     def shape(self):
  *         return tuple([length for length in self.view.shape[:self.view.ndim]])             # <<<<<<<<<<<<<<
- * 
+ *
  *     @property
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10255,7 +10255,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_5shape___get__(stru
 
   /* "View.MemoryView":567
  *         return self.obj
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def shape(self):
  *         return tuple([length for length in self.view.shape[:self.view.ndim]])
@@ -10275,7 +10275,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_5shape___get__(stru
 
 /* "View.MemoryView":571
  *         return tuple([length for length in self.view.shape[:self.view.ndim]])
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def strides(self):
  *         if self.view.strides == NULL:
@@ -10315,7 +10315,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_7strides___get__(st
  *     @property
  *     def strides(self):
  *         if self.view.strides == NULL:             # <<<<<<<<<<<<<<
- * 
+ *
  *             raise ValueError, "Buffer view does not expose strides"
 */
   __pyx_t_1 = (__pyx_v_self->view.strides == NULL);
@@ -10323,9 +10323,9 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_7strides___get__(st
 
     /* "View.MemoryView":575
  *         if self.view.strides == NULL:
- * 
+ *
  *             raise ValueError, "Buffer view does not expose strides"             # <<<<<<<<<<<<<<
- * 
+ *
  *         return tuple([stride for stride in self.view.strides[:self.view.ndim]])
 */
     __Pyx_Raise(__pyx_builtin_ValueError, __pyx_mstate_global->__pyx_kp_u_Buffer_view_does_not_expose_stri, 0, 0);
@@ -10335,16 +10335,16 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_7strides___get__(st
  *     @property
  *     def strides(self):
  *         if self.view.strides == NULL:             # <<<<<<<<<<<<<<
- * 
+ *
  *             raise ValueError, "Buffer view does not expose strides"
 */
   }
 
   /* "View.MemoryView":577
  *             raise ValueError, "Buffer view does not expose strides"
- * 
+ *
  *         return tuple([stride for stride in self.view.strides[:self.view.ndim]])             # <<<<<<<<<<<<<<
- * 
+ *
  *     @property
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10370,7 +10370,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_7strides___get__(st
 
   /* "View.MemoryView":571
  *         return tuple([length for length in self.view.shape[:self.view.ndim]])
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def strides(self):
  *         if self.view.strides == NULL:
@@ -10390,7 +10390,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_7strides___get__(st
 
 /* "View.MemoryView":579
  *         return tuple([stride for stride in self.view.strides[:self.view.ndim]])
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def suboffsets(self):
  *         if self.view.suboffsets == NULL:
@@ -10431,7 +10431,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_10suboffsets___get_
  *     def suboffsets(self):
  *         if self.view.suboffsets == NULL:             # <<<<<<<<<<<<<<
  *             return (-1,) * self.view.ndim
- * 
+ *
 */
   __pyx_t_1 = (__pyx_v_self->view.suboffsets == NULL);
   if (__pyx_t_1) {
@@ -10440,7 +10440,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_10suboffsets___get_
  *     def suboffsets(self):
  *         if self.view.suboffsets == NULL:
  *             return (-1,) * self.view.ndim             # <<<<<<<<<<<<<<
- * 
+ *
  *         return tuple([suboffset for suboffset in self.view.suboffsets[:self.view.ndim]])
 */
     __Pyx_XDECREF(__pyx_r);
@@ -10455,15 +10455,15 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_10suboffsets___get_
  *     def suboffsets(self):
  *         if self.view.suboffsets == NULL:             # <<<<<<<<<<<<<<
  *             return (-1,) * self.view.ndim
- * 
+ *
 */
   }
 
   /* "View.MemoryView":584
  *             return (-1,) * self.view.ndim
- * 
+ *
  *         return tuple([suboffset for suboffset in self.view.suboffsets[:self.view.ndim]])             # <<<<<<<<<<<<<<
- * 
+ *
  *     @property
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10489,7 +10489,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_10suboffsets___get_
 
   /* "View.MemoryView":579
  *         return tuple([stride for stride in self.view.strides[:self.view.ndim]])
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def suboffsets(self):
  *         if self.view.suboffsets == NULL:
@@ -10509,7 +10509,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_10suboffsets___get_
 
 /* "View.MemoryView":586
  *         return tuple([suboffset for suboffset in self.view.suboffsets[:self.view.ndim]])
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def ndim(self):
  *         return self.view.ndim
@@ -10543,7 +10543,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4ndim___get__(struc
  *     @property
  *     def ndim(self):
  *         return self.view.ndim             # <<<<<<<<<<<<<<
- * 
+ *
  *     @property
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10555,7 +10555,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4ndim___get__(struc
 
   /* "View.MemoryView":586
  *         return tuple([suboffset for suboffset in self.view.suboffsets[:self.view.ndim]])
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def ndim(self):
  *         return self.view.ndim
@@ -10574,7 +10574,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4ndim___get__(struc
 
 /* "View.MemoryView":590
  *         return self.view.ndim
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def itemsize(self):
  *         return self.view.itemsize
@@ -10608,7 +10608,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_8itemsize___get__(s
  *     @property
  *     def itemsize(self):
  *         return self.view.itemsize             # <<<<<<<<<<<<<<
- * 
+ *
  *     @property
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10620,7 +10620,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_8itemsize___get__(s
 
   /* "View.MemoryView":590
  *         return self.view.ndim
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def itemsize(self):
  *         return self.view.itemsize
@@ -10639,7 +10639,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_8itemsize___get__(s
 
 /* "View.MemoryView":594
  *         return self.view.itemsize
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def nbytes(self):
  *         return self.size * self.view.itemsize
@@ -10675,7 +10675,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_6nbytes___get__(str
  *     @property
  *     def nbytes(self):
  *         return self.size * self.view.itemsize             # <<<<<<<<<<<<<<
- * 
+ *
  *     @property
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10693,7 +10693,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_6nbytes___get__(str
 
   /* "View.MemoryView":594
  *         return self.view.itemsize
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def nbytes(self):
  *         return self.size * self.view.itemsize
@@ -10714,7 +10714,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_6nbytes___get__(str
 
 /* "View.MemoryView":598
  *         return self.size * self.view.itemsize
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def size(self):
  *         if self._size is None:
@@ -10755,7 +10755,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4size___get__(struc
  *     def size(self):
  *         if self._size is None:             # <<<<<<<<<<<<<<
  *             result = 1
- * 
+ *
 */
   __pyx_t_1 = (__pyx_v_self->_size == Py_None);
   if (__pyx_t_1) {
@@ -10764,7 +10764,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4size___get__(struc
  *     def size(self):
  *         if self._size is None:
  *             result = 1             # <<<<<<<<<<<<<<
- * 
+ *
  *             for length in self.view.shape[:self.view.ndim]:
 */
     __Pyx_INCREF(__pyx_mstate_global->__pyx_int_1);
@@ -10772,10 +10772,10 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4size___get__(struc
 
     /* "View.MemoryView":603
  *             result = 1
- * 
+ *
  *             for length in self.view.shape[:self.view.ndim]:             # <<<<<<<<<<<<<<
  *                 result *= length
- * 
+ *
 */
     __pyx_t_3 = (__pyx_v_self->view.shape + __pyx_v_self->view.ndim);
     for (__pyx_t_4 = __pyx_v_self->view.shape; __pyx_t_4 < __pyx_t_3; __pyx_t_4++) {
@@ -10786,10 +10786,10 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4size___get__(struc
       __pyx_t_5 = 0;
 
       /* "View.MemoryView":604
- * 
+ *
  *             for length in self.view.shape[:self.view.ndim]:
  *                 result *= length             # <<<<<<<<<<<<<<
- * 
+ *
  *             self._size = result
 */
       __pyx_t_5 = PyNumber_InPlaceMultiply(__pyx_v_result, __pyx_v_length); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 604, __pyx_L1_error)
@@ -10800,9 +10800,9 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4size___get__(struc
 
     /* "View.MemoryView":606
  *                 result *= length
- * 
+ *
  *             self._size = result             # <<<<<<<<<<<<<<
- * 
+ *
  *         return self._size
 */
     __Pyx_INCREF(__pyx_v_result);
@@ -10816,15 +10816,15 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4size___get__(struc
  *     def size(self):
  *         if self._size is None:             # <<<<<<<<<<<<<<
  *             result = 1
- * 
+ *
 */
   }
 
   /* "View.MemoryView":608
  *             self._size = result
- * 
+ *
  *         return self._size             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __len__(self):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -10834,7 +10834,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4size___get__(struc
 
   /* "View.MemoryView":598
  *         return self.size * self.view.itemsize
- * 
+ *
  *     @property             # <<<<<<<<<<<<<<
  *     def size(self):
  *         if self._size is None:
@@ -10855,7 +10855,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_4size___get__(struc
 
 /* "View.MemoryView":610
  *         return self._size
- * 
+ *
  *     def __len__(self):             # <<<<<<<<<<<<<<
  *         if self.view.ndim >= 1:
  *             return self.view.shape[0]
@@ -10881,11 +10881,11 @@ static Py_ssize_t __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_1
   int __pyx_t_1;
 
   /* "View.MemoryView":611
- * 
+ *
  *     def __len__(self):
  *         if self.view.ndim >= 1:             # <<<<<<<<<<<<<<
  *             return self.view.shape[0]
- * 
+ *
 */
   __pyx_t_1 = (__pyx_v_self->view.ndim >= 1);
   if (__pyx_t_1) {
@@ -10894,26 +10894,26 @@ static Py_ssize_t __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_1
  *     def __len__(self):
  *         if self.view.ndim >= 1:
  *             return self.view.shape[0]             # <<<<<<<<<<<<<<
- * 
+ *
  *         return 0
 */
     __pyx_r = (__pyx_v_self->view.shape[0]);
     goto __pyx_L0;
 
     /* "View.MemoryView":611
- * 
+ *
  *     def __len__(self):
  *         if self.view.ndim >= 1:             # <<<<<<<<<<<<<<
  *             return self.view.shape[0]
- * 
+ *
 */
   }
 
   /* "View.MemoryView":614
  *             return self.view.shape[0]
- * 
+ *
  *         return 0             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __repr__(self):
 */
   __pyx_r = 0;
@@ -10921,7 +10921,7 @@ static Py_ssize_t __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_1
 
   /* "View.MemoryView":610
  *         return self._size
- * 
+ *
  *     def __len__(self):             # <<<<<<<<<<<<<<
  *         if self.view.ndim >= 1:
  *             return self.view.shape[0]
@@ -10934,7 +10934,7 @@ static Py_ssize_t __pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_1
 
 /* "View.MemoryView":616
  *         return 0
- * 
+ *
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return "<MemoryView of %r at 0x%x>" % (self.base.__class__.__name__,
  *                                                id(self))
@@ -10968,11 +10968,11 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_12
   __Pyx_RefNannySetupContext("__repr__", 0);
 
   /* "View.MemoryView":617
- * 
+ *
  *     def __repr__(self):
  *         return "<MemoryView of %r at 0x%x>" % (self.base.__class__.__name__,             # <<<<<<<<<<<<<<
  *                                                id(self))
- * 
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 617, __pyx_L1_error)
@@ -10991,7 +10991,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_12
  *     def __repr__(self):
  *         return "<MemoryView of %r at 0x%x>" % (self.base.__class__.__name__,
  *                                                id(self))             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __str__(self):
 */
   __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_id, ((PyObject *)__pyx_v_self)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 618, __pyx_L1_error)
@@ -11006,11 +11006,11 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_12
   __pyx_t_4[4] = __pyx_mstate_global->__pyx_kp_u__3;
 
   /* "View.MemoryView":617
- * 
+ *
  *     def __repr__(self):
  *         return "<MemoryView of %r at 0x%x>" % (self.base.__class__.__name__,             # <<<<<<<<<<<<<<
  *                                                id(self))
- * 
+ *
 */
   __pyx_t_1 = __Pyx_PyUnicode_Join(__pyx_t_4, 5, 15 + __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2) + 6 + __Pyx_PyUnicode_GET_LENGTH(__pyx_t_3) + 1, 127 | __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_2) | __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_3));
   if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 617, __pyx_L1_error)
@@ -11023,7 +11023,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_12
 
   /* "View.MemoryView":616
  *         return 0
- * 
+ *
  *     def __repr__(self):             # <<<<<<<<<<<<<<
  *         return "<MemoryView of %r at 0x%x>" % (self.base.__class__.__name__,
  *                                                id(self))
@@ -11044,10 +11044,10 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_12
 
 /* "View.MemoryView":620
  *                                                id(self))
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "<MemoryView of %r object>" % (self.base.__class__.__name__,)
- * 
+ *
 */
 
 /* Python wrapper */
@@ -11077,11 +11077,11 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_14
   __Pyx_RefNannySetupContext("__str__", 0);
 
   /* "View.MemoryView":621
- * 
+ *
  *     def __str__(self):
  *         return "<MemoryView of %r object>" % (self.base.__class__.__name__,)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 621, __pyx_L1_error)
@@ -11108,10 +11108,10 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_14
 
   /* "View.MemoryView":620
  *                                                id(self))
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "<MemoryView of %r object>" % (self.base.__class__.__name__,)
- * 
+ *
 */
 
   /* function exit code */
@@ -11127,22 +11127,22 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_14
 }
 
 /* "View.MemoryView":624
- * 
- * 
+ *
+ *
  *     def is_c_contig(self):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice *mslice
  *         cdef __Pyx_memviewslice tmp
 */
 
 /* Python wrapper */
-static PyObject *__pyx_memoryview_is_c_contig(PyObject *__pyx_v_self, 
+static PyObject *__pyx_memoryview_is_c_contig(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_memoryview_is_c_contig(PyObject *__pyx_v_self, 
+static PyObject *__pyx_memoryview_is_c_contig(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -11192,7 +11192,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_16
  *         cdef __Pyx_memviewslice tmp
  *         mslice = get_slice_from_memview(self, &tmp)             # <<<<<<<<<<<<<<
  *         return slice_is_contig(mslice[0], 'C', self.view.ndim)
- * 
+ *
 */
   __pyx_t_1 = __pyx_memoryview_get_slice_from_memoryview(__pyx_v_self, (&__pyx_v_tmp)); if (unlikely(__pyx_t_1 == ((__Pyx_memviewslice *)0))) __PYX_ERR(1, 627, __pyx_L1_error)
   __pyx_v_mslice = __pyx_t_1;
@@ -11201,7 +11201,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_16
  *         cdef __Pyx_memviewslice tmp
  *         mslice = get_slice_from_memview(self, &tmp)
  *         return slice_is_contig(mslice[0], 'C', self.view.ndim)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def is_f_contig(self):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -11212,8 +11212,8 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_16
   goto __pyx_L0;
 
   /* "View.MemoryView":624
- * 
- * 
+ *
+ *
  *     def is_c_contig(self):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice *mslice
  *         cdef __Pyx_memviewslice tmp
@@ -11232,21 +11232,21 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_16
 
 /* "View.MemoryView":630
  *         return slice_is_contig(mslice[0], 'C', self.view.ndim)
- * 
+ *
  *     def is_f_contig(self):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice *mslice
  *         cdef __Pyx_memviewslice tmp
 */
 
 /* Python wrapper */
-static PyObject *__pyx_memoryview_is_f_contig(PyObject *__pyx_v_self, 
+static PyObject *__pyx_memoryview_is_f_contig(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_memoryview_is_f_contig(PyObject *__pyx_v_self, 
+static PyObject *__pyx_memoryview_is_f_contig(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -11296,7 +11296,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_18
  *         cdef __Pyx_memviewslice tmp
  *         mslice = get_slice_from_memview(self, &tmp)             # <<<<<<<<<<<<<<
  *         return slice_is_contig(mslice[0], 'F', self.view.ndim)
- * 
+ *
 */
   __pyx_t_1 = __pyx_memoryview_get_slice_from_memoryview(__pyx_v_self, (&__pyx_v_tmp)); if (unlikely(__pyx_t_1 == ((__Pyx_memviewslice *)0))) __PYX_ERR(1, 633, __pyx_L1_error)
   __pyx_v_mslice = __pyx_t_1;
@@ -11305,7 +11305,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_18
  *         cdef __Pyx_memviewslice tmp
  *         mslice = get_slice_from_memview(self, &tmp)
  *         return slice_is_contig(mslice[0], 'F', self.view.ndim)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def copy(self):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -11317,7 +11317,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_18
 
   /* "View.MemoryView":630
  *         return slice_is_contig(mslice[0], 'C', self.view.ndim)
- * 
+ *
  *     def is_f_contig(self):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice *mslice
  *         cdef __Pyx_memviewslice tmp
@@ -11336,21 +11336,21 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_18
 
 /* "View.MemoryView":636
  *         return slice_is_contig(mslice[0], 'F', self.view.ndim)
- * 
+ *
  *     def copy(self):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice mslice
  *         cdef int flags = self.flags & ~PyBUF_F_CONTIGUOUS
 */
 
 /* Python wrapper */
-static PyObject *__pyx_memoryview_copy(PyObject *__pyx_v_self, 
+static PyObject *__pyx_memoryview_copy(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_memoryview_copy(PyObject *__pyx_v_self, 
+static PyObject *__pyx_memoryview_copy(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -11399,14 +11399,14 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_20
  *     def copy(self):
  *         cdef __Pyx_memviewslice mslice
  *         cdef int flags = self.flags & ~PyBUF_F_CONTIGUOUS             # <<<<<<<<<<<<<<
- * 
+ *
  *         slice_copy(self, &mslice)
 */
   __pyx_v_flags = (__pyx_v_self->flags & (~PyBUF_F_CONTIGUOUS));
 
   /* "View.MemoryView":640
  *         cdef int flags = self.flags & ~PyBUF_F_CONTIGUOUS
- * 
+ *
  *         slice_copy(self, &mslice)             # <<<<<<<<<<<<<<
  *         mslice = slice_copy_contig(&mslice, "c", self.view.ndim,
  *                                    self.view.itemsize,
@@ -11414,7 +11414,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_20
   __pyx_memoryview_slice_copy(__pyx_v_self, (&__pyx_v_mslice));
 
   /* "View.MemoryView":641
- * 
+ *
  *         slice_copy(self, &mslice)
  *         mslice = slice_copy_contig(&mslice, "c", self.view.ndim,             # <<<<<<<<<<<<<<
  *                                    self.view.itemsize,
@@ -11425,9 +11425,9 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_20
 
   /* "View.MemoryView":646
  *                                    self.dtype_is_object)
- * 
+ *
  *         return memoryview_copy_from_slice(self, &mslice)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def copy_fortran(self):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -11439,7 +11439,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_20
 
   /* "View.MemoryView":636
  *         return slice_is_contig(mslice[0], 'F', self.view.ndim)
- * 
+ *
  *     def copy(self):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice mslice
  *         cdef int flags = self.flags & ~PyBUF_F_CONTIGUOUS
@@ -11458,21 +11458,21 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_20
 
 /* "View.MemoryView":648
  *         return memoryview_copy_from_slice(self, &mslice)
- * 
+ *
  *     def copy_fortran(self):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice src, dst
  *         cdef int flags = self.flags & ~PyBUF_C_CONTIGUOUS
 */
 
 /* Python wrapper */
-static PyObject *__pyx_memoryview_copy_fortran(PyObject *__pyx_v_self, 
+static PyObject *__pyx_memoryview_copy_fortran(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_memoryview_copy_fortran(PyObject *__pyx_v_self, 
+static PyObject *__pyx_memoryview_copy_fortran(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -11522,14 +11522,14 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_22
  *     def copy_fortran(self):
  *         cdef __Pyx_memviewslice src, dst
  *         cdef int flags = self.flags & ~PyBUF_C_CONTIGUOUS             # <<<<<<<<<<<<<<
- * 
+ *
  *         slice_copy(self, &src)
 */
   __pyx_v_flags = (__pyx_v_self->flags & (~PyBUF_C_CONTIGUOUS));
 
   /* "View.MemoryView":652
  *         cdef int flags = self.flags & ~PyBUF_C_CONTIGUOUS
- * 
+ *
  *         slice_copy(self, &src)             # <<<<<<<<<<<<<<
  *         dst = slice_copy_contig(&src, "fortran", self.view.ndim,
  *                                 self.view.itemsize,
@@ -11537,7 +11537,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_22
   __pyx_memoryview_slice_copy(__pyx_v_self, (&__pyx_v_src));
 
   /* "View.MemoryView":653
- * 
+ *
  *         slice_copy(self, &src)
  *         dst = slice_copy_contig(&src, "fortran", self.view.ndim,             # <<<<<<<<<<<<<<
  *                                 self.view.itemsize,
@@ -11548,10 +11548,10 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_22
 
   /* "View.MemoryView":658
  *                                 self.dtype_is_object)
- * 
+ *
  *         return memoryview_copy_from_slice(self, &dst)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = __pyx_memoryview_copy_object_from_slice(__pyx_v_self, (&__pyx_v_dst)); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 658, __pyx_L1_error)
@@ -11562,7 +11562,7 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_22
 
   /* "View.MemoryView":648
  *         return memoryview_copy_from_slice(self, &mslice)
- * 
+ *
  *     def copy_fortran(self):             # <<<<<<<<<<<<<<
  *         cdef __Pyx_memviewslice src, dst
  *         cdef int flags = self.flags & ~PyBUF_C_CONTIGUOUS
@@ -11586,14 +11586,14 @@ static PyObject *__pyx_memoryview___pyx_pf_15View_dot_MemoryView_10memoryview_22
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw___pyx_memoryview_1__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_memoryview_1__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_pw___pyx_memoryview_1__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_memoryview_1__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -11666,14 +11666,14 @@ static PyObject *__pyx_pf___pyx_memoryview___reduce_cython__(CYTHON_UNUSED struc
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw___pyx_memoryview_3__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_memoryview_3__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_pw___pyx_memoryview_3__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_memoryview_3__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -11782,8 +11782,8 @@ static PyObject *__pyx_pf___pyx_memoryview_2__setstate_cython__(CYTHON_UNUSED st
 }
 
 /* "View.MemoryView":661
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_new')             # <<<<<<<<<<<<<<
  * cdef memoryview_cwrapper(object o, int flags, bint dtype_is_object, const __Pyx_TypeInfo *typeinfo):
  *     cdef memoryview result = memoryview(o, flags, dtype_is_object)
@@ -11813,7 +11813,7 @@ static PyObject *__pyx_memoryview_new(PyObject *__pyx_v_o, int __pyx_v_flags, in
 */
   __pyx_t_2 = NULL;
   __Pyx_INCREF((PyObject *)__pyx_mstate_global->__pyx_memoryview_type);
-  __pyx_t_3 = ((PyObject *)__pyx_mstate_global->__pyx_memoryview_type); 
+  __pyx_t_3 = ((PyObject *)__pyx_mstate_global->__pyx_memoryview_type);
   __pyx_t_4 = __Pyx_PyLong_From_int(__pyx_v_flags); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 663, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_5 = __Pyx_PyBool_FromLong(__pyx_v_dtype_is_object); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 663, __pyx_L1_error)
@@ -11837,7 +11837,7 @@ static PyObject *__pyx_memoryview_new(PyObject *__pyx_v_o, int __pyx_v_flags, in
  *     cdef memoryview result = memoryview(o, flags, dtype_is_object)
  *     result.typeinfo = typeinfo             # <<<<<<<<<<<<<<
  *     return result
- * 
+ *
 */
   __pyx_v_result->typeinfo = __pyx_v_typeinfo;
 
@@ -11845,7 +11845,7 @@ static PyObject *__pyx_memoryview_new(PyObject *__pyx_v_o, int __pyx_v_flags, in
  *     cdef memoryview result = memoryview(o, flags, dtype_is_object)
  *     result.typeinfo = typeinfo
  *     return result             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_check')
 */
   __Pyx_XDECREF(__pyx_r);
@@ -11854,8 +11854,8 @@ static PyObject *__pyx_memoryview_new(PyObject *__pyx_v_o, int __pyx_v_flags, in
   goto __pyx_L0;
 
   /* "View.MemoryView":661
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_new')             # <<<<<<<<<<<<<<
  * cdef memoryview_cwrapper(object o, int flags, bint dtype_is_object, const __Pyx_TypeInfo *typeinfo):
  *     cdef memoryview result = memoryview(o, flags, dtype_is_object)
@@ -11879,7 +11879,7 @@ static PyObject *__pyx_memoryview_new(PyObject *__pyx_v_o, int __pyx_v_flags, in
 
 /* "View.MemoryView":667
  *     return result
- * 
+ *
  * @cname('__pyx_memoryview_check')             # <<<<<<<<<<<<<<
  * cdef inline bint memoryview_check(object o) noexcept:
  *     return isinstance(o, memoryview)
@@ -11893,16 +11893,16 @@ static CYTHON_INLINE int __pyx_memoryview_check(PyObject *__pyx_v_o) {
  * @cname('__pyx_memoryview_check')
  * cdef inline bint memoryview_check(object o) noexcept:
  *     return isinstance(o, memoryview)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef tuple _unellipsify(object index, int ndim):
 */
-  __pyx_t_1 = __Pyx_TypeCheck(__pyx_v_o, __pyx_mstate_global->__pyx_memoryview_type); 
+  __pyx_t_1 = __Pyx_TypeCheck(__pyx_v_o, __pyx_mstate_global->__pyx_memoryview_type);
   __pyx_r = __pyx_t_1;
   goto __pyx_L0;
 
   /* "View.MemoryView":667
  *     return result
- * 
+ *
  * @cname('__pyx_memoryview_check')             # <<<<<<<<<<<<<<
  * cdef inline bint memoryview_check(object o) noexcept:
  *     return isinstance(o, memoryview)
@@ -11915,7 +11915,7 @@ static CYTHON_INLINE int __pyx_memoryview_check(PyObject *__pyx_v_o) {
 
 /* "View.MemoryView":671
  *     return isinstance(o, memoryview)
- * 
+ *
  * cdef tuple _unellipsify(object index, int ndim):             # <<<<<<<<<<<<<<
  *     """
  *     Replace all ellipses with full slices and fill incomplete indices with
@@ -11947,10 +11947,10 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
  *     """
  *     cdef Py_ssize_t idx
  *     tup = <tuple>index if isinstance(index, tuple) else (index,)             # <<<<<<<<<<<<<<
- * 
+ *
  *     result = [slice(None)] * ndim
 */
-  __pyx_t_2 = PyTuple_Check(__pyx_v_index); 
+  __pyx_t_2 = PyTuple_Check(__pyx_v_index);
   if (__pyx_t_2) {
     __Pyx_INCREF(((PyObject*)__pyx_v_index));
     __pyx_t_1 = __pyx_v_index;
@@ -11968,7 +11968,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
 
   /* "View.MemoryView":679
  *     tup = <tuple>index if isinstance(index, tuple) else (index,)
- * 
+ *
  *     result = [slice(None)] * ndim             # <<<<<<<<<<<<<<
  *     have_slices = False
  *     seen_ellipsis = False
@@ -11986,7 +11986,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
   __pyx_t_1 = 0;
 
   /* "View.MemoryView":680
- * 
+ *
  *     result = [slice(None)] * ndim
  *     have_slices = False             # <<<<<<<<<<<<<<
  *     seen_ellipsis = False
@@ -12123,7 +12123,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
  *             elif not PyIndex_Check(item):
 */
     /*else*/ {
-      __pyx_t_2 = PySlice_Check(__pyx_v_item); 
+      __pyx_t_2 = PySlice_Check(__pyx_v_item);
       if (__pyx_t_2) {
 
         /* "View.MemoryView":691
@@ -12190,7 +12190,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
  *                 raise TypeError, f"Cannot index with type '{type(item)}'"
  *             result[idx] = item             # <<<<<<<<<<<<<<
  *         idx += 1
- * 
+ *
 */
       if (unlikely((__Pyx_SetItemInt(__pyx_v_result, __pyx_v_idx, __pyx_v_item, Py_ssize_t, 1, PyLong_FromSsize_t, 1, 1, 1, 1) < 0))) __PYX_ERR(1, 694, __pyx_L1_error)
     }
@@ -12200,7 +12200,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
  *                 raise TypeError, f"Cannot index with type '{type(item)}'"
  *             result[idx] = item
  *         idx += 1             # <<<<<<<<<<<<<<
- * 
+ *
  *     nslices = ndim - idx
 */
     __pyx_v_idx = (__pyx_v_idx + 1);
@@ -12217,18 +12217,18 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
 
   /* "View.MemoryView":697
  *         idx += 1
- * 
+ *
  *     nslices = ndim - idx             # <<<<<<<<<<<<<<
  *     return have_slices or nslices, tuple(result)
- * 
+ *
 */
   __pyx_v_nslices = (__pyx_v_ndim - __pyx_v_idx);
 
   /* "View.MemoryView":698
- * 
+ *
  *     nslices = ndim - idx
  *     return have_slices or nslices, tuple(result)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef int assert_direct_dimensions(Py_ssize_t *suboffsets, int ndim) except -1:
 */
   __Pyx_XDECREF(__pyx_r);
@@ -12261,7 +12261,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
 
   /* "View.MemoryView":671
  *     return isinstance(o, memoryview)
- * 
+ *
  * cdef tuple _unellipsify(object index, int ndim):             # <<<<<<<<<<<<<<
  *     """
  *     Replace all ellipses with full slices and fill incomplete indices with
@@ -12285,7 +12285,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
 
 /* "View.MemoryView":700
  *     return have_slices or nslices, tuple(result)
- * 
+ *
  * cdef int assert_direct_dimensions(Py_ssize_t *suboffsets, int ndim) except -1:             # <<<<<<<<<<<<<<
  *     for suboffset in suboffsets[:ndim]:
  *         if suboffset >= 0:
@@ -12303,7 +12303,7 @@ static int assert_direct_dimensions(Py_ssize_t *__pyx_v_suboffsets, int __pyx_v_
   int __pyx_clineno = 0;
 
   /* "View.MemoryView":701
- * 
+ *
  * cdef int assert_direct_dimensions(Py_ssize_t *suboffsets, int ndim) except -1:
  *     for suboffset in suboffsets[:ndim]:             # <<<<<<<<<<<<<<
  *         if suboffset >= 0:
@@ -12329,7 +12329,7 @@ static int assert_direct_dimensions(Py_ssize_t *__pyx_v_suboffsets, int __pyx_v_
  *         if suboffset >= 0:
  *             raise ValueError, "Indirect dimensions not supported"             # <<<<<<<<<<<<<<
  *     return 0  # return type just used as an error flag
- * 
+ *
 */
       __Pyx_Raise(__pyx_builtin_ValueError, __pyx_mstate_global->__pyx_kp_u_Indirect_dimensions_not_supporte, 0, 0);
       __PYX_ERR(1, 703, __pyx_L1_error)
@@ -12348,15 +12348,15 @@ static int assert_direct_dimensions(Py_ssize_t *__pyx_v_suboffsets, int __pyx_v_
  *         if suboffset >= 0:
  *             raise ValueError, "Indirect dimensions not supported"
  *     return 0  # return type just used as an error flag             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = 0;
   goto __pyx_L0;
 
   /* "View.MemoryView":700
  *     return have_slices or nslices, tuple(result)
- * 
+ *
  * cdef int assert_direct_dimensions(Py_ssize_t *suboffsets, int ndim) except -1:             # <<<<<<<<<<<<<<
  *     for suboffset in suboffsets[:ndim]:
  *         if suboffset >= 0:
@@ -12371,8 +12371,8 @@ static int assert_direct_dimensions(Py_ssize_t *__pyx_v_suboffsets, int __pyx_v_
 }
 
 /* "View.MemoryView":710
- * 
- * 
+ *
+ *
  * @cname('__pyx_memview_slice')             # <<<<<<<<<<<<<<
  * cdef memoryview memview_slice(memoryview memview, object indices):
  *     cdef int new_ndim = 0, suboffset_dim = -1, dim
@@ -12425,19 +12425,19 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
   __pyx_v_suboffset_dim = -1;
 
   /* "View.MemoryView":719
- * 
- * 
+ *
+ *
  *     memset(&dst, 0, sizeof(dst))             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef _memoryviewslice memviewsliceobj
 */
   (void)(memset((&__pyx_v_dst), 0, (sizeof(__pyx_v_dst))));
 
   /* "View.MemoryView":723
  *     cdef _memoryviewslice memviewsliceobj
- * 
+ *
  *     assert memview.view.ndim > 0             # <<<<<<<<<<<<<<
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):
 */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
@@ -12454,16 +12454,16 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
 
   /* "View.MemoryView":725
  *     assert memview.view.ndim > 0
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):             # <<<<<<<<<<<<<<
  *         memviewsliceobj = memview
  *         p_src = &memviewsliceobj.from_slice
 */
-  __pyx_t_1 = __Pyx_TypeCheck(((PyObject *)__pyx_v_memview), __pyx_mstate_global->__pyx_memoryviewslice_type); 
+  __pyx_t_1 = __Pyx_TypeCheck(((PyObject *)__pyx_v_memview), __pyx_mstate_global->__pyx_memoryviewslice_type);
   if (__pyx_t_1) {
 
     /* "View.MemoryView":726
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):
  *         memviewsliceobj = memview             # <<<<<<<<<<<<<<
  *         p_src = &memviewsliceobj.from_slice
@@ -12486,7 +12486,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
 
     /* "View.MemoryView":725
  *     assert memview.view.ndim > 0
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):             # <<<<<<<<<<<<<<
  *         memviewsliceobj = memview
  *         p_src = &memviewsliceobj.from_slice
@@ -12499,7 +12499,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
  *     else:
  *         slice_copy(memview, &src)             # <<<<<<<<<<<<<<
  *         p_src = &src
- * 
+ *
 */
   /*else*/ {
     __pyx_memoryview_slice_copy(__pyx_v_memview, (&__pyx_v_src));
@@ -12508,36 +12508,36 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
  *     else:
  *         slice_copy(memview, &src)
  *         p_src = &src             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     __pyx_v_p_src = (&__pyx_v_src);
   }
   __pyx_L3:;
 
   /* "View.MemoryView":736
- * 
- * 
+ *
+ *
  *     dst.memview = p_src.memview             # <<<<<<<<<<<<<<
  *     dst.data = p_src.data
- * 
+ *
 */
   __pyx_t_3 = __pyx_v_p_src->memview;
   __pyx_v_dst.memview = __pyx_t_3;
 
   /* "View.MemoryView":737
- * 
+ *
  *     dst.memview = p_src.memview
  *     dst.data = p_src.data             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_4 = __pyx_v_p_src->data;
   __pyx_v_dst.data = __pyx_t_4;
 
   /* "View.MemoryView":742
- * 
- * 
+ *
+ *
  *     cdef __Pyx_memviewslice *p_dst = &dst             # <<<<<<<<<<<<<<
  *     cdef int *p_suboffset_dim = &suboffset_dim
  *     cdef Py_ssize_t start, stop, step, cindex
@@ -12545,7 +12545,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
   __pyx_v_p_dst = (&__pyx_v_dst);
 
   /* "View.MemoryView":743
- * 
+ *
  *     cdef __Pyx_memviewslice *p_dst = &dst
  *     cdef int *p_suboffset_dim = &suboffset_dim             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t start, stop, step, cindex
@@ -12555,7 +12555,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
 
   /* "View.MemoryView":747
  *     cdef bint have_start, have_stop, have_step
- * 
+ *
  *     for dim, index in enumerate(indices):             # <<<<<<<<<<<<<<
  *         if PyIndex_Check(index):
  *             cindex = index
@@ -12616,7 +12616,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
     __pyx_t_5 = (__pyx_t_5 + 1);
 
     /* "View.MemoryView":748
- * 
+ *
  *     for dim, index in enumerate(indices):
  *         if PyIndex_Check(index):             # <<<<<<<<<<<<<<
  *             cindex = index
@@ -12645,7 +12645,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
       __pyx_t_10 = __pyx_memoryview_slice_memviewslice(__pyx_v_p_dst, (__pyx_v_p_src->shape[__pyx_v_dim]), (__pyx_v_p_src->strides[__pyx_v_dim]), (__pyx_v_p_src->suboffsets[__pyx_v_dim]), __pyx_v_dim, __pyx_v_new_ndim, __pyx_v_p_suboffset_dim, __pyx_v_cindex, 0, 0, 0, 0, 0, 0); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(1, 750, __pyx_L1_error)
 
       /* "View.MemoryView":748
- * 
+ *
  *     for dim, index in enumerate(indices):
  *         if PyIndex_Check(index):             # <<<<<<<<<<<<<<
  *             cindex = index
@@ -12738,7 +12738,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
  *             start = index.start or 0
  *             stop = index.stop or 0             # <<<<<<<<<<<<<<
  *             step = index.step or 0
- * 
+ *
 */
       __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_index, __pyx_mstate_global->__pyx_n_u_stop); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 763, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
@@ -12759,7 +12759,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
  *             start = index.start or 0
  *             stop = index.stop or 0
  *             step = index.step or 0             # <<<<<<<<<<<<<<
- * 
+ *
  *             have_start = index.start is not None
 */
       __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_index, __pyx_mstate_global->__pyx_n_u_step); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 764, __pyx_L1_error)
@@ -12779,7 +12779,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
 
       /* "View.MemoryView":766
  *             step = index.step or 0
- * 
+ *
  *             have_start = index.start is not None             # <<<<<<<<<<<<<<
  *             have_stop = index.stop is not None
  *             have_step = index.step is not None
@@ -12791,11 +12791,11 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
       __pyx_v_have_start = __pyx_t_1;
 
       /* "View.MemoryView":767
- * 
+ *
  *             have_start = index.start is not None
  *             have_stop = index.stop is not None             # <<<<<<<<<<<<<<
  *             have_step = index.step is not None
- * 
+ *
 */
       __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_index, __pyx_mstate_global->__pyx_n_u_stop); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 767, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
@@ -12807,7 +12807,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
  *             have_start = index.start is not None
  *             have_stop = index.stop is not None
  *             have_step = index.step is not None             # <<<<<<<<<<<<<<
- * 
+ *
  *             slice_memviewslice(
 */
       __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_index, __pyx_mstate_global->__pyx_n_u_step); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 768, __pyx_L1_error)
@@ -12818,7 +12818,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
 
       /* "View.MemoryView":770
  *             have_step = index.step is not None
- * 
+ *
  *             slice_memviewslice(             # <<<<<<<<<<<<<<
  *                 p_dst, p_src.shape[dim], p_src.strides[dim], p_src.suboffsets[dim],
  *                 dim, new_ndim, p_suboffset_dim,
@@ -12829,7 +12829,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
  *                 have_start, have_stop, have_step,
  *                 True)
  *             new_ndim += 1             # <<<<<<<<<<<<<<
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):
 */
       __pyx_v_new_ndim = (__pyx_v_new_ndim + 1);
@@ -12838,7 +12838,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
 
     /* "View.MemoryView":747
  *     cdef bint have_start, have_stop, have_step
- * 
+ *
  *     for dim, index in enumerate(indices):             # <<<<<<<<<<<<<<
  *         if PyIndex_Check(index):
  *             cindex = index
@@ -12848,16 +12848,16 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
 
   /* "View.MemoryView":778
  *             new_ndim += 1
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):             # <<<<<<<<<<<<<<
  *         return memoryview_fromslice(dst, new_ndim,
  *                                     memviewsliceobj.to_object_func,
 */
-  __pyx_t_1 = __Pyx_TypeCheck(((PyObject *)__pyx_v_memview), __pyx_mstate_global->__pyx_memoryviewslice_type); 
+  __pyx_t_1 = __Pyx_TypeCheck(((PyObject *)__pyx_v_memview), __pyx_mstate_global->__pyx_memoryviewslice_type);
   if (__pyx_t_1) {
 
     /* "View.MemoryView":779
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):
  *         return memoryview_fromslice(dst, new_ndim,             # <<<<<<<<<<<<<<
  *                                     memviewsliceobj.to_object_func,
@@ -12884,7 +12884,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
     if (unlikely(!__pyx_v_memviewsliceobj)) { __Pyx_RaiseUnboundLocalError("memviewsliceobj"); __PYX_ERR(1, 781, __pyx_L1_error) }
 
     /* "View.MemoryView":779
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):
  *         return memoryview_fromslice(dst, new_ndim,             # <<<<<<<<<<<<<<
  *                                     memviewsliceobj.to_object_func,
@@ -12899,7 +12899,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
 
     /* "View.MemoryView":778
  *             new_ndim += 1
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):             # <<<<<<<<<<<<<<
  *         return memoryview_fromslice(dst, new_ndim,
  *                                     memviewsliceobj.to_object_func,
@@ -12911,7 +12911,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
  *     else:
  *         return memoryview_fromslice(dst, new_ndim, NULL, NULL,             # <<<<<<<<<<<<<<
  *                                     memview.dtype_is_object)
- * 
+ *
 */
   /*else*/ {
     __Pyx_XDECREF((PyObject *)__pyx_r);
@@ -12920,8 +12920,8 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
  *     else:
  *         return memoryview_fromslice(dst, new_ndim, NULL, NULL,
  *                                     memview.dtype_is_object)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_v_dst, __pyx_v_new_ndim, NULL, NULL, __pyx_v_memview->dtype_is_object); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 784, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -12931,7 +12931,7 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
  *     else:
  *         return memoryview_fromslice(dst, new_ndim, NULL, NULL,             # <<<<<<<<<<<<<<
  *                                     memview.dtype_is_object)
- * 
+ *
 */
     if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_mstate_global->__pyx_memoryview_type))))) __PYX_ERR(1, 784, __pyx_L1_error)
     __pyx_r = ((struct __pyx_memoryview_obj *)__pyx_t_2);
@@ -12940,8 +12940,8 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
   }
 
   /* "View.MemoryView":710
- * 
- * 
+ *
+ *
  * @cname('__pyx_memview_slice')             # <<<<<<<<<<<<<<
  * cdef memoryview memview_slice(memoryview memview, object indices):
  *     cdef int new_ndim = 0, suboffset_dim = -1, dim
@@ -12962,8 +12962,8 @@ static struct __pyx_memoryview_obj *__pyx_memview_slice(struct __pyx_memoryview_
 }
 
 /* "View.MemoryView":792
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_slice_memviewslice')             # <<<<<<<<<<<<<<
  * cdef int slice_memviewslice(
  *         __Pyx_memviewslice *dst,
@@ -12983,9 +12983,9 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
   /* "View.MemoryView":813
  *     cdef bint negative_step
- * 
+ *
  *     if not is_slice:             # <<<<<<<<<<<<<<
- * 
+ *
  *         if start < 0:
 */
   __pyx_t_1 = (!__pyx_v_is_slice);
@@ -12993,7 +12993,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
     /* "View.MemoryView":815
  *     if not is_slice:
- * 
+ *
  *         if start < 0:             # <<<<<<<<<<<<<<
  *             start += shape
  *         if not 0 <= start < shape:
@@ -13002,7 +13002,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
     if (__pyx_t_1) {
 
       /* "View.MemoryView":816
- * 
+ *
  *         if start < 0:
  *             start += shape             # <<<<<<<<<<<<<<
  *         if not 0 <= start < shape:
@@ -13012,7 +13012,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
       /* "View.MemoryView":815
  *     if not is_slice:
- * 
+ *
  *         if start < 0:             # <<<<<<<<<<<<<<
  *             start += shape
  *         if not 0 <= start < shape:
@@ -13038,7 +13038,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
  *         if not 0 <= start < shape:
  *             _err_dim(PyExc_IndexError, "Index out of bounds (axis %d)", dim)             # <<<<<<<<<<<<<<
  *     else:
- * 
+ *
 */
       __pyx_t_3 = __pyx_memoryview_err_dim(PyExc_IndexError, __pyx_mstate_global->__pyx_kp_u_Index_out_of_bounds_axis_d, __pyx_v_dim); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(1, 818, __pyx_L1_error)
 
@@ -13053,9 +13053,9 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
     /* "View.MemoryView":813
  *     cdef bint negative_step
- * 
+ *
  *     if not is_slice:             # <<<<<<<<<<<<<<
- * 
+ *
  *         if start < 0:
 */
     goto __pyx_L3;
@@ -13063,7 +13063,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
   /* "View.MemoryView":821
  *     else:
- * 
+ *
  *         if have_step:             # <<<<<<<<<<<<<<
  *             negative_step = step < 0
  *             if step == 0:
@@ -13073,7 +13073,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
     if (__pyx_t_2) {
 
       /* "View.MemoryView":822
- * 
+ *
  *         if have_step:
  *             negative_step = step < 0             # <<<<<<<<<<<<<<
  *             if step == 0:
@@ -13111,7 +13111,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
       /* "View.MemoryView":821
  *     else:
- * 
+ *
  *         if have_step:             # <<<<<<<<<<<<<<
  *             negative_step = step < 0
  *             if step == 0:
@@ -13124,7 +13124,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
  *         else:
  *             negative_step = False             # <<<<<<<<<<<<<<
  *             step = 1
- * 
+ *
 */
     /*else*/ {
       __pyx_v_negative_step = 0;
@@ -13133,16 +13133,16 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
  *         else:
  *             negative_step = False
  *             step = 1             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
       __pyx_v_step = 1;
     }
     __pyx_L6:;
 
     /* "View.MemoryView":830
- * 
- * 
+ *
+ *
  *         if have_start:             # <<<<<<<<<<<<<<
  *             if start < 0:
  *                 start += shape
@@ -13151,7 +13151,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
     if (__pyx_t_2) {
 
       /* "View.MemoryView":831
- * 
+ *
  *         if have_start:
  *             if start < 0:             # <<<<<<<<<<<<<<
  *                 start += shape
@@ -13198,7 +13198,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
         }
 
         /* "View.MemoryView":831
- * 
+ *
  *         if have_start:
  *             if start < 0:             # <<<<<<<<<<<<<<
  *                 start += shape
@@ -13268,8 +13268,8 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
       __pyx_L9:;
 
       /* "View.MemoryView":830
- * 
- * 
+ *
+ *
  *         if have_start:             # <<<<<<<<<<<<<<
  *             if start < 0:
  *                 start += shape
@@ -13310,7 +13310,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
  *                 start = shape - 1
  *             else:
  *                 start = 0             # <<<<<<<<<<<<<<
- * 
+ *
  *         if have_stop:
 */
       /*else*/ {
@@ -13322,7 +13322,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
     /* "View.MemoryView":846
  *                 start = 0
- * 
+ *
  *         if have_stop:             # <<<<<<<<<<<<<<
  *             if stop < 0:
  *                 stop += shape
@@ -13331,7 +13331,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
     if (__pyx_t_2) {
 
       /* "View.MemoryView":847
- * 
+ *
  *         if have_stop:
  *             if stop < 0:             # <<<<<<<<<<<<<<
  *                 stop += shape
@@ -13378,7 +13378,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
         }
 
         /* "View.MemoryView":847
- * 
+ *
  *         if have_stop:
  *             if stop < 0:             # <<<<<<<<<<<<<<
  *                 stop += shape
@@ -13418,7 +13418,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
       /* "View.MemoryView":846
  *                 start = 0
- * 
+ *
  *         if have_stop:             # <<<<<<<<<<<<<<
  *             if stop < 0:
  *                 stop += shape
@@ -13459,8 +13459,8 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
  *                 stop = -1
  *             else:
  *                 stop = shape             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
       /*else*/ {
         __pyx_v_stop = __pyx_v_shape;
@@ -13470,73 +13470,73 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
     __pyx_L13:;
 
     /* "View.MemoryView":861
- * 
+ *
  *         with cython.cdivision(True):
  *             new_shape = (stop - start) // step             # <<<<<<<<<<<<<<
- * 
+ *
  *             if (stop - start) - step * new_shape:
 */
     __pyx_v_new_shape = ((__pyx_v_stop - __pyx_v_start) / __pyx_v_step);
 
     /* "View.MemoryView":863
  *             new_shape = (stop - start) // step
- * 
+ *
  *             if (stop - start) - step * new_shape:             # <<<<<<<<<<<<<<
  *                 new_shape += 1
- * 
+ *
 */
     __pyx_t_2 = (((__pyx_v_stop - __pyx_v_start) - (__pyx_v_step * __pyx_v_new_shape)) != 0);
     if (__pyx_t_2) {
 
       /* "View.MemoryView":864
- * 
+ *
  *             if (stop - start) - step * new_shape:
  *                 new_shape += 1             # <<<<<<<<<<<<<<
- * 
+ *
  *         if new_shape < 0:
 */
       __pyx_v_new_shape = (__pyx_v_new_shape + 1);
 
       /* "View.MemoryView":863
  *             new_shape = (stop - start) // step
- * 
+ *
  *             if (stop - start) - step * new_shape:             # <<<<<<<<<<<<<<
  *                 new_shape += 1
- * 
+ *
 */
     }
 
     /* "View.MemoryView":866
  *                 new_shape += 1
- * 
+ *
  *         if new_shape < 0:             # <<<<<<<<<<<<<<
  *             new_shape = 0
- * 
+ *
 */
     __pyx_t_2 = (__pyx_v_new_shape < 0);
     if (__pyx_t_2) {
 
       /* "View.MemoryView":867
- * 
+ *
  *         if new_shape < 0:
  *             new_shape = 0             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
       __pyx_v_new_shape = 0;
 
       /* "View.MemoryView":866
  *                 new_shape += 1
- * 
+ *
  *         if new_shape < 0:             # <<<<<<<<<<<<<<
  *             new_shape = 0
- * 
+ *
 */
     }
 
     /* "View.MemoryView":870
- * 
- * 
+ *
+ *
  *         dst.strides[new_ndim] = stride * step             # <<<<<<<<<<<<<<
  *         dst.shape[new_ndim] = new_shape
  *         dst.suboffsets[new_ndim] = suboffset
@@ -13544,11 +13544,11 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
     (__pyx_v_dst->strides[__pyx_v_new_ndim]) = (__pyx_v_stride * __pyx_v_step);
 
     /* "View.MemoryView":871
- * 
+ *
  *         dst.strides[new_ndim] = stride * step
  *         dst.shape[new_ndim] = new_shape             # <<<<<<<<<<<<<<
  *         dst.suboffsets[new_ndim] = suboffset
- * 
+ *
 */
     (__pyx_v_dst->shape[__pyx_v_new_ndim]) = __pyx_v_new_shape;
 
@@ -13556,16 +13556,16 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
  *         dst.strides[new_ndim] = stride * step
  *         dst.shape[new_ndim] = new_shape
  *         dst.suboffsets[new_ndim] = suboffset             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     (__pyx_v_dst->suboffsets[__pyx_v_new_ndim]) = __pyx_v_suboffset;
   }
   __pyx_L3:;
 
   /* "View.MemoryView":875
- * 
- * 
+ *
+ *
  *     if suboffset_dim[0] < 0:             # <<<<<<<<<<<<<<
  *         dst.data += start * stride
  *     else:
@@ -13574,7 +13574,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
   if (__pyx_t_2) {
 
     /* "View.MemoryView":876
- * 
+ *
  *     if suboffset_dim[0] < 0:
  *         dst.data += start * stride             # <<<<<<<<<<<<<<
  *     else:
@@ -13583,8 +13583,8 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
     __pyx_v_dst->data = (__pyx_v_dst->data + (__pyx_v_start * __pyx_v_stride));
 
     /* "View.MemoryView":875
- * 
- * 
+ *
+ *
  *     if suboffset_dim[0] < 0:             # <<<<<<<<<<<<<<
  *         dst.data += start * stride
  *     else:
@@ -13596,7 +13596,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
  *         dst.data += start * stride
  *     else:
  *         dst.suboffsets[suboffset_dim[0]] += start * stride             # <<<<<<<<<<<<<<
- * 
+ *
  *     if suboffset >= 0:
 */
   /*else*/ {
@@ -13607,7 +13607,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
   /* "View.MemoryView":880
  *         dst.suboffsets[suboffset_dim[0]] += start * stride
- * 
+ *
  *     if suboffset >= 0:             # <<<<<<<<<<<<<<
  *         if not is_slice:
  *             if new_ndim == 0:
@@ -13616,7 +13616,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
   if (__pyx_t_2) {
 
     /* "View.MemoryView":881
- * 
+ *
  *     if suboffset >= 0:
  *         if not is_slice:             # <<<<<<<<<<<<<<
  *             if new_ndim == 0:
@@ -13675,7 +13675,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
       __pyx_L22:;
 
       /* "View.MemoryView":881
- * 
+ *
  *     if suboffset >= 0:
  *         if not is_slice:             # <<<<<<<<<<<<<<
  *             if new_ndim == 0:
@@ -13688,7 +13688,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
  *                                      "must be indexed and not sliced", dim)
  *         else:
  *             suboffset_dim[0] = new_ndim             # <<<<<<<<<<<<<<
- * 
+ *
  *     return 0
 */
     /*else*/ {
@@ -13698,7 +13698,7 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
     /* "View.MemoryView":880
  *         dst.suboffsets[suboffset_dim[0]] += start * stride
- * 
+ *
  *     if suboffset >= 0:             # <<<<<<<<<<<<<<
  *         if not is_slice:
  *             if new_ndim == 0:
@@ -13707,17 +13707,17 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 
   /* "View.MemoryView":890
  *             suboffset_dim[0] = new_ndim
- * 
+ *
  *     return 0             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = 0;
   goto __pyx_L0;
 
   /* "View.MemoryView":792
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_slice_memviewslice')             # <<<<<<<<<<<<<<
  * cdef int slice_memviewslice(
  *         __Pyx_memviewslice *dst,
@@ -13734,8 +13734,8 @@ static int __pyx_memoryview_slice_memviewslice(__Pyx_memviewslice *__pyx_v_dst, 
 }
 
 /* "View.MemoryView":895
- * 
- * 
+ *
+ *
  * @cname('__pyx_pybuffer_index')             # <<<<<<<<<<<<<<
  * cdef char *pybuffer_index(Py_buffer *view, char *bufp, Py_ssize_t index,
  *                           Py_ssize_t dim) except NULL:
@@ -13773,14 +13773,14 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
  *     cdef Py_ssize_t shape, stride, suboffset = -1
  *     cdef Py_ssize_t itemsize = view.itemsize             # <<<<<<<<<<<<<<
  *     cdef char *resultp
- * 
+ *
 */
   __pyx_t_1 = __pyx_v_view->itemsize;
   __pyx_v_itemsize = __pyx_t_1;
 
   /* "View.MemoryView":902
  *     cdef char *resultp
- * 
+ *
  *     if view.ndim == 0:             # <<<<<<<<<<<<<<
  *         shape = view.len // itemsize
  *         stride = itemsize
@@ -13789,7 +13789,7 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
   if (__pyx_t_2) {
 
     /* "View.MemoryView":903
- * 
+ *
  *     if view.ndim == 0:
  *         shape = view.len // itemsize             # <<<<<<<<<<<<<<
  *         stride = itemsize
@@ -13816,7 +13816,7 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
 
     /* "View.MemoryView":902
  *     cdef char *resultp
- * 
+ *
  *     if view.ndim == 0:             # <<<<<<<<<<<<<<
  *         shape = view.len // itemsize
  *         stride = itemsize
@@ -13848,7 +13848,7 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
  *         stride = view.strides[dim]
  *         if view.suboffsets != NULL:             # <<<<<<<<<<<<<<
  *             suboffset = view.suboffsets[dim]
- * 
+ *
 */
     __pyx_t_2 = (__pyx_v_view->suboffsets != NULL);
     if (__pyx_t_2) {
@@ -13857,7 +13857,7 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
  *         stride = view.strides[dim]
  *         if view.suboffsets != NULL:
  *             suboffset = view.suboffsets[dim]             # <<<<<<<<<<<<<<
- * 
+ *
  *     if index < 0:
 */
       __pyx_v_suboffset = (__pyx_v_view->suboffsets[__pyx_v_dim]);
@@ -13867,7 +13867,7 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
  *         stride = view.strides[dim]
  *         if view.suboffsets != NULL:             # <<<<<<<<<<<<<<
  *             suboffset = view.suboffsets[dim]
- * 
+ *
 */
     }
   }
@@ -13875,7 +13875,7 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
 
   /* "View.MemoryView":911
  *             suboffset = view.suboffsets[dim]
- * 
+ *
  *     if index < 0:             # <<<<<<<<<<<<<<
  *         index += view.shape[dim]
  *         if index < 0:
@@ -13884,7 +13884,7 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
   if (__pyx_t_2) {
 
     /* "View.MemoryView":912
- * 
+ *
  *     if index < 0:
  *         index += view.shape[dim]             # <<<<<<<<<<<<<<
  *         if index < 0:
@@ -13897,7 +13897,7 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
  *         index += view.shape[dim]
  *         if index < 0:             # <<<<<<<<<<<<<<
  *             raise IndexError, f"Out of bounds on buffer access (axis {dim})"
- * 
+ *
 */
     __pyx_t_2 = (__pyx_v_index < 0);
     if (unlikely(__pyx_t_2)) {
@@ -13906,7 +13906,7 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
  *         index += view.shape[dim]
  *         if index < 0:
  *             raise IndexError, f"Out of bounds on buffer access (axis {dim})"             # <<<<<<<<<<<<<<
- * 
+ *
  *     if index >= shape:
 */
       __pyx_t_3 = __Pyx_PyUnicode_From_Py_ssize_t(__pyx_v_dim, 0, ' ', 'd'); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 914, __pyx_L1_error)
@@ -13927,13 +13927,13 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
  *         index += view.shape[dim]
  *         if index < 0:             # <<<<<<<<<<<<<<
  *             raise IndexError, f"Out of bounds on buffer access (axis {dim})"
- * 
+ *
 */
     }
 
     /* "View.MemoryView":911
  *             suboffset = view.suboffsets[dim]
- * 
+ *
  *     if index < 0:             # <<<<<<<<<<<<<<
  *         index += view.shape[dim]
  *         if index < 0:
@@ -13942,19 +13942,19 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
 
   /* "View.MemoryView":916
  *             raise IndexError, f"Out of bounds on buffer access (axis {dim})"
- * 
+ *
  *     if index >= shape:             # <<<<<<<<<<<<<<
  *         raise IndexError, f"Out of bounds on buffer access (axis {dim})"
- * 
+ *
 */
   __pyx_t_2 = (__pyx_v_index >= __pyx_v_shape);
   if (unlikely(__pyx_t_2)) {
 
     /* "View.MemoryView":917
- * 
+ *
  *     if index >= shape:
  *         raise IndexError, f"Out of bounds on buffer access (axis {dim})"             # <<<<<<<<<<<<<<
- * 
+ *
  *     resultp = bufp + index * stride
 */
     __pyx_t_5 = __Pyx_PyUnicode_From_Py_ssize_t(__pyx_v_dim, 0, ' ', 'd'); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 917, __pyx_L1_error)
@@ -13972,16 +13972,16 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
 
     /* "View.MemoryView":916
  *             raise IndexError, f"Out of bounds on buffer access (axis {dim})"
- * 
+ *
  *     if index >= shape:             # <<<<<<<<<<<<<<
  *         raise IndexError, f"Out of bounds on buffer access (axis {dim})"
- * 
+ *
 */
   }
 
   /* "View.MemoryView":919
  *         raise IndexError, f"Out of bounds on buffer access (axis {dim})"
- * 
+ *
  *     resultp = bufp + index * stride             # <<<<<<<<<<<<<<
  *     if suboffset >= 0:
  *         resultp = (<char **> resultp)[0] + suboffset
@@ -13989,11 +13989,11 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
   __pyx_v_resultp = (__pyx_v_bufp + (__pyx_v_index * __pyx_v_stride));
 
   /* "View.MemoryView":920
- * 
+ *
  *     resultp = bufp + index * stride
  *     if suboffset >= 0:             # <<<<<<<<<<<<<<
  *         resultp = (<char **> resultp)[0] + suboffset
- * 
+ *
 */
   __pyx_t_2 = (__pyx_v_suboffset >= 0);
   if (__pyx_t_2) {
@@ -14002,33 +14002,33 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
  *     resultp = bufp + index * stride
  *     if suboffset >= 0:
  *         resultp = (<char **> resultp)[0] + suboffset             # <<<<<<<<<<<<<<
- * 
+ *
  *     return resultp
 */
     __pyx_v_resultp = ((((char **)__pyx_v_resultp)[0]) + __pyx_v_suboffset);
 
     /* "View.MemoryView":920
- * 
+ *
  *     resultp = bufp + index * stride
  *     if suboffset >= 0:             # <<<<<<<<<<<<<<
  *         resultp = (<char **> resultp)[0] + suboffset
- * 
+ *
 */
   }
 
   /* "View.MemoryView":923
  *         resultp = (<char **> resultp)[0] + suboffset
- * 
+ *
  *     return resultp             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = __pyx_v_resultp;
   goto __pyx_L0;
 
   /* "View.MemoryView":895
- * 
- * 
+ *
+ *
  * @cname('__pyx_pybuffer_index')             # <<<<<<<<<<<<<<
  * cdef char *pybuffer_index(Py_buffer *view, char *bufp, Py_ssize_t index,
  *                           Py_ssize_t dim) except NULL:
@@ -14046,8 +14046,8 @@ static char *__pyx_pybuffer_index(Py_buffer *__pyx_v_view, char *__pyx_v_bufp, P
 }
 
 /* "View.MemoryView":928
- * 
- * 
+ *
+ *
  * @cname('__pyx_memslice_transpose')             # <<<<<<<<<<<<<<
  * cdef int transpose_memslice(__Pyx_memviewslice *memslice) except -1 nogil:
  *     cdef int ndim = memslice.memview.view.ndim
@@ -14078,7 +14078,7 @@ static int __pyx_memslice_transpose(__Pyx_memviewslice *__pyx_v_memslice) {
  * @cname('__pyx_memslice_transpose')
  * cdef int transpose_memslice(__Pyx_memviewslice *memslice) except -1 nogil:
  *     cdef int ndim = memslice.memview.view.ndim             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef Py_ssize_t *shape = memslice.shape
 */
   __pyx_t_1 = __pyx_v_memslice->memview->view.ndim;
@@ -14086,26 +14086,26 @@ static int __pyx_memslice_transpose(__Pyx_memviewslice *__pyx_v_memslice) {
 
   /* "View.MemoryView":932
  *     cdef int ndim = memslice.memview.view.ndim
- * 
+ *
  *     cdef Py_ssize_t *shape = memslice.shape             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t *strides = memslice.strides
- * 
+ *
 */
   __pyx_t_2 = __pyx_v_memslice->shape;
   __pyx_v_shape = __pyx_t_2;
 
   /* "View.MemoryView":933
- * 
+ *
  *     cdef Py_ssize_t *shape = memslice.shape
  *     cdef Py_ssize_t *strides = memslice.strides             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_2 = __pyx_v_memslice->strides;
   __pyx_v_strides = __pyx_t_2;
 
   /* "View.MemoryView":937
- * 
+ *
  *     cdef int i, j
  *     for i in range(ndim // 2):             # <<<<<<<<<<<<<<
  *         j = ndim - 1 - i
@@ -14130,7 +14130,7 @@ static int __pyx_memslice_transpose(__Pyx_memviewslice *__pyx_v_memslice) {
  *         j = ndim - 1 - i
  *         strides[i], strides[j] = strides[j], strides[i]             # <<<<<<<<<<<<<<
  *         shape[i], shape[j] = shape[j], shape[i]
- * 
+ *
 */
     __pyx_t_5 = (__pyx_v_strides[__pyx_v_j]);
     __pyx_t_6 = (__pyx_v_strides[__pyx_v_i]);
@@ -14141,7 +14141,7 @@ static int __pyx_memslice_transpose(__Pyx_memviewslice *__pyx_v_memslice) {
  *         j = ndim - 1 - i
  *         strides[i], strides[j] = strides[j], strides[i]
  *         shape[i], shape[j] = shape[j], shape[i]             # <<<<<<<<<<<<<<
- * 
+ *
  *         if memslice.suboffsets[i] >= 0 or memslice.suboffsets[j] >= 0:
 */
     __pyx_t_6 = (__pyx_v_shape[__pyx_v_j]);
@@ -14151,10 +14151,10 @@ static int __pyx_memslice_transpose(__Pyx_memviewslice *__pyx_v_memslice) {
 
     /* "View.MemoryView":942
  *         shape[i], shape[j] = shape[j], shape[i]
- * 
+ *
  *         if memslice.suboffsets[i] >= 0 or memslice.suboffsets[j] >= 0:             # <<<<<<<<<<<<<<
  *             _err(PyExc_ValueError, "Cannot transpose memoryview with indirect dimensions")
- * 
+ *
 */
     __pyx_t_8 = ((__pyx_v_memslice->suboffsets[__pyx_v_i]) >= 0);
     if (!__pyx_t_8) {
@@ -14168,37 +14168,37 @@ static int __pyx_memslice_transpose(__Pyx_memviewslice *__pyx_v_memslice) {
     if (__pyx_t_7) {
 
       /* "View.MemoryView":943
- * 
+ *
  *         if memslice.suboffsets[i] >= 0 or memslice.suboffsets[j] >= 0:
  *             _err(PyExc_ValueError, "Cannot transpose memoryview with indirect dimensions")             # <<<<<<<<<<<<<<
- * 
+ *
  *     return 0
 */
       __pyx_t_9 = __pyx_memoryview_err(PyExc_ValueError, __pyx_mstate_global->__pyx_kp_u_Cannot_transpose_memoryview_with); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(1, 943, __pyx_L1_error)
 
       /* "View.MemoryView":942
  *         shape[i], shape[j] = shape[j], shape[i]
- * 
+ *
  *         if memslice.suboffsets[i] >= 0 or memslice.suboffsets[j] >= 0:             # <<<<<<<<<<<<<<
  *             _err(PyExc_ValueError, "Cannot transpose memoryview with indirect dimensions")
- * 
+ *
 */
     }
   }
 
   /* "View.MemoryView":945
  *             _err(PyExc_ValueError, "Cannot transpose memoryview with indirect dimensions")
- * 
+ *
  *     return 0             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = 0;
   goto __pyx_L0;
 
   /* "View.MemoryView":928
- * 
- * 
+ *
+ *
  * @cname('__pyx_memslice_transpose')             # <<<<<<<<<<<<<<
  * cdef int transpose_memslice(__Pyx_memviewslice *memslice) except -1 nogil:
  *     cdef int ndim = memslice.memview.view.ndim
@@ -14216,10 +14216,10 @@ static int __pyx_memslice_transpose(__Pyx_memviewslice *__pyx_v_memslice) {
 
 /* "View.MemoryView":963
  *     cdef int (*to_dtype_func)(char *, object) except 0
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         __PYX_XCLEAR_MEMVIEW(&self.from_slice, 1)
- * 
+ *
 */
 
 /* Python wrapper */
@@ -14238,20 +14238,20 @@ static void __pyx_memoryviewslice___dealloc__(PyObject *__pyx_v_self) {
 static void __pyx_memoryviewslice___pyx_pf_15View_dot_MemoryView_16_memoryviewslice___dealloc__(struct __pyx_memoryviewslice_obj *__pyx_v_self) {
 
   /* "View.MemoryView":964
- * 
+ *
  *     def __dealloc__(self):
  *         __PYX_XCLEAR_MEMVIEW(&self.from_slice, 1)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef convert_item_to_object(self, char *itemp):
 */
   __PYX_XCLEAR_MEMVIEW((&__pyx_v_self->from_slice), 1);
 
   /* "View.MemoryView":963
  *     cdef int (*to_dtype_func)(char *, object) except 0
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         __PYX_XCLEAR_MEMVIEW(&self.from_slice, 1)
- * 
+ *
 */
 
   /* function exit code */
@@ -14259,7 +14259,7 @@ static void __pyx_memoryviewslice___pyx_pf_15View_dot_MemoryView_16_memoryviewsl
 
 /* "View.MemoryView":966
  *         __PYX_XCLEAR_MEMVIEW(&self.from_slice, 1)
- * 
+ *
  *     cdef convert_item_to_object(self, char *itemp):             # <<<<<<<<<<<<<<
  *         if self.to_object_func != NULL:
  *             return self.to_object_func(itemp)
@@ -14276,7 +14276,7 @@ static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memor
   __Pyx_RefNannySetupContext("convert_item_to_object", 0);
 
   /* "View.MemoryView":967
- * 
+ *
  *     cdef convert_item_to_object(self, char *itemp):
  *         if self.to_object_func != NULL:             # <<<<<<<<<<<<<<
  *             return self.to_object_func(itemp)
@@ -14300,7 +14300,7 @@ static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memor
     goto __pyx_L0;
 
     /* "View.MemoryView":967
- * 
+ *
  *     cdef convert_item_to_object(self, char *itemp):
  *         if self.to_object_func != NULL:             # <<<<<<<<<<<<<<
  *             return self.to_object_func(itemp)
@@ -14312,7 +14312,7 @@ static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memor
  *             return self.to_object_func(itemp)
  *         else:
  *             return memoryview.convert_item_to_object(self, itemp)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef assign_item_from_object(self, char *itemp, object value):
 */
   /*else*/ {
@@ -14326,7 +14326,7 @@ static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memor
 
   /* "View.MemoryView":966
  *         __PYX_XCLEAR_MEMVIEW(&self.from_slice, 1)
- * 
+ *
  *     cdef convert_item_to_object(self, char *itemp):             # <<<<<<<<<<<<<<
  *         if self.to_object_func != NULL:
  *             return self.to_object_func(itemp)
@@ -14345,7 +14345,7 @@ static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memor
 
 /* "View.MemoryView":972
  *             return memoryview.convert_item_to_object(self, itemp)
- * 
+ *
  *     cdef assign_item_from_object(self, char *itemp, object value):             # <<<<<<<<<<<<<<
  *         if self.to_dtype_func != NULL:
  *             self.to_dtype_func(itemp, value)
@@ -14363,7 +14363,7 @@ static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memo
   __Pyx_RefNannySetupContext("assign_item_from_object", 0);
 
   /* "View.MemoryView":973
- * 
+ *
  *     cdef assign_item_from_object(self, char *itemp, object value):
  *         if self.to_dtype_func != NULL:             # <<<<<<<<<<<<<<
  *             self.to_dtype_func(itemp, value)
@@ -14382,7 +14382,7 @@ static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memo
     __pyx_t_2 = __pyx_v_self->to_dtype_func(__pyx_v_itemp, __pyx_v_value); if (unlikely(__pyx_t_2 == ((int)0))) __PYX_ERR(1, 974, __pyx_L1_error)
 
     /* "View.MemoryView":973
- * 
+ *
  *     cdef assign_item_from_object(self, char *itemp, object value):
  *         if self.to_dtype_func != NULL:             # <<<<<<<<<<<<<<
  *             self.to_dtype_func(itemp, value)
@@ -14395,7 +14395,7 @@ static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memo
  *             self.to_dtype_func(itemp, value)
  *         else:
  *             memoryview.assign_item_from_object(self, itemp, value)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef _get_base(self):
 */
   /*else*/ {
@@ -14407,7 +14407,7 @@ static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memo
 
   /* "View.MemoryView":972
  *             return memoryview.convert_item_to_object(self, itemp)
- * 
+ *
  *     cdef assign_item_from_object(self, char *itemp, object value):             # <<<<<<<<<<<<<<
  *         if self.to_dtype_func != NULL:
  *             self.to_dtype_func(itemp, value)
@@ -14428,10 +14428,10 @@ static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memo
 
 /* "View.MemoryView":978
  *             memoryview.assign_item_from_object(self, itemp, value)
- * 
+ *
  *     cdef _get_base(self):             # <<<<<<<<<<<<<<
  *         return self.from_object
- * 
+ *
 */
 
 static PyObject *__pyx_memoryviewslice__get_base(struct __pyx_memoryviewslice_obj *__pyx_v_self) {
@@ -14440,11 +14440,11 @@ static PyObject *__pyx_memoryviewslice__get_base(struct __pyx_memoryviewslice_ob
   __Pyx_RefNannySetupContext("_get_base", 0);
 
   /* "View.MemoryView":979
- * 
+ *
  *     cdef _get_base(self):
  *         return self.from_object             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_self->from_object);
@@ -14453,10 +14453,10 @@ static PyObject *__pyx_memoryviewslice__get_base(struct __pyx_memoryviewslice_ob
 
   /* "View.MemoryView":978
  *             memoryview.assign_item_from_object(self, itemp, value)
- * 
+ *
  *     cdef _get_base(self):             # <<<<<<<<<<<<<<
  *         return self.from_object
- * 
+ *
 */
 
   /* function exit code */
@@ -14473,14 +14473,14 @@ static PyObject *__pyx_memoryviewslice__get_base(struct __pyx_memoryviewslice_ob
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw___pyx_memoryviewslice_1__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_memoryviewslice_1__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_pw___pyx_memoryviewslice_1__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_memoryviewslice_1__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -14553,14 +14553,14 @@ static PyObject *__pyx_pf___pyx_memoryviewslice___reduce_cython__(CYTHON_UNUSED 
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw___pyx_memoryviewslice_3__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_memoryviewslice_3__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyObject *__pyx_pw___pyx_memoryviewslice_3__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw___pyx_memoryviewslice_3__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -14670,7 +14670,7 @@ static PyObject *__pyx_pf___pyx_memoryviewslice_2__setstate_cython__(CYTHON_UNUS
 
 /* "View.MemoryView":998
  *     pass  # ignore failure, it's a minor issue
- * 
+ *
  * @cname('__pyx_memoryview_fromslice')             # <<<<<<<<<<<<<<
  * cdef memoryview_fromslice(__Pyx_memviewslice memviewslice,
  *                           int ndim,
@@ -14698,20 +14698,20 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
   /* "View.MemoryView":1007
  *     cdef _memoryviewslice result
- * 
+ *
  *     if <PyObject *> memviewslice.memview == Py_None:             # <<<<<<<<<<<<<<
  *         return None
- * 
+ *
 */
   __pyx_t_1 = (((PyObject *)__pyx_v_memviewslice.memview) == Py_None);
   if (__pyx_t_1) {
 
     /* "View.MemoryView":1008
- * 
+ *
  *     if <PyObject *> memviewslice.memview == Py_None:
  *         return None             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     __Pyx_XDECREF(__pyx_r);
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
@@ -14719,18 +14719,18 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
     /* "View.MemoryView":1007
  *     cdef _memoryviewslice result
- * 
+ *
  *     if <PyObject *> memviewslice.memview == Py_None:             # <<<<<<<<<<<<<<
  *         return None
- * 
+ *
 */
   }
 
   /* "View.MemoryView":1013
- * 
- * 
+ *
+ *
  *     result = _memoryviewslice.__new__(_memoryviewslice, None, 0, dtype_is_object)             # <<<<<<<<<<<<<<
- * 
+ *
  *     result.from_slice = memviewslice
 */
   __pyx_t_2 = __Pyx_PyBool_FromLong(__pyx_v_dtype_is_object); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1013, __pyx_L1_error)
@@ -14754,28 +14754,28 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
   /* "View.MemoryView":1015
  *     result = _memoryviewslice.__new__(_memoryviewslice, None, 0, dtype_is_object)
- * 
+ *
  *     result.from_slice = memviewslice             # <<<<<<<<<<<<<<
  *     __PYX_INC_MEMVIEW(&memviewslice, 1)
- * 
+ *
 */
   __pyx_v_result->from_slice = __pyx_v_memviewslice;
 
   /* "View.MemoryView":1016
- * 
+ *
  *     result.from_slice = memviewslice
  *     __PYX_INC_MEMVIEW(&memviewslice, 1)             # <<<<<<<<<<<<<<
- * 
+ *
  *     result.from_object = (<memoryview> memviewslice.memview)._get_base()
 */
   __PYX_INC_MEMVIEW((&__pyx_v_memviewslice), 1);
 
   /* "View.MemoryView":1018
  *     __PYX_INC_MEMVIEW(&memviewslice, 1)
- * 
+ *
  *     result.from_object = (<memoryview> memviewslice.memview)._get_base()             # <<<<<<<<<<<<<<
  *     result.typeinfo = memviewslice.memview.typeinfo
- * 
+ *
 */
   __pyx_t_2 = ((struct __pyx_vtabstruct_memoryview *)((struct __pyx_memoryview_obj *)__pyx_v_memviewslice.memview)->__pyx_vtab)->_get_base(((struct __pyx_memoryview_obj *)__pyx_v_memviewslice.memview)); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1018, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -14786,10 +14786,10 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
   __pyx_t_2 = 0;
 
   /* "View.MemoryView":1019
- * 
+ *
  *     result.from_object = (<memoryview> memviewslice.memview)._get_base()
  *     result.typeinfo = memviewslice.memview.typeinfo             # <<<<<<<<<<<<<<
- * 
+ *
  *     result.view = memviewslice.memview.view
 */
   __pyx_t_4 = __pyx_v_memviewslice.memview->typeinfo;
@@ -14797,7 +14797,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
   /* "View.MemoryView":1021
  *     result.typeinfo = memviewslice.memview.typeinfo
- * 
+ *
  *     result.view = memviewslice.memview.view             # <<<<<<<<<<<<<<
  *     result.view.buf = <void *> memviewslice.data
  *     result.view.ndim = ndim
@@ -14806,7 +14806,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
   __pyx_v_result->__pyx_base.view = __pyx_t_5;
 
   /* "View.MemoryView":1022
- * 
+ *
  *     result.view = memviewslice.memview.view
  *     result.view.buf = <void *> memviewslice.data             # <<<<<<<<<<<<<<
  *     result.view.ndim = ndim
@@ -14828,7 +14828,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
  *     result.view.ndim = ndim
  *     (<__pyx_buffer *> &result.view).obj = Py_None             # <<<<<<<<<<<<<<
  *     Py_INCREF(Py_None)
- * 
+ *
 */
   ((Py_buffer *)(&__pyx_v_result->__pyx_base.view))->obj = Py_None;
 
@@ -14836,14 +14836,14 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
  *     result.view.ndim = ndim
  *     (<__pyx_buffer *> &result.view).obj = Py_None
  *     Py_INCREF(Py_None)             # <<<<<<<<<<<<<<
- * 
+ *
  *     if (<memoryview>memviewslice.memview).flags & PyBUF_WRITABLE:
 */
   Py_INCREF(Py_None);
 
   /* "View.MemoryView":1027
  *     Py_INCREF(Py_None)
- * 
+ *
  *     if (<memoryview>memviewslice.memview).flags & PyBUF_WRITABLE:             # <<<<<<<<<<<<<<
  *         result.flags = PyBUF_RECORDS
  *     else:
@@ -14852,7 +14852,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
   if (__pyx_t_1) {
 
     /* "View.MemoryView":1028
- * 
+ *
  *     if (<memoryview>memviewslice.memview).flags & PyBUF_WRITABLE:
  *         result.flags = PyBUF_RECORDS             # <<<<<<<<<<<<<<
  *     else:
@@ -14862,7 +14862,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
     /* "View.MemoryView":1027
  *     Py_INCREF(Py_None)
- * 
+ *
  *     if (<memoryview>memviewslice.memview).flags & PyBUF_WRITABLE:             # <<<<<<<<<<<<<<
  *         result.flags = PyBUF_RECORDS
  *     else:
@@ -14874,7 +14874,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
  *         result.flags = PyBUF_RECORDS
  *     else:
  *         result.flags = PyBUF_RECORDS_RO             # <<<<<<<<<<<<<<
- * 
+ *
  *     result.view.shape = <Py_ssize_t *> result.from_slice.shape
 */
   /*else*/ {
@@ -14884,25 +14884,25 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
   /* "View.MemoryView":1032
  *         result.flags = PyBUF_RECORDS_RO
- * 
+ *
  *     result.view.shape = <Py_ssize_t *> result.from_slice.shape             # <<<<<<<<<<<<<<
  *     result.view.strides = <Py_ssize_t *> result.from_slice.strides
- * 
+ *
 */
   __pyx_v_result->__pyx_base.view.shape = ((Py_ssize_t *)__pyx_v_result->from_slice.shape);
 
   /* "View.MemoryView":1033
- * 
+ *
  *     result.view.shape = <Py_ssize_t *> result.from_slice.shape
  *     result.view.strides = <Py_ssize_t *> result.from_slice.strides             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_v_result->__pyx_base.view.strides = ((Py_ssize_t *)__pyx_v_result->from_slice.strides);
 
   /* "View.MemoryView":1036
- * 
- * 
+ *
+ *
  *     result.view.suboffsets = NULL             # <<<<<<<<<<<<<<
  *     for suboffset in result.from_slice.suboffsets[:ndim]:
  *         if suboffset >= 0:
@@ -14910,7 +14910,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
   __pyx_v_result->__pyx_base.view.suboffsets = NULL;
 
   /* "View.MemoryView":1037
- * 
+ *
  *     result.view.suboffsets = NULL
  *     for suboffset in result.from_slice.suboffsets[:ndim]:             # <<<<<<<<<<<<<<
  *         if suboffset >= 0:
@@ -14936,7 +14936,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
  *         if suboffset >= 0:
  *             result.view.suboffsets = <Py_ssize_t *> result.from_slice.suboffsets             # <<<<<<<<<<<<<<
  *             break
- * 
+ *
 */
       __pyx_v_result->__pyx_base.view.suboffsets = ((Py_ssize_t *)__pyx_v_result->from_slice.suboffsets);
 
@@ -14944,7 +14944,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
  *         if suboffset >= 0:
  *             result.view.suboffsets = <Py_ssize_t *> result.from_slice.suboffsets
  *             break             # <<<<<<<<<<<<<<
- * 
+ *
  *     result.view.len = result.view.itemsize
 */
       goto __pyx_L6_break;
@@ -14962,7 +14962,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
   /* "View.MemoryView":1042
  *             break
- * 
+ *
  *     result.view.len = result.view.itemsize             # <<<<<<<<<<<<<<
  *     for length in result.view.shape[:ndim]:
  *         result.view.len *= length
@@ -14971,11 +14971,11 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
   __pyx_v_result->__pyx_base.view.len = __pyx_t_9;
 
   /* "View.MemoryView":1043
- * 
+ *
  *     result.view.len = result.view.itemsize
  *     for length in result.view.shape[:ndim]:             # <<<<<<<<<<<<<<
  *         result.view.len *= length
- * 
+ *
 */
   __pyx_t_7 = (__pyx_v_result->__pyx_base.view.shape + __pyx_v_ndim);
   for (__pyx_t_8 = __pyx_v_result->__pyx_base.view.shape; __pyx_t_8 < __pyx_t_7; __pyx_t_8++) {
@@ -14989,7 +14989,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
  *     result.view.len = result.view.itemsize
  *     for length in result.view.shape[:ndim]:
  *         result.view.len *= length             # <<<<<<<<<<<<<<
- * 
+ *
  *     result.to_object_func = to_object_func
 */
     __pyx_t_2 = PyLong_FromSsize_t(__pyx_v_result->__pyx_base.view.len); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1044, __pyx_L1_error)
@@ -15004,27 +15004,27 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
   /* "View.MemoryView":1046
  *         result.view.len *= length
- * 
+ *
  *     result.to_object_func = to_object_func             # <<<<<<<<<<<<<<
  *     result.to_dtype_func = to_dtype_func
- * 
+ *
 */
   __pyx_v_result->to_object_func = __pyx_v_to_object_func;
 
   /* "View.MemoryView":1047
- * 
+ *
  *     result.to_object_func = to_object_func
  *     result.to_dtype_func = to_dtype_func             # <<<<<<<<<<<<<<
- * 
+ *
  *     return result
 */
   __pyx_v_result->to_dtype_func = __pyx_v_to_dtype_func;
 
   /* "View.MemoryView":1049
  *     result.to_dtype_func = to_dtype_func
- * 
+ *
  *     return result             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_get_slice_from_memoryview')
 */
   __Pyx_XDECREF(__pyx_r);
@@ -15034,7 +15034,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
   /* "View.MemoryView":998
  *     pass  # ignore failure, it's a minor issue
- * 
+ *
  * @cname('__pyx_memoryview_fromslice')             # <<<<<<<<<<<<<<
  * cdef memoryview_fromslice(__Pyx_memviewslice memviewslice,
  *                           int ndim,
@@ -15056,7 +15056,7 @@ static PyObject *__pyx_memoryview_fromslice(__Pyx_memviewslice __pyx_v_memviewsl
 
 /* "View.MemoryView":1051
  *     return result
- * 
+ *
  * @cname('__pyx_memoryview_get_slice_from_memoryview')             # <<<<<<<<<<<<<<
  * cdef __Pyx_memviewslice *get_slice_from_memview(memoryview memview,
  *                                                    __Pyx_memviewslice *mslice) except NULL:
@@ -15080,7 +15080,7 @@ static __Pyx_memviewslice *__pyx_memoryview_get_slice_from_memoryview(struct __p
  *         obj = memview
  *         return &obj.from_slice
 */
-  __pyx_t_1 = __Pyx_TypeCheck(((PyObject *)__pyx_v_memview), __pyx_mstate_global->__pyx_memoryviewslice_type); 
+  __pyx_t_1 = __Pyx_TypeCheck(((PyObject *)__pyx_v_memview), __pyx_mstate_global->__pyx_memoryviewslice_type);
   if (__pyx_t_1) {
 
     /* "View.MemoryView":1056
@@ -15120,7 +15120,7 @@ static __Pyx_memviewslice *__pyx_memoryview_get_slice_from_memoryview(struct __p
  *     else:
  *         slice_copy(memview, mslice)             # <<<<<<<<<<<<<<
  *         return mslice
- * 
+ *
 */
   /*else*/ {
     __pyx_memoryview_slice_copy(__pyx_v_memview, __pyx_v_mslice);
@@ -15129,7 +15129,7 @@ static __Pyx_memviewslice *__pyx_memoryview_get_slice_from_memoryview(struct __p
  *     else:
  *         slice_copy(memview, mslice)
  *         return mslice             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_slice_copy')
 */
     __pyx_r = __pyx_v_mslice;
@@ -15138,7 +15138,7 @@ static __Pyx_memviewslice *__pyx_memoryview_get_slice_from_memoryview(struct __p
 
   /* "View.MemoryView":1051
  *     return result
- * 
+ *
  * @cname('__pyx_memoryview_get_slice_from_memoryview')             # <<<<<<<<<<<<<<
  * cdef __Pyx_memviewslice *get_slice_from_memview(memoryview memview,
  *                                                    __Pyx_memviewslice *mslice) except NULL:
@@ -15157,7 +15157,7 @@ static __Pyx_memviewslice *__pyx_memoryview_get_slice_from_memoryview(struct __p
 
 /* "View.MemoryView":1062
  *         return mslice
- * 
+ *
  * @cname('__pyx_memoryview_slice_copy')             # <<<<<<<<<<<<<<
  * cdef void slice_copy(memoryview memview, __Pyx_memviewslice *dst) noexcept:
  *     cdef int dim
@@ -15177,7 +15177,7 @@ static void __pyx_memoryview_slice_copy(struct __pyx_memoryview_obj *__pyx_v_mem
 
   /* "View.MemoryView":1067
  *     cdef (Py_ssize_t*) shape, strides, suboffsets
- * 
+ *
  *     shape = memview.view.shape             # <<<<<<<<<<<<<<
  *     strides = memview.view.strides
  *     suboffsets = memview.view.suboffsets
@@ -15186,11 +15186,11 @@ static void __pyx_memoryview_slice_copy(struct __pyx_memoryview_obj *__pyx_v_mem
   __pyx_v_shape = __pyx_t_1;
 
   /* "View.MemoryView":1068
- * 
+ *
  *     shape = memview.view.shape
  *     strides = memview.view.strides             # <<<<<<<<<<<<<<
  *     suboffsets = memview.view.suboffsets
- * 
+ *
 */
   __pyx_t_1 = __pyx_v_memview->view.strides;
   __pyx_v_strides = __pyx_t_1;
@@ -15199,7 +15199,7 @@ static void __pyx_memoryview_slice_copy(struct __pyx_memoryview_obj *__pyx_v_mem
  *     shape = memview.view.shape
  *     strides = memview.view.strides
  *     suboffsets = memview.view.suboffsets             # <<<<<<<<<<<<<<
- * 
+ *
  *     dst.memview = <__pyx_memoryview *> memview
 */
   __pyx_t_1 = __pyx_v_memview->view.suboffsets;
@@ -15207,25 +15207,25 @@ static void __pyx_memoryview_slice_copy(struct __pyx_memoryview_obj *__pyx_v_mem
 
   /* "View.MemoryView":1071
  *     suboffsets = memview.view.suboffsets
- * 
+ *
  *     dst.memview = <__pyx_memoryview *> memview             # <<<<<<<<<<<<<<
  *     dst.data = <char *> memview.view.buf
- * 
+ *
 */
   __pyx_v_dst->memview = ((struct __pyx_memoryview_obj *)__pyx_v_memview);
 
   /* "View.MemoryView":1072
- * 
+ *
  *     dst.memview = <__pyx_memoryview *> memview
  *     dst.data = <char *> memview.view.buf             # <<<<<<<<<<<<<<
- * 
+ *
  *     for dim in range(memview.view.ndim):
 */
   __pyx_v_dst->data = ((char *)__pyx_v_memview->view.buf);
 
   /* "View.MemoryView":1074
  *     dst.data = <char *> memview.view.buf
- * 
+ *
  *     for dim in range(memview.view.ndim):             # <<<<<<<<<<<<<<
  *         dst.shape[dim] = shape[dim]
  *         dst.strides[dim] = strides[dim]
@@ -15236,7 +15236,7 @@ static void __pyx_memoryview_slice_copy(struct __pyx_memoryview_obj *__pyx_v_mem
     __pyx_v_dim = __pyx_t_4;
 
     /* "View.MemoryView":1075
- * 
+ *
  *     for dim in range(memview.view.ndim):
  *         dst.shape[dim] = shape[dim]             # <<<<<<<<<<<<<<
  *         dst.strides[dim] = strides[dim]
@@ -15249,7 +15249,7 @@ static void __pyx_memoryview_slice_copy(struct __pyx_memoryview_obj *__pyx_v_mem
  *         dst.shape[dim] = shape[dim]
  *         dst.strides[dim] = strides[dim]             # <<<<<<<<<<<<<<
  *         dst.suboffsets[dim] = suboffsets[dim] if suboffsets else -1
- * 
+ *
 */
     (__pyx_v_dst->strides[__pyx_v_dim]) = (__pyx_v_strides[__pyx_v_dim]);
 
@@ -15257,7 +15257,7 @@ static void __pyx_memoryview_slice_copy(struct __pyx_memoryview_obj *__pyx_v_mem
  *         dst.shape[dim] = shape[dim]
  *         dst.strides[dim] = strides[dim]
  *         dst.suboffsets[dim] = suboffsets[dim] if suboffsets else -1             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_copy_object')
 */
     __pyx_t_6 = (__pyx_v_suboffsets != 0);
@@ -15271,7 +15271,7 @@ static void __pyx_memoryview_slice_copy(struct __pyx_memoryview_obj *__pyx_v_mem
 
   /* "View.MemoryView":1062
  *         return mslice
- * 
+ *
  * @cname('__pyx_memoryview_slice_copy')             # <<<<<<<<<<<<<<
  * cdef void slice_copy(memoryview memview, __Pyx_memviewslice *dst) noexcept:
  *     cdef int dim
@@ -15282,7 +15282,7 @@ static void __pyx_memoryview_slice_copy(struct __pyx_memoryview_obj *__pyx_v_mem
 
 /* "View.MemoryView":1079
  *         dst.suboffsets[dim] = suboffsets[dim] if suboffsets else -1
- * 
+ *
  * @cname('__pyx_memoryview_copy_object')             # <<<<<<<<<<<<<<
  * cdef memoryview_copy(memoryview memview):
  *     "Create a new memoryview object"
@@ -15303,7 +15303,7 @@ static PyObject *__pyx_memoryview_copy_object(struct __pyx_memoryview_obj *__pyx
  *     cdef __Pyx_memviewslice memviewslice
  *     slice_copy(memview, &memviewslice)             # <<<<<<<<<<<<<<
  *     return memoryview_copy_from_slice(memview, &memviewslice)
- * 
+ *
 */
   __pyx_memoryview_slice_copy(__pyx_v_memview, (&__pyx_v_memviewslice));
 
@@ -15311,7 +15311,7 @@ static PyObject *__pyx_memoryview_copy_object(struct __pyx_memoryview_obj *__pyx
  *     cdef __Pyx_memviewslice memviewslice
  *     slice_copy(memview, &memviewslice)
  *     return memoryview_copy_from_slice(memview, &memviewslice)             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_copy_object_from_slice')
 */
   __Pyx_XDECREF(__pyx_r);
@@ -15323,7 +15323,7 @@ static PyObject *__pyx_memoryview_copy_object(struct __pyx_memoryview_obj *__pyx
 
   /* "View.MemoryView":1079
  *         dst.suboffsets[dim] = suboffsets[dim] if suboffsets else -1
- * 
+ *
  * @cname('__pyx_memoryview_copy_object')             # <<<<<<<<<<<<<<
  * cdef memoryview_copy(memoryview memview):
  *     "Create a new memoryview object"
@@ -15342,7 +15342,7 @@ static PyObject *__pyx_memoryview_copy_object(struct __pyx_memoryview_obj *__pyx
 
 /* "View.MemoryView":1086
  *     return memoryview_copy_from_slice(memview, &memviewslice)
- * 
+ *
  * @cname('__pyx_memoryview_copy_object_from_slice')             # <<<<<<<<<<<<<<
  * cdef memoryview_copy_from_slice(memoryview memview, __Pyx_memviewslice *memviewslice):
  *     """
@@ -15364,16 +15364,16 @@ static PyObject *__pyx_memoryview_copy_object_from_slice(struct __pyx_memoryview
 
   /* "View.MemoryView":1094
  *     cdef int (*to_dtype_func)(char *, object) except 0
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):             # <<<<<<<<<<<<<<
  *         to_object_func = (<_memoryviewslice> memview).to_object_func
  *         to_dtype_func = (<_memoryviewslice> memview).to_dtype_func
 */
-  __pyx_t_1 = __Pyx_TypeCheck(((PyObject *)__pyx_v_memview), __pyx_mstate_global->__pyx_memoryviewslice_type); 
+  __pyx_t_1 = __Pyx_TypeCheck(((PyObject *)__pyx_v_memview), __pyx_mstate_global->__pyx_memoryviewslice_type);
   if (__pyx_t_1) {
 
     /* "View.MemoryView":1095
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):
  *         to_object_func = (<_memoryviewslice> memview).to_object_func             # <<<<<<<<<<<<<<
  *         to_dtype_func = (<_memoryviewslice> memview).to_dtype_func
@@ -15394,7 +15394,7 @@ static PyObject *__pyx_memoryview_copy_object_from_slice(struct __pyx_memoryview
 
     /* "View.MemoryView":1094
  *     cdef int (*to_dtype_func)(char *, object) except 0
- * 
+ *
  *     if isinstance(memview, _memoryviewslice):             # <<<<<<<<<<<<<<
  *         to_object_func = (<_memoryviewslice> memview).to_object_func
  *         to_dtype_func = (<_memoryviewslice> memview).to_dtype_func
@@ -15407,7 +15407,7 @@ static PyObject *__pyx_memoryview_copy_object_from_slice(struct __pyx_memoryview
  *     else:
  *         to_object_func = NULL             # <<<<<<<<<<<<<<
  *         to_dtype_func = NULL
- * 
+ *
 */
   /*else*/ {
     __pyx_v_to_object_func = NULL;
@@ -15416,7 +15416,7 @@ static PyObject *__pyx_memoryview_copy_object_from_slice(struct __pyx_memoryview
  *     else:
  *         to_object_func = NULL
  *         to_dtype_func = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *     return memoryview_fromslice(memviewslice[0], memview.view.ndim,
 */
     __pyx_v_to_dtype_func = NULL;
@@ -15425,7 +15425,7 @@ static PyObject *__pyx_memoryview_copy_object_from_slice(struct __pyx_memoryview
 
   /* "View.MemoryView":1101
  *         to_dtype_func = NULL
- * 
+ *
  *     return memoryview_fromslice(memviewslice[0], memview.view.ndim,             # <<<<<<<<<<<<<<
  *                                 to_object_func, to_dtype_func,
  *                                 memview.dtype_is_object)
@@ -15436,8 +15436,8 @@ static PyObject *__pyx_memoryview_copy_object_from_slice(struct __pyx_memoryview
  *     return memoryview_fromslice(memviewslice[0], memview.view.ndim,
  *                                 to_object_func, to_dtype_func,
  *                                 memview.dtype_is_object)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_4 = __pyx_memoryview_fromslice((__pyx_v_memviewslice[0]), __pyx_v_memview->view.ndim, __pyx_v_to_object_func, __pyx_v_to_dtype_func, __pyx_v_memview->dtype_is_object); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 1101, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
@@ -15447,7 +15447,7 @@ static PyObject *__pyx_memoryview_copy_object_from_slice(struct __pyx_memoryview
 
   /* "View.MemoryView":1086
  *     return memoryview_copy_from_slice(memview, &memviewslice)
- * 
+ *
  * @cname('__pyx_memoryview_copy_object_from_slice')             # <<<<<<<<<<<<<<
  * cdef memoryview_copy_from_slice(memoryview memview, __Pyx_memviewslice *memviewslice):
  *     """
@@ -15465,11 +15465,11 @@ static PyObject *__pyx_memoryview_copy_object_from_slice(struct __pyx_memoryview
 }
 
 /* "View.MemoryView":1109
- * 
- * 
+ *
+ *
  * cdef Py_ssize_t abs_py_ssize_t(Py_ssize_t arg) noexcept nogil:             # <<<<<<<<<<<<<<
  *     return -arg if arg < 0 else arg
- * 
+ *
 */
 
 static Py_ssize_t abs_py_ssize_t(Py_ssize_t __pyx_v_arg) {
@@ -15478,10 +15478,10 @@ static Py_ssize_t abs_py_ssize_t(Py_ssize_t __pyx_v_arg) {
   int __pyx_t_2;
 
   /* "View.MemoryView":1110
- * 
+ *
  * cdef Py_ssize_t abs_py_ssize_t(Py_ssize_t arg) noexcept nogil:
  *     return -arg if arg < 0 else arg             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_get_best_slice_order')
 */
   __pyx_t_2 = (__pyx_v_arg < 0);
@@ -15494,11 +15494,11 @@ static Py_ssize_t abs_py_ssize_t(Py_ssize_t __pyx_v_arg) {
   goto __pyx_L0;
 
   /* "View.MemoryView":1109
- * 
- * 
+ *
+ *
  * cdef Py_ssize_t abs_py_ssize_t(Py_ssize_t arg) noexcept nogil:             # <<<<<<<<<<<<<<
  *     return -arg if arg < 0 else arg
- * 
+ *
 */
 
   /* function exit code */
@@ -15508,7 +15508,7 @@ static Py_ssize_t abs_py_ssize_t(Py_ssize_t __pyx_v_arg) {
 
 /* "View.MemoryView":1112
  *     return -arg if arg < 0 else arg
- * 
+ *
  * @cname('__pyx_get_best_slice_order')             # <<<<<<<<<<<<<<
  * cdef char get_best_order(__Pyx_memviewslice *mslice, int ndim) noexcept nogil:
  *     """
@@ -15529,7 +15529,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
  *     cdef int i
  *     cdef Py_ssize_t c_stride = 0             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t f_stride = 0
- * 
+ *
 */
   __pyx_v_c_stride = 0;
 
@@ -15537,14 +15537,14 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
  *     cdef int i
  *     cdef Py_ssize_t c_stride = 0
  *     cdef Py_ssize_t f_stride = 0             # <<<<<<<<<<<<<<
- * 
+ *
  *     for i in range(ndim - 1, -1, -1):
 */
   __pyx_v_f_stride = 0;
 
   /* "View.MemoryView":1121
  *     cdef Py_ssize_t f_stride = 0
- * 
+ *
  *     for i in range(ndim - 1, -1, -1):             # <<<<<<<<<<<<<<
  *         if mslice.shape[i] > 1:
  *             c_stride = mslice.strides[i]
@@ -15553,7 +15553,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
     __pyx_v_i = __pyx_t_1;
 
     /* "View.MemoryView":1122
- * 
+ *
  *     for i in range(ndim - 1, -1, -1):
  *         if mslice.shape[i] > 1:             # <<<<<<<<<<<<<<
  *             c_stride = mslice.strides[i]
@@ -15567,7 +15567,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
  *         if mslice.shape[i] > 1:
  *             c_stride = mslice.strides[i]             # <<<<<<<<<<<<<<
  *             break
- * 
+ *
 */
       __pyx_v_c_stride = (__pyx_v_mslice->strides[__pyx_v_i]);
 
@@ -15575,13 +15575,13 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
  *         if mslice.shape[i] > 1:
  *             c_stride = mslice.strides[i]
  *             break             # <<<<<<<<<<<<<<
- * 
+ *
  *     for i in range(ndim):
 */
       goto __pyx_L4_break;
 
       /* "View.MemoryView":1122
- * 
+ *
  *     for i in range(ndim - 1, -1, -1):
  *         if mslice.shape[i] > 1:             # <<<<<<<<<<<<<<
  *             c_stride = mslice.strides[i]
@@ -15593,7 +15593,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
 
   /* "View.MemoryView":1126
  *             break
- * 
+ *
  *     for i in range(ndim):             # <<<<<<<<<<<<<<
  *         if mslice.shape[i] > 1:
  *             f_stride = mslice.strides[i]
@@ -15604,7 +15604,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
     __pyx_v_i = __pyx_t_4;
 
     /* "View.MemoryView":1127
- * 
+ *
  *     for i in range(ndim):
  *         if mslice.shape[i] > 1:             # <<<<<<<<<<<<<<
  *             f_stride = mslice.strides[i]
@@ -15618,7 +15618,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
  *         if mslice.shape[i] > 1:
  *             f_stride = mslice.strides[i]             # <<<<<<<<<<<<<<
  *             break
- * 
+ *
 */
       __pyx_v_f_stride = (__pyx_v_mslice->strides[__pyx_v_i]);
 
@@ -15626,13 +15626,13 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
  *         if mslice.shape[i] > 1:
  *             f_stride = mslice.strides[i]
  *             break             # <<<<<<<<<<<<<<
- * 
+ *
  *     if abs_py_ssize_t(c_stride) <= abs_py_ssize_t(f_stride):
 */
       goto __pyx_L7_break;
 
       /* "View.MemoryView":1127
- * 
+ *
  *     for i in range(ndim):
  *         if mslice.shape[i] > 1:             # <<<<<<<<<<<<<<
  *             f_stride = mslice.strides[i]
@@ -15644,7 +15644,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
 
   /* "View.MemoryView":1131
  *             break
- * 
+ *
  *     if abs_py_ssize_t(c_stride) <= abs_py_ssize_t(f_stride):             # <<<<<<<<<<<<<<
  *         return 'C'
  *     else:
@@ -15653,7 +15653,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
   if (__pyx_t_2) {
 
     /* "View.MemoryView":1132
- * 
+ *
  *     if abs_py_ssize_t(c_stride) <= abs_py_ssize_t(f_stride):
  *         return 'C'             # <<<<<<<<<<<<<<
  *     else:
@@ -15664,7 +15664,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
 
     /* "View.MemoryView":1131
  *             break
- * 
+ *
  *     if abs_py_ssize_t(c_stride) <= abs_py_ssize_t(f_stride):             # <<<<<<<<<<<<<<
  *         return 'C'
  *     else:
@@ -15675,7 +15675,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
  *         return 'C'
  *     else:
  *         return 'F'             # <<<<<<<<<<<<<<
- * 
+ *
  * @cython.cdivision(True)
 */
   /*else*/ {
@@ -15685,7 +15685,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
 
   /* "View.MemoryView":1112
  *     return -arg if arg < 0 else arg
- * 
+ *
  * @cname('__pyx_get_best_slice_order')             # <<<<<<<<<<<<<<
  * cdef char get_best_order(__Pyx_memviewslice *mslice, int ndim) noexcept nogil:
  *     """
@@ -15698,7 +15698,7 @@ static char __pyx_get_best_slice_order(__Pyx_memviewslice *__pyx_v_mslice, int _
 
 /* "View.MemoryView":1136
  *         return 'F'
- * 
+ *
  * @cython.cdivision(True)             # <<<<<<<<<<<<<<
  * cdef void _copy_strided_to_strided(char *src_data, Py_ssize_t *src_strides,
  *                                    char *dst_data, Py_ssize_t *dst_strides,
@@ -15717,7 +15717,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
   Py_ssize_t __pyx_t_5;
 
   /* "View.MemoryView":1144
- * 
+ *
  *     cdef Py_ssize_t i
  *     cdef Py_ssize_t src_extent = src_shape[0]             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t dst_extent = dst_shape[0]
@@ -15739,7 +15739,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
  *     cdef Py_ssize_t dst_extent = dst_shape[0]
  *     cdef Py_ssize_t src_stride = src_strides[0]             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t dst_stride = dst_strides[0]
- * 
+ *
 */
   __pyx_v_src_stride = (__pyx_v_src_strides[0]);
 
@@ -15747,14 +15747,14 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
  *     cdef Py_ssize_t dst_extent = dst_shape[0]
  *     cdef Py_ssize_t src_stride = src_strides[0]
  *     cdef Py_ssize_t dst_stride = dst_strides[0]             # <<<<<<<<<<<<<<
- * 
+ *
  *     if ndim == 1:
 */
   __pyx_v_dst_stride = (__pyx_v_dst_strides[0]);
 
   /* "View.MemoryView":1149
  *     cdef Py_ssize_t dst_stride = dst_strides[0]
- * 
+ *
  *     if ndim == 1:             # <<<<<<<<<<<<<<
  *         if (src_stride > 0 and dst_stride > 0 and
  *             <size_t> src_stride == itemsize == <size_t> dst_stride):
@@ -15763,7 +15763,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
   if (__pyx_t_1) {
 
     /* "View.MemoryView":1150
- * 
+ *
  *     if ndim == 1:
  *         if (src_stride > 0 and dst_stride > 0 and             # <<<<<<<<<<<<<<
  *             <size_t> src_stride == itemsize == <size_t> dst_stride):
@@ -15797,7 +15797,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
     __pyx_L5_bool_binop_done:;
 
     /* "View.MemoryView":1150
- * 
+ *
  *     if ndim == 1:
  *         if (src_stride > 0 and dst_stride > 0 and             # <<<<<<<<<<<<<<
  *             <size_t> src_stride == itemsize == <size_t> dst_stride):
@@ -15815,7 +15815,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
       (void)(memcpy(__pyx_v_dst_data, __pyx_v_src_data, (__pyx_v_itemsize * __pyx_v_dst_extent)));
 
       /* "View.MemoryView":1150
- * 
+ *
  *     if ndim == 1:
  *         if (src_stride > 0 and dst_stride > 0 and             # <<<<<<<<<<<<<<
  *             <size_t> src_stride == itemsize == <size_t> dst_stride):
@@ -15869,7 +15869,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
 
     /* "View.MemoryView":1149
  *     cdef Py_ssize_t dst_stride = dst_strides[0]
- * 
+ *
  *     if ndim == 1:             # <<<<<<<<<<<<<<
  *         if (src_stride > 0 and dst_stride > 0 and
  *             <size_t> src_stride == itemsize == <size_t> dst_stride):
@@ -15904,7 +15904,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
  *                                      ndim - 1, itemsize)
  *             src_data += src_stride             # <<<<<<<<<<<<<<
  *             dst_data += dst_stride
- * 
+ *
 */
       __pyx_v_src_data = (__pyx_v_src_data + __pyx_v_src_stride);
 
@@ -15912,7 +15912,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
  *                                      ndim - 1, itemsize)
  *             src_data += src_stride
  *             dst_data += dst_stride             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef void copy_strided_to_strided(__Pyx_memviewslice *src,
 */
       __pyx_v_dst_data = (__pyx_v_dst_data + __pyx_v_dst_stride);
@@ -15922,7 +15922,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
 
   /* "View.MemoryView":1136
  *         return 'F'
- * 
+ *
  * @cython.cdivision(True)             # <<<<<<<<<<<<<<
  * cdef void _copy_strided_to_strided(char *src_data, Py_ssize_t *src_strides,
  *                                    char *dst_data, Py_ssize_t *dst_strides,
@@ -15933,7 +15933,7 @@ static void _copy_strided_to_strided(char *__pyx_v_src_data, Py_ssize_t *__pyx_v
 
 /* "View.MemoryView":1167
  *             dst_data += dst_stride
- * 
+ *
  * cdef void copy_strided_to_strided(__Pyx_memviewslice *src,             # <<<<<<<<<<<<<<
  *                                   __Pyx_memviewslice *dst,
  *                                   int ndim, size_t itemsize) noexcept nogil:
@@ -15946,13 +15946,13 @@ static void copy_strided_to_strided(__Pyx_memviewslice *__pyx_v_src, __Pyx_memvi
  *                                   int ndim, size_t itemsize) noexcept nogil:
  *     _copy_strided_to_strided(src.data, src.strides, dst.data, dst.strides,             # <<<<<<<<<<<<<<
  *                              src.shape, dst.shape, ndim, itemsize)
- * 
+ *
 */
   _copy_strided_to_strided(__pyx_v_src->data, __pyx_v_src->strides, __pyx_v_dst->data, __pyx_v_dst->strides, __pyx_v_src->shape, __pyx_v_dst->shape, __pyx_v_ndim, __pyx_v_itemsize);
 
   /* "View.MemoryView":1167
  *             dst_data += dst_stride
- * 
+ *
  * cdef void copy_strided_to_strided(__Pyx_memviewslice *src,             # <<<<<<<<<<<<<<
  *                                   __Pyx_memviewslice *dst,
  *                                   int ndim, size_t itemsize) noexcept nogil:
@@ -15963,7 +15963,7 @@ static void copy_strided_to_strided(__Pyx_memviewslice *__pyx_v_src, __Pyx_memvi
 
 /* "View.MemoryView":1173
  *                              src.shape, dst.shape, ndim, itemsize)
- * 
+ *
  * @cname('__pyx_memoryview_slice_get_size')             # <<<<<<<<<<<<<<
  * cdef Py_ssize_t slice_get_size(__Pyx_memviewslice *src, int ndim) noexcept nogil:
  *     "Return the size of the memory occupied by the slice in number of bytes"
@@ -15982,7 +15982,7 @@ static Py_ssize_t __pyx_memoryview_slice_get_size(__Pyx_memviewslice *__pyx_v_sr
  * cdef Py_ssize_t slice_get_size(__Pyx_memviewslice *src, int ndim) noexcept nogil:
  *     "Return the size of the memory occupied by the slice in number of bytes"
  *     cdef Py_ssize_t shape, size = src.memview.view.itemsize             # <<<<<<<<<<<<<<
- * 
+ *
  *     for shape in src.shape[:ndim]:
 */
   __pyx_t_1 = __pyx_v_src->memview->view.itemsize;
@@ -15990,10 +15990,10 @@ static Py_ssize_t __pyx_memoryview_slice_get_size(__Pyx_memviewslice *__pyx_v_sr
 
   /* "View.MemoryView":1178
  *     cdef Py_ssize_t shape, size = src.memview.view.itemsize
- * 
+ *
  *     for shape in src.shape[:ndim]:             # <<<<<<<<<<<<<<
  *         size *= shape
- * 
+ *
 */
   __pyx_t_3 = (__pyx_v_src->shape + __pyx_v_ndim);
   for (__pyx_t_4 = __pyx_v_src->shape; __pyx_t_4 < __pyx_t_3; __pyx_t_4++) {
@@ -16001,10 +16001,10 @@ static Py_ssize_t __pyx_memoryview_slice_get_size(__Pyx_memviewslice *__pyx_v_sr
     __pyx_v_shape = (__pyx_t_2[0]);
 
     /* "View.MemoryView":1179
- * 
+ *
  *     for shape in src.shape[:ndim]:
  *         size *= shape             # <<<<<<<<<<<<<<
- * 
+ *
  *     return size
 */
     __pyx_v_size = (__pyx_v_size * __pyx_v_shape);
@@ -16012,9 +16012,9 @@ static Py_ssize_t __pyx_memoryview_slice_get_size(__Pyx_memviewslice *__pyx_v_sr
 
   /* "View.MemoryView":1181
  *         size *= shape
- * 
+ *
  *     return size             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_fill_contig_strides_array')
 */
   __pyx_r = __pyx_v_size;
@@ -16022,7 +16022,7 @@ static Py_ssize_t __pyx_memoryview_slice_get_size(__Pyx_memviewslice *__pyx_v_sr
 
   /* "View.MemoryView":1173
  *                              src.shape, dst.shape, ndim, itemsize)
- * 
+ *
  * @cname('__pyx_memoryview_slice_get_size')             # <<<<<<<<<<<<<<
  * cdef Py_ssize_t slice_get_size(__Pyx_memviewslice *src, int ndim) noexcept nogil:
  *     "Return the size of the memory occupied by the slice in number of bytes"
@@ -16035,7 +16035,7 @@ static Py_ssize_t __pyx_memoryview_slice_get_size(__Pyx_memviewslice *__pyx_v_sr
 
 /* "View.MemoryView":1183
  *     return size
- * 
+ *
  * @cname('__pyx_fill_contig_strides_array')             # <<<<<<<<<<<<<<
  * cdef Py_ssize_t fill_contig_strides_array(
  *                 Py_ssize_t *shape, Py_ssize_t *strides, Py_ssize_t stride,
@@ -16051,7 +16051,7 @@ static Py_ssize_t __pyx_fill_contig_strides_array(Py_ssize_t *__pyx_v_shape, Py_
 
   /* "View.MemoryView":1193
  *     cdef int idx
- * 
+ *
  *     if order == 'F':             # <<<<<<<<<<<<<<
  *         for idx in range(ndim):
  *             strides[idx] = stride
@@ -16060,7 +16060,7 @@ static Py_ssize_t __pyx_fill_contig_strides_array(Py_ssize_t *__pyx_v_shape, Py_
   if (__pyx_t_1) {
 
     /* "View.MemoryView":1194
- * 
+ *
  *     if order == 'F':
  *         for idx in range(ndim):             # <<<<<<<<<<<<<<
  *             strides[idx] = stride
@@ -16092,7 +16092,7 @@ static Py_ssize_t __pyx_fill_contig_strides_array(Py_ssize_t *__pyx_v_shape, Py_
 
     /* "View.MemoryView":1193
  *     cdef int idx
- * 
+ *
  *     if order == 'F':             # <<<<<<<<<<<<<<
  *         for idx in range(ndim):
  *             strides[idx] = stride
@@ -16116,7 +16116,7 @@ static Py_ssize_t __pyx_fill_contig_strides_array(Py_ssize_t *__pyx_v_shape, Py_
  *         for idx in range(ndim - 1, -1, -1):
  *             strides[idx] = stride             # <<<<<<<<<<<<<<
  *             stride *= shape[idx]
- * 
+ *
 */
       (__pyx_v_strides[__pyx_v_idx]) = __pyx_v_stride;
 
@@ -16124,7 +16124,7 @@ static Py_ssize_t __pyx_fill_contig_strides_array(Py_ssize_t *__pyx_v_shape, Py_
  *         for idx in range(ndim - 1, -1, -1):
  *             strides[idx] = stride
  *             stride *= shape[idx]             # <<<<<<<<<<<<<<
- * 
+ *
  *     return stride
 */
       __pyx_v_stride = (__pyx_v_stride * (__pyx_v_shape[__pyx_v_idx]));
@@ -16134,9 +16134,9 @@ static Py_ssize_t __pyx_fill_contig_strides_array(Py_ssize_t *__pyx_v_shape, Py_
 
   /* "View.MemoryView":1202
  *             stride *= shape[idx]
- * 
+ *
  *     return stride             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_copy_data_to_temp')
 */
   __pyx_r = __pyx_v_stride;
@@ -16144,7 +16144,7 @@ static Py_ssize_t __pyx_fill_contig_strides_array(Py_ssize_t *__pyx_v_shape, Py_
 
   /* "View.MemoryView":1183
  *     return size
- * 
+ *
  * @cname('__pyx_fill_contig_strides_array')             # <<<<<<<<<<<<<<
  * cdef Py_ssize_t fill_contig_strides_array(
  *                 Py_ssize_t *shape, Py_ssize_t *strides, Py_ssize_t stride,
@@ -16157,7 +16157,7 @@ static Py_ssize_t __pyx_fill_contig_strides_array(Py_ssize_t *__pyx_v_shape, Py_
 
 /* "View.MemoryView":1204
  *     return stride
- * 
+ *
  * @cname('__pyx_memoryview_copy_data_to_temp')             # <<<<<<<<<<<<<<
  * cdef void *copy_data_to_temp(__Pyx_memviewslice *src,
  *                              __Pyx_memviewslice *tmpslice,
@@ -16182,26 +16182,26 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
 
   /* "View.MemoryView":1216
  *     cdef void *result
- * 
+ *
  *     cdef size_t itemsize = src.memview.view.itemsize             # <<<<<<<<<<<<<<
  *     cdef size_t size = slice_get_size(src, ndim)
- * 
+ *
 */
   __pyx_t_1 = __pyx_v_src->memview->view.itemsize;
   __pyx_v_itemsize = __pyx_t_1;
 
   /* "View.MemoryView":1217
- * 
+ *
  *     cdef size_t itemsize = src.memview.view.itemsize
  *     cdef size_t size = slice_get_size(src, ndim)             # <<<<<<<<<<<<<<
- * 
+ *
  *     result = malloc(size)
 */
   __pyx_v_size = __pyx_memoryview_slice_get_size(__pyx_v_src, __pyx_v_ndim);
 
   /* "View.MemoryView":1219
  *     cdef size_t size = slice_get_size(src, ndim)
- * 
+ *
  *     result = malloc(size)             # <<<<<<<<<<<<<<
  *     if not result:
  *         _err_no_memory()
@@ -16209,11 +16209,11 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
   __pyx_v_result = malloc(__pyx_v_size);
 
   /* "View.MemoryView":1220
- * 
+ *
  *     result = malloc(size)
  *     if not result:             # <<<<<<<<<<<<<<
  *         _err_no_memory()
- * 
+ *
 */
   __pyx_t_2 = (!(__pyx_v_result != 0));
   if (__pyx_t_2) {
@@ -16222,23 +16222,23 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
  *     result = malloc(size)
  *     if not result:
  *         _err_no_memory()             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     __pyx_t_3 = __pyx_memoryview_err_no_memory(); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(1, 1221, __pyx_L1_error)
 
     /* "View.MemoryView":1220
- * 
+ *
  *     result = malloc(size)
  *     if not result:             # <<<<<<<<<<<<<<
  *         _err_no_memory()
- * 
+ *
 */
   }
 
   /* "View.MemoryView":1224
- * 
- * 
+ *
+ *
  *     tmpslice.data = <char *> result             # <<<<<<<<<<<<<<
  *     tmpslice.memview = src.memview
  *     for i in range(ndim):
@@ -16246,7 +16246,7 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
   __pyx_v_tmpslice->data = ((char *)__pyx_v_result);
 
   /* "View.MemoryView":1225
- * 
+ *
  *     tmpslice.data = <char *> result
  *     tmpslice.memview = src.memview             # <<<<<<<<<<<<<<
  *     for i in range(ndim):
@@ -16272,7 +16272,7 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
  *     for i in range(ndim):
  *         tmpslice.shape[i] = src.shape[i]             # <<<<<<<<<<<<<<
  *         tmpslice.suboffsets[i] = -1
- * 
+ *
 */
     (__pyx_v_tmpslice->shape[__pyx_v_i]) = (__pyx_v_src->shape[__pyx_v_i]);
 
@@ -16280,7 +16280,7 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
  *     for i in range(ndim):
  *         tmpslice.shape[i] = src.shape[i]
  *         tmpslice.suboffsets[i] = -1             # <<<<<<<<<<<<<<
- * 
+ *
  *     fill_contig_strides_array(&tmpslice.shape[0], &tmpslice.strides[0], itemsize, ndim, order)
 */
     (__pyx_v_tmpslice->suboffsets[__pyx_v_i]) = -1L;
@@ -16288,16 +16288,16 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
 
   /* "View.MemoryView":1230
  *         tmpslice.suboffsets[i] = -1
- * 
+ *
  *     fill_contig_strides_array(&tmpslice.shape[0], &tmpslice.strides[0], itemsize, ndim, order)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   (void)(__pyx_fill_contig_strides_array((&(__pyx_v_tmpslice->shape[0])), (&(__pyx_v_tmpslice->strides[0])), __pyx_v_itemsize, __pyx_v_ndim, __pyx_v_order));
 
   /* "View.MemoryView":1233
- * 
- * 
+ *
+ *
  *     for i in range(ndim):             # <<<<<<<<<<<<<<
  *         if tmpslice.shape[i] == 1:
  *             tmpslice.strides[i] = 0
@@ -16308,11 +16308,11 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
     __pyx_v_i = __pyx_t_6;
 
     /* "View.MemoryView":1234
- * 
+ *
  *     for i in range(ndim):
  *         if tmpslice.shape[i] == 1:             # <<<<<<<<<<<<<<
  *             tmpslice.strides[i] = 0
- * 
+ *
 */
     __pyx_t_2 = ((__pyx_v_tmpslice->shape[__pyx_v_i]) == 1);
     if (__pyx_t_2) {
@@ -16321,24 +16321,24 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
  *     for i in range(ndim):
  *         if tmpslice.shape[i] == 1:
  *             tmpslice.strides[i] = 0             # <<<<<<<<<<<<<<
- * 
+ *
  *     if slice_is_contig(src[0], order, ndim):
 */
       (__pyx_v_tmpslice->strides[__pyx_v_i]) = 0;
 
       /* "View.MemoryView":1234
- * 
+ *
  *     for i in range(ndim):
  *         if tmpslice.shape[i] == 1:             # <<<<<<<<<<<<<<
  *             tmpslice.strides[i] = 0
- * 
+ *
 */
     }
   }
 
   /* "View.MemoryView":1237
  *             tmpslice.strides[i] = 0
- * 
+ *
  *     if slice_is_contig(src[0], order, ndim):             # <<<<<<<<<<<<<<
  *         memcpy(result, src.data, size)
  *     else:
@@ -16347,7 +16347,7 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
   if (__pyx_t_2) {
 
     /* "View.MemoryView":1238
- * 
+ *
  *     if slice_is_contig(src[0], order, ndim):
  *         memcpy(result, src.data, size)             # <<<<<<<<<<<<<<
  *     else:
@@ -16357,7 +16357,7 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
 
     /* "View.MemoryView":1237
  *             tmpslice.strides[i] = 0
- * 
+ *
  *     if slice_is_contig(src[0], order, ndim):             # <<<<<<<<<<<<<<
  *         memcpy(result, src.data, size)
  *     else:
@@ -16369,7 +16369,7 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
  *         memcpy(result, src.data, size)
  *     else:
  *         copy_strided_to_strided(src, tmpslice, ndim, itemsize)             # <<<<<<<<<<<<<<
- * 
+ *
  *     return result
 */
   /*else*/ {
@@ -16379,17 +16379,17 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
 
   /* "View.MemoryView":1242
  *         copy_strided_to_strided(src, tmpslice, ndim, itemsize)
- * 
+ *
  *     return result             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = __pyx_v_result;
   goto __pyx_L0;
 
   /* "View.MemoryView":1204
  *     return stride
- * 
+ *
  * @cname('__pyx_memoryview_copy_data_to_temp')             # <<<<<<<<<<<<<<
  * cdef void *copy_data_to_temp(__Pyx_memviewslice *src,
  *                              __Pyx_memviewslice *tmpslice,
@@ -16406,8 +16406,8 @@ static void *__pyx_memoryview_copy_data_to_temp(__Pyx_memviewslice *__pyx_v_src,
 }
 
 /* "View.MemoryView":1246
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_err_extents')             # <<<<<<<<<<<<<<
  * cdef int _err_extents(int i, Py_ssize_t extent1,
  *                              Py_ssize_t extent2) except -1 with gil:
@@ -16431,7 +16431,7 @@ static int __pyx_memoryview_err_extents(int __pyx_v_i, Py_ssize_t __pyx_v_extent
  * cdef int _err_extents(int i, Py_ssize_t extent1,
  *                              Py_ssize_t extent2) except -1 with gil:
  *     raise ValueError, f"got differing extents in dimension {i} (got {extent1} and {extent2})"             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_err_dim')
 */
   __pyx_t_1 = __Pyx_PyUnicode_From_int(__pyx_v_i, 0, ' ', 'd'); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 1249, __pyx_L1_error)
@@ -16458,8 +16458,8 @@ static int __pyx_memoryview_err_extents(int __pyx_v_i, Py_ssize_t __pyx_v_extent
   __PYX_ERR(1, 1249, __pyx_L1_error)
 
   /* "View.MemoryView":1246
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_err_extents')             # <<<<<<<<<<<<<<
  * cdef int _err_extents(int i, Py_ssize_t extent1,
  *                              Py_ssize_t extent2) except -1 with gil:
@@ -16480,7 +16480,7 @@ static int __pyx_memoryview_err_extents(int __pyx_v_i, Py_ssize_t __pyx_v_extent
 
 /* "View.MemoryView":1251
  *     raise ValueError, f"got differing extents in dimension {i} (got {extent1} and {extent2})"
- * 
+ *
  * @cname('__pyx_memoryview_err_dim')             # <<<<<<<<<<<<<<
  * cdef int _err_dim(PyObject *error, str msg, int dim) except -1 with gil:
  *     raise <object>error, msg % dim
@@ -16502,7 +16502,7 @@ static int __pyx_memoryview_err_dim(PyObject *__pyx_v_error, PyObject *__pyx_v_m
  * @cname('__pyx_memoryview_err_dim')
  * cdef int _err_dim(PyObject *error, str msg, int dim) except -1 with gil:
  *     raise <object>error, msg % dim             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_err')
 */
   __pyx_t_1 = __Pyx_PyLong_From_int(__pyx_v_dim); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 1253, __pyx_L1_error)
@@ -16516,7 +16516,7 @@ static int __pyx_memoryview_err_dim(PyObject *__pyx_v_error, PyObject *__pyx_v_m
 
   /* "View.MemoryView":1251
  *     raise ValueError, f"got differing extents in dimension {i} (got {extent1} and {extent2})"
- * 
+ *
  * @cname('__pyx_memoryview_err_dim')             # <<<<<<<<<<<<<<
  * cdef int _err_dim(PyObject *error, str msg, int dim) except -1 with gil:
  *     raise <object>error, msg % dim
@@ -16536,7 +16536,7 @@ static int __pyx_memoryview_err_dim(PyObject *__pyx_v_error, PyObject *__pyx_v_m
 
 /* "View.MemoryView":1255
  *     raise <object>error, msg % dim
- * 
+ *
  * @cname('__pyx_memoryview_err')             # <<<<<<<<<<<<<<
  * cdef int _err(PyObject *error, str msg) except -1 with gil:
  *     raise <object>error, msg
@@ -16556,7 +16556,7 @@ static int __pyx_memoryview_err(PyObject *__pyx_v_error, PyObject *__pyx_v_msg) 
  * @cname('__pyx_memoryview_err')
  * cdef int _err(PyObject *error, str msg) except -1 with gil:
  *     raise <object>error, msg             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_err_no_memory')
 */
   __Pyx_Raise(((PyObject *)__pyx_v_error), __pyx_v_msg, 0, 0);
@@ -16564,7 +16564,7 @@ static int __pyx_memoryview_err(PyObject *__pyx_v_error, PyObject *__pyx_v_msg) 
 
   /* "View.MemoryView":1255
  *     raise <object>error, msg % dim
- * 
+ *
  * @cname('__pyx_memoryview_err')             # <<<<<<<<<<<<<<
  * cdef int _err(PyObject *error, str msg) except -1 with gil:
  *     raise <object>error, msg
@@ -16582,7 +16582,7 @@ static int __pyx_memoryview_err(PyObject *__pyx_v_error, PyObject *__pyx_v_msg) 
 
 /* "View.MemoryView":1259
  *     raise <object>error, msg
- * 
+ *
  * @cname('__pyx_memoryview_err_no_memory')             # <<<<<<<<<<<<<<
  * cdef int _err_no_memory() except -1 with gil:
  *     raise MemoryError
@@ -16599,14 +16599,14 @@ static int __pyx_memoryview_err_no_memory(void) {
  * @cname('__pyx_memoryview_err_no_memory')
  * cdef int _err_no_memory() except -1 with gil:
  *     raise MemoryError             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   PyErr_NoMemory(); __PYX_ERR(1, 1261, __pyx_L1_error)
 
   /* "View.MemoryView":1259
  *     raise <object>error, msg
- * 
+ *
  * @cname('__pyx_memoryview_err_no_memory')             # <<<<<<<<<<<<<<
  * cdef int _err_no_memory() except -1 with gil:
  *     raise MemoryError
@@ -16621,8 +16621,8 @@ static int __pyx_memoryview_err_no_memory(void) {
 }
 
 /* "View.MemoryView":1264
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_copy_contents')             # <<<<<<<<<<<<<<
  * cdef int memoryview_copy_contents(__Pyx_memviewslice src,
  *                                   __Pyx_memviewslice dst,
@@ -16692,13 +16692,13 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *     cdef bint broadcasting = False
  *     cdef bint direct_copy = False             # <<<<<<<<<<<<<<
  *     cdef __Pyx_memviewslice tmp
- * 
+ *
 */
   __pyx_v_direct_copy = 0;
 
   /* "View.MemoryView":1281
  *     cdef __Pyx_memviewslice tmp
- * 
+ *
  *     if src_ndim < dst_ndim:             # <<<<<<<<<<<<<<
  *         broadcast_leading(&src, src_ndim, dst_ndim)
  *     elif dst_ndim < src_ndim:
@@ -16707,7 +16707,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
   if (__pyx_t_2) {
 
     /* "View.MemoryView":1282
- * 
+ *
  *     if src_ndim < dst_ndim:
  *         broadcast_leading(&src, src_ndim, dst_ndim)             # <<<<<<<<<<<<<<
  *     elif dst_ndim < src_ndim:
@@ -16717,7 +16717,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
 
     /* "View.MemoryView":1281
  *     cdef __Pyx_memviewslice tmp
- * 
+ *
  *     if src_ndim < dst_ndim:             # <<<<<<<<<<<<<<
  *         broadcast_leading(&src, src_ndim, dst_ndim)
  *     elif dst_ndim < src_ndim:
@@ -16730,7 +16730,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *         broadcast_leading(&src, src_ndim, dst_ndim)
  *     elif dst_ndim < src_ndim:             # <<<<<<<<<<<<<<
  *         broadcast_leading(&dst, dst_ndim, src_ndim)
- * 
+ *
 */
   __pyx_t_2 = (__pyx_v_dst_ndim < __pyx_v_src_ndim);
   if (__pyx_t_2) {
@@ -16739,7 +16739,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *         broadcast_leading(&src, src_ndim, dst_ndim)
  *     elif dst_ndim < src_ndim:
  *         broadcast_leading(&dst, dst_ndim, src_ndim)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef int ndim = max(src_ndim, dst_ndim)
 */
     __pyx_memoryview_broadcast_leading((&__pyx_v_dst), __pyx_v_dst_ndim, __pyx_v_src_ndim);
@@ -16749,16 +16749,16 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *         broadcast_leading(&src, src_ndim, dst_ndim)
  *     elif dst_ndim < src_ndim:             # <<<<<<<<<<<<<<
  *         broadcast_leading(&dst, dst_ndim, src_ndim)
- * 
+ *
 */
   }
   __pyx_L3:;
 
   /* "View.MemoryView":1286
  *         broadcast_leading(&dst, dst_ndim, src_ndim)
- * 
+ *
  *     cdef int ndim = max(src_ndim, dst_ndim)             # <<<<<<<<<<<<<<
- * 
+ *
  *     for i in range(ndim):
 */
   __pyx_t_3 = __pyx_v_dst_ndim;
@@ -16773,7 +16773,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
 
   /* "View.MemoryView":1288
  *     cdef int ndim = max(src_ndim, dst_ndim)
- * 
+ *
  *     for i in range(ndim):             # <<<<<<<<<<<<<<
  *         if src.shape[i] != dst.shape[i]:
  *             if src.shape[i] == 1:
@@ -16784,7 +16784,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
     __pyx_v_i = __pyx_t_4;
 
     /* "View.MemoryView":1289
- * 
+ *
  *     for i in range(ndim):
  *         if src.shape[i] != dst.shape[i]:             # <<<<<<<<<<<<<<
  *             if src.shape[i] == 1:
@@ -16835,7 +16835,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *                 src.strides[i] = 0
  *             else:
  *                 _err_extents(i, dst.shape[i], src.shape[i])             # <<<<<<<<<<<<<<
- * 
+ *
  *         if src.suboffsets[i] >= 0:
 */
       /*else*/ {
@@ -16844,7 +16844,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
       __pyx_L7:;
 
       /* "View.MemoryView":1289
- * 
+ *
  *     for i in range(ndim):
  *         if src.shape[i] != dst.shape[i]:             # <<<<<<<<<<<<<<
  *             if src.shape[i] == 1:
@@ -16854,38 +16854,38 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
 
     /* "View.MemoryView":1296
  *                 _err_extents(i, dst.shape[i], src.shape[i])
- * 
+ *
  *         if src.suboffsets[i] >= 0:             # <<<<<<<<<<<<<<
  *             _err_dim(PyExc_ValueError, "Dimension %d is not direct", i)
- * 
+ *
 */
     __pyx_t_2 = ((__pyx_v_src.suboffsets[__pyx_v_i]) >= 0);
     if (__pyx_t_2) {
 
       /* "View.MemoryView":1297
- * 
+ *
  *         if src.suboffsets[i] >= 0:
  *             _err_dim(PyExc_ValueError, "Dimension %d is not direct", i)             # <<<<<<<<<<<<<<
- * 
+ *
  *     if slices_overlap(&src, &dst, ndim, itemsize):
 */
       __pyx_t_6 = __pyx_memoryview_err_dim(PyExc_ValueError, __pyx_mstate_global->__pyx_kp_u_Dimension_d_is_not_direct, __pyx_v_i); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(1, 1297, __pyx_L1_error)
 
       /* "View.MemoryView":1296
  *                 _err_extents(i, dst.shape[i], src.shape[i])
- * 
+ *
  *         if src.suboffsets[i] >= 0:             # <<<<<<<<<<<<<<
  *             _err_dim(PyExc_ValueError, "Dimension %d is not direct", i)
- * 
+ *
 */
     }
   }
 
   /* "View.MemoryView":1299
  *             _err_dim(PyExc_ValueError, "Dimension %d is not direct", i)
- * 
+ *
  *     if slices_overlap(&src, &dst, ndim, itemsize):             # <<<<<<<<<<<<<<
- * 
+ *
  *         if not slice_is_contig(src, order, ndim):
 */
   __pyx_t_2 = __pyx_slices_overlap((&__pyx_v_src), (&__pyx_v_dst), __pyx_v_ndim, __pyx_v_itemsize);
@@ -16893,73 +16893,73 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
 
     /* "View.MemoryView":1301
  *     if slices_overlap(&src, &dst, ndim, itemsize):
- * 
+ *
  *         if not slice_is_contig(src, order, ndim):             # <<<<<<<<<<<<<<
  *             order = get_best_order(&dst, ndim)
- * 
+ *
 */
     __pyx_t_2 = (!__pyx_memviewslice_is_contig(__pyx_v_src, __pyx_v_order, __pyx_v_ndim));
     if (__pyx_t_2) {
 
       /* "View.MemoryView":1302
- * 
+ *
  *         if not slice_is_contig(src, order, ndim):
  *             order = get_best_order(&dst, ndim)             # <<<<<<<<<<<<<<
- * 
+ *
  *         tmpdata = copy_data_to_temp(&src, &tmp, order, ndim)
 */
       __pyx_v_order = __pyx_get_best_slice_order((&__pyx_v_dst), __pyx_v_ndim);
 
       /* "View.MemoryView":1301
  *     if slices_overlap(&src, &dst, ndim, itemsize):
- * 
+ *
  *         if not slice_is_contig(src, order, ndim):             # <<<<<<<<<<<<<<
  *             order = get_best_order(&dst, ndim)
- * 
+ *
 */
     }
 
     /* "View.MemoryView":1304
  *             order = get_best_order(&dst, ndim)
- * 
+ *
  *         tmpdata = copy_data_to_temp(&src, &tmp, order, ndim)             # <<<<<<<<<<<<<<
  *         src = tmp
- * 
+ *
 */
     __pyx_t_7 = __pyx_memoryview_copy_data_to_temp((&__pyx_v_src), (&__pyx_v_tmp), __pyx_v_order, __pyx_v_ndim); if (unlikely(__pyx_t_7 == ((void *)0))) __PYX_ERR(1, 1304, __pyx_L1_error)
     __pyx_v_tmpdata = __pyx_t_7;
 
     /* "View.MemoryView":1305
- * 
+ *
  *         tmpdata = copy_data_to_temp(&src, &tmp, order, ndim)
  *         src = tmp             # <<<<<<<<<<<<<<
- * 
+ *
  *     if not broadcasting:
 */
     __pyx_v_src = __pyx_v_tmp;
 
     /* "View.MemoryView":1299
  *             _err_dim(PyExc_ValueError, "Dimension %d is not direct", i)
- * 
+ *
  *     if slices_overlap(&src, &dst, ndim, itemsize):             # <<<<<<<<<<<<<<
- * 
+ *
  *         if not slice_is_contig(src, order, ndim):
 */
   }
 
   /* "View.MemoryView":1307
  *         src = tmp
- * 
+ *
  *     if not broadcasting:             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_2 = (!__pyx_v_broadcasting);
   if (__pyx_t_2) {
 
     /* "View.MemoryView":1310
- * 
- * 
+ *
+ *
  *         if slice_is_contig(src, 'C', ndim):             # <<<<<<<<<<<<<<
  *             direct_copy = slice_is_contig(dst, 'C', ndim)
  *         elif slice_is_contig(src, 'F', ndim):
@@ -16968,7 +16968,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
     if (__pyx_t_2) {
 
       /* "View.MemoryView":1311
- * 
+ *
  *         if slice_is_contig(src, 'C', ndim):
  *             direct_copy = slice_is_contig(dst, 'C', ndim)             # <<<<<<<<<<<<<<
  *         elif slice_is_contig(src, 'F', ndim):
@@ -16977,8 +16977,8 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
       __pyx_v_direct_copy = __pyx_memviewslice_is_contig(__pyx_v_dst, 'C', __pyx_v_ndim);
 
       /* "View.MemoryView":1310
- * 
- * 
+ *
+ *
  *         if slice_is_contig(src, 'C', ndim):             # <<<<<<<<<<<<<<
  *             direct_copy = slice_is_contig(dst, 'C', ndim)
  *         elif slice_is_contig(src, 'F', ndim):
@@ -16991,7 +16991,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *             direct_copy = slice_is_contig(dst, 'C', ndim)
  *         elif slice_is_contig(src, 'F', ndim):             # <<<<<<<<<<<<<<
  *             direct_copy = slice_is_contig(dst, 'F', ndim)
- * 
+ *
 */
     __pyx_t_2 = __pyx_memviewslice_is_contig(__pyx_v_src, 'F', __pyx_v_ndim);
     if (__pyx_t_2) {
@@ -17000,7 +17000,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *             direct_copy = slice_is_contig(dst, 'C', ndim)
  *         elif slice_is_contig(src, 'F', ndim):
  *             direct_copy = slice_is_contig(dst, 'F', ndim)             # <<<<<<<<<<<<<<
- * 
+ *
  *         if direct_copy:
 */
       __pyx_v_direct_copy = __pyx_memviewslice_is_contig(__pyx_v_dst, 'F', __pyx_v_ndim);
@@ -17010,23 +17010,23 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *             direct_copy = slice_is_contig(dst, 'C', ndim)
  *         elif slice_is_contig(src, 'F', ndim):             # <<<<<<<<<<<<<<
  *             direct_copy = slice_is_contig(dst, 'F', ndim)
- * 
+ *
 */
     }
     __pyx_L12:;
 
     /* "View.MemoryView":1315
  *             direct_copy = slice_is_contig(dst, 'F', ndim)
- * 
+ *
  *         if direct_copy:             # <<<<<<<<<<<<<<
- * 
+ *
  *             refcount_copying(&dst, dtype_is_object, ndim, inc=False)
 */
     if (__pyx_v_direct_copy) {
 
       /* "View.MemoryView":1317
  *         if direct_copy:
- * 
+ *
  *             refcount_copying(&dst, dtype_is_object, ndim, inc=False)             # <<<<<<<<<<<<<<
  *             memcpy(dst.data, src.data, slice_get_size(&src, ndim))
  *             refcount_copying(&dst, dtype_is_object, ndim, inc=True)
@@ -17034,7 +17034,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
       __pyx_memoryview_refcount_copying((&__pyx_v_dst), __pyx_v_dtype_is_object, __pyx_v_ndim, 0);
 
       /* "View.MemoryView":1318
- * 
+ *
  *             refcount_copying(&dst, dtype_is_object, ndim, inc=False)
  *             memcpy(dst.data, src.data, slice_get_size(&src, ndim))             # <<<<<<<<<<<<<<
  *             refcount_copying(&dst, dtype_is_object, ndim, inc=True)
@@ -17056,7 +17056,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *             refcount_copying(&dst, dtype_is_object, ndim, inc=True)
  *             free(tmpdata)             # <<<<<<<<<<<<<<
  *             return 0
- * 
+ *
 */
       free(__pyx_v_tmpdata);
 
@@ -17064,7 +17064,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *             refcount_copying(&dst, dtype_is_object, ndim, inc=True)
  *             free(tmpdata)
  *             return 0             # <<<<<<<<<<<<<<
- * 
+ *
  *     if order == 'F' == get_best_order(&dst, ndim):
 */
       __pyx_r = 0;
@@ -17072,28 +17072,28 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
 
       /* "View.MemoryView":1315
  *             direct_copy = slice_is_contig(dst, 'F', ndim)
- * 
+ *
  *         if direct_copy:             # <<<<<<<<<<<<<<
- * 
+ *
  *             refcount_copying(&dst, dtype_is_object, ndim, inc=False)
 */
     }
 
     /* "View.MemoryView":1307
  *         src = tmp
- * 
+ *
  *     if not broadcasting:             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   }
 
   /* "View.MemoryView":1323
  *             return 0
- * 
+ *
  *     if order == 'F' == get_best_order(&dst, ndim):             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_2 = (__pyx_v_order == 'F');
   if (__pyx_t_2) {
@@ -17102,35 +17102,35 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
   if (__pyx_t_2) {
 
     /* "View.MemoryView":1326
- * 
- * 
+ *
+ *
  *         transpose_memslice(&src)             # <<<<<<<<<<<<<<
  *         transpose_memslice(&dst)
- * 
+ *
 */
     __pyx_t_5 = __pyx_memslice_transpose((&__pyx_v_src)); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(1, 1326, __pyx_L1_error)
 
     /* "View.MemoryView":1327
- * 
+ *
  *         transpose_memslice(&src)
  *         transpose_memslice(&dst)             # <<<<<<<<<<<<<<
- * 
+ *
  *     refcount_copying(&dst, dtype_is_object, ndim, inc=False)
 */
     __pyx_t_5 = __pyx_memslice_transpose((&__pyx_v_dst)); if (unlikely(__pyx_t_5 == ((int)-1))) __PYX_ERR(1, 1327, __pyx_L1_error)
 
     /* "View.MemoryView":1323
  *             return 0
- * 
+ *
  *     if order == 'F' == get_best_order(&dst, ndim):             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   }
 
   /* "View.MemoryView":1329
  *         transpose_memslice(&dst)
- * 
+ *
  *     refcount_copying(&dst, dtype_is_object, ndim, inc=False)             # <<<<<<<<<<<<<<
  *     copy_strided_to_strided(&src, &dst, ndim, itemsize)
  *     refcount_copying(&dst, dtype_is_object, ndim, inc=True)
@@ -17138,11 +17138,11 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
   __pyx_memoryview_refcount_copying((&__pyx_v_dst), __pyx_v_dtype_is_object, __pyx_v_ndim, 0);
 
   /* "View.MemoryView":1330
- * 
+ *
  *     refcount_copying(&dst, dtype_is_object, ndim, inc=False)
  *     copy_strided_to_strided(&src, &dst, ndim, itemsize)             # <<<<<<<<<<<<<<
  *     refcount_copying(&dst, dtype_is_object, ndim, inc=True)
- * 
+ *
 */
   copy_strided_to_strided((&__pyx_v_src), (&__pyx_v_dst), __pyx_v_ndim, __pyx_v_itemsize);
 
@@ -17150,33 +17150,33 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
  *     refcount_copying(&dst, dtype_is_object, ndim, inc=False)
  *     copy_strided_to_strided(&src, &dst, ndim, itemsize)
  *     refcount_copying(&dst, dtype_is_object, ndim, inc=True)             # <<<<<<<<<<<<<<
- * 
+ *
  *     free(tmpdata)
 */
   __pyx_memoryview_refcount_copying((&__pyx_v_dst), __pyx_v_dtype_is_object, __pyx_v_ndim, 1);
 
   /* "View.MemoryView":1333
  *     refcount_copying(&dst, dtype_is_object, ndim, inc=True)
- * 
+ *
  *     free(tmpdata)             # <<<<<<<<<<<<<<
  *     return 0
- * 
+ *
 */
   free(__pyx_v_tmpdata);
 
   /* "View.MemoryView":1334
- * 
+ *
  *     free(tmpdata)
  *     return 0             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_broadcast_leading')
 */
   __pyx_r = 0;
   goto __pyx_L0;
 
   /* "View.MemoryView":1264
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_copy_contents')             # <<<<<<<<<<<<<<
  * cdef int memoryview_copy_contents(__Pyx_memviewslice src,
  *                                   __Pyx_memviewslice dst,
@@ -17194,7 +17194,7 @@ static int __pyx_memoryview_copy_contents(__Pyx_memviewslice __pyx_v_src, __Pyx_
 
 /* "View.MemoryView":1336
  *     return 0
- * 
+ *
  * @cname('__pyx_memoryview_broadcast_leading')             # <<<<<<<<<<<<<<
  * cdef void broadcast_leading(__Pyx_memviewslice *mslice,
  *                             int ndim,
@@ -17211,14 +17211,14 @@ static void __pyx_memoryview_broadcast_leading(__Pyx_memviewslice *__pyx_v_mslic
  *                             int ndim_other) noexcept nogil:
  *     cdef int i
  *     cdef int offset = ndim_other - ndim             # <<<<<<<<<<<<<<
- * 
+ *
  *     for i in range(ndim - 1, -1, -1):
 */
   __pyx_v_offset = (__pyx_v_ndim_other - __pyx_v_ndim);
 
   /* "View.MemoryView":1343
  *     cdef int offset = ndim_other - ndim
- * 
+ *
  *     for i in range(ndim - 1, -1, -1):             # <<<<<<<<<<<<<<
  *         mslice.shape[i + offset] = mslice.shape[i]
  *         mslice.strides[i + offset] = mslice.strides[i]
@@ -17227,7 +17227,7 @@ static void __pyx_memoryview_broadcast_leading(__Pyx_memviewslice *__pyx_v_mslic
     __pyx_v_i = __pyx_t_1;
 
     /* "View.MemoryView":1344
- * 
+ *
  *     for i in range(ndim - 1, -1, -1):
  *         mslice.shape[i + offset] = mslice.shape[i]             # <<<<<<<<<<<<<<
  *         mslice.strides[i + offset] = mslice.strides[i]
@@ -17240,7 +17240,7 @@ static void __pyx_memoryview_broadcast_leading(__Pyx_memviewslice *__pyx_v_mslic
  *         mslice.shape[i + offset] = mslice.shape[i]
  *         mslice.strides[i + offset] = mslice.strides[i]             # <<<<<<<<<<<<<<
  *         mslice.suboffsets[i + offset] = mslice.suboffsets[i]
- * 
+ *
 */
     (__pyx_v_mslice->strides[(__pyx_v_i + __pyx_v_offset)]) = (__pyx_v_mslice->strides[__pyx_v_i]);
 
@@ -17248,7 +17248,7 @@ static void __pyx_memoryview_broadcast_leading(__Pyx_memviewslice *__pyx_v_mslic
  *         mslice.shape[i + offset] = mslice.shape[i]
  *         mslice.strides[i + offset] = mslice.strides[i]
  *         mslice.suboffsets[i + offset] = mslice.suboffsets[i]             # <<<<<<<<<<<<<<
- * 
+ *
  *     for i in range(offset):
 */
     (__pyx_v_mslice->suboffsets[(__pyx_v_i + __pyx_v_offset)]) = (__pyx_v_mslice->suboffsets[__pyx_v_i]);
@@ -17256,7 +17256,7 @@ static void __pyx_memoryview_broadcast_leading(__Pyx_memviewslice *__pyx_v_mslic
 
   /* "View.MemoryView":1348
  *         mslice.suboffsets[i + offset] = mslice.suboffsets[i]
- * 
+ *
  *     for i in range(offset):             # <<<<<<<<<<<<<<
  *         mslice.shape[i] = 1
  *         mslice.strides[i] = mslice.strides[0]
@@ -17267,7 +17267,7 @@ static void __pyx_memoryview_broadcast_leading(__Pyx_memviewslice *__pyx_v_mslic
     __pyx_v_i = __pyx_t_3;
 
     /* "View.MemoryView":1349
- * 
+ *
  *     for i in range(offset):
  *         mslice.shape[i] = 1             # <<<<<<<<<<<<<<
  *         mslice.strides[i] = mslice.strides[0]
@@ -17280,7 +17280,7 @@ static void __pyx_memoryview_broadcast_leading(__Pyx_memviewslice *__pyx_v_mslic
  *         mslice.shape[i] = 1
  *         mslice.strides[i] = mslice.strides[0]             # <<<<<<<<<<<<<<
  *         mslice.suboffsets[i] = -1
- * 
+ *
 */
     (__pyx_v_mslice->strides[__pyx_v_i]) = (__pyx_v_mslice->strides[0]);
 
@@ -17288,15 +17288,15 @@ static void __pyx_memoryview_broadcast_leading(__Pyx_memviewslice *__pyx_v_mslic
  *         mslice.shape[i] = 1
  *         mslice.strides[i] = mslice.strides[0]
  *         mslice.suboffsets[i] = -1             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     (__pyx_v_mslice->suboffsets[__pyx_v_i]) = -1L;
   }
 
   /* "View.MemoryView":1336
  *     return 0
- * 
+ *
  * @cname('__pyx_memoryview_broadcast_leading')             # <<<<<<<<<<<<<<
  * cdef void broadcast_leading(__Pyx_memviewslice *mslice,
  *                             int ndim,
@@ -17306,48 +17306,48 @@ static void __pyx_memoryview_broadcast_leading(__Pyx_memviewslice *__pyx_v_mslic
 }
 
 /* "View.MemoryView":1358
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_refcount_copying')             # <<<<<<<<<<<<<<
  * cdef void refcount_copying(__Pyx_memviewslice *dst, bint dtype_is_object, int ndim, bint inc) noexcept nogil:
- * 
+ *
 */
 
 static void __pyx_memoryview_refcount_copying(__Pyx_memviewslice *__pyx_v_dst, int __pyx_v_dtype_is_object, int __pyx_v_ndim, int __pyx_v_inc) {
 
   /* "View.MemoryView":1361
  * cdef void refcount_copying(__Pyx_memviewslice *dst, bint dtype_is_object, int ndim, bint inc) noexcept nogil:
- * 
+ *
  *     if dtype_is_object:             # <<<<<<<<<<<<<<
  *         refcount_objects_in_slice_with_gil(dst.data, dst.shape, dst.strides, ndim, inc)
- * 
+ *
 */
   if (__pyx_v_dtype_is_object) {
 
     /* "View.MemoryView":1362
- * 
+ *
  *     if dtype_is_object:
  *         refcount_objects_in_slice_with_gil(dst.data, dst.shape, dst.strides, ndim, inc)             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_refcount_objects_in_slice_with_gil')
 */
     __pyx_memoryview_refcount_objects_in_slice_with_gil(__pyx_v_dst->data, __pyx_v_dst->shape, __pyx_v_dst->strides, __pyx_v_ndim, __pyx_v_inc);
 
     /* "View.MemoryView":1361
  * cdef void refcount_copying(__Pyx_memviewslice *dst, bint dtype_is_object, int ndim, bint inc) noexcept nogil:
- * 
+ *
  *     if dtype_is_object:             # <<<<<<<<<<<<<<
  *         refcount_objects_in_slice_with_gil(dst.data, dst.shape, dst.strides, ndim, inc)
- * 
+ *
 */
   }
 
   /* "View.MemoryView":1358
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_refcount_copying')             # <<<<<<<<<<<<<<
  * cdef void refcount_copying(__Pyx_memviewslice *dst, bint dtype_is_object, int ndim, bint inc) noexcept nogil:
- * 
+ *
 */
 
   /* function exit code */
@@ -17355,7 +17355,7 @@ static void __pyx_memoryview_refcount_copying(__Pyx_memviewslice *__pyx_v_dst, i
 
 /* "View.MemoryView":1364
  *         refcount_objects_in_slice_with_gil(dst.data, dst.shape, dst.strides, ndim, inc)
- * 
+ *
  * @cname('__pyx_memoryview_refcount_objects_in_slice_with_gil')             # <<<<<<<<<<<<<<
  * cdef void refcount_objects_in_slice_with_gil(char *data, Py_ssize_t *shape,
  *                                              Py_ssize_t *strides, int ndim,
@@ -17368,14 +17368,14 @@ static void __pyx_memoryview_refcount_objects_in_slice_with_gil(char *__pyx_v_da
  *                                              Py_ssize_t *strides, int ndim,
  *                                              bint inc) noexcept with gil:
  *     refcount_objects_in_slice(data, shape, strides, ndim, inc)             # <<<<<<<<<<<<<<
- * 
+ *
  * @cname('__pyx_memoryview_refcount_objects_in_slice')
 */
   __pyx_memoryview_refcount_objects_in_slice(__pyx_v_data, __pyx_v_shape, __pyx_v_strides, __pyx_v_ndim, __pyx_v_inc);
 
   /* "View.MemoryView":1364
  *         refcount_objects_in_slice_with_gil(dst.data, dst.shape, dst.strides, ndim, inc)
- * 
+ *
  * @cname('__pyx_memoryview_refcount_objects_in_slice_with_gil')             # <<<<<<<<<<<<<<
  * cdef void refcount_objects_in_slice_with_gil(char *data, Py_ssize_t *shape,
  *                                              Py_ssize_t *strides, int ndim,
@@ -17387,7 +17387,7 @@ static void __pyx_memoryview_refcount_objects_in_slice_with_gil(char *__pyx_v_da
 
 /* "View.MemoryView":1370
  *     refcount_objects_in_slice(data, shape, strides, ndim, inc)
- * 
+ *
  * @cname('__pyx_memoryview_refcount_objects_in_slice')             # <<<<<<<<<<<<<<
  * cdef void refcount_objects_in_slice(char *data, Py_ssize_t *shape,
  *                                     Py_ssize_t *strides, int ndim, bint inc) noexcept:
@@ -17405,14 +17405,14 @@ static void __pyx_memoryview_refcount_objects_in_slice(char *__pyx_v_data, Py_ss
  *                                     Py_ssize_t *strides, int ndim, bint inc) noexcept:
  *     cdef Py_ssize_t i
  *     cdef Py_ssize_t stride = strides[0]             # <<<<<<<<<<<<<<
- * 
+ *
  *     for i in range(shape[0]):
 */
   __pyx_v_stride = (__pyx_v_strides[0]);
 
   /* "View.MemoryView":1376
  *     cdef Py_ssize_t stride = strides[0]
- * 
+ *
  *     for i in range(shape[0]):             # <<<<<<<<<<<<<<
  *         if ndim == 1:
  *             if inc:
@@ -17423,7 +17423,7 @@ static void __pyx_memoryview_refcount_objects_in_slice(char *__pyx_v_data, Py_ss
     __pyx_v_i = __pyx_t_3;
 
     /* "View.MemoryView":1377
- * 
+ *
  *     for i in range(shape[0]):
  *         if ndim == 1:             # <<<<<<<<<<<<<<
  *             if inc:
@@ -17473,7 +17473,7 @@ static void __pyx_memoryview_refcount_objects_in_slice(char *__pyx_v_data, Py_ss
       __pyx_L6:;
 
       /* "View.MemoryView":1377
- * 
+ *
  *     for i in range(shape[0]):
  *         if ndim == 1:             # <<<<<<<<<<<<<<
  *             if inc:
@@ -17486,7 +17486,7 @@ static void __pyx_memoryview_refcount_objects_in_slice(char *__pyx_v_data, Py_ss
  *                 Py_DECREF((<PyObject **> data)[0])
  *         else:
  *             refcount_objects_in_slice(data, shape + 1, strides + 1, ndim - 1, inc)             # <<<<<<<<<<<<<<
- * 
+ *
  *         data += stride
 */
     /*else*/ {
@@ -17496,17 +17496,17 @@ static void __pyx_memoryview_refcount_objects_in_slice(char *__pyx_v_data, Py_ss
 
     /* "View.MemoryView":1385
  *             refcount_objects_in_slice(data, shape + 1, strides + 1, ndim - 1, inc)
- * 
+ *
  *         data += stride             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     __pyx_v_data = (__pyx_v_data + __pyx_v_stride);
   }
 
   /* "View.MemoryView":1370
  *     refcount_objects_in_slice(data, shape, strides, ndim, inc)
- * 
+ *
  * @cname('__pyx_memoryview_refcount_objects_in_slice')             # <<<<<<<<<<<<<<
  * cdef void refcount_objects_in_slice(char *data, Py_ssize_t *shape,
  *                                     Py_ssize_t *strides, int ndim, bint inc) noexcept:
@@ -17516,8 +17516,8 @@ static void __pyx_memoryview_refcount_objects_in_slice(char *__pyx_v_data, Py_ss
 }
 
 /* "View.MemoryView":1390
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_slice_assign_scalar')             # <<<<<<<<<<<<<<
  * cdef void slice_assign_scalar(__Pyx_memviewslice *dst, int ndim,
  *                               size_t itemsize, void *item,
@@ -17539,7 +17539,7 @@ static void __pyx_memoryview_slice_assign_scalar(__Pyx_memviewslice *__pyx_v_dst
  *     refcount_copying(dst, dtype_is_object, ndim, inc=False)
  *     _slice_assign_scalar(dst.data, dst.shape, dst.strides, ndim, itemsize, item)             # <<<<<<<<<<<<<<
  *     refcount_copying(dst, dtype_is_object, ndim, inc=True)
- * 
+ *
 */
   __pyx_memoryview__slice_assign_scalar(__pyx_v_dst->data, __pyx_v_dst->shape, __pyx_v_dst->strides, __pyx_v_ndim, __pyx_v_itemsize, __pyx_v_item);
 
@@ -17547,14 +17547,14 @@ static void __pyx_memoryview_slice_assign_scalar(__Pyx_memviewslice *__pyx_v_dst
  *     refcount_copying(dst, dtype_is_object, ndim, inc=False)
  *     _slice_assign_scalar(dst.data, dst.shape, dst.strides, ndim, itemsize, item)
  *     refcount_copying(dst, dtype_is_object, ndim, inc=True)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_memoryview_refcount_copying(__pyx_v_dst, __pyx_v_dtype_is_object, __pyx_v_ndim, 1);
 
   /* "View.MemoryView":1390
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview_slice_assign_scalar')             # <<<<<<<<<<<<<<
  * cdef void slice_assign_scalar(__Pyx_memviewslice *dst, int ndim,
  *                               size_t itemsize, void *item,
@@ -17564,8 +17564,8 @@ static void __pyx_memoryview_slice_assign_scalar(__Pyx_memviewslice *__pyx_v_dst
 }
 
 /* "View.MemoryView":1399
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview__slice_assign_scalar')             # <<<<<<<<<<<<<<
  * cdef void _slice_assign_scalar(char *data, Py_ssize_t *shape,
  *                               Py_ssize_t *strides, int ndim,
@@ -17585,7 +17585,7 @@ static void __pyx_memoryview__slice_assign_scalar(char *__pyx_v_data, Py_ssize_t
  *     cdef Py_ssize_t i
  *     cdef Py_ssize_t stride = strides[0]             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t extent = shape[0]
- * 
+ *
 */
   __pyx_v_stride = (__pyx_v_strides[0]);
 
@@ -17593,14 +17593,14 @@ static void __pyx_memoryview__slice_assign_scalar(char *__pyx_v_data, Py_ssize_t
  *     cdef Py_ssize_t i
  *     cdef Py_ssize_t stride = strides[0]
  *     cdef Py_ssize_t extent = shape[0]             # <<<<<<<<<<<<<<
- * 
+ *
  *     if ndim == 1:
 */
   __pyx_v_extent = (__pyx_v_shape[0]);
 
   /* "View.MemoryView":1407
  *     cdef Py_ssize_t extent = shape[0]
- * 
+ *
  *     if ndim == 1:             # <<<<<<<<<<<<<<
  *         for i in range(extent):
  *             memcpy(data, item, itemsize)
@@ -17609,7 +17609,7 @@ static void __pyx_memoryview__slice_assign_scalar(char *__pyx_v_data, Py_ssize_t
   if (__pyx_t_1) {
 
     /* "View.MemoryView":1408
- * 
+ *
  *     if ndim == 1:
  *         for i in range(extent):             # <<<<<<<<<<<<<<
  *             memcpy(data, item, itemsize)
@@ -17641,7 +17641,7 @@ static void __pyx_memoryview__slice_assign_scalar(char *__pyx_v_data, Py_ssize_t
 
     /* "View.MemoryView":1407
  *     cdef Py_ssize_t extent = shape[0]
- * 
+ *
  *     if ndim == 1:             # <<<<<<<<<<<<<<
  *         for i in range(extent):
  *             memcpy(data, item, itemsize)
@@ -17667,7 +17667,7 @@ static void __pyx_memoryview__slice_assign_scalar(char *__pyx_v_data, Py_ssize_t
  *         for i in range(extent):
  *             _slice_assign_scalar(data, shape + 1, strides + 1, ndim - 1, itemsize, item)             # <<<<<<<<<<<<<<
  *             data += stride
- * 
+ *
 */
       __pyx_memoryview__slice_assign_scalar(__pyx_v_data, (__pyx_v_shape + 1), (__pyx_v_strides + 1), (__pyx_v_ndim - 1), __pyx_v_itemsize, __pyx_v_item);
 
@@ -17675,8 +17675,8 @@ static void __pyx_memoryview__slice_assign_scalar(char *__pyx_v_data, Py_ssize_t
  *         for i in range(extent):
  *             _slice_assign_scalar(data, shape + 1, strides + 1, ndim - 1, itemsize, item)
  *             data += stride             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
       __pyx_v_data = (__pyx_v_data + __pyx_v_stride);
     }
@@ -17684,8 +17684,8 @@ static void __pyx_memoryview__slice_assign_scalar(char *__pyx_v_data, Py_ssize_t
   __pyx_L3:;
 
   /* "View.MemoryView":1399
- * 
- * 
+ *
+ *
  * @cname('__pyx_memoryview__slice_assign_scalar')             # <<<<<<<<<<<<<<
  * cdef void _slice_assign_scalar(char *data, Py_ssize_t *shape,
  *                               Py_ssize_t *strides, int ndim,
@@ -17701,7 +17701,7 @@ static void __pyx_memoryview__slice_assign_scalar(char *__pyx_v_data, Py_ssize_t
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15View_dot_MemoryView_1__pyx_unpickle_Enum(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_15View_dot_MemoryView_1__pyx_unpickle_Enum(PyObject *__pyx_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -17709,7 +17709,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
 static PyMethodDef __pyx_mdef_15View_dot_MemoryView_1__pyx_unpickle_Enum = {"__pyx_unpickle_Enum", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15View_dot_MemoryView_1__pyx_unpickle_Enum, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_15View_dot_MemoryView_1__pyx_unpickle_Enum(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_15View_dot_MemoryView_1__pyx_unpickle_Enum(PyObject *__pyx_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -18084,7 +18084,7 @@ static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *__
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":242
  *         cdef int type_num
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp itemsize(self) noexcept nogil:
  *             return PyDataType_ELSIZE(self)
@@ -18097,7 +18097,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_5dtype_8itemsize_itemsize(PyArray_D
  *         @property
  *         cdef inline npy_intp itemsize(self) noexcept nogil:
  *             return PyDataType_ELSIZE(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyDataType_ELSIZE(__pyx_v_self);
@@ -18105,7 +18105,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_5dtype_8itemsize_itemsize(PyArray_D
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":242
  *         cdef int type_num
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp itemsize(self) noexcept nogil:
  *             return PyDataType_ELSIZE(self)
@@ -18118,7 +18118,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_5dtype_8itemsize_itemsize(PyArray_D
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":246
  *             return PyDataType_ELSIZE(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp alignment(self) noexcept nogil:
  *             return PyDataType_ALIGNMENT(self)
@@ -18131,7 +18131,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_5dtype_9alignment_alignment(PyArray
  *         @property
  *         cdef inline npy_intp alignment(self) noexcept nogil:
  *             return PyDataType_ALIGNMENT(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         # Use fields/names with care as they may be NULL.  You must check
 */
   __pyx_r = PyDataType_ALIGNMENT(__pyx_v_self);
@@ -18139,7 +18139,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_5dtype_9alignment_alignment(PyArray
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":246
  *             return PyDataType_ELSIZE(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp alignment(self) noexcept nogil:
  *             return PyDataType_ALIGNMENT(self)
@@ -18168,7 +18168,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_5dtype_6fields_fields(PyArray_Desc
  *         @property
  *         cdef inline object fields(self):
  *             return <object>PyDataType_FIELDS(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __Pyx_XDECREF(__pyx_r);
@@ -18194,7 +18194,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_5dtype_6fields_fields(PyArray_Desc
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":256
  *             return <object>PyDataType_FIELDS(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline tuple names(self):
  *             return <tuple>PyDataType_NAMES(self)
@@ -18210,7 +18210,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_5dtype_5names_names(PyArray_Descr 
  *         @property
  *         cdef inline tuple names(self):
  *             return <tuple>PyDataType_NAMES(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         # Use PyDataType_HASSUBARRAY to test whether this field is
 */
   __Pyx_XDECREF(__pyx_r);
@@ -18221,7 +18221,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_5dtype_5names_names(PyArray_Descr 
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":256
  *             return <object>PyDataType_FIELDS(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline tuple names(self):
  *             return <tuple>PyDataType_NAMES(self)
@@ -18249,7 +18249,7 @@ static CYTHON_INLINE PyArray_ArrayDescr *__pyx_f_5numpy_5dtype_8subarray_subarra
  *         @property
  *         cdef inline PyArray_ArrayDescr* subarray(self) noexcept nogil:
  *             return PyDataType_SUBARRAY(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyDataType_SUBARRAY(__pyx_v_self);
@@ -18270,7 +18270,7 @@ static CYTHON_INLINE PyArray_ArrayDescr *__pyx_f_5numpy_5dtype_8subarray_subarra
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":267
  *             return PyDataType_SUBARRAY(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_uint64 flags(self) noexcept nogil:
  *             """The data types flags."""
@@ -18283,15 +18283,15 @@ static CYTHON_INLINE npy_uint64 __pyx_f_5numpy_5dtype_5flags_flags(PyArray_Descr
  *         cdef inline npy_uint64 flags(self) noexcept nogil:
  *             """The data types flags."""
  *             return PyDataType_FLAGS(self)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = PyDataType_FLAGS(__pyx_v_self);
   goto __pyx_L0;
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":267
  *             return PyDataType_SUBARRAY(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_uint64 flags(self) noexcept nogil:
  *             """The data types flags."""
@@ -18304,7 +18304,7 @@ static CYTHON_INLINE npy_uint64 __pyx_f_5numpy_5dtype_5flags_flags(PyArray_Descr
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":279
  *     ctypedef class numpy.broadcast [object PyArrayMultiIterObject, check_size ignore]:
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline int numiter(self) noexcept nogil:
  *             """The number of arrays that need to be broadcast to the same shape."""
@@ -18317,7 +18317,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_9broadcast_7numiter_numiter(PyArrayMulti
  *         cdef inline int numiter(self) noexcept nogil:
  *             """The number of arrays that need to be broadcast to the same shape."""
  *             return PyArray_MultiIter_NUMITER(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_MultiIter_NUMITER(__pyx_v_self);
@@ -18325,7 +18325,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_9broadcast_7numiter_numiter(PyArrayMulti
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":279
  *     ctypedef class numpy.broadcast [object PyArrayMultiIterObject, check_size ignore]:
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline int numiter(self) noexcept nogil:
  *             """The number of arrays that need to be broadcast to the same shape."""
@@ -18338,7 +18338,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_9broadcast_7numiter_numiter(PyArrayMulti
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":284
  *             return PyArray_MultiIter_NUMITER(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp size(self) noexcept nogil:
  *             """The total broadcasted size."""
@@ -18351,7 +18351,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_9broadcast_4size_size(PyArrayMultiI
  *         cdef inline npy_intp size(self) noexcept nogil:
  *             """The total broadcasted size."""
  *             return PyArray_MultiIter_SIZE(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_MultiIter_SIZE(__pyx_v_self);
@@ -18359,7 +18359,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_9broadcast_4size_size(PyArrayMultiI
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":284
  *             return PyArray_MultiIter_NUMITER(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp size(self) noexcept nogil:
  *             """The total broadcasted size."""
@@ -18372,7 +18372,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_9broadcast_4size_size(PyArrayMultiI
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":289
  *             return PyArray_MultiIter_SIZE(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp index(self) noexcept nogil:
  *             """The current (1-d) index into the broadcasted result."""
@@ -18385,7 +18385,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_9broadcast_5index_index(PyArrayMult
  *         cdef inline npy_intp index(self) noexcept nogil:
  *             """The current (1-d) index into the broadcasted result."""
  *             return PyArray_MultiIter_INDEX(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_MultiIter_INDEX(__pyx_v_self);
@@ -18393,7 +18393,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_9broadcast_5index_index(PyArrayMult
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":289
  *             return PyArray_MultiIter_SIZE(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp index(self) noexcept nogil:
  *             """The current (1-d) index into the broadcasted result."""
@@ -18406,7 +18406,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_9broadcast_5index_index(PyArrayMult
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":294
  *             return PyArray_MultiIter_INDEX(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline int nd(self) noexcept nogil:
  *             """The number of dimensions in the broadcasted result."""
@@ -18419,7 +18419,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_9broadcast_2nd_nd(PyArrayMultiIterObject
  *         cdef inline int nd(self) noexcept nogil:
  *             """The number of dimensions in the broadcasted result."""
  *             return PyArray_MultiIter_NDIM(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_MultiIter_NDIM(__pyx_v_self);
@@ -18427,7 +18427,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_9broadcast_2nd_nd(PyArrayMultiIterObject
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":294
  *             return PyArray_MultiIter_INDEX(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline int nd(self) noexcept nogil:
  *             """The number of dimensions in the broadcasted result."""
@@ -18440,7 +18440,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_9broadcast_2nd_nd(PyArrayMultiIterObject
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":299
  *             return PyArray_MultiIter_NDIM(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp* dimensions(self) noexcept nogil:
  *             """The shape of the broadcasted result."""
@@ -18453,7 +18453,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_9broadcast_10dimensions_dimensions
  *         cdef inline npy_intp* dimensions(self) noexcept nogil:
  *             """The shape of the broadcasted result."""
  *             return PyArray_MultiIter_DIMS(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_MultiIter_DIMS(__pyx_v_self);
@@ -18461,7 +18461,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_9broadcast_10dimensions_dimensions
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":299
  *             return PyArray_MultiIter_NDIM(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp* dimensions(self) noexcept nogil:
  *             """The shape of the broadcasted result."""
@@ -18474,7 +18474,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_9broadcast_10dimensions_dimensions
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":304
  *             return PyArray_MultiIter_DIMS(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline void** iters(self) noexcept nogil:
  *             """An array of iterator objects that holds the iterators for the arrays to be broadcast together.
@@ -18487,15 +18487,15 @@ static CYTHON_INLINE void **__pyx_f_5numpy_9broadcast_5iters_iters(PyArrayMultiI
  *             """An array of iterator objects that holds the iterators for the arrays to be broadcast together.
  *             On return, the iterators are adjusted for broadcasting."""
  *             return PyArray_MultiIter_ITERS(self)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = PyArray_MultiIter_ITERS(__pyx_v_self);
   goto __pyx_L0;
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":304
  *             return PyArray_MultiIter_DIMS(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline void** iters(self) noexcept nogil:
  *             """An array of iterator objects that holds the iterators for the arrays to be broadcast together.
@@ -18508,7 +18508,7 @@ static CYTHON_INLINE void **__pyx_f_5numpy_9broadcast_5iters_iters(PyArrayMultiI
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":322
  *         # Instead, we use properties that map to the corresponding C-API functions.
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline PyObject* base(self) noexcept nogil:
  *             """Returns a borrowed reference to the object owning the data/memory.
@@ -18521,7 +18521,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_7ndarray_4base_base(PyArrayObject 
  *             """Returns a borrowed reference to the object owning the data/memory.
  *             """
  *             return PyArray_BASE(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_BASE(__pyx_v_self);
@@ -18529,7 +18529,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_7ndarray_4base_base(PyArrayObject 
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":322
  *         # Instead, we use properties that map to the corresponding C-API functions.
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline PyObject* base(self) noexcept nogil:
  *             """Returns a borrowed reference to the object owning the data/memory.
@@ -18542,7 +18542,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_7ndarray_4base_base(PyArrayObject 
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":328
  *             return PyArray_BASE(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline dtype descr(self):
  *             """Returns an owned reference to the dtype of the array.
@@ -18558,7 +18558,7 @@ static CYTHON_INLINE PyArray_Descr *__pyx_f_5numpy_7ndarray_5descr_descr(PyArray
  *             """Returns an owned reference to the dtype of the array.
  *             """
  *             return <dtype>PyArray_DESCR(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __Pyx_XDECREF((PyObject *)__pyx_r);
@@ -18569,7 +18569,7 @@ static CYTHON_INLINE PyArray_Descr *__pyx_f_5numpy_7ndarray_5descr_descr(PyArray
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":328
  *             return PyArray_BASE(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline dtype descr(self):
  *             """Returns an owned reference to the dtype of the array.
@@ -18584,7 +18584,7 @@ static CYTHON_INLINE PyArray_Descr *__pyx_f_5numpy_7ndarray_5descr_descr(PyArray
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":334
  *             return <dtype>PyArray_DESCR(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline int ndim(self) noexcept nogil:
  *             """Returns the number of dimensions in the array.
@@ -18597,7 +18597,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_7ndarray_4ndim_ndim(PyArrayObject *__pyx
  *             """Returns the number of dimensions in the array.
  *             """
  *             return PyArray_NDIM(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_NDIM(__pyx_v_self);
@@ -18605,7 +18605,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_7ndarray_4ndim_ndim(PyArrayObject *__pyx
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":334
  *             return <dtype>PyArray_DESCR(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline int ndim(self) noexcept nogil:
  *             """Returns the number of dimensions in the array.
@@ -18618,7 +18618,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_7ndarray_4ndim_ndim(PyArrayObject *__pyx
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":340
  *             return PyArray_NDIM(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp *shape(self) noexcept nogil:
  *             """Returns a pointer to the dimensions/shape of the array.
@@ -18631,7 +18631,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_5shape_shape(PyArrayObjec
  *             Can return NULL for 0-dimensional arrays.
  *             """
  *             return PyArray_DIMS(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_DIMS(__pyx_v_self);
@@ -18639,7 +18639,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_5shape_shape(PyArrayObjec
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":340
  *             return PyArray_NDIM(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp *shape(self) noexcept nogil:
  *             """Returns a pointer to the dimensions/shape of the array.
@@ -18652,7 +18652,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_5shape_shape(PyArrayObjec
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":348
  *             return PyArray_DIMS(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp *strides(self) noexcept nogil:
  *             """Returns a pointer to the strides of the array.
@@ -18665,7 +18665,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayO
  *             The number of elements matches the number of dimensions of the array (ndim).
  *             """
  *             return PyArray_STRIDES(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_STRIDES(__pyx_v_self);
@@ -18673,7 +18673,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayO
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":348
  *             return PyArray_DIMS(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp *strides(self) noexcept nogil:
  *             """Returns a pointer to the strides of the array.
@@ -18686,7 +18686,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayO
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":355
  *             return PyArray_STRIDES(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp size(self) noexcept nogil:
  *             """Returns the total size (in number of elements) of the array.
@@ -18699,7 +18699,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *
  *             """Returns the total size (in number of elements) of the array.
  *             """
  *             return PyArray_SIZE(self)             # <<<<<<<<<<<<<<
- * 
+ *
  *         @property
 */
   __pyx_r = PyArray_SIZE(__pyx_v_self);
@@ -18707,7 +18707,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":355
  *             return PyArray_STRIDES(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline npy_intp size(self) noexcept nogil:
  *             """Returns the total size (in number of elements) of the array.
@@ -18720,7 +18720,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":361
  *             return PyArray_SIZE(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline char* data(self) noexcept nogil:
  *             """The pointer to the data buffer as a char*.
@@ -18733,15 +18733,15 @@ static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__p
  *             of `PyArray_DATA()` instead, which returns a 'void*'.
  *             """
  *             return PyArray_BYTES(self)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = PyArray_BYTES(__pyx_v_self);
   goto __pyx_L0;
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":361
  *             return PyArray_SIZE(self)
- * 
+ *
  *         @property             # <<<<<<<<<<<<<<
  *         cdef inline char* data(self) noexcept nogil:
  *             """The pointer to the data buffer as a char*.
@@ -18754,10 +18754,10 @@ static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__p
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":776
  * ctypedef long double complex clongdouble_t
- * 
+ *
  * cdef inline object PyArray_MultiIterNew1(a):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(1, <void*>a)
- * 
+ *
 */
 
 static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__pyx_v_a) {
@@ -18770,10 +18770,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew1", 0);
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":777
- * 
+ *
  * cdef inline object PyArray_MultiIterNew1(a):
  *     return PyArray_MultiIterNew(1, <void*>a)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef inline object PyArray_MultiIterNew2(a, b):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -18785,10 +18785,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":776
  * ctypedef long double complex clongdouble_t
- * 
+ *
  * cdef inline object PyArray_MultiIterNew1(a):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(1, <void*>a)
- * 
+ *
 */
 
   /* function exit code */
@@ -18804,10 +18804,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":779
  *     return PyArray_MultiIterNew(1, <void*>a)
- * 
+ *
  * cdef inline object PyArray_MultiIterNew2(a, b):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)
- * 
+ *
 */
 
 static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__pyx_v_a, PyObject *__pyx_v_b) {
@@ -18820,10 +18820,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew2", 0);
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":780
- * 
+ *
  * cdef inline object PyArray_MultiIterNew2(a, b):
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef inline object PyArray_MultiIterNew3(a, b, c):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -18835,10 +18835,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":779
  *     return PyArray_MultiIterNew(1, <void*>a)
- * 
+ *
  * cdef inline object PyArray_MultiIterNew2(a, b):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)
- * 
+ *
 */
 
   /* function exit code */
@@ -18854,10 +18854,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":782
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)
- * 
+ *
  * cdef inline object PyArray_MultiIterNew3(a, b, c):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)
- * 
+ *
 */
 
 static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__pyx_v_a, PyObject *__pyx_v_b, PyObject *__pyx_v_c) {
@@ -18870,10 +18870,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew3", 0);
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":783
- * 
+ *
  * cdef inline object PyArray_MultiIterNew3(a, b, c):
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -18885,10 +18885,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":782
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)
- * 
+ *
  * cdef inline object PyArray_MultiIterNew3(a, b, c):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)
- * 
+ *
 */
 
   /* function exit code */
@@ -18904,10 +18904,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":785
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)
- * 
+ *
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)
- * 
+ *
 */
 
 static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__pyx_v_a, PyObject *__pyx_v_b, PyObject *__pyx_v_c, PyObject *__pyx_v_d) {
@@ -18920,10 +18920,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew4", 0);
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":786
- * 
+ *
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -18935,10 +18935,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":785
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)
- * 
+ *
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)
- * 
+ *
 */
 
   /* function exit code */
@@ -18954,10 +18954,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":788
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)
- * 
+ *
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)
- * 
+ *
 */
 
 static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__pyx_v_a, PyObject *__pyx_v_b, PyObject *__pyx_v_c, PyObject *__pyx_v_d, PyObject *__pyx_v_e) {
@@ -18970,10 +18970,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew5", 0);
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":789
- * 
+ *
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef inline tuple PyDataType_SHAPE(dtype d):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -18985,10 +18985,10 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":788
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)
- * 
+ *
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):             # <<<<<<<<<<<<<<
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)
- * 
+ *
 */
 
   /* function exit code */
@@ -19004,7 +19004,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":791
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)
- * 
+ *
  * cdef inline tuple PyDataType_SHAPE(dtype d):             # <<<<<<<<<<<<<<
  *     if PyDataType_HASSUBARRAY(d):
  *         return <tuple>d.subarray.shape
@@ -19018,7 +19018,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
   __Pyx_RefNannySetupContext("PyDataType_SHAPE", 0);
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":792
- * 
+ *
  * cdef inline tuple PyDataType_SHAPE(dtype d):
  *     if PyDataType_HASSUBARRAY(d):             # <<<<<<<<<<<<<<
  *         return <tuple>d.subarray.shape
@@ -19041,7 +19041,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
     goto __pyx_L0;
 
     /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":792
- * 
+ *
  * cdef inline tuple PyDataType_SHAPE(dtype d):
  *     if PyDataType_HASSUBARRAY(d):             # <<<<<<<<<<<<<<
  *         return <tuple>d.subarray.shape
@@ -19053,8 +19053,8 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
  *         return <tuple>d.subarray.shape
  *     else:
  *         return ()             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
@@ -19065,7 +19065,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":791
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)
- * 
+ *
  * cdef inline tuple PyDataType_SHAPE(dtype d):             # <<<<<<<<<<<<<<
  *     if PyDataType_HASSUBARRAY(d):
  *         return <tuple>d.subarray.shape
@@ -19080,7 +19080,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":994
  *     int _import_umath() except -1
- * 
+ *
  * cdef inline void set_array_base(ndarray arr, object base) except *:             # <<<<<<<<<<<<<<
  *     Py_INCREF(base) # important to do this before stealing the reference below!
  *     PyArray_SetBaseObject(arr, base)
@@ -19093,11 +19093,11 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
   int __pyx_clineno = 0;
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":995
- * 
+ *
  * cdef inline void set_array_base(ndarray arr, object base) except *:
  *     Py_INCREF(base) # important to do this before stealing the reference below!             # <<<<<<<<<<<<<<
  *     PyArray_SetBaseObject(arr, base)
- * 
+ *
 */
   Py_INCREF(__pyx_v_base);
 
@@ -19105,14 +19105,14 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
  * cdef inline void set_array_base(ndarray arr, object base) except *:
  *     Py_INCREF(base) # important to do this before stealing the reference below!
  *     PyArray_SetBaseObject(arr, base)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef inline object get_array_base(ndarray arr):
 */
   __pyx_t_1 = PyArray_SetBaseObject(__pyx_v_arr, __pyx_v_base); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(2, 996, __pyx_L1_error)
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":994
  *     int _import_umath() except -1
- * 
+ *
  * cdef inline void set_array_base(ndarray arr, object base) except *:             # <<<<<<<<<<<<<<
  *     Py_INCREF(base) # important to do this before stealing the reference below!
  *     PyArray_SetBaseObject(arr, base)
@@ -19127,7 +19127,7 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":998
  *     PyArray_SetBaseObject(arr, base)
- * 
+ *
  * cdef inline object get_array_base(ndarray arr):             # <<<<<<<<<<<<<<
  *     base = PyArray_BASE(arr)
  *     if base is NULL:
@@ -19141,7 +19141,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   __Pyx_RefNannySetupContext("get_array_base", 0);
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":999
- * 
+ *
  * cdef inline object get_array_base(ndarray arr):
  *     base = PyArray_BASE(arr)             # <<<<<<<<<<<<<<
  *     if base is NULL:
@@ -19164,7 +19164,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
  *     if base is NULL:
  *         return None             # <<<<<<<<<<<<<<
  *     return <object>base
- * 
+ *
 */
     __Pyx_XDECREF(__pyx_r);
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
@@ -19183,7 +19183,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
  *     if base is NULL:
  *         return None
  *     return <object>base             # <<<<<<<<<<<<<<
- * 
+ *
  * # Versions of the import_* functions which are more suitable for
 */
   __Pyx_XDECREF(__pyx_r);
@@ -19193,7 +19193,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":998
  *     PyArray_SetBaseObject(arr, base)
- * 
+ *
  * cdef inline object get_array_base(ndarray arr):             # <<<<<<<<<<<<<<
  *     base = PyArray_BASE(arr)
  *     if base is NULL:
@@ -19277,7 +19277,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
  *         __pyx_import_array()
  *     except Exception:             # <<<<<<<<<<<<<<
  *         raise ImportError("numpy._core.multiarray failed to import")
- * 
+ *
 */
     __pyx_t_4 = __Pyx_PyErr_ExceptionMatches(((PyObject *)(((PyTypeObject*)PyExc_Exception))));
     if (__pyx_t_4) {
@@ -19291,12 +19291,12 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
  *         __pyx_import_array()
  *     except Exception:
  *         raise ImportError("numpy._core.multiarray failed to import")             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef inline int import_umath() except -1:
 */
       __pyx_t_9 = NULL;
       __Pyx_INCREF(__pyx_builtin_ImportError);
-      __pyx_t_10 = __pyx_builtin_ImportError; 
+      __pyx_t_10 = __pyx_builtin_ImportError;
       __pyx_t_11 = 1;
       {
         PyObject *__pyx_callargs[2] = {__pyx_t_9, __pyx_mstate_global->__pyx_kp_u_numpy__core_multiarray_failed_to};
@@ -19355,7 +19355,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1012
  *         raise ImportError("numpy._core.multiarray failed to import")
- * 
+ *
  * cdef inline int import_umath() except -1:             # <<<<<<<<<<<<<<
  *     try:
  *         _import_umath()
@@ -19381,7 +19381,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
   __Pyx_RefNannySetupContext("import_umath", 0);
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1013
- * 
+ *
  * cdef inline int import_umath() except -1:
  *     try:             # <<<<<<<<<<<<<<
  *         _import_umath()
@@ -19406,7 +19406,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
       __pyx_t_4 = _import_umath(); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(2, 1014, __pyx_L3_error)
 
       /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1013
- * 
+ *
  * cdef inline int import_umath() except -1:
  *     try:             # <<<<<<<<<<<<<<
  *         _import_umath()
@@ -19424,7 +19424,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
  *         _import_umath()
  *     except Exception:             # <<<<<<<<<<<<<<
  *         raise ImportError("numpy._core.umath failed to import")
- * 
+ *
 */
     __pyx_t_4 = __Pyx_PyErr_ExceptionMatches(((PyObject *)(((PyTypeObject*)PyExc_Exception))));
     if (__pyx_t_4) {
@@ -19438,12 +19438,12 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
  *         _import_umath()
  *     except Exception:
  *         raise ImportError("numpy._core.umath failed to import")             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef inline int import_ufunc() except -1:
 */
       __pyx_t_9 = NULL;
       __Pyx_INCREF(__pyx_builtin_ImportError);
-      __pyx_t_10 = __pyx_builtin_ImportError; 
+      __pyx_t_10 = __pyx_builtin_ImportError;
       __pyx_t_11 = 1;
       {
         PyObject *__pyx_callargs[2] = {__pyx_t_9, __pyx_mstate_global->__pyx_kp_u_numpy__core_umath_failed_to_impo};
@@ -19460,7 +19460,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
     goto __pyx_L5_except_error;
 
     /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1013
- * 
+ *
  * cdef inline int import_umath() except -1:
  *     try:             # <<<<<<<<<<<<<<
  *         _import_umath()
@@ -19477,7 +19477,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1012
  *         raise ImportError("numpy._core.multiarray failed to import")
- * 
+ *
  * cdef inline int import_umath() except -1:             # <<<<<<<<<<<<<<
  *     try:
  *         _import_umath()
@@ -19502,7 +19502,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1018
  *         raise ImportError("numpy._core.umath failed to import")
- * 
+ *
  * cdef inline int import_ufunc() except -1:             # <<<<<<<<<<<<<<
  *     try:
  *         _import_umath()
@@ -19528,7 +19528,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
   __Pyx_RefNannySetupContext("import_ufunc", 0);
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1019
- * 
+ *
  * cdef inline int import_ufunc() except -1:
  *     try:             # <<<<<<<<<<<<<<
  *         _import_umath()
@@ -19553,7 +19553,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
       __pyx_t_4 = _import_umath(); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(2, 1020, __pyx_L3_error)
 
       /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1019
- * 
+ *
  * cdef inline int import_ufunc() except -1:
  *     try:             # <<<<<<<<<<<<<<
  *         _import_umath()
@@ -19571,7 +19571,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
  *         _import_umath()
  *     except Exception:             # <<<<<<<<<<<<<<
  *         raise ImportError("numpy._core.umath failed to import")
- * 
+ *
 */
     __pyx_t_4 = __Pyx_PyErr_ExceptionMatches(((PyObject *)(((PyTypeObject*)PyExc_Exception))));
     if (__pyx_t_4) {
@@ -19585,12 +19585,12 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
  *         _import_umath()
  *     except Exception:
  *         raise ImportError("numpy._core.umath failed to import")             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
       __pyx_t_9 = NULL;
       __Pyx_INCREF(__pyx_builtin_ImportError);
-      __pyx_t_10 = __pyx_builtin_ImportError; 
+      __pyx_t_10 = __pyx_builtin_ImportError;
       __pyx_t_11 = 1;
       {
         PyObject *__pyx_callargs[2] = {__pyx_t_9, __pyx_mstate_global->__pyx_kp_u_numpy__core_umath_failed_to_impo};
@@ -19607,7 +19607,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
     goto __pyx_L5_except_error;
 
     /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1019
- * 
+ *
  * cdef inline int import_ufunc() except -1:
  *     try:             # <<<<<<<<<<<<<<
  *         _import_umath()
@@ -19624,7 +19624,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1018
  *         raise ImportError("numpy._core.umath failed to import")
- * 
+ *
  * cdef inline int import_ufunc() except -1:             # <<<<<<<<<<<<<<
  *     try:
  *         _import_umath()
@@ -19648,8 +19648,8 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
 }
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1025
- * 
- * 
+ *
+ *
  * cdef inline bint is_timedelta64_object(object obj) noexcept:             # <<<<<<<<<<<<<<
  *     """
  *     Cython equivalent of `isinstance(obj, np.timedelta64)`
@@ -19662,15 +19662,15 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_timedelta64_object(PyObject *__pyx_v_
  *     bool
  *     """
  *     return PyObject_TypeCheck(obj, &PyTimedeltaArrType_Type)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = PyObject_TypeCheck(__pyx_v_obj, (&PyTimedeltaArrType_Type));
   goto __pyx_L0;
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1025
- * 
- * 
+ *
+ *
  * cdef inline bint is_timedelta64_object(object obj) noexcept:             # <<<<<<<<<<<<<<
  *     """
  *     Cython equivalent of `isinstance(obj, np.timedelta64)`
@@ -19682,8 +19682,8 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_timedelta64_object(PyObject *__pyx_v_
 }
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1040
- * 
- * 
+ *
+ *
  * cdef inline bint is_datetime64_object(object obj) noexcept:             # <<<<<<<<<<<<<<
  *     """
  *     Cython equivalent of `isinstance(obj, np.datetime64)`
@@ -19696,15 +19696,15 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_datetime64_object(PyObject *__pyx_v_o
  *     bool
  *     """
  *     return PyObject_TypeCheck(obj, &PyDatetimeArrType_Type)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = PyObject_TypeCheck(__pyx_v_obj, (&PyDatetimeArrType_Type));
   goto __pyx_L0;
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1040
- * 
- * 
+ *
+ *
  * cdef inline bint is_datetime64_object(object obj) noexcept:             # <<<<<<<<<<<<<<
  *     """
  *     Cython equivalent of `isinstance(obj, np.datetime64)`
@@ -19716,8 +19716,8 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_datetime64_object(PyObject *__pyx_v_o
 }
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1055
- * 
- * 
+ *
+ *
  * cdef inline npy_datetime get_datetime64_value(object obj) noexcept nogil:             # <<<<<<<<<<<<<<
  *     """
  *     returns the int64 value underlying scalar numpy datetime64 object
@@ -19730,15 +19730,15 @@ static CYTHON_INLINE npy_datetime __pyx_f_5numpy_get_datetime64_value(PyObject *
  *     also needed.  That can be found using `get_datetime64_unit`.
  *     """
  *     return (<PyDatetimeScalarObject*>obj).obval             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = ((PyDatetimeScalarObject *)__pyx_v_obj)->obval;
   goto __pyx_L0;
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1055
- * 
- * 
+ *
+ *
  * cdef inline npy_datetime get_datetime64_value(object obj) noexcept nogil:             # <<<<<<<<<<<<<<
  *     """
  *     returns the int64 value underlying scalar numpy datetime64 object
@@ -19750,8 +19750,8 @@ static CYTHON_INLINE npy_datetime __pyx_f_5numpy_get_datetime64_value(PyObject *
 }
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1065
- * 
- * 
+ *
+ *
  * cdef inline npy_timedelta get_timedelta64_value(object obj) noexcept nogil:             # <<<<<<<<<<<<<<
  *     """
  *     returns the int64 value underlying scalar numpy timedelta64 object
@@ -19764,15 +19764,15 @@ static CYTHON_INLINE npy_timedelta __pyx_f_5numpy_get_timedelta64_value(PyObject
  *     returns the int64 value underlying scalar numpy timedelta64 object
  *     """
  *     return (<PyTimedeltaScalarObject*>obj).obval             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = ((PyTimedeltaScalarObject *)__pyx_v_obj)->obval;
   goto __pyx_L0;
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1065
- * 
- * 
+ *
+ *
  * cdef inline npy_timedelta get_timedelta64_value(object obj) noexcept nogil:             # <<<<<<<<<<<<<<
  *     """
  *     returns the int64 value underlying scalar numpy timedelta64 object
@@ -19784,8 +19784,8 @@ static CYTHON_INLINE npy_timedelta __pyx_f_5numpy_get_timedelta64_value(PyObject
 }
 
 /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1072
- * 
- * 
+ *
+ *
  * cdef inline NPY_DATETIMEUNIT get_datetime64_unit(object obj) noexcept nogil:             # <<<<<<<<<<<<<<
  *     """
  *     returns the unit part of the dtype for a numpy datetime64 object.
@@ -19798,15 +19798,15 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
  *     returns the unit part of the dtype for a numpy datetime64 object.
  *     """
  *     return <NPY_DATETIMEUNIT>(<PyDatetimeScalarObject*>obj).obmeta.base             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_r = ((NPY_DATETIMEUNIT)((PyDatetimeScalarObject *)__pyx_v_obj)->obmeta.base);
   goto __pyx_L0;
 
   /* "../../usr/local/venv/lib/python3.12/site-packages/numpy/__init__.cython-30.pxd":1072
- * 
- * 
+ *
+ *
  * cdef inline NPY_DATETIMEUNIT get_datetime64_unit(object obj) noexcept nogil:             # <<<<<<<<<<<<<<
  *     """
  *     returns the unit part of the dtype for a numpy datetime64 object.
@@ -19817,17 +19817,17 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":69
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":69
  *     cdef str nlp_solver_type
- * 
+ *
  *     def __cinit__(self, model_name, nlp_solver_type, N):             # <<<<<<<<<<<<<<
- * 
+ *
  *         self.solver_created = False
 */
 
 /* Python wrapper */
-static int __pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static int __pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static int __pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static int __pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_model_name = 0;
   PyObject *__pyx_v_nlp_solver_type = 0;
   PyObject *__pyx_v_N = 0;
@@ -19895,11 +19895,11 @@ static int __pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverC
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython___cinit__(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_model_name, __pyx_v_nlp_solver_type, __pyx_v_N);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython___cinit__(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_model_name, __pyx_v_nlp_solver_type, __pyx_v_N);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -19909,7 +19909,7 @@ static int __pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverC
   return __pyx_r;
 }
 
-static int __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython___cinit__(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_model_name, PyObject *__pyx_v_nlp_solver_type, PyObject *__pyx_v_N) {
+static int __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython___cinit__(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_model_name, PyObject *__pyx_v_nlp_solver_type, PyObject *__pyx_v_N) {
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -19922,18 +19922,18 @@ static int __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverC
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":71
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":71
  *     def __cinit__(self, model_name, nlp_solver_type, N):
- * 
+ *
  *         self.solver_created = False             # <<<<<<<<<<<<<<
- * 
+ *
  *         self.N = N
 */
   __pyx_v_self->solver_created = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":73
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":73
  *         self.solver_created = False
- * 
+ *
  *         self.N = N             # <<<<<<<<<<<<<<
  *         self.model_name = model_name
  *         self.nlp_solver_type = nlp_solver_type
@@ -19941,12 +19941,12 @@ static int __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverC
   __pyx_t_1 = __Pyx_PyLong_As_int(__pyx_v_N); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 73, __pyx_L1_error)
   __pyx_v_self->N = __pyx_t_1;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":74
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":74
+ *
  *         self.N = N
  *         self.model_name = model_name             # <<<<<<<<<<<<<<
  *         self.nlp_solver_type = nlp_solver_type
- * 
+ *
 */
   __pyx_t_2 = __pyx_v_model_name;
   __Pyx_INCREF(__pyx_t_2);
@@ -19957,11 +19957,11 @@ static int __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverC
   __pyx_v_self->model_name = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":75
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":75
  *         self.N = N
  *         self.model_name = model_name
  *         self.nlp_solver_type = nlp_solver_type             # <<<<<<<<<<<<<<
- * 
+ *
  *         # create capsule
 */
   __pyx_t_2 = __pyx_v_nlp_solver_type;
@@ -19973,21 +19973,21 @@ static int __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverC
   __pyx_v_self->nlp_solver_type = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":78
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":78
+ *
  *         # create capsule
  *         self.capsule = acados_solver.acados_create_capsule()             # <<<<<<<<<<<<<<
- * 
+ *
  *         # create solver
 */
   __pyx_v_self->capsule = long_acados_create_capsule();
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":81
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":81
+ *
  *         # create solver
  *         assert acados_solver.acados_create(self.capsule) == 0             # <<<<<<<<<<<<<<
  *         self.solver_created = True
- * 
+ *
 */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(__pyx_assertions_enabled())) {
@@ -20001,21 +20001,21 @@ static int __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverC
   if ((1)); else __PYX_ERR(0, 81, __pyx_L1_error)
   #endif
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":82
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":82
  *         # create solver
  *         assert acados_solver.acados_create(self.capsule) == 0
  *         self.solver_created = True             # <<<<<<<<<<<<<<
- * 
+ *
  *         # get pointers solver
 */
   __pyx_v_self->solver_created = 1;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":85
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":85
+ *
  *         # get pointers solver
  *         self.__get_pointers_solver()             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_4 = ((PyObject *)__pyx_v_self);
   __Pyx_INCREF(__pyx_t_4);
@@ -20029,11 +20029,11 @@ static int __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverC
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":69
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":69
  *     cdef str nlp_solver_type
- * 
+ *
  *     def __cinit__(self, model_name, nlp_solver_type, N):             # <<<<<<<<<<<<<<
- * 
+ *
  *         self.solver_created = False
 */
 
@@ -20043,32 +20043,32 @@ static int __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverC
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":88
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":88
+ *
+ *
  *     def __get_pointers_solver(self):             # <<<<<<<<<<<<<<
  *         """
  *         Private function to get the pointers for solver
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver, "\n        Private function to get the pointers for solver\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver = {"_AcadosOcpSolverCython__get_pointers_solver", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver, "\n        Private function to get the pointers for solver\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver = {"_AcadosOcpSolverCython__get_pointers_solver", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -20094,19 +20094,19 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   const Py_ssize_t __pyx_kwds_len = unlikely(__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
   if (unlikely(__pyx_kwds_len < 0)) return NULL;
   if (unlikely(__pyx_kwds_len > 0)) {__Pyx_RejectKeywords("_AcadosOcpSolverCython__get_pointers_solver", __pyx_kwds); return NULL;}
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_AcadosOcpSolverCython__get_pointers_solver", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":93
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":93
  *         """
  *         # get pointers solver
  *         self.nlp_opts = acados_solver.acados_get_nlp_opts(self.capsule)             # <<<<<<<<<<<<<<
@@ -20115,7 +20115,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
   __pyx_v_self->nlp_opts = long_acados_get_nlp_opts(__pyx_v_self->capsule);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":94
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":94
  *         # get pointers solver
  *         self.nlp_opts = acados_solver.acados_get_nlp_opts(self.capsule)
  *         self.nlp_dims = acados_solver.acados_get_nlp_dims(self.capsule)             # <<<<<<<<<<<<<<
@@ -20124,7 +20124,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
   __pyx_v_self->nlp_dims = long_acados_get_nlp_dims(__pyx_v_self->capsule);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":95
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":95
  *         self.nlp_opts = acados_solver.acados_get_nlp_opts(self.capsule)
  *         self.nlp_dims = acados_solver.acados_get_nlp_dims(self.capsule)
  *         self.nlp_config = acados_solver.acados_get_nlp_config(self.capsule)             # <<<<<<<<<<<<<<
@@ -20133,7 +20133,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
   __pyx_v_self->nlp_config = long_acados_get_nlp_config(__pyx_v_self->capsule);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":96
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":96
  *         self.nlp_dims = acados_solver.acados_get_nlp_dims(self.capsule)
  *         self.nlp_config = acados_solver.acados_get_nlp_config(self.capsule)
  *         self.nlp_out = acados_solver.acados_get_nlp_out(self.capsule)             # <<<<<<<<<<<<<<
@@ -20142,7 +20142,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
   __pyx_v_self->nlp_out = long_acados_get_nlp_out(__pyx_v_self->capsule);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":97
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":97
  *         self.nlp_config = acados_solver.acados_get_nlp_config(self.capsule)
  *         self.nlp_out = acados_solver.acados_get_nlp_out(self.capsule)
  *         self.sens_out = acados_solver.acados_get_sens_out(self.capsule)             # <<<<<<<<<<<<<<
@@ -20151,27 +20151,27 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
   __pyx_v_self->sens_out = long_acados_get_sens_out(__pyx_v_self->capsule);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":98
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":98
  *         self.nlp_out = acados_solver.acados_get_nlp_out(self.capsule)
  *         self.sens_out = acados_solver.acados_get_sens_out(self.capsule)
  *         self.nlp_in = acados_solver.acados_get_nlp_in(self.capsule)             # <<<<<<<<<<<<<<
  *         self.nlp_solver = acados_solver.acados_get_nlp_solver(self.capsule)
- * 
+ *
 */
   __pyx_v_self->nlp_in = long_acados_get_nlp_in(__pyx_v_self->capsule);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":99
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":99
  *         self.sens_out = acados_solver.acados_get_sens_out(self.capsule)
  *         self.nlp_in = acados_solver.acados_get_nlp_in(self.capsule)
  *         self.nlp_solver = acados_solver.acados_get_nlp_solver(self.capsule)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_v_self->nlp_solver = long_acados_get_nlp_solver(__pyx_v_self->capsule);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":88
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":88
+ *
+ *
  *     def __get_pointers_solver(self):             # <<<<<<<<<<<<<<
  *         """
  *         Private function to get the pointers for solver
@@ -20184,25 +20184,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":102
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":102
+ *
+ *
  *     def solve_for_x0(self, x0_bar):             # <<<<<<<<<<<<<<
  *         """
  *         Wrapper around `solve()` which sets initial state constraint, solves the OCP, and returns u0.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0, "\n        Wrapper around `solve()` which sets initial state constraint, solves the OCP, and returns u0.\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0 = {"solve_for_x0", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0, "\n        Wrapper around `solve()` which sets initial state constraint, solves the OCP, and returns u0.\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0 = {"solve_for_x0", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -20264,11 +20264,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.solve_for_x0", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.solve_for_x0", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_x0_bar);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_x0_bar);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -20278,7 +20278,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_x0_bar) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_x0_bar) {
   PyObject *__pyx_v_status = NULL;
   PyObject *__pyx_v_u0 = NULL;
   PyObject *__pyx_r = NULL;
@@ -20295,12 +20295,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("solve_for_x0", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":106
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":106
  *         Wrapper around `solve()` which sets initial state constraint, solves the OCP, and returns u0.
  *         """
  *         self.set(0, "lbx", x0_bar)             # <<<<<<<<<<<<<<
  *         self.set(0, "ubx", x0_bar)
- * 
+ *
 */
   __pyx_t_2 = ((PyObject *)__pyx_v_self);
   __Pyx_INCREF(__pyx_t_2);
@@ -20314,11 +20314,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":107
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":107
  *         """
  *         self.set(0, "lbx", x0_bar)
  *         self.set(0, "ubx", x0_bar)             # <<<<<<<<<<<<<<
- * 
+ *
  *         status = self.solve()
 */
   __pyx_t_2 = ((PyObject *)__pyx_v_self);
@@ -20333,11 +20333,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":109
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":109
  *         self.set(0, "ubx", x0_bar)
- * 
+ *
  *         status = self.solve()             # <<<<<<<<<<<<<<
- * 
+ *
  *         if status == 2:
 */
   __pyx_t_2 = ((PyObject *)__pyx_v_self);
@@ -20353,9 +20353,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_status = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":111
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":111
  *         status = self.solve()
- * 
+ *
  *         if status == 2:             # <<<<<<<<<<<<<<
  *             print("Warning: acados_ocp_solver reached maximum iterations.")
  *         elif status != 0:
@@ -20363,8 +20363,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (__Pyx_PyLong_BoolEqObjC(__pyx_v_status, __pyx_mstate_global->__pyx_int_2, 2, 0)); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 111, __pyx_L1_error)
   if (__pyx_t_4) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":112
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":112
+ *
  *         if status == 2:
  *             print("Warning: acados_ocp_solver reached maximum iterations.")             # <<<<<<<<<<<<<<
  *         elif status != 0:
@@ -20372,7 +20372,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
     __pyx_t_2 = NULL;
     __Pyx_INCREF(__pyx_builtin_print);
-    __pyx_t_5 = __pyx_builtin_print; 
+    __pyx_t_5 = __pyx_builtin_print;
     __pyx_t_3 = 1;
     {
       PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_mstate_global->__pyx_kp_u_Warning_acados_ocp_solver_reache};
@@ -20384,9 +20384,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":111
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":111
  *         status = self.solve()
- * 
+ *
  *         if status == 2:             # <<<<<<<<<<<<<<
  *             print("Warning: acados_ocp_solver reached maximum iterations.")
  *         elif status != 0:
@@ -20394,26 +20394,26 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     goto __pyx_L3;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":113
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":113
  *         if status == 2:
  *             print("Warning: acados_ocp_solver reached maximum iterations.")
  *         elif status != 0:             # <<<<<<<<<<<<<<
  *             raise Exception(f'acados acados_ocp_solver returned status {status}')
- * 
+ *
 */
   __pyx_t_4 = (__Pyx_PyLong_BoolNeObjC(__pyx_v_status, __pyx_mstate_global->__pyx_int_0, 0, 0)); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 113, __pyx_L1_error)
   if (unlikely(__pyx_t_4)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":114
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":114
  *             print("Warning: acados_ocp_solver reached maximum iterations.")
  *         elif status != 0:
  *             raise Exception(f'acados acados_ocp_solver returned status {status}')             # <<<<<<<<<<<<<<
- * 
+ *
  *         u0 = self.get(0, "u")
 */
     __pyx_t_5 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_2 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_2 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
     __pyx_t_6 = __Pyx_PyObject_FormatSimple(__pyx_v_status, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 114, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7 = __Pyx_PyUnicode_Concat(__pyx_mstate_global->__pyx_kp_u_acados_acados_ocp_solver_returne, __pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 114, __pyx_L1_error)
@@ -20433,22 +20433,22 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __PYX_ERR(0, 114, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":113
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":113
  *         if status == 2:
  *             print("Warning: acados_ocp_solver reached maximum iterations.")
  *         elif status != 0:             # <<<<<<<<<<<<<<
  *             raise Exception(f'acados acados_ocp_solver returned status {status}')
- * 
+ *
 */
   }
   __pyx_L3:;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":116
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":116
  *             raise Exception(f'acados acados_ocp_solver returned status {status}')
- * 
+ *
  *         u0 = self.get(0, "u")             # <<<<<<<<<<<<<<
  *         return u0
- * 
+ *
 */
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_mstate_global->__pyx_n_u_get); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 116, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -20458,21 +20458,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_u0 = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":117
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":117
+ *
  *         u0 = self.get(0, "u")
  *         return u0             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_u0);
   __pyx_r = __pyx_v_u0;
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":102
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":102
+ *
+ *
  *     def solve_for_x0(self, x0_bar):             # <<<<<<<<<<<<<<
  *         """
  *         Wrapper around `solve()` which sets initial state constraint, solves the OCP, and returns u0.
@@ -20485,7 +20485,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.solve_for_x0", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.solve_for_x0", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_status);
@@ -20495,25 +20495,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":120
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":120
+ *
+ *
  *     def solve(self):             # <<<<<<<<<<<<<<
  *         """
  *         Solve the ocp with current input.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve, "\n        Solve the ocp with current input.\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve = {"solve", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve, "\n        Solve the ocp with current input.\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve = {"solve", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -20539,14 +20539,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   const Py_ssize_t __pyx_kwds_len = unlikely(__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
   if (unlikely(__pyx_kwds_len < 0)) return NULL;
   if (unlikely(__pyx_kwds_len > 0)) {__Pyx_RejectKeywords("solve", __pyx_kwds); return NULL;}
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -20555,12 +20555,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("solve", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":124
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":124
  *         Solve the ocp with current input.
  *         """
  *         return acados_solver.acados_solve(self.capsule)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyLong_From_int(long_acados_solve(__pyx_v_self->capsule)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 124, __pyx_L1_error)
@@ -20569,9 +20569,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":120
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":120
+ *
+ *
  *     def solve(self):             # <<<<<<<<<<<<<<
  *         """
  *         Solve the ocp with current input.
@@ -20580,7 +20580,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.solve", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.solve", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -20588,25 +20588,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":127
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":127
+ *
+ *
  *     def reset(self, reset_qp_solver_mem=1):             # <<<<<<<<<<<<<<
  *         """
  *         Sets current iterate to all zeros.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset, "\n        Sets current iterate to all zeros.\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset = {"reset", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset, "\n        Sets current iterate to all zeros.\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset = {"reset", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -20671,11 +20671,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.reset", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.reset", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_reset_qp_solver_mem);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_reset_qp_solver_mem);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -20685,7 +20685,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_reset_qp_solver_mem) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_reset_qp_solver_mem) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -20695,12 +20695,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("reset", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":131
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":131
  *         Sets current iterate to all zeros.
  *         """
  *         return acados_solver.acados_reset(self.capsule, reset_qp_solver_mem)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyLong_As_int(__pyx_v_reset_qp_solver_mem); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 131, __pyx_L1_error)
@@ -20710,9 +20710,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":127
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":127
+ *
+ *
  *     def reset(self, reset_qp_solver_mem=1):             # <<<<<<<<<<<<<<
  *         """
  *         Sets current iterate to all zeros.
@@ -20721,7 +20721,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.reset", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.reset", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -20729,25 +20729,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":134
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":134
+ *
+ *
  *     def custom_update(self, data_):             # <<<<<<<<<<<<<<
  *         """
  *         A custom function that can be implemented by a user to be called between solver calls.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update, "\n        A custom function that can be implemented by a user to be called between solver calls.\n        By default this does nothing.\n        The idea is to have a convenient wrapper to do complex updates of parameters and numerical data efficiently in C,\n        in a function that is compiled into the solver library and can be conveniently used in the Python environment.\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update = {"custom_update", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update, "\n        A custom function that can be implemented by a user to be called between solver calls.\n        By default this does nothing.\n        The idea is to have a convenient wrapper to do complex updates of parameters and numerical data efficiently in C,\n        in a function that is compiled into the solver library and can be conveniently used in the Python environment.\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update = {"custom_update", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -20809,11 +20809,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.custom_update", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.custom_update", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_data_);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_data_);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -20823,7 +20823,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_data_) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_data_) {
   Py_ssize_t __pyx_v_data_len;
   PyArrayObject *__pyx_v_data = 0;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_data;
@@ -20846,21 +20846,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_pybuffernd_data.data = NULL;
   __pyx_pybuffernd_data.rcbuffer = &__pyx_pybuffer_data;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":141
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":141
  *         in a function that is compiled into the solver library and can be conveniently used in the Python environment.
  *         """
  *         data_len = len(data_)             # <<<<<<<<<<<<<<
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] data = np.ascontiguousarray(data_, dtype=np.float64)
- * 
+ *
 */
   __pyx_t_1 = PyObject_Length(__pyx_v_data_); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 141, __pyx_L1_error)
   __pyx_v_data_len = __pyx_t_1;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":142
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":142
  *         """
  *         data_len = len(data_)
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] data = np.ascontiguousarray(data_, dtype=np.float64)             # <<<<<<<<<<<<<<
- * 
+ *
  *         return acados_solver.acados_custom_update(self.capsule, <double *> data.data, data_len)
 */
   __pyx_t_3 = NULL;
@@ -20911,12 +20911,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_data = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":144
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":144
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] data = np.ascontiguousarray(data_, dtype=np.float64)
- * 
+ *
  *         return acados_solver.acados_custom_update(self.capsule, <double *> data.data, data_len)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = __Pyx_PyLong_From_int(long_acados_custom_update(__pyx_v_self->capsule, ((double *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_data))), __pyx_v_data_len)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 144, __pyx_L1_error)
@@ -20925,9 +20925,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":134
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":134
+ *
+ *
  *     def custom_update(self, data_):             # <<<<<<<<<<<<<<
  *         """
  *         A custom function that can be implemented by a user to be called between solver calls.
@@ -20946,7 +20946,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_data.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.custom_update", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.custom_update", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -20958,25 +20958,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":147
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":147
+ *
+ *
  *     def set_new_time_steps(self, new_time_steps):             # <<<<<<<<<<<<<<
  *         """
  *         Set new time steps.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps, "\n        Set new time steps.\n        Recreates the solver if N changes.\n\n            :param new_time_steps: 1 dimensional np array of new time steps for the solver\n\n            .. note:: This allows for different use-cases: either set a new size of time-steps or a new distribution of\n                      the shooting nodes without changing the number, e.g., to reach a different final time. Both cases\n                      do not require a new code export and compilation.\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps = {"set_new_time_steps", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps, "\n        Set new time steps.\n        Recreates the solver if N changes.\n\n            :param new_time_steps: 1 dimensional np array of new time steps for the solver\n\n            .. note:: This allows for different use-cases: either set a new size of time-steps or a new distribution of\n                      the shooting nodes without changing the number, e.g., to reach a different final time. Both cases\n                      do not require a new code export and compilation.\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps = {"set_new_time_steps", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -21038,11 +21038,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set_new_time_steps", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set_new_time_steps", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_new_time_steps);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_new_time_steps);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -21052,7 +21052,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps(CYTHON_UNUSED struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_new_time_steps) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps(CYTHON_UNUSED struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_new_time_steps) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -21064,16 +21064,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("set_new_time_steps", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":159
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":159
  *         """
- * 
+ *
  *         raise NotImplementedError("AcadosOcpSolverCython: does not support set_new_time_steps() since it is only a prototyping feature")             # <<<<<<<<<<<<<<
  *         # # unlikely but still possible
  *         # if not self.solver_created:
 */
   __pyx_t_2 = NULL;
   __Pyx_INCREF(__pyx_builtin_NotImplementedError);
-  __pyx_t_3 = __pyx_builtin_NotImplementedError; 
+  __pyx_t_3 = __pyx_builtin_NotImplementedError;
   __pyx_t_4 = 1;
   {
     PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_does_not_s};
@@ -21087,9 +21087,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __PYX_ERR(0, 159, __pyx_L1_error)
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":147
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":147
+ *
+ *
  *     def set_new_time_steps(self, new_time_steps):             # <<<<<<<<<<<<<<
  *         """
  *         Set new time steps.
@@ -21100,32 +21100,32 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set_new_time_steps", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set_new_time_steps", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":198
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":198
+ *
+ *
  *     def update_qp_solver_cond_N(self, qp_solver_cond_N: int):             # <<<<<<<<<<<<<<
  *         """
  *         Recreate solver with new value `qp_solver_cond_N` with a partial condensing QP solver.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N, "\n        Recreate solver with new value `qp_solver_cond_N` with a partial condensing QP solver.\n        This function is relevant for code reuse, i.e., if either `set_new_time_steps(...)` is used or\n        the influence of a different `qp_solver_cond_N` is studied without code export and compilation.\n            :param qp_solver_cond_N: new number of condensing stages for the solver\n\n            .. note:: This function can only be used in combination with a partial condensing QP solver.\n\n            .. note:: After `set_new_time_steps(...)` is used and depending on the new number of time steps it might be\n                      necessary to change `qp_solver_cond_N` as well (using this function), i.e., typically\n                      `qp_solver_cond_N < N`.\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N = {"update_qp_solver_cond_N", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N, "\n        Recreate solver with new value `qp_solver_cond_N` with a partial condensing QP solver.\n        This function is relevant for code reuse, i.e., if either `set_new_time_steps(...)` is used or\n        the influence of a different `qp_solver_cond_N` is studied without code export and compilation.\n            :param qp_solver_cond_N: new number of condensing stages for the solver\n\n            .. note:: This function can only be used in combination with a partial condensing QP solver.\n\n            .. note:: After `set_new_time_steps(...)` is used and depending on the new number of time steps it might be\n                      necessary to change `qp_solver_cond_N` as well (using this function), i.e., typically\n                      `qp_solver_cond_N < N`.\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N = {"update_qp_solver_cond_N", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -21187,12 +21187,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.update_qp_solver_cond_N", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.update_qp_solver_cond_N", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_qp_solver_cond_N), (&PyLong_Type), 0, "qp_solver_cond_N", 2))) __PYX_ERR(0, 198, __pyx_L1_error)
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_qp_solver_cond_N);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_qp_solver_cond_N);
 
   /* function exit code */
   goto __pyx_L0;
@@ -21211,7 +21211,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N(CYTHON_UNUSED struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_qp_solver_cond_N) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N(CYTHON_UNUSED struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_qp_solver_cond_N) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -21223,16 +21223,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("update_qp_solver_cond_N", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":211
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":211
  *                       `qp_solver_cond_N < N`.
  *         """
  *         raise NotImplementedError("AcadosOcpSolverCython: does not support update_qp_solver_cond_N() since it is only a prototyping feature")             # <<<<<<<<<<<<<<
- * 
+ *
  *         # # unlikely but still possible
 */
   __pyx_t_2 = NULL;
   __Pyx_INCREF(__pyx_builtin_NotImplementedError);
-  __pyx_t_3 = __pyx_builtin_NotImplementedError; 
+  __pyx_t_3 = __pyx_builtin_NotImplementedError;
   __pyx_t_4 = 1;
   {
     PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_does_not_s_2};
@@ -21246,9 +21246,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __PYX_ERR(0, 211, __pyx_L1_error)
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":198
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":198
+ *
+ *
  *     def update_qp_solver_cond_N(self, qp_solver_cond_N: int):             # <<<<<<<<<<<<<<
  *         """
  *         Recreate solver with new value `qp_solver_cond_N` with a partial condensing QP solver.
@@ -21259,32 +21259,32 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.update_qp_solver_cond_N", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.update_qp_solver_cond_N", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":232
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":232
+ *
+ *
  *     def eval_param_sens(self, index, stage=0, field="ex"):             # <<<<<<<<<<<<<<
  *         """
  *         Calculate the sensitivity of the curent solution with respect to the initial state component of index
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens, "\n        Calculate the sensitivity of the curent solution with respect to the initial state component of index\n\n            :param index: integer corresponding to initial state index in range(nx)\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens = {"eval_param_sens", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens, "\n        Calculate the sensitivity of the curent solution with respect to the initial state component of index\n\n            :param index: integer corresponding to initial state index in range(nx)\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens = {"eval_param_sens", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -21373,11 +21373,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.eval_param_sens", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.eval_param_sens", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_index, __pyx_v_stage, __pyx_v_field);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_index, __pyx_v_stage, __pyx_v_field);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -21387,7 +21387,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_index, PyObject *__pyx_v_stage, PyObject *__pyx_v_field) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_index, PyObject *__pyx_v_stage, PyObject *__pyx_v_field) {
   PyObject *__pyx_v_field_ = NULL;
   int __pyx_v_nx;
   PyObject *__pyx_r = NULL;
@@ -21411,21 +21411,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_RefNannySetupContext("eval_param_sens", 0);
   __Pyx_INCREF(__pyx_v_field);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":239
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":239
  *         """
- * 
+ *
  *         field_ = field             # <<<<<<<<<<<<<<
  *         field = field_.encode('utf-8')
- * 
+ *
 */
   __Pyx_INCREF(__pyx_v_field);
   __pyx_v_field_ = __pyx_v_field;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":240
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":240
+ *
  *         field_ = field
  *         field = field_.encode('utf-8')             # <<<<<<<<<<<<<<
- * 
+ *
  *         # checks
 */
   __pyx_t_2 = __pyx_v_field_;
@@ -21441,27 +21441,27 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_DECREF_SET(__pyx_v_field, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":243
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":243
+ *
  *         # checks
  *         if not isinstance(index, int):             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.eval_param_sens(): index must be Integer.')
- * 
+ *
 */
-  __pyx_t_4 = PyLong_Check(__pyx_v_index); 
+  __pyx_t_4 = PyLong_Check(__pyx_v_index);
   __pyx_t_5 = (!__pyx_t_4);
   if (unlikely(__pyx_t_5)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":244
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":244
  *         # checks
  *         if not isinstance(index, int):
  *             raise Exception('AcadosOcpSolverCython.eval_param_sens(): index must be Integer.')             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef int nx = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config, self.nlp_dims, self.nlp_out, 0, "x".encode('utf-8'))
 */
     __pyx_t_2 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_6 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_6 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
     __pyx_t_3 = 1;
     {
       PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_eval_param};
@@ -21475,31 +21475,31 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __PYX_ERR(0, 244, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":243
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":243
+ *
  *         # checks
  *         if not isinstance(index, int):             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.eval_param_sens(): index must be Integer.')
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":246
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":246
  *             raise Exception('AcadosOcpSolverCython.eval_param_sens(): index must be Integer.')
- * 
+ *
  *         cdef int nx = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config, self.nlp_dims, self.nlp_out, 0, "x".encode('utf-8'))             # <<<<<<<<<<<<<<
- * 
+ *
  *         if index < 0 or index > nx:
 */
   __pyx_t_7 = __Pyx_PyBytes_AsString(__pyx_mstate_global->__pyx_n_b_x); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) __PYX_ERR(0, 246, __pyx_L1_error)
   __pyx_v_nx = ocp_nlp_dims_get_from_attr(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_out, 0, __pyx_t_7);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":248
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":248
  *         cdef int nx = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config, self.nlp_dims, self.nlp_out, 0, "x".encode('utf-8'))
- * 
+ *
  *         if index < 0 or index > nx:             # <<<<<<<<<<<<<<
  *             raise Exception(f'AcadosOcpSolverCython.eval_param_sens(): index must be in [0, nx-1], got: {index}.')
- * 
+ *
 */
   __pyx_t_1 = PyObject_RichCompare(__pyx_v_index, __pyx_mstate_global->__pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 248, __pyx_L1_error)
   __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 248, __pyx_L1_error)
@@ -21519,16 +21519,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_L5_bool_binop_done:;
   if (unlikely(__pyx_t_5)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":249
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":249
+ *
  *         if index < 0 or index > nx:
  *             raise Exception(f'AcadosOcpSolverCython.eval_param_sens(): index must be in [0, nx-1], got: {index}.')             # <<<<<<<<<<<<<<
- * 
+ *
  *         # actual eval_param
 */
     __pyx_t_1 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_2 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_2 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
     __pyx_t_8 = __Pyx_PyObject_FormatSimple(__pyx_v_index, __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 249, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_9[0] = __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_eval_param_2;
@@ -21552,20 +21552,20 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __PYX_ERR(0, 249, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":248
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":248
  *         cdef int nx = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config, self.nlp_dims, self.nlp_out, 0, "x".encode('utf-8'))
- * 
+ *
  *         if index < 0 or index > nx:             # <<<<<<<<<<<<<<
  *             raise Exception(f'AcadosOcpSolverCython.eval_param_sens(): index must be in [0, nx-1], got: {index}.')
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":252
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":252
+ *
  *         # actual eval_param
  *         acados_solver_common.ocp_nlp_eval_param_sens(self.nlp_solver, field, stage, index, self.sens_out)             # <<<<<<<<<<<<<<
- * 
+ *
  *         return
 */
   __pyx_t_11 = __Pyx_PyObject_AsWritableString(__pyx_v_field); if (unlikely((!__pyx_t_11) && PyErr_Occurred())) __PYX_ERR(0, 252, __pyx_L1_error)
@@ -21573,20 +21573,20 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_13 = __Pyx_PyLong_As_int(__pyx_v_index); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 252, __pyx_L1_error)
   ocp_nlp_eval_param_sens(__pyx_v_self->nlp_solver, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_v_self->sens_out);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":254
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":254
  *         acados_solver_common.ocp_nlp_eval_param_sens(self.nlp_solver, field, stage, index, self.sens_out)
- * 
+ *
  *         return             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":232
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":232
+ *
+ *
  *     def eval_param_sens(self, index, stage=0, field="ex"):             # <<<<<<<<<<<<<<
  *         """
  *         Calculate the sensitivity of the curent solution with respect to the initial state component of index
@@ -21599,7 +21599,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_10);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.eval_param_sens", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.eval_param_sens", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_field_);
@@ -21609,25 +21609,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":257
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":257
+ *
+ *
  *     def get(self, int stage, str field_):             # <<<<<<<<<<<<<<
  *         """
  *         Get the last solution of the solver:
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get, "\n        Get the last solution of the solver:\n\n            :param stage: integer corresponding to shooting node\n            :param field: string in ['x', 'u', 'z', 'pi', 'lam', 't', 'sl', 'su',]\n\n            .. note:: regarding lam, t: \n\n                    the inequalities are internally organized in the following order: \n\n                    [ lbu lbx lg lh lphi ubu ubx ug uh uphi; \n\n                      lsbu lsbx lsg lsh lsphi usbu usbx usg ush usphi]\n\n            .. note:: pi: multipliers for dynamics equality constraints \n\n                      lam: multipliers for inequalities \n\n                      t: slack variables corresponding to evaluation of all inequalities (at the solution) \n\n                      sl: slack variables of soft lower inequality constraints \n\n                      su: slack variables of soft upper inequality constraints \n\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get = {"get", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get, "\n        Get the last solution of the solver:\n\n            :param stage: integer corresponding to shooting node\n            :param field: string in ['x', 'u', 'z', 'pi', 'lam', 't', 'sl', 'su',]\n\n            .. note:: regarding lam, t: \n\n                    the inequalities are internally organized in the following order: \n\n                    [ lbu lbx lg lh lphi ubu ubx ug uh uphi; \n\n                      lsbu lsbx lsg lsh lsphi usbu usbx usg ush usphi]\n\n            .. note:: pi: multipliers for dynamics equality constraints \n\n                      lam: multipliers for inequalities \n\n                      t: slack variables corresponding to evaluation of all inequalities (at the solution) \n\n                      sl: slack variables of soft lower inequality constraints \n\n                      su: slack variables of soft upper inequality constraints \n\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get = {"get", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -21697,12 +21697,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_field_), (&PyUnicode_Type), 1, "field_", 1))) __PYX_ERR(0, 257, __pyx_L1_error)
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_);
 
   /* function exit code */
   goto __pyx_L0;
@@ -21721,7 +21721,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_) {
   PyObject *__pyx_v_out_fields = NULL;
   PyObject *__pyx_v_field = NULL;
   int __pyx_v_dims;
@@ -21750,12 +21750,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_pybuffernd_out.data = NULL;
   __pyx_pybuffernd_out.rcbuffer = &__pyx_pybuffer_out;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":276
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":276
  *         """
- * 
+ *
  *         out_fields = ['x', 'u', 'z', 'pi', 'lam', 't', 'sl', 'su']             # <<<<<<<<<<<<<<
  *         field = field_.encode('utf-8')
- * 
+ *
 */
   __pyx_t_1 = PyList_New(8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -21786,11 +21786,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_out_fields = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":277
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":277
+ *
  *         out_fields = ['x', 'u', 'z', 'pi', 'lam', 't', 'sl', 'su']
  *         field = field_.encode('utf-8')             # <<<<<<<<<<<<<<
- * 
+ *
  *         if field_ not in out_fields:
 */
   if (unlikely(__pyx_v_field_ == Py_None)) {
@@ -21802,9 +21802,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_field = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":279
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":279
  *         field = field_.encode('utf-8')
- * 
+ *
  *         if field_ not in out_fields:             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.get(): {} is an invalid argument.\
  *                     \n Possible values are {}.'.format(field_, out_fields))
@@ -21812,22 +21812,22 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_2 = (__Pyx_PySequence_ContainsTF(__pyx_v_field_, __pyx_v_out_fields, Py_NE)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 279, __pyx_L1_error)
   if (unlikely(__pyx_t_2)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":280
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":280
+ *
  *         if field_ not in out_fields:
  *             raise Exception('AcadosOcpSolverCython.get(): {} is an invalid argument.\             # <<<<<<<<<<<<<<
  *                     \n Possible values are {}.'.format(field_, out_fields))
- * 
+ *
 */
     __pyx_t_3 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_4 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_4 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":281
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":281
  *         if field_ not in out_fields:
  *             raise Exception('AcadosOcpSolverCython.get(): {} is an invalid argument.\
  *                     \n Possible values are {}.'.format(field_, out_fields))             # <<<<<<<<<<<<<<
- * 
+ *
  *         if stage < 0 or stage > self.N:
 */
     __pyx_t_6 = __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_get_is_an;
@@ -21854,21 +21854,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __PYX_ERR(0, 280, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":279
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":279
  *         field = field_.encode('utf-8')
- * 
+ *
  *         if field_ not in out_fields:             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.get(): {} is an invalid argument.\
  *                     \n Possible values are {}.'.format(field_, out_fields))
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":283
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":283
  *                     \n Possible values are {}.'.format(field_, out_fields))
- * 
+ *
  *         if stage < 0 or stage > self.N:             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.get(): stage index must be in [0, N], got: {}.'.format(self.N))
- * 
+ *
 */
   __pyx_t_8 = (__pyx_v_stage < 0);
   if (!__pyx_t_8) {
@@ -21881,16 +21881,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_L5_bool_binop_done:;
   if (unlikely(__pyx_t_2)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":284
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":284
+ *
  *         if stage < 0 or stage > self.N:
  *             raise Exception('AcadosOcpSolverCython.get(): stage index must be in [0, N], got: {}.'.format(self.N))             # <<<<<<<<<<<<<<
- * 
+ *
  *         if stage == self.N and field_ == 'pi':
 */
     __pyx_t_4 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
     __pyx_t_6 = __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_get_stage;
     __Pyx_INCREF(__pyx_t_6);
     __pyx_t_9 = __Pyx_PyLong_From_int(__pyx_v_self->N); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 284, __pyx_L1_error)
@@ -21918,18 +21918,18 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __PYX_ERR(0, 284, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":283
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":283
  *                     \n Possible values are {}.'.format(field_, out_fields))
- * 
+ *
  *         if stage < 0 or stage > self.N:             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.get(): stage index must be in [0, N], got: {}.'.format(self.N))
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":286
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":286
  *             raise Exception('AcadosOcpSolverCython.get(): stage index must be in [0, N], got: {}.'.format(self.N))
- * 
+ *
  *         if stage == self.N and field_ == 'pi':             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.get(): field {} does not exist at final stage {}.'\
  *                 .format(field_, stage))
@@ -21945,22 +21945,22 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_L8_bool_binop_done:;
   if (unlikely(__pyx_t_2)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":287
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":287
+ *
  *         if stage == self.N and field_ == 'pi':
  *             raise Exception('AcadosOcpSolverCython.get(): field {} does not exist at final stage {}.'\             # <<<<<<<<<<<<<<
  *                 .format(field_, stage))
- * 
+ *
 */
     __pyx_t_5 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_3 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_3 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":288
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":288
  *         if stage == self.N and field_ == 'pi':
  *             raise Exception('AcadosOcpSolverCython.get(): field {} does not exist at final stage {}.'\
  *                 .format(field_, stage))             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef int dims = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config,
 */
     __pyx_t_9 = __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_get_field;
@@ -21990,36 +21990,36 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __PYX_ERR(0, 287, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":286
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":286
  *             raise Exception('AcadosOcpSolverCython.get(): stage index must be in [0, N], got: {}.'.format(self.N))
- * 
+ *
  *         if stage == self.N and field_ == 'pi':             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.get(): field {} does not exist at final stage {}.'\
  *                 .format(field_, stage))
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":291
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":291
+ *
  *         cdef int dims = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config,
  *             self.nlp_dims, self.nlp_out, stage, field)             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((dims,))
 */
   __pyx_t_10 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) __PYX_ERR(0, 291, __pyx_L1_error)
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":290
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":290
  *                 .format(field_, stage))
- * 
+ *
  *         cdef int dims = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config,             # <<<<<<<<<<<<<<
  *             self.nlp_dims, self.nlp_out, stage, field)
- * 
+ *
 */
   __pyx_v_dims = ocp_nlp_dims_get_from_attr(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_out, __pyx_v_stage, __pyx_t_10);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":293
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":293
  *             self.nlp_dims, self.nlp_out, stage, field)
- * 
+ *
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((dims,))             # <<<<<<<<<<<<<<
  *         acados_solver_common.ocp_nlp_out_get(self.nlp_config, \
  *             self.nlp_dims, self.nlp_out, stage, field, <void *> out.data)
@@ -22070,39 +22070,39 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_out = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":295
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":295
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((dims,))
  *         acados_solver_common.ocp_nlp_out_get(self.nlp_config, \
  *             self.nlp_dims, self.nlp_out, stage, field, <void *> out.data)             # <<<<<<<<<<<<<<
- * 
+ *
  *         return out
 */
   __pyx_t_11 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_11) && PyErr_Occurred())) __PYX_ERR(0, 295, __pyx_L1_error)
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":294
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":294
+ *
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((dims,))
  *         acados_solver_common.ocp_nlp_out_get(self.nlp_config, \             # <<<<<<<<<<<<<<
  *             self.nlp_dims, self.nlp_out, stage, field, <void *> out.data)
- * 
+ *
 */
   ocp_nlp_out_get(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_out, __pyx_v_stage, __pyx_t_11, ((void *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_out))));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":297
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":297
  *             self.nlp_dims, self.nlp_out, stage, field, <void *> out.data)
- * 
+ *
  *         return out             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF((PyObject *)__pyx_v_out);
   __pyx_r = ((PyObject *)__pyx_v_out);
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":257
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":257
+ *
+ *
  *     def get(self, int stage, str field_):             # <<<<<<<<<<<<<<
  *         """
  *         Get the last solution of the solver:
@@ -22122,7 +22122,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_out.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -22136,25 +22136,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":300
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":300
+ *
+ *
  *     def print_statistics(self):             # <<<<<<<<<<<<<<
  *         """
  *         prints statistics of previous solver run as a table:
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics, "\n        prints statistics of previous solver run as a table:\n            - iter: iteration number\n            - res_stat: stationarity residual\n            - res_eq: residual wrt equality constraints (dynamics)\n            - res_ineq: residual wrt inequality constraints (constraints)\n            - res_comp: residual wrt complementarity conditions\n            - qp_stat: status of QP solver\n            - qp_iter: number of QP iterations\n            - qp_res_stat: stationarity residual of the last QP solution\n            - qp_res_eq: residual wrt equality constraints (dynamics) of the last QP solution\n            - qp_res_ineq: residual wrt inequality constraints (constraints)  of the last QP solution\n            - qp_res_comp: residual wrt complementarity conditions of the last QP solution\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics = {"print_statistics", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics, "\n        prints statistics of previous solver run as a table:\n            - iter: iteration number\n            - res_stat: stationarity residual\n            - res_eq: residual wrt equality constraints (dynamics)\n            - res_ineq: residual wrt inequality constraints (constraints)\n            - res_comp: residual wrt complementarity conditions\n            - qp_stat: status of QP solver\n            - qp_iter: number of QP iterations\n            - qp_res_stat: stationarity residual of the last QP solution\n            - qp_res_eq: residual wrt equality constraints (dynamics) of the last QP solution\n            - qp_res_ineq: residual wrt inequality constraints (constraints)  of the last QP solution\n            - qp_res_comp: residual wrt complementarity conditions of the last QP solution\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics = {"print_statistics", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -22180,30 +22180,30 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   const Py_ssize_t __pyx_kwds_len = unlikely(__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
   if (unlikely(__pyx_kwds_len < 0)) return NULL;
   if (unlikely(__pyx_kwds_len > 0)) {__Pyx_RejectKeywords("print_statistics", __pyx_kwds); return NULL;}
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("print_statistics", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":315
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":315
  *             - qp_res_comp: residual wrt complementarity conditions of the last QP solution
  *         """
  *         acados_solver.acados_print_stats(self.capsule)             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   long_acados_print_stats(__pyx_v_self->capsule);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":300
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":300
+ *
+ *
  *     def print_statistics(self):             # <<<<<<<<<<<<<<
  *         """
  *         prints statistics of previous solver run as a table:
@@ -22216,25 +22216,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":318
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":318
+ *
+ *
  *     def store_iterate(self, filename='', overwrite=False):             # <<<<<<<<<<<<<<
  *         """
  *         Stores the current iterate of the ocp solver in a json file.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate, "\n        Stores the current iterate of the ocp solver in a json file.\n\n            :param filename: if not set, use model_name + timestamp + '.json'\n            :param overwrite: if false and filename exists add timestamp to filename\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate = {"store_iterate", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate, "\n        Stores the current iterate of the ocp solver in a json file.\n\n            :param filename: if not set, use model_name + timestamp + '.json'\n            :param overwrite: if false and filename exists add timestamp to filename\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate = {"store_iterate", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -22311,11 +22311,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_filename, __pyx_v_overwrite);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_filename, __pyx_v_overwrite);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -22325,24 +22325,24 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":357
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":357
  *         # save
  *         with open(filename, 'w') as f:
  *             json.dump(solution, f, default=lambda x: x.tolist(), indent=4, sort_keys=True)             # <<<<<<<<<<<<<<
  *         print("stored current iterate in ", os.path.join(os.getcwd(), filename))
- * 
+ *
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda(PyObject *__pyx_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda = {"lambda", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda = {"lambda", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda(PyObject *__pyx_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -22404,7 +22404,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate.lambda", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate.lambda", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
@@ -22447,7 +22447,7 @@ static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self,
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate.lambda", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate.lambda", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -22455,15 +22455,15 @@ static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self,
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":318
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":318
+ *
+ *
  *     def store_iterate(self, filename='', overwrite=False):             # <<<<<<<<<<<<<<
  *         """
  *         Stores the current iterate of the ocp solver in a json file.
 */
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_filename, PyObject *__pyx_v_overwrite) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_filename, PyObject *__pyx_v_overwrite) {
   PyObject *__pyx_v_json = NULL;
   PyObject *__pyx_v_solution = NULL;
   Py_ssize_t __pyx_v_lN;
@@ -22503,7 +22503,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_RefNannySetupContext("store_iterate", 0);
   __Pyx_INCREF(__pyx_v_filename);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":325
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":325
  *             :param overwrite: if false and filename exists add timestamp to filename
  *         """
  *         import json             # <<<<<<<<<<<<<<
@@ -22515,21 +22515,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_json = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":326
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":326
  *         """
  *         import json
  *         if filename == '':             # <<<<<<<<<<<<<<
  *             filename += self.model_name + '_' + 'iterate' + '.json'
- * 
+ *
 */
   __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_v_filename, __pyx_mstate_global->__pyx_kp_u__6, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 326, __pyx_L1_error)
   if (__pyx_t_2) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":327
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":327
  *         import json
  *         if filename == '':
  *             filename += self.model_name + '_' + 'iterate' + '.json'             # <<<<<<<<<<<<<<
- * 
+ *
  *         if not overwrite:
 */
     __pyx_t_1 = __Pyx_PyUnicode_ConcatSafe(__pyx_v_self->model_name, __pyx_mstate_global->__pyx_n_u__7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 327, __pyx_L1_error)
@@ -22546,18 +22546,18 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF_SET(__pyx_v_filename, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":326
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":326
  *         """
  *         import json
  *         if filename == '':             # <<<<<<<<<<<<<<
  *             filename += self.model_name + '_' + 'iterate' + '.json'
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":329
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":329
  *             filename += self.model_name + '_' + 'iterate' + '.json'
- * 
+ *
  *         if not overwrite:             # <<<<<<<<<<<<<<
  *             # append timestamp
  *             if os.path.isfile(filename):
@@ -22566,7 +22566,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (!__pyx_t_2);
   if (__pyx_t_4) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":331
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":331
  *         if not overwrite:
  *             # append timestamp
  *             if os.path.isfile(filename):             # <<<<<<<<<<<<<<
@@ -22593,23 +22593,23 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (__pyx_t_4) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":332
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":332
  *             # append timestamp
  *             if os.path.isfile(filename):
  *                 filename = filename[:-5]             # <<<<<<<<<<<<<<
  *                 filename += datetime.utcnow().strftime('%Y-%m-%d-%H:%M:%S.%f') + '.json'
- * 
+ *
 */
       __pyx_t_3 = __Pyx_PyObject_GetSlice(__pyx_v_filename, 0, -5L, NULL, NULL, &__pyx_mstate_global->__pyx_slice[1], 0, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 332, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF_SET(__pyx_v_filename, __pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":333
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":333
  *             if os.path.isfile(filename):
  *                 filename = filename[:-5]
  *                 filename += datetime.utcnow().strftime('%Y-%m-%d-%H:%M:%S.%f') + '.json'             # <<<<<<<<<<<<<<
- * 
+ *
  *         # get iterate:
 */
       __pyx_t_5 = NULL;
@@ -22658,7 +22658,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __Pyx_DECREF_SET(__pyx_v_filename, __pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":331
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":331
  *         if not overwrite:
  *             # append timestamp
  *             if os.path.isfile(filename):             # <<<<<<<<<<<<<<
@@ -22667,20 +22667,20 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":329
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":329
  *             filename += self.model_name + '_' + 'iterate' + '.json'
- * 
+ *
  *         if not overwrite:             # <<<<<<<<<<<<<<
  *             # append timestamp
  *             if os.path.isfile(filename):
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":336
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":336
+ *
  *         # get iterate:
  *         solution = dict()             # <<<<<<<<<<<<<<
- * 
+ *
  *         lN = len(str(self.N+1))
 */
   __pyx_t_3 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 336, __pyx_L1_error)
@@ -22688,9 +22688,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_solution = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":338
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":338
  *         solution = dict()
- * 
+ *
  *         lN = len(str(self.N+1))             # <<<<<<<<<<<<<<
  *         for i in range(self.N+1):
  *             i_string = f'{i:0{lN}d}'
@@ -22704,8 +22704,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_lN = __pyx_t_10;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":339
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":339
+ *
  *         lN = len(str(self.N+1))
  *         for i in range(self.N+1):             # <<<<<<<<<<<<<<
  *             i_string = f'{i:0{lN}d}'
@@ -22716,7 +22716,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
     __pyx_v_i = __pyx_t_13;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":340
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":340
  *         lN = len(str(self.N+1))
  *         for i in range(self.N+1):
  *             i_string = f'{i:0{lN}d}'             # <<<<<<<<<<<<<<
@@ -22741,7 +22741,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_XDECREF_SET(__pyx_v_i_string, ((PyObject*)__pyx_t_3));
     __pyx_t_3 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":341
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":341
  *         for i in range(self.N+1):
  *             i_string = f'{i:0{lN}d}'
  *             solution['x_'+i_string] = self.get(i,'x')             # <<<<<<<<<<<<<<
@@ -22767,7 +22767,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":342
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":342
  *             i_string = f'{i:0{lN}d}'
  *             solution['x_'+i_string] = self.get(i,'x')
  *             solution['u_'+i_string] = self.get(i,'u')             # <<<<<<<<<<<<<<
@@ -22793,7 +22793,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":343
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":343
  *             solution['x_'+i_string] = self.get(i,'x')
  *             solution['u_'+i_string] = self.get(i,'u')
  *             solution['z_'+i_string] = self.get(i,'z')             # <<<<<<<<<<<<<<
@@ -22819,7 +22819,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":344
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":344
  *             solution['u_'+i_string] = self.get(i,'u')
  *             solution['z_'+i_string] = self.get(i,'z')
  *             solution['lam_'+i_string] = self.get(i,'lam')             # <<<<<<<<<<<<<<
@@ -22845,7 +22845,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":345
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":345
  *             solution['z_'+i_string] = self.get(i,'z')
  *             solution['lam_'+i_string] = self.get(i,'lam')
  *             solution['t_'+i_string] = self.get(i, 't')             # <<<<<<<<<<<<<<
@@ -22871,7 +22871,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":346
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":346
  *             solution['lam_'+i_string] = self.get(i,'lam')
  *             solution['t_'+i_string] = self.get(i, 't')
  *             solution['sl_'+i_string] = self.get(i, 'sl')             # <<<<<<<<<<<<<<
@@ -22897,7 +22897,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":347
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":347
  *             solution['t_'+i_string] = self.get(i, 't')
  *             solution['sl_'+i_string] = self.get(i, 'sl')
  *             solution['su_'+i_string] = self.get(i, 'su')             # <<<<<<<<<<<<<<
@@ -22923,21 +22923,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":348
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":348
  *             solution['sl_'+i_string] = self.get(i, 'sl')
  *             solution['su_'+i_string] = self.get(i, 'su')
  *             if i < self.N:             # <<<<<<<<<<<<<<
  *                 solution['pi_'+i_string] = self.get(i,'pi')
- * 
+ *
 */
     __pyx_t_4 = (__pyx_v_i < __pyx_v_self->N);
     if (__pyx_t_4) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":349
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":349
  *             solution['su_'+i_string] = self.get(i, 'su')
  *             if i < self.N:
  *                 solution['pi_'+i_string] = self.get(i,'pi')             # <<<<<<<<<<<<<<
- * 
+ *
  *         for k in list(solution.keys()):
 */
       __pyx_t_1 = ((PyObject *)__pyx_v_self);
@@ -22959,19 +22959,19 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":348
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":348
  *             solution['sl_'+i_string] = self.get(i, 'sl')
  *             solution['su_'+i_string] = self.get(i, 'su')
  *             if i < self.N:             # <<<<<<<<<<<<<<
  *                 solution['pi_'+i_string] = self.get(i,'pi')
- * 
+ *
 */
     }
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":351
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":351
  *                 solution['pi_'+i_string] = self.get(i,'pi')
- * 
+ *
  *         for k in list(solution.keys()):             # <<<<<<<<<<<<<<
  *             if len(solution[k]) == 0:
  *                 del solution[k]
@@ -22999,12 +22999,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_XDECREF_SET(__pyx_v_k, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":352
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":352
+ *
  *         for k in list(solution.keys()):
  *             if len(solution[k]) == 0:             # <<<<<<<<<<<<<<
  *                 del solution[k]
- * 
+ *
 */
     __pyx_t_6 = __Pyx_PyDict_GetItem(__pyx_v_solution, __pyx_v_k); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 352, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
@@ -23013,27 +23013,27 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_4 = (__pyx_t_15 == 0);
     if (__pyx_t_4) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":353
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":353
  *         for k in list(solution.keys()):
  *             if len(solution[k]) == 0:
  *                 del solution[k]             # <<<<<<<<<<<<<<
- * 
+ *
  *         # save
 */
       if (unlikely((PyDict_DelItem(__pyx_v_solution, __pyx_v_k) < 0))) __PYX_ERR(0, 353, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":352
- * 
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":352
+ *
  *         for k in list(solution.keys()):
  *             if len(solution[k]) == 0:             # <<<<<<<<<<<<<<
  *                 del solution[k]
- * 
+ *
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":351
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":351
  *                 solution['pi_'+i_string] = self.get(i,'pi')
- * 
+ *
  *         for k in list(solution.keys()):             # <<<<<<<<<<<<<<
  *             if len(solution[k]) == 0:
  *                 del solution[k]
@@ -23041,8 +23041,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":356
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":356
+ *
  *         # save
  *         with open(filename, 'w') as f:             # <<<<<<<<<<<<<<
  *             json.dump(solution, f, default=lambda x: x.tolist(), indent=4, sort_keys=True)
@@ -23051,7 +23051,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   /*with:*/ {
     __pyx_t_6 = NULL;
     __Pyx_INCREF(__pyx_builtin_open);
-    __pyx_t_1 = __pyx_builtin_open; 
+    __pyx_t_1 = __pyx_builtin_open;
     __pyx_t_7 = 1;
     {
       PyObject *__pyx_callargs[3] = {__pyx_t_6, __pyx_v_filename, __pyx_mstate_global->__pyx_n_u_w};
@@ -23101,16 +23101,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
           __pyx_v_f = __pyx_t_9;
           __pyx_t_9 = 0;
 
-          /* "acados_template/acados_ocp_solver_pyx.pyx":357
+          /* "acados/acados_template/acados_ocp_solver_pyx.pyx":357
  *         # save
  *         with open(filename, 'w') as f:
  *             json.dump(solution, f, default=lambda x: x.tolist(), indent=4, sort_keys=True)             # <<<<<<<<<<<<<<
  *         print("stored current iterate in ", os.path.join(os.getcwd(), filename))
- * 
+ *
 */
           __pyx_t_3 = __pyx_v_json;
           __Pyx_INCREF(__pyx_t_3);
-          __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda, 0, __pyx_mstate_global->__pyx_n_u_store_iterate_locals_lambda, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 357, __pyx_L17_error)
+          __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13store_iterate_lambda, 0, __pyx_mstate_global->__pyx_n_u_store_iterate_locals_lambda, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 357, __pyx_L17_error)
           __Pyx_GOTREF(__pyx_t_1);
           __pyx_t_7 = 0;
           {
@@ -23129,8 +23129,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
           }
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-          /* "acados_template/acados_ocp_solver_pyx.pyx":356
- * 
+          /* "acados/acados_template/acados_ocp_solver_pyx.pyx":356
+ *
  *         # save
  *         with open(filename, 'w') as f:             # <<<<<<<<<<<<<<
  *             json.dump(solution, f, default=lambda x: x.tolist(), indent=4, sort_keys=True)
@@ -23149,7 +23149,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
         /*except:*/ {
-          __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+          __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
           if (__Pyx_GetException(&__pyx_t_9, &__pyx_t_6, &__pyx_t_1) < 0) __PYX_ERR(0, 356, __pyx_L19_except_error)
           __Pyx_XGOTREF(__pyx_t_9);
           __Pyx_XGOTREF(__pyx_t_6);
@@ -23170,7 +23170,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
             __Pyx_GIVEREF(__pyx_t_6);
             __Pyx_XGIVEREF(__pyx_t_1);
             __Pyx_ErrRestoreWithState(__pyx_t_9, __pyx_t_6, __pyx_t_1);
-            __pyx_t_9 = 0;  __pyx_t_6 = 0;  __pyx_t_1 = 0; 
+            __pyx_t_9 = 0;  __pyx_t_6 = 0;  __pyx_t_1 = 0;
             __PYX_ERR(0, 356, __pyx_L19_except_error)
           }
           __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -23212,16 +23212,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_L26:;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":358
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":358
  *         with open(filename, 'w') as f:
  *             json.dump(solution, f, default=lambda x: x.tolist(), indent=4, sort_keys=True)
  *         print("stored current iterate in ", os.path.join(os.getcwd(), filename))             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_6 = NULL;
   __Pyx_INCREF(__pyx_builtin_print);
-  __pyx_t_9 = __pyx_builtin_print; 
+  __pyx_t_9 = __pyx_builtin_print;
   __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_mstate_global->__pyx_n_u_os); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 358, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_mstate_global->__pyx_n_u_path); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 358, __pyx_L1_error)
@@ -23277,9 +23277,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":318
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":318
+ *
+ *
  *     def store_iterate(self, filename='', overwrite=False):             # <<<<<<<<<<<<<<
  *         """
  *         Stores the current iterate of the ocp solver in a json file.
@@ -23299,7 +23299,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_XDECREF(__pyx_t_22);
   __Pyx_XDECREF(__pyx_t_23);
   __Pyx_XDECREF(__pyx_t_24);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.store_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_json);
@@ -23313,25 +23313,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":361
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":361
+ *
+ *
  *     def load_iterate(self, filename):             # <<<<<<<<<<<<<<
  *         """
  *         Loads the iterate stored in json file with filename into the ocp solver.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate, "\n        Loads the iterate stored in json file with filename into the ocp solver.\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate = {"load_iterate", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate, "\n        Loads the iterate stored in json file with filename into the ocp solver.\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate = {"load_iterate", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -23393,11 +23393,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.load_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.load_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_filename);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_filename);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -23407,7 +23407,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_filename) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_filename) {
   PyObject *__pyx_v_json = NULL;
   PyObject *__pyx_v_f = NULL;
   PyObject *__pyx_v_solution = NULL;
@@ -23444,7 +23444,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("load_iterate", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":365
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":365
  *         Loads the iterate stored in json file with filename into the ocp solver.
  *         """
  *         import json             # <<<<<<<<<<<<<<
@@ -23456,12 +23456,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_json = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":366
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":366
  *         """
  *         import json
  *         if not os.path.isfile(filename):             # <<<<<<<<<<<<<<
  *             raise Exception('load_iterate: failed, file does not exist: ' + os.path.join(os.getcwd(), filename))
- * 
+ *
 */
   __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_mstate_global->__pyx_n_u_os); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 366, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
@@ -23484,16 +23484,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_7 = (!__pyx_t_6);
   if (unlikely(__pyx_t_7)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":367
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":367
  *         import json
  *         if not os.path.isfile(filename):
  *             raise Exception('load_iterate: failed, file does not exist: ' + os.path.join(os.getcwd(), filename))             # <<<<<<<<<<<<<<
- * 
+ *
  *         with open(filename, 'r') as f:
 */
     __pyx_t_4 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_2 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_2 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
     __Pyx_GetModuleGlobalName(__pyx_t_9, __pyx_mstate_global->__pyx_n_u_os); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 367, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_mstate_global->__pyx_n_u_path); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 367, __pyx_L1_error)
@@ -23554,26 +23554,26 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __PYX_ERR(0, 367, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":366
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":366
  *         """
  *         import json
  *         if not os.path.isfile(filename):             # <<<<<<<<<<<<<<
  *             raise Exception('load_iterate: failed, file does not exist: ' + os.path.join(os.getcwd(), filename))
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":369
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":369
  *             raise Exception('load_iterate: failed, file does not exist: ' + os.path.join(os.getcwd(), filename))
- * 
+ *
  *         with open(filename, 'r') as f:             # <<<<<<<<<<<<<<
  *             solution = json.load(f)
- * 
+ *
 */
   /*with:*/ {
     __pyx_t_2 = NULL;
     __Pyx_INCREF(__pyx_builtin_open);
-    __pyx_t_10 = __pyx_builtin_open; 
+    __pyx_t_10 = __pyx_builtin_open;
     __pyx_t_5 = 1;
     {
       PyObject *__pyx_callargs[3] = {__pyx_t_2, __pyx_v_filename, __pyx_mstate_global->__pyx_n_u_r};
@@ -23623,11 +23623,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
           __pyx_v_f = __pyx_t_4;
           __pyx_t_4 = 0;
 
-          /* "acados_template/acados_ocp_solver_pyx.pyx":370
- * 
+          /* "acados/acados_template/acados_ocp_solver_pyx.pyx":370
+ *
  *         with open(filename, 'r') as f:
  *             solution = json.load(f)             # <<<<<<<<<<<<<<
- * 
+ *
  *         for key in solution.keys():
 */
           __pyx_t_1 = __pyx_v_json;
@@ -23643,12 +23643,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
           __pyx_v_solution = __pyx_t_4;
           __pyx_t_4 = 0;
 
-          /* "acados_template/acados_ocp_solver_pyx.pyx":369
+          /* "acados/acados_template/acados_ocp_solver_pyx.pyx":369
  *             raise Exception('load_iterate: failed, file does not exist: ' + os.path.join(os.getcwd(), filename))
- * 
+ *
  *         with open(filename, 'r') as f:             # <<<<<<<<<<<<<<
  *             solution = json.load(f)
- * 
+ *
 */
         }
         __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -23667,7 +23667,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
         /*except:*/ {
-          __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.load_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+          __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.load_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
           if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_1, &__pyx_t_10) < 0) __PYX_ERR(0, 369, __pyx_L10_except_error)
           __Pyx_XGOTREF(__pyx_t_4);
           __Pyx_XGOTREF(__pyx_t_1);
@@ -23688,7 +23688,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
             __Pyx_GIVEREF(__pyx_t_1);
             __Pyx_XGIVEREF(__pyx_t_10);
             __Pyx_ErrRestoreWithState(__pyx_t_4, __pyx_t_1, __pyx_t_10);
-            __pyx_t_4 = 0;  __pyx_t_1 = 0;  __pyx_t_10 = 0; 
+            __pyx_t_4 = 0;  __pyx_t_1 = 0;  __pyx_t_10 = 0;
             __PYX_ERR(0, 369, __pyx_L10_except_error)
           }
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -23730,9 +23730,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_L17:;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":372
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":372
  *             solution = json.load(f)
- * 
+ *
  *         for key in solution.keys():             # <<<<<<<<<<<<<<
  *             (field, stage) = key.split('_')
  *             self.set(int(stage), field, np.array(solution[key]))
@@ -23756,12 +23756,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_XDECREF_SET(__pyx_v_key, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":373
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":373
+ *
  *         for key in solution.keys():
  *             (field, stage) = key.split('_')             # <<<<<<<<<<<<<<
  *             self.set(int(stage), field, np.array(solution[key]))
- * 
+ *
 */
     __pyx_t_4 = __pyx_v_key;
     __Pyx_INCREF(__pyx_t_4);
@@ -23828,12 +23828,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_XDECREF_SET(__pyx_v_stage, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":374
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":374
  *         for key in solution.keys():
  *             (field, stage) = key.split('_')
  *             self.set(int(stage), field, np.array(solution[key]))             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     __pyx_t_2 = ((PyObject *)__pyx_v_self);
     __Pyx_INCREF(__pyx_t_2);
@@ -23883,9 +23883,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":361
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":361
+ *
+ *
  *     def load_iterate(self, filename):             # <<<<<<<<<<<<<<
  *         """
  *         Loads the iterate stored in json file with filename into the ocp solver.
@@ -23905,7 +23905,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_XDECREF(__pyx_t_11);
   __Pyx_XDECREF(__pyx_t_12);
   __Pyx_XDECREF(__pyx_t_13);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.load_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.load_iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_json);
@@ -23919,25 +23919,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":377
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":377
+ *
+ *
  *     def get_stats(self, field_):             # <<<<<<<<<<<<<<
  *         """
  *         Get the information of the last solver call.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats, "\n        Get the information of the last solver call.\n\n            :param field: string in ['statistics', 'time_tot', 'time_lin', 'time_sim', 'time_sim_ad', 'time_sim_la', 'time_qp', 'time_qp_solver_call', 'time_reg', 'sqp_iter']\n        Available fileds:\n            - time_tot: total CPU time previous call\n            - time_lin: CPU time for linearization\n            - time_sim: CPU time for integrator\n            - time_sim_ad: CPU time for integrator contribution of external function calls\n            - time_sim_la: CPU time for integrator contribution of linear algebra\n            - time_qp: CPU time qp solution\n            - time_qp_solver_call: CPU time inside qp solver (without converting the QP)\n            - time_qp_xcond: time_glob: CPU time globalization\n            - time_solution_sensitivities: CPU time for previous call to eval_param_sens\n            - time_reg: CPU time regularization\n            - sqp_iter: number of SQP iterations\n            - qp_iter: vector of QP iterations for last SQP call\n            - statistics: table with info about last iteration\n            - stat_m: number of rows in statistics matrix\n            - stat_n: number of columns in statistics matrix\n            - residuals: residuals of last iterate\n            - alpha: step sizes of SQP iterations\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats = {"get_stats", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats, "\n        Get the information of the last solver call.\n\n            :param field: string in ['statistics', 'time_tot', 'time_lin', 'time_sim', 'time_sim_ad', 'time_sim_la', 'time_qp', 'time_qp_solver_call', 'time_reg', 'sqp_iter']\n        Available fileds:\n            - time_tot: total CPU time previous call\n            - time_lin: CPU time for linearization\n            - time_sim: CPU time for integrator\n            - time_sim_ad: CPU time for integrator contribution of external function calls\n            - time_sim_la: CPU time for integrator contribution of linear algebra\n            - time_qp: CPU time qp solution\n            - time_qp_solver_call: CPU time inside qp solver (without converting the QP)\n            - time_qp_xcond: time_glob: CPU time globalization\n            - time_solution_sensitivities: CPU time for previous call to eval_param_sens\n            - time_reg: CPU time regularization\n            - sqp_iter: number of SQP iterations\n            - qp_iter: vector of QP iterations for last SQP call\n            - statistics: table with info about last iteration\n            - stat_m: number of rows in statistics matrix\n            - stat_n: number of columns in statistics matrix\n            - residuals: residuals of last iterate\n            - alpha: step sizes of SQP iterations\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats = {"get_stats", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -23999,11 +23999,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_stats", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_stats", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field_);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field_);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -24013,7 +24013,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field_) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field_) {
   PyObject *__pyx_v_double_fields = NULL;
   CYTHON_UNUSED PyObject *__pyx_v_fields = NULL;
   PyObject *__pyx_v_field = NULL;
@@ -24036,9 +24036,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_stats", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":402
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":402
  *         """
- * 
+ *
  *         double_fields = ['time_tot',             # <<<<<<<<<<<<<<
  *                   'time_lin',
  *                   'time_sim',
@@ -24081,7 +24081,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_double_fields = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":414
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":414
  *                   'time_reg'
  *         ]
  *         fields = double_fields + [             # <<<<<<<<<<<<<<
@@ -24117,11 +24117,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_fields = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":423
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":423
  *                   'alpha',
  *                 ]
  *         field = field_.encode('utf-8')             # <<<<<<<<<<<<<<
- * 
+ *
  *         if field_ in ['sqp_iter', 'stat_m', 'stat_n']:
 */
   __pyx_t_1 = __pyx_v_field_;
@@ -24137,12 +24137,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_field = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":425
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":425
  *         field = field_.encode('utf-8')
- * 
+ *
  *         if field_ in ['sqp_iter', 'stat_m', 'stat_n']:             # <<<<<<<<<<<<<<
  *             return self.__get_stat_int(field)
- * 
+ *
 */
   __Pyx_INCREF(__pyx_v_field_);
   __pyx_t_2 = __pyx_v_field_;
@@ -24165,11 +24165,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_5 = __pyx_t_4;
   if (__pyx_t_5) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":426
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":426
+ *
  *         if field_ in ['sqp_iter', 'stat_m', 'stat_n']:
  *             return self.__get_stat_int(field)             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif field_ in double_fields:
 */
     __Pyx_XDECREF(__pyx_r);
@@ -24187,30 +24187,30 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":425
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":425
  *         field = field_.encode('utf-8')
- * 
+ *
  *         if field_ in ['sqp_iter', 'stat_m', 'stat_n']:             # <<<<<<<<<<<<<<
  *             return self.__get_stat_int(field)
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":428
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":428
  *             return self.__get_stat_int(field)
- * 
+ *
  *         elif field_ in double_fields:             # <<<<<<<<<<<<<<
  *             return self.__get_stat_double(field)
- * 
+ *
 */
   __pyx_t_5 = (__Pyx_PySequence_ContainsTF(__pyx_v_field_, __pyx_v_double_fields, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 428, __pyx_L1_error)
   if (__pyx_t_5) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":429
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":429
+ *
  *         elif field_ in double_fields:
  *             return self.__get_stat_double(field)             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif field_ == 'statistics':
 */
     __Pyx_XDECREF(__pyx_r);
@@ -24228,18 +24228,18 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":428
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":428
  *             return self.__get_stat_int(field)
- * 
+ *
  *         elif field_ in double_fields:             # <<<<<<<<<<<<<<
  *             return self.__get_stat_double(field)
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":431
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":431
  *             return self.__get_stat_double(field)
- * 
+ *
  *         elif field_ == 'statistics':             # <<<<<<<<<<<<<<
  *             sqp_iter = self.get_stats("sqp_iter")
  *             stat_m = self.get_stats("stat_m")
@@ -24247,8 +24247,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_field_, __pyx_mstate_global->__pyx_n_u_statistics, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 431, __pyx_L1_error)
   if (__pyx_t_5) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":432
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":432
+ *
  *         elif field_ == 'statistics':
  *             sqp_iter = self.get_stats("sqp_iter")             # <<<<<<<<<<<<<<
  *             stat_m = self.get_stats("stat_m")
@@ -24267,7 +24267,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_v_sqp_iter = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":433
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":433
  *         elif field_ == 'statistics':
  *             sqp_iter = self.get_stats("sqp_iter")
  *             stat_m = self.get_stats("stat_m")             # <<<<<<<<<<<<<<
@@ -24287,7 +24287,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_v_stat_m = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":434
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":434
  *             sqp_iter = self.get_stats("sqp_iter")
  *             stat_m = self.get_stats("stat_m")
  *             stat_n = self.get_stats("stat_n")             # <<<<<<<<<<<<<<
@@ -24307,12 +24307,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_v_stat_n = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":435
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":435
  *             stat_m = self.get_stats("stat_m")
  *             stat_n = self.get_stats("stat_n")
  *             min_size = min([stat_m, sqp_iter+1])             # <<<<<<<<<<<<<<
  *             return self.__get_stat_matrix(field, stat_n+1, min_size)
- * 
+ *
 */
     __pyx_t_2 = __Pyx_PyLong_AddObjC(__pyx_v_sqp_iter, __pyx_mstate_global->__pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 435, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -24336,11 +24336,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_v_min_size = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":436
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":436
  *             stat_n = self.get_stats("stat_n")
  *             min_size = min([stat_m, sqp_iter+1])
  *             return self.__get_stat_matrix(field, stat_n+1, min_size)             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif field_ == 'qp_iter':
 */
     __Pyx_XDECREF(__pyx_r);
@@ -24361,18 +24361,18 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":431
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":431
  *             return self.__get_stat_double(field)
- * 
+ *
  *         elif field_ == 'statistics':             # <<<<<<<<<<<<<<
  *             sqp_iter = self.get_stats("sqp_iter")
  *             stat_m = self.get_stats("stat_m")
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":438
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":438
  *             return self.__get_stat_matrix(field, stat_n+1, min_size)
- * 
+ *
  *         elif field_ == 'qp_iter':             # <<<<<<<<<<<<<<
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':
@@ -24380,8 +24380,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_field_, __pyx_mstate_global->__pyx_n_u_qp_iter, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 438, __pyx_L1_error)
   if (__pyx_t_5) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":439
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":439
+ *
  *         elif field_ == 'qp_iter':
  *             full_stats = self.get_stats('statistics')             # <<<<<<<<<<<<<<
  *             if self.nlp_solver_type == 'SQP':
@@ -24400,7 +24400,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_v_full_stats = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":440
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":440
  *         elif field_ == 'qp_iter':
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':             # <<<<<<<<<<<<<<
@@ -24410,7 +24410,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_self->nlp_solver_type, __pyx_mstate_global->__pyx_n_u_SQP, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 440, __pyx_L1_error)
     if (__pyx_t_5) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":441
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":441
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':
  *                 return full_stats[6, :]             # <<<<<<<<<<<<<<
@@ -24424,7 +24424,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __pyx_t_2 = 0;
       goto __pyx_L0;
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":440
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":440
  *         elif field_ == 'qp_iter':
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':             # <<<<<<<<<<<<<<
@@ -24433,21 +24433,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":442
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":442
  *             if self.nlp_solver_type == 'SQP':
  *                 return full_stats[6, :]
  *             elif self.nlp_solver_type == 'SQP_RTI':             # <<<<<<<<<<<<<<
  *                 return full_stats[2, :]
- * 
+ *
 */
     __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_self->nlp_solver_type, __pyx_mstate_global->__pyx_n_u_SQP_RTI, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 442, __pyx_L1_error)
     if (__pyx_t_5) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":443
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":443
  *                 return full_stats[6, :]
  *             elif self.nlp_solver_type == 'SQP_RTI':
  *                 return full_stats[2, :]             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif field_ == 'alpha':
 */
       __Pyx_XDECREF(__pyx_r);
@@ -24457,18 +24457,18 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __pyx_t_2 = 0;
       goto __pyx_L0;
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":442
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":442
  *             if self.nlp_solver_type == 'SQP':
  *                 return full_stats[6, :]
  *             elif self.nlp_solver_type == 'SQP_RTI':             # <<<<<<<<<<<<<<
  *                 return full_stats[2, :]
- * 
+ *
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":438
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":438
  *             return self.__get_stat_matrix(field, stat_n+1, min_size)
- * 
+ *
  *         elif field_ == 'qp_iter':             # <<<<<<<<<<<<<<
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':
@@ -24476,9 +24476,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     goto __pyx_L3;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":445
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":445
  *                 return full_stats[2, :]
- * 
+ *
  *         elif field_ == 'alpha':             # <<<<<<<<<<<<<<
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':
@@ -24486,8 +24486,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_field_, __pyx_mstate_global->__pyx_n_u_alpha, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 445, __pyx_L1_error)
   if (__pyx_t_5) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":446
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":446
+ *
  *         elif field_ == 'alpha':
  *             full_stats = self.get_stats('statistics')             # <<<<<<<<<<<<<<
  *             if self.nlp_solver_type == 'SQP':
@@ -24506,7 +24506,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_v_full_stats = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":447
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":447
  *         elif field_ == 'alpha':
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':             # <<<<<<<<<<<<<<
@@ -24516,7 +24516,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_self->nlp_solver_type, __pyx_mstate_global->__pyx_n_u_SQP, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 447, __pyx_L1_error)
     if (likely(__pyx_t_5)) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":448
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":448
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':
  *                 return full_stats[7, :]             # <<<<<<<<<<<<<<
@@ -24530,7 +24530,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __pyx_t_2 = 0;
       goto __pyx_L0;
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":447
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":447
  *         elif field_ == 'alpha':
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':             # <<<<<<<<<<<<<<
@@ -24539,17 +24539,17 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":450
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":450
  *                 return full_stats[7, :]
  *             else: # self.nlp_solver_type == 'SQP_RTI':
  *                 raise Exception("alpha values are not available for SQP_RTI")             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif field_ == 'residuals':
 */
     /*else*/ {
       __pyx_t_1 = NULL;
       __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-      __pyx_t_6 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+      __pyx_t_6 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
       __pyx_t_3 = 1;
       {
         PyObject *__pyx_callargs[2] = {__pyx_t_1, __pyx_mstate_global->__pyx_kp_u_alpha_values_are_not_available_f};
@@ -24564,30 +24564,30 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __PYX_ERR(0, 450, __pyx_L1_error)
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":445
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":445
  *                 return full_stats[2, :]
- * 
+ *
  *         elif field_ == 'alpha':             # <<<<<<<<<<<<<<
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":452
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":452
  *                 raise Exception("alpha values are not available for SQP_RTI")
- * 
+ *
  *         elif field_ == 'residuals':             # <<<<<<<<<<<<<<
  *             return self.get_residuals()
- * 
+ *
 */
   __pyx_t_5 = (__Pyx_PyUnicode_Equals(__pyx_v_field_, __pyx_mstate_global->__pyx_n_u_residuals, Py_EQ)); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 452, __pyx_L1_error)
   if (likely(__pyx_t_5)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":453
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":453
+ *
  *         elif field_ == 'residuals':
  *             return self.get_residuals()             # <<<<<<<<<<<<<<
- * 
+ *
  *         else:
 */
     __Pyx_XDECREF(__pyx_r);
@@ -24605,26 +24605,26 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":452
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":452
  *                 raise Exception("alpha values are not available for SQP_RTI")
- * 
+ *
  *         elif field_ == 'residuals':             # <<<<<<<<<<<<<<
  *             return self.get_residuals()
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":456
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":456
+ *
  *         else:
  *             raise NotImplementedError("TODO!")             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   /*else*/ {
     __pyx_t_6 = NULL;
     __Pyx_INCREF(__pyx_builtin_NotImplementedError);
-    __pyx_t_1 = __pyx_builtin_NotImplementedError; 
+    __pyx_t_1 = __pyx_builtin_NotImplementedError;
     __pyx_t_3 = 1;
     {
       PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_mstate_global->__pyx_kp_u_TODO};
@@ -24640,9 +24640,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __pyx_L3:;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":377
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":377
+ *
+ *
  *     def get_stats(self, field_):             # <<<<<<<<<<<<<<
  *         """
  *         Get the information of the last solver call.
@@ -24656,7 +24656,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_stats", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_stats", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_double_fields);
@@ -24672,24 +24672,24 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":459
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":459
+ *
+ *
  *     def __get_stat_int(self, field):             # <<<<<<<<<<<<<<
  *         cdef int out
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &out)
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int = {"_AcadosOcpSolverCython__get_stat_int", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int = {"_AcadosOcpSolverCython__get_stat_int", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -24751,11 +24751,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_int", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_int", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_28__get_stat_int(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_28__get_stat_int(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -24765,7 +24765,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_28__get_stat_int(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_28__get_stat_int(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field) {
   int __pyx_v_out;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -24776,21 +24776,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_AcadosOcpSolverCython__get_stat_int", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":461
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":461
  *     def __get_stat_int(self, field):
  *         cdef int out
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &out)             # <<<<<<<<<<<<<<
  *         return out
- * 
+ *
 */
   __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_field); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 461, __pyx_L1_error)
   ocp_nlp_get(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, __pyx_t_1, ((void *)(&__pyx_v_out)));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":462
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":462
  *         cdef int out
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &out)
  *         return out             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __get_stat_double(self, field):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -24800,9 +24800,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":459
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":459
+ *
+ *
  *     def __get_stat_int(self, field):             # <<<<<<<<<<<<<<
  *         cdef int out
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &out)
@@ -24811,7 +24811,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_int", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_int", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -24819,24 +24819,24 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":464
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":464
  *         return out
- * 
+ *
  *     def __get_stat_double(self, field):             # <<<<<<<<<<<<<<
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((1,))
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out.data)
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double = {"_AcadosOcpSolverCython__get_stat_double", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double = {"_AcadosOcpSolverCython__get_stat_double", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -24898,11 +24898,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_double", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_double", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_30__get_stat_double(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_30__get_stat_double(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -24912,7 +24912,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_30__get_stat_double(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_30__get_stat_double(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field) {
   PyArrayObject *__pyx_v_out = 0;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_out;
   __Pyx_Buffer __pyx_pybuffer_out;
@@ -24933,8 +24933,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_pybuffernd_out.data = NULL;
   __pyx_pybuffernd_out.rcbuffer = &__pyx_pybuffer_out;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":465
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":465
+ *
  *     def __get_stat_double(self, field):
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((1,))             # <<<<<<<<<<<<<<
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out.data)
@@ -24978,21 +24978,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_out = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":466
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":466
  *     def __get_stat_double(self, field):
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((1,))
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out.data)             # <<<<<<<<<<<<<<
  *         return out
- * 
+ *
 */
   __pyx_t_6 = __Pyx_PyObject_AsString(__pyx_v_field); if (unlikely((!__pyx_t_6) && PyErr_Occurred())) __PYX_ERR(0, 466, __pyx_L1_error)
   ocp_nlp_get(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, __pyx_t_6, ((void *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_out))));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":467
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":467
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((1,))
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out.data)
  *         return out             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __get_stat_matrix(self, field, n, m):
 */
   __Pyx_XDECREF(__pyx_r);
@@ -25000,9 +25000,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_r = ((PyObject *)__pyx_v_out);
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":464
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":464
  *         return out
- * 
+ *
  *     def __get_stat_double(self, field):             # <<<<<<<<<<<<<<
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((1,))
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out.data)
@@ -25020,7 +25020,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_out.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_double", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_double", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -25032,24 +25032,24 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":469
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":469
  *         return out
- * 
+ *
  *     def __get_stat_matrix(self, field, n, m):             # <<<<<<<<<<<<<<
  *         cdef cnp.ndarray[cnp.float64_t, ndim=2] out_mat = np.ascontiguousarray(np.zeros((n, m)), dtype=np.float64)
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out_mat.data)
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix = {"_AcadosOcpSolverCython__get_stat_matrix", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix = {"_AcadosOcpSolverCython__get_stat_matrix", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -25127,11 +25127,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_matrix", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_matrix", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_32__get_stat_matrix(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field, __pyx_v_n, __pyx_v_m);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_32__get_stat_matrix(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field, __pyx_v_n, __pyx_v_m);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -25141,7 +25141,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_32__get_stat_matrix(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field, PyObject *__pyx_v_n, PyObject *__pyx_v_m) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_32__get_stat_matrix(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field, PyObject *__pyx_v_n, PyObject *__pyx_v_m) {
   PyArrayObject *__pyx_v_out_mat = 0;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_out_mat;
   __Pyx_Buffer __pyx_pybuffer_out_mat;
@@ -25165,8 +25165,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_pybuffernd_out_mat.data = NULL;
   __pyx_pybuffernd_out_mat.rcbuffer = &__pyx_pybuffer_out_mat;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":470
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":470
+ *
  *     def __get_stat_matrix(self, field, n, m):
  *         cdef cnp.ndarray[cnp.float64_t, ndim=2] out_mat = np.ascontiguousarray(np.zeros((n, m)), dtype=np.float64)             # <<<<<<<<<<<<<<
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out_mat.data)
@@ -25256,31 +25256,31 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_out_mat = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":471
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":471
  *     def __get_stat_matrix(self, field, n, m):
  *         cdef cnp.ndarray[cnp.float64_t, ndim=2] out_mat = np.ascontiguousarray(np.zeros((n, m)), dtype=np.float64)
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out_mat.data)             # <<<<<<<<<<<<<<
  *         return out_mat
- * 
+ *
 */
   __pyx_t_9 = __Pyx_PyObject_AsString(__pyx_v_field); if (unlikely((!__pyx_t_9) && PyErr_Occurred())) __PYX_ERR(0, 471, __pyx_L1_error)
   ocp_nlp_get(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, __pyx_t_9, ((void *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_out_mat))));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":472
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":472
  *         cdef cnp.ndarray[cnp.float64_t, ndim=2] out_mat = np.ascontiguousarray(np.zeros((n, m)), dtype=np.float64)
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out_mat.data)
  *         return out_mat             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF((PyObject *)__pyx_v_out_mat);
   __pyx_r = ((PyObject *)__pyx_v_out_mat);
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":469
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":469
  *         return out
- * 
+ *
  *     def __get_stat_matrix(self, field, n, m):             # <<<<<<<<<<<<<<
  *         cdef cnp.ndarray[cnp.float64_t, ndim=2] out_mat = np.ascontiguousarray(np.zeros((n, m)), dtype=np.float64)
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out_mat.data)
@@ -25301,7 +25301,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_out_mat.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_matrix", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython._AcadosOcpSolverCython__get_stat_matrix", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -25313,25 +25313,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":475
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":475
+ *
+ *
  *     def get_cost(self):             # <<<<<<<<<<<<<<
  *         """
  *         Returns the cost value of the current solution.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost, "\n        Returns the cost value of the current solution.\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost = {"get_cost", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost, "\n        Returns the cost value of the current solution.\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost = {"get_cost", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -25357,14 +25357,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   const Py_ssize_t __pyx_kwds_len = unlikely(__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
   if (unlikely(__pyx_kwds_len < 0)) return NULL;
   if (unlikely(__pyx_kwds_len > 0)) {__Pyx_RejectKeywords("get_cost", __pyx_kwds); return NULL;}
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
   double __pyx_v_out;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -25374,30 +25374,30 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_cost", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":480
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":480
  *         """
  *         # compute cost internally
  *         acados_solver_common.ocp_nlp_eval_cost(self.nlp_solver, self.nlp_in, self.nlp_out)             # <<<<<<<<<<<<<<
- * 
+ *
  *         # create output
 */
   ocp_nlp_eval_cost(__pyx_v_self->nlp_solver, __pyx_v_self->nlp_in, __pyx_v_self->nlp_out);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":486
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":486
+ *
  *         # call getter
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, "cost_value", <void *> &out)             # <<<<<<<<<<<<<<
- * 
+ *
  *         return out
 */
   ocp_nlp_get(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, ((char const *)"cost_value"), ((void *)(&__pyx_v_out)));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":488
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":488
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, "cost_value", <void *> &out)
- * 
+ *
  *         return out             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = PyFloat_FromDouble(__pyx_v_out); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 488, __pyx_L1_error)
@@ -25406,9 +25406,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":475
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":475
+ *
+ *
  *     def get_cost(self):             # <<<<<<<<<<<<<<
  *         """
  *         Returns the cost value of the current solution.
@@ -25417,7 +25417,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_cost", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_cost", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -25425,25 +25425,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":491
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":491
+ *
+ *
  *     def get_residuals(self, recompute=False):             # <<<<<<<<<<<<<<
  *         """
  *         Returns an array of the form [res_stat, res_eq, res_ineq, res_comp].
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals, "\n        Returns an array of the form [res_stat, res_eq, res_ineq, res_comp].\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals = {"get_residuals", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals, "\n        Returns an array of the form [res_stat, res_eq, res_ineq, res_comp].\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals = {"get_residuals", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -25508,11 +25508,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_residuals", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_residuals", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_recompute);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_recompute);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -25522,7 +25522,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_recompute) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_recompute) {
   PyArrayObject *__pyx_v_out = 0;
   double __pyx_v_double_value;
   PyObject *__pyx_v_field = NULL;
@@ -25553,12 +25553,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_pybuffernd_out.data = NULL;
   __pyx_pybuffernd_out.rcbuffer = &__pyx_pybuffer_out;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":496
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":496
  *         """
  *         # compute residuals if RTI
  *         if self.nlp_solver_type == 'SQP_RTI' or recompute:             # <<<<<<<<<<<<<<
  *             acados_solver_common.ocp_nlp_eval_residuals(self.nlp_solver, self.nlp_in, self.nlp_out)
- * 
+ *
 */
   __pyx_t_2 = (__Pyx_PyUnicode_Equals(__pyx_v_self->nlp_solver_type, __pyx_mstate_global->__pyx_n_u_SQP_RTI, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 496, __pyx_L1_error)
   if (!__pyx_t_2) {
@@ -25571,30 +25571,30 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":497
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":497
  *         # compute residuals if RTI
  *         if self.nlp_solver_type == 'SQP_RTI' or recompute:
  *             acados_solver_common.ocp_nlp_eval_residuals(self.nlp_solver, self.nlp_in, self.nlp_out)             # <<<<<<<<<<<<<<
- * 
+ *
  *         # create output array
 */
     ocp_nlp_eval_residuals(__pyx_v_self->nlp_solver, __pyx_v_self->nlp_in, __pyx_v_self->nlp_out);
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":496
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":496
  *         """
  *         # compute residuals if RTI
  *         if self.nlp_solver_type == 'SQP_RTI' or recompute:             # <<<<<<<<<<<<<<
  *             acados_solver_common.ocp_nlp_eval_residuals(self.nlp_solver, self.nlp_in, self.nlp_out)
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":500
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":500
+ *
  *         # create output array
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.ascontiguousarray(np.zeros((4,), dtype=np.float64))             # <<<<<<<<<<<<<<
  *         cdef double double_value
- * 
+ *
 */
   __pyx_t_4 = NULL;
   __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_mstate_global->__pyx_n_u_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 500, __pyx_L1_error)
@@ -25671,9 +25671,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_out = ((PyArrayObject *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":503
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":503
  *         cdef double double_value
- * 
+ *
  *         field = "res_stat".encode('utf-8')             # <<<<<<<<<<<<<<
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)
  *         out[0] = double_value
@@ -25681,21 +25681,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_INCREF(__pyx_mstate_global->__pyx_n_b_res_stat);
   __pyx_v_field = __pyx_mstate_global->__pyx_n_b_res_stat;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":504
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":504
+ *
  *         field = "res_stat".encode('utf-8')
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)             # <<<<<<<<<<<<<<
  *         out[0] = double_value
- * 
+ *
 */
   __pyx_t_12 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_12) && PyErr_Occurred())) __PYX_ERR(0, 504, __pyx_L1_error)
   ocp_nlp_get(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, __pyx_t_12, ((void *)(&__pyx_v_double_value)));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":505
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":505
  *         field = "res_stat".encode('utf-8')
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)
  *         out[0] = double_value             # <<<<<<<<<<<<<<
- * 
+ *
  *         field = "res_eq".encode('utf-8')
 */
   __pyx_t_13 = 0;
@@ -25710,9 +25710,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_out.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_out.diminfo[0].strides) = __pyx_v_double_value;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":507
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":507
  *         out[0] = double_value
- * 
+ *
  *         field = "res_eq".encode('utf-8')             # <<<<<<<<<<<<<<
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)
  *         out[1] = double_value
@@ -25720,21 +25720,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_INCREF(__pyx_mstate_global->__pyx_n_b_res_eq);
   __Pyx_DECREF_SET(__pyx_v_field, __pyx_mstate_global->__pyx_n_b_res_eq);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":508
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":508
+ *
  *         field = "res_eq".encode('utf-8')
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)             # <<<<<<<<<<<<<<
  *         out[1] = double_value
- * 
+ *
 */
   __pyx_t_12 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_12) && PyErr_Occurred())) __PYX_ERR(0, 508, __pyx_L1_error)
   ocp_nlp_get(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, __pyx_t_12, ((void *)(&__pyx_v_double_value)));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":509
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":509
  *         field = "res_eq".encode('utf-8')
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)
  *         out[1] = double_value             # <<<<<<<<<<<<<<
- * 
+ *
  *         field = "res_ineq".encode('utf-8')
 */
   __pyx_t_13 = 1;
@@ -25749,9 +25749,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_out.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_out.diminfo[0].strides) = __pyx_v_double_value;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":511
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":511
  *         out[1] = double_value
- * 
+ *
  *         field = "res_ineq".encode('utf-8')             # <<<<<<<<<<<<<<
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)
  *         out[2] = double_value
@@ -25759,21 +25759,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_INCREF(__pyx_mstate_global->__pyx_n_b_res_ineq);
   __Pyx_DECREF_SET(__pyx_v_field, __pyx_mstate_global->__pyx_n_b_res_ineq);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":512
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":512
+ *
  *         field = "res_ineq".encode('utf-8')
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)             # <<<<<<<<<<<<<<
  *         out[2] = double_value
- * 
+ *
 */
   __pyx_t_12 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_12) && PyErr_Occurred())) __PYX_ERR(0, 512, __pyx_L1_error)
   ocp_nlp_get(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, __pyx_t_12, ((void *)(&__pyx_v_double_value)));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":513
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":513
  *         field = "res_ineq".encode('utf-8')
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)
  *         out[2] = double_value             # <<<<<<<<<<<<<<
- * 
+ *
  *         field = "res_comp".encode('utf-8')
 */
   __pyx_t_13 = 2;
@@ -25788,9 +25788,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_out.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_out.diminfo[0].strides) = __pyx_v_double_value;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":515
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":515
  *         out[2] = double_value
- * 
+ *
  *         field = "res_comp".encode('utf-8')             # <<<<<<<<<<<<<<
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)
  *         out[3] = double_value
@@ -25798,21 +25798,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_INCREF(__pyx_mstate_global->__pyx_n_b_res_comp);
   __Pyx_DECREF_SET(__pyx_v_field, __pyx_mstate_global->__pyx_n_b_res_comp);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":516
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":516
+ *
  *         field = "res_comp".encode('utf-8')
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)             # <<<<<<<<<<<<<<
  *         out[3] = double_value
- * 
+ *
 */
   __pyx_t_12 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_12) && PyErr_Occurred())) __PYX_ERR(0, 516, __pyx_L1_error)
   ocp_nlp_get(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, __pyx_t_12, ((void *)(&__pyx_v_double_value)));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":517
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":517
  *         field = "res_comp".encode('utf-8')
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &double_value)
  *         out[3] = double_value             # <<<<<<<<<<<<<<
- * 
+ *
  *         return out
 */
   __pyx_t_13 = 3;
@@ -25827,21 +25827,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_out.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_out.diminfo[0].strides) = __pyx_v_double_value;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":519
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":519
  *         out[3] = double_value
- * 
+ *
  *         return out             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF((PyObject *)__pyx_v_out);
   __pyx_r = ((PyObject *)__pyx_v_out);
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":491
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":491
+ *
+ *
  *     def get_residuals(self, recompute=False):             # <<<<<<<<<<<<<<
  *         """
  *         Returns an array of the form [res_stat, res_eq, res_ineq, res_comp].
@@ -25863,7 +25863,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_out.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_residuals", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_residuals", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -25876,25 +25876,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":523
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":523
+ *
  *     # Note: this function should not be used anymore, better use cost_set, constraints_set
  *     def set(self, int stage, str field_, value_):             # <<<<<<<<<<<<<<
- * 
+ *
  *         """
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set, "\n        Set numerical data inside the solver.\n\n            :param stage: integer corresponding to shooting node\n            :param field: string in ['x', 'u', 'pi', 'lam', 't', 'p']\n\n            .. note:: regarding lam, t: \n\n                    the inequalities are internally organized in the following order: \n\n                    [ lbu lbx lg lh lphi ubu ubx ug uh uphi; \n\n                      lsbu lsbx lsg lsh lsphi usbu usbx usg ush usphi]\n\n            .. note:: pi: multipliers for dynamics equality constraints \n\n                      lam: multipliers for inequalities \n\n                      t: slack variables corresponding to evaluation of all inequalities (at the solution) \n\n                      sl: slack variables of soft lower inequality constraints \n\n                      su: slack variables of soft upper inequality constraints \n\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set = {"set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set, "\n        Set numerical data inside the solver.\n\n            :param stage: integer corresponding to shooting node\n            :param field: string in ['x', 'u', 'pi', 'lam', 't', 'p']\n\n            .. note:: regarding lam, t: \n\n                    the inequalities are internally organized in the following order: \n\n                    [ lbu lbx lg lh lphi ubu ubx ug uh uphi; \n\n                      lsbu lsbx lsg lsh lsphi usbu usbx usg ush usphi]\n\n            .. note:: pi: multipliers for dynamics equality constraints \n\n                      lam: multipliers for inequalities \n\n                      t: slack variables corresponding to evaluation of all inequalities (at the solution) \n\n                      sl: slack variables of soft lower inequality constraints \n\n                      su: slack variables of soft upper inequality constraints \n\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set = {"set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -25972,12 +25972,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_field_), (&PyUnicode_Type), 1, "field_", 1))) __PYX_ERR(0, 523, __pyx_L1_error)
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_, __pyx_v_value_);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_, __pyx_v_value_);
 
   /* function exit code */
   goto __pyx_L0;
@@ -25996,7 +25996,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_) {
   PyObject *__pyx_v_cost_fields = NULL;
   PyObject *__pyx_v_constraints_fields = NULL;
   PyObject *__pyx_v_out_fields = NULL;
@@ -26035,7 +26035,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_pybuffernd_value.data = NULL;
   __pyx_pybuffernd_value.rcbuffer = &__pyx_pybuffer_value;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":542
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":542
  *                       su: slack variables of soft upper inequality constraints \n
  *         """
  *         if not isinstance(value_, np.ndarray):             # <<<<<<<<<<<<<<
@@ -26052,7 +26052,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (!__pyx_t_3);
   if (unlikely(__pyx_t_4)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":543
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":543
  *         """
  *         if not isinstance(value_, np.ndarray):
  *             raise Exception(f"set: value must be numpy array, got {type(value_)}.")             # <<<<<<<<<<<<<<
@@ -26061,7 +26061,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
     __pyx_t_1 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
     __pyx_t_6 = __Pyx_PyObject_FormatSimple(((PyObject *)Py_TYPE(__pyx_v_value_)), __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 543, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7[0] = __pyx_mstate_global->__pyx_kp_u_set_value_must_be_numpy_array_go;
@@ -26085,7 +26085,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __PYX_ERR(0, 543, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":542
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":542
  *                       su: slack variables of soft upper inequality constraints \n
  *         """
  *         if not isinstance(value_, np.ndarray):             # <<<<<<<<<<<<<<
@@ -26094,7 +26094,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":544
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":544
  *         if not isinstance(value_, np.ndarray):
  *             raise Exception(f"set: value must be numpy array, got {type(value_)}.")
  *         cost_fields = ['y_ref', 'yref']             # <<<<<<<<<<<<<<
@@ -26112,7 +26112,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_cost_fields = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":545
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":545
  *             raise Exception(f"set: value must be numpy array, got {type(value_)}.")
  *         cost_fields = ['y_ref', 'yref']
  *         constraints_fields = ['lbx', 'ubx', 'lbu', 'ubu']             # <<<<<<<<<<<<<<
@@ -26136,12 +26136,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_constraints_fields = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":546
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":546
  *         cost_fields = ['y_ref', 'yref']
  *         constraints_fields = ['lbx', 'ubx', 'lbu', 'ubu']
  *         out_fields = ['x', 'u', 'pi', 'lam', 't', 'z', 'sl', 'su']             # <<<<<<<<<<<<<<
  *         mem_fields = ['xdot_guess', 'z_guess']
- * 
+ *
 */
   __pyx_t_2 = PyList_New(8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 546, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -26172,11 +26172,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_out_fields = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":547
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":547
  *         constraints_fields = ['lbx', 'ubx', 'lbu', 'ubu']
  *         out_fields = ['x', 'u', 'pi', 'lam', 't', 'z', 'sl', 'su']
  *         mem_fields = ['xdot_guess', 'z_guess']             # <<<<<<<<<<<<<<
- * 
+ *
  *         field = field_.encode('utf-8')
 */
   __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 547, __pyx_L1_error)
@@ -26190,11 +26190,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_mem_fields = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":549
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":549
  *         mem_fields = ['xdot_guess', 'z_guess']
- * 
+ *
  *         field = field_.encode('utf-8')             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] value = np.ascontiguousarray(value_, dtype=np.float64)
 */
   if (unlikely(__pyx_v_field_ == Py_None)) {
@@ -26206,11 +26206,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_field = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":551
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":551
  *         field = field_.encode('utf-8')
- * 
+ *
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] value = np.ascontiguousarray(value_, dtype=np.float64)             # <<<<<<<<<<<<<<
- * 
+ *
  *         # treat parameters separately
 */
   __pyx_t_5 = NULL;
@@ -26261,8 +26261,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_value = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":554
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":554
+ *
  *         # treat parameters separately
  *         if field_ == 'p':             # <<<<<<<<<<<<<<
  *             assert acados_solver.acados_update_params(self.capsule, stage, <double *> value.data, value.shape[0]) == 0
@@ -26271,7 +26271,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (__Pyx_PyUnicode_Equals(__pyx_v_field_, __pyx_mstate_global->__pyx_n_u_p, Py_EQ)); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 554, __pyx_L1_error)
   if (__pyx_t_4) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":555
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":555
  *         # treat parameters separately
  *         if field_ == 'p':
  *             assert acados_solver.acados_update_params(self.capsule, stage, <double *> value.data, value.shape[0]) == 0             # <<<<<<<<<<<<<<
@@ -26290,8 +26290,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     if ((1)); else __PYX_ERR(0, 555, __pyx_L1_error)
     #endif
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":554
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":554
+ *
  *         # treat parameters separately
  *         if field_ == 'p':             # <<<<<<<<<<<<<<
  *             assert acados_solver.acados_update_params(self.capsule, stage, <double *> value.data, value.shape[0]) == 0
@@ -26300,7 +26300,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     goto __pyx_L4;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":557
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":557
  *             assert acados_solver.acados_update_params(self.capsule, stage, <double *> value.data, value.shape[0]) == 0
  *         else:
  *             if field_ not in constraints_fields + cost_fields + out_fields:             # <<<<<<<<<<<<<<
@@ -26317,7 +26317,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if (unlikely(__pyx_t_4)) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":558
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":558
  *         else:
  *             if field_ not in constraints_fields + cost_fields + out_fields:
  *                 raise Exception("AcadosOcpSolverCython.set(): {} is not a valid argument.\             # <<<<<<<<<<<<<<
@@ -26326,23 +26326,23 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       __pyx_t_2 = NULL;
       __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-      __pyx_t_8 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+      __pyx_t_8 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":559
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":559
  *             if field_ not in constraints_fields + cost_fields + out_fields:
  *                 raise Exception("AcadosOcpSolverCython.set(): {} is not a valid argument.\
  *                     \nPossible values are {}.".format(field, \             # <<<<<<<<<<<<<<
  *                     constraints_fields + cost_fields + out_fields + ['p']))
- * 
+ *
 */
       __pyx_t_5 = __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_set_is_not;
       __Pyx_INCREF(__pyx_t_5);
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":560
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":560
  *                 raise Exception("AcadosOcpSolverCython.set(): {} is not a valid argument.\
  *                     \nPossible values are {}.".format(field, \
  *                     constraints_fields + cost_fields + out_fields + ['p']))             # <<<<<<<<<<<<<<
- * 
+ *
  *             dims = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config,
 */
       __pyx_t_10 = PyNumber_Add(__pyx_v_constraints_fields, __pyx_v_cost_fields); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 560, __pyx_L1_error)
@@ -26382,7 +26382,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __PYX_ERR(0, 558, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":557
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":557
  *             assert acados_solver.acados_update_params(self.capsule, stage, <double *> value.data, value.shape[0]) == 0
  *         else:
  *             if field_ not in constraints_fields + cost_fields + out_fields:             # <<<<<<<<<<<<<<
@@ -26391,30 +26391,30 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":563
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":563
+ *
  *             dims = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config,
  *                 self.nlp_dims, self.nlp_out, stage, field)             # <<<<<<<<<<<<<<
- * 
+ *
  *             if value_.shape[0] != dims:
 */
     __pyx_t_13 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_13) && PyErr_Occurred())) __PYX_ERR(0, 563, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":562
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":562
  *                     constraints_fields + cost_fields + out_fields + ['p']))
- * 
+ *
  *             dims = acados_solver_common.ocp_nlp_dims_get_from_attr(self.nlp_config,             # <<<<<<<<<<<<<<
  *                 self.nlp_dims, self.nlp_out, stage, field)
- * 
+ *
 */
     __pyx_t_1 = __Pyx_PyLong_From_int(ocp_nlp_dims_get_from_attr(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_out, __pyx_v_stage, __pyx_t_13)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 562, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_v_dims = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":565
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":565
  *                 self.nlp_dims, self.nlp_out, stage, field)
- * 
+ *
  *             if value_.shape[0] != dims:             # <<<<<<<<<<<<<<
  *                 msg = 'AcadosOcpSolverCython.set(): mismatching dimension for field "{}" '.format(field_)
  *                 msg += 'with dimension {} (you have {})'.format(dims, value_.shape[0])
@@ -26430,8 +26430,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if (unlikely(__pyx_t_4)) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":566
- * 
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":566
+ *
  *             if value_.shape[0] != dims:
  *                 msg = 'AcadosOcpSolverCython.set(): mismatching dimension for field "{}" '.format(field_)             # <<<<<<<<<<<<<<
  *                 msg += 'with dimension {} (you have {})'.format(dims, value_.shape[0])
@@ -26450,12 +26450,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __pyx_v_msg = ((PyObject*)__pyx_t_1);
       __pyx_t_1 = 0;
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":567
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":567
  *             if value_.shape[0] != dims:
  *                 msg = 'AcadosOcpSolverCython.set(): mismatching dimension for field "{}" '.format(field_)
  *                 msg += 'with dimension {} (you have {})'.format(dims, value_.shape[0])             # <<<<<<<<<<<<<<
  *                 raise Exception(msg)
- * 
+ *
 */
       __pyx_t_8 = __pyx_mstate_global->__pyx_kp_u_with_dimension_you_have;
       __Pyx_INCREF(__pyx_t_8);
@@ -26479,16 +26479,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __Pyx_DECREF_SET(__pyx_v_msg, ((PyObject*)__pyx_t_2));
       __pyx_t_2 = 0;
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":568
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":568
  *                 msg = 'AcadosOcpSolverCython.set(): mismatching dimension for field "{}" '.format(field_)
  *                 msg += 'with dimension {} (you have {})'.format(dims, value_.shape[0])
  *                 raise Exception(msg)             # <<<<<<<<<<<<<<
- * 
+ *
  *             if field_ in constraints_fields:
 */
       __pyx_t_1 = NULL;
       __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-      __pyx_t_8 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+      __pyx_t_8 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
       __pyx_t_9 = 1;
       {
         PyObject *__pyx_callargs[2] = {__pyx_t_1, __pyx_v_msg};
@@ -26502,18 +26502,18 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __PYX_ERR(0, 568, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":565
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":565
  *                 self.nlp_dims, self.nlp_out, stage, field)
- * 
+ *
  *             if value_.shape[0] != dims:             # <<<<<<<<<<<<<<
  *                 msg = 'AcadosOcpSolverCython.set(): mismatching dimension for field "{}" '.format(field_)
  *                 msg += 'with dimension {} (you have {})'.format(dims, value_.shape[0])
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":570
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":570
  *                 raise Exception(msg)
- * 
+ *
  *             if field_ in constraints_fields:             # <<<<<<<<<<<<<<
  *                 acados_solver_common.ocp_nlp_constraints_model_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)
@@ -26521,7 +26521,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_field_, __pyx_v_constraints_fields, Py_EQ)); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 570, __pyx_L1_error)
     if (__pyx_t_4) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":572
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":572
  *             if field_ in constraints_fields:
  *                 acados_solver_common.ocp_nlp_constraints_model_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)             # <<<<<<<<<<<<<<
@@ -26530,8 +26530,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       __pyx_t_14 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_14) && PyErr_Occurred())) __PYX_ERR(0, 572, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":571
- * 
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":571
+ *
  *             if field_ in constraints_fields:
  *                 acados_solver_common.ocp_nlp_constraints_model_set(self.nlp_config,             # <<<<<<<<<<<<<<
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)
@@ -26539,9 +26539,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       (void)(ocp_nlp_constraints_model_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_in, __pyx_v_stage, __pyx_t_14, ((void *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_value)))));
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":570
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":570
  *                 raise Exception(msg)
- * 
+ *
  *             if field_ in constraints_fields:             # <<<<<<<<<<<<<<
  *                 acados_solver_common.ocp_nlp_constraints_model_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)
@@ -26549,7 +26549,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       goto __pyx_L7;
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":573
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":573
  *                 acados_solver_common.ocp_nlp_constraints_model_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)
  *             elif field_ in cost_fields:             # <<<<<<<<<<<<<<
@@ -26559,7 +26559,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_field_, __pyx_v_cost_fields, Py_EQ)); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 573, __pyx_L1_error)
     if (__pyx_t_4) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":575
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":575
  *             elif field_ in cost_fields:
  *                 acados_solver_common.ocp_nlp_cost_model_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)             # <<<<<<<<<<<<<<
@@ -26568,7 +26568,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       __pyx_t_15 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_15) && PyErr_Occurred())) __PYX_ERR(0, 575, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":574
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":574
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)
  *             elif field_ in cost_fields:
  *                 acados_solver_common.ocp_nlp_cost_model_set(self.nlp_config,             # <<<<<<<<<<<<<<
@@ -26577,7 +26577,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       (void)(ocp_nlp_cost_model_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_in, __pyx_v_stage, __pyx_t_15, ((void *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_value)))));
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":573
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":573
  *                 acados_solver_common.ocp_nlp_constraints_model_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)
  *             elif field_ in cost_fields:             # <<<<<<<<<<<<<<
@@ -26587,7 +26587,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       goto __pyx_L7;
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":576
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":576
  *                 acados_solver_common.ocp_nlp_cost_model_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)
  *             elif field_ in out_fields:             # <<<<<<<<<<<<<<
@@ -26597,7 +26597,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_field_, __pyx_v_out_fields, Py_EQ)); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 576, __pyx_L1_error)
     if (__pyx_t_4) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":578
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":578
  *             elif field_ in out_fields:
  *                 acados_solver_common.ocp_nlp_out_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_out, stage, field, <void *> value.data)             # <<<<<<<<<<<<<<
@@ -26606,7 +26606,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       __pyx_t_16 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_16) && PyErr_Occurred())) __PYX_ERR(0, 578, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":577
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":577
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)
  *             elif field_ in out_fields:
  *                 acados_solver_common.ocp_nlp_out_set(self.nlp_config,             # <<<<<<<<<<<<<<
@@ -26615,7 +26615,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       ocp_nlp_out_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_out, __pyx_v_stage, __pyx_t_16, ((void *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_value))));
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":576
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":576
  *                 acados_solver_common.ocp_nlp_cost_model_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_in, stage, field, <void *> value.data)
  *             elif field_ in out_fields:             # <<<<<<<<<<<<<<
@@ -26625,7 +26625,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       goto __pyx_L7;
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":579
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":579
  *                 acados_solver_common.ocp_nlp_out_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_out, stage, field, <void *> value.data)
  *             elif field_ in mem_fields:             # <<<<<<<<<<<<<<
@@ -26635,25 +26635,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_field_, __pyx_v_mem_fields, Py_EQ)); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 579, __pyx_L1_error)
     if (__pyx_t_4) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":581
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":581
  *             elif field_ in mem_fields:
  *                 acados_solver_common.ocp_nlp_set(self.nlp_config, \
  *                     self.nlp_solver, stage, field, <void *> value.data)             # <<<<<<<<<<<<<<
- * 
+ *
  *             if field_ == 'z':
 */
       __pyx_t_17 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_17) && PyErr_Occurred())) __PYX_ERR(0, 581, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":580
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":580
  *                     self.nlp_dims, self.nlp_out, stage, field, <void *> value.data)
  *             elif field_ in mem_fields:
  *                 acados_solver_common.ocp_nlp_set(self.nlp_config, \             # <<<<<<<<<<<<<<
  *                     self.nlp_solver, stage, field, <void *> value.data)
- * 
+ *
 */
       ocp_nlp_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, __pyx_v_stage, __pyx_t_17, ((void *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_value))));
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":579
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":579
  *                 acados_solver_common.ocp_nlp_out_set(self.nlp_config,
  *                     self.nlp_dims, self.nlp_out, stage, field, <void *> value.data)
  *             elif field_ in mem_fields:             # <<<<<<<<<<<<<<
@@ -26663,9 +26663,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     }
     __pyx_L7:;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":583
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":583
  *                     self.nlp_solver, stage, field, <void *> value.data)
- * 
+ *
  *             if field_ == 'z':             # <<<<<<<<<<<<<<
  *                 field = 'z_guess'.encode('utf-8')
  *                 acados_solver_common.ocp_nlp_set(self.nlp_config, \
@@ -26673,8 +26673,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_4 = (__Pyx_PyUnicode_Equals(__pyx_v_field_, __pyx_mstate_global->__pyx_n_u_z, Py_EQ)); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 583, __pyx_L1_error)
     if (__pyx_t_4) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":584
- * 
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":584
+ *
  *             if field_ == 'z':
  *                 field = 'z_guess'.encode('utf-8')             # <<<<<<<<<<<<<<
  *                 acados_solver_common.ocp_nlp_set(self.nlp_config, \
@@ -26683,16 +26683,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __Pyx_INCREF(__pyx_mstate_global->__pyx_n_b_z_guess);
       __Pyx_DECREF_SET(__pyx_v_field, __pyx_mstate_global->__pyx_n_b_z_guess);
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":586
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":586
  *                 field = 'z_guess'.encode('utf-8')
  *                 acados_solver_common.ocp_nlp_set(self.nlp_config, \
  *                     self.nlp_solver, stage, field, <void *> value.data)             # <<<<<<<<<<<<<<
  *         return
- * 
+ *
 */
       __pyx_t_17 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_17) && PyErr_Occurred())) __PYX_ERR(0, 586, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":585
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":585
  *             if field_ == 'z':
  *                 field = 'z_guess'.encode('utf-8')
  *                 acados_solver_common.ocp_nlp_set(self.nlp_config, \             # <<<<<<<<<<<<<<
@@ -26701,9 +26701,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       ocp_nlp_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_solver, __pyx_v_stage, __pyx_t_17, ((void *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_value))));
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":583
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":583
  *                     self.nlp_solver, stage, field, <void *> value.data)
- * 
+ *
  *             if field_ == 'z':             # <<<<<<<<<<<<<<
  *                 field = 'z_guess'.encode('utf-8')
  *                 acados_solver_common.ocp_nlp_set(self.nlp_config, \
@@ -26712,22 +26712,22 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __pyx_L4:;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":587
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":587
  *                 acados_solver_common.ocp_nlp_set(self.nlp_config, \
  *                     self.nlp_solver, stage, field, <void *> value.data)
  *         return             # <<<<<<<<<<<<<<
- * 
+ *
  *     def cost_set(self, int stage, str field_, value_):
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":523
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":523
+ *
  *     # Note: this function should not be used anymore, better use cost_set, constraints_set
  *     def set(self, int stage, str field_, value_):             # <<<<<<<<<<<<<<
- * 
+ *
  *         """
 */
 
@@ -26747,7 +26747,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_value.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -26766,25 +26766,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":589
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":589
  *         return
- * 
+ *
  *     def cost_set(self, int stage, str field_, value_):             # <<<<<<<<<<<<<<
  *         """
  *         Set numerical data in the cost module of the solver.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set, "\n        Set numerical data in the cost module of the solver.\n\n            :param stage: integer corresponding to shooting node\n            :param field: string, e.g. 'yref', 'W', 'ext_cost_num_hess'\n            :param value: of appropriate size\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set = {"cost_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set, "\n        Set numerical data in the cost module of the solver.\n\n            :param stage: integer corresponding to shooting node\n            :param field: string, e.g. 'yref', 'W', 'ext_cost_num_hess'\n            :param value: of appropriate size\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set = {"cost_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -26862,12 +26862,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.cost_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.cost_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_field_), (&PyUnicode_Type), 1, "field_", 1))) __PYX_ERR(0, 589, __pyx_L1_error)
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_, __pyx_v_value_);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_, __pyx_v_value_);
 
   /* function exit code */
   goto __pyx_L0;
@@ -26886,7 +26886,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_) {
   PyObject *__pyx_v_field = NULL;
   int __pyx_v_dims[2];
   __Pyx_memviewslice __pyx_v_value = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -26918,7 +26918,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cost_set", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":597
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":597
  *             :param value: of appropriate size
  *         """
  *         if not isinstance(value_, np.ndarray):             # <<<<<<<<<<<<<<
@@ -26935,16 +26935,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (!__pyx_t_3);
   if (unlikely(__pyx_t_4)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":598
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":598
  *         """
  *         if not isinstance(value_, np.ndarray):
  *             raise Exception(f"cost_set: value must be numpy array, got {type(value_)}.")             # <<<<<<<<<<<<<<
  *         field = field_.encode('utf-8')
- * 
+ *
 */
     __pyx_t_1 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
     __pyx_t_6 = __Pyx_PyObject_FormatSimple(((PyObject *)Py_TYPE(__pyx_v_value_)), __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 598, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7[0] = __pyx_mstate_global->__pyx_kp_u_cost_set_value_must_be_numpy_arr;
@@ -26968,7 +26968,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __PYX_ERR(0, 598, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":597
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":597
  *             :param value: of appropriate size
  *         """
  *         if not isinstance(value_, np.ndarray):             # <<<<<<<<<<<<<<
@@ -26977,11 +26977,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":599
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":599
  *         if not isinstance(value_, np.ndarray):
  *             raise Exception(f"cost_set: value must be numpy array, got {type(value_)}.")
  *         field = field_.encode('utf-8')             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef int dims[2]
 */
   if (unlikely(__pyx_v_field_ == Py_None)) {
@@ -26993,27 +26993,27 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_field = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":603
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":603
  *         cdef int dims[2]
  *         acados_solver_common.ocp_nlp_cost_dims_get_from_attr(self.nlp_config, \
  *             self.nlp_dims, self.nlp_out, stage, field, &dims[0])             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef double[::1,:] value
 */
   __pyx_t_10 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) __PYX_ERR(0, 603, __pyx_L1_error)
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":602
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":602
+ *
  *         cdef int dims[2]
  *         acados_solver_common.ocp_nlp_cost_dims_get_from_attr(self.nlp_config, \             # <<<<<<<<<<<<<<
  *             self.nlp_dims, self.nlp_out, stage, field, &dims[0])
- * 
+ *
 */
   ocp_nlp_cost_dims_get_from_attr(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_out, __pyx_v_stage, __pyx_t_10, (&(__pyx_v_dims[0])));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":607
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":607
  *         cdef double[::1,:] value
- * 
+ *
  *         value_shape = value_.shape             # <<<<<<<<<<<<<<
  *         if len(value_shape) == 1:
  *             value_shape = (value_shape[0], 0)
@@ -27023,8 +27023,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_value_shape = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":608
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":608
+ *
  *         value_shape = value_.shape
  *         if len(value_shape) == 1:             # <<<<<<<<<<<<<<
  *             value_shape = (value_shape[0], 0)
@@ -27034,12 +27034,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (__pyx_t_11 == 1);
   if (__pyx_t_4) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":609
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":609
  *         value_shape = value_.shape
  *         if len(value_shape) == 1:
  *             value_shape = (value_shape[0], 0)             # <<<<<<<<<<<<<<
  *             value = np.asfortranarray(value_[None,:])
- * 
+ *
 */
     __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_value_shape, 0, long, 1, __Pyx_PyLong_From_long, 0, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 609, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -27054,11 +27054,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF_SET(__pyx_v_value_shape, __pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":610
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":610
  *         if len(value_shape) == 1:
  *             value_shape = (value_shape[0], 0)
  *             value = np.asfortranarray(value_[None,:])             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif len(value_shape) == 2:
 */
     __pyx_t_2 = NULL;
@@ -27096,8 +27096,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_12.memview = NULL;
     __pyx_t_12.data = NULL;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":608
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":608
+ *
  *         value_shape = value_.shape
  *         if len(value_shape) == 1:             # <<<<<<<<<<<<<<
  *             value_shape = (value_shape[0], 0)
@@ -27106,9 +27106,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     goto __pyx_L4;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":612
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":612
  *             value = np.asfortranarray(value_[None,:])
- * 
+ *
  *         elif len(value_shape) == 2:             # <<<<<<<<<<<<<<
  *             # Get elements in column major order
  *             value = np.asfortranarray(value_)
@@ -27117,11 +27117,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (__pyx_t_11 == 2);
   if (__pyx_t_4) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":614
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":614
  *         elif len(value_shape) == 2:
  *             # Get elements in column major order
  *             value = np.asfortranarray(value_)             # <<<<<<<<<<<<<<
- * 
+ *
  *         if value_shape[0] != dims[0] or value_shape[1] != dims[1]:
 */
     __pyx_t_1 = NULL;
@@ -27156,9 +27156,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_12.memview = NULL;
     __pyx_t_12.data = NULL;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":612
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":612
  *             value = np.asfortranarray(value_[None,:])
- * 
+ *
  *         elif len(value_shape) == 2:             # <<<<<<<<<<<<<<
  *             # Get elements in column major order
  *             value = np.asfortranarray(value_)
@@ -27166,9 +27166,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __pyx_L4:;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":616
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":616
  *             value = np.asfortranarray(value_)
- * 
+ *
  *         if value_shape[0] != dims[0] or value_shape[1] != dims[1]:             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.cost_set(): mismatching dimension' +
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')
@@ -27200,22 +27200,22 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_L6_bool_binop_done:;
   if (unlikely(__pyx_t_4)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":617
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":617
+ *
  *         if value_shape[0] != dims[0] or value_shape[1] != dims[1]:
  *             raise Exception('AcadosOcpSolverCython.cost_set(): mismatching dimension' +             # <<<<<<<<<<<<<<
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')
- * 
+ *
 */
     __pyx_t_2 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_1 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_1 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":618
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":618
  *         if value_shape[0] != dims[0] or value_shape[1] != dims[1]:
  *             raise Exception('AcadosOcpSolverCython.cost_set(): mismatching dimension' +
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')             # <<<<<<<<<<<<<<
- * 
+ *
  *         acados_solver_common.ocp_nlp_cost_model_set(self.nlp_config, \
 */
     __pyx_t_8 = __Pyx_PyUnicode_Unicode(__pyx_v_field_); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 618, __pyx_L1_error)
@@ -27262,21 +27262,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __PYX_ERR(0, 617, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":616
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":616
  *             value = np.asfortranarray(value_)
- * 
+ *
  *         if value_shape[0] != dims[0] or value_shape[1] != dims[1]:             # <<<<<<<<<<<<<<
  *             raise Exception('AcadosOcpSolverCython.cost_set(): mismatching dimension' +
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":621
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":621
+ *
  *         acados_solver_common.ocp_nlp_cost_model_set(self.nlp_config, \
  *             self.nlp_dims, self.nlp_in, stage, field, <void *> &value[0][0])             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_17 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_17) && PyErr_Occurred())) __PYX_ERR(0, 621, __pyx_L1_error)
   if (unlikely(!__pyx_v_value.memview)) { __Pyx_RaiseUnboundLocalError("value"); __PYX_ERR(0, 621, __pyx_L1_error) }
@@ -27296,18 +27296,18 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __PYX_ERR(0, 621, __pyx_L1_error)
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":620
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":620
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')
- * 
+ *
  *         acados_solver_common.ocp_nlp_cost_model_set(self.nlp_config, \             # <<<<<<<<<<<<<<
  *             self.nlp_dims, self.nlp_in, stage, field, <void *> &value[0][0])
- * 
+ *
 */
   (void)(ocp_nlp_cost_model_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_in, __pyx_v_stage, __pyx_t_17, ((void *)(&(*((double *) ( /* dim=1 */ (( /* dim=0 */ ((char *) (((double *) __pyx_v_value.data) + __pyx_t_18)) ) + __pyx_t_19 * __pyx_v_value.strides[1]) )))))));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":589
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":589
  *         return
- * 
+ *
  *     def cost_set(self, int stage, str field_, value_):             # <<<<<<<<<<<<<<
  *         """
  *         Set numerical data in the cost module of the solver.
@@ -27326,7 +27326,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_XDECREF(__pyx_t_13);
   __Pyx_XDECREF(__pyx_t_14);
   __Pyx_XDECREF(__pyx_t_16);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.cost_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.cost_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_field);
@@ -27337,25 +27337,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":624
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":624
+ *
+ *
  *     def constraints_set(self, int stage, str field_, value_):             # <<<<<<<<<<<<<<
  *         """
  *         Set numerical data in the constraint module of the solver.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set, "\n        Set numerical data in the constraint module of the solver.\n\n            :param stage: integer corresponding to shooting node\n            :param field: string in ['lbx', 'ubx', 'lbu', 'ubu', 'lg', 'ug', 'lh', 'uh', 'uphi', 'C', 'D']\n            :param value: of appropriate size\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set = {"constraints_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set, "\n        Set numerical data in the constraint module of the solver.\n\n            :param stage: integer corresponding to shooting node\n            :param field: string in ['lbx', 'ubx', 'lbu', 'ubu', 'lg', 'ug', 'lh', 'uh', 'uphi', 'C', 'D']\n            :param value: of appropriate size\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set = {"constraints_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -27433,12 +27433,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.constraints_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.constraints_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_field_), (&PyUnicode_Type), 1, "field_", 1))) __PYX_ERR(0, 624, __pyx_L1_error)
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_, __pyx_v_value_);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_, __pyx_v_value_);
 
   /* function exit code */
   goto __pyx_L0;
@@ -27457,7 +27457,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_) {
   PyObject *__pyx_v_field = NULL;
   int __pyx_v_dims[2];
   __Pyx_memviewslice __pyx_v_value = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -27489,12 +27489,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("constraints_set", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":632
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":632
  *             :param value: of appropriate size
  *         """
  *         if not isinstance(value_, np.ndarray):             # <<<<<<<<<<<<<<
  *             raise Exception(f"constraints_set: value must be numpy array, got {type(value_)}.")
- * 
+ *
 */
   __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 632, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -27506,16 +27506,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (!__pyx_t_3);
   if (unlikely(__pyx_t_4)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":633
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":633
  *         """
  *         if not isinstance(value_, np.ndarray):
  *             raise Exception(f"constraints_set: value must be numpy array, got {type(value_)}.")             # <<<<<<<<<<<<<<
- * 
+ *
  *         field = field_.encode('utf-8')
 */
     __pyx_t_1 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
     __pyx_t_6 = __Pyx_PyObject_FormatSimple(((PyObject *)Py_TYPE(__pyx_v_value_)), __pyx_mstate_global->__pyx_empty_unicode); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 633, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7[0] = __pyx_mstate_global->__pyx_kp_u_constraints_set_value_must_be_nu;
@@ -27539,20 +27539,20 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __PYX_ERR(0, 633, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":632
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":632
  *             :param value: of appropriate size
  *         """
  *         if not isinstance(value_, np.ndarray):             # <<<<<<<<<<<<<<
  *             raise Exception(f"constraints_set: value must be numpy array, got {type(value_)}.")
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":635
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":635
  *             raise Exception(f"constraints_set: value must be numpy array, got {type(value_)}.")
- * 
+ *
  *         field = field_.encode('utf-8')             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef int dims[2]
 */
   if (unlikely(__pyx_v_field_ == Py_None)) {
@@ -27564,27 +27564,27 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_field = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":639
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":639
  *         cdef int dims[2]
  *         acados_solver_common.ocp_nlp_constraint_dims_get_from_attr(self.nlp_config, \
  *             self.nlp_dims, self.nlp_out, stage, field, &dims[0])             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef double[::1,:] value
 */
   __pyx_t_10 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) __PYX_ERR(0, 639, __pyx_L1_error)
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":638
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":638
+ *
  *         cdef int dims[2]
  *         acados_solver_common.ocp_nlp_constraint_dims_get_from_attr(self.nlp_config, \             # <<<<<<<<<<<<<<
  *             self.nlp_dims, self.nlp_out, stage, field, &dims[0])
- * 
+ *
 */
   ocp_nlp_constraint_dims_get_from_attr(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_out, __pyx_v_stage, __pyx_t_10, (&(__pyx_v_dims[0])));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":643
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":643
  *         cdef double[::1,:] value
- * 
+ *
  *         value_shape = value_.shape             # <<<<<<<<<<<<<<
  *         if len(value_shape) == 1:
  *             value_shape = (value_shape[0], 0)
@@ -27594,8 +27594,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_value_shape = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":644
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":644
+ *
  *         value_shape = value_.shape
  *         if len(value_shape) == 1:             # <<<<<<<<<<<<<<
  *             value_shape = (value_shape[0], 0)
@@ -27605,12 +27605,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (__pyx_t_11 == 1);
   if (__pyx_t_4) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":645
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":645
  *         value_shape = value_.shape
  *         if len(value_shape) == 1:
  *             value_shape = (value_shape[0], 0)             # <<<<<<<<<<<<<<
  *             value = np.asfortranarray(value_[None,:])
- * 
+ *
 */
     __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_value_shape, 0, long, 1, __Pyx_PyLong_From_long, 0, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 645, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -27625,11 +27625,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF_SET(__pyx_v_value_shape, __pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":646
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":646
  *         if len(value_shape) == 1:
  *             value_shape = (value_shape[0], 0)
  *             value = np.asfortranarray(value_[None,:])             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif len(value_shape) == 2:
 */
     __pyx_t_2 = NULL;
@@ -27667,8 +27667,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_12.memview = NULL;
     __pyx_t_12.data = NULL;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":644
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":644
+ *
  *         value_shape = value_.shape
  *         if len(value_shape) == 1:             # <<<<<<<<<<<<<<
  *             value_shape = (value_shape[0], 0)
@@ -27677,9 +27677,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     goto __pyx_L4;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":648
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":648
  *             value = np.asfortranarray(value_[None,:])
- * 
+ *
  *         elif len(value_shape) == 2:             # <<<<<<<<<<<<<<
  *             # Get elements in column major order
  *             value = np.asfortranarray(value_)
@@ -27688,11 +27688,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (__pyx_t_11 == 2);
   if (__pyx_t_4) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":650
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":650
  *         elif len(value_shape) == 2:
  *             # Get elements in column major order
  *             value = np.asfortranarray(value_)             # <<<<<<<<<<<<<<
- * 
+ *
  *         if value_shape != tuple(dims):
 */
     __pyx_t_1 = NULL;
@@ -27727,9 +27727,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_12.memview = NULL;
     __pyx_t_12.data = NULL;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":648
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":648
  *             value = np.asfortranarray(value_[None,:])
- * 
+ *
  *         elif len(value_shape) == 2:             # <<<<<<<<<<<<<<
  *             # Get elements in column major order
  *             value = np.asfortranarray(value_)
@@ -27737,9 +27737,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __pyx_L4:;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":652
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":652
  *             value = np.asfortranarray(value_)
- * 
+ *
  *         if value_shape != tuple(dims):             # <<<<<<<<<<<<<<
  *             raise Exception(f'AcadosOcpSolverCython.constraints_set(): mismatching dimension' +
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')
@@ -27755,22 +27755,22 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   if (unlikely(__pyx_t_4)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":653
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":653
+ *
  *         if value_shape != tuple(dims):
  *             raise Exception(f'AcadosOcpSolverCython.constraints_set(): mismatching dimension' +             # <<<<<<<<<<<<<<
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')
- * 
+ *
 */
     __pyx_t_2 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_1 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_1 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":654
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":654
  *         if value_shape != tuple(dims):
  *             raise Exception(f'AcadosOcpSolverCython.constraints_set(): mismatching dimension' +
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')             # <<<<<<<<<<<<<<
- * 
+ *
  *         acados_solver_common.ocp_nlp_constraints_model_set(self.nlp_config, \
 */
     __pyx_t_8 = __Pyx_PyUnicode_Unicode(__pyx_v_field_); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 654, __pyx_L1_error)
@@ -27817,20 +27817,20 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __PYX_ERR(0, 653, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":652
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":652
  *             value = np.asfortranarray(value_)
- * 
+ *
  *         if value_shape != tuple(dims):             # <<<<<<<<<<<<<<
  *             raise Exception(f'AcadosOcpSolverCython.constraints_set(): mismatching dimension' +
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":657
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":657
+ *
  *         acados_solver_common.ocp_nlp_constraints_model_set(self.nlp_config, \
  *             self.nlp_dims, self.nlp_in, stage, field, <void *> &value[0][0])             # <<<<<<<<<<<<<<
- * 
+ *
  *         return
 */
   __pyx_t_17 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_17) && PyErr_Occurred())) __PYX_ERR(0, 657, __pyx_L1_error)
@@ -27851,29 +27851,29 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __PYX_ERR(0, 657, __pyx_L1_error)
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":656
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":656
  *                 f' for field "{field_}" at stage {stage} with dimension {tuple(dims)} (you have {value_shape})')
- * 
+ *
  *         acados_solver_common.ocp_nlp_constraints_model_set(self.nlp_config, \             # <<<<<<<<<<<<<<
  *             self.nlp_dims, self.nlp_in, stage, field, <void *> &value[0][0])
- * 
+ *
 */
   (void)(ocp_nlp_constraints_model_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_in, __pyx_v_stage, __pyx_t_17, ((void *)(&(*((double *) ( /* dim=1 */ (( /* dim=0 */ ((char *) (((double *) __pyx_v_value.data) + __pyx_t_18)) ) + __pyx_t_19 * __pyx_v_value.strides[1]) )))))));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":659
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":659
  *             self.nlp_dims, self.nlp_in, stage, field, <void *> &value[0][0])
- * 
+ *
  *         return             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":624
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":624
+ *
+ *
  *     def constraints_set(self, int stage, str field_, value_):             # <<<<<<<<<<<<<<
  *         """
  *         Set numerical data in the constraint module of the solver.
@@ -27890,7 +27890,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_XDECREF(__pyx_t_13);
   __Pyx_XDECREF(__pyx_t_14);
   __Pyx_XDECREF(__pyx_t_16);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.constraints_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.constraints_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_field);
@@ -27901,25 +27901,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":662
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":662
+ *
+ *
  *     def get_from_qp_in(self, int stage, str field_):             # <<<<<<<<<<<<<<
  *         """
  *         Get numerical data from the dynamics module of the solver:
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in, "\n        Get numerical data from the dynamics module of the solver:\n\n            :param stage: integer corresponding to shooting node\n            :param field: string, e.g. 'A'\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in = {"get_from_qp_in", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in, "\n        Get numerical data from the dynamics module of the solver:\n\n            :param stage: integer corresponding to shooting node\n            :param field: string, e.g. 'A'\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in = {"get_from_qp_in", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -27989,12 +27989,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_from_qp_in", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_from_qp_in", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_field_), (&PyUnicode_Type), 1, "field_", 1))) __PYX_ERR(0, 662, __pyx_L1_error)
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_field_);
 
   /* function exit code */
   goto __pyx_L0;
@@ -28013,7 +28013,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_field_) {
   PyObject *__pyx_v_field = NULL;
   int __pyx_v_dims[2];
   PyArrayObject *__pyx_v_out = 0;
@@ -28039,11 +28039,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_pybuffernd_out.data = NULL;
   __pyx_pybuffernd_out.rcbuffer = &__pyx_pybuffer_out;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":669
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":669
  *             :param field: string, e.g. 'A'
  *         """
  *         field = field_.encode('utf-8')             # <<<<<<<<<<<<<<
- * 
+ *
  *         # get dims
 */
   if (unlikely(__pyx_v_field_ == Py_None)) {
@@ -28055,21 +28055,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_field = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":673
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":673
  *         # get dims
  *         cdef int[2] dims
  *         acados_solver_common.ocp_nlp_qp_dims_get_from_attr(self.nlp_config, self.nlp_dims, self.nlp_out, stage, field, &dims[0])             # <<<<<<<<<<<<<<
- * 
+ *
  *         # create output data
 */
   __pyx_t_2 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 673, __pyx_L1_error)
   ocp_nlp_qp_dims_get_from_attr(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_out, __pyx_v_stage, __pyx_t_2, (&(__pyx_v_dims[0])));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":676
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":676
+ *
  *         # create output data
  *         cdef cnp.ndarray[cnp.float64_t, ndim=2] out = np.zeros((dims[0], dims[1]), order='F')             # <<<<<<<<<<<<<<
- * 
+ *
  *         # call getter
 */
   __pyx_t_3 = NULL;
@@ -28127,31 +28127,31 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_out = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":679
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":679
+ *
  *         # call getter
  *         acados_solver_common.ocp_nlp_get_at_stage(self.nlp_config, self.nlp_dims, self.nlp_solver, stage, field, <void *> out.data)             # <<<<<<<<<<<<<<
- * 
+ *
  *         return out
 */
   __pyx_t_9 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_9) && PyErr_Occurred())) __PYX_ERR(0, 679, __pyx_L1_error)
   ocp_nlp_get_at_stage(__pyx_v_self->nlp_config, __pyx_v_self->nlp_dims, __pyx_v_self->nlp_solver, __pyx_v_stage, __pyx_t_9, ((void *)__pyx_f_5numpy_7ndarray_4data_data(((PyArrayObject *)__pyx_v_out))));
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":681
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":681
  *         acados_solver_common.ocp_nlp_get_at_stage(self.nlp_config, self.nlp_dims, self.nlp_solver, stage, field, <void *> out.data)
- * 
+ *
  *         return out             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF((PyObject *)__pyx_v_out);
   __pyx_r = ((PyObject *)__pyx_v_out);
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":662
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":662
+ *
+ *
  *     def get_from_qp_in(self, int stage, str field_):             # <<<<<<<<<<<<<<
  *         """
  *         Get numerical data from the dynamics module of the solver:
@@ -28171,7 +28171,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_out.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_from_qp_in", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.get_from_qp_in", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -28184,25 +28184,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":684
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":684
+ *
+ *
  *     def options_set(self, str field_, value_):             # <<<<<<<<<<<<<<
  *         """
  *         Set options of the solver.
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set, "\n        Set options of the solver.\n\n            :param field: string, e.g. 'print_level', 'rti_phase', 'initialize_t_slacks', 'step_length', 'alpha_min', 'alpha_reduction', 'qp_warm_start', 'line_search_use_sufficient_descent', 'full_step_dual', 'globalization_use_SOC', 'qp_tol_stat', 'qp_tol_eq', 'qp_tol_ineq', 'qp_tol_comp', 'qp_tau_min', 'qp_mu0'\n\n            :param value: of type int, float, string\n\n            - qp_tol_stat: QP solver tolerance stationarity\n            - qp_tol_eq: QP solver tolerance equalities\n            - qp_tol_ineq: QP solver tolerance inequalities\n            - qp_tol_comp: QP solver tolerance complementarity\n            - qp_tau_min: for HPIPM QP solvers: minimum value of barrier parameter in HPIPM\n            - qp_mu0: for HPIPM QP solvers: initial value for complementarity slackness\n            - warm_start_first_qp: indicates if first QP in SQP is warm_started\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set = {"options_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set, "\n        Set options of the solver.\n\n            :param field: string, e.g. 'print_level', 'rti_phase', 'initialize_t_slacks', 'step_length', 'alpha_min', 'alpha_reduction', 'qp_warm_start', 'line_search_use_sufficient_descent', 'full_step_dual', 'globalization_use_SOC', 'qp_tol_stat', 'qp_tol_eq', 'qp_tol_ineq', 'qp_tol_comp', 'qp_tau_min', 'qp_mu0'\n\n            :param value: of type int, float, string\n\n            - qp_tol_stat: QP solver tolerance stationarity\n            - qp_tol_eq: QP solver tolerance equalities\n            - qp_tol_ineq: QP solver tolerance inequalities\n            - qp_tol_comp: QP solver tolerance complementarity\n            - qp_tau_min: for HPIPM QP solvers: minimum value of barrier parameter in HPIPM\n            - qp_mu0: for HPIPM QP solvers: initial value for complementarity slackness\n            - warm_start_first_qp: indicates if first QP in SQP is warm_started\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set = {"options_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -28272,12 +28272,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.options_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.options_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_field_), (&PyUnicode_Type), 1, "field_", 1))) __PYX_ERR(0, 684, __pyx_L1_error)
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field_, __pyx_v_value_);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_field_, __pyx_v_value_);
 
   /* function exit code */
   goto __pyx_L0;
@@ -28296,7 +28296,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, PyObject *__pyx_v_field_, PyObject *__pyx_v_value_) {
   PyObject *__pyx_v_int_fields = NULL;
   PyObject *__pyx_v_double_fields = NULL;
   PyObject *__pyx_v_string_fields = NULL;
@@ -28326,7 +28326,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("options_set", 0);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":700
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":700
  *             - warm_start_first_qp: indicates if first QP in SQP is warm_started
  *         """
  *         int_fields = ['print_level', 'rti_phase', 'initialize_t_slacks', 'qp_warm_start', 'line_search_use_sufficient_descent', 'full_step_dual', 'globalization_use_SOC', 'warm_start_first_qp']             # <<<<<<<<<<<<<<
@@ -28362,7 +28362,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_int_fields = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":701
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":701
  *         """
  *         int_fields = ['print_level', 'rti_phase', 'initialize_t_slacks', 'qp_warm_start', 'line_search_use_sufficient_descent', 'full_step_dual', 'globalization_use_SOC', 'warm_start_first_qp']
  *         double_fields = ['step_length', 'tol_eq', 'tol_stat', 'tol_ineq', 'tol_comp', 'alpha_min', 'alpha_reduction', 'eps_sufficient_descent',             # <<<<<<<<<<<<<<
@@ -28416,11 +28416,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_double_fields = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":703
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":703
  *         double_fields = ['step_length', 'tol_eq', 'tol_stat', 'tol_ineq', 'tol_comp', 'alpha_min', 'alpha_reduction', 'eps_sufficient_descent',
  *         'qp_tol_stat', 'qp_tol_eq', 'qp_tol_ineq', 'qp_tol_comp', 'qp_tau_min', 'qp_mu0']
  *         string_fields = ['globalization']             # <<<<<<<<<<<<<<
- * 
+ *
  *         # encode
 */
   __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 703, __pyx_L1_error)
@@ -28431,11 +28431,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_string_fields = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":706
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":706
+ *
  *         # encode
  *         field = field_.encode('utf-8')             # <<<<<<<<<<<<<<
- * 
+ *
  *         cdef int int_value
 */
   if (unlikely(__pyx_v_field_ == Py_None)) {
@@ -28447,8 +28447,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_field = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":713
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":713
+ *
  *         # check field availability and type
  *         if field_ in int_fields:             # <<<<<<<<<<<<<<
  *             if not isinstance(value_, int):
@@ -28457,27 +28457,27 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_2 = (__Pyx_PySequence_ContainsTF(__pyx_v_field_, __pyx_v_int_fields, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 713, __pyx_L1_error)
   if (__pyx_t_2) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":714
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":714
  *         # check field availability and type
  *         if field_ in int_fields:
  *             if not isinstance(value_, int):             # <<<<<<<<<<<<<<
  *                 raise Exception('solver option {} must be of type int. You have {}.'.format(field_, type(value_)))
- * 
+ *
 */
-    __pyx_t_2 = PyLong_Check(__pyx_v_value_); 
+    __pyx_t_2 = PyLong_Check(__pyx_v_value_);
     __pyx_t_3 = (!__pyx_t_2);
     if (unlikely(__pyx_t_3)) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":715
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":715
  *         if field_ in int_fields:
  *             if not isinstance(value_, int):
  *                 raise Exception('solver option {} must be of type int. You have {}.'.format(field_, type(value_)))             # <<<<<<<<<<<<<<
- * 
+ *
  *             if field_ == 'rti_phase':
 */
       __pyx_t_4 = NULL;
       __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-      __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+      __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
       __pyx_t_7 = __pyx_mstate_global->__pyx_kp_u_solver_option_must_be_of_type_in;
       __Pyx_INCREF(__pyx_t_7);
       __pyx_t_8 = 0;
@@ -28502,18 +28502,18 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __PYX_ERR(0, 715, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":714
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":714
  *         # check field availability and type
  *         if field_ in int_fields:
  *             if not isinstance(value_, int):             # <<<<<<<<<<<<<<
  *                 raise Exception('solver option {} must be of type int. You have {}.'.format(field_, type(value_)))
- * 
+ *
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":717
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":717
  *                 raise Exception('solver option {} must be of type int. You have {}.'.format(field_, type(value_)))
- * 
+ *
  *             if field_ == 'rti_phase':             # <<<<<<<<<<<<<<
  *                 if value_ < 0 or value_ > 2:
  *                     raise Exception('AcadosOcpSolverCython.solve(): argument \'rti_phase\' can '
@@ -28521,8 +28521,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_3 = (__Pyx_PyUnicode_Equals(__pyx_v_field_, __pyx_mstate_global->__pyx_n_u_rti_phase, Py_EQ)); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 717, __pyx_L1_error)
     if (__pyx_t_3) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":718
- * 
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":718
+ *
  *             if field_ == 'rti_phase':
  *                 if value_ < 0 or value_ > 2:             # <<<<<<<<<<<<<<
  *                     raise Exception('AcadosOcpSolverCython.solve(): argument \'rti_phase\' can '
@@ -28543,7 +28543,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __pyx_L7_bool_binop_done:;
       if (unlikely(__pyx_t_3)) {
 
-        /* "acados_template/acados_ocp_solver_pyx.pyx":719
+        /* "acados/acados_template/acados_ocp_solver_pyx.pyx":719
  *             if field_ == 'rti_phase':
  *                 if value_ < 0 or value_ > 2:
  *                     raise Exception('AcadosOcpSolverCython.solve(): argument \'rti_phase\' can '             # <<<<<<<<<<<<<<
@@ -28552,7 +28552,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
         __pyx_t_5 = NULL;
         __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-        __pyx_t_6 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+        __pyx_t_6 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
         __pyx_t_8 = 1;
         {
           PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_solve_argu};
@@ -28566,8 +28566,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
         __PYX_ERR(0, 719, __pyx_L1_error)
 
-        /* "acados_template/acados_ocp_solver_pyx.pyx":718
- * 
+        /* "acados/acados_template/acados_ocp_solver_pyx.pyx":718
+ *
  *             if field_ == 'rti_phase':
  *                 if value_ < 0 or value_ > 2:             # <<<<<<<<<<<<<<
  *                     raise Exception('AcadosOcpSolverCython.solve(): argument \'rti_phase\' can '
@@ -28575,7 +28575,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       }
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":721
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":721
  *                     raise Exception('AcadosOcpSolverCython.solve(): argument \'rti_phase\' can '
  *                         'take only values 0, 1, 2 for SQP-RTI-type solvers')
  *                 if self.nlp_solver_type != 'SQP_RTI' and value_ > 0:             # <<<<<<<<<<<<<<
@@ -28595,16 +28595,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __pyx_L10_bool_binop_done:;
       if (unlikely(__pyx_t_3)) {
 
-        /* "acados_template/acados_ocp_solver_pyx.pyx":722
+        /* "acados/acados_template/acados_ocp_solver_pyx.pyx":722
  *                         'take only values 0, 1, 2 for SQP-RTI-type solvers')
  *                 if self.nlp_solver_type != 'SQP_RTI' and value_ > 0:
  *                     raise Exception('AcadosOcpSolverCython.solve(): argument \'rti_phase\' can '             # <<<<<<<<<<<<<<
  *                         'take only value 0 for SQP-type solvers')
- * 
+ *
 */
         __pyx_t_6 = NULL;
         __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-        __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+        __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
         __pyx_t_8 = 1;
         {
           PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_solve_argu_2};
@@ -28618,7 +28618,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
         __PYX_ERR(0, 722, __pyx_L1_error)
 
-        /* "acados_template/acados_ocp_solver_pyx.pyx":721
+        /* "acados/acados_template/acados_ocp_solver_pyx.pyx":721
  *                     raise Exception('AcadosOcpSolverCython.solve(): argument \'rti_phase\' can '
  *                         'take only values 0, 1, 2 for SQP-RTI-type solvers')
  *                 if self.nlp_solver_type != 'SQP_RTI' and value_ > 0:             # <<<<<<<<<<<<<<
@@ -28627,37 +28627,37 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
       }
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":717
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":717
  *                 raise Exception('solver option {} must be of type int. You have {}.'.format(field_, type(value_)))
- * 
+ *
  *             if field_ == 'rti_phase':             # <<<<<<<<<<<<<<
  *                 if value_ < 0 or value_ > 2:
  *                     raise Exception('AcadosOcpSolverCython.solve(): argument \'rti_phase\' can '
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":725
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":725
  *                         'take only value 0 for SQP-type solvers')
- * 
+ *
  *             int_value = value_             # <<<<<<<<<<<<<<
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &int_value)
- * 
+ *
 */
     __pyx_t_9 = __Pyx_PyLong_As_int(__pyx_v_value_); if (unlikely((__pyx_t_9 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 725, __pyx_L1_error)
     __pyx_v_int_value = __pyx_t_9;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":726
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":726
+ *
  *             int_value = value_
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &int_value)             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif field_ in double_fields:
 */
     __pyx_t_10 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) __PYX_ERR(0, 726, __pyx_L1_error)
     ocp_nlp_solver_opts_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_opts, __pyx_t_10, ((void *)(&__pyx_v_int_value)));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":713
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":713
+ *
  *         # check field availability and type
  *         if field_ in int_fields:             # <<<<<<<<<<<<<<
  *             if not isinstance(value_, int):
@@ -28666,9 +28666,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     goto __pyx_L3;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":728
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":728
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &int_value)
- * 
+ *
  *         elif field_ in double_fields:             # <<<<<<<<<<<<<<
  *             if not isinstance(value_, float):
  *                 raise Exception('solver option {} must be of type float. You have {}.'.format(field_, type(value_)))
@@ -28676,27 +28676,27 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_3 = (__Pyx_PySequence_ContainsTF(__pyx_v_field_, __pyx_v_double_fields, Py_EQ)); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 728, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":729
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":729
+ *
  *         elif field_ in double_fields:
  *             if not isinstance(value_, float):             # <<<<<<<<<<<<<<
  *                 raise Exception('solver option {} must be of type float. You have {}.'.format(field_, type(value_)))
- * 
+ *
 */
-    __pyx_t_3 = PyFloat_Check(__pyx_v_value_); 
+    __pyx_t_3 = PyFloat_Check(__pyx_v_value_);
     __pyx_t_2 = (!__pyx_t_3);
     if (unlikely(__pyx_t_2)) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":730
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":730
  *         elif field_ in double_fields:
  *             if not isinstance(value_, float):
  *                 raise Exception('solver option {} must be of type float. You have {}.'.format(field_, type(value_)))             # <<<<<<<<<<<<<<
- * 
+ *
  *             double_value = value_
 */
       __pyx_t_5 = NULL;
       __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-      __pyx_t_6 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+      __pyx_t_6 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
       __pyx_t_7 = __pyx_mstate_global->__pyx_kp_u_solver_option_must_be_of_type_fl;
       __Pyx_INCREF(__pyx_t_7);
       __pyx_t_8 = 0;
@@ -28721,38 +28721,38 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __PYX_ERR(0, 730, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":729
- * 
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":729
+ *
  *         elif field_ in double_fields:
  *             if not isinstance(value_, float):             # <<<<<<<<<<<<<<
  *                 raise Exception('solver option {} must be of type float. You have {}.'.format(field_, type(value_)))
- * 
+ *
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":732
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":732
  *                 raise Exception('solver option {} must be of type float. You have {}.'.format(field_, type(value_)))
- * 
+ *
  *             double_value = value_             # <<<<<<<<<<<<<<
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &double_value)
- * 
+ *
 */
     __pyx_t_11 = __Pyx_PyFloat_AsDouble(__pyx_v_value_); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 732, __pyx_L1_error)
     __pyx_v_double_value = __pyx_t_11;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":733
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":733
+ *
  *             double_value = value_
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &double_value)             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif field_ in string_fields:
 */
     __pyx_t_10 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) __PYX_ERR(0, 733, __pyx_L1_error)
     ocp_nlp_solver_opts_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_opts, __pyx_t_10, ((void *)(&__pyx_v_double_value)));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":728
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":728
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &int_value)
- * 
+ *
  *         elif field_ in double_fields:             # <<<<<<<<<<<<<<
  *             if not isinstance(value_, float):
  *                 raise Exception('solver option {} must be of type float. You have {}.'.format(field_, type(value_)))
@@ -28760,9 +28760,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     goto __pyx_L3;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":735
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":735
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &double_value)
- * 
+ *
  *         elif field_ in string_fields:             # <<<<<<<<<<<<<<
  *             if not isinstance(value_, bytes):
  *                 raise Exception('solver option {} must be of type str. You have {}.'.format(field_, type(value_)))
@@ -28770,27 +28770,27 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_2 = (__Pyx_PySequence_ContainsTF(__pyx_v_field_, __pyx_v_string_fields, Py_EQ)); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 735, __pyx_L1_error)
   if (likely(__pyx_t_2)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":736
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":736
+ *
  *         elif field_ in string_fields:
  *             if not isinstance(value_, bytes):             # <<<<<<<<<<<<<<
  *                 raise Exception('solver option {} must be of type str. You have {}.'.format(field_, type(value_)))
- * 
+ *
 */
-    __pyx_t_2 = PyBytes_Check(__pyx_v_value_); 
+    __pyx_t_2 = PyBytes_Check(__pyx_v_value_);
     __pyx_t_3 = (!__pyx_t_2);
     if (unlikely(__pyx_t_3)) {
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":737
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":737
  *         elif field_ in string_fields:
  *             if not isinstance(value_, bytes):
  *                 raise Exception('solver option {} must be of type str. You have {}.'.format(field_, type(value_)))             # <<<<<<<<<<<<<<
- * 
+ *
  *             string_value = value_.encode('utf-8')
 */
       __pyx_t_6 = NULL;
       __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-      __pyx_t_4 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+      __pyx_t_4 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
       __pyx_t_7 = __pyx_mstate_global->__pyx_kp_u_solver_option_must_be_of_type_st;
       __Pyx_INCREF(__pyx_t_7);
       __pyx_t_8 = 0;
@@ -28815,21 +28815,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __PYX_ERR(0, 737, __pyx_L1_error)
 
-      /* "acados_template/acados_ocp_solver_pyx.pyx":736
- * 
+      /* "acados/acados_template/acados_ocp_solver_pyx.pyx":736
+ *
  *         elif field_ in string_fields:
  *             if not isinstance(value_, bytes):             # <<<<<<<<<<<<<<
  *                 raise Exception('solver option {} must be of type str. You have {}.'.format(field_, type(value_)))
- * 
+ *
 */
     }
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":739
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":739
  *                 raise Exception('solver option {} must be of type str. You have {}.'.format(field_, type(value_)))
- * 
+ *
  *             string_value = value_.encode('utf-8')             # <<<<<<<<<<<<<<
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &string_value[0])
- * 
+ *
 */
     __pyx_t_4 = __pyx_v_value_;
     __Pyx_INCREF(__pyx_t_4);
@@ -28847,11 +28847,11 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __pyx_t_12.memview = NULL;
     __pyx_t_12.data = NULL;
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":740
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":740
+ *
  *             string_value = value_.encode('utf-8')
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &string_value[0])             # <<<<<<<<<<<<<<
- * 
+ *
  *         else:
 */
     __pyx_t_10 = __Pyx_PyBytes_AsString(__pyx_v_field); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) __PYX_ERR(0, 740, __pyx_L1_error)
@@ -28867,9 +28867,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     }
     ocp_nlp_solver_opts_set(__pyx_v_self->nlp_config, __pyx_v_self->nlp_opts, __pyx_t_10, ((void *)(&(*((unsigned char *) ( /* dim=0 */ ((char *) (((unsigned char *) __pyx_v_string_value.data) + __pyx_t_13)) ))))));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":735
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":735
  *             acados_solver_common.ocp_nlp_solver_opts_set(self.nlp_config, self.nlp_opts, field, <void *> &double_value)
- * 
+ *
  *         elif field_ in string_fields:             # <<<<<<<<<<<<<<
  *             if not isinstance(value_, bytes):
  *                 raise Exception('solver option {} must be of type str. You have {}.'.format(field_, type(value_)))
@@ -28877,24 +28877,24 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     goto __pyx_L3;
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":743
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":743
+ *
  *         else:
  *             raise Exception('AcadosOcpSolverCython.options_set() does not support field {}.'\             # <<<<<<<<<<<<<<
  *                 '\n Possible values are {}.'.format(field_, ', '.join(int_fields + double_fields + string_fields)))
- * 
+ *
 */
   /*else*/ {
     __pyx_t_4 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":744
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":744
  *         else:
  *             raise Exception('AcadosOcpSolverCython.options_set() does not support field {}.'\
  *                 '\n Possible values are {}.'.format(field_, ', '.join(int_fields + double_fields + string_fields)))             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
     __pyx_t_7 = __pyx_mstate_global->__pyx_kp_u_AcadosOcpSolverCython_options_se;
     __Pyx_INCREF(__pyx_t_7);
@@ -28931,9 +28931,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   }
   __pyx_L3:;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":684
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":684
+ *
+ *
  *     def options_set(self, str field_, value_):             # <<<<<<<<<<<<<<
  *         """
  *         Set options of the solver.
@@ -28951,7 +28951,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __PYX_XCLEAR_MEMVIEW(&__pyx_t_12, 1);
   __Pyx_XDECREF(__pyx_t_14);
   __Pyx_XDECREF(__pyx_t_15);
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.options_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.options_set", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_int_fields);
@@ -28964,25 +28964,25 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":747
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":747
+ *
+ *
  *     def set_params_sparse(self, int stage, idx_values_, param_values_):             # <<<<<<<<<<<<<<
  *         """
  *         set parameters of the solvers external function partially:
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse, "\n        set parameters of the solvers external function partially:\n        Pseudo: solver.param[idx_values_] = param_values_;\n        Parameters:\n            :param stage_: integer corresponding to shooting node\n            :param idx_values_: 0 based integer array corresponding to parameter indices to be set\n            :param param_values_: new parameter values as numpy array\n        ");
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse = {"set_params_sparse", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse(PyObject *__pyx_v_self, 
+PyDoc_STRVAR(__pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse, "\n        set parameters of the solvers external function partially:\n        Pseudo: solver.param[idx_values_] = param_values_;\n        Parameters:\n            :param stage_: integer corresponding to shooting node\n            :param idx_values_: 0 based integer array corresponding to parameter indices to be set\n            :param param_values_: new parameter values as numpy array\n        ");
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse = {"set_params_sparse", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -29060,11 +29060,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set_params_sparse", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set_params_sparse", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_idx_values_, __pyx_v_param_values_);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v_stage, __pyx_v_idx_values_, __pyx_v_param_values_);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -29074,7 +29074,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_idx_values_, PyObject *__pyx_v_param_values_) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, int __pyx_v_stage, PyObject *__pyx_v_idx_values_, PyObject *__pyx_v_param_values_) {
   PyArrayObject *__pyx_v_value = 0;
   PyArrayObject *__pyx_v_idx = 0;
   int __pyx_v_n_update;
@@ -29108,12 +29108,12 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_pybuffernd_idx.data = NULL;
   __pyx_pybuffernd_idx.rcbuffer = &__pyx_pybuffer_idx;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":757
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":757
  *         """
- * 
+ *
  *         if not isinstance(param_values_, np.ndarray):             # <<<<<<<<<<<<<<
  *             raise Exception('param_values_ must be np.array.')
- * 
+ *
 */
   __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_mstate_global->__pyx_n_u_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 757, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -29125,16 +29125,16 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_t_4 = (!__pyx_t_3);
   if (unlikely(__pyx_t_4)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":758
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":758
+ *
  *         if not isinstance(param_values_, np.ndarray):
  *             raise Exception('param_values_ must be np.array.')             # <<<<<<<<<<<<<<
- * 
+ *
  *         if param_values_.shape[0] != len(idx_values_):
 */
     __pyx_t_1 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
     __pyx_t_6 = 1;
     {
       PyObject *__pyx_callargs[2] = {__pyx_t_1, __pyx_mstate_global->__pyx_kp_u_param_values__must_be_np_array};
@@ -29148,18 +29148,18 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __PYX_ERR(0, 758, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":757
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":757
  *         """
- * 
+ *
  *         if not isinstance(param_values_, np.ndarray):             # <<<<<<<<<<<<<<
  *             raise Exception('param_values_ must be np.array.')
- * 
+ *
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":760
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":760
  *             raise Exception('param_values_ must be np.array.')
- * 
+ *
  *         if param_values_.shape[0] != len(idx_values_):             # <<<<<<<<<<<<<<
  *             raise Exception(f'param_values_ and idx_values_ must be of the same size.' +
  *                  f' Got sizes idx {param_values_.shape[0]}, param_values {len(idx_values_)}.')
@@ -29179,22 +29179,22 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (unlikely(__pyx_t_4)) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":761
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":761
+ *
  *         if param_values_.shape[0] != len(idx_values_):
  *             raise Exception(f'param_values_ and idx_values_ must be of the same size.' +             # <<<<<<<<<<<<<<
  *                  f' Got sizes idx {param_values_.shape[0]}, param_values {len(idx_values_)}.')
- * 
+ *
 */
     __pyx_t_2 = NULL;
     __Pyx_INCREF((PyObject *)(((PyTypeObject*)PyExc_Exception)));
-    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception))); 
+    __pyx_t_5 = ((PyObject *)(((PyTypeObject*)PyExc_Exception)));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":762
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":762
  *         if param_values_.shape[0] != len(idx_values_):
  *             raise Exception(f'param_values_ and idx_values_ must be of the same size.' +
  *                  f' Got sizes idx {param_values_.shape[0]}, param_values {len(idx_values_)}.')             # <<<<<<<<<<<<<<
- * 
+ *
  *         # n_update = c_int(len(param_values_))
 */
     __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_param_values_, __pyx_mstate_global->__pyx_n_u_shape); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 762, __pyx_L1_error)
@@ -29232,21 +29232,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __PYX_ERR(0, 761, __pyx_L1_error)
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":760
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":760
  *             raise Exception('param_values_ must be np.array.')
- * 
+ *
  *         if param_values_.shape[0] != len(idx_values_):             # <<<<<<<<<<<<<<
  *             raise Exception(f'param_values_ and idx_values_ must be of the same size.' +
  *                  f' Got sizes idx {param_values_.shape[0]}, param_values {len(idx_values_)}.')
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":776
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":776
  *         #                             (self.capsule, stage, idx_data, param_data, n_update)
- * 
+ *
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] value = np.ascontiguousarray(param_values_, dtype=np.float64)             # <<<<<<<<<<<<<<
  *         # cdef cnp.ndarray[cnp.intc, ndim=1] idx = np.ascontiguousarray(idx_values_, dtype=np.intc)
- * 
+ *
 */
   __pyx_t_5 = NULL;
   __Pyx_GetModuleGlobalName(__pyx_t_11, __pyx_mstate_global->__pyx_n_u_np); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 776, __pyx_L1_error)
@@ -29296,9 +29296,9 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_value = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":783
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":783
  *         # cdef cnp.ndarray[cnp.int, ndim=1] idx = np.ascontiguousarray(idx_values_, dtype=np.intc)
- * 
+ *
  *         cdef cnp.ndarray[cnp.int32_t, ndim=1] idx = np.ascontiguousarray(idx_values_, dtype=np.int32)             # <<<<<<<<<<<<<<
  *         cdef int n_update = value.shape[0]
  *         # print(f"in set_params_sparse Cython n_update {n_update}")
@@ -29351,21 +29351,21 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   __pyx_v_idx = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":784
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":784
+ *
  *         cdef cnp.ndarray[cnp.int32_t, ndim=1] idx = np.ascontiguousarray(idx_values_, dtype=np.int32)
  *         cdef int n_update = value.shape[0]             # <<<<<<<<<<<<<<
  *         # print(f"in set_params_sparse Cython n_update {n_update}")
- * 
+ *
 */
   __pyx_v_n_update = (__pyx_f_5numpy_7ndarray_5shape_shape(((PyArrayObject *)__pyx_v_value))[0]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":787
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":787
  *         # print(f"in set_params_sparse Cython n_update {n_update}")
- * 
+ *
  *         assert acados_solver.acados_update_params_sparse(self.capsule, stage, <int *> idx.data, <double *> value.data, n_update) == 0             # <<<<<<<<<<<<<<
  *         return
- * 
+ *
 */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(__pyx_assertions_enabled())) {
@@ -29379,20 +29379,20 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   if ((1)); else __PYX_ERR(0, 787, __pyx_L1_error)
   #endif
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":788
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":788
+ *
  *         assert acados_solver.acados_update_params_sparse(self.capsule, stage, <int *> idx.data, <double *> value.data, n_update) == 0
  *         return             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __Pyx_XDECREF(__pyx_r);
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":747
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":747
+ *
+ *
  *     def set_params_sparse(self, int stage, idx_values_, param_values_):             # <<<<<<<<<<<<<<
  *         """
  *         set parameters of the solvers external function partially:
@@ -29413,7 +29413,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_idx.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_value.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set_params_sparse", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.set_params_sparse", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -29427,31 +29427,31 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
   return __pyx_r;
 }
 
-/* "acados_template/acados_ocp_solver_pyx.pyx":791
- * 
- * 
+/* "acados/acados_template/acados_ocp_solver_pyx.pyx":791
+ *
+ *
  *     def __del__(self):             # <<<<<<<<<<<<<<
  *         if self.solver_created:
  *             acados_solver.acados_free(self.capsule)
 */
 
 /* Python wrapper */
-static void __pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_51__del__(PyObject *__pyx_v_self); /*proto*/
-static void __pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_51__del__(PyObject *__pyx_v_self) {
+static void __pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_51__del__(PyObject *__pyx_v_self); /*proto*/
+static void __pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_51__del__(PyObject *__pyx_v_self) {
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__del__ (wrapper)", 0);
   __pyx_kwvalues = __Pyx_KwValues_VARARGS(__pyx_args, __pyx_nargs);
-  __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_50__del__(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
+  __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_50__del__(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-static void __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_50__del__(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
+static void __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_50__del__(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":792
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":792
+ *
  *     def __del__(self):
  *         if self.solver_created:             # <<<<<<<<<<<<<<
  *             acados_solver.acados_free(self.capsule)
@@ -29459,7 +29459,7 @@ static void __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolver
 */
   if (__pyx_v_self->solver_created) {
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":793
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":793
  *     def __del__(self):
  *         if self.solver_created:
  *             acados_solver.acados_free(self.capsule)             # <<<<<<<<<<<<<<
@@ -29467,15 +29467,15 @@ static void __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolver
 */
     (void)(long_acados_free(__pyx_v_self->capsule));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":794
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":794
  *         if self.solver_created:
  *             acados_solver.acados_free(self.capsule)
  *             acados_solver.acados_free_capsule(self.capsule)             # <<<<<<<<<<<<<<
 */
     (void)(long_acados_free_capsule(__pyx_v_self->capsule));
 
-    /* "acados_template/acados_ocp_solver_pyx.pyx":792
- * 
+    /* "acados/acados_template/acados_ocp_solver_pyx.pyx":792
+ *
  *     def __del__(self):
  *         if self.solver_created:             # <<<<<<<<<<<<<<
  *             acados_solver.acados_free(self.capsule)
@@ -29483,9 +29483,9 @@ static void __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolver
 */
   }
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":791
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":791
+ *
+ *
  *     def __del__(self):             # <<<<<<<<<<<<<<
  *         if self.solver_created:
  *             acados_solver.acados_free(self.capsule)
@@ -29501,15 +29501,15 @@ static void __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolver
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -29535,14 +29535,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   const Py_ssize_t __pyx_kwds_len = unlikely(__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
   if (unlikely(__pyx_kwds_len < 0)) return NULL;
   if (unlikely(__pyx_kwds_len > 0)) {__Pyx_RejectKeywords("__reduce_cython__", __pyx_kwds); return NULL;}
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_52__reduce_cython__(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_52__reduce_cython__(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_52__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_52__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
@@ -29567,7 +29567,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
@@ -29582,15 +29582,15 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -29652,11 +29652,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
     Py_XDECREF(values[__pyx_temp]);
   }
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_54__setstate_cython__(((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v___pyx_state);
+  __pyx_r = __pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_54__setstate_cython__(((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)__pyx_v_self), __pyx_v___pyx_state);
 
   /* function exit code */
   for (Py_ssize_t __pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
@@ -29666,7 +29666,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_54__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_54__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_lineno = 0;
@@ -29691,7 +29691,7 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_AddTraceback("acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
@@ -29699,8 +29699,8 @@ static PyObject *__pyx_pf_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpS
 }
 /* #### Code section: module_exttypes ### */
 
-static PyObject *__pyx_tp_new_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython(PyTypeObject *t, PyObject *a, PyObject *k) {
-  struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *p;
+static PyObject *__pyx_tp_new_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython(PyTypeObject *t, PyObject *a, PyObject *k) {
+  struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *p;
   PyObject *o;
   #if CYTHON_COMPILING_IN_LIMITED_API
   allocfunc alloc_func = (allocfunc)PyType_GetSlot(t, Py_tp_alloc);
@@ -29713,10 +29713,10 @@ static PyObject *__pyx_tp_new_15acados_template_21acados_ocp_solver_pyx_AcadosOc
   }
   if (unlikely(!o)) return 0;
   #endif
-  p = ((struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)o);
+  p = ((struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)o);
   p->model_name = ((PyObject*)Py_None); Py_INCREF(Py_None);
   p->nlp_solver_type = ((PyObject*)Py_None); Py_INCREF(Py_None);
-  if (unlikely(__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_1__cinit__(o, a, k) < 0)) goto bad;
+  if (unlikely(__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_1__cinit__(o, a, k) < 0)) goto bad;
   return o;
   bad:
   Py_DECREF(o); o = 0;
@@ -29725,19 +29725,19 @@ static PyObject *__pyx_tp_new_15acados_template_21acados_ocp_solver_pyx_AcadosOc
 
 #if CYTHON_USE_TP_FINALIZE
 
-static void __pyx_tp_finalize_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython(PyObject *o) {
+static void __pyx_tp_finalize_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython(PyObject *o) {
   PyObject *etype, *eval, *etb;
   PyErr_Fetch(&etype, &eval, &etb);
-  __pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_51__del__(o);
+  __pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_51__del__(o);
   PyErr_Restore(etype, eval, etb);
 }
 #endif
 
-static void __pyx_tp_dealloc_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython(PyObject *o) {
-  struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *p = (struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)o;
+static void __pyx_tp_dealloc_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython(PyObject *o) {
+  struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *p = (struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython *)o;
   #if CYTHON_USE_TP_FINALIZE
   if (unlikely((PY_VERSION_HEX >= 0x03080000 || __Pyx_PyType_HasFeature(Py_TYPE(o), Py_TPFLAGS_HAVE_FINALIZE)) && __Pyx_PyObject_GetSlot(o, tp_finalize, destructor)) && (!PyType_IS_GC(Py_TYPE(o)) || !__Pyx_PyObject_GC_IsFinalized(o))) {
-    if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) {
+    if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) {
       if (PyObject_CallFinalizerFromDealloc(o)) return;
     }
   }
@@ -29754,61 +29754,61 @@ static void __pyx_tp_dealloc_15acados_template_21acados_ocp_solver_pyx_AcadosOcp
   #endif
 }
 
-static PyMethodDef __pyx_methods_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython[] = {
-  {"_AcadosOcpSolverCython__get_pointers_solver", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver},
-  {"solve_for_x0", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0},
-  {"solve", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve},
-  {"reset", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset},
-  {"custom_update", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update},
-  {"set_new_time_steps", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps},
-  {"update_qp_solver_cond_N", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N},
-  {"eval_param_sens", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens},
-  {"get", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get},
-  {"print_statistics", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics},
-  {"store_iterate", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate},
-  {"load_iterate", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate},
-  {"get_stats", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats},
-  {"_AcadosOcpSolverCython__get_stat_int", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"_AcadosOcpSolverCython__get_stat_double", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"_AcadosOcpSolverCython__get_stat_matrix", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"get_cost", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost},
-  {"get_residuals", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals},
-  {"set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set},
-  {"cost_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set},
-  {"constraints_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set},
-  {"get_from_qp_in", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in},
-  {"options_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set},
-  {"set_params_sparse", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse},
-  {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+static PyMethodDef __pyx_methods_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython[] = {
+  {"_AcadosOcpSolverCython__get_pointers_solver", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_2__get_pointers_solver},
+  {"solve_for_x0", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_4solve_for_x0},
+  {"solve", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_6solve},
+  {"reset", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_8reset},
+  {"custom_update", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_10custom_update},
+  {"set_new_time_steps", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_12set_new_time_steps},
+  {"update_qp_solver_cond_N", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_14update_qp_solver_cond_N},
+  {"eval_param_sens", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_16eval_param_sens},
+  {"get", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_18get},
+  {"print_statistics", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_20print_statistics},
+  {"store_iterate", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_22store_iterate},
+  {"load_iterate", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_24load_iterate},
+  {"get_stats", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_26get_stats},
+  {"_AcadosOcpSolverCython__get_stat_int", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"_AcadosOcpSolverCython__get_stat_double", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"_AcadosOcpSolverCython__get_stat_matrix", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"get_cost", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_34get_cost},
+  {"get_residuals", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_36get_residuals},
+  {"set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_38set},
+  {"cost_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_40cost_set},
+  {"constraints_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_42constraints_set},
+  {"get_from_qp_in", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_44get_from_qp_in},
+  {"options_set", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_46options_set},
+  {"set_params_sparse", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_48set_params_sparse},
+  {"__reduce_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"__setstate_cython__", (PyCFunction)(void(*)(void))(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 #if CYTHON_USE_TYPE_SPECS
-static PyType_Slot __pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_slots[] = {
-  {Py_tp_dealloc, (void *)__pyx_tp_dealloc_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython},
+static PyType_Slot __pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_slots[] = {
+  {Py_tp_dealloc, (void *)__pyx_tp_dealloc_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython},
   {Py_tp_doc, (void *)PyDoc_STR("\n    Class to interact with the acados ocp solver C object.\n    ")},
-  {Py_tp_methods, (void *)__pyx_methods_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython},
-  {Py_tp_new, (void *)__pyx_tp_new_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython},
+  {Py_tp_methods, (void *)__pyx_methods_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython},
+  {Py_tp_new, (void *)__pyx_tp_new_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython},
   #if CYTHON_USE_TP_FINALIZE
-  {Py_tp_finalize, (void *)__pyx_tp_finalize_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython},
+  {Py_tp_finalize, (void *)__pyx_tp_finalize_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython},
   #endif
   {0, 0},
 };
-static PyType_Spec __pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_spec = {
-  "acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython",
-  sizeof(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython),
+static PyType_Spec __pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_spec = {
+  "acados.acados_template.acados_ocp_solver_pyx.AcadosOcpSolverCython",
+  sizeof(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_FINALIZE,
-  __pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_slots,
+  __pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_slots,
 };
 #else
 
-static PyTypeObject __pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython = {
+static PyTypeObject __pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython = {
   PyVarObject_HEAD_INIT(0, 0)
-  "acados_template.acados_ocp_solver_pyx.""AcadosOcpSolverCython", /*tp_name*/
-  sizeof(struct __pyx_obj_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython), /*tp_basicsize*/
+  "acados.acados_template.acados_ocp_solver_pyx.""AcadosOcpSolverCython", /*tp_name*/
+  sizeof(struct __pyx_obj_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, /*tp_dealloc*/
+  __pyx_tp_dealloc_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, /*tp_dealloc*/
   #if PY_VERSION_HEX < 0x030800b4
   0, /*tp_print*/
   #endif
@@ -29836,7 +29836,7 @@ static PyTypeObject __pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosO
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
   0, /*tp_iternext*/
-  __pyx_methods_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, /*tp_methods*/
+  __pyx_methods_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, /*tp_methods*/
   0, /*tp_members*/
   0, /*tp_getset*/
   0, /*tp_base*/
@@ -29848,7 +29848,7 @@ static PyTypeObject __pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosO
   #endif
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, /*tp_new*/
+  __pyx_tp_new_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -29859,7 +29859,7 @@ static PyTypeObject __pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosO
   0, /*tp_del*/
   0, /*tp_version_tag*/
   #if CYTHON_USE_TP_FINALIZE
-  __pyx_tp_finalize_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, /*tp_finalize*/
+  __pyx_tp_finalize_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, /*tp_finalize*/
   #else
   NULL, /*tp_finalize*/
   #endif
@@ -30011,7 +30011,7 @@ static PyType_Slot __pyx_type___pyx_array_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_array_spec = {
-  "acados_template.acados_ocp_solver_pyx.array",
+  "acados.acados_template.acados_ocp_solver_pyx.array",
   sizeof(struct __pyx_array_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_SEQUENCE,
@@ -30045,7 +30045,7 @@ static PyBufferProcs __pyx_tp_as_buffer_array = {
 
 static PyTypeObject __pyx_type___pyx_array = {
   PyVarObject_HEAD_INIT(0, 0)
-  "acados_template.acados_ocp_solver_pyx.""array", /*tp_name*/
+  "acados.acados_template.acados_ocp_solver_pyx.""array", /*tp_name*/
   sizeof(struct __pyx_array_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_array, /*tp_dealloc*/
@@ -30200,7 +30200,7 @@ static PyType_Slot __pyx_type___pyx_MemviewEnum_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_MemviewEnum_spec = {
-  "acados_template.acados_ocp_solver_pyx.Enum",
+  "acados.acados_template.acados_ocp_solver_pyx.Enum",
   sizeof(struct __pyx_MemviewEnum_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
@@ -30210,7 +30210,7 @@ static PyType_Spec __pyx_type___pyx_MemviewEnum_spec = {
 
 static PyTypeObject __pyx_type___pyx_MemviewEnum = {
   PyVarObject_HEAD_INIT(0, 0)
-  "acados_template.acados_ocp_solver_pyx.""Enum", /*tp_name*/
+  "acados.acados_template.acados_ocp_solver_pyx.""Enum", /*tp_name*/
   sizeof(struct __pyx_MemviewEnum_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_Enum, /*tp_dealloc*/
@@ -30495,7 +30495,7 @@ static PyType_Slot __pyx_type___pyx_memoryview_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_memoryview_spec = {
-  "acados_template.acados_ocp_solver_pyx.memoryview",
+  "acados.acados_template.acados_ocp_solver_pyx.memoryview",
   sizeof(struct __pyx_memoryview_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
@@ -30529,7 +30529,7 @@ static PyBufferProcs __pyx_tp_as_buffer_memoryview = {
 
 static PyTypeObject __pyx_type___pyx_memoryview = {
   PyVarObject_HEAD_INIT(0, 0)
-  "acados_template.acados_ocp_solver_pyx.""memoryview", /*tp_name*/
+  "acados.acados_template.acados_ocp_solver_pyx.""memoryview", /*tp_name*/
   sizeof(struct __pyx_memoryview_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_memoryview, /*tp_dealloc*/
@@ -30677,7 +30677,7 @@ static PyType_Slot __pyx_type___pyx_memoryviewslice_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_memoryviewslice_spec = {
-  "acados_template.acados_ocp_solver_pyx._memoryviewslice",
+  "acados.acados_template.acados_ocp_solver_pyx._memoryviewslice",
   sizeof(struct __pyx_memoryviewslice_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_SEQUENCE,
@@ -30687,7 +30687,7 @@ static PyType_Spec __pyx_type___pyx_memoryviewslice_spec = {
 
 static PyTypeObject __pyx_type___pyx_memoryviewslice = {
   PyVarObject_HEAD_INIT(0, 0)
-  "acados_template.acados_ocp_solver_pyx.""_memoryviewslice", /*tp_name*/
+  "acados.acados_template.acados_ocp_solver_pyx.""_memoryviewslice", /*tp_name*/
   sizeof(struct __pyx_memoryviewslice_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc__memoryviewslice, /*tp_dealloc*/
@@ -30832,23 +30832,23 @@ static int __Pyx_modinit_type_init_code(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython)) __PYX_ERR(0, 48, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_spec, __pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_spec, NULL); if (unlikely(!__pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython)) __PYX_ERR(0, 48, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython_spec, __pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
   #else
-  __pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython = &__pyx_type_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython;
+  __pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython = &__pyx_type_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
-  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython->tp_dictoffset && __pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython->tp_getattro == PyObject_GenericGetAttr)) {
-    __pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython->tp_getattro = PyObject_GenericGetAttr;
+  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython->tp_dictoffset && __pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython->tp_getattro == PyObject_GenericGetAttr)) {
+    __pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython->tp_getattro = PyObject_GenericGetAttr;
   }
   #endif
-  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython, (PyObject *) __pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython, (PyObject *) __pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject *) __pyx_mstate->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
   __pyx_vtabptr_array = &__pyx_vtable_array;
   __pyx_vtable_array.get_memview = (PyObject *(*)(struct __pyx_array_obj *))__pyx_array_get_memview;
   #if CYTHON_USE_TYPE_SPECS
@@ -31421,13 +31421,13 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   if (__pyx_AsyncGen_init(__pyx_m) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
   /*--- Library function declarations ---*/
-  if (__pyx_module_is_main_acados_template__acados_ocp_solver_pyx) {
+  if (__pyx_module_is_main_acados__acados_template__acados_ocp_solver_pyx) {
     if (PyObject_SetAttr(__pyx_m, __pyx_mstate_global->__pyx_n_u_name_2, __pyx_mstate_global->__pyx_n_u_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "acados_template.acados_ocp_solver_pyx")) {
-      if (unlikely((PyDict_SetItemString(modules, "acados_template.acados_ocp_solver_pyx", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "acados.acados_template.acados_ocp_solver_pyx")) {
+      if (unlikely((PyDict_SetItemString(modules, "acados.acados_template.acados_ocp_solver_pyx", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   /*--- Builtin init code ---*/
@@ -31446,7 +31446,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   /*--- Execution code ---*/
 
   /* "View.MemoryView":100
- * 
+ *
  * cdef object __pyx_collections_abc_Sequence "__pyx_collections_abc_Sequence"
  * try:             # <<<<<<<<<<<<<<
  *     __pyx_collections_abc_Sequence = __import__("collections.abc").abc.Sequence
@@ -31466,11 +31466,11 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
  * try:
  *     __pyx_collections_abc_Sequence = __import__("collections.abc").abc.Sequence             # <<<<<<<<<<<<<<
  * except:
- * 
+ *
 */
       __pyx_t_5 = NULL;
       __Pyx_INCREF(__pyx_builtin___import__);
-      __pyx_t_6 = __pyx_builtin___import__; 
+      __pyx_t_6 = __pyx_builtin___import__;
       __pyx_t_7 = 1;
       {
         PyObject *__pyx_callargs[2] = {__pyx_t_5, __pyx_mstate_global->__pyx_kp_u_collections_abc};
@@ -31492,7 +31492,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
       __pyx_t_4 = 0;
 
       /* "View.MemoryView":100
- * 
+ *
  * cdef object __pyx_collections_abc_Sequence "__pyx_collections_abc_Sequence"
  * try:             # <<<<<<<<<<<<<<
  *     __pyx_collections_abc_Sequence = __import__("collections.abc").abc.Sequence
@@ -31512,7 +31512,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
  * try:
  *     __pyx_collections_abc_Sequence = __import__("collections.abc").abc.Sequence
  * except:             # <<<<<<<<<<<<<<
- * 
+ *
  *     __pyx_collections_abc_Sequence = None
 */
     /*except:*/ {
@@ -31524,10 +31524,10 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
 
       /* "View.MemoryView":104
  * except:
- * 
+ *
  *     __pyx_collections_abc_Sequence = None             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
       __Pyx_INCREF(Py_None);
       __Pyx_XGOTREF(__pyx_collections_abc_Sequence);
@@ -31540,7 +31540,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
     }
 
     /* "View.MemoryView":100
- * 
+ *
  * cdef object __pyx_collections_abc_Sequence "__pyx_collections_abc_Sequence"
  * try:             # <<<<<<<<<<<<<<
  *     __pyx_collections_abc_Sequence = __import__("collections.abc").abc.Sequence
@@ -31561,8 +31561,8 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   }
 
   /* "View.MemoryView":239
- * 
- * 
+ *
+ *
  *     try:             # <<<<<<<<<<<<<<
  *         count = __pyx_collections_abc_Sequence.count
  *         index = __pyx_collections_abc_Sequence.index
@@ -31577,7 +31577,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
     /*try:*/ {
 
       /* "View.MemoryView":240
- * 
+ *
  *     try:
  *         count = __pyx_collections_abc_Sequence.count             # <<<<<<<<<<<<<<
  *         index = __pyx_collections_abc_Sequence.index
@@ -31601,8 +31601,8 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
       /* "View.MemoryView":239
- * 
- * 
+ *
+ *
  *     try:             # <<<<<<<<<<<<<<
  *         count = __pyx_collections_abc_Sequence.count
  *         index = __pyx_collections_abc_Sequence.index
@@ -31622,7 +31622,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
  *         index = __pyx_collections_abc_Sequence.index
  *     except:             # <<<<<<<<<<<<<<
  *         pass
- * 
+ *
 */
     /*except:*/ {
       __Pyx_ErrRestore(0,0,0);
@@ -31638,14 +31638,14 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
 
   /* "View.MemoryView":307
  *         return self.name
- * 
+ *
  * cdef generic = Enum("<strided and direct or indirect>")             # <<<<<<<<<<<<<<
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
 */
   __pyx_t_6 = NULL;
   __Pyx_INCREF((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
-  __pyx_t_4 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type); 
+  __pyx_t_4 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
   __pyx_t_7 = 1;
   {
     PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_mstate_global->__pyx_kp_u_strided_and_direct_or_indirect};
@@ -31661,15 +31661,15 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   __pyx_t_5 = 0;
 
   /* "View.MemoryView":308
- * 
+ *
  * cdef generic = Enum("<strided and direct or indirect>")
  * cdef strided = Enum("<strided and direct>") # default             # <<<<<<<<<<<<<<
  * cdef indirect = Enum("<strided and indirect>")
- * 
+ *
 */
   __pyx_t_4 = NULL;
   __Pyx_INCREF((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
-  __pyx_t_6 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type); 
+  __pyx_t_6 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
   __pyx_t_7 = 1;
   {
     PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_mstate_global->__pyx_kp_u_strided_and_direct};
@@ -31688,12 +31688,12 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
  * cdef generic = Enum("<strided and direct or indirect>")
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_6 = NULL;
   __Pyx_INCREF((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
-  __pyx_t_4 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type); 
+  __pyx_t_4 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
   __pyx_t_7 = 1;
   {
     PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_mstate_global->__pyx_kp_u_strided_and_indirect};
@@ -31709,15 +31709,15 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   __pyx_t_5 = 0;
 
   /* "View.MemoryView":312
- * 
- * 
+ *
+ *
  * cdef contiguous = Enum("<contiguous and direct>")             # <<<<<<<<<<<<<<
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
- * 
+ *
 */
   __pyx_t_4 = NULL;
   __Pyx_INCREF((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
-  __pyx_t_6 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type); 
+  __pyx_t_6 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
   __pyx_t_7 = 1;
   {
     PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_mstate_global->__pyx_kp_u_contiguous_and_direct};
@@ -31733,15 +31733,15 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   __pyx_t_5 = 0;
 
   /* "View.MemoryView":313
- * 
+ *
  * cdef contiguous = Enum("<contiguous and direct>")
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_6 = NULL;
   __Pyx_INCREF((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
-  __pyx_t_4 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type); 
+  __pyx_t_4 = ((PyObject *)__pyx_mstate_global->__pyx_MemviewEnum_type);
   __pyx_t_7 = 1;
   {
     PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_mstate_global->__pyx_kp_u_contiguous_and_indirect};
@@ -31757,8 +31757,8 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   __pyx_t_5 = 0;
 
   /* "View.MemoryView":321
- * 
- * 
+ *
+ *
  * cdef int __pyx_memoryview_thread_locks_used = 0             # <<<<<<<<<<<<<<
  * cdef PyThread_type_lock[8] __pyx_memoryview_thread_locks = [
  *     PyThread_allocate_lock(),
@@ -31766,7 +31766,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   __pyx_memoryview_thread_locks_used = 0;
 
   /* "View.MemoryView":322
- * 
+ *
  * cdef int __pyx_memoryview_thread_locks_used = 0
  * cdef PyThread_type_lock[8] __pyx_memoryview_thread_locks = [             # <<<<<<<<<<<<<<
  *     PyThread_allocate_lock(),
@@ -31783,8 +31783,8 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   memcpy(&(__pyx_memoryview_thread_locks[0]), __pyx_t_8, sizeof(__pyx_memoryview_thread_locks[0]) * (8));
 
   /* "View.MemoryView":982
- * 
- * 
+ *
+ *
  *     try:             # <<<<<<<<<<<<<<
  *         count = __pyx_collections_abc_Sequence.count
  *         index = __pyx_collections_abc_Sequence.index
@@ -31799,7 +31799,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
     /*try:*/ {
 
       /* "View.MemoryView":983
- * 
+ *
  *     try:
  *         count = __pyx_collections_abc_Sequence.count             # <<<<<<<<<<<<<<
  *         index = __pyx_collections_abc_Sequence.index
@@ -31823,8 +31823,8 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
       /* "View.MemoryView":982
- * 
- * 
+ *
+ *
  *     try:             # <<<<<<<<<<<<<<
  *         count = __pyx_collections_abc_Sequence.count
  *         index = __pyx_collections_abc_Sequence.index
@@ -31844,7 +31844,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
  *         index = __pyx_collections_abc_Sequence.index
  *     except:             # <<<<<<<<<<<<<<
  *         pass
- * 
+ *
 */
     /*except:*/ {
       __Pyx_ErrRestore(0,0,0);
@@ -31860,10 +31860,10 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
 
   /* "View.MemoryView":988
  *         pass
- * 
+ *
  * try:             # <<<<<<<<<<<<<<
  *     if __pyx_collections_abc_Sequence:
- * 
+ *
 */
   {
     __Pyx_PyThreadState_declare
@@ -31875,18 +31875,18 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
     /*try:*/ {
 
       /* "View.MemoryView":989
- * 
+ *
  * try:
  *     if __pyx_collections_abc_Sequence:             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
       __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_collections_abc_Sequence); if (unlikely((__pyx_t_9 < 0))) __PYX_ERR(1, 989, __pyx_L26_error)
       if (__pyx_t_9) {
 
         /* "View.MemoryView":993
- * 
- * 
+ *
+ *
  *         __pyx_collections_abc_Sequence.register(_memoryviewslice)             # <<<<<<<<<<<<<<
  *         __pyx_collections_abc_Sequence.register(array)
  * except:
@@ -31904,7 +31904,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
         /* "View.MemoryView":994
- * 
+ *
  *         __pyx_collections_abc_Sequence.register(_memoryviewslice)
  *         __pyx_collections_abc_Sequence.register(array)             # <<<<<<<<<<<<<<
  * except:
@@ -31923,20 +31923,20 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
         /* "View.MemoryView":989
- * 
+ *
  * try:
  *     if __pyx_collections_abc_Sequence:             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
       }
 
       /* "View.MemoryView":988
  *         pass
- * 
+ *
  * try:             # <<<<<<<<<<<<<<
  *     if __pyx_collections_abc_Sequence:
- * 
+ *
 */
     }
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -31953,7 +31953,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
  *         __pyx_collections_abc_Sequence.register(array)
  * except:             # <<<<<<<<<<<<<<
  *     pass  # ignore failure, it's a minor issue
- * 
+ *
 */
     /*except:*/ {
       __Pyx_ErrRestore(0,0,0);
@@ -31977,9 +31977,9 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_pyx_unpickle_Enum, __pyx_t_5) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":43
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":43
  * cimport numpy as cnp
- * 
+ *
  * import os             # <<<<<<<<<<<<<<
  * from datetime import datetime
  * import numpy as np
@@ -31989,12 +31989,12 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_os, __pyx_t_5) < 0) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":44
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":44
+ *
  * import os
  * from datetime import datetime             # <<<<<<<<<<<<<<
  * import numpy as np
- * 
+ *
 */
   __pyx_t_5 = __Pyx_PyList_Pack(1, __pyx_mstate_global->__pyx_n_u_datetime); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
@@ -32007,94 +32007,94 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":45
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":45
  * import os
  * from datetime import datetime
  * import numpy as np             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
 */
   __pyx_t_4 = __Pyx_ImportDottedModule(__pyx_mstate_global->__pyx_n_u_numpy, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_np, __pyx_t_4) < 0) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":88
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":88
+ *
+ *
  *     def __get_pointers_solver(self):             # <<<<<<<<<<<<<<
  *         """
  *         Private function to get the pointers for solver
 */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___get_poin, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_3_AcadosOcpSolverCython__get_pointers_solver, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___get_poin, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython__get_poin, __pyx_t_4) < 0) __PYX_ERR(0, 88, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython__get_poin, __pyx_t_4) < 0) __PYX_ERR(0, 88, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":102
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":102
+ *
+ *
  *     def solve_for_x0(self, x0_bar):             # <<<<<<<<<<<<<<
  *         """
  *         Wrapper around `solve()` which sets initial state constraint, solves the OCP, and returns u0.
 */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_solve_for, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[2])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_5solve_for_x0, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_solve_for, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[2])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 102, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_solve_for_x0, __pyx_t_4) < 0) __PYX_ERR(0, 102, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_solve_for_x0, __pyx_t_4) < 0) __PYX_ERR(0, 102, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":120
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":120
+ *
+ *
  *     def solve(self):             # <<<<<<<<<<<<<<
  *         """
  *         Solve the ocp with current input.
 */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_solve, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[3])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 120, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_7solve, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_solve, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[3])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_solve, __pyx_t_4) < 0) __PYX_ERR(0, 120, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_solve, __pyx_t_4) < 0) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":127
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":127
+ *
+ *
  *     def reset(self, reset_qp_solver_mem=1):             # <<<<<<<<<<<<<<
  *         """
  *         Sets current iterate to all zeros.
 */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_reset, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[4])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_9reset, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_reset, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[4])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_4, __pyx_mstate_global->__pyx_tuple[7]);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_reset, __pyx_t_4) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_reset, __pyx_t_4) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":134
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":134
+ *
+ *
  *     def custom_update(self, data_):             # <<<<<<<<<<<<<<
  *         """
  *         A custom function that can be implemented by a user to be called between solver calls.
 */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_custom_upd, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[5])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_11custom_update, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_custom_upd, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[5])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_custom_update, __pyx_t_4) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_custom_update, __pyx_t_4) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":147
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":147
+ *
+ *
  *     def set_new_time_steps(self, new_time_steps):             # <<<<<<<<<<<<<<
  *         """
  *         Set new time steps.
 */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_set_new_ti, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[6])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 147, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_13set_new_time_steps, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_set_new_ti, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[6])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_set_new_time_steps, __pyx_t_4) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_set_new_time_steps, __pyx_t_4) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":198
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":198
+ *
+ *
  *     def update_qp_solver_cond_N(self, qp_solver_cond_N: int):             # <<<<<<<<<<<<<<
  *         """
  *         Recreate solver with new value `qp_solver_cond_N` with a partial condensing QP solver.
@@ -32102,218 +32102,218 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 198, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (PyDict_SetItem(__pyx_t_4, __pyx_mstate_global->__pyx_n_u_qp_solver_cond_N, __pyx_mstate_global->__pyx_n_u_int) < 0) __PYX_ERR(0, 198, __pyx_L1_error)
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_update_qp, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[7])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 198, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_15update_qp_solver_cond_N, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_update_qp, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[7])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 198, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_5, __pyx_t_4);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_update_qp_solver_cond_N, __pyx_t_5) < 0) __PYX_ERR(0, 198, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_update_qp_solver_cond_N, __pyx_t_5) < 0) __PYX_ERR(0, 198, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":232
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":232
+ *
+ *
  *     def eval_param_sens(self, index, stage=0, field="ex"):             # <<<<<<<<<<<<<<
  *         """
  *         Calculate the sensitivity of the curent solution with respect to the initial state component of index
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_eval_param_3, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[8])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 232, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_17eval_param_sens, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_eval_param_3, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[8])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 232, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_5, __pyx_mstate_global->__pyx_tuple[10]);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_eval_param_sens, __pyx_t_5) < 0) __PYX_ERR(0, 232, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_eval_param_sens, __pyx_t_5) < 0) __PYX_ERR(0, 232, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":257
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":257
+ *
+ *
  *     def get(self, int stage, str field_):             # <<<<<<<<<<<<<<
  *         """
  *         Get the last solution of the solver:
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[9])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 257, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_19get, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[9])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 257, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get, __pyx_t_5) < 0) __PYX_ERR(0, 257, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get, __pyx_t_5) < 0) __PYX_ERR(0, 257, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":300
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":300
+ *
+ *
  *     def print_statistics(self):             # <<<<<<<<<<<<<<
  *         """
  *         prints statistics of previous solver run as a table:
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_print_stat, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[10])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 300, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_21print_statistics, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_print_stat, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[10])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 300, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_print_statistics, __pyx_t_5) < 0) __PYX_ERR(0, 300, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_print_statistics, __pyx_t_5) < 0) __PYX_ERR(0, 300, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":318
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":318
+ *
+ *
  *     def store_iterate(self, filename='', overwrite=False):             # <<<<<<<<<<<<<<
  *         """
  *         Stores the current iterate of the ocp solver in a json file.
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_store_iter, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[11])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 318, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_23store_iterate, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_store_iter, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[11])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 318, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_5, __pyx_mstate_global->__pyx_tuple[11]);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_store_iterate, __pyx_t_5) < 0) __PYX_ERR(0, 318, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_store_iterate, __pyx_t_5) < 0) __PYX_ERR(0, 318, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":361
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":361
+ *
+ *
  *     def load_iterate(self, filename):             # <<<<<<<<<<<<<<
  *         """
  *         Loads the iterate stored in json file with filename into the ocp solver.
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_load_itera, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[12])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 361, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_25load_iterate, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_load_itera, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[12])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 361, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_load_iterate, __pyx_t_5) < 0) __PYX_ERR(0, 361, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_load_iterate, __pyx_t_5) < 0) __PYX_ERR(0, 361, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":377
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":377
+ *
+ *
  *     def get_stats(self, field_):             # <<<<<<<<<<<<<<
  *         """
  *         Get the information of the last solver call.
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get_stats, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[13])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 377, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_27get_stats, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get_stats, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[13])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get_stats, __pyx_t_5) < 0) __PYX_ERR(0, 377, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get_stats, __pyx_t_5) < 0) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":459
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":459
+ *
+ *
  *     def __get_stat_int(self, field):             # <<<<<<<<<<<<<<
  *         cdef int out
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> &out)
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___get_stat, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[14])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 459, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_29_AcadosOcpSolverCython__get_stat_int, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___get_stat, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[14])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 459, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython__get_stat, __pyx_t_5) < 0) __PYX_ERR(0, 459, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython__get_stat, __pyx_t_5) < 0) __PYX_ERR(0, 459, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":464
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":464
  *         return out
- * 
+ *
  *     def __get_stat_double(self, field):             # <<<<<<<<<<<<<<
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((1,))
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out.data)
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___get_stat_2, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[15])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 464, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_31_AcadosOcpSolverCython__get_stat_double, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___get_stat_2, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[15])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 464, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython__get_stat_2, __pyx_t_5) < 0) __PYX_ERR(0, 464, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython__get_stat_2, __pyx_t_5) < 0) __PYX_ERR(0, 464, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":469
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":469
  *         return out
- * 
+ *
  *     def __get_stat_matrix(self, field, n, m):             # <<<<<<<<<<<<<<
  *         cdef cnp.ndarray[cnp.float64_t, ndim=2] out_mat = np.ascontiguousarray(np.zeros((n, m)), dtype=np.float64)
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out_mat.data)
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___get_stat_3, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[16])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 469, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_33_AcadosOcpSolverCython__get_stat_matrix, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___get_stat_3, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[16])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 469, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython__get_stat_3, __pyx_t_5) < 0) __PYX_ERR(0, 469, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython__get_stat_3, __pyx_t_5) < 0) __PYX_ERR(0, 469, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":475
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":475
+ *
+ *
  *     def get_cost(self):             # <<<<<<<<<<<<<<
  *         """
  *         Returns the cost value of the current solution.
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get_cost, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[17])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 475, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_35get_cost, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get_cost, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[17])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 475, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get_cost, __pyx_t_5) < 0) __PYX_ERR(0, 475, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get_cost, __pyx_t_5) < 0) __PYX_ERR(0, 475, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":491
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":491
+ *
+ *
  *     def get_residuals(self, recompute=False):             # <<<<<<<<<<<<<<
  *         """
  *         Returns an array of the form [res_stat, res_eq, res_ineq, res_comp].
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get_residu, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[18])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 491, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_37get_residuals, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get_residu, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[18])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_5, __pyx_mstate_global->__pyx_tuple[12]);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get_residuals, __pyx_t_5) < 0) __PYX_ERR(0, 491, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get_residuals, __pyx_t_5) < 0) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":523
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":523
+ *
  *     # Note: this function should not be used anymore, better use cost_set, constraints_set
  *     def set(self, int stage, str field_, value_):             # <<<<<<<<<<<<<<
- * 
+ *
  *         """
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_set, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[19])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 523, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_39set, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_set, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[19])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 523, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_set, __pyx_t_5) < 0) __PYX_ERR(0, 523, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_set, __pyx_t_5) < 0) __PYX_ERR(0, 523, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":589
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":589
  *         return
- * 
+ *
  *     def cost_set(self, int stage, str field_, value_):             # <<<<<<<<<<<<<<
  *         """
  *         Set numerical data in the cost module of the solver.
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_cost_set, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[20])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 589, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_41cost_set, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_cost_set, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[20])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 589, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_cost_set, __pyx_t_5) < 0) __PYX_ERR(0, 589, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_cost_set, __pyx_t_5) < 0) __PYX_ERR(0, 589, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":624
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":624
+ *
+ *
  *     def constraints_set(self, int stage, str field_, value_):             # <<<<<<<<<<<<<<
  *         """
  *         Set numerical data in the constraint module of the solver.
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_constraint_2, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[21])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 624, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_43constraints_set, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_constraint_2, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[21])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 624, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_constraints_set, __pyx_t_5) < 0) __PYX_ERR(0, 624, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_constraints_set, __pyx_t_5) < 0) __PYX_ERR(0, 624, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":662
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":662
+ *
+ *
  *     def get_from_qp_in(self, int stage, str field_):             # <<<<<<<<<<<<<<
  *         """
  *         Get numerical data from the dynamics module of the solver:
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get_from_q, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[22])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 662, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_45get_from_qp_in, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_get_from_q, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[22])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 662, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get_from_qp_in, __pyx_t_5) < 0) __PYX_ERR(0, 662, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_get_from_qp_in, __pyx_t_5) < 0) __PYX_ERR(0, 662, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":684
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":684
+ *
+ *
  *     def options_set(self, str field_, value_):             # <<<<<<<<<<<<<<
  *         """
  *         Set options of the solver.
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_options_se_2, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[23])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 684, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_47options_set, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_options_se_2, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[23])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 684, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_options_set, __pyx_t_5) < 0) __PYX_ERR(0, 684, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_options_set, __pyx_t_5) < 0) __PYX_ERR(0, 684, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":747
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":747
+ *
+ *
  *     def set_params_sparse(self, int stage, idx_values_, param_values_):             # <<<<<<<<<<<<<<
  *         """
  *         set parameters of the solvers external function partially:
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_set_params, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[24])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 747, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_49set_params_sparse, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython_set_params, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[24])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 747, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_set_params_sparse, __pyx_t_5) < 0) __PYX_ERR(0, 747, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict(__pyx_mstate_global->__pyx_ptype_6acados_15acados_template_21acados_ocp_solver_pyx_AcadosOcpSolverCython, __pyx_mstate_global->__pyx_n_u_set_params_sparse, __pyx_t_5) < 0) __PYX_ERR(0, 747, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
   /* "(tree fragment)":1
@@ -32321,7 +32321,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
  * def __setstate_cython__(self, __pyx_state):
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___reduce_c, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[25])); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_53__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___reduce_c, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[25])); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_reduce_cython, __pyx_t_5) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -32332,12 +32332,12 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     raise TypeError, "no default __reduce__ due to non-trivial __cinit__"
 */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___setstate, NULL, __pyx_mstate_global->__pyx_n_u_acados_template_acados_ocp_solve, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[26])); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 3, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6acados_15acados_template_21acados_ocp_solver_pyx_21AcadosOcpSolverCython_55__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_mstate_global->__pyx_n_u_AcadosOcpSolverCython___setstate, NULL, __pyx_mstate_global->__pyx_n_u_acados_acados_template_acados_oc, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[26])); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_setstate_cython, __pyx_t_5) < 0) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":1
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":1
  * #             # <<<<<<<<<<<<<<
  * # Copyright (c) The acados authors.
  * #
@@ -32356,7 +32356,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
   __Pyx_XDECREF(__pyx_t_6);
   if (__pyx_m) {
     if (__pyx_mstate->__pyx_d && stringtab_initialized) {
-      __Pyx_AddTraceback("init acados_template.acados_ocp_solver_pyx", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init acados.acados_template.acados_ocp_solver_pyx", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     #if !CYTHON_USE_MODULE_STATE
     Py_CLEAR(__pyx_m);
@@ -32370,7 +32370,7 @@ __Pyx_RefNannySetupContext("PyInit_acados_ocp_solver_pyx", 0);
     }
     #endif
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init acados_template.acados_ocp_solver_pyx");
+    PyErr_SetString(PyExc_ImportError, "init acados.acados_template.acados_ocp_solver_pyx");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
@@ -32504,7 +32504,8 @@ static const __Pyx_StringTabEntry __pyx_string_tab[] = {
   {__pyx_k__9, sizeof(__pyx_k__9), 0, 1, 0}, /* PyObject cname: __pyx_kp_u__9 */
   {__pyx_k_abc, sizeof(__pyx_k_abc), 0, 1, 1}, /* PyObject cname: __pyx_n_u_abc */
   {__pyx_k_acados_acados_ocp_solver_returne, sizeof(__pyx_k_acados_acados_ocp_solver_returne), 0, 1, 0}, /* PyObject cname: __pyx_kp_u_acados_acados_ocp_solver_returne */
-  {__pyx_k_acados_template_acados_ocp_solve, sizeof(__pyx_k_acados_template_acados_ocp_solve), 0, 1, 1}, /* PyObject cname: __pyx_n_u_acados_template_acados_ocp_solve */
+  {__pyx_k_acados_acados_template_acados_oc, sizeof(__pyx_k_acados_acados_template_acados_oc), 0, 1, 1}, /* PyObject cname: __pyx_n_u_acados_acados_template_acados_oc */
+  {__pyx_k_acados_acados_template_acados_oc_2, sizeof(__pyx_k_acados_acados_template_acados_oc_2), 0, 1, 0}, /* PyObject cname: __pyx_kp_u_acados_acados_template_acados_oc_2 */
   {__pyx_k_add_note, sizeof(__pyx_k_add_note), 0, 1, 0}, /* PyObject cname: __pyx_kp_u_add_note */
   {__pyx_k_allocate_buffer, sizeof(__pyx_k_allocate_buffer), 0, 1, 1}, /* PyObject cname: __pyx_n_u_allocate_buffer */
   {__pyx_k_alpha, sizeof(__pyx_k_alpha), 0, 1, 1}, /* PyObject cname: __pyx_n_u_alpha */
@@ -32746,7 +32747,6 @@ static const __Pyx_StringTabEntry __pyx_string_tab[] = {
   {__pyx_k_t, sizeof(__pyx_k_t), 0, 1, 1}, /* PyObject cname: __pyx_n_u_t */
   {__pyx_k_t_2, sizeof(__pyx_k_t_2), 0, 1, 1}, /* PyObject cname: __pyx_n_u_t_2 */
   {__pyx_k_test, sizeof(__pyx_k_test), 0, 1, 1}, /* PyObject cname: __pyx_n_u_test */
-  {__pyx_k_third_party_acados_acados_templa, sizeof(__pyx_k_third_party_acados_acados_templa), 0, 1, 0}, /* PyObject cname: __pyx_kp_u_third_party_acados_acados_templa */
   {__pyx_k_time_glob, sizeof(__pyx_k_time_glob), 0, 1, 1}, /* PyObject cname: __pyx_n_u_time_glob */
   {__pyx_k_time_lin, sizeof(__pyx_k_time_lin), 0, 1, 1}, /* PyObject cname: __pyx_n_u_time_lin */
   {__pyx_k_time_qp, sizeof(__pyx_k_time_qp), 0, 1, 1}, /* PyObject cname: __pyx_n_u_time_qp */
@@ -32833,7 +32833,7 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
  *     def suboffsets(self):
  *         if self.view.suboffsets == NULL:
  *             return (-1,) * self.view.ndim             # <<<<<<<<<<<<<<
- * 
+ *
  *         return tuple([suboffset for suboffset in self.view.suboffsets[:self.view.ndim]])
 */
   __pyx_mstate_global->__pyx_tuple[0] = PyTuple_New(1); if (unlikely(!__pyx_mstate_global->__pyx_tuple[0])) __PYX_ERR(1, 582, __pyx_L1_error)
@@ -32845,7 +32845,7 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
 
   /* "View.MemoryView":679
  *     tup = <tuple>index if isinstance(index, tuple) else (index,)
- * 
+ *
  *     result = [slice(None)] * ndim             # <<<<<<<<<<<<<<
  *     have_slices = False
  *     seen_ellipsis = False
@@ -32865,30 +32865,30 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[1]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[1]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":116
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":116
  *             raise Exception(f'acados acados_ocp_solver returned status {status}')
- * 
+ *
  *         u0 = self.get(0, "u")             # <<<<<<<<<<<<<<
  *         return u0
- * 
+ *
 */
   __pyx_mstate_global->__pyx_tuple[2] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_0, __pyx_mstate_global->__pyx_n_u_u); if (unlikely(!__pyx_mstate_global->__pyx_tuple[2])) __PYX_ERR(0, 116, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[2]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[2]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":332
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":332
  *             # append timestamp
  *             if os.path.isfile(filename):
  *                 filename = filename[:-5]             # <<<<<<<<<<<<<<
  *                 filename += datetime.utcnow().strftime('%Y-%m-%d-%H:%M:%S.%f') + '.json'
- * 
+ *
 */
   __pyx_mstate_global->__pyx_slice[1] = PySlice_New(Py_None, __pyx_mstate_global->__pyx_int_neg_5, Py_None); if (unlikely(!__pyx_mstate_global->__pyx_slice[1])) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_slice[1]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_slice[1]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":356
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":356
+ *
  *         # save
  *         with open(filename, 'w') as f:             # <<<<<<<<<<<<<<
  *             json.dump(solution, f, default=lambda x: x.tolist(), indent=4, sort_keys=True)
@@ -32898,7 +32898,7 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[3]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[3]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":441
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":441
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':
  *                 return full_stats[6, :]             # <<<<<<<<<<<<<<
@@ -32909,18 +32909,18 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[4]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[4]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":443
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":443
  *                 return full_stats[6, :]
  *             elif self.nlp_solver_type == 'SQP_RTI':
  *                 return full_stats[2, :]             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif field_ == 'alpha':
 */
   __pyx_mstate_global->__pyx_tuple[5] = PyTuple_Pack(2, __pyx_mstate_global->__pyx_int_2, __pyx_mstate_global->__pyx_slice[0]); if (unlikely(!__pyx_mstate_global->__pyx_tuple[5])) __PYX_ERR(0, 443, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[5]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[5]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":448
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":448
  *             full_stats = self.get_stats('statistics')
  *             if self.nlp_solver_type == 'SQP':
  *                 return full_stats[7, :]             # <<<<<<<<<<<<<<
@@ -32931,8 +32931,8 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[6]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[6]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":465
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":465
+ *
  *     def __get_stat_double(self, field):
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.zeros((1,))             # <<<<<<<<<<<<<<
  *         acados_solver_common.ocp_nlp_get(self.nlp_config, self.nlp_solver, field, <void *> out.data)
@@ -32942,31 +32942,31 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[7]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[7]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":500
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":500
+ *
  *         # create output array
  *         cdef cnp.ndarray[cnp.float64_t, ndim=1] out = np.ascontiguousarray(np.zeros((4,), dtype=np.float64))             # <<<<<<<<<<<<<<
  *         cdef double double_value
- * 
+ *
 */
   __pyx_mstate_global->__pyx_tuple[8] = PyTuple_Pack(1, __pyx_mstate_global->__pyx_int_4); if (unlikely(!__pyx_mstate_global->__pyx_tuple[8])) __PYX_ERR(0, 500, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[8]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[8]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":610
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":610
  *         if len(value_shape) == 1:
  *             value_shape = (value_shape[0], 0)
  *             value = np.asfortranarray(value_[None,:])             # <<<<<<<<<<<<<<
- * 
+ *
  *         elif len(value_shape) == 2:
 */
   __pyx_mstate_global->__pyx_tuple[9] = PyTuple_Pack(2, Py_None, __pyx_mstate_global->__pyx_slice[0]); if (unlikely(!__pyx_mstate_global->__pyx_tuple[9])) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[9]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[9]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":232
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":232
+ *
+ *
  *     def eval_param_sens(self, index, stage=0, field="ex"):             # <<<<<<<<<<<<<<
  *         """
  *         Calculate the sensitivity of the curent solution with respect to the initial state component of index
@@ -32975,9 +32975,9 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[10]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[10]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":318
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":318
+ *
+ *
  *     def store_iterate(self, filename='', overwrite=False):             # <<<<<<<<<<<<<<
  *         """
  *         Stores the current iterate of the ocp solver in a json file.
@@ -32986,9 +32986,9 @@ static int __Pyx_InitCachedConstants(__pyx_mstatetype *__pyx_mstate) {
   __Pyx_GOTREF(__pyx_mstate_global->__pyx_tuple[11]);
   __Pyx_GIVEREF(__pyx_mstate_global->__pyx_tuple[11]);
 
-  /* "acados_template/acados_ocp_solver_pyx.pyx":491
- * 
- * 
+  /* "acados/acados_template/acados_ocp_solver_pyx.pyx":491
+ *
+ *
  *     def get_residuals(self, recompute=False):             # <<<<<<<<<<<<<<
  *         """
  *         Returns an array of the form [res_stat, res_eq, res_ineq, res_comp].
@@ -33054,127 +33054,127 @@ static int __Pyx_CreateCodeObjects(__pyx_mstatetype *__pyx_mstate) {
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 357, 8};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_x};
-    __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_lambda, __pyx_k_QgQ, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_lambda, __pyx_k_QgQ, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 88, 109};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self};
-    __pyx_mstate_global->__pyx_codeobj_tab[1] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_get_pointers_solver, __pyx_k_A_9_a_9_a_Qd_7q_A_9_a_5Qd_Qd, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[1])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[1] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_get_pointers_solver, __pyx_k_A_9_a_9_a_Qd_7q_A_9_a_5Qd_Qd, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[1])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 4, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 102, 94};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_x0_bar, __pyx_mstate->__pyx_n_u_status, __pyx_mstate->__pyx_n_u_u0};
-    __pyx_mstate_global->__pyx_codeobj_tab[2] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_solve_for_x0, __pyx_k_A_D_G1_D_G1_V1_7_Q_Cq_1B_K1_T_Qc, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[2])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[2] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_solve_for_x0, __pyx_k_A_D_G1_D_G1_V1_7_Q_Cq_1B_K1_T_Qc, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[2])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 120, 15};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self};
-    __pyx_mstate_global->__pyx_codeobj_tab[3] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_solve, __pyx_k_A_M_a, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[3])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[3] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_solve, __pyx_k_A_M_a, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[3])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 127, 20};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_reset_qp_solver_mem};
-    __pyx_mstate_global->__pyx_codeobj_tab[4] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_reset, __pyx_k_M_j, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[4])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[4] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_reset, __pyx_k_M_j, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[4])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 4, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 134, 55};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_data, __pyx_mstate->__pyx_n_u_data_len, __pyx_mstate->__pyx_n_u_data_2};
-    __pyx_mstate_global->__pyx_codeobj_tab[5] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_custom_update, __pyx_k_A_3aq_7r9K1GSYY_1_j_4wVW, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[5])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[5] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_custom_update, __pyx_k_A_3aq_7r9K1GSYY_1_j_4wVW, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[5])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 147, 14};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_new_time_steps};
-    __pyx_mstate_global->__pyx_codeobj_tab[6] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_set_new_time_steps, __pyx_k_A, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[6])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[6] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_set_new_time_steps, __pyx_k_A, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[6])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 198, 17};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_qp_solver_cond_N};
-    __pyx_mstate_global->__pyx_codeobj_tab[7] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_update_qp_solver_cond_N, __pyx_k_8, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[7])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[7] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_update_qp_solver_cond_N, __pyx_k_8, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[7])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 6, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 232, 159};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_index, __pyx_mstate->__pyx_n_u_stage, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_field_2, __pyx_mstate->__pyx_n_u_nx};
-    __pyx_mstate_global->__pyx_codeobj_tab[8] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_eval_param_sens, __pyx_k_9A_gQa_4z_1A_EQd_W_ffjjttwwz_B, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[8])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[8] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_eval_param_sens, __pyx_k_9A_gQa_4z_1A_EQd_W_ffjjttwwz_B, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[8])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {3, 0, 0, 7, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 257, 210};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_stage, __pyx_mstate->__pyx_n_u_field_2, __pyx_mstate->__pyx_n_u_out_fields, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_dims, __pyx_mstate->__pyx_n_u_out};
-    __pyx_mstate_global->__pyx_codeobj_tab[9] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_get, __pyx_k_A_Qe5_V7_vQ_gQa_7_1A_6axq_6_2S_b, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[9])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[9] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_get, __pyx_k_A_Qe5_V7_vQ_gQa_7_1A_6axq_6_2S_b, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[9])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 300, 13};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self};
-    __pyx_mstate_global->__pyx_codeobj_tab[10] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_print_statistics, __pyx_k_A_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[10])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[10] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_print_statistics, __pyx_k_A_Q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[10])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {3, 0, 0, 10, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 318, 426};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_filename, __pyx_mstate->__pyx_n_u_overwrite, __pyx_mstate->__pyx_n_u_json, __pyx_mstate->__pyx_n_u_solution, __pyx_mstate->__pyx_n_u_lN, __pyx_mstate->__pyx_n_u_i, __pyx_mstate->__pyx_n_u_i_string, __pyx_mstate->__pyx_n_u_k, __pyx_mstate->__pyx_n_u_f};
-    __pyx_mstate_global->__pyx_codeobj_tab[11] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_store_iterate, __pyx_k_1_9Cq_L_b_A_4q_r_gQa_83a_HG2Ya7, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[11])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[11] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_store_iterate, __pyx_k_1_9Cq_L_b_A_4q_r_gQa_83a_HG2Ya7, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[11])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 8, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 361, 129};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_filename, __pyx_mstate->__pyx_n_u_json, __pyx_mstate->__pyx_n_u_f, __pyx_mstate->__pyx_n_u_solution, __pyx_mstate->__pyx_n_u_key, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_stage};
-    __pyx_mstate_global->__pyx_codeobj_tab[12] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_load_iterate, __pyx_k_A_4r_gQa_1_J_BeSXXYY_bbffg_HA_t5, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[12])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[12] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_load_iterate, __pyx_k_A_4r_gQa_1_J_BeSXXYY_bbffg_HA_t5, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[12])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 10, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 377, 332};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_field_2, __pyx_mstate->__pyx_n_u_double_fields, __pyx_mstate->__pyx_n_u_fields, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_sqp_iter, __pyx_mstate->__pyx_n_u_stat_m, __pyx_mstate->__pyx_n_u_stat_n, __pyx_mstate->__pyx_n_u_min_size, __pyx_mstate->__pyx_n_u_full_stats};
-    __pyx_mstate_global->__pyx_codeobj_tab[13] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_get_stats, __pyx_k_A2_r_gQa_7_l_A_4_aq_Cq_4_Cq_t_Qa, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[13])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[13] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_get_stats, __pyx_k_A2_r_gQa_7_l_A_4_aq_Cq_4_Cq_t_Qa, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[13])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 3, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 459, 31};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_out};
-    __pyx_mstate_global->__pyx_codeobj_tab[14] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_get_stat_int, __pyx_k_A_m7R_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[14])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[14] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_get_stat_int, __pyx_k_A_m7R_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[14])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 3, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 464, 42};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_out};
-    __pyx_mstate_global->__pyx_codeobj_tab[15] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_get_stat_double, __pyx_k_A_6b_b_m7R___q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[15])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[15] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_get_stat_double, __pyx_k_A_6b_b_m7R___q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[15])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 5, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 469, 64};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_n, __pyx_mstate->__pyx_n_u_m, __pyx_mstate->__pyx_n_u_out_mat};
-    __pyx_mstate_global->__pyx_codeobj_tab[16] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_get_stat_matrix, __pyx_k_A_NarQWWYY_aaggiij_m7R_bbc_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[16])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[16] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_get_stat_matrix, __pyx_k_A_NarQWWYY_aaggiij_m7R_bbc_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[16])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 475, 53};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_out};
-    __pyx_mstate_global->__pyx_codeobj_tab[17] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_get_cost, __pyx_k_A_at_ITQR_m_Ybbccd_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[17])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[17] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_get_cost, __pyx_k_A_at_ITQR_m_Ybbccd_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[17])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {2, 0, 0, 5, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 491, 256};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_recompute, __pyx_mstate->__pyx_n_u_out, __pyx_mstate->__pyx_n_u_double_value, __pyx_mstate->__pyx_n_u_field};
-    __pyx_mstate_global->__pyx_codeobj_tab[18] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_get_residuals, __pyx_k_a_4_S_7q_M_YVZZ_7b8J_2VSUUZZ_bb, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[18])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[18] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_get_residuals, __pyx_k_a_4_S_7q_M_YVZZ_7b8J_2VSUUZZ_bb, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[18])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 12, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 523, 494};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_stage, __pyx_mstate->__pyx_n_u_field_2, __pyx_mstate->__pyx_n_u_value, __pyx_mstate->__pyx_n_u_cost_fields, __pyx_mstate->__pyx_n_u_constraints_fields, __pyx_mstate->__pyx_n_u_out_fields, __pyx_mstate->__pyx_n_u_mem_fields, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_value_2, __pyx_mstate->__pyx_n_u_dims, __pyx_mstate->__pyx_n_u_msg};
-    __pyx_mstate_global->__pyx_codeobj_tab[19] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_set, __pyx_k_A_4z_A_1B_Fd_1_ay_QgWG1_Qe5_gU_v, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[19])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[19] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_set, __pyx_k_A_4z_A_1B_Fd_1_ay_QgWG1_Qe5_gU_v, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[19])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 8, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 589, 250};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_stage, __pyx_mstate->__pyx_n_u_field_2, __pyx_mstate->__pyx_n_u_value, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_dims, __pyx_mstate->__pyx_n_u_value_2, __pyx_mstate->__pyx_n_u_value_shape};
-    __pyx_mstate_global->__pyx_codeobj_tab[20] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_cost_set, __pyx_k_A_4z_A_1B_K4qPQ_gQa_AT_4z_q_AQ_f, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[20])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[20] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_cost_set, __pyx_k_A_4z_A_1B_K4qPQ_gQa_AT_4z_q_AQ_f, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[20])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 8, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 624, 236};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_stage, __pyx_mstate->__pyx_n_u_field_2, __pyx_mstate->__pyx_n_u_value, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_dims, __pyx_mstate->__pyx_n_u_value_2, __pyx_mstate->__pyx_n_u_value_shape};
-    __pyx_mstate_global->__pyx_codeobj_tab[21] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_constraints_set, __pyx_k_A_4z_A_1B_RRVVWWX_gQa_C_4q_4z_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[21])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[21] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_constraints_set, __pyx_k_A_4z_A_1B_RRVVWWX_gQa_C_4q_4z_q, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[21])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {3, 0, 0, 6, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 662, 125};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_stage, __pyx_mstate->__pyx_n_u_field_2, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_dims, __pyx_mstate->__pyx_n_u_out};
-    __pyx_mstate_global->__pyx_codeobj_tab[22] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_get_from_qp_in, __pyx_k_A_gQa_4_DP___iippwwxx_7b_b_AT_Qe, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[22])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[22] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_get_from_qp_in, __pyx_k_A_gQa_4_DP___iippwwxx_7b_b_AT_Qe, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[22])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {3, 0, 0, 10, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 684, 459};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_field_2, __pyx_mstate->__pyx_n_u_value, __pyx_mstate->__pyx_n_u_int_fields, __pyx_mstate->__pyx_n_u_double_fields, __pyx_mstate->__pyx_n_u_string_fields, __pyx_mstate->__pyx_n_u_field, __pyx_mstate->__pyx_n_u_int_value, __pyx_mstate->__pyx_n_u_double_value, __pyx_mstate->__pyx_n_u_string_value};
-    __pyx_mstate_global->__pyx_codeobj_tab[23] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_options_set, __pyx_k_A_Qo_2IIZ_A_A_S_S_l_l_m_l_Vccvvw, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[23])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[23] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_options_set, __pyx_k_A_Qo_2IIZ_A_A_S_S_l_l_m_l_Vccvvw, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[23])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {4, 0, 0, 7, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 747, 193};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_self, __pyx_mstate->__pyx_n_u_stage, __pyx_mstate->__pyx_n_u_idx_values, __pyx_mstate->__pyx_n_u_param_values, __pyx_mstate->__pyx_n_u_value_2, __pyx_mstate->__pyx_n_u_idx, __pyx_mstate->__pyx_n_u_n_update};
-    __pyx_mstate_global->__pyx_codeobj_tab[24] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_third_party_acados_acados_templa, __pyx_mstate->__pyx_n_u_set_params_sparse, __pyx_k_A_4z_1_1A_as_S_3a_m6_MSPQQR_9_LA, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[24])) goto bad;
+    __pyx_mstate_global->__pyx_codeobj_tab[24] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_acados_acados_template_acados_oc_2, __pyx_mstate->__pyx_n_u_set_params_sparse, __pyx_k_A_4z_1_1A_as_S_3a_m6_MSPQQR_9_LA, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[24])) goto bad;
   }
   {
     const __Pyx_PyCode_New_function_description descr = {1, 0, 0, 1, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 1, 9};
@@ -38948,8 +38948,8 @@ static PyObject* __Pyx_Unpacked___Pyx_PyLong_AddObjC(PyObject *op1, PyObject *op
         return PyLong_FromLongLong(llx);
 #endif
     return __Pyx_Fallback___Pyx_PyLong_AddObjC(op1, op2, inplace);
-    
-    
+
+
 }
 #endif
 static PyObject* __Pyx_Float___Pyx_PyLong_AddObjC(PyObject *float_val, long intval, int zerodivision_check) {
@@ -38957,7 +38957,7 @@ static PyObject* __Pyx_Float___Pyx_PyLong_AddObjC(PyObject *float_val, long intv
     const long b = intval;
     double a = __Pyx_PyFloat_AS_DOUBLE(float_val);
         double result;
-        
+
         result = ((double)a) + (double)b;
         return PyFloat_FromDouble(result);
 }

@@ -85,6 +85,7 @@ class CarrotServ:
     self.nRoadLimitSpeed = 30
     self.nRoadLimitSpeed_last = 30
     self.nRoadLimitSpeed_counter = 0
+    self.road_limit_received = False
 
     self.active_carrot = 0     ## 1: CarrotMan Active, 2: sdi active , 3: speed decel active, 4: section active, 5: bump active, 6: speed limit active
     self.active_count = 0
@@ -805,7 +806,6 @@ class CarrotServ:
       delta_dist = 0
       CS = None
 
-    road_speed_limit_changed = True if self.nRoadLimitSpeed != self.nRoadLimitSpeed_last else False
     self.nRoadLimitSpeed_last = self.nRoadLimitSpeed
     #self.bearing = self.nPosAngle #self._update_gps(v_ego, sm)
     self.bearing = self._update_gps(v_ego, sm, gps_service)
@@ -916,34 +916,16 @@ class CarrotServ:
       speed_n_sources.append((route_speed, "route"))
       #speed_n_sources.append((self.calculate_current_speed(dist, speed * self.mapTurnSpeedFactor, 0, 1.2), "route"))
 
-    # modelTurnSpeed 字段在 cereal 里不存在（sunnypilot 最新版），用模型转向预测替代
-    # 用 modelV2 的 lateral plan 估计转向速度，或直接用 route_speed 兜底
-    try:
-      model_turn_speed = max(getattr(sm['modelV2'].meta, 'modelTurnSpeed', 0), self.autoCurveSpeedLowerLimit)
-    except Exception:
-      model_turn_speed = self.autoCurveSpeedLowerLimit
-    if model_turn_speed < 200 and abs(vturn_speed) < 120:
-      speed_n_sources.append((model_turn_speed, "model"))
-
+    # This schema has no meta.modelTurnSpeed. vturn above is the supported
+    # model-derived path; a missing field must not invent a minimum-speed turn.
+    constraint_speed, constraint_source = min(
+      (candidate for candidate in speed_n_sources if candidate[1] != "road"),
+      key=lambda candidate: candidate[0],
+    )
     desired_speed, source = min(speed_n_sources, key=lambda x: x[0])
-
-    if CS is not None:
-      if source != self.source_last:
-        self.gas_override_speed = 0
-        self.gas_pressed_state = CS.gasPressed
-      if CS.vEgo < 0.1 or desired_speed > 150 or source in ["cam", "section", "police"] or CS.brakePressed or road_speed_limit_changed:
-        self.gas_override_speed = 0
-      elif CS.gasPressed and not self.gas_pressed_state:
-        self.gas_override_speed = max(v_ego_kph, self.gas_override_speed)
-      else:
-        self.gas_pressed_state = False
-      self.source_last = source
-
-      if desired_speed < self.gas_override_speed:
-        source = "gas"
-        desired_speed = self.gas_override_speed
-
-      self.debugText += f"route={route_speed:.1f}"#f"desired={desired_speed:.1f},{source},g={self.gas_override_speed:.0f}"
+    # plannerd alone owns the pedal-release override. Never raise this
+    # aggregate, otherwise a driver override can bypass a curve/speed bump.
+    self.debugText += f"route={route_speed:.1f}"
 
     left_spd_sec = 100
     left_tbt_sec = 100
@@ -985,6 +967,7 @@ class CarrotServ:
     msg.valid = True
     msg.carrotMan.activeCarrot = self.active_carrot
     msg.carrotMan.nRoadLimitSpeed = int(self.nRoadLimitSpeed)
+    msg.carrotMan.roadLimitValid = bool(self.road_limit_received and self.active_count > 0)
     msg.carrotMan.remote = remote_ip
     msg.carrotMan.xSpdType = int(self.xSpdType)
     msg.carrotMan.xSpdLimit = int(self.xSpdLimit)
@@ -999,6 +982,9 @@ class CarrotServ:
     msg.carrotMan.szTBTMainText = self.szTBTMainText
     msg.carrotMan.desiredSpeed = int(desired_speed)
     msg.carrotMan.desiredSource = source
+    msg.carrotMan.constraintSpeed = float(constraint_speed)
+    msg.carrotMan.constraintSource = constraint_source
+    msg.carrotMan.constraintValid = bool(0 < constraint_speed <= 150)
     msg.carrotMan.carrotCmdIndex = int(self.carrotCmdIndex)
     msg.carrotMan.carrotCmd = self.carrotCmd
     msg.carrotMan.carrotArg = self.carrotArg
@@ -1176,6 +1162,8 @@ class CarrotServ:
           self.nRoadLimitSpeed = nRoadLimitSpeed
       else:
         self.nRoadLimitSpeed_counter = 0
+      if int(json.get("nRoadLimitSpeed", 0)) > 0 and 0 < nRoadLimitSpeed <= 150 and self.nRoadLimitSpeed == nRoadLimitSpeed:
+        self.road_limit_received = True
 
       ### SDI
       self.nSdiType = _i(json.get("nSdiType"), -1)

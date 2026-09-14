@@ -516,6 +516,12 @@ struct CarrotMan @0xc2243c65e0340384 {
   szSdiDescr @26 : Text;
   naviPaths @27 : Text;
   leftSec @28 : Int32;
+  # Independent of road limit and driver override; km/h. Valid=false for
+  # older producers or when no curve/navigation constraint is available.
+  constraintSpeed @29 : Float32;
+  constraintSource @30 : Text;
+  constraintValid @31 : Bool;
+  roadLimitValid @32 : Bool; # received road value, not the legacy default 30
 }
 
 struct AmapNavi @0x9ccdc8676701b412 {

@@ -24,18 +24,18 @@ CRUISE_BUTTON_TIMER = {ButtonType.decelCruise: 0, ButtonType.accelCruise: 0,
 V_CRUISE_MIN = 8
 V_CRUISE_MAX = 145
 V_CRUISE_UNSET = 255
-AUTO_SPEED_RAISE_INTERVAL_FRAMES = 100
+AUTO_SPEED_RAISE_STABLE_FRAMES = 50
+AUTO_SPEED_RAISE_LIMIT_EPSILON_KPH = 0.5
 
 
 def auto_speed_limit_raise(current_kph: float, road_limit_kph: float, ratio: float,
-                           lead_status: bool, lead_distance_m: float, lead_speed_kph: float,
                            inputs_valid: bool = True) -> float:
-  """Return one conservative 5 km/h upward step, matching Carrot's lead-gated behavior."""
+  """Raise only the driver ceiling; the planner still owns the road target."""
   ceiling_kph = min(V_CRUISE_MAX, road_limit_kph * ratio)
-  lead_is_pulling_away = lead_status and 0.0 < lead_distance_m < 60.0 and lead_speed_kph + 5.0 > current_kph
-  if not inputs_valid or ratio <= 0.0 or road_limit_kph <= 0.0 or not lead_is_pulling_away or current_kph >= ceiling_kph:
+  if (not inputs_valid or not np.isfinite(ceiling_kph) or ratio <= 0.0 or
+      road_limit_kph <= 0.0 or current_kph >= ceiling_kph):
     return current_kph
-  return float(min(current_kph + 5.0, ceiling_kph))
+  return float(ceiling_kph)
 
 
 def owns_cruise_set_speed(pcm_cruise: bool, pcm_cruise_speed: bool) -> bool:
@@ -76,6 +76,7 @@ class VCruiseHelperSP:
     self.prev_sla_state = SpeedLimitAssistState.disabled
     self.has_speed_limit = False
     self.current_speed_limit_valid = False
+    self.speed_limit_kph = 0.
     self.speed_limit_final_last = 0.
     self.speed_limit_final_last_kph = 0.
     self.speed_limit_final_kph = 0.
@@ -83,7 +84,10 @@ class VCruiseHelperSP:
     self.req_plus = False
     self.req_minus = False
     self.auto_speed_limit_ratio = 0.0
-    self.auto_speed_raise_frames = 0
+    self.auto_speed_raise_candidate_kph = None
+    self.auto_speed_raise_candidate_frames = 0
+    self.auto_speed_raise_stable_limit_kph = None
+    self.auto_speed_raise_pending = False
     self.auto_speed_raise_paused = False
     self.auto_speed_enabled_prev = False
 
@@ -91,45 +95,68 @@ class VCruiseHelperSP:
     self.custom_acc_enabled = self.params.get_bool("CustomAccIncrementsEnabled")
     self.short_increment = self.params.get("CustomAccShortPressIncrement", return_default=True)
     self.long_increment = self.params.get("CustomAccLongPressIncrement", return_default=True)
+    previous_ratio = self.auto_speed_limit_ratio
     self.auto_speed_limit_ratio = max(0.0, self.carrot_params.get_float("AutoSpeedUptoRoadSpeedLimit") * 0.01)
+    if (self.auto_speed_limit_ratio > previous_ratio and
+        self.auto_speed_raise_stable_limit_kph is not None and not self.auto_speed_raise_paused):
+      self.auto_speed_raise_pending = True
 
-  def update_auto_speed_limit_raise(self, CS: car.CarState, radar_state, enabled: bool, inputs_valid: bool = True) -> None:
-    """Optionally raise the driver's maximum toward the road limit.
+  def update_auto_speed_limit_raise(self, CS: car.CarState, enabled: bool, inputs_valid: bool = True) -> None:
+    """Raise the driver's maximum after a stable new road limit.
 
     This never lowers the set speed and never changes the planner's final
-    target directly. A manual minus/set press pauses it until a plus/resume
-    press or a fresh engagement.
+    target directly. A manual minus/set press suppresses the current road
+    limit until a higher stable limit or a plus/resume press arrives.
     """
     for be in CS.buttonEvents:
       if not be.pressed and be.type in (ButtonType.decelCruise, ButtonType.setCruise):
         self.auto_speed_raise_paused = True
+        self.auto_speed_raise_pending = False
       elif not be.pressed and be.type in (ButtonType.accelCruise, ButtonType.resumeCruise):
         self.auto_speed_raise_paused = False
+        if self.auto_speed_raise_stable_limit_kph is not None:
+          self.auto_speed_raise_pending = True
 
-    if enabled and not self.auto_speed_enabled_prev:
-      self.auto_speed_raise_paused = False
+    if enabled and not self.auto_speed_enabled_prev and not self.auto_speed_raise_paused:
+      self.auto_speed_raise_pending = self.auto_speed_raise_stable_limit_kph is not None
     self.auto_speed_enabled_prev = enabled
 
-    lead = radar_state.leadOne
+    if (not inputs_valid or not self.current_speed_limit_valid or
+        not np.isfinite(self.speed_limit_final_kph) or not np.isfinite(self.speed_limit_kph)):
+      self.auto_speed_raise_candidate_kph = None
+      self.auto_speed_raise_candidate_frames = 0
+      return
+
+    # The auto-raised driver ceiling is based on the posted limit. A planning
+    # offset must not be multiplied again by the ceiling ratio.
+    road_limit_kph = self.speed_limit_kph
+    if (self.auto_speed_raise_candidate_kph is None or
+        abs(road_limit_kph - self.auto_speed_raise_candidate_kph) > AUTO_SPEED_RAISE_LIMIT_EPSILON_KPH):
+      self.auto_speed_raise_candidate_kph = road_limit_kph
+      self.auto_speed_raise_candidate_frames = 1
+    else:
+      self.auto_speed_raise_candidate_frames += 1
+
+    if self.auto_speed_raise_candidate_frames == AUTO_SPEED_RAISE_STABLE_FRAMES:
+      previous_limit = self.auto_speed_raise_stable_limit_kph
+      self.auto_speed_raise_stable_limit_kph = road_limit_kph
+      if previous_limit is None or road_limit_kph > previous_limit + AUTO_SPEED_RAISE_LIMIT_EPSILON_KPH:
+        self.auto_speed_raise_paused = False
+        self.auto_speed_raise_pending = True
+
     owns_set_speed = owns_cruise_set_speed(self.CP.pcmCruise, self.CP_SP.pcmCruiseSpeed)
     eligible = (enabled and owns_set_speed and self.auto_speed_limit_ratio > 0.0 and
-                inputs_valid and self.current_speed_limit_valid and not self.auto_speed_raise_paused and not CS.brakePressed and
-                not CS.gasPressed and CS.vEgo > 5.0 and lead.status)
-    if not eligible:
-      self.auto_speed_raise_frames = 0
+                self.auto_speed_raise_pending and not self.auto_speed_raise_paused and
+                not CS.brakePressed and not CS.gasPressed and CS.vEgo > 5.0)
+    if not eligible or self.auto_speed_raise_stable_limit_kph is None:
       return
 
-    self.auto_speed_raise_frames += 1
-    if self.auto_speed_raise_frames < AUTO_SPEED_RAISE_INTERVAL_FRAMES:
-      return
-    self.auto_speed_raise_frames = 0
-
-    raised_kph = auto_speed_limit_raise(self.v_cruise_kph, self.speed_limit_final_kph,
-                                        self.auto_speed_limit_ratio, lead.status, lead.dRel,
-                                        lead.vLeadK * CV.MS_TO_KPH, inputs_valid)
+    raised_kph = auto_speed_limit_raise(self.v_cruise_kph, self.auto_speed_raise_stable_limit_kph,
+                                        self.auto_speed_limit_ratio, inputs_valid)
     if raised_kph > self.v_cruise_kph:
       self.v_cruise_kph = raised_kph
       self.v_cruise_cluster_kph = raised_kph
+    self.auto_speed_raise_pending = False
 
   def update_v_cruise_delta(self, long_press: bool, v_cruise_delta: float) -> tuple[bool, float]:
     if not self.custom_acc_enabled:
@@ -173,6 +200,7 @@ class VCruiseHelperSP:
     if not inputs_valid:
       self.has_speed_limit = False
       self.current_speed_limit_valid = False
+      self.speed_limit_kph = 0.
       self.speed_limit_final_last = 0.
       self.speed_limit_final_last_kph = 0.
       self.speed_limit_final_kph = 0.
@@ -184,6 +212,7 @@ class VCruiseHelperSP:
     resolver = LP_SP.speedLimit.resolver
     self.has_speed_limit = resolver.speedLimitValid or resolver.speedLimitLastValid
     self.current_speed_limit_valid = resolver.speedLimitValid
+    self.speed_limit_kph = resolver.speedLimit * CV.MS_TO_KPH
     self.speed_limit_final_last = LP_SP.speedLimit.resolver.speedLimitFinalLast
     self.speed_limit_final_last_kph = self.speed_limit_final_last * CV.MS_TO_KPH
     self.speed_limit_final_kph = LP_SP.speedLimit.resolver.speedLimitFinal * CV.MS_TO_KPH

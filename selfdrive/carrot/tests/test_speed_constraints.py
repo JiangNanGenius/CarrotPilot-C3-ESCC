@@ -5,7 +5,9 @@ import pytest
 from openpilot.common.constants import CV
 from openpilot.selfdrive.carrot.carrot_speed_limit import CarrotSpeedLimit, CarrotSpeedLimitSource, classify_carrot_desired_source
 from openpilot.selfdrive.carrot.carrot_traffic_stop import CarrotTrafficStop
-from openpilot.selfdrive.carrot.carrot_functions import CarrotPlanner, traffic_stop_target_speed
+from openpilot.selfdrive.carrot.carrot_functions import (
+  CarrotPlanner, TrafficState, advance_latched_stop_distance, traffic_state_from_evidence, traffic_stop_target_speed,
+)
 
 
 class FakeParams:
@@ -69,6 +71,22 @@ def test_disabled_speed_limit_clears_active_source():
   assert limiter.active_source == CarrotSpeedLimitSource.none
 
 
+def test_independent_curve_survives_driver_road_override():
+  sm = FakeSubMaster(desired_speed=40, desired_source='road')
+  sm['carrotMan'].constraintSpeed = 32
+  sm['carrotMan'].constraintSource = 'route'
+  sm['carrotMan'].constraintValid = True
+  limiter = CarrotSpeedLimit(FakeParams())
+  assert limiter.update(sm, 60 / 3.6, independent_constraints=True) == pytest.approx(32 / 3.6)
+  assert limiter.active_source == CarrotSpeedLimitSource.mapCurve
+
+
+@pytest.mark.parametrize('source', ['gas', 'road', 'driver'])
+def test_legacy_aggregate_cannot_reset_planner_road_override(source):
+  sm = FakeSubMaster(desired_speed=40, desired_source=source)
+  assert CarrotSpeedLimit(FakeParams()).update(sm, 60 / 3.6, independent_constraints=True) == pytest.approx(60 / 3.6)
+
+
 @pytest.mark.parametrize("health", [{"alive": False}, {"valid": False}])
 def test_stale_nav_speed_and_red_light_fail_closed(health):
   sm = FakeSubMaster(desired_speed=40, traffic_state=1, **health)
@@ -124,4 +142,30 @@ def test_traffic_stop_safety_buffer_only_lowers_allowed_speed():
 def test_traffic_stop_short_distance_is_not_artificially_extended():
   # A close 3 m detection with a 2 m margin has only 1 m of usable travel;
   # the old max(stop_dist, 5) path incorrectly treated it as 4 m after margin.
-  assert traffic_stop_target_speed(3.0, 2.4, 2.0) == pytest.approx((2.0 * 2.4 * 1.0) ** 0.5)
+  assert traffic_stop_target_speed(3.0, 2.4, 2.0) == pytest.approx((1.5**2 + 2.0) ** 0.5 - 1.5)
+
+
+def test_recorded_close_red_stop_requires_deceleration_not_acceleration():
+  # Route 3e, t=256.06: v=15.67 kph, stopPoint=10.19 m, old target=21.41 kph.
+  assert traffic_stop_target_speed(10.19, 2.4, 2.0) * 3.6 < 15.67
+
+
+def test_red_requires_two_model_frames_but_green_keeps_existing_confirmation():
+  assert traffic_state_from_evidence(1, 0) == TrafficState.off
+  assert traffic_state_from_evidence(2, 0) == TrafficState.red
+  assert traffic_state_from_evidence(0, 5) == TrafficState.green
+
+
+def test_committed_stop_survives_dropout_and_only_moves_closer():
+  assert advance_latched_stop_distance(40.0, None, False, 1.0) == 39.0
+  assert advance_latched_stop_distance(40.0, 50.0, True, 1.0) == 39.0
+  assert advance_latched_stop_distance(40.0, 30.0, True, 1.0) == 30.0
+
+
+@pytest.mark.parametrize('distance', [0.0, 2.0, 3.0, 10.0, 40.0, 100.0])
+def test_envelope_respects_available_braking_and_delay(distance):
+  speed = traffic_stop_target_speed(distance, 2.4, 2.0, 1.5)
+  assert speed >= 0
+  assert speed * 1.5 + speed**2 / 2 <= max(0, distance - 2) + 1e-8
+  assert traffic_stop_target_speed(distance, 2.4, 3.0, 1.5) <= speed
+  assert traffic_stop_target_speed(distance, 2.4, 2.0, 2.0) <= speed

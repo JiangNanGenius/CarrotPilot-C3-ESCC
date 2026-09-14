@@ -1,121 +1,56 @@
-"""
-Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
-
-This file is part of GeniusPilot and is licensed under the MIT License.
-See the LICENSE.md file in the root directory for more details.
-"""
+"""Persistent, fail-visible SCC badges. Pulsing means selected curve limiting."""
+import math
 import pyray as rl
 
-from openpilot.selfdrive.ui.onroad.hud_renderer import COLORS
+from openpilot.common.constants import CV
 from openpilot.selfdrive.ui.ui_state import ui_state
+from openpilot.selfdrive.ui.sunnypilot.onroad.curve_status import curve_status
+from openpilot.selfdrive.ui.sunnypilot.onroad.hud_layout import CRUISE_PANEL_WIDTH, LEFT_MARGIN, TOP_MARGIN
 from openpilot.system.ui.lib.application import gui_app, FontWeight
-from openpilot.system.ui.lib.multilang import tr
 from openpilot.system.ui.lib.text_measure import measure_text_cached
 from openpilot.system.ui.sunnypilot.lib.utils import AlertFadeAnimator
 from openpilot.system.ui.widgets import Widget
 
 
 class SmartCruiseControlRenderer(Widget):
-  _VISION_PREVIEW_ENTER = 1.0
-  _VISION_PREVIEW_EXIT = 0.85
-
   def __init__(self):
     super().__init__()
-    self.vision_enabled = False
-    self.vision_active = False
-    self.vision_approaching = False
-    self.map_enabled = False
-    self.map_active = False
-    self.long_override = False
-
-    self._vision_fade = AlertFadeAnimator(gui_app.target_fps)
-    self._map_fade = AlertFadeAnimator(gui_app.target_fps)
-
     self.font = gui_app.font(FontWeight.BOLD)
+    self._fades = [AlertFadeAnimator(gui_app.target_fps, duration_on=0.15) for _ in range(2)]
+    self._states = [('数据失效', 'unknown', False)] * 2
 
   def update(self):
     sm = ui_state.sm
-    if sm.updated["longitudinalPlanSP"]:
-      lp_sp = sm["longitudinalPlanSP"]
-      vision = lp_sp.smartCruiseControl.vision
-      map_ = lp_sp.smartCruiseControl.map
-
-      self.vision_enabled = vision.enabled
-      self.vision_active = vision.active
-      predicted_lat_accel = vision.maxPredictedLateralAccel
-      if self.vision_active or not self.vision_enabled:
-        self.vision_approaching = False
-      elif self.vision_approaching:
-        self.vision_approaching = predicted_lat_accel >= self._VISION_PREVIEW_EXIT
-      else:
-        self.vision_approaching = predicted_lat_accel >= self._VISION_PREVIEW_ENTER
-      self.map_enabled = map_.enabled
-      self.map_active = map_.active
-
-    if sm.updated["carControl"]:
-      self.long_override = sm["carControl"].cruiseControl.override
-
-    self._vision_fade.update(self.vision_active)
-    self._map_fade.update(self.map_active)
-
-  def _draw_icon(self, rect_center_x, rect_height, x_offset, y_offset, name, alpha=1.0, approaching=False):
-    text = name
-    font_size = 44
-    padding_v = 8
-    box_width = 210
-
-    sz = measure_text_cached(self.font, text, font_size)
-    box_height = int(sz.y + padding_v * 2)
-
-    if self.long_override:
-      color = COLORS.OVERRIDE
-      box_color = rl.Color(color.r, color.g, color.b, int(alpha * 255))
-    elif approaching:
-      box_color = rl.Color(255, 190, 32, int(alpha * 255))
-    else:
-      box_color = rl.Color(0, 255, 0, int(alpha * 255))
-
-    text_color = rl.Color(0, 0, 0, int(alpha * 255))
-
-    screen_y = rect_height / 4 + y_offset
-
-    box_x = rect_center_x + x_offset - box_width / 2
-    box_y = screen_y - box_height / 2
-
-    # Draw rounded background box
-    if alpha > 0.01:
-      rl.draw_rectangle_rounded(rl.Rectangle(box_x, box_y, box_width, box_height), 0.2, 10, box_color)
-
-      # Draw text centered in the box (black color for contrast against bright green/grey)
-      text_pos_x = box_x + (box_width - sz.x) / 2
-      text_pos_y = box_y + (box_height - sz.y) / 2
-
-      rl.draw_text_ex(self.font, text, rl.Vector2(text_pos_x, text_pos_y), font_size, 0, text_color)
+    fresh = all(sm.alive[k] and sm.valid[k] for k in ('longitudinalPlanSP', 'longitudinalPlan', 'carControl'))
+    plan = sm['longitudinalPlanSP']
+    control = sm['carControl']
+    source = str(sm['longitudinalPlan'].cruiseTargetSource)
+    speed_conv = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
+    for i, (curve, source_name) in enumerate(((plan.smartCruiseControl.vision, 'visionCurve'),
+                                             (plan.smartCruiseControl.map, 'mapCurve'))):
+      predicted = curve.maxPredictedLateralAccel if i == 0 else 0.0
+      self._states[i] = curve_status(
+        fresh=fresh, enabled=curve.enabled, active=curve.active,
+        approaching=math.isfinite(predicted) and predicted >= 1.0,
+        override=control.cruiseControl.override, selected=source == source_name,
+        target=curve.vTarget * speed_conv,
+      )
+      self._fades[i].update(self._states[i][2])
 
   def _render(self, rect: rl.Rectangle):
-    x_offset = -260
-    y1_offset = -40
-    y2_offset = -100
-
-    orders = [y1_offset, y2_offset]
-    y_scc_v = 0
-    y_scc_m = 0
-    idx = 0
-
-    if self.vision_enabled:
-      y_scc_v = orders[idx]
-      idx += 1
-
-    if self.map_enabled:
-      y_scc_m = orders[idx]
-      idx += 1
-
-    if self.vision_enabled:
-      alpha = self._vision_fade.alpha if self.vision_active else 1.0
-      label = tr("CURVE") if self.vision_approaching else "SCC-V"
-      self._draw_icon(rect.x + rect.width / 2, rect.height, x_offset, y_scc_v, label, alpha,
-                      approaching=self.vision_approaching)
-
-    if self.map_enabled:
-      alpha = self._map_fade.alpha if self.map_active else 1.0
-      self._draw_icon(rect.x + rect.width / 2, rect.height, x_offset, y_scc_m, "SCC-M", alpha)
+    # Beside the left rail; leave current speed, alerts and ESCC clear.
+    x = rect.x + LEFT_MARGIN + CRUISE_PANEL_WIDTH + 16
+    colors = {'idle': rl.Color(55, 62, 70, 235), 'unknown': rl.Color(65, 65, 65, 235),
+              'preview': rl.Color(235, 179, 45, 245), 'active': rl.Color(60, 210, 120, 245)}
+    for i, name in enumerate(('SCC-V  视觉', 'SCC-M  地图')):
+      label, kind, pulse = self._states[i]
+      y = rect.y + TOP_MARGIN + i * 88
+      color = colors[kind]
+      # Never blink completely out: status remains readable during the pulse.
+      alpha = 0.55 + 0.45 * self._fades[i].alpha if pulse else 1.0
+      bg = rl.Color(color.r, color.g, color.b, int(color.a * alpha))
+      fg = rl.BLACK if kind in ('preview', 'active') else rl.WHITE
+      rl.draw_rectangle_rounded(rl.Rectangle(x, y, 270, 78), 0.15, 8, bg)
+      for text, size, dy in ((name, 30, 6), (label, 28, 42)):
+        width = measure_text_cached(self.font, text, size).x
+        rl.draw_text_ex(self.font, text, rl.Vector2(x + (270-width)/2, y+dy), size, 0, fg)

@@ -20,7 +20,7 @@ from openpilot.system.ui.widgets.network import NavButton
 from openpilot.system.ui.widgets.scroller_tici import Scroller
 
 SPEED_LIMIT_MODE_BUTTONS = [tr("Off"), tr("Info"), tr("Warning"), tr("Assist")]
-SPEED_LIMIT_OFFSET_TYPE_BUTTONS = [tr("None"), tr("Fixed"), tr("%")]
+SPEED_LIMIT_OFFSET_TYPE_BUTTONS = ["关闭", "固定", "百分比", "分段"]
 
 SPEED_LIMIT_MODE_DESCRIPTIONS = [
   tr("Off: Disables the Speed Limit functions."),
@@ -33,6 +33,7 @@ SPEED_LIMIT_OFFSET_DESCRIPTIONS = [
   tr("None: No Offset"),
   tr("Fixed: Adds a fixed offset [Speed Limit + Offset]"),
   tr("Percent: Adds a percent offset [Speed Limit + (Offset % Speed Limit)]"),
+  "分段：根据道路限速选择低、中、高速段的独立固定偏移。",
 ]
 
 
@@ -74,7 +75,7 @@ class SpeedLimitSettingsLayout(Widget):
       description="",
       buttons=SPEED_LIMIT_OFFSET_TYPE_BUTTONS,
       param="SpeedLimitOffsetType",
-      button_width=450,
+      button_width=320,
     )
 
     self._speed_limit_value_offset = option_item_sp(
@@ -86,13 +87,43 @@ class SpeedLimitSettingsLayout(Widget):
       label_callback=self._get_offset_label,
     )
 
+    self._segmented_offset_low = option_item_sp(
+      title=lambda: self._get_segment_title("low"),
+      param="SpeedLimitSegmentedOffsetLow",
+      min_value=-5,
+      max_value=3,
+      description="低速段默认 0，避免无意超过识别到的道路限速。",
+      label_callback=self._get_fixed_offset_label,
+    )
+
+    self._segmented_offset_medium = option_item_sp(
+      title=lambda: self._get_segment_title("medium"),
+      param="SpeedLimitSegmentedOffsetMedium",
+      min_value=-5,
+      max_value=5,
+      description="中速段默认 +1；规划目标仍受最高定速、弯道、前车和红灯约束。",
+      label_callback=self._get_fixed_offset_label,
+    )
+
+    self._segmented_offset_high = option_item_sp(
+      title=lambda: self._get_segment_title("high"),
+      param="SpeedLimitSegmentedOffsetHigh",
+      min_value=-5,
+      max_value=10,
+      description="高速段默认 +2；这是规划偏移，不代表道路执法容差。",
+      label_callback=self._get_fixed_offset_label,
+    )
+
     items = [
       self._speed_limit_mode,
       LineSeparatorSP(40),
       self._source_button,
       LineSeparatorSP(40),
       self._speed_limit_offset_type,
-      self._speed_limit_value_offset
+      self._speed_limit_value_offset,
+      self._segmented_offset_low,
+      self._segmented_offset_medium,
+      self._segmented_offset_high,
     ]
     return items
 
@@ -119,6 +150,17 @@ class SpeedLimitSettingsLayout(Widget):
     elif offset_type == int(SpeedLimitOffsetType.fixed):
       return f"{value} {unit}"
     return str(value)
+
+  @staticmethod
+  def _get_fixed_offset_label(value):
+    unit = tr("km/h") if ui_state.is_metric else tr("mph")
+    return f"{int(value):+d} {unit}"
+
+  @staticmethod
+  def _get_segment_title(segment):
+    if ui_state.is_metric:
+      return {"low": "低速段（60 km/h 及以下）", "medium": "中速段（70 到 80 km/h）", "high": "高速段（90 km/h 及以上）"}[segment]
+    return {"low": "低速段（40 mph 及以下）", "medium": "中速段（45 到 50 mph）", "high": "高速段（55 mph 及以上）"}[segment]
 
   def _update_state(self):
     super()._update_state()
@@ -150,8 +192,12 @@ class SpeedLimitSettingsLayout(Widget):
     else:
       self._speed_limit_mode.action_item.set_enabled_buttons(None)
 
-    offset_type = ui_state.params.get("SpeedLimitOffsetType", return_default=True)
-    self._speed_limit_value_offset.set_visible(offset_type != int(SpeedLimitOffsetType.off))
+    offset_type = int(ui_state.params.get("SpeedLimitOffsetType", return_default=True))
+    segmented = offset_type == int(SpeedLimitOffsetType.segmented)
+    self._speed_limit_value_offset.set_visible(offset_type in (int(SpeedLimitOffsetType.fixed), int(SpeedLimitOffsetType.percentage)))
+    self._segmented_offset_low.set_visible(segmented)
+    self._segmented_offset_medium.set_visible(segmented)
+    self._segmented_offset_high.set_visible(segmented)
 
   def _render(self, rect):
     if self._current_panel == PanelType.POLICY:

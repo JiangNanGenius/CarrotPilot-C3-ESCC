@@ -9,6 +9,7 @@ from cereal import messaging, custom
 from opendbc.car import structs
 from openpilot.common.constants import CV
 from openpilot.selfdrive.car.cruise import V_CRUISE_MAX
+from openpilot.selfdrive.controls.lib.cruise_target_policy import CruiseTargetPolicy
 from openpilot.sunnypilot.selfdrive.controls.lib.dec.dec import DynamicExperimentalController
 from openpilot.sunnypilot.selfdrive.controls.lib.e2e_alerts_helper import E2EAlertsHelper
 from openpilot.sunnypilot.selfdrive.controls.lib.smart_cruise_control.smart_cruise_control import SmartCruiseControl
@@ -24,7 +25,6 @@ LongitudinalPlanSource = custom.LongitudinalPlanSP.LongitudinalPlanSource
 class LongitudinalPlannerSP:
   def __init__(self, CP: structs.CarParams, CP_SP: structs.CarParamsSP, mpc):
     self.events_sp = EventsSP()
-    self.resolver = SpeedLimitResolver()
     self.dec = DynamicExperimentalController(CP, mpc)
     self.scc = SmartCruiseControl()
     self.resolver = SpeedLimitResolver()
@@ -35,6 +35,10 @@ class LongitudinalPlannerSP:
 
     self.output_v_target = 0.
     self.output_a_target = 0.
+    self.cruise_policy = CruiseTargetPolicy()
+    self.policy_enabled = False
+    self.policy_road_target = None
+    self.policy_navigation_limit = False
 
   def is_e2e(self, sm: messaging.SubMaster) -> bool:
     experimental_mode = sm['selfdriveState'].experimentalMode
@@ -62,12 +66,33 @@ class LongitudinalPlannerSP:
     self.sla.update(long_enabled, long_override, v_ego, a_ego, v_cruise_cluster, self.resolver.speed_limit,
                     self.resolver.speed_limit_final_last, has_speed_limit, self.resolver.distance, self.events_sp)
 
+    # The Carrot planning mode treats +/- as a ceiling, not SLA confirmation.
+    # Native Sunny behavior stays intact when the user disables this mode.
+    self.policy_enabled = self.carrot_speed_limit.enabled
+    self.policy_navigation_limit = False
+    self.policy_road_target = self.resolver.speed_limit_final if self.resolver.speed_limit_valid else None
+    if self.policy_road_target is None and sm.alive['carrotMan'] and sm.valid['carrotMan']:
+      nav = sm['carrotMan']
+      if nav.roadLimitValid and nav.activeCarrot > 1 and 0 < nav.nRoadLimitSpeed <= 150:
+        self.policy_road_target = nav.nRoadLimitSpeed * CV.KPH_TO_MS
+        self.policy_navigation_limit = True
+    policy_target = self.cruise_policy.update(
+      ceiling=v_cruise, road_limit=self.policy_road_target,
+      speed=CS.vEgoCluster if self.speed_reference.reference == 1 else CS.vEgo,
+      gas=CS.gasPressed, brake=CS.brakePressed,
+      # longActive drops during normal accelerator override; enabled retains
+      # the longitudinal session and drops on cancel/disengagement.
+      engaged=self.policy_enabled and long_enabled,
+      standstill=CS.standstill or CS.vEgo < 0.1,
+    )
+
     targets = {
-      LongitudinalPlanSource.cruise: (v_cruise, a_ego),
+      LongitudinalPlanSource.cruise: (policy_target if self.policy_enabled else v_cruise, a_ego),
       LongitudinalPlanSource.sccVision: (self.scc.vision.output_v_target, self.scc.vision.output_a_target),
       LongitudinalPlanSource.sccMap: (self.scc.map.output_v_target, self.scc.map.output_a_target),
-      LongitudinalPlanSource.speedLimitAssist: (self.sla.output_v_target, self.sla.output_a_target),
     }
+    if not self.policy_enabled:
+      targets[LongitudinalPlanSource.speedLimitAssist] = (self.sla.output_v_target, self.sla.output_a_target)
 
     self.source = min(targets, key=lambda k: targets[k][0])
     self.output_v_target, self.output_a_target = targets[self.source]

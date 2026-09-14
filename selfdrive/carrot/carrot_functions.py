@@ -44,13 +44,41 @@ A_CRUISE_MAX_BP_CARROT = [0., 10 * CV.KPH_TO_MS, 40 * CV.KPH_TO_MS, 60 * CV.KPH_
 # conservative. The original controller already reserved 1 m in its v_soft
 # calculation; the additional 1 m addresses the reported close stopping.
 TRAFFIC_STOP_SAFETY_BUFFER_M = 2.0
+TRAFFIC_STOP_CONFIRM_TIME = 0.1
 
 
 def traffic_stop_target_speed(stop_distance_m: float, comfort_brake: float,
-                              safety_buffer_m: float = TRAFFIC_STOP_SAFETY_BUFFER_M) -> float:
-  """Return the kinematic speed ceiling for a buffered traffic-light stop."""
+                              safety_buffer_m: float = TRAFFIC_STOP_SAFETY_BUFFER_M,
+                              response_time: float = 1.5) -> float:
+  """Speed ceiling for the cruise channel, NOT an unconstrained braking model.
+
+  That channel is limited to -1.2 m/s² and jerk-limited. Budget 1.0 m/s²,
+  reserve actuator + response time, then solve d = v*t + v²/(2*b).
+  This does not change brake limits, traffic detection or release authority.
+  """
+  if not all(np.isfinite(x) for x in (stop_distance_m, comfort_brake, safety_buffer_m, response_time)):
+    return 0.0
   usable_distance_m = max(0.0, stop_distance_m - max(0.0, safety_buffer_m))
-  return float(np.sqrt(max(0.0, 2.0 * max(0.0, comfort_brake) * usable_distance_m)))
+  brake = min(1.0, max(0.0, comfort_brake))
+  delay_term = brake * max(0.0, response_time)
+  return float(max(0.0, np.sqrt(delay_term**2 + 2.0 * brake * usable_distance_m) - delay_term))
+
+
+def advance_latched_stop_distance(current_distance_m: float, observed_distance_m: float | None,
+                                  red_confirmed: bool, distance_travelled_m: float) -> float:
+  """Advance a committed stop point without letting detector dropouts move it away."""
+  remaining = max(0.0, current_distance_m - max(0.0, distance_travelled_m))
+  if red_confirmed and observed_distance_m is not None and np.isfinite(observed_distance_m):
+    remaining = min(remaining, max(0.0, observed_distance_m))
+  return float(remaining)
+
+
+def traffic_state_from_evidence(stop_count: int, start_count: int) -> TrafficState:
+  if stop_count * DT_MDL >= TRAFFIC_STOP_CONFIRM_TIME:
+    return TrafficState.red
+  if start_count * DT_MDL > 0.2:
+    return TrafficState.green
+  return TrafficState.off
 
 
 class CarrotPlanner:
@@ -93,7 +121,8 @@ class CarrotPlanner:
     self.stopSignCount = 0
 
     self.stop_distance = 6.0
-    self.trafficStopDistanceAdjust = 2.5 #params.get_float("TrafficStopDistanceAdjust") / 100.
+    self.traffic_stop_buffer = TRAFFIC_STOP_SAFETY_BUFFER_M
+    self.traffic_response_time = 1.5
     self.comfortBrake = 2.4
     self.comfort_brake = self.comfortBrake
 
@@ -355,12 +384,7 @@ class CarrotPlanner:
     self.stopSignCount = self.stopSignCount + 1 if stopSign else 0
     self.startSignCount = self.startSignCount + 1 if startSign and not stopSign else 0
 
-    if self.stopSignCount * DT_MDL > 0.0:
-      self.trafficState = TrafficState.red
-    elif self.startSignCount * DT_MDL > 0.2:
-      self.trafficState = TrafficState.green
-    else:
-      self.trafficState = TrafficState.off
+    self.trafficState = traffic_state_from_evidence(self.stopSignCount, self.startSignCount)
 
   def _update_carrot_man(self, sm, v_ego_kph, v_cruise_kph):
     atc_active = False
@@ -439,6 +463,11 @@ class CarrotPlanner:
     carstate = sm['carState']
     radarstate = sm['radarState']
     model = sm['modelV2']
+    long_enabled = bool(sm['carControl'].enabled)
+
+    if not long_enabled and self.xState in [XState.e2eStop, XState.e2eStopped]:
+      self.xState = XState.e2eCruise
+      self.actual_stop_distance = 0.0
 
     # softHoldActive belonged to the source fork's extended CarState schema.
     # brakeHoldActive is the closest schema-backed signal in this tree; do
@@ -537,12 +566,11 @@ class CarrotPlanner:
           # 停车距离优化：高速时保持安全距离（0.7→0.85）
           self.trafficStopAdjustRatio = np.interp(v_ego_kph, [0, 100], [1.0, 0.85])
           stop_dist = stop_model_x_rl * np.interp(stop_model_x_rl, [0, 50], [1.0, self.trafficStopAdjustRatio])
-          # stop_dist is remaining travel distance. Never raise it to create a
-          # "buffer"; that permits a higher speed and moves the stop later.
-          # The physical safety margin is subtracted in traffic_stop_target_speed.
-          stop_dist = max(0.0, stop_dist)
-          # 修正记录逻辑：无论距离多少都记录
-          self.actual_stop_distance = stop_dist
+          # Once committed, an absent red classification must not erase or
+          # move the stop point farther away. A newly confirmed closer point
+          # may still make the target more conservative.
+          if self.trafficState == TrafficState.red:
+            self.actual_stop_distance = min(self.actual_stop_distance, max(0.0, stop_dist))
           stop_model_x = 0
           self.fakeCruiseDistance = 0 if self.actual_stop_distance > 10.0 else 10.0
           if v_ego < 0.3:
@@ -563,13 +591,14 @@ class CarrotPlanner:
       self.traffic_starting_count = max(0, self.traffic_starting_count - 1)
       if lead_detected:
         self.xState = XState.lead
-      elif self.trafficState == TrafficState.red and abs(carstate.steeringAngleDeg) < 30 and self.traffic_starting_count == 0:
+      elif (long_enabled and self.trafficState == TrafficState.red and abs(carstate.steeringAngleDeg) < 30 and
+            self.traffic_starting_count == 0):
         self.xState = XState.e2eStop
         self.actual_stop_distance = stop_model_x_rl
       else:
         self.xState = XState.e2eCruise
 
-    if self.trafficState in [TrafficState.off, TrafficState.green] or self.xState not in [XState.e2eStop, XState.e2eStopped]:
+    if self.xState not in [XState.e2eStop, XState.e2eStopped]:
       stop_model_x = 1000.0
 
     if self.user_stop_distance >= 0:
@@ -581,14 +610,18 @@ class CarrotPlanner:
       mode = 'blended' if self.xState in [XState.e2ePrepare] else 'acc'
 
     self.comfort_brake *= self.mySafeFactor
-    self.actual_stop_distance = max(0, self.actual_stop_distance - (v_ego * DT_MDL))
+    self.actual_stop_distance = advance_latched_stop_distance(
+      self.actual_stop_distance, stop_model_x_rl,
+      self.xState in [XState.e2eStop, XState.e2eStopped] and self.trafficState == TrafficState.red,
+      v_ego * DT_MDL,
+    )
 
     if stop_model_x == 1000.0: ##  e2eCruise, lead�ΰ��
       self.actual_stop_distance = 0.0
     elif self.actual_stop_distance > 0: ## e2eStop, e2eStopped�ΰ��..
       stop_model_x = 0.0
 
-    stopping_active = self.xState not in [XState.e2eStop, XState.e2eStopped]
+    stopping_active = self.xState in [XState.e2eStop, XState.e2eStopped]
     if not stopping_active:
       self._stop_x_rl = stop_model_x_raw
 
@@ -603,9 +636,8 @@ class CarrotPlanner:
     stop_dist =  stop_model_x + self.actual_stop_distance
     stop_dist = max(stop_dist, 0.0)
 
-    stopping_active = (self.xState in [XState.e2eStop, XState.e2eStopped])
     if stopping_active and stop_dist < 300.0:
-      v_soft = traffic_stop_target_speed(stop_dist, self.comfort_brake)
+      v_soft = traffic_stop_target_speed(stop_dist, self.comfort_brake, self.traffic_stop_buffer, self.traffic_response_time)
       v_cruise = min(v_cruise, v_soft)
 
     self.v_cruise = v_cruise

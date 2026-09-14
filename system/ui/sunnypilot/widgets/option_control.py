@@ -22,10 +22,10 @@ class OptionControlSP(ItemAction):
                on_value_changed: Callable[[int], None] | None = None,
                value_map: dict[int, int] | None = None,
                label_width: int = LABEL_WIDTH,
-               use_float_scaling: bool = False, label_callback: Callable[[int], str] | None = None):
+               use_float_scaling: bool = False, label_callback: Callable[[int], str] | None = None, params=None):
 
     super().__init__(enabled=enabled)
-    self.params = Params()
+    self.params = params if params is not None else Params()
     self.param_key = param
     self.min_value = min_value
     self.max_value = max_value

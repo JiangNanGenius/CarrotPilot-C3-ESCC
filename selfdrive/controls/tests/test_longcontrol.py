@@ -1,59 +1,35 @@
-from cereal import car, custom
+"""Exercise the current off/pid/stopping API, not the removed starting state."""
+import pytest
+from cereal import custom
+
 from openpilot.selfdrive.controls.lib.longcontrol import LongCtrlState, long_control_state_trans
 
 
+@pytest.mark.parametrize('current', [LongCtrlState.off, LongCtrlState.pid, LongCtrlState.stopping])
+def test_disengagement_always_exits(current):
+  cp = custom.CarParamsSP.new_message()
+  assert long_control_state_trans(cp, False, current, False, False, False) == LongCtrlState.off
 
 
-class TestLongControlStateTransition:
+@pytest.mark.parametrize('current', [LongCtrlState.off, LongCtrlState.stopping])
+@pytest.mark.parametrize('stop,brake,standstill', [(True, False, False), (False, True, False), (False, False, True)])
+def test_hold_conditions_prevent_start(current, stop, brake, standstill):
+  cp = custom.CarParamsSP.new_message()
+  assert long_control_state_trans(cp, True, current, stop, brake, standstill) == LongCtrlState.stopping
 
-  def test_stay_stopped(self):
-    CP = car.CarParams.new_message()
-    CP_SP = custom.CarParamsSP.new_message()
-    active = True
-    current_state = LongCtrlState.stopping
-    next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=0.1,
-                             should_stop=True, brake_pressed=False, cruise_standstill=False)
-    assert next_state == LongCtrlState.stopping
-    next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=0.1,
-                             should_stop=False, brake_pressed=True, cruise_standstill=False)
-    assert next_state == LongCtrlState.stopping
-    next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=0.1,
-                             should_stop=False, brake_pressed=False, cruise_standstill=True)
-    assert next_state == LongCtrlState.stopping
-    next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=1.0,
-                             should_stop=False, brake_pressed=False, cruise_standstill=False)
-    assert next_state == LongCtrlState.pid
-    active = False
-    next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=1.0,
-                             should_stop=False, brake_pressed=False, cruise_standstill=False)
-    assert next_state == LongCtrlState.off
 
-def test_engage():
-  CP = car.CarParams.new_message()
-  CP_SP = custom.CarParamsSP.new_message()
-  active = True
-  current_state = LongCtrlState.off
-  next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=0.1,
-                             should_stop=True, brake_pressed=False, cruise_standstill=False)
-  assert next_state == LongCtrlState.stopping
-  next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=0.1,
-                             should_stop=False, brake_pressed=True, cruise_standstill=False)
-  assert next_state == LongCtrlState.stopping
-  next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=0.1,
-                             should_stop=False, brake_pressed=False, cruise_standstill=True)
-  assert next_state == LongCtrlState.stopping
-  next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=0.1,
-                             should_stop=False, brake_pressed=False, cruise_standstill=False)
-  assert next_state == LongCtrlState.pid
+@pytest.mark.parametrize('current', [LongCtrlState.off, LongCtrlState.stopping])
+def test_clear_hold_enters_pid(current):
+  cp = custom.CarParamsSP.new_message()
+  assert long_control_state_trans(cp, True, current, False, False, False) == LongCtrlState.pid
 
-def test_starting():
-  CP = car.CarParams.new_message(startingState=True, vEgoStarting=0.5)
-  CP_SP = custom.CarParamsSP.new_message()
-  active = True
-  current_state = LongCtrlState.starting
-  next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=0.1,
-                             should_stop=False, brake_pressed=False, cruise_standstill=False)
-  assert next_state == LongCtrlState.starting
-  next_state = long_control_state_trans(CP, CP_SP, active, current_state, v_ego=1.0,
-                             should_stop=False, brake_pressed=False, cruise_standstill=False)
-  assert next_state == LongCtrlState.pid
+
+def test_stop_request_leaves_pid():
+  cp = custom.CarParamsSP.new_message()
+  assert long_control_state_trans(cp, True, LongCtrlState.pid, True, False, False) == LongCtrlState.stopping
+
+
+def test_gas_interceptor_only_ignores_cruise_standstill():
+  cp = custom.CarParamsSP.new_message(enableGasInterceptor=True)
+  assert long_control_state_trans(cp, True, LongCtrlState.stopping, False, False, True) == LongCtrlState.pid
+  assert long_control_state_trans(cp, True, LongCtrlState.stopping, False, True, True) == LongCtrlState.stopping

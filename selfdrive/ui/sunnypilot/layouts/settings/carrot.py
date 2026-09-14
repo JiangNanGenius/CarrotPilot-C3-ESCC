@@ -76,8 +76,8 @@ class CarrotLayout(Widget):
         button_width=260,
       ),
       self._toggle(
-        "CarrotSpeedLimitEnable", "Carrot 规划速度源",
-        "使用 Carrot 规划的道路限速、导航测速/减速带、车辆转发限速和弯道速度；Sunny Speed Limit 仍独立管理车辆与原生地图源。",
+        "CarrotSpeedLimitEnable", "道路限速来源",
+        "使用车辆识别或外部导航提供的有效限速，最高定速仅作为上限。新限速会清除油门临时目标；弯道、前车和红灯仍可减速。",
       ),
       self._selector(
         "AutoRoadSpeedLimitOffset", "道路限速偏移",

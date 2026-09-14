@@ -85,6 +85,7 @@ enum class AudibleAlert_878e32a6bc486e3f: uint16_t {
 };
 CAPNP_DECLARE_ENUM(AudibleAlert, 878e32a6bc486e3f);
 CAPNP_DECLARE_SCHEMA(aedffd8f31e7b55d);
+CAPNP_DECLARE_SCHEMA(8abb12161ac791ec);
 CAPNP_DECLARE_SCHEMA(d8cbae8ae9dfe286);
 CAPNP_DECLARE_SCHEMA(da834d53e62048b9);
 enum class DownloadStatus_da834d53e62048b9: uint16_t {
@@ -93,9 +94,11 @@ enum class DownloadStatus_da834d53e62048b9: uint16_t {
   DOWNLOADED,
   CACHED,
   FAILED,
+  CANCELLED,
 };
 CAPNP_DECLARE_ENUM(DownloadStatus, da834d53e62048b9);
 CAPNP_DECLARE_SCHEMA(a677b25114d64c73);
+CAPNP_DECLARE_SCHEMA(8d6e2aaaa9978a41);
 CAPNP_DECLARE_SCHEMA(e441ce74a64693d1);
 CAPNP_DECLARE_SCHEMA(e7c36e65fea112b1);
 CAPNP_DECLARE_SCHEMA(af23faeb2c26a5b2);
@@ -106,6 +109,7 @@ enum class Type_af23faeb2c26a5b2: uint16_t {
   POLICY,
   OFF_POLICY,
   ON_POLICY,
+  CHUNKED,
 };
 CAPNP_DECLARE_ENUM(Type, af23faeb2c26a5b2);
 CAPNP_DECLARE_SCHEMA(c99c128a7e247b05);
@@ -203,6 +207,7 @@ enum class EventName_b8007ed8a646b5e6: uint16_t {
   SPEED_LIMIT_CHANGED,
   SPEED_LIMIT_PENDING,
   E2E_CHIME,
+  LANE_CHANGE_ROAD_EDGE,
 };
 CAPNP_DECLARE_ENUM(EventName, b8007ed8a646b5e6);
 CAPNP_DECLARE_SCHEMA(80ae746ee2596b11);
@@ -320,7 +325,7 @@ struct SelfdriveStateSP {
 
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(81c2f05a394cf4af, 0, 2)
+    CAPNP_DECLARE_STRUCT_HEADER(81c2f05a394cf4af, 1, 2)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -333,10 +338,12 @@ struct ModelManagerSP {
   class Reader;
   class Builder;
   class Pipeline;
+  struct DownloadSummary;
   struct DownloadUri;
   typedef ::capnp::schemas::DownloadStatus_da834d53e62048b9 DownloadStatus;
 
   struct DownloadProgress;
+  struct Chunk;
   struct Artifact;
   struct Model;
   typedef ::capnp::schemas::Runner_c99c128a7e247b05 Runner;
@@ -345,7 +352,22 @@ struct ModelManagerSP {
   struct ModelBundle;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(aedffd8f31e7b55d, 0, 3)
+    CAPNP_DECLARE_STRUCT_HEADER(aedffd8f31e7b55d, 0, 4)
+    #if !CAPNP_LITE
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
+    #endif  // !CAPNP_LITE
+  };
+};
+
+struct ModelManagerSP::DownloadSummary {
+  DownloadSummary() = delete;
+
+  class Reader;
+  class Builder;
+  class Pipeline;
+
+  struct _capnpPrivate {
+    CAPNP_DECLARE_STRUCT_HEADER(8abb12161ac791ec, 2, 3)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -382,6 +404,21 @@ struct ModelManagerSP::DownloadProgress {
   };
 };
 
+struct ModelManagerSP::Chunk {
+  Chunk() = delete;
+
+  class Reader;
+  class Builder;
+  class Pipeline;
+
+  struct _capnpPrivate {
+    CAPNP_DECLARE_STRUCT_HEADER(8d6e2aaaa9978a41, 0, 2)
+    #if !CAPNP_LITE
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
+    #endif  // !CAPNP_LITE
+  };
+};
+
 struct ModelManagerSP::Artifact {
   Artifact() = delete;
 
@@ -390,7 +427,7 @@ struct ModelManagerSP::Artifact {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(e441ce74a64693d1, 0, 3)
+    CAPNP_DECLARE_STRUCT_HEADER(e441ce74a64693d1, 0, 4)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -839,30 +876,30 @@ struct CustomReserved10 {
   };
 };
 
-struct CustomReserved11 {
-  CustomReserved11() = delete;
+struct CarrotMan {
+  CarrotMan() = delete;
 
   class Reader;
   class Builder;
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(c2243c65e0340384, 0, 0)
+    CAPNP_DECLARE_STRUCT_HEADER(c2243c65e0340384, 11, 10)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
   };
 };
 
-struct CustomReserved12 {
-  CustomReserved12() = delete;
+struct AmapNavi {
+  AmapNavi() = delete;
 
   class Reader;
   class Builder;
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(9ccdc8676701b412, 0, 0)
+    CAPNP_DECLARE_STRUCT_HEADER(9ccdc8676701b412, 3, 0)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -1327,6 +1364,10 @@ public:
   inline bool hasIntelligentCruiseButtonManagement() const;
   inline  ::cereal::IntelligentCruiseButtonManagement::Reader getIntelligentCruiseButtonManagement() const;
 
+  inline  ::uint16_t getButtonsPressed() const;
+
+  inline  ::uint16_t getButtonsReleaseToggle() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -1368,6 +1409,12 @@ public:
   inline  ::cereal::IntelligentCruiseButtonManagement::Builder initIntelligentCruiseButtonManagement();
   inline void adoptIntelligentCruiseButtonManagement(::capnp::Orphan< ::cereal::IntelligentCruiseButtonManagement>&& value);
   inline ::capnp::Orphan< ::cereal::IntelligentCruiseButtonManagement> disownIntelligentCruiseButtonManagement();
+
+  inline  ::uint16_t getButtonsPressed();
+  inline void setButtonsPressed( ::uint16_t value);
+
+  inline  ::uint16_t getButtonsReleaseToggle();
+  inline void setButtonsReleaseToggle( ::uint16_t value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -1423,6 +1470,9 @@ public:
   inline bool hasAvailableBundles() const;
   inline  ::capnp::List< ::cereal::ModelManagerSP::ModelBundle,  ::capnp::Kind::STRUCT>::Reader getAvailableBundles() const;
 
+  inline bool hasDownloadSummary() const;
+  inline  ::cereal::ModelManagerSP::DownloadSummary::Reader getDownloadSummary() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -1472,6 +1522,13 @@ public:
   inline void adoptAvailableBundles(::capnp::Orphan< ::capnp::List< ::cereal::ModelManagerSP::ModelBundle,  ::capnp::Kind::STRUCT>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::cereal::ModelManagerSP::ModelBundle,  ::capnp::Kind::STRUCT>> disownAvailableBundles();
 
+  inline bool hasDownloadSummary();
+  inline  ::cereal::ModelManagerSP::DownloadSummary::Builder getDownloadSummary();
+  inline void setDownloadSummary( ::cereal::ModelManagerSP::DownloadSummary::Reader value);
+  inline  ::cereal::ModelManagerSP::DownloadSummary::Builder initDownloadSummary();
+  inline void adoptDownloadSummary(::capnp::Orphan< ::cereal::ModelManagerSP::DownloadSummary>&& value);
+  inline ::capnp::Orphan< ::cereal::ModelManagerSP::DownloadSummary> disownDownloadSummary();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -1492,6 +1549,133 @@ public:
 
   inline  ::cereal::ModelManagerSP::ModelBundle::Pipeline getActiveBundle();
   inline  ::cereal::ModelManagerSP::ModelBundle::Pipeline getSelectedBundle();
+  inline  ::cereal::ModelManagerSP::DownloadSummary::Pipeline getDownloadSummary();
+private:
+  ::capnp::AnyPointer::Pipeline _typeless;
+  friend class ::capnp::PipelineHook;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+};
+#endif  // !CAPNP_LITE
+
+class ModelManagerSP::DownloadSummary::Reader {
+public:
+  typedef DownloadSummary Reads;
+
+  Reader() = default;
+  inline explicit Reader(::capnp::_::StructReader base): _reader(base) {}
+
+  inline ::capnp::MessageSize totalSize() const {
+    return _reader.totalSize().asPublic();
+  }
+
+#if !CAPNP_LITE
+  inline ::kj::StringTree toString() const {
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand());
+  }
+#endif  // !CAPNP_LITE
+
+  inline  ::cereal::ModelManagerSP::DownloadStatus getStatus() const;
+
+  inline bool hasBundleName() const;
+  inline  ::capnp::Text::Reader getBundleName() const;
+
+  inline bool hasCurrentFile() const;
+  inline  ::capnp::Text::Reader getCurrentFile() const;
+
+  inline float getProgress() const;
+
+  inline  ::uint32_t getEta() const;
+
+  inline  ::uint16_t getCompletedFiles() const;
+
+  inline  ::uint16_t getTotalFiles() const;
+
+  inline bool hasError() const;
+  inline  ::capnp::Text::Reader getError() const;
+
+private:
+  ::capnp::_::StructReader _reader;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::_::PointerHelpers;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::List;
+  friend class ::capnp::MessageBuilder;
+  friend class ::capnp::Orphanage;
+};
+
+class ModelManagerSP::DownloadSummary::Builder {
+public:
+  typedef DownloadSummary Builds;
+
+  Builder() = delete;  // Deleted to discourage incorrect usage.
+                       // You can explicitly initialize to nullptr instead.
+  inline Builder(decltype(nullptr)) {}
+  inline explicit Builder(::capnp::_::StructBuilder base): _builder(base) {}
+  inline operator Reader() const { return Reader(_builder.asReader()); }
+  inline Reader asReader() const { return *this; }
+
+  inline ::capnp::MessageSize totalSize() const { return asReader().totalSize(); }
+#if !CAPNP_LITE
+  inline ::kj::StringTree toString() const { return asReader().toString(); }
+#endif  // !CAPNP_LITE
+
+  inline  ::cereal::ModelManagerSP::DownloadStatus getStatus();
+  inline void setStatus( ::cereal::ModelManagerSP::DownloadStatus value);
+
+  inline bool hasBundleName();
+  inline  ::capnp::Text::Builder getBundleName();
+  inline void setBundleName( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initBundleName(unsigned int size);
+  inline void adoptBundleName(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownBundleName();
+
+  inline bool hasCurrentFile();
+  inline  ::capnp::Text::Builder getCurrentFile();
+  inline void setCurrentFile( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initCurrentFile(unsigned int size);
+  inline void adoptCurrentFile(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownCurrentFile();
+
+  inline float getProgress();
+  inline void setProgress(float value);
+
+  inline  ::uint32_t getEta();
+  inline void setEta( ::uint32_t value);
+
+  inline  ::uint16_t getCompletedFiles();
+  inline void setCompletedFiles( ::uint16_t value);
+
+  inline  ::uint16_t getTotalFiles();
+  inline void setTotalFiles( ::uint16_t value);
+
+  inline bool hasError();
+  inline  ::capnp::Text::Builder getError();
+  inline void setError( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initError(unsigned int size);
+  inline void adoptError(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownError();
+
+private:
+  ::capnp::_::StructBuilder _builder;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+  friend class ::capnp::Orphanage;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::_::PointerHelpers;
+};
+
+#if !CAPNP_LITE
+class ModelManagerSP::DownloadSummary::Pipeline {
+public:
+  typedef DownloadSummary Pipelines;
+
+  inline Pipeline(decltype(nullptr)): _typeless(nullptr) {}
+  inline explicit Pipeline(::capnp::AnyPointer::Pipeline&& typeless)
+      : _typeless(kj::mv(typeless)) {}
+
 private:
   ::capnp::AnyPointer::Pipeline _typeless;
   friend class ::capnp::PipelineHook;
@@ -1677,6 +1861,97 @@ private:
 };
 #endif  // !CAPNP_LITE
 
+class ModelManagerSP::Chunk::Reader {
+public:
+  typedef Chunk Reads;
+
+  Reader() = default;
+  inline explicit Reader(::capnp::_::StructReader base): _reader(base) {}
+
+  inline ::capnp::MessageSize totalSize() const {
+    return _reader.totalSize().asPublic();
+  }
+
+#if !CAPNP_LITE
+  inline ::kj::StringTree toString() const {
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand());
+  }
+#endif  // !CAPNP_LITE
+
+  inline bool hasFileName() const;
+  inline  ::capnp::Text::Reader getFileName() const;
+
+  inline bool hasSha256() const;
+  inline  ::capnp::Text::Reader getSha256() const;
+
+private:
+  ::capnp::_::StructReader _reader;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::_::PointerHelpers;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::List;
+  friend class ::capnp::MessageBuilder;
+  friend class ::capnp::Orphanage;
+};
+
+class ModelManagerSP::Chunk::Builder {
+public:
+  typedef Chunk Builds;
+
+  Builder() = delete;  // Deleted to discourage incorrect usage.
+                       // You can explicitly initialize to nullptr instead.
+  inline Builder(decltype(nullptr)) {}
+  inline explicit Builder(::capnp::_::StructBuilder base): _builder(base) {}
+  inline operator Reader() const { return Reader(_builder.asReader()); }
+  inline Reader asReader() const { return *this; }
+
+  inline ::capnp::MessageSize totalSize() const { return asReader().totalSize(); }
+#if !CAPNP_LITE
+  inline ::kj::StringTree toString() const { return asReader().toString(); }
+#endif  // !CAPNP_LITE
+
+  inline bool hasFileName();
+  inline  ::capnp::Text::Builder getFileName();
+  inline void setFileName( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initFileName(unsigned int size);
+  inline void adoptFileName(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownFileName();
+
+  inline bool hasSha256();
+  inline  ::capnp::Text::Builder getSha256();
+  inline void setSha256( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initSha256(unsigned int size);
+  inline void adoptSha256(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownSha256();
+
+private:
+  ::capnp::_::StructBuilder _builder;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+  friend class ::capnp::Orphanage;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::_::PointerHelpers;
+};
+
+#if !CAPNP_LITE
+class ModelManagerSP::Chunk::Pipeline {
+public:
+  typedef Chunk Pipelines;
+
+  inline Pipeline(decltype(nullptr)): _typeless(nullptr) {}
+  inline explicit Pipeline(::capnp::AnyPointer::Pipeline&& typeless)
+      : _typeless(kj::mv(typeless)) {}
+
+private:
+  ::capnp::AnyPointer::Pipeline _typeless;
+  friend class ::capnp::PipelineHook;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+};
+#endif  // !CAPNP_LITE
+
 class ModelManagerSP::Artifact::Reader {
 public:
   typedef Artifact Reads;
@@ -1702,6 +1977,9 @@ public:
 
   inline bool hasDownloadProgress() const;
   inline  ::cereal::ModelManagerSP::DownloadProgress::Reader getDownloadProgress() const;
+
+  inline bool hasChunks() const;
+  inline  ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>::Reader getChunks() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -1751,6 +2029,13 @@ public:
   inline  ::cereal::ModelManagerSP::DownloadProgress::Builder initDownloadProgress();
   inline void adoptDownloadProgress(::capnp::Orphan< ::cereal::ModelManagerSP::DownloadProgress>&& value);
   inline ::capnp::Orphan< ::cereal::ModelManagerSP::DownloadProgress> disownDownloadProgress();
+
+  inline bool hasChunks();
+  inline  ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>::Builder getChunks();
+  inline void setChunks( ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>::Reader value);
+  inline  ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>::Builder initChunks(unsigned int size);
+  inline void adoptChunks(::capnp::Orphan< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>> disownChunks();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -4428,6 +4713,10 @@ public:
 
   inline  ::cereal::ModelDataV2SP::TurnDirection getLaneTurnDirection() const;
 
+  inline bool getLeftLaneChangeEdgeBlock() const;
+
+  inline bool getRightLaneChangeEdgeBlock() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -4458,6 +4747,12 @@ public:
 
   inline  ::cereal::ModelDataV2SP::TurnDirection getLaneTurnDirection();
   inline void setLaneTurnDirection( ::cereal::ModelDataV2SP::TurnDirection value);
+
+  inline bool getLeftLaneChangeEdgeBlock();
+  inline void setLeftLaneChangeEdgeBlock(bool value);
+
+  inline bool getRightLaneChangeEdgeBlock();
+  inline void setRightLaneChangeEdgeBlock(bool value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -4556,9 +4851,9 @@ private:
 };
 #endif  // !CAPNP_LITE
 
-class CustomReserved11::Reader {
+class CarrotMan::Reader {
 public:
-  typedef CustomReserved11 Reads;
+  typedef CarrotMan Reads;
 
   Reader() = default;
   inline explicit Reader(::capnp::_::StructReader base): _reader(base) {}
@@ -4573,6 +4868,82 @@ public:
   }
 #endif  // !CAPNP_LITE
 
+  inline  ::int32_t getActiveCarrot() const;
+
+  inline  ::int32_t getNRoadLimitSpeed() const;
+
+  inline bool hasRemote() const;
+  inline  ::capnp::Text::Reader getRemote() const;
+
+  inline  ::int32_t getXSpdType() const;
+
+  inline  ::int32_t getXSpdLimit() const;
+
+  inline  ::int32_t getXSpdDist() const;
+
+  inline  ::int32_t getXSpdCountDown() const;
+
+  inline  ::int32_t getXTurnInfo() const;
+
+  inline  ::int32_t getXDistToTurn() const;
+
+  inline  ::int32_t getXTurnCountDown() const;
+
+  inline bool hasAtcType() const;
+  inline  ::capnp::Text::Reader getAtcType() const;
+
+  inline  ::int32_t getVTurnSpeed() const;
+
+  inline bool hasSzPosRoadName() const;
+  inline  ::capnp::Text::Reader getSzPosRoadName() const;
+
+  inline bool hasSzTBTMainText() const;
+  inline  ::capnp::Text::Reader getSzTBTMainText() const;
+
+  inline  ::int32_t getDesiredSpeed() const;
+
+  inline bool hasDesiredSource() const;
+  inline  ::capnp::Text::Reader getDesiredSource() const;
+
+  inline  ::int32_t getCarrotCmdIndex() const;
+
+  inline bool hasCarrotCmd() const;
+  inline  ::capnp::Text::Reader getCarrotCmd() const;
+
+  inline bool hasCarrotArg() const;
+  inline  ::capnp::Text::Reader getCarrotArg() const;
+
+  inline float getXPosLat() const;
+
+  inline float getXPosLon() const;
+
+  inline float getXPosAngle() const;
+
+  inline float getXPosSpeed() const;
+
+  inline  ::int32_t getTrafficState() const;
+
+  inline  ::int32_t getNGoPosDist() const;
+
+  inline  ::int32_t getNGoPosTime() const;
+
+  inline bool hasSzSdiDescr() const;
+  inline  ::capnp::Text::Reader getSzSdiDescr() const;
+
+  inline bool hasNaviPaths() const;
+  inline  ::capnp::Text::Reader getNaviPaths() const;
+
+  inline  ::int32_t getLeftSec() const;
+
+  inline float getConstraintSpeed() const;
+
+  inline bool hasConstraintSource() const;
+  inline  ::capnp::Text::Reader getConstraintSource() const;
+
+  inline bool getConstraintValid() const;
+
+  inline bool getRoadLimitValid() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -4585,9 +4956,9 @@ private:
   friend class ::capnp::Orphanage;
 };
 
-class CustomReserved11::Builder {
+class CarrotMan::Builder {
 public:
-  typedef CustomReserved11 Builds;
+  typedef CarrotMan Builds;
 
   Builder() = delete;  // Deleted to discourage incorrect usage.
                        // You can explicitly initialize to nullptr instead.
@@ -4601,6 +4972,145 @@ public:
   inline ::kj::StringTree toString() const { return asReader().toString(); }
 #endif  // !CAPNP_LITE
 
+  inline  ::int32_t getActiveCarrot();
+  inline void setActiveCarrot( ::int32_t value);
+
+  inline  ::int32_t getNRoadLimitSpeed();
+  inline void setNRoadLimitSpeed( ::int32_t value);
+
+  inline bool hasRemote();
+  inline  ::capnp::Text::Builder getRemote();
+  inline void setRemote( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initRemote(unsigned int size);
+  inline void adoptRemote(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownRemote();
+
+  inline  ::int32_t getXSpdType();
+  inline void setXSpdType( ::int32_t value);
+
+  inline  ::int32_t getXSpdLimit();
+  inline void setXSpdLimit( ::int32_t value);
+
+  inline  ::int32_t getXSpdDist();
+  inline void setXSpdDist( ::int32_t value);
+
+  inline  ::int32_t getXSpdCountDown();
+  inline void setXSpdCountDown( ::int32_t value);
+
+  inline  ::int32_t getXTurnInfo();
+  inline void setXTurnInfo( ::int32_t value);
+
+  inline  ::int32_t getXDistToTurn();
+  inline void setXDistToTurn( ::int32_t value);
+
+  inline  ::int32_t getXTurnCountDown();
+  inline void setXTurnCountDown( ::int32_t value);
+
+  inline bool hasAtcType();
+  inline  ::capnp::Text::Builder getAtcType();
+  inline void setAtcType( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initAtcType(unsigned int size);
+  inline void adoptAtcType(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownAtcType();
+
+  inline  ::int32_t getVTurnSpeed();
+  inline void setVTurnSpeed( ::int32_t value);
+
+  inline bool hasSzPosRoadName();
+  inline  ::capnp::Text::Builder getSzPosRoadName();
+  inline void setSzPosRoadName( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initSzPosRoadName(unsigned int size);
+  inline void adoptSzPosRoadName(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownSzPosRoadName();
+
+  inline bool hasSzTBTMainText();
+  inline  ::capnp::Text::Builder getSzTBTMainText();
+  inline void setSzTBTMainText( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initSzTBTMainText(unsigned int size);
+  inline void adoptSzTBTMainText(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownSzTBTMainText();
+
+  inline  ::int32_t getDesiredSpeed();
+  inline void setDesiredSpeed( ::int32_t value);
+
+  inline bool hasDesiredSource();
+  inline  ::capnp::Text::Builder getDesiredSource();
+  inline void setDesiredSource( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initDesiredSource(unsigned int size);
+  inline void adoptDesiredSource(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownDesiredSource();
+
+  inline  ::int32_t getCarrotCmdIndex();
+  inline void setCarrotCmdIndex( ::int32_t value);
+
+  inline bool hasCarrotCmd();
+  inline  ::capnp::Text::Builder getCarrotCmd();
+  inline void setCarrotCmd( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initCarrotCmd(unsigned int size);
+  inline void adoptCarrotCmd(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownCarrotCmd();
+
+  inline bool hasCarrotArg();
+  inline  ::capnp::Text::Builder getCarrotArg();
+  inline void setCarrotArg( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initCarrotArg(unsigned int size);
+  inline void adoptCarrotArg(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownCarrotArg();
+
+  inline float getXPosLat();
+  inline void setXPosLat(float value);
+
+  inline float getXPosLon();
+  inline void setXPosLon(float value);
+
+  inline float getXPosAngle();
+  inline void setXPosAngle(float value);
+
+  inline float getXPosSpeed();
+  inline void setXPosSpeed(float value);
+
+  inline  ::int32_t getTrafficState();
+  inline void setTrafficState( ::int32_t value);
+
+  inline  ::int32_t getNGoPosDist();
+  inline void setNGoPosDist( ::int32_t value);
+
+  inline  ::int32_t getNGoPosTime();
+  inline void setNGoPosTime( ::int32_t value);
+
+  inline bool hasSzSdiDescr();
+  inline  ::capnp::Text::Builder getSzSdiDescr();
+  inline void setSzSdiDescr( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initSzSdiDescr(unsigned int size);
+  inline void adoptSzSdiDescr(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownSzSdiDescr();
+
+  inline bool hasNaviPaths();
+  inline  ::capnp::Text::Builder getNaviPaths();
+  inline void setNaviPaths( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initNaviPaths(unsigned int size);
+  inline void adoptNaviPaths(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownNaviPaths();
+
+  inline  ::int32_t getLeftSec();
+  inline void setLeftSec( ::int32_t value);
+
+  inline float getConstraintSpeed();
+  inline void setConstraintSpeed(float value);
+
+  inline bool hasConstraintSource();
+  inline  ::capnp::Text::Builder getConstraintSource();
+  inline void setConstraintSource( ::capnp::Text::Reader value);
+  inline  ::capnp::Text::Builder initConstraintSource(unsigned int size);
+  inline void adoptConstraintSource(::capnp::Orphan< ::capnp::Text>&& value);
+  inline ::capnp::Orphan< ::capnp::Text> disownConstraintSource();
+
+  inline bool getConstraintValid();
+  inline void setConstraintValid(bool value);
+
+  inline bool getRoadLimitValid();
+  inline void setRoadLimitValid(bool value);
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -4611,9 +5121,9 @@ private:
 };
 
 #if !CAPNP_LITE
-class CustomReserved11::Pipeline {
+class CarrotMan::Pipeline {
 public:
-  typedef CustomReserved11 Pipelines;
+  typedef CarrotMan Pipelines;
 
   inline Pipeline(decltype(nullptr)): _typeless(nullptr) {}
   inline explicit Pipeline(::capnp::AnyPointer::Pipeline&& typeless)
@@ -4627,9 +5137,9 @@ private:
 };
 #endif  // !CAPNP_LITE
 
-class CustomReserved12::Reader {
+class AmapNavi::Reader {
 public:
-  typedef CustomReserved12 Reads;
+  typedef AmapNavi Reads;
 
   Reader() = default;
   inline explicit Reader(::capnp::_::StructReader base): _reader(base) {}
@@ -4644,6 +5154,16 @@ public:
   }
 #endif  // !CAPNP_LITE
 
+  inline  ::int32_t getLeftBlind() const;
+
+  inline  ::int32_t getRightBlind() const;
+
+  inline bool getLineValid() const;
+
+  inline  ::int32_t getLeftLine() const;
+
+  inline  ::int32_t getRightLine() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -4656,9 +5176,9 @@ private:
   friend class ::capnp::Orphanage;
 };
 
-class CustomReserved12::Builder {
+class AmapNavi::Builder {
 public:
-  typedef CustomReserved12 Builds;
+  typedef AmapNavi Builds;
 
   Builder() = delete;  // Deleted to discourage incorrect usage.
                        // You can explicitly initialize to nullptr instead.
@@ -4672,6 +5192,21 @@ public:
   inline ::kj::StringTree toString() const { return asReader().toString(); }
 #endif  // !CAPNP_LITE
 
+  inline  ::int32_t getLeftBlind();
+  inline void setLeftBlind( ::int32_t value);
+
+  inline  ::int32_t getRightBlind();
+  inline void setRightBlind( ::int32_t value);
+
+  inline bool getLineValid();
+  inline void setLineValid(bool value);
+
+  inline  ::int32_t getLeftLine();
+  inline void setLeftLine( ::int32_t value);
+
+  inline  ::int32_t getRightLine();
+  inline void setRightLine( ::int32_t value);
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -4682,9 +5217,9 @@ private:
 };
 
 #if !CAPNP_LITE
-class CustomReserved12::Pipeline {
+class AmapNavi::Pipeline {
 public:
-  typedef CustomReserved12 Pipelines;
+  typedef AmapNavi Pipelines;
 
   inline Pipeline(decltype(nullptr)): _typeless(nullptr) {}
   inline explicit Pipeline(::capnp::AnyPointer::Pipeline&& typeless)
@@ -5597,6 +6132,34 @@ inline ::capnp::Orphan< ::cereal::IntelligentCruiseButtonManagement> SelfdriveSt
       ::capnp::bounded<1>() * ::capnp::POINTERS));
 }
 
+inline  ::uint16_t SelfdriveStateSP::Reader::getButtonsPressed() const {
+  return _reader.getDataField< ::uint16_t>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
+}
+
+inline  ::uint16_t SelfdriveStateSP::Builder::getButtonsPressed() {
+  return _builder.getDataField< ::uint16_t>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
+}
+inline void SelfdriveStateSP::Builder::setButtonsPressed( ::uint16_t value) {
+  _builder.setDataField< ::uint16_t>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint16_t SelfdriveStateSP::Reader::getButtonsReleaseToggle() const {
+  return _reader.getDataField< ::uint16_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+
+inline  ::uint16_t SelfdriveStateSP::Builder::getButtonsReleaseToggle() {
+  return _builder.getDataField< ::uint16_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+inline void SelfdriveStateSP::Builder::setButtonsReleaseToggle( ::uint16_t value) {
+  _builder.setDataField< ::uint16_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS, value);
+}
+
 inline bool ModelManagerSP::Reader::hasActiveBundle() const {
   return !_reader.getPointerField(
       ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
@@ -5706,6 +6269,217 @@ inline void ModelManagerSP::Builder::adoptAvailableBundles(
 }
 inline ::capnp::Orphan< ::capnp::List< ::cereal::ModelManagerSP::ModelBundle,  ::capnp::Kind::STRUCT>> ModelManagerSP::Builder::disownAvailableBundles() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::cereal::ModelManagerSP::ModelBundle,  ::capnp::Kind::STRUCT>>::disown(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+
+inline bool ModelManagerSP::Reader::hasDownloadSummary() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS).isNull();
+}
+inline bool ModelManagerSP::Builder::hasDownloadSummary() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS).isNull();
+}
+inline  ::cereal::ModelManagerSP::DownloadSummary::Reader ModelManagerSP::Reader::getDownloadSummary() const {
+  return ::capnp::_::PointerHelpers< ::cereal::ModelManagerSP::DownloadSummary>::get(_reader.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+inline  ::cereal::ModelManagerSP::DownloadSummary::Builder ModelManagerSP::Builder::getDownloadSummary() {
+  return ::capnp::_::PointerHelpers< ::cereal::ModelManagerSP::DownloadSummary>::get(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+#if !CAPNP_LITE
+inline  ::cereal::ModelManagerSP::DownloadSummary::Pipeline ModelManagerSP::Pipeline::getDownloadSummary() {
+  return  ::cereal::ModelManagerSP::DownloadSummary::Pipeline(_typeless.getPointerField(3));
+}
+#endif  // !CAPNP_LITE
+inline void ModelManagerSP::Builder::setDownloadSummary( ::cereal::ModelManagerSP::DownloadSummary::Reader value) {
+  ::capnp::_::PointerHelpers< ::cereal::ModelManagerSP::DownloadSummary>::set(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), value);
+}
+inline  ::cereal::ModelManagerSP::DownloadSummary::Builder ModelManagerSP::Builder::initDownloadSummary() {
+  return ::capnp::_::PointerHelpers< ::cereal::ModelManagerSP::DownloadSummary>::init(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+inline void ModelManagerSP::Builder::adoptDownloadSummary(
+    ::capnp::Orphan< ::cereal::ModelManagerSP::DownloadSummary>&& value) {
+  ::capnp::_::PointerHelpers< ::cereal::ModelManagerSP::DownloadSummary>::adopt(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::cereal::ModelManagerSP::DownloadSummary> ModelManagerSP::Builder::disownDownloadSummary() {
+  return ::capnp::_::PointerHelpers< ::cereal::ModelManagerSP::DownloadSummary>::disown(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+
+inline  ::cereal::ModelManagerSP::DownloadStatus ModelManagerSP::DownloadSummary::Reader::getStatus() const {
+  return _reader.getDataField< ::cereal::ModelManagerSP::DownloadStatus>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
+}
+
+inline  ::cereal::ModelManagerSP::DownloadStatus ModelManagerSP::DownloadSummary::Builder::getStatus() {
+  return _builder.getDataField< ::cereal::ModelManagerSP::DownloadStatus>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
+}
+inline void ModelManagerSP::DownloadSummary::Builder::setStatus( ::cereal::ModelManagerSP::DownloadStatus value) {
+  _builder.setDataField< ::cereal::ModelManagerSP::DownloadStatus>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool ModelManagerSP::DownloadSummary::Reader::hasBundleName() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
+}
+inline bool ModelManagerSP::DownloadSummary::Builder::hasBundleName() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader ModelManagerSP::DownloadSummary::Reader::getBundleName() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder ModelManagerSP::DownloadSummary::Builder::getBundleName() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+inline void ModelManagerSP::DownloadSummary::Builder::setBundleName( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder ModelManagerSP::DownloadSummary::Builder::initBundleName(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), size);
+}
+inline void ModelManagerSP::DownloadSummary::Builder::adoptBundleName(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> ModelManagerSP::DownloadSummary::Builder::disownBundleName() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+
+inline bool ModelManagerSP::DownloadSummary::Reader::hasCurrentFile() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
+}
+inline bool ModelManagerSP::DownloadSummary::Builder::hasCurrentFile() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader ModelManagerSP::DownloadSummary::Reader::getCurrentFile() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder ModelManagerSP::DownloadSummary::Builder::getCurrentFile() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS));
+}
+inline void ModelManagerSP::DownloadSummary::Builder::setCurrentFile( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder ModelManagerSP::DownloadSummary::Builder::initCurrentFile(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS), size);
+}
+inline void ModelManagerSP::DownloadSummary::Builder::adoptCurrentFile(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> ModelManagerSP::DownloadSummary::Builder::disownCurrentFile() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS));
+}
+
+inline float ModelManagerSP::DownloadSummary::Reader::getProgress() const {
+  return _reader.getDataField<float>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+
+inline float ModelManagerSP::DownloadSummary::Builder::getProgress() {
+  return _builder.getDataField<float>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+inline void ModelManagerSP::DownloadSummary::Builder::setProgress(float value) {
+  _builder.setDataField<float>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint32_t ModelManagerSP::DownloadSummary::Reader::getEta() const {
+  return _reader.getDataField< ::uint32_t>(
+      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
+}
+
+inline  ::uint32_t ModelManagerSP::DownloadSummary::Builder::getEta() {
+  return _builder.getDataField< ::uint32_t>(
+      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
+}
+inline void ModelManagerSP::DownloadSummary::Builder::setEta( ::uint32_t value) {
+  _builder.setDataField< ::uint32_t>(
+      ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint16_t ModelManagerSP::DownloadSummary::Reader::getCompletedFiles() const {
+  return _reader.getDataField< ::uint16_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+
+inline  ::uint16_t ModelManagerSP::DownloadSummary::Builder::getCompletedFiles() {
+  return _builder.getDataField< ::uint16_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+inline void ModelManagerSP::DownloadSummary::Builder::setCompletedFiles( ::uint16_t value) {
+  _builder.setDataField< ::uint16_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint16_t ModelManagerSP::DownloadSummary::Reader::getTotalFiles() const {
+  return _reader.getDataField< ::uint16_t>(
+      ::capnp::bounded<6>() * ::capnp::ELEMENTS);
+}
+
+inline  ::uint16_t ModelManagerSP::DownloadSummary::Builder::getTotalFiles() {
+  return _builder.getDataField< ::uint16_t>(
+      ::capnp::bounded<6>() * ::capnp::ELEMENTS);
+}
+inline void ModelManagerSP::DownloadSummary::Builder::setTotalFiles( ::uint16_t value) {
+  _builder.setDataField< ::uint16_t>(
+      ::capnp::bounded<6>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool ModelManagerSP::DownloadSummary::Reader::hasError() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
+}
+inline bool ModelManagerSP::DownloadSummary::Builder::hasError() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader ModelManagerSP::DownloadSummary::Reader::getError() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder ModelManagerSP::DownloadSummary::Builder::getError() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+inline void ModelManagerSP::DownloadSummary::Builder::setError( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder ModelManagerSP::DownloadSummary::Builder::initError(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS), size);
+}
+inline void ModelManagerSP::DownloadSummary::Builder::adoptError(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> ModelManagerSP::DownloadSummary::Builder::disownError() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
       ::capnp::bounded<2>() * ::capnp::POINTERS));
 }
 
@@ -5819,6 +6593,74 @@ inline void ModelManagerSP::DownloadProgress::Builder::setEta( ::uint32_t value)
       ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
 }
 
+inline bool ModelManagerSP::Chunk::Reader::hasFileName() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
+}
+inline bool ModelManagerSP::Chunk::Builder::hasFileName() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader ModelManagerSP::Chunk::Reader::getFileName() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder ModelManagerSP::Chunk::Builder::getFileName() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+inline void ModelManagerSP::Chunk::Builder::setFileName( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder ModelManagerSP::Chunk::Builder::initFileName(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), size);
+}
+inline void ModelManagerSP::Chunk::Builder::adoptFileName(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> ModelManagerSP::Chunk::Builder::disownFileName() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+
+inline bool ModelManagerSP::Chunk::Reader::hasSha256() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
+}
+inline bool ModelManagerSP::Chunk::Builder::hasSha256() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader ModelManagerSP::Chunk::Reader::getSha256() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder ModelManagerSP::Chunk::Builder::getSha256() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS));
+}
+inline void ModelManagerSP::Chunk::Builder::setSha256( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder ModelManagerSP::Chunk::Builder::initSha256(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS), size);
+}
+inline void ModelManagerSP::Chunk::Builder::adoptSha256(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> ModelManagerSP::Chunk::Builder::disownSha256() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS));
+}
+
 inline bool ModelManagerSP::Artifact::Reader::hasFileName() const {
   return !_reader.getPointerField(
       ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
@@ -5929,6 +6771,40 @@ inline void ModelManagerSP::Artifact::Builder::adoptDownloadProgress(
 inline ::capnp::Orphan< ::cereal::ModelManagerSP::DownloadProgress> ModelManagerSP::Artifact::Builder::disownDownloadProgress() {
   return ::capnp::_::PointerHelpers< ::cereal::ModelManagerSP::DownloadProgress>::disown(_builder.getPointerField(
       ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+
+inline bool ModelManagerSP::Artifact::Reader::hasChunks() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS).isNull();
+}
+inline bool ModelManagerSP::Artifact::Builder::hasChunks() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>::Reader ModelManagerSP::Artifact::Reader::getChunks() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>>::get(_reader.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>::Builder ModelManagerSP::Artifact::Builder::getChunks() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>>::get(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+inline void ModelManagerSP::Artifact::Builder::setChunks( ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>>::set(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>::Builder ModelManagerSP::Artifact::Builder::initChunks(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>>::init(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), size);
+}
+inline void ModelManagerSP::Artifact::Builder::adoptChunks(
+    ::capnp::Orphan< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>>::adopt(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>> ModelManagerSP::Artifact::Builder::disownChunks() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::cereal::ModelManagerSP::Chunk,  ::capnp::Kind::STRUCT>>::disown(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
 }
 
 inline  ::cereal::ModelManagerSP::Model::Type ModelManagerSP::Model::Reader::getType() const {
@@ -8651,6 +9527,766 @@ inline  ::cereal::ModelDataV2SP::TurnDirection ModelDataV2SP::Builder::getLaneTu
 inline void ModelDataV2SP::Builder::setLaneTurnDirection( ::cereal::ModelDataV2SP::TurnDirection value) {
   _builder.setDataField< ::cereal::ModelDataV2SP::TurnDirection>(
       ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool ModelDataV2SP::Reader::getLeftLaneChangeEdgeBlock() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<16>() * ::capnp::ELEMENTS);
+}
+
+inline bool ModelDataV2SP::Builder::getLeftLaneChangeEdgeBlock() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<16>() * ::capnp::ELEMENTS);
+}
+inline void ModelDataV2SP::Builder::setLeftLaneChangeEdgeBlock(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<16>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool ModelDataV2SP::Reader::getRightLaneChangeEdgeBlock() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<17>() * ::capnp::ELEMENTS);
+}
+
+inline bool ModelDataV2SP::Builder::getRightLaneChangeEdgeBlock() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<17>() * ::capnp::ELEMENTS);
+}
+inline void ModelDataV2SP::Builder::setRightLaneChangeEdgeBlock(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<17>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getActiveCarrot() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getActiveCarrot() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setActiveCarrot( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getNRoadLimitSpeed() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getNRoadLimitSpeed() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setNRoadLimitSpeed( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool CarrotMan::Reader::hasRemote() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasRemote() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getRemote() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getRemote() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setRemote( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initRemote(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptRemote(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownRemote() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<0>() * ::capnp::POINTERS));
+}
+
+inline  ::int32_t CarrotMan::Reader::getXSpdType() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getXSpdType() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<2>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXSpdType( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getXSpdLimit() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getXSpdLimit() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXSpdLimit( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getXSpdDist() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<4>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getXSpdDist() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<4>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXSpdDist( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<4>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getXSpdCountDown() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<5>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getXSpdCountDown() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<5>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXSpdCountDown( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<5>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getXTurnInfo() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<6>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getXTurnInfo() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<6>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXTurnInfo( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<6>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getXDistToTurn() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<7>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getXDistToTurn() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<7>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXDistToTurn( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<7>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getXTurnCountDown() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<8>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getXTurnCountDown() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<8>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXTurnCountDown( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<8>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool CarrotMan::Reader::hasAtcType() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasAtcType() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getAtcType() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getAtcType() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setAtcType( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initAtcType(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptAtcType(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownAtcType() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<1>() * ::capnp::POINTERS));
+}
+
+inline  ::int32_t CarrotMan::Reader::getVTurnSpeed() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<9>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getVTurnSpeed() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<9>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setVTurnSpeed( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<9>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool CarrotMan::Reader::hasSzPosRoadName() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasSzPosRoadName() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getSzPosRoadName() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getSzPosRoadName() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setSzPosRoadName( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initSzPosRoadName(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptSzPosRoadName(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownSzPosRoadName() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+
+inline bool CarrotMan::Reader::hasSzTBTMainText() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasSzTBTMainText() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getSzTBTMainText() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getSzTBTMainText() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setSzTBTMainText( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initSzTBTMainText(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptSzTBTMainText(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownSzTBTMainText() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+
+inline  ::int32_t CarrotMan::Reader::getDesiredSpeed() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<10>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getDesiredSpeed() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<10>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setDesiredSpeed( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<10>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool CarrotMan::Reader::hasDesiredSource() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<4>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasDesiredSource() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<4>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getDesiredSource() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<4>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getDesiredSource() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<4>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setDesiredSource( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<4>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initDesiredSource(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<4>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptDesiredSource(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<4>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownDesiredSource() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<4>() * ::capnp::POINTERS));
+}
+
+inline  ::int32_t CarrotMan::Reader::getCarrotCmdIndex() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<11>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getCarrotCmdIndex() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<11>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setCarrotCmdIndex( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<11>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool CarrotMan::Reader::hasCarrotCmd() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<5>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasCarrotCmd() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<5>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getCarrotCmd() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<5>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getCarrotCmd() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<5>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setCarrotCmd( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<5>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initCarrotCmd(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<5>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptCarrotCmd(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<5>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownCarrotCmd() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<5>() * ::capnp::POINTERS));
+}
+
+inline bool CarrotMan::Reader::hasCarrotArg() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<6>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasCarrotArg() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<6>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getCarrotArg() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<6>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getCarrotArg() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<6>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setCarrotArg( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<6>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initCarrotArg(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<6>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptCarrotArg(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<6>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownCarrotArg() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<6>() * ::capnp::POINTERS));
+}
+
+inline float CarrotMan::Reader::getXPosLat() const {
+  return _reader.getDataField<float>(
+      ::capnp::bounded<12>() * ::capnp::ELEMENTS);
+}
+
+inline float CarrotMan::Builder::getXPosLat() {
+  return _builder.getDataField<float>(
+      ::capnp::bounded<12>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXPosLat(float value) {
+  _builder.setDataField<float>(
+      ::capnp::bounded<12>() * ::capnp::ELEMENTS, value);
+}
+
+inline float CarrotMan::Reader::getXPosLon() const {
+  return _reader.getDataField<float>(
+      ::capnp::bounded<13>() * ::capnp::ELEMENTS);
+}
+
+inline float CarrotMan::Builder::getXPosLon() {
+  return _builder.getDataField<float>(
+      ::capnp::bounded<13>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXPosLon(float value) {
+  _builder.setDataField<float>(
+      ::capnp::bounded<13>() * ::capnp::ELEMENTS, value);
+}
+
+inline float CarrotMan::Reader::getXPosAngle() const {
+  return _reader.getDataField<float>(
+      ::capnp::bounded<14>() * ::capnp::ELEMENTS);
+}
+
+inline float CarrotMan::Builder::getXPosAngle() {
+  return _builder.getDataField<float>(
+      ::capnp::bounded<14>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXPosAngle(float value) {
+  _builder.setDataField<float>(
+      ::capnp::bounded<14>() * ::capnp::ELEMENTS, value);
+}
+
+inline float CarrotMan::Reader::getXPosSpeed() const {
+  return _reader.getDataField<float>(
+      ::capnp::bounded<15>() * ::capnp::ELEMENTS);
+}
+
+inline float CarrotMan::Builder::getXPosSpeed() {
+  return _builder.getDataField<float>(
+      ::capnp::bounded<15>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setXPosSpeed(float value) {
+  _builder.setDataField<float>(
+      ::capnp::bounded<15>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getTrafficState() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<16>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getTrafficState() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<16>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setTrafficState( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<16>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getNGoPosDist() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<17>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getNGoPosDist() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<17>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setNGoPosDist( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<17>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t CarrotMan::Reader::getNGoPosTime() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<18>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getNGoPosTime() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<18>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setNGoPosTime( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<18>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool CarrotMan::Reader::hasSzSdiDescr() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<7>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasSzSdiDescr() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<7>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getSzSdiDescr() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<7>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getSzSdiDescr() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<7>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setSzSdiDescr( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<7>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initSzSdiDescr(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<7>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptSzSdiDescr(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<7>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownSzSdiDescr() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<7>() * ::capnp::POINTERS));
+}
+
+inline bool CarrotMan::Reader::hasNaviPaths() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<8>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasNaviPaths() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<8>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getNaviPaths() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<8>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getNaviPaths() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<8>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setNaviPaths( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<8>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initNaviPaths(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<8>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptNaviPaths(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<8>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownNaviPaths() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<8>() * ::capnp::POINTERS));
+}
+
+inline  ::int32_t CarrotMan::Reader::getLeftSec() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<19>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t CarrotMan::Builder::getLeftSec() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<19>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setLeftSec( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<19>() * ::capnp::ELEMENTS, value);
+}
+
+inline float CarrotMan::Reader::getConstraintSpeed() const {
+  return _reader.getDataField<float>(
+      ::capnp::bounded<20>() * ::capnp::ELEMENTS);
+}
+
+inline float CarrotMan::Builder::getConstraintSpeed() {
+  return _builder.getDataField<float>(
+      ::capnp::bounded<20>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setConstraintSpeed(float value) {
+  _builder.setDataField<float>(
+      ::capnp::bounded<20>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool CarrotMan::Reader::hasConstraintSource() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<9>() * ::capnp::POINTERS).isNull();
+}
+inline bool CarrotMan::Builder::hasConstraintSource() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<9>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::Text::Reader CarrotMan::Reader::getConstraintSource() const {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_reader.getPointerField(
+      ::capnp::bounded<9>() * ::capnp::POINTERS));
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::getConstraintSource() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::get(_builder.getPointerField(
+      ::capnp::bounded<9>() * ::capnp::POINTERS));
+}
+inline void CarrotMan::Builder::setConstraintSource( ::capnp::Text::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::set(_builder.getPointerField(
+      ::capnp::bounded<9>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::Text::Builder CarrotMan::Builder::initConstraintSource(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::init(_builder.getPointerField(
+      ::capnp::bounded<9>() * ::capnp::POINTERS), size);
+}
+inline void CarrotMan::Builder::adoptConstraintSource(
+    ::capnp::Orphan< ::capnp::Text>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::Text>::adopt(_builder.getPointerField(
+      ::capnp::bounded<9>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::Text> CarrotMan::Builder::disownConstraintSource() {
+  return ::capnp::_::PointerHelpers< ::capnp::Text>::disown(_builder.getPointerField(
+      ::capnp::bounded<9>() * ::capnp::POINTERS));
+}
+
+inline bool CarrotMan::Reader::getConstraintValid() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<672>() * ::capnp::ELEMENTS);
+}
+
+inline bool CarrotMan::Builder::getConstraintValid() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<672>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setConstraintValid(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<672>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool CarrotMan::Reader::getRoadLimitValid() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<673>() * ::capnp::ELEMENTS);
+}
+
+inline bool CarrotMan::Builder::getRoadLimitValid() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<673>() * ::capnp::ELEMENTS);
+}
+inline void CarrotMan::Builder::setRoadLimitValid(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<673>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t AmapNavi::Reader::getLeftBlind() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t AmapNavi::Builder::getLeftBlind() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS);
+}
+inline void AmapNavi::Builder::setLeftBlind( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t AmapNavi::Reader::getRightBlind() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t AmapNavi::Builder::getRightBlind() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS);
+}
+inline void AmapNavi::Builder::setRightBlind( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<1>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool AmapNavi::Reader::getLineValid() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<64>() * ::capnp::ELEMENTS);
+}
+
+inline bool AmapNavi::Builder::getLineValid() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<64>() * ::capnp::ELEMENTS);
+}
+inline void AmapNavi::Builder::setLineValid(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<64>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t AmapNavi::Reader::getLeftLine() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t AmapNavi::Builder::getLeftLine() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
+}
+inline void AmapNavi::Builder::setLeftLine( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int32_t AmapNavi::Reader::getRightLine() const {
+  return _reader.getDataField< ::int32_t>(
+      ::capnp::bounded<4>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int32_t AmapNavi::Builder::getRightLine() {
+  return _builder.getDataField< ::int32_t>(
+      ::capnp::bounded<4>() * ::capnp::ELEMENTS);
+}
+inline void AmapNavi::Builder::setRightLine( ::int32_t value) {
+  _builder.setDataField< ::int32_t>(
+      ::capnp::bounded<4>() * ::capnp::ELEMENTS, value);
 }
 
 }  // namespace

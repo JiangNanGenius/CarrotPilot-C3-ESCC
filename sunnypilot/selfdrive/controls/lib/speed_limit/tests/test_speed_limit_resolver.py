@@ -11,10 +11,13 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cereal import custom
+from openpilot.common.constants import CV
 from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit import LIMIT_MAX_MAP_DATA_AGE
 
-from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.speed_limit_resolver import SpeedLimitResolver, ALL_SOURCES
-from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.common import Policy
+from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.speed_limit_resolver import (
+  ALL_SOURCES, SpeedLimitResolver, get_segmented_speed_limit_offset,
+)
+from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.common import OffsetType, Policy
 
 SpeedLimitSource = custom.LongitudinalPlanSP.SpeedLimit.Source
 
@@ -50,8 +53,8 @@ def setup_sm_mock(mocker: MockerFixture):
     'unixTimestampMillis': 1_800_000_000_000,
   }, mocker)
   sm_mock = mocker.MagicMock()
-  sm_mock.alive = {'liveMapDataSP': True}
-  sm_mock.valid = {'liveMapDataSP': True}
+  sm_mock.alive = {'liveMapDataSP': True, 'carStateSP': True}
+  sm_mock.valid = {'liveMapDataSP': True, 'carStateSP': True}
   sm_mock.recv_time = {'liveMapDataSP': time.monotonic()}
   sm_mock.__getitem__.side_effect = lambda key: {
     'carState': car_state,
@@ -75,6 +78,15 @@ parametrized_policies = pytest.mark.parametrize(
 
 @pytest.mark.parametrize("resolver_class", [SpeedLimitResolver])
 class TestSpeedLimitResolverValidation:
+
+  @pytest.mark.parametrize('health_key', ['alive', 'valid'])
+  def test_invalid_vehicle_limit_clears_source(self, resolver_class, health_key, mocker):
+    resolver = resolver_class()
+    sm = setup_sm_mock(mocker)
+    resolver._get_from_car_state(sm)
+    getattr(sm, health_key)['carStateSP'] = False
+    resolver._get_from_car_state(sm)
+    assert resolver.limit_solutions[SpeedLimitSource.car] == 0.0
 
   @pytest.mark.parametrize("policy", list(Policy), ids=lambda policy: policy.name)
   def test_initial_state(self, resolver_class, policy):
@@ -157,3 +169,27 @@ class TestSpeedLimitResolverValidation:
 
     assert resolver.limit_solutions[SpeedLimitSource.map] == 0.
     assert resolver.distance_solutions[SpeedLimitSource.map] == 0.
+
+
+@pytest.mark.parametrize("posted,expected", [(40, 0), (60, 0), (70, 1), (80, 1), (90, 2), (110, 2)])
+def test_metric_segmented_offset_boundaries(posted, expected):
+  offset = get_segmented_speed_limit_offset(posted / 3.6, True, 0, 1, 2)
+  assert offset * 3.6 == pytest.approx(expected)
+
+
+@pytest.mark.parametrize("posted,expected", [(30, 0), (40, 0), (45, 1), (50, 1), (55, 2), (70, 2)])
+def test_imperial_segmented_offset_boundaries(posted, expected):
+  offset = get_segmented_speed_limit_offset(posted * CV.MPH_TO_MS, False, 0, 1, 2)
+  assert offset * CV.MS_TO_MPH == pytest.approx(expected)
+
+
+def test_segmented_mode_selects_one_offset_without_legacy_stacking():
+  resolver = SpeedLimitResolver()
+  resolver.is_metric = True
+  resolver.speed_limit = 80 / 3.6
+  resolver.offset_type = OffsetType.segmented
+  resolver.offset_value = 30
+  resolver.segmented_offset_low = 0
+  resolver.segmented_offset_medium = 1
+  resolver.segmented_offset_high = 2
+  assert resolver._get_speed_limit_offset() * 3.6 == pytest.approx(1)

@@ -15,6 +15,8 @@ from openpilot.system import micd
 from openpilot.system.hardware import HARDWARE
 
 from openpilot.sunnypilot.selfdrive.ui.quiet_mode import QuietMode
+from openpilot.selfdrive.carrot.carrot_params import CarrotParams
+from openpilot.selfdrive.ui.traffic_cues import TrafficCues
 
 SAMPLE_RATE = 48000
 SAMPLE_BUFFER = 4096 # (approx 100ms)
@@ -82,11 +84,15 @@ class Soundd(QuietMode):
     self.current_alert = AudibleAlert.none
     self.current_volume = MIN_VOLUME
     self.current_sound_frame = 0
+    self.courtesy_chime = False
 
     self.ramp_start_volume = MIN_VOLUME
     self.ramp_start_time = 0.
 
     self.selfdrive_timeout_alert = False
+    self.traffic_cues = TrafficCues()
+    self.carrot_params = CarrotParams()
+    self.traffic_cues_enabled = self.carrot_params.get_bool("TrafficCueSound")
 
     self.spl_filter_weighted = FirstOrderFilter(0, 2.5, FILTER_DT, initialized=False)
 
@@ -109,7 +115,7 @@ class Soundd(QuietMode):
 
     ret = np.zeros(frames, dtype=np.float32)
 
-    if self.should_play_sound(self.current_alert):
+    if self.should_play_sound(self.current_alert) or (self.courtesy_chime and self.current_alert in sound_list_sp):
       num_loops = sound_list[self.current_alert][1]
       sound_data = self.loaded_sounds[self.current_alert]
       written_frames = 0
@@ -134,6 +140,7 @@ class Soundd(QuietMode):
   def update_alert(self, new_alert):
     current_alert_played_once = self.current_alert == AudibleAlert.none or self.current_sound_frame > len(self.loaded_sounds[self.current_alert])
     if self.current_alert != new_alert and (new_alert != AudibleAlert.none or current_alert_played_once):
+      self.courtesy_chime = False
       if new_alert == AudibleAlert.warningImmediate:
         self.ramp_start_volume = self.current_volume
         self.ramp_start_time = time.monotonic()
@@ -155,6 +162,25 @@ class Soundd(QuietMode):
     volume = ((weighted_db - AMBIENT_DB) / DB_SCALE) * (MAX_VOLUME - MIN_VOLUME) + MIN_VOLUME
     return math.pow(VOLUME_BASE, (np.clip(volume, MIN_VOLUME, MAX_VOLUME) - 1))
 
+  def update_traffic_cue(self, sm):
+    if self._frame % 50 == 0:
+      self.traffic_cues_enabled = self.carrot_params.get_bool("TrafficCueSound")
+    now = time.monotonic()
+    healthy = all(sm.alive[s] and sm.valid[s] and 0 <= now - sm.recv_time[s] < 0.3
+                  for s in ('longitudinalPlan', 'carState', 'carControl', 'selfdriveState'))
+    cs, cc = sm['carState'], sm['carControl']
+    cue = self.traffic_cues.update(
+      now, healthy=healthy, enabled=self.traffic_cues_enabled and cc.enabled,
+      traffic_state=int(sm['longitudinalPlan'].trafficState), speed=cs.vEgo,
+      long_active=cc.longActive, brake=cs.brakePressed, gas=cs.gasPressed,
+    )
+    # Drop (never queue) a courtesy chime when any system alert is playing.
+    if cue and self.current_alert == AudibleAlert.none and sm['selfdriveState'].alertSound.raw == AudibleAlert.none:
+      self.update_alert(AudibleAlertSP.promptSingleHigh if cue == 'starting' else AudibleAlertSP.promptSingleLow)
+      # This explicit setting controls only these two courtesy notifications,
+      # independently of QuietMode. It does not unmute other prompts.
+      self.courtesy_chime = True
+
   @retry(attempts=10, delay=3)
   def get_stream(self, sd):
     # reload sounddevice to reinitialize portaudio
@@ -166,7 +192,7 @@ class Soundd(QuietMode):
     # sounddevice must be imported after forking processes
     import sounddevice as sd
 
-    sm = messaging.SubMaster(['selfdriveState', 'selfdriveStateSP', 'soundPressure'])
+    sm = messaging.SubMaster(['selfdriveState', 'selfdriveStateSP', 'soundPressure', 'longitudinalPlan', 'carState', 'carControl'])
 
     with self.get_stream(sd) as stream:
       rk = Ratekeeper(20)
@@ -183,6 +209,7 @@ class Soundd(QuietMode):
           self.current_volume = self.calculate_volume(float(self.spl_filter_weighted.x))
 
         self.get_audible_alert(sm)
+        self.update_traffic_cue(sm)
 
         # Ramp up immediate warning sound over 4s
         if self.current_alert == AudibleAlert.warningImmediate:

@@ -9,6 +9,18 @@ from openpilot.selfdrive.controls.lib.longcontrol import LongCtrlState
 from openpilot.selfdrive.modeld.constants import ModelConstants
 from openpilot.selfdrive.controls.lib.longitudinal_planner import LongitudinalPlanner
 from openpilot.selfdrive.controls.radard import _LEAD_ACCEL_TAU
+from openpilot.selfdrive.car.cruise import V_CRUISE_MAX
+
+
+class PlantMessages(dict):
+  """SubMaster data/health contract for deterministic in-process simulations."""
+  def __init__(self, data):
+    super().__init__(data)
+    optional = {'carrotMan', 'liveMapDataSP', 'gpsLocation'}
+    self.alive = {key: key not in optional for key in data}
+    self.valid = self.alive.copy()
+    self.recv_time = {key: time.monotonic() for key in data}
+    self.updated = {key: True for key in data}
 
 
 class Plant:
@@ -54,6 +66,7 @@ class Plant:
     CP = CarInterface.get_non_essential_params(CAR.HONDA_CIVIC)
     CP_SP = CarInterface.get_non_essential_params_sp(CP, CAR.HONDA_CIVIC)
     self.planner = LongitudinalPlanner(CP, CP_SP, init_v=self.speed)
+    self.stop_accel = CP.stopAccel
 
   @property
   def current_time(self):
@@ -72,6 +85,7 @@ class Plant:
     car_state_sp = messaging.new_message('carStateSP')
     live_map_data_sp = messaging.new_message('liveMapDataSP')
     gps_data = messaging.new_message('gpsLocation')
+    carrot_data = messaging.new_message('carrotMan')
     a_lead = (v_lead - self.v_lead_prev)/self.ts
     self.v_lead_prev = v_lead
 
@@ -117,6 +131,7 @@ class Plant:
     velocity.x = [float(x) for x in (self.speed + 0.5) * np.ones_like(ModelConstants.T_IDXS)]
     velocity.x[0] = float(self.speed) # always start at current speed
     model.modelV2.velocity = velocity
+    model.modelV2.orientationRate.z = [0.0] * len(ModelConstants.T_IDXS)
     acceleration = log.XYZTData.new_message()
     acceleration.x = [float(x) for x in np.zeros_like(ModelConstants.T_IDXS)]
     model.modelV2.acceleration = acceleration
@@ -127,12 +142,18 @@ class Plant:
     ss.selfdriveState.personality = self.personality
     control.controlsState.forceDecel = self.force_decel
     car_state.carState.vEgo = float(self.speed)
+    car_state.carState.aEgo = float(self.acceleration)
+    car_state.carState.vEgoCluster = float(self.speed)
     car_state.carState.standstill = bool(self.speed < 0.01)
-    car_state.carState.vCruise = float(v_cruise * 3.6)
+    car_state.carState.vCruise = float(min(v_cruise * 3.6, V_CRUISE_MAX))
+    car_state.carState.vCruiseCluster = car_state.carState.vCruise
+    car_control.carControl.enabled = self.enabled
+    car_control.carControl.longActive = self.enabled
+    ss.selfdriveState.enabled = self.enabled
     car_control.carControl.orientationNED = [0., float(pitch), 0.]
 
     # ******** get controlsState messages for plotting ***
-    sm = {'radarState': radar.radarState,
+    sm = PlantMessages({'radarState': radar.radarState,
           'carState': car_state.carState,
           'carControl': car_control.carControl,
           'controlsState': control.controlsState,
@@ -141,11 +162,17 @@ class Plant:
           'modelV2': model.modelV2,
           'carStateSP': car_state_sp.carStateSP,
           'liveMapDataSP': live_map_data_sp.liveMapDataSP,
-          'gpsLocation': gps_data.gpsLocation}
+          'gpsLocation': gps_data.gpsLocation,
+          'carrotMan': carrot_data.carrotMan})
     self.planner.update(sm)
     self.acceleration = self.planner.output_a_target
-    self.speed = self.speed + self.acceleration * self.ts
     self.should_stop = self.planner.output_should_stop
+    if self.should_stop:
+      # The current planner emits a separate stop request. Ignoring it made
+      # the ideal plant creep after the controller would have applied its
+      # standstill brake. This is an ideal actuator, not a vehicle validation.
+      self.acceleration = min(self.acceleration, self.stop_accel)
+    self.speed = self.speed + self.acceleration * self.ts
     fcw = self.planner.fcw
     self.distance_lead = self.distance_lead + v_lead * self.ts
 

@@ -1159,6 +1159,11 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   cruiseTargetSpeed @42 :Float32;   # final planner cruise target, km/h
   cruiseTargetSource @43 :CruiseTargetSource; # authority that set cruiseTargetSpeed
   cruiseTargetValid @44 :Bool;      # false while the driver's cruise ceiling is unset
+  cruiseCeiling @45 :Float32;       # km/h, selected display reference
+  roadCruiseTarget @46 :Float32;    # km/h; only meaningful when roadCruiseValid
+  roadCruiseValid @47 :Bool;
+  driverCruiseTarget @48 :Float32;  # km/h; only meaningful when driverCruiseValid
+  driverCruiseValid @49 :Bool;
 
 
   solverExecutionTime @35 :Float32;
@@ -1184,6 +1189,7 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
     mapCurve @6;
     trafficLight @7;
     safetyDecel @8;
+    driverOverride @9;
   }
 
 

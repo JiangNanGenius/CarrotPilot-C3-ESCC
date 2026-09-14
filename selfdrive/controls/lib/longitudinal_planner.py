@@ -3,6 +3,7 @@ import math
 import numpy as np
 
 import cereal.messaging as messaging
+from cereal import custom
 from opendbc.car.interfaces import ACCEL_MIN, ACCEL_MAX
 from openpilot.common.constants import CV
 from openpilot.common.filter_simple import FirstOrderFilter
@@ -13,6 +14,7 @@ from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import Longi
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDXS as T_IDXS_MPC
 from openpilot.selfdrive.controls.lib.drive_helpers import CONTROL_N, get_accel_from_plan, should_stop
 from openpilot.selfdrive.controls.lib.speed_reference import SpeedReference, INSTRUMENT_SPEED
+from openpilot.selfdrive.controls.lib.stop_distance_settings import StopDistanceSettings
 from openpilot.selfdrive.car.cruise import V_CRUISE_MAX
 from openpilot.common.swaglog import cloudlog
 
@@ -98,11 +100,18 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.carrot_speed_limit = CarrotSpeedLimit()
     self.carrot_traffic_stop = CarrotTrafficStop()
     self.carrot_planner = CarrotPlanner()
+    # The visual speed envelope must reserve the actuator delay plus a second
+    # for the existing jerk-limited cruise speed controller to respond.
+    delay = float(CP.longitudinalActuatorDelay)
+    self.carrot_planner.traffic_response_time = max(1.5, delay + 1.0) if math.isfinite(delay) else 1.5
     self.carrot_planner_faulted = False
     self.speed_reference = SpeedReference()
+    self.stop_distances = StopDistanceSettings(self.carrot_planner.params)
 
   def update(self, sm):
     LongitudinalPlannerSP.update(self, sm)
+    self.stop_distances.update()
+    self.carrot_planner.traffic_stop_buffer = self.stop_distances.traffic
 
     if len(sm['carControl'].orientationNED) == 3:
       accel_coast = get_coast_accel(sm['carControl'].orientationNED[1])
@@ -148,6 +157,14 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # Get new v_cruise and a_target from Smart Cruise Control and Speed Limit Assist
     v_cruise, self.output_a_target = LongitudinalPlannerSP.update_targets(self, sm, self.v_desired_filter.x, self.output_a_target, v_cruise)
     self.cruise_target_source = base_cruise_target_source(self.source, self.resolver.source, self.speed_reference.reference)
+    if self.policy_enabled and self.source == custom.LongitudinalPlanSP.LongitudinalPlanSource.cruise:
+      if self.cruise_policy.source == 'driver':
+        self.cruise_target_source = CruiseTargetSource.driverOverride
+      elif self.cruise_policy.source == 'road':
+        self.cruise_target_source = (CruiseTargetSource.navigationLimit if self.policy_navigation_limit else
+                                    base_cruise_target_source(
+                                      custom.LongitudinalPlanSP.LongitudinalPlanSource.speedLimitAssist,
+                                      self.resolver.source, self.speed_reference.reference))
 
     # Carrot visual traffic-stop state and eco target. Dedicated helpers below
     # own speed-limit selection and nav-app red-light handling; MPC continues
@@ -171,7 +188,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # Sunny keeps its native camera/map policy and configured offset. Carrot's
     # independently enabled aggregate may also contribute a forwarded vehicle
     # limit; desiredSource below keeps the final displayed authority truthful.
-    v_cruise = self.carrot_speed_limit.update(sm, v_cruise)
+    v_cruise = self.carrot_speed_limit.update(sm, v_cruise, independent_constraints=self.policy_enabled)
     if self.carrot_speed_limit.active_source != CarrotSpeedLimitSource.none:
       self.cruise_target_source = carrot_cruise_target_source(
         self.carrot_speed_limit.active_source, self.speed_reference.reference,
@@ -196,7 +213,8 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
 
     self.mpc.set_weights(prev_accel_constraint, personality=sm['selfdriveState'].personality)
     self.mpc.set_cur_state(self.v_desired_filter.x, self.output_a_target)
-    self.mpc.update(sm['radarState'], personality=sm['selfdriveState'].personality)
+    self.mpc.update(sm['radarState'], personality=sm['selfdriveState'].personality,
+                    stop_distance=self.stop_distances.follow)
 
     self.v_desired_trajectory = np.interp(CONTROL_N_T_IDX, T_IDXS_MPC, self.mpc.v_solution)
     self.a_desired_trajectory = np.interp(CONTROL_N_T_IDX, T_IDXS_MPC, self.mpc.a_solution)
@@ -262,6 +280,11 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     longitudinalPlan.cruiseTargetSpeed = float(self.cruise_target_speed)
     longitudinalPlan.cruiseTargetSource = self.cruise_target_source
     longitudinalPlan.cruiseTargetValid = self.cruise_target_valid
+    longitudinalPlan.cruiseCeiling = float(sm['carState'].vCruise) if self.cruise_target_valid else 0.0
+    longitudinalPlan.roadCruiseValid = self.policy_enabled and self.policy_road_target is not None
+    longitudinalPlan.roadCruiseTarget = float((self.policy_road_target or 0.0) * CV.MS_TO_KPH)
+    longitudinalPlan.driverCruiseValid = self.policy_enabled and self.cruise_policy.override is not None
+    longitudinalPlan.driverCruiseTarget = float((self.cruise_policy.override or 0.0) * CV.MS_TO_KPH)
 
     pm.send('longitudinalPlan', plan_send)
 

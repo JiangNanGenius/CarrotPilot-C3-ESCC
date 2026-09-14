@@ -48,7 +48,8 @@ def cruise_source_label(plan_alive: bool, target_source) -> str:
     CruiseTargetSource.mapCurve: "地图弯道",
     CruiseTargetSource.trafficLight: "红灯停车",
     CruiseTargetSource.safetyDecel: "安全减速",
-  }.get(target_source, "仪表定速")
+    CruiseTargetSource.driverOverride: "油门设定",
+  }.get(target_source, "未知来源")
 
 
 def radar_packet_status(packet_valid: bool, has_errors: bool) -> str:
@@ -86,6 +87,8 @@ class HudRendererSP(HudRenderer):
     self.radar_seen: bool = False
     self._radar_wait_frames: int = 0
     self.escc_enabled: bool = False
+    self.escc_control_fresh: bool = False
+    self.escc_control_active: bool = False
     self.lead_detected: bool = False
     self.lead_from_radar: bool = False
     self.cruise_target_speed: float = 0.0
@@ -108,6 +111,8 @@ class HudRendererSP(HudRenderer):
         ui_state.CP_SP.flags & HyundaiFlagsSP.ENHANCED_SCC
       )
     self.speed_conv = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
+    self.escc_control_fresh = ui_state.sm.alive['carControl'] and ui_state.sm.valid['carControl']
+    self.escc_control_active = self.escc_control_fresh and ui_state.sm['carControl'].longActive
     self.speed_cluster = ui_state.sm['carState'].cruiseState.speedCluster * self.speed_conv
 
     # 当前档位
@@ -323,11 +328,11 @@ class HudRendererSP(HudRenderer):
       label, detail, color = "纵向离线", "不可用", rl.RED
     elif self.traffic_light_state == "red":
       detail = f"距停点 {self.traffic_stop_distance:.0f}m" if self.traffic_stop_distance > 0 else "停车控制中"
-      label, color = "红灯停车", rl.RED
+      label, color = "检测到停车", rl.RED
     elif self.traffic_light_state == "green":
-      label, detail, color = "绿灯通行", "路径已放行", rl.GREEN
+      label, detail, color = "模型放行", "请确认路况", rl.GREEN
     else:
-      label, detail, color = "信号灯", "正在监测", COLORS.GREY
+      label, detail, color = "信号灯", "未检测到", COLORS.GREY
     rl.draw_text_ex(self._font_semi_bold, label, rl.Vector2(x, y), 29, 0, color)
     rl.draw_circle(int(x + width / 2), int(y + 83), 43, rl.Color(8, 8, 8, 245))
     rl.draw_circle(int(x + width / 2), int(y + 83), 34, color)
@@ -359,8 +364,8 @@ class HudRendererSP(HudRenderer):
 
     self.developer_ui.render(rect)
     self.road_name_renderer.render(rect)
-    # Speed-limit, traffic-light and curve-control states share the left
-    # cruise rail; standalone floating cards are deliberately suppressed.
+    # Curve controllers need independent visibility when another target wins.
+    self.smart_cruise_control_renderer.render(rect)
     self.turn_signal_controller.render(rect)
     self.circular_alerts_renderer.render(rect)
     self.rocket_fuel.render(rect, ui_state.sm)
@@ -389,8 +394,8 @@ class HudRendererSP(HudRenderer):
 
   def _draw_radar_status(self, rect: rl.Rectangle) -> None:
     """Draw radar status indicator (top-right corner)."""
-    w = 218
-    h = 70
+    w = 280
+    h = 80
     x = rect.x + rect.width - UI_CONFIG.border_size - UI_CONFIG.button_size - w - 18
     y = rect.y + 42
 
@@ -398,7 +403,7 @@ class HudRendererSP(HudRenderer):
     rl.draw_rectangle_rounded(rl.Rectangle(x, y, w, h), 0.22, 8, bg_color)
 
     if self.radar_status == "healthy":
-      radar_color = COLORS.ENGAGED
+      radar_color = COLORS.ENGAGED if not self.escc_enabled or self.escc_control_active else COLORS.GREY
     elif self.radar_status in ("initializing", "invalid"):
       radar_color = rl.Color(255, 190, 32, 255)
     else:
@@ -407,13 +412,16 @@ class HudRendererSP(HudRenderer):
 
     text = "ESCC" if self.escc_enabled else "RADAR"
     text_color = radar_color
-    rl.draw_text_ex(self._font_semi_bold, text, rl.Vector2(x + 48, y + 8), 25, 0, text_color)
+    rl.draw_text_ex(self._font_semi_bold, text, rl.Vector2(x + 48, y + 8), 28, 0, text_color)
 
     if self.radar_status == "healthy":
       # Keep status text inside the shipped atlas. The middle-dot glyph is not
       # part of the CJK fallback set and rendered as a replacement character.
-      detail = "正常 / 雷达前车" if self.lead_detected and self.lead_from_radar else \
-               "正常 / 视觉前车" if self.lead_detected else "硬件正常"
+      if self.escc_enabled:
+        detail = "纵向已启用" if self.escc_control_active else "待命 / 雷达正常" if self.escc_control_fresh else "控制状态未知"
+      else:
+        detail = "正常 / 雷达前车" if self.lead_detected and self.lead_from_radar else \
+                 "正常 / 视觉前车" if self.lead_detected else "硬件正常"
     elif self.radar_status == "initializing":
       detail = "正在初始化"
     elif self.radar_status == "invalid":
@@ -422,4 +430,4 @@ class HudRendererSP(HudRenderer):
       detail = "数据中断"
     else:
       detail = "雷达故障"
-    rl.draw_text_ex(self._font_medium, detail, rl.Vector2(x + 48, y + 39), 20, 0, radar_color)
+    rl.draw_text_ex(self._font_medium, detail, rl.Vector2(x + 48, y + 43), 24, 0, radar_color)

@@ -1,5 +1,17 @@
 ![](https://user-images.githubusercontent.com/47793918/233812617-beab2e71-57b9-479e-8bff-c3931347ca40.png)
 
+## GeniusPilot C3 安装
+
+当前受维护的主线是 [`genius/c3`](https://github.com/JiangNanGenius/CarrotPilot-C3-ESCC/tree/genius/c3)，用于 Mr.One C3 克隆机和 Kia Seltos 2023 ESCC 配置。
+
+- 首次安装地址：[`https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i`](https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/i)
+- SSH 安装或切换主线：`curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh`
+- 更新来源固定为本仓库的 `genius/c3`；SunnyPilot 仅作为只读上游。
+
+最新主线包含 Panda/C3 通信修复、仪表速度基准、道路限速与驾驶员最高定速分离、三段式限速偏移、SCC-V/SCC-M 独立强度、红灯停车目标保持、停车提前量、提示音以及新的 Onroad 巡航状态显示。自动红灯停车仍属于辅助功能，不能替代驾驶员观察和制动。
+
+发布和验证记录见 [`docs/GENIUSPILOT_RELEASE_20260914.md`](docs/GENIUSPILOT_RELEASE_20260914.md)。
+
 ## 🌞 What is sunnypilot?
 [sunnypilot](https://github.com/sunnyhaibin/sunnypilot) is a fork of comma.ai's openpilot, an open source driver assistance system. sunnypilot offers the user a unique driving experience for over 300+ supported car makes and models with modified behaviors of driving assist engagements. sunnypilot complies with comma.ai's safety rules as accurately as possible.
 

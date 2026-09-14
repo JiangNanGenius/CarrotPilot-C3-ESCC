@@ -81,17 +81,29 @@ class CruiseLayout(Widget):
       description="仪表模式会校正实际纵向目标，使车辆仪表显示贴合设定速度；不使用 GPS。")
 
     self.carrot_speed_limit = self._carrot_toggle(
-      "CarrotSpeedLimitEnable", "Carrot 规划速度源",
-      "把 Carrot 规划的道路限速、导航测速/减速带、车辆转发限速和弯道速度加入巡航上限。下方 Speed Limit 仍独立管理车辆与原生地图源。")
+      "CarrotSpeedLimitEnable", "道路限速来源",
+      "使用车辆识别或外部导航提供的有效限速，最高定速仅作为上限。松油门记住当时车速；新限速、刹车或退出巡航清除临时目标。弯道、前车和红灯仍可减速。关闭后恢复原生定速逻辑。")
 
     self.carrot_traffic_stop = self._carrot_toggle(
       "CarrotTrafficStopEnable", "红绿灯停车",
       "同时启用视觉模型停车和导航 App 红灯提前减速。关闭后两条 Carrot 红绿灯控制链都不介入；仍需随时观察并接管。")
 
+    self.follow_stop_distance = option_item_sp(
+      title="静止跟车目标距离", param="StopDistanceCarrot", min_value=300, max_value=1200,
+      value_change_step=100, label_callback=lambda value: f"{value / 100:g} 米", params=self._carrot_params,
+      description="默认6米，仅调整前车跟停目标，不改变行驶跟车时距。雷达目标距离不等于保险杠间距；实际过近时必须接管。")
+    self.traffic_cue_sound = self._carrot_toggle(
+      "TrafficCueSound", "信号识别与起步提示音",
+      "巡航时检测到停车信号、停车后自动开始移动，各提示一次。独立于全局静音；故障报警优先。踩踏板或数据失效会取消起步提示。仅提醒，不控制起步；模型放行不代表绿灯。")
+    self.traffic_stop_buffer = option_item_sp(
+      title="红灯停止线提前量", param="TrafficStopBufferCm", min_value=100, max_value=1000,
+      value_change_step=50, label_callback=lambda value: f"{value / 100:g} 米", params=self._carrot_params,
+      description="相对模型停止点提前停车；数值越大越早收速。当前设置会保留，短暂丢失红灯识别时也会继续执行已确认的停车目标。")
+
     self.auto_speed_limit_raise = self._carrot_selector(
       "AutoSpeedUptoRoadSpeedLimit", "按限速自动提高最高定速",
       ["关闭", "100%", "110%", "120%"], [0, 100, 110, 120],
-      description="前车在 60 米内且车流速度更高时，逐步提高最高定速；绝不超过道路限速 × 所选比例。按减速键会暂停，按加速/恢复键才重新允许。")
+      description="收到稳定且更高的新限速后，提高最高定速至道路限速 × 所选比例；规划速度仍按道路限速。按减速键会保留人工选择，直到更高限速或按加速/恢复键。")
 
     self.brake_auto_resume = self._carrot_toggle(
       "BrakeCruiseAutoResume", "刹车接管后自动恢复",
@@ -103,10 +115,22 @@ class CruiseLayout(Widget):
       description=tr("Use vision path predictions to estimate the appropriate speed to drive through turns ahead."),
       param="SmartCruiseControlVision")
 
+    self.scc_v_strength = option_item_sp(
+      title="视觉弯道减速强度", param="SCCVisionDecelStrength",
+      min_value=50, max_value=100, value_change_step=10,
+      label_callback=lambda value: f"{value}%",
+      description="100%保持 Sunny 原生减速，数值越低减速越轻。仅在视觉弯道控制介入时生效。")
+
     self.scc_m_toggle = toggle_item_sp(
       title=tr("Smart Cruise Control - Map"),
       description=tr("Use map data to estimate the appropriate speed to drive through turns ahead."),
       param="SmartCruiseControlMap")
+
+    self.scc_m_strength = option_item_sp(
+      title="地图弯道减速强度", param="SCCMapDecelStrength",
+      min_value=50, max_value=100, value_change_step=10,
+      label_callback=lambda value: f"{value}%",
+      description="100%保持 Sunny 原生减速，数值越低减速越轻。仅在地图弯道控制介入时生效。")
 
     self.custom_acc_toggle = toggle_item_sp(
       title=tr("Custom ACC Speed Increments"),
@@ -144,11 +168,16 @@ class CruiseLayout(Widget):
       self.speed_reference,
       self.carrot_speed_limit,
       self.carrot_traffic_stop,
+      self.traffic_cue_sound,
+      self.follow_stop_distance,
+      self.traffic_stop_buffer,
       self.auto_speed_limit_raise,
       self.brake_auto_resume,
       self.dec_toggle,
       self.scc_v_toggle,
+      self.scc_v_strength,
       self.scc_m_toggle,
+      self.scc_m_strength,
       self.custom_acc_toggle,
       self.custom_acc_short_increment,
       self.custom_acc_long_increment,
@@ -165,6 +194,13 @@ class CruiseLayout(Widget):
   def show_event(self):
     self._set_current_panel(PanelType.CRUISE)
     self._refresh_carrot_controls()
+    for item, key in ((self.follow_stop_distance, 'StopDistanceCarrot'),
+                      (self.traffic_stop_buffer, 'TrafficStopBufferCm')):
+      # Refresh without writing: merely opening a menu cannot reset a setting.
+      item.action_item.current_value = self._carrot_params.get_int(key)
+    for item, key in ((self.scc_v_strength, 'SCCVisionDecelStrength'),
+                      (self.scc_m_strength, 'SCCMapDecelStrength')):
+      item.action_item.current_value = int(item.action_item.params.get(key, return_default=True))
     self._scroller.show_event()
     self.custom_acc_toggle.show_description(True)
 
@@ -184,6 +220,8 @@ class CruiseLayout(Widget):
       self.dec_toggle.action_item.set_enabled(False)
       self.scc_v_toggle.action_item.set_enabled(False)
       self.scc_m_toggle.action_item.set_enabled(False)
+      self.scc_v_strength.action_item.set_enabled(False)
+      self.scc_m_strength.action_item.set_enabled(False)
       new_custom_acc_desc = tr(ONROAD_ONLY_DESCRIPTION)
       if self.custom_acc_toggle.description != new_custom_acc_desc:
         self.custom_acc_toggle.set_description(new_custom_acc_desc)
@@ -198,6 +236,8 @@ class CruiseLayout(Widget):
       self.dec_toggle.action_item.set_enabled(has_long)
       self.scc_v_toggle.action_item.set_enabled(True)
       self.scc_m_toggle.action_item.set_enabled(True)
+      self.scc_v_strength.action_item.set_enabled(True)
+      self.scc_m_strength.action_item.set_enabled(True)
     else:
       # Compatibility enforcement is centralized in UIStateSP once an
       # authoritative CarParams is available. A menu refresh must never erase
@@ -206,6 +246,8 @@ class CruiseLayout(Widget):
       self.dec_toggle.action_item.set_enabled(False)
       self.scc_v_toggle.action_item.set_enabled(False)
       self.scc_m_toggle.action_item.set_enabled(False)
+      self.scc_v_strength.action_item.set_enabled(False)
+      self.scc_m_strength.action_item.set_enabled(False)
 
     show_custom_acc_desc = False
 
