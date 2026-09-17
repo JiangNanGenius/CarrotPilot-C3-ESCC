@@ -593,18 +593,18 @@
     {
       "group": "LONG",
       "name": "StopDistanceCarrot",
-      "title": "StopDistance(600)cm",
+      "title": "StopDistance(350)cm",
       "descr": "Target stop distance used by Carrot longitudinal control. Higher values stop farther behind the lead/stop point.",
       "egroup": "LONG",
-      "etitle": "StopDistance(600)cm",
+      "etitle": "StopDistance(350)cm",
       "edescr": "Target stop distance used by Carrot longitudinal control. Higher values stop farther behind the lead/stop point.",
-      "min": 300,
-      "max": 1200,
-      "default": 600,
-      "unit": 10,
+      "min": 250,
+      "max": 600,
+      "default": 350,
+      "unit": 50,
       "cgroup": "纵向控制",
-      "ctitle": "停止距离(600)cm",
-      "cdescr": "前车跟停的雷达目标距离，不等于保险杠间距；默认 600 厘米，不改变行驶跟车时距。"
+      "ctitle": "停止距离(350)cm",
+      "cdescr": "静止前车跟停和低速保持目标；默认 350 厘米，不改变行驶跟车时距。"
     },
     {
       "group": "LONG",

@@ -21,7 +21,7 @@ def solve(distance):
   return mpc
 
 
-@pytest.mark.parametrize('distance', [3.0, 6.0, 8.0, 12.0])
+@pytest.mark.parametrize('distance', [2.5, 3.5, 5.0, 6.0])
 def test_generated_solver_accepts_runtime_distance(distance):
   mpc = solve(distance)
   assert PARAM_DIM == 7
@@ -29,5 +29,5 @@ def test_generated_solver_accepts_runtime_distance(distance):
 
 
 def test_larger_buffer_does_not_plan_a_closer_stop():
-  short, long = solve(6.0), solve(8.0)
+  short, long = solve(3.5), solve(6.0)
   assert long.x_sol[-1, 0] <= short.x_sol[-1, 0] + 0.05

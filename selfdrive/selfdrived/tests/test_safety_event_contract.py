@@ -25,3 +25,11 @@ def test_invalid_advisory_envelopes_do_not_publish_stale_events():
 
   assert "if service_data_available(self.sm, 'driverMonitoringState')" in source
   assert "if service_data_available(self.sm, 'longitudinalPlanSP')" in source
+
+
+def test_startup_grace_only_suppresses_the_generic_comm_catch_all():
+  source = SELFDRIVED.read_text()
+  assert "startup_comm_grace_frames = int(8. / DT_CTRL)" in source
+  assert "and not startup_comm_grace" in source
+  assert source.index("EventName.processNotRunning") < source.index("startup_comm_grace =")
+  assert source.index("EventName.canError") < source.index("startup_comm_grace =")

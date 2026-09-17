@@ -49,6 +49,7 @@ def cruise_source_label(plan_alive: bool, target_source) -> str:
     CruiseTargetSource.trafficLight: "红灯停车",
     CruiseTargetSource.safetyDecel: "安全减速",
     CruiseTargetSource.driverOverride: "油门设定",
+    CruiseTargetSource.speedCamera: "测速限速",
   }.get(target_source, "未知来源")
 
 
@@ -96,6 +97,7 @@ class HudRendererSP(HudRenderer):
     self.cruise_target_available: bool = False
     self.traffic_stop_distance: float = 0.0
     self.traffic_light_state: str = "off"
+    self.traffic_stop_late: bool = False
     self._traffic_light_hold_frames: int = 0
     self.longitudinal_plan_alive: bool = False
     self.gear_shifter: str = "unknown"  # 当前档位
@@ -176,6 +178,7 @@ class HudRendererSP(HudRenderer):
           self.cruise_target_speed = 0.0
         stop_distance = float(long_plan.trafficStopDistance)
         self.traffic_stop_distance = max(0.0, stop_distance) if math.isfinite(stop_distance) else 0.0
+        self.traffic_stop_late = bool(long_plan.trafficStopLate)
 
         traffic_state = int(long_plan.trafficState)
         if traffic_state == 1:
@@ -189,6 +192,7 @@ class HudRendererSP(HudRenderer):
         else:
           self.traffic_light_state = "off"
           self.traffic_stop_distance = 0.0
+          self.traffic_stop_late = False
       else:
         # An alive producer can continuously publish invalid envelopes. Never
         # retain an old target or green-light release through that condition.
@@ -197,6 +201,7 @@ class HudRendererSP(HudRenderer):
         self.cruise_target_speed = 0.0
         self.traffic_light_state = "off"
         self.traffic_stop_distance = 0.0
+        self.traffic_stop_late = False
         self._traffic_light_hold_frames = 0
     elif not ui_state.sm.alive['longitudinalPlan']:
       self.longitudinal_plan_alive = False
@@ -204,6 +209,7 @@ class HudRendererSP(HudRenderer):
       self.cruise_target_speed = 0.0
       self.traffic_light_state = "off"
       self.traffic_stop_distance = 0.0
+      self.traffic_stop_late = False
       self._traffic_light_hold_frames = 0
 
     super()._update_state()
@@ -301,7 +307,7 @@ class HudRendererSP(HudRenderer):
                           text_value: bool = False) -> None:
     label_width = measure_text_cached(self._font_semi_bold, label, 29).x
     rl.draw_text_ex(self._font_semi_bold, label, rl.Vector2(x + (width - label_width) / 2, y), 29, 0, COLORS.GREY)
-    value_size = (36 if len(value) >= 4 else 41) if text_value else (54 if len(value) >= 3 else 62)
+    value_size = (40 if len(value) >= 4 else 44) if text_value else (54 if len(value) >= 3 else 62)
     value_width = measure_text_cached(self._font_bold, value, value_size).x
     rl.draw_text_ex(self._font_bold, value, rl.Vector2(x + (width - value_width) / 2, y + 35), value_size, 0, color)
 
@@ -327,7 +333,8 @@ class HudRendererSP(HudRenderer):
     if not self.longitudinal_plan_alive:
       label, detail, color = "纵向离线", "不可用", rl.RED
     elif self.traffic_light_state == "red":
-      detail = f"距停点 {self.traffic_stop_distance:.0f}m" if self.traffic_stop_distance > 0 else "停车控制中"
+      detail = ("停车点过近 请接管" if self.traffic_stop_late else
+                f"距停点 {self.traffic_stop_distance:.0f}m" if self.traffic_stop_distance > 0 else "停车控制中")
       label, color = "检测到停车", rl.RED
     elif self.traffic_light_state == "green":
       label, detail, color = "模型放行", "请确认路况", rl.GREEN

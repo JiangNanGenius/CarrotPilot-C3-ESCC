@@ -8,7 +8,7 @@
 
 #ifndef CAPNP_VERSION
 #error "CAPNP_VERSION is not defined, is capnp/generated-header-support.h missing?"
-#elif CAPNP_VERSION != 1000001
+#elif CAPNP_VERSION != 1000002
 #error "Version mismatch between generated code and library headers.  You must use the same version of the Cap'n Proto compiler and library."
 #endif
 
@@ -448,6 +448,7 @@ enum class CruiseTargetSource_cf78851b9bc74a46: uint16_t {
   TRAFFIC_LIGHT,
   SAFETY_DECEL,
   DRIVER_OVERRIDE,
+  SPEED_CAMERA,
 };
 CAPNP_DECLARE_ENUM(CruiseTargetSource, cf78851b9bc74a46);
 CAPNP_DECLARE_SCHEMA(f241315ad87f2721);
@@ -10973,6 +10974,10 @@ public:
 
   inline bool getDriverCruiseValid() const;
 
+  inline bool getSpeedCameraEnforced() const;
+
+  inline bool getTrafficStopLate() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -11087,6 +11092,12 @@ public:
 
   inline bool getDriverCruiseValid();
   inline void setDriverCruiseValid(bool value);
+
+  inline bool getSpeedCameraEnforced();
+  inline void setSpeedCameraEnforced(bool value);
+
+  inline bool getTrafficStopLate();
+  inline void setTrafficStopLate(bool value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -35076,6 +35087,34 @@ inline bool LongitudinalPlan::Builder::getDriverCruiseValid() {
 inline void LongitudinalPlan::Builder::setDriverCruiseValid(bool value) {
   _builder.setDataField<bool>(
       ::capnp::bounded<665>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool LongitudinalPlan::Reader::getSpeedCameraEnforced() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<666>() * ::capnp::ELEMENTS);
+}
+
+inline bool LongitudinalPlan::Builder::getSpeedCameraEnforced() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<666>() * ::capnp::ELEMENTS);
+}
+inline void LongitudinalPlan::Builder::setSpeedCameraEnforced(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<666>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool LongitudinalPlan::Reader::getTrafficStopLate() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<667>() * ::capnp::ELEMENTS);
+}
+
+inline bool LongitudinalPlan::Builder::getTrafficStopLate() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<667>() * ::capnp::ELEMENTS);
+}
+inline void LongitudinalPlan::Builder::setTrafficStopLate(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<667>() * ::capnp::ELEMENTS, value);
 }
 
 inline bool LongitudinalPlan::Deprecated::Reader::getLateralValid() const {

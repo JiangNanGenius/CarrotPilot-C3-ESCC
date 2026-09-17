@@ -19,6 +19,7 @@ def test_cruise_source_uses_authoritative_final_constraint():
   assert _label(CruiseTargetSource.mapCurve) == "地图弯道"
   assert _label(CruiseTargetSource.safetyDecel) == "安全减速"
   assert _label(CruiseTargetSource.driverOverride) == "油门设定"
+  assert _label(CruiseTargetSource.speedCamera) == "测速限速"
   assert _label(100) == "未知来源"
 
 

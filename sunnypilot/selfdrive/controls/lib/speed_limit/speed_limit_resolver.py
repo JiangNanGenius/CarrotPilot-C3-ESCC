@@ -18,6 +18,8 @@ from openpilot.sunnypilot.selfdrive.controls.lib.speed_limit.common import Polic
 SpeedLimitSource = custom.LongitudinalPlanSP.SpeedLimit.Source
 
 ALL_SOURCES = tuple(SpeedLimitSource.schema.enumerants.values())
+SPEED_CAMERA_CONFIRM_FRAMES = max(1, round(0.1 / DT_MDL))
+SPEED_CAMERA_HOLD_FRAMES = max(SPEED_CAMERA_CONFIRM_FRAMES, round(1.0 / DT_MDL))
 
 
 def get_segmented_speed_limit_offset(speed_limit: float, is_metric: bool,
@@ -91,6 +93,9 @@ class SpeedLimitResolver:
     self.speed_limit_final = 0.
     self.speed_limit_final_last = 0.
     self.speed_limit_offset = 0.
+    self.speed_camera_active = False
+    self._speed_camera_confirm_frames = 0
+    self._speed_camera_hold_frames = 0
 
   def update_speed_limit_states(self) -> None:
     self.speed_limit_final = self.speed_limit + self.speed_limit_offset
@@ -142,6 +147,23 @@ class SpeedLimitResolver:
       return
     self.limit_solutions[SpeedLimitSource.car] = sm['carStateSP'].speedLimit
     self.distance_solutions[SpeedLimitSource.car] = 0.
+
+  def _update_speed_camera_state(self, sm: messaging.SubMaster) -> None:
+    """Debounce the exact OEM camera bit and bridge brief CAN dropouts."""
+    raw_active = bool(sm.alive['carStateSP'] and sm.valid['carStateSP'] and
+                      sm['carStateSP'].speedCameraActive)
+    if raw_active:
+      self._speed_camera_confirm_frames += 1
+      if self._speed_camera_confirm_frames >= SPEED_CAMERA_CONFIRM_FRAMES:
+        self.speed_camera_active = True
+        self._speed_camera_hold_frames = SPEED_CAMERA_HOLD_FRAMES
+    else:
+      self._speed_camera_confirm_frames = 0
+      if self.speed_camera_active and self._speed_camera_hold_frames > 0:
+        self._speed_camera_hold_frames -= 1
+      else:
+        self.speed_camera_active = False
+        self._speed_camera_hold_frames = 0
 
   def _get_from_map_data(self, sm: messaging.SubMaster) -> None:
     self._reset_limit_sources(SpeedLimitSource.map)
@@ -205,6 +227,11 @@ class SpeedLimitResolver:
     self._get_from_car_state(sm)
     self._get_from_map_data(sm)
 
+    # A confirmed OEM camera has the strongest authority and must use the raw
+    # limit paired with that same Navi_HU packet, never a map-derived value.
+    if self.speed_camera_active and self.limit_solutions[SpeedLimitSource.car] > 0.:
+      return self.limit_solutions[SpeedLimitSource.car], 0., SpeedLimitSource.car
+
     source = self._get_source_solution_according_to_policy()
     speed_limit = self.limit_solutions[source] if source else 0.
     distance = self.distance_solutions[source] if source else 0.
@@ -215,8 +242,9 @@ class SpeedLimitResolver:
     self.v_ego = v_ego
     self.update_params()
 
+    self._update_speed_camera_state(sm)
     self.speed_limit, self.distance, self.source = self._resolve_limit_sources(sm)
-    self.speed_limit_offset = self._get_speed_limit_offset()
+    self.speed_limit_offset = 0. if self.speed_camera_active else self._get_speed_limit_offset()
 
     self.update_speed_limit_states()
 

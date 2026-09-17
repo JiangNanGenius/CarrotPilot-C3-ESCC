@@ -8,9 +8,9 @@
 - SSH 安装或切换主线：`curl -fsSL https://jiangnangenius.github.io/CarrotPilot-C3-ESCC/s | sh`
 - 更新来源固定为本仓库的 `genius/c3`；SunnyPilot 仅作为只读上游。
 
-最新主线包含 Panda/C3 通信修复、仪表速度基准、道路限速与驾驶员最高定速分离、三段式限速偏移、SCC-V/SCC-M 独立强度、红灯停车目标保持、停车提前量、提示音以及新的 Onroad 巡航状态显示。自动红灯停车仍属于辅助功能，不能替代驾驶员观察和制动。
+最新主线包含 Panda/C3 通信修复、仪表速度基准、道路限速与驾驶员最高定速分离、三段式限速偏移、原厂测速摄像头限速、SCC-V/SCC-M 独立强度、低速跟停保持、红灯停车目标保持、停车提前量、提示音以及新的 Onroad 巡航状态显示。自动红灯停车仍属于辅助功能，不能替代驾驶员观察和制动。
 
-发布和验证记录见 [`docs/GENIUSPILOT_RELEASE_20260914.md`](docs/GENIUSPILOT_RELEASE_20260914.md)。
+最新发布和验证记录见 [`docs/GENIUSPILOT_RELEASE_20260918.md`](docs/GENIUSPILOT_RELEASE_20260918.md)。
 
 ## 🌞 What is sunnypilot?
 [sunnypilot](https://github.com/sunnyhaibin/sunnypilot) is a fork of comma.ai's openpilot, an open source driver assistance system. sunnypilot offers the user a unique driving experience for over 300+ supported car makes and models with modified behaviors of driving assist engagements. sunnypilot complies with comma.ai's safety rules as accurately as possible.

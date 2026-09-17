@@ -337,7 +337,7 @@ class LongitudinalMpc:
     self.params[:,3] = np.copy(self.a_prev)
     self.params[:,4] = t_follow
     self.params[:,5] = LEAD_DANGER_FACTOR
-    self.params[:,6] = np.clip(stop_distance, 3.0, 12.0) if np.isfinite(stop_distance) else STOP_DISTANCE
+    self.params[:,6] = np.clip(stop_distance, 2.5, 6.0) if np.isfinite(stop_distance) else STOP_DISTANCE
 
     self.run()
     if (np.any(lead_xv_0[FCW_IDXS,0] - self.x_sol[FCW_IDXS,0] < CRASH_DISTANCE) and

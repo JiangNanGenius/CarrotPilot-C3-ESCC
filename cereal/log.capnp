@@ -1164,6 +1164,8 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   roadCruiseValid @47 :Bool;
   driverCruiseTarget @48 :Float32;  # km/h; only meaningful when driverCruiseValid
   driverCruiseValid @49 :Bool;
+  speedCameraEnforced @50 :Bool;    # debounced OEM navigation camera flag
+  trafficStopLate @51 :Bool;        # stopping point exceeds normal braking budget
 
 
   solverExecutionTime @35 :Float32;
@@ -1190,6 +1192,7 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
     trafficLight @7;
     safetyDecel @8;
     driverOverride @9;
+    speedCamera @10;
   }
 
 

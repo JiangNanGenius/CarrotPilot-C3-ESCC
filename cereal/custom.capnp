@@ -458,6 +458,10 @@ struct BackupManagerSP @0xf98d843bfd7004a3 {
 
 struct CarStateSP @0xb86e6369214c01c8 {
   speedLimit @0 :Float32;
+  # Raw OEM-navigation camera flag. Hyundai CAN exposes this as
+  # Navi_HU.SpeedLim_Nav_Cam; keep it separate from the debounced planner
+  # state so route logs can prove whether the head unit actually asserted it.
+  speedCameraActive @1 :Bool;
 }
 
 struct LiveMapDataSP @0xf416ec09499d9d19 {

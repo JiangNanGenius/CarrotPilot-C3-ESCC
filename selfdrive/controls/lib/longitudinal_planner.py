@@ -15,6 +15,7 @@ from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import T_IDX
 from openpilot.selfdrive.controls.lib.drive_helpers import CONTROL_N, get_accel_from_plan, should_stop
 from openpilot.selfdrive.controls.lib.speed_reference import SpeedReference, INSTRUMENT_SPEED
 from openpilot.selfdrive.controls.lib.stop_distance_settings import StopDistanceSettings
+from openpilot.selfdrive.controls.lib.lead_stop_hold import LeadStopHold
 from openpilot.selfdrive.car.cruise import V_CRUISE_MAX
 from openpilot.common.swaglog import cloudlog
 
@@ -107,6 +108,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.carrot_planner_faulted = False
     self.speed_reference = SpeedReference()
     self.stop_distances = StopDistanceSettings(self.carrot_planner.params)
+    self.lead_stop_hold = LeadStopHold()
 
   def update(self, sm):
     LongitudinalPlannerSP.update(self, sm)
@@ -158,7 +160,9 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     v_cruise, self.output_a_target = LongitudinalPlannerSP.update_targets(self, sm, self.v_desired_filter.x, self.output_a_target, v_cruise)
     self.cruise_target_source = base_cruise_target_source(self.source, self.resolver.source, self.speed_reference.reference)
     if self.policy_enabled and self.source == custom.LongitudinalPlanSP.LongitudinalPlanSource.cruise:
-      if self.cruise_policy.source == 'driver':
+      if self.resolver.speed_camera_active:
+        self.cruise_target_source = CruiseTargetSource.speedCamera
+      elif self.cruise_policy.source == 'driver':
         self.cruise_target_source = CruiseTargetSource.driverOverride
       elif self.cruise_policy.source == 'road':
         self.cruise_target_source = (CruiseTargetSource.navigationLimit if self.policy_navigation_limit else
@@ -176,7 +180,7 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
           sm, v_cruise * CV.MS_TO_KPH, mode="combined", traffic_stop_enabled=traffic_stop_enabled,
         )
         carrot_v_cruise = v_cruise_kph_carrot * CV.KPH_TO_MS
-        if carrot_v_cruise < v_cruise - 1e-3 and int(self.carrot_planner.trafficState.value) == 1:
+        if carrot_v_cruise < v_cruise - 1e-3 and self.carrot_planner.traffic_stop_active:
           self.cruise_target_source = CruiseTargetSource.trafficLight
         v_cruise = carrot_v_cruise
       except Exception:
@@ -188,7 +192,10 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     # Sunny keeps its native camera/map policy and configured offset. Carrot's
     # independently enabled aggregate may also contribute a forwarded vehicle
     # limit; desiredSource below keeps the final displayed authority truthful.
-    v_cruise = self.carrot_speed_limit.update(sm, v_cruise, independent_constraints=self.policy_enabled)
+    v_cruise = self.carrot_speed_limit.update(
+      sm, v_cruise, independent_constraints=self.policy_enabled,
+      driver_curve_override=self.policy_enabled and self.cruise_policy.override is not None,
+    )
     if self.carrot_speed_limit.active_source != CarrotSpeedLimitSource.none:
       self.cruise_target_source = carrot_cruise_target_source(
         self.carrot_speed_limit.active_source, self.speed_reference.reference,
@@ -249,6 +256,13 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
 
     output_a_target, self.mpc.source, _ = min(candidates, key=lambda c: c[0])
     self.output_should_stop = any(should_stop for _, _, should_stop in candidates)
+    lead = sm['radarState'].leadOne
+    if self.lead_stop_hold.update(
+        lead_status=lead.status, lead_distance=lead.dRel, lead_speed=lead.vLead,
+        ego_speed=v_ego, desired_gap=self.stop_distances.follow,
+        engaged=not reset_state, gas=sm['carState'].gasPressed):
+      self.output_should_stop = True
+      self.mpc.source = LongitudinalPlanSource.lead0
     self.output_a_target = np.clip(output_a_target, ACCEL_MIN, ACCEL_MAX)
 
     self.v_desired_filter.x = self.v_desired_filter.x + self.dt * (self.output_a_target + a_prev) / 2.0
@@ -275,7 +289,8 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     longitudinalPlan.shouldStop = bool(self.output_should_stop)
     longitudinalPlan.allowBrake = True
     longitudinalPlan.allowThrottle = bool(self.allow_throttle)
-    longitudinalPlan.trafficState = 1 if self.carrot_traffic_stop.active else int(self.carrot_planner.trafficState.value)
+    longitudinalPlan.trafficState = (1 if self.carrot_traffic_stop.active or self.carrot_planner.traffic_stop_active
+                                     else int(self.carrot_planner.trafficState.value))
     longitudinalPlan.trafficStopDistance = float(max(0.0, self.carrot_planner.stop_dist))
     longitudinalPlan.cruiseTargetSpeed = float(self.cruise_target_speed)
     longitudinalPlan.cruiseTargetSource = self.cruise_target_source
@@ -285,6 +300,8 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     longitudinalPlan.roadCruiseTarget = float((self.policy_road_target or 0.0) * CV.MS_TO_KPH)
     longitudinalPlan.driverCruiseValid = self.policy_enabled and self.cruise_policy.override is not None
     longitudinalPlan.driverCruiseTarget = float((self.cruise_policy.override or 0.0) * CV.MS_TO_KPH)
+    longitudinalPlan.speedCameraEnforced = bool(self.resolver.speed_camera_active)
+    longitudinalPlan.trafficStopLate = bool(self.carrot_planner.traffic_stop_late)
 
     pm.send('longitudinalPlan', plan_send)
 

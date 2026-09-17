@@ -179,7 +179,13 @@ class CarrotPlanner:
     self.atc_active = False
 
     self._stop_x_rl = None
+    self._stop_disengaged_frames = 0
+    self.traffic_stop_late = False
     self.last_event_time = 0.0
+
+  @property
+  def traffic_stop_active(self) -> bool:
+    return self.xState in [XState.e2eStop, XState.e2eStopped]
 
   def _params_update(self):
     self.frame += 1
@@ -455,6 +461,8 @@ class CarrotPlanner:
       self.actual_stop_distance = 0.0
       self.stop_dist = 0.0
       self._stop_x_rl = None
+      self._stop_disengaged_frames = 0
+      self.traffic_stop_late = False
       return v_cruise_kph
 
     self._params_update()
@@ -466,8 +474,15 @@ class CarrotPlanner:
     long_enabled = bool(sm['carControl'].enabled)
 
     if not long_enabled and self.xState in [XState.e2eStop, XState.e2eStopped]:
-      self.xState = XState.e2eCruise
-      self.actual_stop_distance = 0.0
+      # Brake takeover and brief longitudinal interruptions must not discard a
+      # stop point that was already confirmed. Keep it for ten seconds so an
+      # optional safe resume continues toward the original line.
+      self._stop_disengaged_frames += 1
+      if self._stop_disengaged_frames * DT_MDL > 10.0:
+        self.xState = XState.e2eCruise
+        self.actual_stop_distance = 0.0
+    else:
+      self._stop_disengaged_frames = 0
 
     # softHoldActive belonged to the source fork's extended CarState schema.
     # brakeHoldActive is the closest schema-backed signal in this tree; do
@@ -497,14 +512,27 @@ class CarrotPlanner:
     v = model.velocity.x
 
     # A newly selected model can publish an empty/partial trajectory during
-    # runner handover. Skip visual stopping for that frame instead of faulting
-    # and disabling the feature for the rest of the drive.
+    # runner handover. Preserve an already committed stop and advance it from
+    # ego travel; only an uncommitted detector state is reset.
     if len(x) <= 31 or len(y) == 0 or len(v) == 0:
       self.trafficState = TrafficState.off
+      if self.xState in [XState.e2eStop, XState.e2eStopped]:
+        self.actual_stop_distance = advance_latched_stop_distance(
+          self.actual_stop_distance, None, False, v_ego * DT_MDL,
+        )
+        self.stop_dist = self.actual_stop_distance
+        v_soft = traffic_stop_target_speed(
+          self.stop_dist, self.comfort_brake, self.traffic_stop_buffer, self.traffic_response_time,
+        )
+        self.v_cruise = min(v_cruise, v_soft)
+        usable = max(0.1, self.stop_dist - self.traffic_stop_buffer)
+        self.traffic_stop_late = v_ego**2 / (2.0 * usable) > 1.2
+        return self.v_cruise * CV.MS_TO_KPH
       self.xState = XState.e2eCruise
       self.actual_stop_distance = 0.0
       self.stop_dist = 0.0
       self._stop_x_rl = None
+      self.traffic_stop_late = False
       return v_cruise_kph
 
     self.fakeCruiseDistance = 0.0
@@ -639,6 +667,10 @@ class CarrotPlanner:
     if stopping_active and stop_dist < 300.0:
       v_soft = traffic_stop_target_speed(stop_dist, self.comfort_brake, self.traffic_stop_buffer, self.traffic_response_time)
       v_cruise = min(v_cruise, v_soft)
+
+    usable_stop_distance = max(0.1, stop_dist - self.traffic_stop_buffer)
+    self.traffic_stop_late = bool(stopping_active and v_ego > 0.3 and
+                                  v_ego**2 / (2.0 * usable_stop_distance) > 1.2)
 
     self.v_cruise = v_cruise
     self.stop_dist = stop_dist

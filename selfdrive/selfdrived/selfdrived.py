@@ -131,6 +131,7 @@ class SelfdriveD(CruiseHelper):
     self.events = Events()
 
     self.initialized = False
+    self.startup_comm_grace_frames = 0
     self.enabled = False
     self.active = False
     self.mismatch_counter = 0
@@ -386,7 +387,9 @@ class SelfdriveD(CruiseHelper):
     # generic catch-all. ideally, a more specific event should be added above instead
     has_disable_events = self.events.contains(ET.NO_ENTRY) and (self.events.contains(ET.SOFT_DISABLE) or self.events.contains(ET.IMMEDIATE_DISABLE))
     no_system_errors = (not has_disable_events) or (len(self.events) == num_events)
-    if not self.sm.all_checks() and no_system_errors:
+    startup_comm_grace = self.startup_comm_grace_frames > 0
+    self.startup_comm_grace_frames = max(0, self.startup_comm_grace_frames - 1)
+    if not self.sm.all_checks() and no_system_errors and not startup_comm_grace:
       if not self.sm.all_alive():
         self.events.add(EventName.commIssue)
       elif not self.sm.all_freq_ok():
@@ -497,6 +500,11 @@ class SelfdriveD(CruiseHelper):
           self.state_machine.state = State.enabled
 
         self.initialized = True
+        # C3 radar and driver-monitoring envelopes can need a few extra
+        # seconds after the bounded initialization timeout. Specific process,
+        # camera, CAN, Panda and radar faults remain active; suppress only the
+        # generic communication catch-all during this startup window.
+        self.startup_comm_grace_frames = int(8. / DT_CTRL)
         cloudlog.event(
           "selfdrived.initialized",
           dt=self.sm.frame*DT_CTRL,

@@ -84,13 +84,18 @@ class LongitudinalPlannerSP:
       # the longitudinal session and drops on cancel/disengagement.
       engaged=self.policy_enabled and long_enabled,
       standstill=CS.standstill or CS.vEgo < 0.1,
+      enforce_limit=self.resolver.speed_camera_active,
     )
 
     targets = {
       LongitudinalPlanSource.cruise: (policy_target if self.policy_enabled else v_cruise, a_ego),
-      LongitudinalPlanSource.sccVision: (self.scc.vision.output_v_target, self.scc.vision.output_a_target),
-      LongitudinalPlanSource.sccMap: (self.scc.map.output_v_target, self.scc.map.output_a_target),
     }
+    # A released pedal may temporarily override excessive curve slowing, but
+    # lead/e2e/traffic constraints remain downstream. Camera enforcement
+    # clears this state before target selection.
+    if not (self.policy_enabled and self.cruise_policy.override is not None):
+      targets[LongitudinalPlanSource.sccVision] = (self.scc.vision.output_v_target, self.scc.vision.output_a_target)
+      targets[LongitudinalPlanSource.sccMap] = (self.scc.map.output_v_target, self.scc.map.output_a_target)
     if not self.policy_enabled:
       targets[LongitudinalPlanSource.speedLimitAssist] = (self.sla.output_v_target, self.sla.output_a_target)
 

@@ -81,6 +81,28 @@ def test_independent_curve_survives_driver_road_override():
   assert limiter.active_source == CarrotSpeedLimitSource.mapCurve
 
 
+@pytest.mark.parametrize('source', ['model', 'vturn', 'route', 'atc'])
+def test_driver_pedal_override_bypasses_only_curve_constraints(source):
+  sm = FakeSubMaster(desired_speed=32, desired_source=source)
+  sm['carrotMan'].constraintSpeed = 32
+  sm['carrotMan'].constraintSource = source
+  sm['carrotMan'].constraintValid = True
+  limiter = CarrotSpeedLimit(FakeParams())
+  assert limiter.update(sm, 60 / 3.6, independent_constraints=True,
+                        driver_curve_override=True) == pytest.approx(60 / 3.6)
+
+
+@pytest.mark.parametrize('source', ['bump', 'cam', 'safety'])
+def test_driver_pedal_override_cannot_bypass_non_curve_constraints(source):
+  sm = FakeSubMaster(desired_speed=32, desired_source=source)
+  sm['carrotMan'].constraintSpeed = 32
+  sm['carrotMan'].constraintSource = source
+  sm['carrotMan'].constraintValid = True
+  limiter = CarrotSpeedLimit(FakeParams())
+  assert limiter.update(sm, 60 / 3.6, independent_constraints=True,
+                        driver_curve_override=True) == pytest.approx(32 / 3.6)
+
+
 @pytest.mark.parametrize('source', ['gas', 'road', 'driver'])
 def test_legacy_aggregate_cannot_reset_planner_road_override(source):
   sm = FakeSubMaster(desired_speed=40, desired_source=source)

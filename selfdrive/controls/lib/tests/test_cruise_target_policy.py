@@ -27,6 +27,18 @@ class TestCruiseTargetPolicy:
     assert self.update(speed=45 / 3.6) == pytest.approx(60)
     assert self.update(road_limit=40 / 3.6 + 1e-7) == pytest.approx(60)
 
+  def test_release_below_limit_recovers_to_limit(self):
+    self.update(road_limit=60 / 3.6)
+    self.update(gas=True, speed=30 / 3.6)
+    assert self.update(gas=False, speed=30 / 3.6) == pytest.approx(60)
+    assert self.policy.override == pytest.approx(60 / 3.6)
+
+  def test_camera_enforcement_clears_override_and_offset_target(self):
+    self.override()
+    assert self.policy.override is not None
+    assert self.update(road_limit=40 / 3.6, enforce_limit=True) == pytest.approx(40)
+    assert self.policy.override is None
+
   def test_new_limit_wins_over_release(self):
     self.update(gas=True, speed=70 / 3.6)
     assert self.update(gas=False, road_limit=50 / 3.6) == pytest.approx(50)

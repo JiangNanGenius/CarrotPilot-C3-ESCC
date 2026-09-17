@@ -40,6 +40,7 @@ def setup_sm_mock(mocker: MockerFixture):
   }, mocker)
   car_state_sp = create_mock({
     'speedLimit': cruise_speed_limit,
+    'speedCameraActive': False,
   }, mocker)
   live_map_data = create_mock({
     'speedLimit': live_map_data_limit,
@@ -193,3 +194,40 @@ def test_segmented_mode_selects_one_offset_without_legacy_stacking():
   resolver.segmented_offset_medium = 1
   resolver.segmented_offset_high = 2
   assert resolver._get_speed_limit_offset() * 3.6 == pytest.approx(1)
+
+
+def test_oem_camera_requires_confirmation_then_forces_raw_vehicle_limit(mocker):
+  resolver = SpeedLimitResolver()
+  resolver.policy = Policy.combined
+  resolver.offset_type = OffsetType.segmented
+  resolver.is_metric = True
+  resolver.segmented_offset_low = 3
+  resolver.segmented_offset_medium = 5
+  resolver.segmented_offset_high = 10
+  sm = setup_sm_mock(mocker)
+  sm['carStateSP'].speedLimit = 60 / 3.6
+  sm['liveMapDataSP'].speedLimit = 40 / 3.6
+  sm['carStateSP'].speedCameraActive = True
+
+  resolver.update(0, sm)
+  assert not resolver.speed_camera_active
+  resolver.update(0, sm)
+  assert resolver.speed_camera_active
+  assert resolver.source == SpeedLimitSource.car
+  assert resolver.speed_limit == pytest.approx(60 / 3.6)
+  assert resolver.speed_limit_final == pytest.approx(60 / 3.6)
+  assert resolver.speed_limit_offset == 0
+
+
+def test_oem_camera_short_dropout_is_held(mocker):
+  resolver = SpeedLimitResolver()
+  resolver.policy = Policy.car_state_only
+  sm = setup_sm_mock(mocker)
+  sm['carStateSP'].speedCameraActive = True
+  resolver.update(0, sm)
+  resolver.update(0, sm)
+  assert resolver.speed_camera_active
+
+  sm['carStateSP'].speedCameraActive = False
+  resolver.update(0, sm)
+  assert resolver.speed_camera_active

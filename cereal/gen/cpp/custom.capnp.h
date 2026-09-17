@@ -8,7 +8,7 @@
 
 #ifndef CAPNP_VERSION
 #error "CAPNP_VERSION is not defined, is capnp/generated-header-support.h missing?"
-#elif CAPNP_VERSION != 1000001
+#elif CAPNP_VERSION != 1000002
 #error "Version mismatch between generated code and library headers.  You must use the same version of the Cap'n Proto compiler and library."
 #endif
 
@@ -4531,6 +4531,8 @@ public:
 
   inline float getSpeedLimit() const;
 
+  inline bool getSpeedCameraActive() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -4561,6 +4563,9 @@ public:
 
   inline float getSpeedLimit();
   inline void setSpeedLimit(float value);
+
+  inline bool getSpeedCameraActive();
+  inline void setSpeedCameraActive(bool value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -9409,6 +9414,20 @@ inline float CarStateSP::Builder::getSpeedLimit() {
 inline void CarStateSP::Builder::setSpeedLimit(float value) {
   _builder.setDataField<float>(
       ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool CarStateSP::Reader::getSpeedCameraActive() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<32>() * ::capnp::ELEMENTS);
+}
+
+inline bool CarStateSP::Builder::getSpeedCameraActive() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<32>() * ::capnp::ELEMENTS);
+}
+inline void CarStateSP::Builder::setSpeedCameraActive(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<32>() * ::capnp::ELEMENTS, value);
 }
 
 inline bool LiveMapDataSP::Reader::getSpeedLimitValid() const {

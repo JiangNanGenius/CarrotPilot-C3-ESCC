@@ -41,6 +41,14 @@ class CarStateExt:
 
     return speed_limit
 
+  def update_speed_camera(self, cp) -> bool:
+    """Return the exact OEM navigation camera-active bit without heuristics."""
+    if self.CP.flags & HyundaiFlags.CANFD:
+      return False
+    if not self.CP_SP.flags & HyundaiFlagsSP.SPEED_LIMIT_AVAILABLE:
+      return False
+    return cp.vl["Navi_HU"]["SpeedLim_Nav_Cam"] == 1
+
   def update(self, ret: structs.CarState, ret_sp: structs.CarStateSP, can_parsers: dict[StrEnum, CANParser], speed_conv: float) -> None:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
@@ -75,6 +83,7 @@ class CarStateExt:
         ret.stockAeb = aeb_warning and aeb_braking
 
     ret_sp.speedLimit = self.update_speed_limit(cp, cp_cam) * speed_conv
+    ret_sp.speedCameraActive = self.update_speed_camera(cp)
 
   def update_canfd_ext(self, ret: structs.CarState, ret_sp: structs.CarStateSP, can_parsers: dict[StrEnum, CANParser],
                        speed_factor: float) -> None:
@@ -84,3 +93,4 @@ class CarStateExt:
     self.aBasis = cp.vl["TCS"]["aBasis"]
 
     ret_sp.speedLimit = self.update_speed_limit(cp, cp_cam) * speed_factor
+    ret_sp.speedCameraActive = False

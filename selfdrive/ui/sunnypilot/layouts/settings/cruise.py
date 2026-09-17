@@ -89,9 +89,9 @@ class CruiseLayout(Widget):
       "同时启用视觉模型停车和导航 App 红灯提前减速。关闭后两条 Carrot 红绿灯控制链都不介入；仍需随时观察并接管。")
 
     self.follow_stop_distance = option_item_sp(
-      title="静止跟车目标距离", param="StopDistanceCarrot", min_value=300, max_value=1200,
-      value_change_step=100, label_callback=lambda value: f"{value / 100:g} 米", params=self._carrot_params,
-      description="默认6米，仅调整前车跟停目标，不改变行驶跟车时距。雷达目标距离不等于保险杠间距；实际过近时必须接管。")
+      title="静止跟车目标距离", param="StopDistanceCarrot", min_value=250, max_value=600,
+      value_change_step=50, label_callback=lambda value: f"{value / 100:g} 米", params=self._carrot_params,
+      description="默认3.5米，仅调整静止前车的跟停与低速保持，不改变行驶跟车时距。前车短暂丢失时会保持停车任务；实际过近时必须接管。")
     self.traffic_cue_sound = self._carrot_toggle(
       "TrafficCueSound", "信号识别与起步提示音",
       "巡航时检测到停车信号、停车后自动开始移动，各提示一次。独立于全局静音；故障报警优先。踩踏板或数据失效会取消起步提示。仅提醒，不控制起步；模型放行不代表绿灯。")

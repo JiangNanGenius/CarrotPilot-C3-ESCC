@@ -23,7 +23,7 @@ PARAM_LIMITS = {
   "SteerRatioRate": (50, 150),
   "DynamicTFollow": (0, 100),
   "TFollowDecelBoost": (0, 100),
-  "StopDistanceCarrot": (300, 1200),
+  "StopDistanceCarrot": (250, 600),
 }
 
 

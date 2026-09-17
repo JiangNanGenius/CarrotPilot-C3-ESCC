@@ -87,7 +87,8 @@ class CarrotSpeedLimit:
       self.enabled = self.params.get_bool("CarrotSpeedLimitEnable")
     self.frame += 1
 
-  def update(self, sm, v_cruise_ms: float, *, independent_constraints: bool = False) -> float:
+  def update(self, sm, v_cruise_ms: float, *, independent_constraints: bool = False,
+             driver_curve_override: bool = False) -> float:
     self._refresh_enabled()
     self.active_source = CarrotSpeedLimitSource.none
     if not self.enabled:
@@ -108,6 +109,9 @@ class CarrotSpeedLimit:
             # Older producers cannot separate a curve hidden behind a road
             # limit. Do not use their aggregate to undo the planner override.
             return v_cruise_ms
+        if driver_curve_override and classify_carrot_desired_source(desired_source) in (
+            CarrotSpeedLimitSource.visionCurve, CarrotSpeedLimitSource.mapCurve):
+          return v_cruise_ms
         desired_ms = desired_kph * CV.KPH_TO_MS
         if _MIN_NAV_SPEED_KPH < desired_kph <= _MAX_NAV_SPEED_KPH and desired_ms < v_cruise_ms:
           self.active_source = classify_carrot_desired_source(desired_source)
