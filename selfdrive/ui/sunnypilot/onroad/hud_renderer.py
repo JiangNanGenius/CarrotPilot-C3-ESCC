@@ -301,7 +301,7 @@ class HudRendererSP(HudRenderer):
                           text_value: bool = False) -> None:
     label_width = measure_text_cached(self._font_semi_bold, label, 29).x
     rl.draw_text_ex(self._font_semi_bold, label, rl.Vector2(x + (width - label_width) / 2, y), 29, 0, COLORS.GREY)
-    value_size = (32 if len(value) >= 4 else 37) if text_value else (54 if len(value) >= 3 else 62)
+    value_size = (36 if len(value) >= 4 else 41) if text_value else (54 if len(value) >= 3 else 62)
     value_width = measure_text_cached(self._font_bold, value, value_size).x
     rl.draw_text_ex(self._font_bold, value, rl.Vector2(x + (width - value_width) / 2, y + 35), value_size, 0, color)
 
