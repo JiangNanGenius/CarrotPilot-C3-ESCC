@@ -307,7 +307,15 @@ class HudRendererSP(HudRenderer):
                           text_value: bool = False) -> None:
     label_width = measure_text_cached(self._font_semi_bold, label, 29).x
     rl.draw_text_ex(self._font_semi_bold, label, rl.Vector2(x + (width - label_width) / 2, y), 29, 0, COLORS.GREY)
-    value_size = (40 if len(value) >= 4 else 44) if text_value else (54 if len(value) >= 3 else 62)
+    if text_value:
+      # Use the largest readable source label that actually fits its column.
+      # Four-character Chinese labels normally land around 42-44 px, while
+      # shorter labels can use the full 48 px without colliding with the edge.
+      value_size = 48
+      while value_size > 40 and measure_text_cached(self._font_bold, value, value_size).x > width - 4:
+        value_size -= 1
+    else:
+      value_size = 54 if len(value) >= 3 else 62
     value_width = measure_text_cached(self._font_bold, value, value_size).x
     rl.draw_text_ex(self._font_bold, value, rl.Vector2(x + (width - value_width) / 2, y + 35), value_size, 0, color)
 
