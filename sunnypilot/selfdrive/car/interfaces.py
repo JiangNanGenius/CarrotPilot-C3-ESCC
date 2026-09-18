@@ -58,6 +58,19 @@ def _initialize_torque_lateral_control(CI: CarInterfaceBase, CP: structs.CarPara
     CI.configure_torque_tune(CP.carFingerprint, CP.lateralTuning)
 
 
+def _configure_hyundai_steering_assist(CI: CarInterfaceBase, CP: structs.CarParams, params: Params) -> None:
+  controller = getattr(CI, "CC", None)
+  configure = getattr(controller, "configure_steering_assist", None)
+  if CP.brand != "hyundai" or configure is None:
+    return
+
+  configure(
+    params.get_bool("HyundaiEpsAngleFaultProtection"),
+    float(params.get("HyundaiEpsAngleFaultTriggerSeconds", return_default=True)),
+    int(params.get("HyundaiSteerTorqueScale", return_default=True)),
+  )
+
+
 def _cleanup_unsupported_params(CP: structs.CarParams, CP_SP: structs.CarParamsSP, params: Params = None) -> None:
   """Apply runtime availability handling without erasing durable preferences.
 
@@ -79,12 +92,16 @@ def _cleanup_unsupported_params(CP: structs.CarParams, CP_SP: structs.CarParamsS
 
 
 def setup_interfaces(CI: CarInterfaceBase, params: Params = None) -> None:
+  if params is None:
+    params = Params()
+
   CP = CI.CP
   CP_SP = CI.CP_SP
 
   enforce_torque = _enforce_torque_lateral_control(CP, params)
   nnlc_enabled = _initialize_neural_network_lateral_control(CP, CP_SP, params)
   _initialize_torque_lateral_control(CI, CP, enforce_torque, nnlc_enabled)
+  _configure_hyundai_steering_assist(CI, CP, params)
   _cleanup_unsupported_params(CP, CP_SP, params)
 
 

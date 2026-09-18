@@ -96,6 +96,30 @@ class SteeringLayout(Widget):
       title=lambda: tr("Neural Network Lateral Control (NNLC)"),
       description=lambda: tr("Use the neural-network steering controller when the selected vehicle supports it. Leave off if steering behavior is uncertain.")
     )
+    self._hyundai_steer_torque_scale = option_item_sp(
+      param="HyundaiSteerTorqueScale",
+      title="Hyundai/Kia 转向辅助力度",
+      min_value=100,
+      max_value=110,
+      value_change_step=1,
+      label_callback=lambda value: f"{value}%",
+      description="略微增加正常转弯时的转向辅助，但不会突破车辆和 Panda 现有扭矩上限。此车建议使用 105%。",
+    )
+    self._eps_angle_fault_protection = toggle_item_sp(
+      param="HyundaiEpsAngleFaultProtection",
+      title="EPS 大角度故障保护",
+      description="方向盘持续超过约 85° 时，短暂释放转向请求位以避免原厂 EPS 故障；扭矩数值不会清零。关闭后若触发 EPS 故障，可能需要重启车辆。",
+    )
+    self._eps_angle_fault_trigger_seconds = option_item_sp(
+      param="HyundaiEpsAngleFaultTriggerSeconds",
+      title="大角度保护触发时间",
+      min_value=90,
+      max_value=200,
+      value_change_step=10,
+      use_float_scaling=True,
+      label_callback=lambda value: f"{value / 100:.1f} s",
+      description="方向盘持续超过约 85° 后，等待多久再介入保护。0.9 秒是已验证的安全默认值；调高会增加 EPS 报错风险，下次行车生效。",
+    )
 
     items = [
       self._mads_toggle,
@@ -111,6 +135,10 @@ class SteeringLayout(Widget):
       self._torque_customization_button,
       LineSeparatorSP(40),
       self._nnlc_toggle,
+      LineSeparatorSP(40),
+      self._hyundai_steer_torque_scale,
+      self._eps_angle_fault_protection,
+      self._eps_angle_fault_trigger_seconds,
     ]
     return items
 
@@ -137,6 +165,11 @@ class SteeringLayout(Widget):
     self._nnlc_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not enforce_torque_enabled)
     self._torque_control_toggle.action_item.set_enabled(ui_state.is_offroad() and torque_allowed and not nnlc_enabled)
     self._torque_customization_button.action_item.set_enabled(self._torque_control_toggle.action_item.get_state())
+    hyundai_settings_enabled = ui_state.is_offroad()
+    self._hyundai_steer_torque_scale.action_item.set_enabled(hyundai_settings_enabled)
+    self._eps_angle_fault_protection.action_item.set_enabled(hyundai_settings_enabled)
+    self._eps_angle_fault_trigger_seconds.set_visible(self._eps_angle_fault_protection.action_item.get_state())
+    self._eps_angle_fault_trigger_seconds.action_item.set_enabled(hyundai_settings_enabled)
 
   def _render(self, rect):
     if self._current_panel == PanelType.LANE_CHANGE:

@@ -24,6 +24,9 @@ DURABLE_PREFERENCES = (
   "SmartCruiseControlVision",
   "SmartCruiseControlMap",
   "SpeedLimitMode",
+  "HyundaiEpsAngleFaultProtection",
+  "HyundaiEpsAngleFaultTriggerSeconds",
+  "HyundaiSteerTorqueScale",
 )
 SPEED_LIMIT_ASSIST_MODE = 3
 
@@ -32,6 +35,8 @@ class PreferenceParams:
   def __init__(self):
     self.values = dict.fromkeys(DURABLE_PREFERENCES, True)
     self.values["SpeedLimitMode"] = SPEED_LIMIT_ASSIST_MODE
+    self.values["HyundaiEpsAngleFaultTriggerSeconds"] = 0.9
+    self.values["HyundaiSteerTorqueScale"] = 105
     self.removed = []
     self.writes = []
 
@@ -55,6 +60,8 @@ class FakeCarInterface:
     self.CP = CP
     self.CP_SP = CP_SP
     self.torque_tune_configurations = 0
+    self.steering_assist_configurations = []
+    self.CC = SimpleNamespace(configure_steering_assist=lambda *args: self.steering_assist_configurations.append(args))
 
   def configure_torque_tune(self, fingerprint, lateral_tuning):
     self.torque_tune_configurations += 1
@@ -98,6 +105,7 @@ def test_transient_incompatible_cp_does_not_erase_preferences(monkeypatch):
   assert not interfaces._initialize_neural_network_lateral_control(transient_cp, transient_ci.CP_SP, params)
   assert not runtime_experimental_mode(params, transient_cp)
   assert transient_ci.torque_tune_configurations == 0
+  assert transient_ci.steering_assist_configurations == []
   assert params.values == expected
   assert params.removed == []
   assert params.writes == []
@@ -116,6 +124,7 @@ def test_transient_incompatible_cp_does_not_erase_preferences(monkeypatch):
   assert interfaces._initialize_neural_network_lateral_control(real_cp, real_ci.CP_SP, params)
   assert runtime_experimental_mode(params, real_cp)
   assert real_ci.torque_tune_configurations == 1
+  assert real_ci.steering_assist_configurations == [(True, 0.9, 105)]
   assert params.values == expected
   assert params.removed == []
   assert params.writes == []

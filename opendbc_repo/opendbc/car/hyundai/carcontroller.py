@@ -21,6 +21,10 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
+MAX_ANGLE_TRIGGER_SECONDS_MIN = (MAX_ANGLE_FRAMES + 1) * DT_CTRL
+MAX_ANGLE_TRIGGER_SECONDS_MAX = 2.0
+STEER_TORQUE_SCALE_MIN = 1.0
+STEER_TORQUE_SCALE_MAX = 1.1
 
 # On some HKG CAN and CAN FD non-CANFD_ALT_BUTTONS, the cancel button (CF_Clu_CruiseSwState / CRUISE_BUTTONS = 4) is
 # a pause/resume toggle, not a dedicated cancel. Firing it mid-brake inadvertently can cause a re-enable attempt
@@ -64,12 +68,26 @@ class CarController(CarControllerBase, EsccCarController, LeadDataCarController,
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
+    self.eps_angle_fault_protection = True
+    self.eps_angle_fault_frames = MAX_ANGLE_FRAMES
+    self.steer_torque_scale = 1.05
 
     self.accel_last = 0
     self.apply_torque_last = 0
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
     self.cancel_counter = 0
+
+  def configure_steering_assist(self, eps_angle_fault_protection: bool, eps_angle_fault_trigger_seconds: float,
+                                steer_torque_scale_percent: int) -> None:
+    """Configure Hyundai EPS behavior without widening the Panda torque safety envelope."""
+    trigger_seconds = float(np.clip(eps_angle_fault_trigger_seconds,
+                                    MAX_ANGLE_TRIGGER_SECONDS_MIN, MAX_ANGLE_TRIGGER_SECONDS_MAX))
+    self.eps_angle_fault_protection = bool(eps_angle_fault_protection)
+    # common_fault_avoidance cuts the request when counter > max frames.
+    self.eps_angle_fault_frames = max(MAX_ANGLE_FRAMES, int(round(trigger_seconds / DT_CTRL)) - 1)
+    self.steer_torque_scale = float(np.clip(steer_torque_scale_percent / 100.0,
+                                            STEER_TORQUE_SCALE_MIN, STEER_TORQUE_SCALE_MAX))
 
   def update(self, CC, CC_SP, CS, now_nanos):
     EsccCarController.update(self, CS)
@@ -82,13 +100,20 @@ class CarController(CarControllerBase, EsccCarController, LeadDataCarController,
     hud_control = CC.hudControl
 
     # steering torque
-    new_torque = int(round(actuators.torque * self.params.STEER_MAX))
+    # A small gain helps the controller reach the existing vehicle-specific torque
+    # envelope sooner. The downstream driver and Panda limits remain authoritative.
+    new_torque = int(round(actuators.torque * self.params.STEER_MAX * self.steer_torque_scale))
     apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
     # >90 degree steering fault prevention
-    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
-                                                                       self.angle_limit_counter, MAX_ANGLE_FRAMES,
-                                                                       MAX_ANGLE_CONSECUTIVE_FRAMES)
+    if self.eps_angle_fault_protection:
+      self.angle_limit_counter, apply_steer_req = common_fault_avoidance(
+        abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive, self.angle_limit_counter,
+        self.eps_angle_fault_frames, MAX_ANGLE_CONSECUTIVE_FRAMES,
+      )
+    else:
+      self.angle_limit_counter = 0
+      apply_steer_req = CC.latActive
 
     if not CC.latActive:
       apply_torque = 0
